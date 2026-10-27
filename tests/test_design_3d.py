@@ -29,7 +29,10 @@ def test_structural_meshes_openings_and_camera_remain_unchanged():
     assert [t.to_plotly_json() for t in complete.data[: len(room.data)]] == [
         t.to_plotly_json() for t in room.data
     ]
-    assert complete.layout.scene.camera == room.layout.scene.camera
+    assert complete.layout.scene.camera.eye == room.layout.scene.camera.eye
+    assert complete.layout.scene.camera.up == room.layout.scene.camera.up
+    assert complete.layout.scene.camera.projection.type == "perspective"
+    assert room.layout.scene.camera.projection.type == "orthographic"
     assert {t.meta["kind"] for t in complete.data} >= {
         "floor",
         "wall",
@@ -91,7 +94,7 @@ def test_equal_meter_scaling_includes_tall_and_out_of_room_furniture():
     ]
     assert ratios == pytest.approx([ratios[0]] * 3)
     assert scene.aspectmode == "manual"
-    assert scene.camera.projection.type == "orthographic"
+    assert scene.camera.projection.type == "perspective"
     assert design.model_dump_json() == before
 
 
@@ -167,3 +170,63 @@ def test_work_limit_is_explicit():
     ]
     with pytest.raises(FurnitureGeometryError, match="at most"):
         render_design_3d(design)
+
+
+# AppTest checks the rendered figure data, not just the presence of a heading.
+def _app_furnished(app):
+    return next(
+        go.Figure(json.loads(chart.proto.spec))
+        for chart in app.get("plotly_chart")
+        if json.loads(chart.proto.spec)["layout"].get("meta", {}).get("kind")
+        == "design_3d"
+    )
+
+
+def _app():
+    from pathlib import Path
+
+    from streamlit.testing.v1 import AppTest
+
+    return AppTest.from_file(
+        str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=30
+    ).run()
+
+
+def test_streamlit_furnished_fixed_sample_and_structural_preview_both_render():
+    app = _app()
+    assert not app.exception
+    assert "Interactive 3D Furnished Room Preview" in [h.value for h in app.subheader]
+    assert any(
+        "Fixed sample bedroom — independent of the selected Layout A/B." in c.value
+        for c in app.caption
+    )
+    figure = _app_furnished(app)
+    assert {t.meta["id"] for t in furniture(figure)} == {
+        "queen-bed",
+        "desk",
+        "wardrobe",
+    }
+    assert json.loads(figure.to_json()) == json.loads(
+        render_design_3d(create_sample_bedroom()).to_json()
+    )
+    structural = next(
+        json.loads(chart.proto.spec)
+        for chart in app.get("plotly_chart")
+        if json.loads(chart.proto.spec)["layout"].get("meta", {}).get("kind")
+        == "room_3d"
+    )
+    assert not any(t["meta"].get("kind") == "furniture" for t in structural["data"])
+
+
+def test_layout_selection_and_regeneration_preserve_fixed_furnished_sample():
+    app = _app()
+    before = _app_furnished(app).to_json()
+    app.button(key="generate_layouts").click().run()
+    assert not app.exception
+    assert _app_furnished(app).to_json() == before
+    app.radio(key="selected_layout").set_value("Layout B").run()
+    assert _app_furnished(app).to_json() == before
+    app.number_input(key="layout_seed").set_value(43).run()
+    app.button(key="generate_layouts").click().run()
+    assert not app.exception
+    assert _app_furnished(app).to_json() == before

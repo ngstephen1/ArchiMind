@@ -414,7 +414,7 @@ def test_streamlit_contains_structural_3d_preview_and_required_caption() -> None
     assert not app.exception
     assert "Interactive 3D Room Preview" in [heading.value for heading in app.subheader]
     assert (
-        "3D structural preview — furniture and layout synchronization will be added in upcoming phases."
+        "Structural-only preview of the fixed sample room. See the furnished sample below; selected-layout synchronization is planned."
         in [item.value for item in app.caption]
     )
     figure = _app_3d_figure(app)

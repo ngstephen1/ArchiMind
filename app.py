@@ -3,7 +3,7 @@
 import streamlit as st
 
 from archimind.examples import create_sample_bedroom
-from archimind.render import render_floorplan, render_room_3d
+from archimind.render import render_design_3d, render_floorplan, render_room_3d
 from archimind.ui import render_layout_generator
 
 
@@ -20,20 +20,20 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 06A")
+    phase.metric("Current development phase", "Task 06B")
     status.metric("Application status", "Running")
 
     st.divider()
     st.subheader("Planned capabilities")
     st.markdown(
         "- AI-assisted room planning\n"
-        "- 3D furniture visualization\n"
+        "- Selected 2D/3D layout synchronization\n"
         "- Multi-agent collaboration\n"
         "- Versioned projects and export"
     )
     st.caption(
         "These capabilities are planned. Deterministic layout generation, "
-        "spatial validation, 2D comparison, and a 3D structural preview are available below."
+        "spatial validation, 2D comparison, and structural/furnished 3D previews are available below."
     )
 
     st.divider()
@@ -68,8 +68,25 @@ def main() -> None:
             alt="3D sample room structure with a floor, four walls, a south door opening, and a north window.",
         )
         st.caption(
-            "3D structural preview — furniture and layout synchronization "
-            "will be added in upcoming phases."
+            "Structural-only preview of the fixed sample room. "
+            "See the furnished sample below; selected-layout synchronization is planned."
+        )
+
+    st.divider()
+    with st.container(key="design_3d_preview"):
+        st.subheader("Interactive 3D Furnished Room Preview")
+        st.plotly_chart(
+            render_design_3d(design),
+            width="stretch",
+            theme=None,
+            key="design-3d",
+            config={"scrollZoom": True, "displaylogo": False},
+            alt="Fixed 3D sample bedroom with a queen bed, desk, wardrobe, four walls, south door opening, and north window.",
+        )
+        st.caption(
+            "Fixed sample bedroom — independent of the selected Layout A/B. "
+            "Rendering does not establish spatial validity. "
+            "Selected-layout synchronization belongs to Task 06C."
         )
 
 

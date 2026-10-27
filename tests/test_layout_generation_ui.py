@@ -20,12 +20,11 @@ APP_PATH = Path(__file__).resolve().parents[1] / "app.py"
 
 
 def _floorplans(app: AppTest) -> list:
-    """Count the 2D previews independently of the new structural 3D chart."""
+    """Count Cartesian previews independently of both structural/furnished scenes."""
     return [
         chart
         for chart in app.get("plotly_chart")
-        if json.loads(chart.proto.spec)["layout"].get("meta", {}).get("kind")
-        != "room_3d"
+        if "scene" not in json.loads(chart.proto.spec)["layout"]
     ]
 
 

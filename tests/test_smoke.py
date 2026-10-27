@@ -47,13 +47,13 @@ def test_streamlit_app_runs() -> None:
         "Multi-Agent Interior Design & 3D Spatial Planning"
     )
     assert {metric.label: metric.value for metric in app.metric} == {
-        "Current development phase": "Task 06A",
+        "Current development phase": "Task 06B",
         "Application status": "Running",
     }
     assert app.subheader[1].value == "Planned capabilities"
     for capability in (
         "AI-assisted room planning",
-        "3D furniture visualization",
+        "Selected 2D/3D layout synchronization",
         "Multi-agent collaboration",
         "Versioned projects and export",
     ):

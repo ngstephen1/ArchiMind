@@ -15,7 +15,9 @@ MAX_DESIGN_3D_FURNITURE = 100
 def render_design_3d(design: RoomDesign) -> go.Figure:
     """Render a furnished design, preserving structural meshes and source models.
 
-    Uses render_room_3d for all walls/openings, initial camera and interactions.
+    Uses render_room_3d for all walls/openings and the isometric eye direction.
+    Perspective projection makes camera dolly/zoom visibly useful; the independent
+    structural-only renderer keeps its original orthographic projection.
     Axis ranges include out-of-room and above-ceiling furniture without moving it.
     Equal meters along X/Y/Z are preserved using the full scene's span ratios.
     This viewer does not check collisions, clearances, or architectural validity.
@@ -43,14 +45,22 @@ def render_design_3d(design: RoomDesign) -> go.Figure:
     spans = [high - low for low, high in ranges]
     if not all(isfinite(span) and span > 0 for span in spans):
         raise FurnitureGeometryError("Furnished scene spans exceed numeric limits")
-    proportions = [0.8 * span / max(spans) for span in spans]
+    # Uniform framing leaves room for axis titles at narrow browser widths.
+    proportions = [0.72 * span / max(spans) for span in spans]
     if any(value <= 0 for value in proportions):
         raise FurnitureGeometryError(
             "Furnished scene proportions exceed numeric limits"
         )
     figure.update_layout(
-        title={"text": f"{escape(design.room.name)} · Furnished room", "x": 0.02},
-        height=640,
+        title={
+            "text": f"{escape(design.room.name)} · Furnished room",
+            "x": 0.02,
+            "y": 0.98,
+            "yanchor": "top",
+        },
+        height=600,
+        margin={"l": 0, "r": 0, "t": 140, "b": 0},
+        legend={"orientation": "h", "x": 0, "y": 1.02, "yanchor": "bottom"},
         meta={
             "kind": "design_3d",
             "room_id": design.room.id,
@@ -61,6 +71,7 @@ def render_design_3d(design: RoomDesign) -> go.Figure:
         uirevision=f"design-3d:{design.room.id}",
     )
     figure.update_scenes(
+        camera_projection_type="perspective",
         xaxis_range=ranges[0],
         yaxis_range=ranges[1],
         zaxis_range=ranges[2],

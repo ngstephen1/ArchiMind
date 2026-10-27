@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06A: interactive 3D room structure. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06B: interactive 3D furnished room. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,19 +40,19 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded bedroom alternatives and compare their scores, coordinates, and 2D plans. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 06A — Basic interactive 3D room geometry**
+> **Current stage · Task 06B — Interactive 3D furniture visualization**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
-> Task 03 sample preview remains available, alongside a separate 3D structural
-> room preview with real wall openings. Placement is deterministic seeded search;
-> 3D furniture, layout synchronization, AI reasoning, persistence, and export remain planned.
+> Task 03 sample preview remains available, alongside structural and furnished
+> 3D sample previews with real wall openings. Placement is deterministic seeded
+> search; layout synchronization, AI reasoning, persistence, and export remain planned.
 > **No API key is required.**
 
-Tasks **01–03, 04A, 04B, 05A, 05B, and 06A are complete**. The
+Tasks **01–03, 04A, 04B, 05A, 05B, 06A, and 06B are complete**. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**485 passing tests**: all 432 Task 06A cases plus 53 offline Codex adapter cases.
+**528 passing tests**: all 485 previous cases plus 43 furniture/scene/integration cases.
 
 The header is an original concept illustration, not an application screenshot or a
 generated design.
@@ -186,7 +186,7 @@ four walls, with a south door gap and a north window at its actual sill height.
 It is independent of the selected furniture alternative and contains no furniture.
 The caption explicitly states:
 
-> 3D structural preview — furniture and layout synchronization will be added in upcoming phases.
+> Structural-only preview of the fixed sample room. See the furnished sample below; selected-layout synchronization is planned.
 
 Drag to orbit; scroll to zoom, or choose zoom/pan from the Plotly modebar. Use
 **Reset camera to last save** to restore the initial isometric view. The scene
@@ -220,6 +220,63 @@ This is a zero-thickness structural preview with no ceiling slab, wall reveals,
 requires browser graphics support. Browser verification observed no errors and
 one non-fatal Plotly canvas readback performance advisory. Restart an already
 running Streamlit server after adding renderer modules if it retains old imports.
+
+### Interactive 3D furnished room
+
+**Interactive 3D Furnished Room Preview** displays the fixed sample bedroom,
+independently of the selected Layout A/B. It preserves the structural-only scene
+and comparison above it. Task 06C will connect the selected layout to 3D.
+Rendering alone does not establish spatial validity.
+
+```python
+from archimind.examples import create_sample_bedroom
+from archimind.render import render_design_3d, render_furniture_3d
+
+design = create_sample_bedroom()
+figure = render_design_3d(design)
+bed_meshes = render_furniture_3d(design.furniture[0])
+```
+
+`render_design_3d()` reuses `render_room_3d()` without changing any wall, floor,
+door, or window vertices/triangles. Furniture parts are explicit Plotly `Mesh3d`
+cuboids with eight vertices and twelve triangles each. Materials are muted,
+opaque colors; every detail lies inside its declared bounding box.
+
+| Appearance | Selection | Geometry |
+| --- | --- | --- |
+| Bed | Category `bed` | Full-footprint frame, inset mattress, two pillows |
+| Desk | Category `desk` | Full-footprint tabletop and four corner legs |
+| Wardrobe | Category `wardrobe`, or `storage` with name `Wardrobe` | Plinth, cabinet, two front panels, two handles |
+| Generic | Other categories | One dimensionally accurate solid |
+
+Category matching ignores case and surrounding whitespace. Furniture starts at
+Z=0, preserving southwest-origin X/Y positions and metric dimensions. Only rotation
+0 is supported; nonzero rotations raise `FurnitureGeometryError`. Schema errors,
+collapsed/non-finite spans or face areas, and more than 100 furniture objects are
+rejected explicitly. Out-of-room, overlapping, and above-ceiling objects remain
+visible without relocation or any validity claim. Scene ranges include them;
+axis proportions preserve equal physical units.
+
+The furnished camera starts in an isometric direction with perspective projection
+so modebar zoom visibly changes magnification. The independent structural preview
+retains its orthographic camera. Drag to orbit; select **Pan** or **Zoom** in the
+modebar and drag. **Reset camera to last save** restores the initial view. Scroll
+zoom is enabled, but mouse-wheel magnification was not confirmed in this browser;
+use the verified modebar zoom. Hover reports name, ID, category, X/Y position,
+dimensions, height, and rotation. Legend items can toggle trace groups; hide
+**Walls** when a wall intercepts a furniture hover target.
+
+Desktop (1440 px) and narrow (390 px) browser inspection checked geometry,
+openings, hover, orbit, zoom, pan, reset, and fixed-sample independence from A/B.
+The furnished scene uses extra legend spacing and uniform framing to keep labels
+visible at narrow widths. Screenshots are local ignored artifacts in
+`output/task06b/`. Console: no application errors; one non-fatal Plotly Canvas2D
+readback performance advisory. WebGL support is required.
+
+The sample adds 15 cuboids / 180 furniture triangles. Warm rendering measured
+about 23 ms per call locally (imports excluded; this is an observation, not a CI
+threshold). No external assets, new dependency, geometry algorithm, model schema,
+live Codex functionality, or 2D/3D selection synchronization was added.
 
 ## Models and coordinates
 
@@ -646,7 +703,9 @@ ArchiMind/
 │   ├── render/
 │   │   ├── __init__.py           Public rendering function
 │   │   ├── floorplan_2d.py       Metric, interactive Plotly floor plan
-│   │   └── room_3d.py            Structural meshes with real opening gaps
+│   │   ├── room_3d.py            Structural meshes with real opening gaps
+│   │   ├── furniture_3d.py       Bounded furniture cuboids and hover information
+│   │   └── design_3d.py          Furnished scene composition
 │   ├── ui/
 │   │   ├── __init__.py           Public Streamlit presentation helper
 │   │   └── layout_generation.py  Button-driven generation, state, and comparison
@@ -662,7 +721,9 @@ ArchiMind/
 │   ├── test_accessibility.py     Door/circulation/configuration/report tests
 │   ├── test_layout_generator.py  Seeded alternatives, scores, bounds, and renderer tests
 │   ├── test_layout_generation_ui.py  AppTest controls, selection, state, and error cases
-│   └── test_room_3d.py           Coordinates, wall triangles, gaps, and 3D integration
+│   ├── test_room_3d.py           Coordinates, wall triangles, gaps, and 3D integration
+│   ├── test_furniture_3d.py      Bounds, surfaces, dimensions, and numeric limits
+│   └── test_design_3d.py         Scene composition, 2D correspondence, and app preview
 ├── scripts/check_health.py      Temporary server health check
 ├── docs/
 │   ├── assets/                  README artwork and logo badges
@@ -687,8 +748,9 @@ and verification record.
 - [x] **Task 05A · Deterministic furniture layout generation** — validated backend alternatives.
 - [x] **Task 05B · Streamlit generation and comparison** — A/B plans, scores, validation, and session state.
 - [x] **Task 06A · Basic interactive 3D room geometry** — structural room meshes and real wall openings.
-- [ ] **Task 06B · 3D furniture visualization** — recommended next milestone.
-- [ ] 2D/3D layout synchronization and export.
+- [x] **Task 06B · 3D furniture visualization** — bounded meshes and independent furnished sample.
+- [ ] **Task 06C · Synchronize Selected 2D and 3D Layouts** — recommended next milestone.
+- [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.
 

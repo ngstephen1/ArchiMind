@@ -2,8 +2,9 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 06A complete — interactive structural 3D room geometry.**
-Task 06B is recommended next. The Task 03 preview and Task 05B comparison are preserved.
+**Current milestone: Task 06B complete — interactive 3D furniture visualization.**
+Task 06C is recommended next. The Task 03 preview, Task 05B comparison, and
+Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
 advisor with offline tests. C02 remains a separate proposed integration.
 
@@ -20,7 +21,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 05B — Streamlit layout generation and comparison | Complete | Seed/button controls, A/B selection, real coordinates/scores/reports, session state, explicit failures, and 20 frontend tests |
 | Task 06A — Basic interactive 3D room geometry | Complete | Structural meshes with real door/window holes, orthographic camera, equal metric scaling, 3D preview, and 43 tests |
 | Optional C01 — Codex CLI advisor backend | Complete, live behavior unverified | Typed suggestions, fixed isolated read-only invocation, default-off and per-call gates, bounded I/O, sanitized failures, and 53 mocked tests |
-| Task 06B — 3D furniture visualization | Recommended next | Not implemented |
+| Task 06B — 3D furniture visualization | Complete | Bounded bed/desk/wardrobe/generic meshes, furnished scene, fixed-sample app preview, 43 new tests, and browser verification |
+| Task 06C — Selected 2D/3D layout synchronization | Recommended next | Not implemented |
 | Later phases | Planned | Layout synchronization, agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -40,6 +42,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Layout generation | Backend and Streamlit expose up to two distinct validator-approved alternatives with deterministic seeds/scores and validation summaries | Rotation zero; fixed sample dimensions in UI; no LLMs or global-optimality claims |
 | Session state | Results and selection survive normal reruns; generation and acceptance checks run only on button click | Refresh/disconnect may clear results; no database persistence |
 | 3D structure | Floor, four zero-thickness walls, real door/window gaps, optional blue glazing, and orbit/zoom/pan | No 3D furniture, ceiling slab, reveals, or synchronization with selected layouts |
+| 3D furniture | Bed frame/mattress/pillows, desk tabletop/legs, wardrobe/plinth/panels/handles, and generic solids | Rotation 0 only; at most 100 items; fixed sample in UI; no spatial-validity claim or selection synchronization |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
 | Agents / API | Not implemented | No LangGraph or OpenAI calls; no API key required |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
@@ -47,7 +50,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 ## What the app currently shows
 
 The original branding and canonical **2D Floor Plan Preview** remain. The phase
-metric now reads Task 06A, and planned-capabilities text reflects current support.
+metric now reads Task 06B, and planned-capabilities text reflects current support.
 Below the sample, **AI-Assisted Room Layout Generator** presents Room Information,
 Layout Generation Controls, Generated Alternatives, Selected 2D Floor Plan, and
 Spatial Validation Summary. It calls the existing deterministic generator, uses
@@ -60,7 +63,12 @@ The preview caption explicitly states:
 The new **Interactive 3D Room Preview** below the comparison displays only the
 fixed sample room structure, with this explicit caption:
 
-> 3D structural preview — furniture and layout synchronization will be added in upcoming phases.
+> Structural-only preview of the fixed sample room. See the furnished sample below; selected-layout synchronization is planned.
+
+**Interactive 3D Furnished Room Preview** follows it, showing the canonical sample
+bedroom with all three furniture items. Its caption explicitly identifies it as a
+fixed sample, independent of Layout A/B, and says rendering does not establish
+spatial validity. The fixed scene survives generation, selection, and regeneration.
 
 The animated isometric README header remains concept artwork. The live app now
 provides both top-down 2D plans and an independent structural 3D scene.
@@ -259,16 +267,67 @@ all checks passed; **35 files already formatted**. The real Streamlit health
 check returned HTTP **200 ok**. All 14 protected Python files (app, models,
 geometry/generator, renderers, and UI helpers) match the pre-C01 SHA-256 snapshot.
 No dependency was added. Existing uncommitted work and unrelated agent directories
-are preserved; nothing was committed or pushed.
+are preserved; nothing was committed or pushed during C01. These verified changes
+were subsequently checkpointed and pushed under the explicit Task 06B authorization.
 
 Live model/provider behavior remains unverified. Read-only sandboxing does not
 guarantee confidentiality, and the adapter must remain local-only. C02, an optional
 Streamlit Design Advisor panel, is recommended for a separate reviewed task.
 
+## Task 06B furnished renderer
+
+`render_furniture_3d(furniture)` returns bounded, explicit `Mesh3d` cuboids.
+Category selects bed, desk, wardrobe, or a generic fallback; the canonical
+`storage` / `Wardrobe` item uses the wardrobe appearance. All parts remain within
+the object's declared X/Y/Z bounds. Decimal endpoint arithmetic, finite spans
+and face areas, strict schema revalidation, and explicit nonzero-rotation rejection
+prevent silent geometry errors. Parts carry raw IDs/metadata and escaped hover
+text with names, categories, metric position, dimensions, height, and rotation.
+
+`render_design_3d(design)` reuses the existing room figure without changing any
+structural vertices, triangles, or opening geometry. Furniture is sorted by ID.
+Scene bounds include out-of-room and above-ceiling furniture without relocation;
+axis proportions retain equal units. Input data and generated layout reports are
+not changed. This is rendering only; no spatial algorithm or Pydantic schema was
+modified, and no Codex live functionality was activated or changed.
+
+The furnished viewer uses an isometric eye direction with perspective projection
+for visible modebar zoom; the original structural-only viewer remains orthographic.
+Browser verification at desktop 1440 px and narrow 390 px checked initial framing,
+door/window visibility, orbit, modebar zoom, pan, reset, furniture hover, A/B
+independence, and absence of page overflow. Narrow legend/title overlap and tight
+axis framing found during inspection were corrected. Wheel zoom is enabled but
+visible magnification was not confirmed; modebar zoom was confirmed visually.
+Console: zero application errors and one non-fatal Plotly Canvas2D readback advisory.
+Screenshots are ignored local artifacts under `output/task06b/`.
+
+The sample adds 15 cuboids / 180 furniture triangles, for 23 total scene traces.
+Warm local scene construction measured a median 23.39 ms (23.24–24.30 ms across
+10 calls, imports excluded, before final camera/framing adjustments). This is an
+observation, not a performance guarantee. Mesh work is capped at 100 items;
+WebGL/browser resources and translucent-wall sorting remain practical limits.
+No assets were downloaded and no dependency was added.
+
+Final local verification: **528 passed in 14.15s**, retaining all 485 previous
+cases and adding 43 furniture/scene/app cases. Existing UI assertions were updated
+for Task 06B copy, and the 2D-chart helper now excludes both types of 3D scene.
+`pip check`: no broken requirements. Ruff: all checks passed, **39 files already
+formatted**. A fresh real Streamlit launch returned HTTP **200 ok**. The app was
+also launched explicitly on local port 8510 for the browser checks. The source
+diff confirms no changes to canonical models, existing renderers, geometry,
+layout generation, UI generation logic, or the C01 integration.
+
+Checkpoint A (`a349cfb21756a086f8508ad66524d3fdc117755c`) preserves the verified
+prior milestones; checkpoint B (`533d713dd7de7683caee1260184fd64d72a1010c`) adds
+backend furniture/scene geometry. Both were pushed to `origin/main`, synchronized
+after each push, and passed GitHub Actions. The final integration checkpoint
+contains the preview, browser-driven framing/projection adjustments, tests, and docs.
+Unrelated `.agents/` and `.claude/` remain untracked and untouched.
+
 ## Next milestone
 
-**Task 06B — 3D Furniture Visualization** is recommended next. It is not
-implemented here. Layout synchronization, rotated-footprint support, furniture
+**Task 06C — Synchronize Selected 2D and 3D Layouts** is recommended next. It is not
+implemented here. Rotated-footprint support, furniture
 editing, persistence, export, and agents remain separate future work.
 
 For setup, local commands, coordinates, and renderer usage, see the
