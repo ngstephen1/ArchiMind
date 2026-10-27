@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06B: interactive 3D furnished room. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06C: synchronized 2D and 3D layouts. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -37,22 +37,23 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 
 | **Define the space** | **Trust the data** | **See the plan** |
 | :--- | :--- | :--- |
-| Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded bedroom alternatives and compare their scores, coordinates, and 2D plans. |
+| Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 06B — Interactive 3D furniture visualization**
+> **Current stage · Task 06C — Synchronized 2D and 3D layouts**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
-> Task 03 sample preview remains available, alongside structural and furnished
-> 3D sample previews with real wall openings. Placement is deterministic seeded
-> search; layout synchronization, AI reasoning, persistence, and export remain planned.
+> Task 03 sample preview remains available, alongside clearly labeled standalone
+> 3D samples. Selecting Layout A/B updates both generated views from the same
+> candidate. Placement uses deterministic seeded search; realistic assets, AI
+> reasoning, persistence, and export remain planned.
 > **No API key is required.**
 
-Tasks **01–03, 04A, 04B, 05A, 05B, 06A, and 06B are complete**. The
+Tasks **01–03, 04A, 04B, 05A, 05B, 06A, 06B, and 06C are complete**. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**528 passing tests**: all 485 previous cases plus 43 furniture/scene/integration cases.
+**541 passing tests**: all 528 previous cases plus 13 synchronization/framing cases.
 
 The header is an original concept illustration, not an application screenshot or a
 generated design.
@@ -152,7 +153,7 @@ uses Task 04A/04B checks and reports validation for each generated alternative.
 
 ### Generate and compare layouts
 
-The **AI-Assisted Room Layout Generator** section has five parts:
+The **AI-Assisted Room Layout Generator** section has six parts:
 
 1. **Room Information** — the 5 × 4 × 2.7 m bedroom, bed, desk, wardrobe, south
    door, and north window.
@@ -161,17 +162,26 @@ The **AI-Assisted Room Layout Generator** section has five parts:
    generation seed/attempts, and an A/B selector.
 4. **Selected 2D Floor Plan** — the existing interactive renderer and the selected
    candidate's furniture-position table in meters.
-5. **Spatial Validation Summary** — containment, overlaps, door approaches,
+5. **Selected 3D Furnished Room** — the same selected candidate's room and furniture.
+6. **Spatial Validation Summary** — containment, overlaps, door approaches,
    circulation, and any advisory warnings.
 
 Generation happens only on the button click. Results and selection persist across
 normal reruns in [Streamlit session state](https://docs.streamlit.io/develop/api-reference/caching-and-state/st.session_state).
-Selecting A/B does not regenerate or revalidate. Editing the seed keeps the old
+Selecting A/B passes the exact stored `candidate.design` to both `render_floorplan`
+and `render_design_3d`. There is no duplicate selected-design state or coordinate
+conversion. Switching does not regenerate or spatially revalidate; existing
+renderer schema checks remain in place. Editing the seed keeps the old
 result and selection, with an explicit pending-seed notice. A successful generation
 response replaces the stored result and selects A; a response with no candidates
 clears the displayed alternatives. An exception keeps the prior result and
 selection with an error message. Refreshing/disconnecting the browser may clear
 the session; there is no database persistence.
+
+No generated 2D/3D pair is shown before generation or for a normal empty/failed
+outcome. A failed generation exception retains both views of the previous selected
+candidate. A single available alternative is shown in both views. The standalone
+sample charts remain separate demonstrations throughout.
 
 `complete`, `search_exhausted`, `infeasible`, and `unsupported` responses are shown
 explicitly. A single valid alternative is displayed on its own; search exhaustion
@@ -186,7 +196,7 @@ four walls, with a south door gap and a north window at its actual sill height.
 It is independent of the selected furniture alternative and contains no furniture.
 The caption explicitly states:
 
-> Structural-only preview of the fixed sample room. See the furnished sample below; selected-layout synchronization is planned.
+> Structural-only preview of the fixed sample room. Independent of Layout A/B; synchronized views appear in the generator section.
 
 Drag to orbit; scroll to zoom, or choose zoom/pan from the Plotly modebar. Use
 **Reset camera to last save** to restore the initial isometric view. The scene
@@ -225,7 +235,8 @@ running Streamlit server after adding renderer modules if it retains old imports
 
 **Interactive 3D Furnished Room Preview** displays the fixed sample bedroom,
 independently of the selected Layout A/B. It preserves the structural-only scene
-and comparison above it. Task 06C will connect the selected layout to 3D.
+and synchronized generated views above it. The generated 3D chart is labeled
+**Selected 3D Furnished Room** and names Layout A or B in its caption.
 Rendering alone does not establish spatial validity.
 
 ```python
@@ -257,26 +268,34 @@ rejected explicitly. Out-of-room, overlapping, and above-ceiling objects remain
 visible without relocation or any validity claim. Scene ranges include them;
 axis proportions preserve equal physical units.
 
-The furnished camera starts in an isometric direction with perspective projection
-so modebar zoom visibly changes magnification. The independent structural preview
+The furnished camera uses perspective projection with eye `(1.35, -1.65, 1.35)`
+and center `(0, 0, -0.06)`. The 400 px chart replaces the previous 600 px height;
+top margin is 36 px instead of 140 px. Uniform aspect proportions now use the
+actual scene-span ratios, with equal physical X/Y/Z units. Geometry is unchanged.
+Only the useful **Walls** legend toggle remains, and controls are arranged vertically
+to keep the title readable at narrow widths. Short X/Y/Z axis titles retain meters;
+directions remain east/north/up. The independent structural preview
 retains its orthographic camera. Drag to orbit; select **Pan** or **Zoom** in the
 modebar and drag. **Reset camera to last save** restores the initial view. Scroll
 zoom is enabled, but mouse-wheel magnification was not confirmed in this browser;
 use the verified modebar zoom. Hover reports name, ID, category, X/Y position,
-dimensions, height, and rotation. Legend items can toggle trace groups; hide
-**Walls** when a wall intercepts a furniture hover target.
+dimensions, height, and rotation. Toggle **Walls** when a wall intercepts a furniture
+hover target. Streamlit currently resets the camera to the deterministic initial
+framing when A/B changes; selected data and generation results remain in session state.
 
-Desktop (1440 px) and narrow (390 px) browser inspection checked geometry,
-openings, hover, orbit, zoom, pan, reset, and fixed-sample independence from A/B.
-The furnished scene uses extra legend spacing and uniform framing to keep labels
-visible at narrow widths. Screenshots are local ignored artifacts in
-`output/task06b/`. Console: no application errors; one non-fatal Plotly Canvas2D
+Desktop (1440 px) and narrow (390 px) browser inspection checked Layout A and B
+in both views, matching IDs/positions, unchanged structural meshes, readable labels,
+orbit, modebar zoom, pan, and reset. The scene framing leaves the Z label visible
+at narrow widths. Eight screenshots are local ignored artifacts in
+`output/task06c/`. Task 06B inspection/hover screenshots remain in `output/task06b/`.
+Console: no application errors; one non-fatal Plotly Canvas2D
 readback performance advisory. WebGL support is required.
 
 The sample adds 15 cuboids / 180 furniture triangles. Warm rendering measured
 about 23 ms per call locally (imports excluded; this is an observation, not a CI
-threshold). No external assets, new dependency, geometry algorithm, model schema,
-live Codex functionality, or 2D/3D selection synchronization was added.
+threshold). Task 06C adds selection synchronization and presentation adjustments
+without external assets, new dependencies, geometry algorithms, schema changes,
+or live Codex functionality.
 
 ## Models and coordinates
 
@@ -596,9 +615,9 @@ claim. Task 05B exposes these same results in Streamlit alongside the Task 03 pr
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
 | Language | Python 3.11+ | Application and package |
-| Interface | Streamlit 1.66.1 | Sample preview, seeded layout comparison, structural 3D preview, and AppTest utilities |
+| Interface | Streamlit 1.66.1 | Sample previews, seeded layout comparison, selected 2D/3D views, and AppTest utilities |
 | Data | Pydantic 2.14.1 | Room, opening, furniture, and design schemas |
-| Visualization | Plotly 7.1.0 | Metric 2D floor plans and structural 3D meshes from canonical models |
+| Visualization | Plotly 7.1.0 | Metric 2D plans and structural/furniture 3D meshes from canonical models |
 | Spatial geometry | Shapely 2.2.0 | Zero-rotation furniture containment and overlap checks |
 | Testing | pytest 9.1.1 | Smoke, model, renderer, and preview integration tests |
 | Code quality | Ruff 0.17.3 | Linting and formatting |
@@ -723,7 +742,8 @@ ArchiMind/
 │   ├── test_layout_generation_ui.py  AppTest controls, selection, state, and error cases
 │   ├── test_room_3d.py           Coordinates, wall triangles, gaps, and 3D integration
 │   ├── test_furniture_3d.py      Bounds, surfaces, dimensions, and numeric limits
-│   └── test_design_3d.py         Scene composition, 2D correspondence, and app preview
+│   ├── test_design_3d.py         Scene composition, 2D correspondence, and app preview
+│   └── test_layout_sync.py       Selected object identity, matching geometry, session states, and framing
 ├── scripts/check_health.py      Temporary server health check
 ├── docs/
 │   ├── assets/                  README artwork and logo badges
@@ -749,7 +769,8 @@ and verification record.
 - [x] **Task 05B · Streamlit generation and comparison** — A/B plans, scores, validation, and session state.
 - [x] **Task 06A · Basic interactive 3D room geometry** — structural room meshes and real wall openings.
 - [x] **Task 06B · 3D furniture visualization** — bounded meshes and independent furnished sample.
-- [ ] **Task 06C · Synchronize Selected 2D and 3D Layouts** — recommended next milestone.
+- [x] **Task 06C · Synchronize Selected 2D and 3D Layouts** — one stored candidate supplies both views; compact furnished camera framing.
+- [ ] **Task 06D · Realistic 3D Asset and Renderer Proof of Concept** — recommended next milestone.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

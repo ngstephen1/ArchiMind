@@ -414,7 +414,7 @@ def test_streamlit_contains_structural_3d_preview_and_required_caption() -> None
     assert not app.exception
     assert "Interactive 3D Room Preview" in [heading.value for heading in app.subheader]
     assert (
-        "Structural-only preview of the fixed sample room. See the furnished sample below; selected-layout synchronization is planned."
+        "Structural-only preview of the fixed sample room. Independent of Layout A/B; synchronized views appear in the generator section."
         in [item.value for item in app.caption]
     )
     figure = _app_3d_figure(app)

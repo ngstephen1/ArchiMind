@@ -22,14 +22,25 @@ def furniture(figure):
     return [trace for trace in figure.data if trace.meta.get("kind") == "furniture"]
 
 
-def test_structural_meshes_openings_and_camera_remain_unchanged():
+def _without_legend(trace):
+    return {
+        key: value
+        for key, value in trace.to_plotly_json().items()
+        if key != "showlegend"
+    }
+
+
+def test_structural_meshes_and_openings_unchanged_with_closer_camera():
     design = create_sample_bedroom()
     room = render_room_3d(design.room)
     complete = render_design_3d(design)
-    assert [t.to_plotly_json() for t in complete.data[: len(room.data)]] == [
-        t.to_plotly_json() for t in room.data
+    # Composition changes legend visibility, not structural geometry or hover data.
+    assert [_without_legend(t) for t in complete.data[: len(room.data)]] == [
+        _without_legend(t) for t in room.data
     ]
-    assert complete.layout.scene.camera.eye == room.layout.scene.camera.eye
+    assert sum(
+        v * v for v in complete.layout.scene.camera.eye.to_plotly_json().values()
+    ) < sum(v * v for v in room.layout.scene.camera.eye.to_plotly_json().values())
     assert complete.layout.scene.camera.up == room.layout.scene.camera.up
     assert complete.layout.scene.camera.projection.type == "perspective"
     assert room.layout.scene.camera.projection.type == "orthographic"
@@ -70,8 +81,8 @@ def test_empty_furniture_list_is_structural_geometry():
     design.furniture = []
     complete = render_design_3d(design)
     assert not furniture(complete)
-    assert [t.to_plotly_json() for t in complete.data] == [
-        t.to_plotly_json() for t in render_room_3d(design.room).data
+    assert [_without_legend(t) for t in complete.data] == [
+        _without_legend(t) for t in render_room_3d(design.room).data
     ]
 
 
@@ -177,8 +188,7 @@ def _app_furnished(app):
     return next(
         go.Figure(json.loads(chart.proto.spec))
         for chart in app.get("plotly_chart")
-        if json.loads(chart.proto.spec)["layout"].get("meta", {}).get("kind")
-        == "design_3d"
+        if chart.key == "design-3d"  # Standalone sample, not the synchronized view.
     )
 
 

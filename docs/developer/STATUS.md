@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 06B complete — interactive 3D furniture visualization.**
-Task 06C is recommended next. The Task 03 preview, Task 05B comparison, and
+**Current milestone: Task 06C complete — synchronized selected 2D/3D layouts.**
+Task 06D is recommended next. The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
 advisor with offline tests. C02 remains a separate proposed integration.
@@ -22,8 +22,9 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 06A — Basic interactive 3D room geometry | Complete | Structural meshes with real door/window holes, orthographic camera, equal metric scaling, 3D preview, and 43 tests |
 | Optional C01 — Codex CLI advisor backend | Complete, live behavior unverified | Typed suggestions, fixed isolated read-only invocation, default-off and per-call gates, bounded I/O, sanitized failures, and 53 mocked tests |
 | Task 06B — 3D furniture visualization | Complete | Bounded bed/desk/wardrobe/generic meshes, furnished scene, fixed-sample app preview, 43 new tests, and browser verification |
-| Task 06C — Selected 2D/3D layout synchronization | Recommended next | Not implemented |
-| Later phases | Planned | Layout synchronization, agents, targeted revisions, persistence, and export |
+| Task 06C — Selected 2D/3D layout synchronization | Complete | Exact selected candidate feeds both views, compact camera framing, 13 new tests, and desktop/mobile verification |
+| Task 06D — Realistic 3D asset/renderer proof of concept | Recommended next | Not implemented |
+| Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
 
@@ -42,7 +43,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Layout generation | Backend and Streamlit expose up to two distinct validator-approved alternatives with deterministic seeds/scores and validation summaries | Rotation zero; fixed sample dimensions in UI; no LLMs or global-optimality claims |
 | Session state | Results and selection survive normal reruns; generation and acceptance checks run only on button click | Refresh/disconnect may clear results; no database persistence |
 | 3D structure | Floor, four zero-thickness walls, real door/window gaps, optional blue glazing, and orbit/zoom/pan | No 3D furniture, ceiling slab, reveals, or synchronization with selected layouts |
-| 3D furniture | Bed frame/mattress/pillows, desk tabletop/legs, wardrobe/plinth/panels/handles, and generic solids | Rotation 0 only; at most 100 items; fixed sample in UI; no spatial-validity claim or selection synchronization |
+| 3D furniture | Bed frame/mattress/pillows, desk tabletop/legs, wardrobe/plinth/panels/handles, and generic solids | Rotation 0 only; at most 100 items; generated selection and separate fixed sample; no rendering-based validity claim |
+| Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; no furniture editing or camera-pose persistence across A/B switches |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
 | Agents / API | Not implemented | No LangGraph or OpenAI calls; no API key required |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
@@ -50,9 +52,10 @@ advisor with offline tests. C02 remains a separate proposed integration.
 ## What the app currently shows
 
 The original branding and canonical **2D Floor Plan Preview** remain. The phase
-metric now reads Task 06B, and planned-capabilities text reflects current support.
+metric now reads Task 06C, and planned-capabilities text reflects current support.
 Below the sample, **AI-Assisted Room Layout Generator** presents Room Information,
-Layout Generation Controls, Generated Alternatives, Selected 2D Floor Plan, and
+Layout Generation Controls, Generated Alternatives, Selected 2D Floor Plan,
+Selected 3D Furnished Room, and
 Spatial Validation Summary. It calls the existing deterministic generator, uses
 the existing renderer, and makes no AI-reasoning claim.
 
@@ -63,7 +66,7 @@ The preview caption explicitly states:
 The new **Interactive 3D Room Preview** below the comparison displays only the
 fixed sample room structure, with this explicit caption:
 
-> Structural-only preview of the fixed sample room. See the furnished sample below; selected-layout synchronization is planned.
+> Structural-only preview of the fixed sample room. Independent of Layout A/B; synchronized views appear in the generator section.
 
 **Interactive 3D Furnished Room Preview** follows it, showing the canonical sample
 bedroom with all three furniture items. Its caption explicitly identifies it as a
@@ -71,7 +74,7 @@ fixed sample, independent of Layout A/B, and says rendering does not establish
 spatial validity. The fixed scene survives generation, selection, and regeneration.
 
 The animated isometric README header remains concept artwork. The live app now
-provides both top-down 2D plans and an independent structural 3D scene.
+provides synchronized generated 2D/3D views and separate sample demonstrations.
 
 ## Verified baseline
 
@@ -324,9 +327,66 @@ after each push, and passed GitHub Actions. The final integration checkpoint
 contains the preview, browser-driven framing/projection adjustments, tests, and docs.
 Unrelated `.agents/` and `.claude/` remain untracked and untouched.
 
+## Task 06C selection synchronization and framing
+
+One local `candidate` is resolved from the existing session-state result and A/B
+radio. Its exact `candidate.design` object is passed to both renderers. No second
+selected-design state, coordinate conversion, automatic placement, or geometry
+algorithm is introduced. Generation and spatial acceptance checks remain confined
+to Generate Layouts. Renderers retain their existing schema-revalidation contracts.
+
+Normal reruns and pending seed edits preserve results and selection. A new
+successful generation selects A; normal empty/failure outcomes show no generated
+2D/3D pair. An exception preserves both views of the previous selected candidate.
+Standalone sample charts remain clearly labeled and independent. The selected
+chart keys stay stable, but actual browser inspection found Streamlit resets the
+camera to its initial framing when A/B changes; camera pose is not persisted.
+
+The furnished renderer now uses 400 px height (previously 600), a 36 px top margin
+(previously 140), a closer perspective eye `(1.35, -1.65, 1.35)`, and center
+`(0, 0, -0.06)`. Aspect ratios follow scene-span ratios with equal physical units.
+Only the Walls legend control remains; the modebar is vertical and axis titles
+are compact. This reduces blank space and keeps the Z label readable at 390 px.
+Only presentation changes; furniture coordinates, mesh vertices/triangles,
+structural geometry, dimensions, identities, and canonical room ranges are retained.
+
+The seed-42 browser inspection confirmed these exact meter positions in both
+the selected 2D and 3D chart data:
+
+| Furniture ID | Layout A X/Y | Layout B X/Y |
+| --- | --- | --- |
+| `desk` | 0, 1.36 | 3.74, 3.4 |
+| `queen-bed` | 3.4, 1.69 | 1.96, 0 |
+| `wardrobe` | 0, 3.4 | 0, 3.4 |
+
+Actual desktop (1440 px) and mobile (390 px) inspection covered both views of A/B,
+matching IDs/positions/heights, unchanged room structure, initial framing, readable
+labels, orbit, modebar zoom, pan, reset, and no page overflow. Eight screenshots
+are ignored artifacts in `output/task06c/`. Console: no application errors and
+one non-fatal Plotly Canvas2D readback advisory. The app was started explicitly
+on port 8511. Modebar zoom is verified; wheel magnification remains unconfirmed.
+
+All previous test cases remain active. New tests cover exact object identity at
+both renderer calls, coordinate and ID agreement, immutable results, structural
+geometry, no generation/spatial validation on switches or normal reruns, pending
+seeds, empty/failed/partial outcomes, exception recovery, fresh sessions, and
+deterministic framing with equal units. Models, furniture meshes, structural and
+2D renderers, spatial algorithms, layout generation, dependencies, and C01 source
+remain unchanged. No live Codex call was made; no asset or AI feature was added.
+
+Final local verification: **541 passed in 21.52s**, including all 528 previous
+cases and 13 new synchronization/framing cases. Existing tests retain their
+behavioral coverage with updated phase/caption assertions, standalone-chart
+selection, and presentation expectations. `pip check`: no broken requirements.
+Ruff: all checks passed; **40 files already formatted**. The real headless
+Streamlit health check returned HTTP **200 ok**. Protected source paths were
+compared against `e455efe`; only UI synchronization, furnished-scene presentation,
+tests, and software documentation changed. Screenshots, secrets, and unrelated
+agent directories are excluded from the checkpoint.
+
 ## Next milestone
 
-**Task 06C — Synchronize Selected 2D and 3D Layouts** is recommended next. It is not
+**Task 06D — Realistic 3D Asset and Renderer Proof of Concept** is recommended next. It is not
 implemented here. Rotated-footprint support, furniture
 editing, persistence, export, and agents remain separate future work.
 

@@ -15,7 +15,7 @@ MAX_DESIGN_3D_FURNITURE = 100
 def render_design_3d(design: RoomDesign) -> go.Figure:
     """Render a furnished design, preserving structural meshes and source models.
 
-    Uses render_room_3d for all walls/openings and the isometric eye direction.
+    Uses render_room_3d for all walls/openings, with a closer furnished-scene camera.
     Perspective projection makes camera dolly/zoom visibly useful; the independent
     structural-only renderer keeps its original orthographic projection.
     Axis ranges include out-of-room and above-ceiling furniture without moving it.
@@ -42,11 +42,15 @@ def render_design_3d(design: RoomDesign) -> go.Figure:
             ):
                 limits[0] = min(limits[0], min(coordinates))
                 limits[1] = max(limits[1], max(coordinates))
+    # Names/colors remain available on hover. Keep only the useful wall toggle
+    # instead of reserving rows for seven redundant legend entries on mobile.
+    for trace in figure.data:
+        trace.showlegend = trace.meta.get("kind") == "wall" and bool(trace.showlegend)
     spans = [high - low for low, high in ranges]
     if not all(isfinite(span) and span > 0 for span in spans):
         raise FurnitureGeometryError("Furnished scene spans exceed numeric limits")
     # Uniform framing leaves room for axis titles at narrow browser widths.
-    proportions = [0.72 * span / max(spans) for span in spans]
+    proportions = [span / max(spans) for span in spans]
     if any(value <= 0 for value in proportions):
         raise FurnitureGeometryError(
             "Furnished scene proportions exceed numeric limits"
@@ -58,9 +62,17 @@ def render_design_3d(design: RoomDesign) -> go.Figure:
             "y": 0.98,
             "yanchor": "top",
         },
-        height=600,
-        margin={"l": 0, "r": 0, "t": 140, "b": 0},
-        legend={"orientation": "h", "x": 0, "y": 1.02, "yanchor": "bottom"},
+        height=400,
+        margin={"l": 8, "r": 8, "t": 36, "b": 8},
+        legend={
+            "orientation": "h",
+            "x": 0.01,
+            "y": 0.98,
+            "xanchor": "left",
+            "yanchor": "top",
+            "font": {"size": 10},
+        },
+        modebar={"orientation": "v"},
         meta={
             "kind": "design_3d",
             "room_id": design.room.id,
@@ -71,7 +83,12 @@ def render_design_3d(design: RoomDesign) -> go.Figure:
         uirevision=f"design-3d:{design.room.id}",
     )
     figure.update_scenes(
+        camera_eye={"x": 1.35, "y": -1.65, "z": 1.35},
+        camera_center={"x": 0, "y": 0, "z": -0.06},
         camera_projection_type="perspective",
+        xaxis_title="X (m)",
+        yaxis_title="Y (m)",
+        zaxis_title="Z (m)",
         xaxis_range=ranges[0],
         yaxis_range=ranges[1],
         zaxis_range=ranges[2],

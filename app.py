@@ -20,20 +20,20 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 06B")
+    phase.metric("Current development phase", "Task 06C")
     status.metric("Application status", "Running")
 
     st.divider()
     st.subheader("Planned capabilities")
     st.markdown(
         "- AI-assisted room planning\n"
-        "- Selected 2D/3D layout synchronization\n"
+        "- Realistic 3D furniture assets\n"
         "- Multi-agent collaboration\n"
         "- Versioned projects and export"
     )
     st.caption(
         "These capabilities are planned. Deterministic layout generation, "
-        "spatial validation, 2D comparison, and structural/furnished 3D previews are available below."
+        "spatial validation, synchronized selected 2D/3D layouts, and standalone sample previews are available below."
     )
 
     st.divider()
@@ -69,7 +69,7 @@ def main() -> None:
         )
         st.caption(
             "Structural-only preview of the fixed sample room. "
-            "See the furnished sample below; selected-layout synchronization is planned."
+            "Independent of Layout A/B; synchronized views appear in the generator section."
         )
 
     st.divider()
@@ -86,7 +86,7 @@ def main() -> None:
         st.caption(
             "Fixed sample bedroom — independent of the selected Layout A/B. "
             "Rendering does not establish spatial validity. "
-            "Selected-layout synchronization belongs to Task 06C."
+            "Synchronized selected-layout views appear in the generator section above."
         )
 
 

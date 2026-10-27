@@ -17,7 +17,7 @@ from archimind.geometry import (
     validate_accessibility,
 )
 from archimind.models import RoomDesign
-from archimind.render import render_floorplan
+from archimind.render import render_design_3d, render_floorplan
 
 RESULT_KEY = "layout_generation_result"
 ERROR_KEY = "layout_generation_error"
@@ -66,7 +66,11 @@ def _show_outcome(result: LayoutGenerationResult) -> None:
 
 
 def render_layout_generator(specification: RoomDesign) -> None:
-    """Render sample generation controls and compare at most two stored layouts."""
+    """Compare stored layouts; one selected candidate supplies both renderers.
+
+    Selection does not copy, regenerate, or spatially revalidate candidate data.
+    Renderer schema checks remain part of their existing public contracts.
+    """
     st.subheader("AI-Assisted Room Layout Generator")
     st.write(
         "Generate reproducible furniture arrangements with deterministic seeded "
@@ -201,6 +205,22 @@ def render_layout_generator(specification: RoomDesign) -> None:
         width="stretch",
         key="layout_positions",
     )
+
+    with st.container(key="selected_design_3d"):
+        st.markdown("### Selected 3D Furnished Room")
+        st.caption(
+            f"{selected} · Same furniture and room data as the selected 2D floor plan. "
+            "Drag to orbit; use the modebar to zoom, pan, or reset. "
+            "Toggle Walls if a hover target is obscured."
+        )
+        st.plotly_chart(
+            render_design_3d(candidate.design),
+            width="stretch",
+            theme=None,
+            key="generated-design-3d",
+            config={"scrollZoom": True, "displaylogo": False},
+            alt=f"{selected}: synchronized 3D bedroom with the selected furniture positions and unchanged room openings.",
+        )
 
     st.markdown("### Spatial Validation Summary")
     report = candidate.validation
