@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title description">
+  <title id="title">ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning</title>
+  <desc id="description">An animated architectural blueprint with an isometric bedroom, a moving scan line, and pulsing survey points. Task 02: core data models. Concept illustration, not application output.</desc>
+  <defs>
+    <linearGradient id="background" x2="1" y2="1"><stop stop-color="#0B1725"/><stop offset="1" stop-color="#112C36"/></linearGradient>
+    <linearGradient id="floor-fill" x2="1" y2="1"><stop stop-color="#14343E"/><stop offset="1" stop-color="#102531"/></linearGradient>
+    <linearGradient id="wall-fill" x2="1" y2="1"><stop stop-color="#21404B" stop-opacity="0.8"/><stop offset="1" stop-color="#142E39" stop-opacity="0.5"/></linearGradient>
+    <linearGradient id="scan" x2="1"><stop stop-color="#60DEC4" stop-opacity="0"/><stop offset="0.5" stop-color="#A2F6E3"/><stop offset="1" stop-color="#60DEC4" stop-opacity="0"/></linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#7CABA8" stroke-opacity="0.07"/></pattern>
+    <clipPath id="frame"><rect width="1200" height="440" rx="24"/></clipPath>
+    <clipPath id="floor"><path d="M750 269 960 356 1132 253 922 168Z"/></clipPath>
+    <filter id="glow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="5"/></filter>
+  </defs>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+    .mono { font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace; }
+    @media (prefers-reduced-motion: reduce) { .motion { display: none; } }
+  </style>
+  <g clip-path="url(#frame)">
+    <rect width="1200" height="440" fill="url(#background)"/>
+    <rect width="1200" height="440" fill="url(#grid)"/>
+    <circle cx="1100" cy="440" r="330" fill="#2A8C7A" opacity="0.045"/>
+    <circle cx="1160" cy="40" r="185" fill="none" stroke="#72CAB6" stroke-opacity="0.06"/>
+    <circle cx="1160" cy="40" r="215" fill="none" stroke="#72CAB6" stroke-opacity="0.04"/>
+    <path d="M685 56V388" stroke="#45616A" stroke-opacity="0.35"/>
+    <!-- Original ArchiMind mark: an open room and an architectural A. -->
+    <g transform="translate(52 47)" fill="none" stroke="#73E2C7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M0 11 21 0 42 11V34L21 46 0 34Z"/><path d="M0 11 21 23 42 11M21 23V46" opacity="0.55"/>
+      <path d="m10 31 11-21 11 21M15 24h12" stroke="#DCEDE8"/>
+    </g>
+    <text x="112" y="66" fill="#DDEBE8" font-size="12" font-weight="600" letter-spacing="2.5">DESIGN + INTELLIGENCE</text>
+    <text x="112" y="87" fill="#8DA7AE" font-size="10.5" letter-spacing="1.2">ADS 5984 · ENGINEERING PROTOTYPE</text>
+    <text x="48" y="181" fill="#F1F5F1" font-size="80" font-weight="700" letter-spacing="-4">ArchiMind</text>
+    <rect x="414" y="132" width="64" height="49" rx="12" fill="#D6B78B"/>
+    <text x="446" y="166" fill="#14252D" font-size="26" font-weight="700" text-anchor="middle">AI</text>
+    <text x="52" y="232" fill="#CADBD8" font-size="24">Multi-Agent Interior Design</text>
+    <text x="52" y="264" fill="#CADBD8" font-size="24">&amp; 3D Spatial Planning</text>
+    <text x="52" y="312" fill="#91A8AF" font-size="16">Thoughtful spaces. Structured foundations.</text>
+    <rect x="52" y="357" width="258" height="34" rx="17" fill="#173D39" stroke="#32675A"/>
+    <circle cx="70" cy="374" r="3.5" fill="#77E0BB"/>
+    <text x="83" y="378" fill="#BCE7D7" font-size="10.5" font-weight="600" letter-spacing="0.6">TASK 02 / CORE DATA MODELS</text>
+    <text x="331" y="378" fill="#97ADB1" font-size="11" class="mono">schema first. space next.</text>
+    <!-- Concept illustration. The application does not render rooms yet. -->
+    <path d="M750 269 960 356 1132 253 922 168Z" fill="url(#floor-fill)" stroke="#477F80" stroke-width="1.5"/>
+    <g clip-path="url(#floor)" fill="none" stroke="#72B5AC" stroke-opacity="0.14" stroke-width="0.8">
+      <path d="m766 282 172-103m24 113 172-103m-124 123 172-103m-124 123 172-103m-124 123 172-103"/>
+      <path d="m778 251 210 87m-175-108 210 87m-175-108 210 87m-175-108 210 87"/>
+    </g>
+    <path d="M750 269V149L922 48V168Z" fill="url(#wall-fill)" stroke="#4B8B8B" stroke-width="1.5"/>
+    <path d="M922 168V48L1132 133V253Z" fill="url(#wall-fill)" stroke="#5D9C97" stroke-width="1.5"/>
+    <path d="M750 149 922 48 1132 133" fill="none" stroke="#8DC8B9" stroke-width="2"/>
+    <path d="M998 133 1074 164V201L998 170Z" fill="#69CABB" fill-opacity="0.13" stroke="#81CDBA" stroke-width="1.4"/>
+    <path d="M1036 149V186" stroke="#81CDBA" stroke-opacity="0.7"/>
+    <path d="M750 207 922 106" fill="none" stroke="#588D8A" stroke-opacity="0.22"/>
+    <path d="M804 252V270L886 304V286Z" fill="#263B4A" stroke="#698F9B"/>
+    <path d="M886 286V304L962 260V242Z" fill="#1C303E" stroke="#698F9B"/>
+    <path d="M804 252 881 208 962 242 886 286Z" fill="#3C5666" stroke="#91ACB4" stroke-width="1.3"/>
+    <path d="M816 249 841 235 870 247 845 261Z" fill="#C0CFCE"/>
+    <path d="M846 232 871 218 900 230 875 244Z" fill="#C0CFCE"/>
+    <path d="M858 275 934 231" stroke="#77979D" stroke-width="2"/>
+    <path d="M989 237V273M1055 264V300M1105 234V270" fill="none" stroke="#B79A77" stroke-width="3"/>
+    <path d="M989 237 1040 207 1105 234 1055 264Z" fill="#BAA07E" stroke="#E0C4A0" stroke-width="1.3"/>
+    <path d="M1027 225 1047 213 1072 223 1052 236Z" fill="#203742" stroke="#718E94"/>
+    <g fill="none" stroke="#658F91" stroke-width="0.9" opacity="0.7"><path d="M740 294 952 382M736 287l8 14m204 74 8 14M981 378l172-102m-179 99 14 6m158-108 14 6"/></g>
+    <text x="822" y="348" fill="#8CA9AA" font-size="10.5" class="mono" transform="rotate(22.5 822 348)">X / 5.0 m</text>
+    <text x="1047" y="351" fill="#8CA9AA" font-size="10.5" class="mono" transform="rotate(-30.5 1047 351)">Y / 4.0 m</text>
+    <g fill="#8DE4CB"><circle cx="750" cy="269" r="3"/><circle cx="960" cy="356" r="3"/><circle cx="1132" cy="253" r="3"/><circle cx="922" cy="48" r="3"/></g>
+    <!-- Native SVG animation; meaningful artwork remains visible without it. -->
+    <g class="motion" clip-path="url(#floor)">
+      <path d="M830 308 1003 207" fill="none" stroke="url(#scan)" stroke-width="18" opacity="0.35" filter="url(#glow)"><animateTransform attributeName="transform" type="translate" values="-150 -62;150 62;-150 -62" dur="9s" repeatCount="indefinite"/></path>
+      <path d="M830 308 1003 207" fill="none" stroke="url(#scan)" stroke-width="1.5" opacity="0.8"><animateTransform attributeName="transform" type="translate" values="-150 -62;150 62;-150 -62" dur="9s" repeatCount="indefinite"/></path>
+      <path d="M750 269 960 356 1132 253 922 168Z" fill="none" stroke="#B2F3DD" stroke-width="2" stroke-dasharray="32 760"><animate attributeName="stroke-dashoffset" from="0" to="-1584" dur="12s" repeatCount="indefinite"/></path>
+    </g>
+    <g class="motion" fill="none" stroke="#8DE4CB">
+      <circle cx="960" cy="356" r="3" opacity="0"><animate attributeName="r" values="3;16" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.55;0" dur="4s" repeatCount="indefinite"/></circle>
+      <circle cx="922" cy="48" r="3" opacity="0"><animate attributeName="r" values="3;13" begin="2s" dur="4s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.5;0" begin="2s" dur="4s" repeatCount="indefinite"/></circle>
+    </g>
+    <text x="941" y="417" fill="#6F9499" font-size="9" text-anchor="middle" letter-spacing="1.4" class="mono">CONCEPT ILLUSTRATION · NOT GENERATED OUTPUT</text>
+    <rect x="0.5" y="0.5" width="1199" height="439" rx="23.5" fill="none" stroke="#45616A" stroke-opacity="0.5"/>
+  </g>
+</svg>
