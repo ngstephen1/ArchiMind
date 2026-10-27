@@ -1,0 +1,28 @@
+"""Dedicated one-chair experiment; independent of the bedroom and generator."""
+
+from archimind.models import Furniture, Room, RoomDesign
+
+
+def create_sample_chair() -> RoomDesign:
+    return RoomDesign(
+        name="Experimental textured chair",
+        room=Room(
+            id="chair-room",
+            name="Chair studio",
+            width_m=3.2,
+            depth_m=2.8,
+            ceiling_height_m=2.7,
+        ),
+        furniture=[
+            Furniture(
+                id="sheen-chair",
+                name="Sheen Chair",
+                category="chair",
+                x_m=1.1,
+                y_m=0.8,
+                width_m=0.85,
+                depth_m=0.7,
+                height_m=0.85,
+            )
+        ],
+    )

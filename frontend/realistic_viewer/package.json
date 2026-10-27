@@ -1,0 +1,14 @@
+{
+  "name": "archimind-realistic-viewer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {"node": ">=20"},
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test tests/*.test.js",
+    "check": "node --check src/main.js && node --check src/viewer.js && node --check src/geometry.js"
+  },
+  "dependencies": {"three": "0.186.1"},
+  "devDependencies": {"esbuild": "0.28.2"}
+}

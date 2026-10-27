@@ -1,0 +1,20 @@
+{
+  "name": "Sheen Chair",
+  "asset_id": "sheen-chair",
+  "file": "SheenChair.glb",
+  "format": "GLB 2.0",
+  "creator": "Eric Chadwick",
+  "copyright": "2020 Wayfair, LLC",
+  "license": "CC0-1.0",
+  "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+  "source_url": "https://github.com/KhronosGroup/glTF-Sample-Assets/tree/8f492390ddc7a2ae221a1369ef560589cf8c70fb/Models/SheenChair",
+  "download_url": "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/8f492390ddc7a2ae221a1369ef560589cf8c70fb/Models/SheenChair/glTF-Binary/SheenChair.glb",
+  "source_commit": "8f492390ddc7a2ae221a1369ef560589cf8c70fb",
+  "download_date": "2026-10-27",
+  "size_bytes": 4125648,
+  "sha256": "f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399",
+  "modifications": "Unmodified GLB; runtime proportional scaling and origin translation only.",
+  "native_up": "+Y",
+  "native_front": "+Z",
+  "three_yaw_degrees": 0
+}

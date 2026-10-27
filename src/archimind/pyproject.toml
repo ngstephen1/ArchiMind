@@ -1,0 +1,7 @@
+[project]
+name = "archimind"
+version = "0.1.0"
+
+[[tool.streamlit.component.components]]
+name = "realistic_viewer"
+asset_dir = "_viewer_assets"

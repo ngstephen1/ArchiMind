@@ -43,6 +43,19 @@ jobs:
         run: python -m ruff format --check .
       - name: Check dependency compatibility
         run: python -m pip check
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "20.13.1"
+          cache: npm
+          cache-dependency-path: frontend/realistic_viewer/package-lock.json
+      - name: Check isolated realistic viewer
+        working-directory: frontend/realistic_viewer
+        run: |
+          npm ci --ignore-scripts --no-fund
+          npm run check
+          npm test
+          npm run build
+          git diff --exit-code -- ../../src/archimind/_viewer_assets
       - name: Run package and Streamlit application tests
         run: python -m pytest -q
       - name: Check headless Streamlit server

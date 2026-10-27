@@ -1,0 +1,11 @@
+.viewer-host, [data-viewer="realistic"] { width: 100%; min-width: 0; font: 14px/1.5 system-ui, sans-serif; color: #243b43; }
+.stage { position: relative; width: 100%; height: clamp(340px, 65vw, 480px); border-radius: 12px; overflow: hidden; background: #e9edf0; }
+.stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.status { position: absolute; left: 12px; top: 12px; max-width: calc(100% - 48px); padding: 5px 10px; border-radius: 6px; background: #ffffffdf; pointer-events: none; font-size: 12px; }
+.status[data-state="ready"] { color: #216359; }
+.status[data-state="error"] { background: #fff0ec; color: #842d1d; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-top: 10px; }
+button { border: 1px solid #a4b6ba; border-radius: 6px; padding: 7px 12px; background: white; color: #243b43; cursor: pointer; }
+button:focus-visible, input:focus-visible { outline: 2px solid #15867e; outline-offset: 3px; }
+p { margin: 8px 0 0; overflow-wrap: anywhere; }
+.fit, .metrics { font-size: 12px; color: #52676e; }
