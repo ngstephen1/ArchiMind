@@ -4,3 +4,4 @@ recursive-include tests *.py
 recursive-include .github/workflows *.yml
 recursive-include docs .gitkeep
 recursive-include docs/assets *.svg *.md
+include docs/developer/STATUS.md
