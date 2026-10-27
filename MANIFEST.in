@@ -3,3 +3,4 @@ recursive-include scripts *.py
 recursive-include tests *.py
 recursive-include .github/workflows *.yml
 recursive-include docs .gitkeep
+recursive-include docs/assets *.svg *.md

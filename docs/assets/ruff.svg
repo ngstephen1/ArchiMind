@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="102" height="36" viewBox="0 0 102 36" role="img" aria-labelledby="title">
+  <title id="title">Ruff</title>
+  <rect x="0.5" y="0.5" width="101" height="35" rx="8" fill="#132936" stroke="#2C4652"/>
+  <g transform="translate(12 8) scale(0.8333333333)" fill="#D4EE8C">
+    <path d="M3 0C1.338 0 0 1.338 0 3v18c0 1.662 1.338 3 3 3h18c1.662 0 3-1.338 3-3V3c0-1.662-1.338-3-3-3Zm4.2 7.2h8.641c.53 0 .959.43.959.959v3.266c0 .53-.43.959-.959.959h-.961v.768h1.92V16.8h-4.416v-2.88h-.768v2.88H7.2Zm3.648 3.648v.768h2.304v-.768z"/>
+  </g>
+  <text x="43" y="23" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif" font-size="14" font-weight="600" fill="#DCE8E8">Ruff</text>
+</svg>
