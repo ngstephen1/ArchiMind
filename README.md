@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 05A: deterministic furniture layouts. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06A: interactive 3D room structure. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -37,22 +37,22 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 
 | **Define the space** | **Trust the data** | **See the plan** |
 | :--- | :--- | :--- |
-| Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, opening limits, IDs, and JSON round-trips. | Inspect a manually specified bedroom in an interactive, scaled 2D preview. |
-| Available now | Available now | Demonstration available |
+| Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded bedroom alternatives and compare their scores, coordinates, and 2D plans. |
+| Available now | Available now | Interactive sample available |
 
-> **Current backend stage · Task 05A — Deterministic layout generation**
+> **Current stage · Task 06A — Basic interactive 3D room geometry**
 >
-> The UI remains the Task 03 **2D Floor Plan Preview**, beneath the preserved
-> Foundation content. Backend checks cover containment, furniture overlaps,
-> rectangular door approach zones, and conservative walking-path connectivity.
-> A seeded backend generator now returns validated furniture alternatives.
-> Displaying alternatives in the UI, 3D, agents, persistence, and export remain planned.
+> Generate and select bedroom alternatives in Streamlit, inspect their coordinates
+> and heuristic scores, and review their spatial validation reports. The original
+> Task 03 sample preview remains available, alongside a separate 3D structural
+> room preview with real wall openings. Placement is deterministic seeded search;
+> 3D furniture, layout synchronization, AI reasoning, persistence, and export remain planned.
 > **No API key is required.**
 
-Tasks **01–03, 04A, 04B, and 05A are complete**. The
+Tasks **01–03, 04A, 04B, 05A, 05B, and 06A are complete**. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**369 passing tests**: all 317 previous cases plus 52 generation cases.
+**485 passing tests**: all 432 Task 06A cases plus 53 offline Codex adapter cases.
 
 The header is an original concept illustration, not an application screenshot or a
 generated design.
@@ -142,12 +142,84 @@ rotations raise a clear `ValueError`; rotated footprints are deferred. Out-of-ro
 furniture is included in the visible ranges, not hidden or declared valid. Door
 swings are omitted because hinge and swing information is not part of the model.
 
-The unchanged Task 03 preview caption reads:
+The Task 03 sample geometry is preserved. Its caption now distinguishes the
+manually specified preview from generated alternatives:
 
-> Demonstration layout — spatial validation and automatic placement are not yet implemented.
+> Manually specified Task 03 demonstration. Generate and compare validated alternatives below.
 
-Task 04A/04B checks are available through the backend APIs below; the preview
-does not run them or display a spatial-validation result.
+The preview itself displays the fixed sample. The generator section below it
+uses Task 04A/04B checks and reports validation for each generated alternative.
+
+### Generate and compare layouts
+
+The **AI-Assisted Room Layout Generator** section has five parts:
+
+1. **Room Information** — the 5 × 4 × 2.7 m bedroom, bed, desk, wardrobe, south
+   door, and north window.
+2. **Layout Generation Controls** — random seed (default 42) and **Generate Layouts**.
+3. **Generated Alternatives** — actual scores, passing status, issue/warning counts,
+   generation seed/attempts, and an A/B selector.
+4. **Selected 2D Floor Plan** — the existing interactive renderer and the selected
+   candidate's furniture-position table in meters.
+5. **Spatial Validation Summary** — containment, overlaps, door approaches,
+   circulation, and any advisory warnings.
+
+Generation happens only on the button click. Results and selection persist across
+normal reruns in [Streamlit session state](https://docs.streamlit.io/develop/api-reference/caching-and-state/st.session_state).
+Selecting A/B does not regenerate or revalidate. Editing the seed keeps the old
+result and selection, with an explicit pending-seed notice. A successful generation
+response replaces the stored result and selects A; a response with no candidates
+clears the displayed alternatives. An exception keeps the prior result and
+selection with an error message. Refreshing/disconnecting the browser may clear
+the session; there is no database persistence.
+
+`complete`, `search_exhausted`, `infeasible`, and `unsupported` responses are shown
+explicitly. A single valid alternative is displayed on its own; search exhaustion
+never claims infeasibility. Missing alternatives are never rendered. Candidate
+geometry and reports are checked once on generation before storage. Scores are
+placement heuristics, and the current generator uses no AI reasoning.
+
+### Interactive 3D room structure
+
+The **Interactive 3D Room Preview** section renders the sample room's floor and
+four walls, with a south door gap and a north window at its actual sill height.
+It is independent of the selected furniture alternative and contains no furniture.
+The caption explicitly states:
+
+> 3D structural preview — furniture and layout synchronization will be added in upcoming phases.
+
+Drag to orbit; scroll to zoom, or choose zoom/pan from the Plotly modebar. Use
+**Reset camera to last save** to restore the initial isometric view. The scene
+uses an orthographic camera and axis proportions matching width:depth:height;
+a uniform framing factor leaves space for labels on narrow screens. X/Y/Z are
+meters east/north/up from the southwest floor corner.
+
+```python
+from archimind.examples import create_sample_bedroom
+from archimind.render import render_room_3d
+
+figure = render_room_3d(create_sample_bedroom().room)
+```
+
+`render_room_3d(room)` returns a reusable Plotly figure without modifying the
+canonical models. Floor and wall panels use [explicit mesh triangles](https://plotly.com/python/3d-mesh/).
+Each wall is split at opening endpoints, and only solid vertical intervals are
+triangulated. Door/window rectangles are **real holes in the wall mesh**. Window
+panes are separate translucent blue surfaces; gold door outlines contain no leaf
+or swing geometry. No Boolean mesh engine or new dependency is used.
+
+All four walls support multiple openings, corner openings, shared opening edges,
+and openings stacked at different heights. Positive-area overlap between openings
+on the same wall raises `RoomGeometryError`. Schema-invalid rooms raise Pydantic
+validation errors. Collapsed/non-finite panels, unusable scene proportions, and
+more than 128 openings also raise explicit geometry errors. Decimal endpoint
+arithmetic matches the canonical schemas.
+
+This is a zero-thickness structural preview with no ceiling slab, wall reveals,
+3D furniture, CAD/export, or synchronization with selected layouts. Plotly WebGL
+requires browser graphics support. Browser verification observed no errors and
+one non-fatal Plotly canvas readback performance advisory. Restart an already
+running Streamlit server after adding renderer modules if it retains old imports.
 
 ## Models and coordinates
 
@@ -244,8 +316,8 @@ rotations is marked passed. Invalid canonical schemas raise Pydantic
 These are planar GEOS double-precision checks with an absolute area tolerance.
 `validate_layout` retains its original Task 04A scope and JSON schema. Use the
 combined API below for Task 04B. Neither API establishes architectural safety or
-code compliance. The Streamlit UI does not call either backend API yet, and its
-demonstration caption is unchanged.
+code compliance. The Streamlit generator uses the combined backend API; the
+original manually specified preview remains a separate demonstration.
 
 ## Door access and circulation — Task 04B
 
@@ -458,7 +530,7 @@ returns that layout with `search_exhausted`. Searches can miss feasible placemen
 because of finite sampling, centimeter rounding, fixed rotation, ordering, or the
 Task 04B conservative assumptions. There is no minimum visual difference rule
 beyond distinct exact coordinates, and no optimality or architectural compliance
-claim. The Streamlit UI remains the manually specified Task 03 preview.
+claim. Task 05B exposes these same results in Streamlit alongside the Task 03 preview.
 
 ## Technology
 
@@ -467,9 +539,9 @@ claim. The Streamlit UI remains the manually specified Task 03 preview.
 | Layer | Technology | Purpose |
 | :--- | :--- | :--- |
 | Language | Python 3.11+ | Application and package |
-| Interface | Streamlit 1.66.1 | Foundation screen, 2D preview, and AppTest utilities |
+| Interface | Streamlit 1.66.1 | Sample preview, seeded layout comparison, structural 3D preview, and AppTest utilities |
 | Data | Pydantic 2.14.1 | Room, opening, furniture, and design schemas |
-| 2D visualization | Plotly 7.1.0 | Interactive floor plans from canonical models |
+| Visualization | Plotly 7.1.0 | Metric 2D floor plans and structural 3D meshes from canonical models |
 | Spatial geometry | Shapely 2.2.0 | Zero-rotation furniture containment and overlap checks |
 | Testing | pytest 9.1.1 | Smoke, model, renderer, and preview integration tests |
 | Code quality | Ruff 0.17.3 | Linting and formatting |
@@ -484,7 +556,7 @@ future tools are not added to project requirements prematurely.
 | Capability | Proposed technology |
 | :--- | :--- |
 | Agent orchestration | LangGraph + OpenAI API |
-| 3D visualization | Plotly |
+| 3D furniture visualization | Plotly |
 | 3D export | Trimesh |
 | Local persistence | SQLite |
 
@@ -494,7 +566,9 @@ The test suite covers package imports, the Streamlit screen and chart, schema
 validation, wall/ceiling limits, opening and furniture coordinates, equal-scale
 axes, containment, collisions, door zones on every wall, corner entrances,
 circulation barriers and alternative routes, missing/multiple doors, tolerance behavior, unsupported geometry,
-seeded generation, bounded failures, ranked alternatives, input immutability, IDs, and lossless JSON
+seeded generation, bounded failures, ranked alternatives, button-driven UI state,
+A/B selection, seed changes, failure messages, actual 3D wall-triangle coverage and
+opening gaps, input immutability, IDs, and lossless JSON
 round-trips. Tests run without an API key or external model service.
 
 ```bash
@@ -520,7 +594,7 @@ duplicate branch/PR runs. One Linux/Python 3.11 job installs dependencies once.
 | :--- | :--- |
 | Code quality | Ruff linting, import ordering, and formatting |
 | Dependencies | `python -m pip check` |
-| Application | All 369 tests, including Streamlit, geometry, and seeded layout generation |
+| Application | All tests, including Streamlit, geometry, seeded generation, and comparison state |
 | Runtime | A real headless Streamlit server must return HTTP `200` / `ok` |
 
 Actions use pinned revisions, read-only repository permissions, and cancellation of
@@ -533,7 +607,7 @@ is not configured.
 <summary><strong>Application tests, formatting, and manual server checks</strong></summary>
 
 Smoke tests check imports from outside the repository without `PYTHONPATH`, package
-metadata, and the Foundation screen through Streamlit's
+metadata, branding, the preserved sample, and generated-layout comparison through Streamlit's
 [AppTest](https://docs.streamlit.io/develop/api-reference/app-testing/st.testing.v1.apptest).
 AppTest does not start a network server.
 
@@ -571,7 +645,11 @@ ArchiMind/
 │   │   └── validator.py          Scoped, deterministic spatial reports
 │   ├── render/
 │   │   ├── __init__.py           Public rendering function
-│   │   └── floorplan_2d.py       Metric, interactive Plotly floor plan
+│   │   ├── floorplan_2d.py       Metric, interactive Plotly floor plan
+│   │   └── room_3d.py            Structural meshes with real opening gaps
+│   ├── ui/
+│   │   ├── __init__.py           Public Streamlit presentation helper
+│   │   └── layout_generation.py  Button-driven generation, state, and comparison
 │   └── examples/
 │       ├── __init__.py           Public example factory
 │       ├── sample_bedroom.py     Reproducible canonical-model bedroom
@@ -582,7 +660,9 @@ ArchiMind/
 │   ├── test_floorplan_2d.py      Coordinate and preview integration tests
 │   ├── test_geometry.py          Backend containment/collision/report tests
 │   ├── test_accessibility.py     Door/circulation/configuration/report tests
-│   └── test_layout_generator.py  Seeded alternatives, scores, bounds, and renderer tests
+│   ├── test_layout_generator.py  Seeded alternatives, scores, bounds, and renderer tests
+│   ├── test_layout_generation_ui.py  AppTest controls, selection, state, and error cases
+│   └── test_room_3d.py           Coordinates, wall triangles, gaps, and 3D integration
 ├── scripts/check_health.py      Temporary server health check
 ├── docs/
 │   ├── assets/                  README artwork and logo badges
@@ -605,8 +685,10 @@ and verification record.
 - [x] **Task 04A · Spatial validation backend** — containment and furniture overlaps.
 - [x] **Task 04B · Door clearance and walking-path validation** — bounded backend approximations.
 - [x] **Task 05A · Deterministic furniture layout generation** — validated backend alternatives.
-- [ ] **Task 05B · Expose generated alternatives in Streamlit** — recommended next milestone.
-- [ ] Interactive 3D visualization and export.
+- [x] **Task 05B · Streamlit generation and comparison** — A/B plans, scores, validation, and session state.
+- [x] **Task 06A · Basic interactive 3D room geometry** — structural room meshes and real wall openings.
+- [ ] **Task 06B · 3D furniture visualization** — recommended next milestone.
+- [ ] 2D/3D layout synchronization and export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.
 
@@ -614,6 +696,12 @@ Later phases remain proposed work. This prototype does not provide CAD/BIM outpu
 construction guidance, or building-code/accessibility certification.
 
 ## Configuration and project boundaries
+
+The optional [Codex Design Advisor backend](docs/developer/CODEX_ADVISOR.md) is
+implemented separately as C01. It is disabled by default
+(`ARCHIMIND_ENABLE_CODEX_ADVISOR=0`), requires explicit per-call live-usage opt-in,
+and is limited to local single-user testing. It returns unvalidated suggestions;
+there is no advisor UI or automatic placement application.
 
 `.env.example` documents a future `OPENAI_API_KEY` placeholder. The current app does
 not load environment files or use an API key. Keep real credentials in ignored

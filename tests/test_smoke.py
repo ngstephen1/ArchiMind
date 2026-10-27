@@ -1,4 +1,4 @@
-"""Smoke tests for the installed package and Foundation application."""
+"""Smoke tests for the installed package and application."""
 
 import os
 import subprocess
@@ -38,7 +38,7 @@ def test_project_initialization() -> None:
 
 
 def test_streamlit_app_runs() -> None:
-    """The application must render its honest Foundation status without errors."""
+    """The application must render its current status and branding without errors."""
     app = AppTest.from_file(str(PROJECT_ROOT / "app.py"), default_timeout=30).run()
 
     assert not app.exception
@@ -47,15 +47,15 @@ def test_streamlit_app_runs() -> None:
         "Multi-Agent Interior Design & 3D Spatial Planning"
     )
     assert {metric.label: metric.value for metric in app.metric} == {
-        "Current development phase": "Foundation",
+        "Current development phase": "Task 06A",
         "Application status": "Running",
     }
     assert app.subheader[1].value == "Planned capabilities"
     for capability in (
         "AI-assisted room planning",
-        "2D/3D visualization",
-        "Spatial validation",
+        "3D furniture visualization",
         "Multi-agent collaboration",
+        "Versioned projects and export",
     ):
         assert capability in app.markdown[1].value
     assert "These capabilities are planned." in app.caption[0].value

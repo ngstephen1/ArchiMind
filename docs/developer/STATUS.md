@@ -2,8 +2,10 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 05A complete — deterministic furniture layout generation.**
-Task 05B is recommended next. The UI remains at the Task 03 preview.
+**Current milestone: Task 06A complete — interactive structural 3D room geometry.**
+Task 06B is recommended next. The Task 03 preview and Task 05B comparison are preserved.
+Optional C01 is complete separately: a disabled-by-default, backend-only Codex
+advisor with offline tests. C02 remains a separate proposed integration.
 
 ## Milestones
 
@@ -15,8 +17,11 @@ Task 05B is recommended next. The UI remains at the Task 03 preview.
 | Task 04A — Containment and collisions | Complete | Zero-rotation Shapely footprints, containment, all-pair overlaps, scoped JSON reports, and geometry tests |
 | Task 04B — Door clearance and paths | Complete | Configurable rectangular door approach checks, bounded polygon circulation connectivity, explicit check states, and 69 new tests |
 | Task 05A — Deterministic furniture layout generation | Complete | Bounded seeded placement, validator-backed alternatives, reproducible scores, bedroom CLI, and 52 new tests |
-| Task 05B — Expose generated alternatives in Streamlit | Recommended next | Not implemented |
-| Later phases | Planned | 3D, agents, targeted revisions, persistence, and export |
+| Task 05B — Streamlit layout generation and comparison | Complete | Seed/button controls, A/B selection, real coordinates/scores/reports, session state, explicit failures, and 20 frontend tests |
+| Task 06A — Basic interactive 3D room geometry | Complete | Structural meshes with real door/window holes, orthographic camera, equal metric scaling, 3D preview, and 43 tests |
+| Optional C01 — Codex CLI advisor backend | Complete, live behavior unverified | Typed suggestions, fixed isolated read-only invocation, default-off and per-call gates, bounded I/O, sanitized failures, and 53 mocked tests |
+| Task 06B — 3D furniture visualization | Recommended next | Not implemented |
+| Later phases | Planned | Layout synchronization, agents, targeted revisions, persistence, and export |
 
 ## Capability status
 
@@ -27,29 +32,38 @@ Task 05B is recommended next. The UI remains at the Task 03 preview.
 | Furniture data | IDs, names, categories, positions, dimensions, and right-angle rotations | Data can represent overlaps and out-of-room objects |
 | Schema validation | Strict types, finite numbers, positive dimensions, opening extents, and design-wide unique IDs | Does not establish spatial validity |
 | 2D rendering | Walls with opening gaps, blue windows, gold door spans, furniture footprints, and labels | Only zero-rotation furniture; unsupported rotations raise `ValueError` |
-| Interaction | Hover details, panning, scroll zoom, and equal X/Y metric scale | No editing or generated-alternative controls in the UI |
+| Interaction | Hover, pan/zoom, equal metric scale, Generate Layouts button, seed control, and A/B selector | Fixed sample specification; no furniture-editing controls |
 | Sample data | Fresh 5 × 4 × 2.7 m bedroom with a south door, north window, bed, desk, and wardrobe | Manually specified demonstration, not an optimized or spatially validated layout |
 | JSON | Model serialization and reconstruction | No project-save UI or revision database |
 | Spatial checks | Backend containment, furniture overlaps, door approaches, and circulation for rotation 0 | Separate from renderer; rectangular/square approximations, no swing or vertical checks |
 | Validation reports | Unchanged Task 04A API plus combined Task 04B report; typed JSON, errors/warnings, per-check results, and overall passed/failed/unverified | Unsupported/unevaluated required checks cannot pass; supported violations remain visible |
-| Layout generation | Up to two distinct validator-approved RoomDesign alternatives; local seeds, attempt limits, deterministic score components, and JSON | Backend only; rotation zero; fixed dimensions; no LLMs or global-optimality claims |
-| 3D / export | Not implemented | No 3D viewer, GLB, CAD, or BIM integration |
+| Layout generation | Backend and Streamlit expose up to two distinct validator-approved alternatives with deterministic seeds/scores and validation summaries | Rotation zero; fixed sample dimensions in UI; no LLMs or global-optimality claims |
+| Session state | Results and selection survive normal reruns; generation and acceptance checks run only on button click | Refresh/disconnect may clear results; no database persistence |
+| 3D structure | Floor, four zero-thickness walls, real door/window gaps, optional blue glazing, and orbit/zoom/pan | No 3D furniture, ceiling slab, reveals, or synchronization with selected layouts |
+| Export | Not implemented | No GLB, CAD, or BIM integration |
 | Agents / API | Not implemented | No LangGraph or OpenAI calls; no API key required |
+| Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
 ## What the app currently shows
 
-The original branding, Foundation metric, and planned-capabilities section remain
-intact. The **2D Floor Plan Preview** beneath them displays the canonical sample
-bedroom. The Foundation label is preserved UI content, not the current project
-milestone; the current backend milestone is Task 05A. The UI has not been wired to
-the spatial engine or generator, and the caption continues to describe the demonstration UI.
+The original branding and canonical **2D Floor Plan Preview** remain. The phase
+metric now reads Task 06A, and planned-capabilities text reflects current support.
+Below the sample, **AI-Assisted Room Layout Generator** presents Room Information,
+Layout Generation Controls, Generated Alternatives, Selected 2D Floor Plan, and
+Spatial Validation Summary. It calls the existing deterministic generator, uses
+the existing renderer, and makes no AI-reasoning claim.
 
 The preview caption explicitly states:
 
-> Demonstration layout — spatial validation and automatic placement are not yet implemented.
+> Manually specified Task 03 demonstration. Generate and compare validated alternatives below.
 
-The animated isometric README header is concept artwork. The live app's actual
-rendering is a top-down 2D Plotly chart.
+The new **Interactive 3D Room Preview** below the comparison displays only the
+fixed sample room structure, with this explicit caption:
+
+> 3D structural preview — furniture and layout synchronization will be added in upcoming phases.
+
+The animated isometric README header remains concept artwork. The live app now
+provides both top-down 2D plans and an independent structural 3D scene.
 
 ## Verified baseline
 
@@ -61,10 +75,12 @@ rendering is a top-down 2D Plotly chart.
 | Plotly | 7.1.0 |
 | Shapely | 2.2.0 |
 
-Local verification for this milestone:
+Task 06A verification retained from that milestone:
 
-- `python -m pytest -q`: **369 passing tests**, preserving all 317 previous cases
-  and adding 52 generation/scoring/search-result/example tests.
+- `python -m pytest -q`: **432 passing tests**, retaining all 389 previous cases
+  and adding 43 3D geometry/integration cases. Existing app assertions reflect
+  the new phase/planned-copy; comparison tests count 2D charts independently
+  from the added 3D structural chart.
 - `python -m pip check`: no broken requirements.
 - `python -m ruff check .` and `python -m ruff format --check .`: passed.
 - Headless Streamlit health endpoint: HTTP `200` with `ok`.
@@ -75,7 +91,8 @@ Local verification for this milestone:
 - Task 04A geometry tests cover wall contact, each room boundary, complete exclusion,
   every overlapping pair, shared edges/corners, tolerance, unsupported rotations
   and numeric geometry, deterministic issue ordering, report JSON round-trips, and
-  preservation of the original design. The UI, renderer, and canonical models are unchanged.
+  preservation of the original design. The renderer, geometry APIs, generator,
+  and canonical models remain unchanged in Task 05B.
 - Task 04B covers all four walls, both wall endpoints, every door blocker,
   advisory-only warnings, strict zone contact, barriers, narrow passages, alternate
   routes, multiple/no doors, unsupported rotations, work limits, numeric precision,
@@ -85,6 +102,14 @@ Local verification for this milestone:
   seeds, input-order independence, no global random-state changes, unchanged and
   independent inputs, scores, advisory penalties, budget limits, infeasibility vs
   exhaustion, empty requests, unsupported features, JSON, CLI, and rendering.
+- Task 05B uses AppTest and real/mocked results for generation parameters,
+  A/B coordinates/plots, scores/reports, no repeated generation or revalidation,
+  pending/new seeds, separate sessions, warnings, partial/empty/failed outcomes,
+  exception recovery, and rejection of stale reports on invalid geometry.
+- Task 06A tests actual wall triangles and coverage, opening gaps on all walls,
+  corner/stacked/multiple/touching openings, overlap rejection, full-wall holes,
+  2D projection agreement, metric scaling, determinism, immutability, JSON,
+  numeric/work limits, and independent Streamlit 3D geometry across A/B selection.
 
 The overlap area tolerance is **1e-9 m²** by default; containment uses Shapely
 `covers` without buffering. The original `validate_layout` remains scoped to
@@ -145,10 +170,36 @@ original specification and alternatives, with execution timing separately on
 stderr. Seed 42 returns two alternatives in 9 attempts; both pass every spatial
 check, with scores **67.721925** and **67.614973**. Exact coordinates and components
 are documented in the README. Existing `render_floorplan(candidate.design)` works
-without changes. The UI remains unchanged.
+without changes. Task 05B now exposes these same alternatives in the UI.
 
-Measured locally with Python 3.11.13, ten function calls per case (imports and
-rendering excluded; these are observations, not CI timing thresholds):
+## Task 05B integration
+
+The button calls `generate_layout_candidates` with the canonical sample, seed 42
+by default, two requested candidates, and 500 maximum attempts. Results are schema
+revalidated and candidate geometry/reports checked through the existing spatial
+API once before storage. Session state owns the result, last error, and selection.
+Changing the seed or A/B selection never invokes generation or acceptance checks.
+New responses replace the stored result and select A; exceptions retain the old
+result/selection, while structured no-candidate responses clear the alternatives.
+No database, AI calls, new layout algorithm, or dependency was added.
+
+The UI displays actual heuristic scores, furniture coordinates, report status,
+issue counts, advisory warnings, and check results. Search exhaustion is distinct
+from necessary-condition infeasibility. Unsupported inputs show backend reasons,
+including the zero-rotation restriction. Browser refresh/session loss can clear
+results. The interface is limited to the fixed sample bedroom in this phase.
+
+Playwright verification: Generate Layouts, A/B selection, seed 42-to-43 pending
+state, explicit regeneration, actual coordinates, hover, drag-pan, scroll zoom,
+and reset all worked. The default seed returned the same two passing layouts and
+scores as Task 05A. Desktop (1440 px) and narrow (390 px) views were inspected;
+room axes preserve equal pixels per meter, labels are readable, and the page has
+no horizontal overflow. Browser console: zero warnings/errors. Screenshots are
+local, ignored artifacts in `output/task05b/`.
+
+Task 05A backend measurements, retained from that phase: Python 3.11.13, ten
+function calls per case (imports, rendering, and UI integration excluded; these
+are observations, not CI timing thresholds):
 
 | Case | Outcome / attempts | Median | Observed range |
 | --- | --- | --- | --- |
@@ -160,8 +211,32 @@ rendering excluded; these are observations, not CI timing thresholds):
 The exhausted search returned at its configured limit; no unbounded retry loop
 is used. Cost increases with item count and attempt budget.
 
+## Task 06A structural renderer
+
+`render_room_3d(room)` revalidates canonical schemas/IDs and builds explicit
+triangles for the floor and solid wall panels. Wall strips are cut at opening
+endpoints, with opening height intervals omitted. Separate blue glazing and
+door/window outlines do not fill wall holes. Positive-area opening overlap on a
+wall raises `RoomGeometryError`; shared edges and disjoint stacked openings work.
+Limits include 128 openings, finite positive panel areas, and representable spans.
+
+Axis proportions are width:depth:height, uniformly scaled for narrow-screen
+framing. The initial camera is orthographic and isometric. Orbit, scroll zoom,
+modebar pan/zoom, and reset are available. Scene backgrounds are hidden so they
+cannot visually mask the openings. No furniture or synchronization is added.
+The sample floor spans 5 × 4 m at Z=0 and the walls reach Z=2.7 m. Its south door
+is X=0.6–1.45, Z=0–2.1; its north window is X=2.7–4.2, Z=0.9–2.1.
+
+Browser verification inspected desktop and 390 px views with no initial geometry
+or axis-label clipping and no page overflow. Camera controls and existing A/B
+comparison were checked. Console: zero errors; one non-fatal Plotly Canvas2D
+readback performance advisory. Screenshots are ignored local artifacts under
+`output/task06a/`. An older running server required restart to load the new
+renderer export; a fresh launch works. Geometry models, validation, 2D renderer,
+and layout-generation algorithms remain unchanged. No dependency was added.
+
 GitHub Actions uses one Linux/Python 3.11 job with one dependency installation for
-Ruff lint/format checks, `pip check`, all 369 tests, and a real Streamlit health
+Ruff lint/format checks, `pip check`, the full test suite, and a real Streamlit health
 check. It runs for PRs targeting main, pushes to main, and manual dispatches.
 The redundant OS/Python matrix, separate quality/build jobs, distribution/archive
 checks, clean-wheel installation, and artifact uploads were removed from routine
@@ -169,11 +244,32 @@ CI. Manual builds remain available; deployment is not configured. See the
 [workflow results](https://github.com/ngstephen1/ArchiMind/actions/workflows/ci.yml)
 for the result of a particular commit.
 
+## Optional C01 verification
+
+The [Codex advisor guide](CODEX_ADVISOR.md) documents the API, opt-in gates,
+sanitized example, limits, failure codes, and confidentiality limitations.
+CLI preflight: `codex-cli 0.135.0` on PATH, saved authentication available;
+help confirms required flags. No model request was made. The optional reference
+addendum PDF was not located in the repository, Desktop, Downloads, or supplied
+attachments; implementation follows the supplied C01 specification.
+
+Latest local verification: **485 passed in 7.56s**, including all 432 baseline
+tests and 53 mocked adapter cases. `pip check`: no broken requirements. Ruff:
+all checks passed; **35 files already formatted**. The real Streamlit health
+check returned HTTP **200 ok**. All 14 protected Python files (app, models,
+geometry/generator, renderers, and UI helpers) match the pre-C01 SHA-256 snapshot.
+No dependency was added. Existing uncommitted work and unrelated agent directories
+are preserved; nothing was committed or pushed.
+
+Live model/provider behavior remains unverified. Read-only sandboxing does not
+guarantee confidentiality, and the adapter must remain local-only. C02, an optional
+Streamlit Design Advisor panel, is recommended for a separate reviewed task.
+
 ## Next milestone
 
-**Task 05B — Exposing Generated Alternatives in the Streamlit UI** is recommended
-next. It is not implemented here. Rotated-footprint support, 3D, and agents remain
-separate future work.
+**Task 06B — 3D Furniture Visualization** is recommended next. It is not
+implemented here. Layout synchronization, rotated-footprint support, furniture
+editing, persistence, export, and agents remain separate future work.
 
 For setup, local commands, coordinates, and renderer usage, see the
 [project README](../../README.md).

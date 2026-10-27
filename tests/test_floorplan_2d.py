@@ -210,8 +210,8 @@ def test_app_displays_the_canonical_sample_and_caption() -> None:
     assert not app.exception
     assert "2D Floor Plan Preview" in [heading.value for heading in app.subheader]
     assert (
-        "Demonstration layout — spatial validation and automatic placement "
-        "are not yet implemented."
+        "Manually specified Task 03 demonstration. Generate and compare "
+        "validated alternatives below."
     ) in [caption.value for caption in app.caption]
     chart = app.get("plotly_chart")[0]
     figure = go.Figure(json.loads(chart.proto.spec))
