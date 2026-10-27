@@ -1,0 +1,53 @@
+# Local Python environments and secrets
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+.envrc
+.secrets/
+.streamlit/secrets.toml
+*.pem
+*.key
+
+# Python build artifacts and caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# macOS
+.DS_Store
+
+# Local databases, including journal and write-ahead-log files
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+
+# Generated project data, simulations, and renders
+/storage/
+/output/
+/outputs/
+/renders/
+/simulations/
+
+# Temporary files
+/tmp/
+/temp/
+*.tmp
+*.temp
+*.log
+*.swp
+*.swo
+*~
