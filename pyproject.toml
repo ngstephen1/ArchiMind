@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "Foundation for a multi-agent interior design and spatial planning prototype."
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = ["streamlit==1.66.1", "pydantic==2.14.1"]
+dependencies = ["streamlit==1.66.1", "pydantic==2.14.1", "plotly==7.1.0"]
 
 [project.optional-dependencies]
 dev = ["pytest==9.1.1", "ruff==0.17.3", "build==1.6.1"]
