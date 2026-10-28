@@ -8,3 +8,5 @@ include docs/developer/STATUS.md
 recursive-include frontend/realistic_viewer *.json *.js *.mjs *.md *.html *.css
 prune frontend/realistic_viewer/node_modules
 include docs/developer/REALISTIC_VIEWER.md
+
+include docs/developer/REALISTIC_ROOM.md

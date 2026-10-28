@@ -5,7 +5,7 @@ import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 import {fitBounds, validatePayload, toThree} from './geometry.js';
 
 const ASSET_URL = new URL('./furniture/SheenChair.glb', import.meta.url);
-function disposeObject(object) {
+export function disposeObject(object) {
   const geometries = new Set(), materials = new Set(), textures = new Set();
   object.traverse(o => {
     if (o.geometry) geometries.add(o.geometry);

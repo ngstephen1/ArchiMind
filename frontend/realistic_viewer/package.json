@@ -3,12 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": {"node": ">=20"},
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "node build.mjs",
     "test": "node --test tests/*.test.js",
-    "check": "node --check src/main.js && node --check src/viewer.js && node --check src/geometry.js"
+    "check": "node --check src/main.js && node --check src/viewer.js && node --check src/geometry.js && node --check src/room_viewer.js && node --check src/room_geometry.js && node --check src/room_objects.js && node --check src/asset_pool.js"
   },
-  "dependencies": {"three": "0.186.1"},
-  "devDependencies": {"esbuild": "0.28.2"}
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
 }
