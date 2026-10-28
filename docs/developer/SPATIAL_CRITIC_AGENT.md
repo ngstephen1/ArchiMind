@@ -222,5 +222,6 @@ general intent interpretation, functional furniture access, vertical geometry,
 actual daylight/ergonomics and certification remain unverified. Existing spatial
 approximations and small candidate/rationale sets still apply. The optional
 [D2 workflow route](SPATIAL_CRITIC_WORKFLOW.md) is now implemented with deterministic
-approval and explicit usage gates. Recommend **Task 07E — Interior Stylist agent**.
-No revision loop is implemented. Verification counts above record D1.
+approval and explicit usage gates. The [E1 Interior Stylist](INTERIOR_STYLIST_AGENT.md)
+is now complete separately; recommend **Task 07E2 — optional stylist workflow
+integration**. No revision loop is implemented. Verification counts above record D1.

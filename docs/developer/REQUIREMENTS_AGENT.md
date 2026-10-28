@@ -187,5 +187,6 @@ Task 07C1 adds [Layout Designer advice](LAYOUT_AGENT.md), now optionally integra
 after critique by [Task 07C2](LAYOUT_WORKFLOW.md). The interpreter's own gates and
 default workflow behavior are preserved. The separate
 [Task 07D1 critic](SPATIAL_CRITIC_AGENT.md) is now optionally integrated by
-[D2](SPATIAL_CRITIC_WORKFLOW.md). Recommended next: **Task 07E — Interior Stylist
-agent**, keeping deterministic validation authoritative.
+[D2](SPATIAL_CRITIC_WORKFLOW.md). E1 now adds a standalone
+[Interior Stylist](INTERIOR_STYLIST_AGENT.md); recommended next: **Task 07E2 —
+Optional stylist workflow integration**, keeping deterministic validation authoritative.

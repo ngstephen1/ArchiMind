@@ -164,5 +164,6 @@ rectangular room, zero rotation and conservative clearance approximations.
 No UI integration, persistence, automatic revisions or new agent was added.
 Task 07D1 provides the [AI design critic](SPATIAL_CRITIC_AGENT.md), now optionally
 invoked after this advisor by [D2](SPATIAL_CRITIC_WORKFLOW.md). A critique or challenge
-never changes the accepted selection. Recommended next: **Task 07E — Interior Stylist
-agent**, retaining deterministic validation as the authority.
+never changes the accepted selection. E1 now adds a separate
+[Interior Stylist](INTERIOR_STYLIST_AGENT.md); recommended next: **Task 07E2 —
+Optional stylist workflow integration**, retaining deterministic validation as the authority.

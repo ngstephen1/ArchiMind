@@ -1,7 +1,10 @@
 """Offline styling tests: verified candidates, immutable catalog and mocked API."""
 
 import json
+import os
 import socket
+import subprocess
+import sys
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -771,3 +774,60 @@ def test_styled_results_are_reproducible_independent_copies(
 def test_success_cannot_be_claimed_without_a_checked_plan():
     with pytest.raises(ValidationError):
         InteriorStylistResult(status="styled", message="Invented style")
+
+
+def test_offline_bedroom_demo_preserves_state_and_restores_environment(
+    monkeypatch, offline
+):
+    from archimind.examples.style_bedroom import offline_style_bedroom
+
+    monkeypatch.setenv("OPENAI_API_KEY", "do-not-use-real-key")
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STYLIST", "0")
+    before = dict(os.environ)
+    workflow, result = offline_style_bedroom()
+    assert dict(os.environ) == before
+    assert result.mode == "offline_fixture" and result.model is None
+    assert result.context.request.candidate.design == workflow.approved_design
+    assert workflow.selected_candidate_index == 0 and len(workflow.trace) == 4
+    assert "do-not-use-real-key" not in result.model_dump_json()
+    offline.assert_not_called()
+
+
+@pytest.mark.parametrize("json_output", [False, True])
+def test_actual_style_bedroom_cli_is_offline(json_output):
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "archimind.examples.style_bedroom",
+            *(["--json"] if json_output else []),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env={"PATH": os.defpath, "PYTHONNOUSERSITE": "1", "LANGSMITH_TRACING": "false"},
+    )
+    assert process.returncode == 0 and process.stderr == ""
+    if json_output:
+        data = json.loads(process.stdout)
+        result = InteriorStylistResult.model_validate_json(json.dumps(data["styling"]))
+        assert data["mode"] == "offline_mock" and result.mode == "offline_fixture"
+        assert (
+            result.context.request.candidate.design.model_dump(mode="json")
+            == data["workflow"]["approved_design"]
+        )
+        assert (
+            result.context.request.candidate.validation.model_dump(mode="json")
+            == data["workflow"]["reviews"][0]["report"]
+        )
+        assert (
+            result.context.request.candidate.score.total == 67.721925
+            and result.plan.rendered is False
+        )
+    else:
+        assert "zero live OpenAI requests" in process.stdout
+        assert "scandi_warm_sage" in process.stdout and "muted_sage" in process.stdout
+        assert (
+            "Geometry, coordinates, selected candidate, validation and scores are identical"
+            in process.stdout
+        )

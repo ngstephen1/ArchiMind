@@ -190,4 +190,6 @@ explicitly opted-in [advisor route](LAYOUT_WORKFLOW.md) after critique, with saf
 fallback and selection provenance. Task 07D1 adds a standalone
 [AI design critic](SPATIAL_CRITIC_AGENT.md), now integrated as an optional advisory
 node by [Task 07D2](SPATIAL_CRITIC_WORKFLOW.md). Default structured execution remains
-deterministic. Recommended next: **Task 07E — Interior Stylist agent**.
+deterministic. E1 adds the standalone [Interior Stylist](INTERIOR_STYLIST_AGENT.md),
+without replacing the fixture or changing routing. Recommended next: **Task 07E2 —
+Optional Interior Stylist workflow integration**.

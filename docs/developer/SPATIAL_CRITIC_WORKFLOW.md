@@ -186,5 +186,7 @@ Live model quality/account availability is unverified. D1's limited preference
 vocabulary and planar geometry assumptions still apply; no actual daylight,
 ergonomics, furniture usability or code certification is established. There is no
 UI integration, persistence, revision loop or automatic furniture modification.
-Recommended next: **Task 07E — Interior Stylist agent**, preserving selected
-canonical geometry and deterministic approval. D2 stops at advisory integration.
+Task 07E1 now provides the standalone [Interior Stylist](INTERIOR_STYLIST_AGENT.md),
+without changing this graph's fixture styling. Recommended next: **Task 07E2 —
+Optional Interior Stylist workflow integration**, preserving selected canonical
+geometry and deterministic approval. D2 stops at advisory integration.

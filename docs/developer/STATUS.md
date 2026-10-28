@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 07D2 complete — optional advisory critic in LangGraph.**
-Live model behavior is unverified. Task 07E is recommended next; Task 06E2 remains
+**Current milestone: Task 07E1 complete — standalone catalog-based AI Interior Stylist.**
+Live model behavior is unverified. Task 07E2 is recommended next; Task 06E2 remains
 separate proposed renderer work.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -34,7 +34,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 07C2 — Layout Designer graph integration | Complete backend; live behavior unverified | Optional approved-candidate selection after critique, grounded handoff, provenance, deterministic fallback and 50 new offline tests |
 | Task 07D1 — AI Spatial Design Critic | Complete standalone; live behavior unverified | Strict evidence-based observations, independent support/challenge, preference tradeoffs and abstention; deterministic reports authoritative |
 | Task 07D2 — AI critic graph integration | Complete backend; live behavior unverified | Independent optional critic after deterministic approval/advice, grounded read-only review, fresh fallback verification, 66 new tests and three offline scenarios |
-| Task 07E — Interior Stylist agent | Recommended next | Not implemented; existing fixture styling remains deterministic |
+| Task 07E1 — Standalone AI Interior Stylist | Complete backend; live behavior unverified | Five-theme immutable catalog, verified selected candidate, controlled finish/accent metadata, conflicts/clarification and 89 new offline tests |
+| Task 07E2 — Interior Stylist workflow integration | Recommended next | Not implemented; existing graph fixture styling remains deterministic |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -62,7 +63,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Requirements interpretation | Optional OpenAI Responses API with structured extraction and canonical conversion | Disabled by default; explicit per-call authorization/key required; only rectangular bedrooms/studios and a three-item furniture catalog; verified with mocks only |
 | Layout recommendation | Optional standalone C1 adapter and C2 post-critic workflow handoff | Default-off; only critic-approved candidates, Python-grounded facts and safe deterministic fallback; no UI connection or live verification |
 | AI design critique | Standalone D1 adapter and optional D2 workflow node review the approved selected candidate | At most three grounded observations; challenge/failure cannot change selection or deterministic approval; no UI integration or live verification |
-| Other LLM agents | Not implemented | Generation, independent spatial validation and fixture Interior Stylist remain deterministic |
+| Interior style planning | Optional standalone E1 adapter returns catalog colors/finishes for one approved selected candidate | Separate appearance metadata; no graph integration, material rendering, physical assets or performance certification |
+| Workflow stylist | Existing deterministic fixture | Standalone E1 does not replace it; E2 integration remains future work |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
 ## What the app currently shows
@@ -898,10 +900,85 @@ trusted-code DI, conservative preference vocabulary and inherited planar/spatial
 approximations. No daylight, ergonomics, furniture-function or code certification
 is established by these tests or mocks.
 
+## Task 07E1 standalone Interior Stylist
+
+[Stylist guide](INTERIOR_STYLIST_AGENT.md) documents the request/proposal/plan,
+catalog, validation, failure behavior, commands and rendering boundary. The adapter
+accepts exactly one caller-selected `LayoutCandidate` with its canonical design,
+original report/score, stated style, 0–8 soft preferences and optional checked
+critique. It has no selection API. Geometry is independently rechecked with the
+existing accessibility API, the entire report must match, and the existing score
+helper verifies the original score. Optional critique must be genuine grounded
+D1 output concerning this exact candidate and any explicit local review target.
+
+Catalog `archimind_style_v1` provides five themes/palettes: Scandinavian,
+Modern, Minimalist, Industrial and Neutral. Frozen records, immutable mappings
+and tuple allowlists define 15 wall/floor/furniture representations and six accent
+colors. Model output contains one theme/palette, compatible wall/floor tokens,
+exact existing furniture IDs and at most three distinct accents, plus controlled
+rationale/conflict/assessment codes. Python resolves all fixed hex values and
+explanations. Unknown IDs, wrong surfaces/palette combinations, paths/code,
+invented measurements/performance claims and hidden recognized conflicts fail.
+
+Style metadata is separate from `RoomDesign`. A plan has a furniture-ID-keyed
+finish map, preference notes, unmet indices, conflicts, assumptions and limitations.
+Preference notes are subjective; multiple named themes require compromise or
+clarification. Known performance/spatial-improvement requests remain unverified.
+Missing main style details produce explicit non-evaluated clarification without
+a client. Failed/unavailable requests never fabricate an AI style plan.
+
+Material/accent records expose future flat-color metadata and
+`physical_asset_available=False`; the plan has `rendered=False`. No texture,
+material asset, component mapping, physical specification, actual rendering or
+performance evidence is supplied. No claim of improved verified circulation is
+made. LangGraph routing, its deterministic Stylist fixture, canonical models,
+geometry/generation algorithms, Streamlit and both renderers remain unchanged.
+
+`ARCHIMIND_ENABLE_OPENAI_STYLIST=0` is the default. Live use requires the flag,
+exact per-call `allow_live_usage=True`, valid bounded data and existing key/model
+preflight. The existing SDK/client, endpoint/allowlist, 30-second timeout, zero
+retries, no-tools policy and sanitized errors are reused. Input/context each have
+a 65,536-byte cap, responses use 4,096 tokens and a 131,072-byte application cap;
+SDK buffering precedes that check. No new client wrapper or dependency was added.
+
+`python -m archimind.examples.style_bedroom` uses the canonical 5 × 4 × 2.7 m
+bedroom and independently approved Layout A/index 0, seed 42, score **67.721925**.
+The mocked plan selects `scandinavian` / `scandi_warm_sage`, warm white walls
+(`#F5F1E8`), light oak floor (`#D4B58C`), `finish_light_oak` (`#CDB18A`) for desk,
+queen bed and wardrobe, and muted sage accents (`#9BAE98`). Complete candidate,
+geometry, coordinates, validation, scores, selected index and workflow JSON remain
+identical. The four-node fixture workflow and environment are preserved; output
+is labeled `offline_fixture`, model `None`, without rendered/physical-asset claims.
+
+Verification: baseline **986 passed in 42.49s**, plus **27 frontend tests**.
+Final local run **1,075 passed in 49.32s**, preserving all 986 cases and adding
+**89 stylist tests**. Frontend **27/27**, syntax/build, Ruff lint/format, pip
+compatibility and real Streamlit health (**HTTP 200 ok**) all passed. Committed
+frontend bundles are unchanged. Tests block network attempts, mock clients and
+exercise real SDK mock-HTTP parsing, all themes, catalog/ID/compatibility rules,
+conflicts, unsupported claims, input validity/limits, authorization/errors,
+immutability/JSON, existing-agent compatibility and actual offline CLI output.
+
+Checkpoint A `05863b81d95d61d07b5dd113bc79a07afeb093b6` contains the four modules
+and first 86 cases, verified with **1,072 tests in 46.67s** before push;
+[GitHub Actions passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40624916653).
+The demo/documentation checkpoint adds three actual CLI/environment-restoration
+cases. Source archive and wheel builds passed; contents include the four modules,
+demo, source tests and guide, with no secrets/caches/unrelated directories. A wheel
+installed into an isolated temporary target ran the mock demo outside the repository
+under isolated Python, with its import location verified. Temporary artifacts were
+removed; no generated package output is staged.
+
+No live OpenAI or C01 request, new asset/dataset, physical material rendering,
+LangGraph integration, persistent storage, chat or automatic revision was added.
+Unrelated `.agents/` and `.claude/` remain untouched/uncommitted. Live quality/account
+availability, general intent matching and physical performance are unverified.
+The small catalog, one finish per object and existing spatial limits still apply.
+
 ## Next milestone
 
-**Task 07E — Interior Stylist agent** is recommended next, preserving selected
-canonical geometry and deterministic approval. It is not implemented here.
+**Task 07E2 — Optional Interior Stylist workflow integration** is recommended next,
+preserving selected canonical geometry and deterministic approval. It is not implemented here.
 Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 

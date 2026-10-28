@@ -16,3 +16,4 @@ include docs/developer/LAYOUT_AGENT.md
 include docs/developer/LAYOUT_WORKFLOW.md
 include docs/developer/SPATIAL_CRITIC_AGENT.md
 include docs/developer/SPATIAL_CRITIC_WORKFLOW.md
+include docs/developer/INTERIOR_STYLIST_AGENT.md

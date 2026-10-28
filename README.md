@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07D2: optional advisory critique in LangGraph. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07E1: standalone catalog-based interior style planning. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07D2 — Optional AI Spatial Critic workflow integration**
+> **Current stage · Task 07E1 — Standalone AI Interior Stylist**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -57,16 +57,19 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > for five nodes, or both for six. The optional AI critic explains measured
 > tradeoffs, supports or challenges recommendations and discloses missing evidence.
 > Its feedback cannot change the selected candidate. Deterministic validation
-> remains authoritative. Live model behavior has not been tested.
+> remains authoritative. A standalone Interior Stylist now plans catalog colors
+> and finish representations for an approved selected room. Its metadata is separate
+> from geometry; the graph's stylist remains the deterministic fixture. No material
+> choices have been applied to either renderer. Live model behavior has not been tested.
 > A full asset catalog, further agent reasoning,
 > persistence, and export remain planned.
 > **No API key is required for the app, structured workflow or offline demonstrations.**
 
-Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1 and 07D2 are complete**, including the isolated architectural
+Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1, 07D2 and 07E1 are complete**, including the isolated architectural
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**986 passing Python tests**: all 920 previous cases plus 66 critic-workflow cases,
+**1,075 passing Python tests**: all 986 previous cases plus 89 Interior Stylist cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -504,7 +507,36 @@ failure reason. The critic has no selection-update code path.
 Live critic usage requires `ARCHIMIND_ENABLE_OPENAI_CRITIC=1`, `use_ai_critic=True`
 and exact per-call `allow_live_critic=True`, plus existing key/model preflight.
 Disabled/unrequested critique invokes no adapter, including injected callables.
-Recommended next: **Task 07E — Interior Stylist agent**.
+### Standalone AI Interior Stylist — Task 07E1
+
+The [stylist guide](docs/developer/INTERIOR_STYLIST_AGENT.md) describes
+`recommend_style(InteriorStylistRequest(...))`: one selected `LayoutCandidate`,
+stated style/preferences and optional checked critique produce separate style
+metadata. Python verifies the original spatial report/score and resolves closed
+theme, palette and material IDs; no furniture, geometry or selection is changed.
+
+Five small themes are available: **Scandinavian, Modern, Minimalist, Industrial
+and Neutral**, with compatible palettes, wall/floor representations, furniture
+finishes and at most three accent colors. All values come from an immutable
+catalog. No arbitrary texture paths, URLs, code or performance claims are accepted.
+
+```bash
+python -m archimind.examples.style_bedroom
+python -m archimind.examples.style_bedroom --json
+```
+
+The **offline mock** styles the canonical approved Layout A with warm white walls,
+light oak floor/furniture representations and muted sage accents. Its original
+score stays **67.721925**; complete candidate geometry, coordinates, validation
+and workflow selection are identical before/after. `rendered=False` and
+`physical_asset_available=False` distinguish appearance metadata from physical
+assets or actual Plotly/Three.js output. Existing graph routing/fixture styling
+remain unchanged; integration belongs to Task 07E2.
+
+`ARCHIMIND_ENABLE_OPENAI_STYLIST=0` is the default. Live usage requires exact
+per-call `allow_live_usage=True`, the feature flag and existing key/model/input
+preflight. No live request was made. Recommended next: **Task 07E2 — Optional
+Interior Stylist workflow integration**.
 
 ## Models and coordinates
 
@@ -829,7 +861,7 @@ claim. Task 05B exposes these same results in Streamlit alongside the Task 03 pr
 | Visualization | Plotly 7.1.0 | Metric 2D plans and structural/furniture 3D meshes from canonical models |
 | Spatial geometry | Shapely 2.2.0 | Zero-rotation furniture containment and overlap checks |
 | Backend orchestration | LangGraph 1.2.18 | Bounded default workflow and optional post-critic recommendation |
-| Optional model adapter | OpenAI SDK 3.40.0 | Separately gated requirements interpretation and candidate advice; mock-verified |
+| Optional model adapters | OpenAI SDK 3.40.0 | Separately gated requirements, layout advice, design critique and standalone style planning; mock-verified |
 | Testing | pytest 9.1.1 | Smoke, model, renderer, and preview integration tests |
 | Code quality | Ruff 0.17.3 | Linting and formatting |
 | Packaging | build 1.6.1 + setuptools | Wheel and source distributions |
@@ -938,6 +970,11 @@ ArchiMind/
 │   ├── ui/
 │   │   ├── __init__.py           Public Streamlit presentation helper
 │   │   └── layout_generation.py  Button-driven generation, state, and comparison
+│   ├── agents/
+│   │   ├── interior_stylist_agent.py    Standalone gated style adapter
+│   │   ├── interior_stylist_catalog.py  Immutable appearance tokens and palettes
+│   │   ├── interior_stylist_grounding.py  Layout verification and style resolution
+│   │   └── interior_stylist_schemas.py  Strict requests/proposals/metadata
 │   ├── workflow/
 │   │   ├── __init__.py           Public workflow API with optional gated advice
 │   │   ├── state.py             Typed requests, handoffs, critiques, trace and result
@@ -951,7 +988,8 @@ ArchiMind/
 │       ├── generate_bedroom.py   Original request and generated-alternatives CLI
 │       ├── workflow_bedroom.py   Default offline result/trace/JSON demonstration
 │       ├── advised_workflow.py   Default versus advised comparison using a mock
-│       └── critiqued_workflow.py Default, supported B and challenged B mocks
+│       ├── critiqued_workflow.py Default, supported B and challenged B mocks
+│       └── style_bedroom.py      Standalone catalog style mock, unchanged layout
 ├── tests/
 │   ├── test_smoke.py             Package and application checks
 │   ├── test_models.py            Model tests and bedroom fixture
@@ -1000,7 +1038,8 @@ and verification record.
 - [x] **Task 07C2 · LangGraph Layout Designer integration** — optional post-critic selection, grounded provenance, safe deterministic fallback and offline demonstration.
 - [x] **Task 07D1 · Standalone AI Spatial Design Critic** — evidence-grounded support/challenge, preference tradeoffs, abstention and mocked verification.
 - [x] **Task 07D2 · AI critic graph integration** — optional traced review after deterministic approval/advice; challenge never switches selection.
-- [ ] **Task 07E · Interior Stylist agent** — recommended next; preserve selected canonical geometry and deterministic approval.
+- [x] **Task 07E1 · Standalone Interior Stylist agent** — controlled catalog metadata, verified selected layout, conflicts/clarification and mocked verification.
+- [ ] **Task 07E2 · Interior Stylist workflow integration** — recommended next; preserve selected canonical geometry and deterministic approval.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.
