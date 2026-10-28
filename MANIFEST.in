@@ -12,3 +12,4 @@ include docs/developer/REALISTIC_VIEWER.md
 include docs/developer/REALISTIC_ROOM.md
 include docs/developer/WORKFLOW.md
 include docs/developer/REQUIREMENTS_AGENT.md
+include docs/developer/LAYOUT_AGENT.md

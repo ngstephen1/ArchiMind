@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 07B complete — optional gated Requirements Interpreter.**
-Live model behavior is unverified. Task 07C is recommended next; Task 06E2 remains
+**Current milestone: Task 07C1 complete — optional standalone Layout Designer advice.**
+Live model behavior is unverified. Task 07C2 is recommended next; Task 06E2 remains
 separate proposed renderer work.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -30,7 +30,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 06E2 | Proposed rendering work | Curated asset bindings and room interaction refinements; not implemented |
 | Task 07A — LangGraph workflow foundation | Complete, deterministic backend only | Typed state, four future-agent roles, independent spatial critique, fixture styling, bounded conditional execution, offline CLI, 38 tests |
 | Task 07B — OpenAI-backed Requirements Interpreter | Complete backend; live behavior unverified | Gated Responses/Pydantic extraction, canonical evidence/catalog conversion, clarification, optional graph adapter, 77 mock-only tests |
-| Task 07C — OpenAI-backed Layout Designer | Recommended next | Layout design remains deterministic; not implemented |
+| Task 07C1 — OpenAI-powered Layout Designer advice | Complete standalone; live behavior unverified | Existing-candidate recommendation/abstention, grounded fact refs, preserved scores/reports, 65 offline tests; no graph integration |
+| Task 07C2 — Layout Designer graph integration | Recommended next | Not implemented; graph behavior remains unchanged |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -56,6 +57,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Export | Not implemented | No GLB, CAD, or BIM integration |
 | Workflow orchestration | Backend-only LangGraph requirements → layout → critique → styling graph | Structured path remains deterministic; explicit free-text mode can use separately gated interpretation; no UI connection/persistence/revisions |
 | Requirements interpretation | Optional OpenAI Responses API with structured extraction and canonical conversion | Disabled by default; explicit per-call authorization/key required; only rectangular bedrooms/studios and a three-item furniture catalog; verified with mocks only |
+| Layout recommendation | Optional standalone OpenAI comparison of existing validated candidates and soft preferences | Default-off, read-only advice; measured facts supplied/rendered by Python; Spatial Critic still required; no LangGraph/UI connection |
 | Other LLM agents | Not implemented | Layout Designer, Spatial Critic and Interior Stylist remain deterministic |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
@@ -628,9 +630,72 @@ spatial approximations do not establish vertical/ergonomic/code compliance.
 The SDK buffers/parses before the application response-size check; it is not a
 streaming memory quota. Live evaluation remains separate future work.
 
+## Task 07C1 standalone Layout Designer advice
+
+The [layout-advisor guide](LAYOUT_AGENT.md) records contracts, API gates, grounding,
+actual demonstration output, tests and limitations. `LayoutAdviceRequest` reuses
+canonical `RoomDesign` and `LayoutGenerationResult` plus bounded soft preferences.
+`LayoutProposal` contains only a supplied index or abstention, controlled rationale
+codes, known fact refs, subjective preference assessments and limitation codes.
+The model cannot return geometry, scores or free-form measurement claims.
+`LayoutAdviceResult` keeps a copied source context, checked proposal, Python-rendered
+explanation, factual comparisons, subjective tradeoffs/unmet preferences and errors.
+
+Read-only screening checks canonical identity/dimension preservation and calls the
+existing accessibility API at zero tolerance for every candidate. Invalid,
+unverified or mismatched reports reject the request before a model call; indices
+are preserved. Shapely's existing footprints provide shortest planar distances to
+canonical door/window segments on all four walls. Original scores/ratios and
+usable-center area are also supplied. There is no regeneration or rescoring.
+
+Fact refs must exist and belong to the proposed candidate. Measured rationale
+codes must agree with actual extrema across supplied candidates: minimum cited
+window gap, maximum cited door gap, or maximum usable-center ratio. A subjective
+balance code allows tradeoffs without claiming metric optimality. Matching peer
+facts are attached automatically; no model-supplied number enters the explanation.
+Common unsupported daylight/ergonomic/certification requests must remain uncertain.
+All judgments are advisory, and `requires_spatial_critic=True` remains explicit.
+
+`ARCHIMIND_ENABLE_OPENAI_LAYOUT=0` is the default. Exact per-call authorization,
+an environment API key and a supported model are also required. The adapter reuses
+07B's client/model conventions: official SDK 3.40.0, Responses/Pydantic parse,
+30-second timeout, zero retries, no tools/search, fixed endpoint and sanitized
+failures. Request/context limit: 65,536 bytes; output: 4,096 tokens and 131,072
+serialized bytes. At most two candidates, 32 furniture objects and 16 openings.
+Disabled/unavailable advice never fabricates a recommendation.
+
+Actual CLI `python -m archimind.examples.advise_layout` is **OFFLINE MOCK** only.
+It generates the existing 5 × 4 m bedroom's two real alternatives, mocks a grounded
+proposal, and recommends candidate **1 / Layout B**. Desk-to-north-window planar
+gaps are **2.532114 m** (A) and **0.000000 m** (B). Original scores remain
+**67.721925** (A) and **67.614973** (B); the lower-scored choice is explicitly
+reported. Both candidate designs/reports remain unchanged. JSON round-trip and
+environment restoration were verified. Daylight and ergonomics are not evaluated.
+
+Final local verification: **773 passed in 31.03s**, preserving all 708 prior Python
+tests and adding 65 focused cases. **27 frontend tests passed**; syntax/build,
+Ruff lint/format, pip compatibility and Streamlit health (**HTTP 200 ok**) passed.
+Committed frontend bundles were unchanged. Tests block network attempts, exercise
+the real SDK with mock HTTP, and cover grounding, invalid candidates/selections,
+abstention, unavailable/gated/error paths, immutability, deterministic mocks,
+Requirements Interpreter compatibility and actual CLI JSON output.
+
+No live OpenAI or C01 call, new dependency, workflow behavior change, UI/rendering
+change, spatial/generation algorithm change, persistent store, asset or dataset
+was introduced. The new module is not registered in LangGraph; its Layout Designer
+node remains the original deterministic generator. Unrelated `.agents/` and
+`.claude/` directories remain untouched and uncommitted.
+
+Limits: mocked verification does not establish live model quality or account
+availability. Rationale vocabulary and candidate set are intentionally small;
+preference judgments cannot prove arbitrary intent. Planar gaps do not measure
+daylight, ergonomics, actual minimum clearances, vertical collisions or code
+compliance. The SDK buffers/parses before the application response-byte check.
+Final spatial approval remains the independent Spatial Critic's responsibility.
+
 ## Next milestone
 
-**Task 07C — OpenAI-Backed Layout Designer Agent** is recommended next.
+**Task 07C2 — Integrate Layout Designer recommendations into LangGraph** is recommended next.
 It is not implemented here. Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 

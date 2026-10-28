@@ -183,5 +183,6 @@ npm --prefix frontend/realistic_viewer run check
 npm --prefix frontend/realistic_viewer run build
 ```
 
-Recommended next: **Task 07C — OpenAI-Backed Layout Designer Agent**. No other
-LLM-powered workflow role is implemented in 07B.
+Task 07C1 now adds separate [Layout Designer advice](LAYOUT_AGENT.md).
+No other LLM-powered workflow role is integrated into the graph yet.
+Recommended next: **Task 07C2 — LangGraph Layout Designer integration**.

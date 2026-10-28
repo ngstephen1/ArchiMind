@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07B: optional Requirements Interpreter. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07C1: standalone Layout Designer advice. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07B — Optional OpenAI Requirements Interpreter (backend only)**
+> **Current stage · Task 07C1 — Optional standalone Layout Designer advice**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -50,17 +50,19 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > now displays a room with genuine openings, shared textured chairs, and explicit
 > procedural furniture placeholders. A separate LangGraph backend
 > coordinates requirements, layout design, spatial critique and fixture styling.
-> Only requirements interpretation now has an optional, disabled-by-default
-> OpenAI path. The other three nodes remain deterministic; live model behavior
-> has not been tested. A full asset catalog, further agent reasoning,
+> Requirements interpretation has an optional, disabled-by-default OpenAI path.
+> A separate optional Layout Designer can recommend an existing candidate using
+> grounded evidence. It is not connected to LangGraph; the other three workflow
+> nodes remain deterministic. Live model behavior has not been tested.
+> A full asset catalog, further agent reasoning,
 > persistence, and export remain planned.
 > **No API key is required for the app, structured workflow or offline demonstrations.**
 
-Tasks **01–06E1, 07A and 07B are complete**, including the isolated architectural
+Tasks **01–06E1, 07A, 07B and 07C1 are complete**, including the isolated architectural
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**708 passing Python tests**: all 631 previous cases plus 77 interpreter/integration cases,
+**773 passing Python tests**: all 708 previous cases plus 65 layout-advisor cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -405,7 +407,28 @@ Canonical inputs always bypass the model. `ARCHIMIND_OPENAI_MODEL` selects a
 documentation-verified model from the allowlist, defaulting to
 `gpt-5.4-mini-2026-03-17`. No live model call was made for verification.
 
-Next agent milestone: **Task 07C — OpenAI-Backed Layout Designer Agent**.
+### Standalone Layout Designer advice — Task 07C1
+
+The [layout-advisor guide](docs/developer/LAYOUT_AGENT.md) describes a separately
+gated Responses adapter that compares existing validated candidates. It proposes
+an index or abstains; it never changes geometry, reports or scores. Python computes
+planar furniture-to-opening gaps and renders factual explanations. Model output
+contains controlled rationale codes and existing evidence refs, preventing invented
+measurements from entering the result. Preference judgments remain subjective.
+
+```bash
+python -m archimind.examples.advise_layout
+python -m archimind.examples.advise_layout --json
+```
+
+This demonstration is **offline and mocked**. It proposes Layout B: its desk has
+a **0 m** planar gap to the north-wall window versus about **2.532 m** for Layout A.
+The original scores stay **67.614973** and **67.721925**, respectively. It makes
+no daylight or ergonomic claim and still requires independent Spatial Critic
+approval. `ARCHIMIND_ENABLE_OPENAI_LAYOUT=0` is the default; live use requires
+explicit per-call authorization and an API key. No live request was made.
+
+Next milestone: **Task 07C2 — Integrate Layout Designer recommendations into LangGraph**.
 
 ## Models and coordinates
 
@@ -892,7 +915,8 @@ and verification record.
 - [ ] **Task 06E2** — separate proposed rendering work: curated asset bindings and room interaction.
 - [x] **Task 07A · LangGraph Workflow Foundation** — backend-only, deterministic requirements/design/critique/styling nodes, bounded execution and typed trace; no LLMs.
 - [x] **Task 07B · OpenAI-Backed Requirements Interpreter Agent** — optional gated Responses extraction, evidence/catalog conversion, clarification, typed failures and mocked verification; live behavior unverified.
-- [ ] **Task 07C · OpenAI-Backed Layout Designer Agent** — recommended next agent milestone.
+- [x] **Task 07C1 · OpenAI-Powered Layout Designer Agent** — standalone, default-off candidate recommendation with grounded facts, immutable layouts and mocked verification.
+- [ ] **Task 07C2 · LangGraph Layout Designer integration** — recommended next; workflow behavior remains unchanged.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

@@ -181,4 +181,5 @@ automatic retries/revisions or real styling assessment is delivered here.
 
 Task 07B is now implemented separately; see the
 [Requirements Interpreter guide](REQUIREMENTS_AGENT.md).
-Recommended next: **Task 07C — OpenAI-Backed Layout Designer Agent**.
+Task 07C1 adds [standalone layout advice](LAYOUT_AGENT.md) without changing this
+graph. Recommended next: **Task 07C2 — LangGraph Layout Designer integration**.
