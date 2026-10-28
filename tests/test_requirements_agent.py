@@ -412,8 +412,9 @@ def test_owned_client_has_fixed_endpoint_timeout_no_proxy_or_retries(monkeypatch
     }
 
 
+@pytest.mark.parametrize("case", ["ready", "refusal", "incomplete", "malformed"])
 def test_real_sdk_serializes_schema_and_parses_mock_http_without_network(
-    monkeypatch, extraction
+    monkeypatch, extraction, case
 ):
     from openai import OpenAI
 
@@ -423,13 +424,22 @@ def test_real_sdk_serializes_schema_and_parses_mock_http_without_network(
 
     def transport(request):
         requests.append(json.loads(request.content))
+        content = {
+            "type": "output_text",
+            "text": extraction.model_dump_json(),
+            "annotations": [],
+        }
+        if case == "refusal":
+            content = {"type": "refusal", "refusal": "Offline refusal fixture"}
+        elif case == "malformed":
+            content["text"] = "{"
         return httpx2.Response(
             200,
             json={
                 "id": "offline-response",
                 "object": "response",
                 "created_at": 0,
-                "status": "completed",
+                "status": "incomplete" if case == "incomplete" else "completed",
                 "model": agent.DEFAULT_MODEL,
                 "output": [
                     {
@@ -437,13 +447,7 @@ def test_real_sdk_serializes_schema_and_parses_mock_http_without_network(
                         "id": "offline-message",
                         "role": "assistant",
                         "status": "completed",
-                        "content": [
-                            {
-                                "type": "output_text",
-                                "text": extraction.model_dump_json(),
-                                "annotations": [],
-                            }
-                        ],
+                        "content": [content],
                     }
                 ],
             },
@@ -459,7 +463,18 @@ def test_real_sdk_serializes_schema_and_parses_mock_http_without_network(
     result = interpret_requirements(
         SAMPLE_REQUEST, allow_live=True, client_factory=factory
     )
-    assert result.status == "ready", result.error
+    if case == "ready":
+        assert result.status == "ready", result.error
+    else:
+        assert (
+            result.status == "error"
+            and result.error.code
+            == {
+                "refusal": "refusal",
+                "incomplete": "incomplete",
+                "malformed": "invalid_response",
+            }[case]
+        )
     assert len(requests) == 1 and requests[0]["tools"] == []
     assert requests[0]["text"]["format"]["type"] == "json_schema"
     assert requests[0]["text"]["format"]["strict"] is True

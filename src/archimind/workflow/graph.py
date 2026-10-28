@@ -1,10 +1,12 @@
 """A bounded, sequential LangGraph workflow with conditional safe termination."""
 
 from collections.abc import Callable
+from functools import partial
 
 from langgraph.graph import END, START, StateGraph
 from langsmith import tracing_context
 
+from archimind.agents.requirements_schemas import RequirementsResult
 from archimind.workflow import nodes
 from archimind.workflow.state import DesignRequest, NodeName, WorkflowState
 
@@ -21,7 +23,7 @@ def _guard(name: NodeName, operation: Callable[[WorkflowState], dict]) -> Callab
                 state,
                 name,
                 "node_error",
-                f"Deterministic node {name} failed; no design was approved.",
+                f"Workflow node {name} failed; no design was approved.",
                 iteration_count=1
                 if name == "layout_designer"
                 else state.iteration_count,
@@ -34,11 +36,26 @@ def _continue(state: WorkflowState) -> str:
     return "next" if state.status == "running" else "stop"
 
 
-def _build_workflow():
+def _build_workflow(
+    *,
+    interpret_free_text: bool = False,
+    allow_live_requirements: bool = False,
+    interpreter: Callable[..., RequirementsResult] | None = None,
+):
     """Build fresh internal orchestration; there is no global graph/checkpointer."""
     graph = StateGraph(WorkflowState)
+    requirements = (
+        partial(
+            nodes.requirements_interpreter,
+            interpret_free_text=True,
+            allow_live=allow_live_requirements,
+            interpreter=interpreter,
+        )
+        if interpret_free_text
+        else nodes.requirements_interpreter
+    )
     roles = (
-        ("requirements_interpreter", nodes.requirements_interpreter),
+        ("requirements_interpreter", requirements),
         ("layout_designer", nodes.layout_designer),
         ("spatial_critic", nodes.spatial_critic),
         ("interior_stylist", nodes.interior_stylist),
@@ -52,19 +69,36 @@ def _build_workflow():
     return graph.compile()
 
 
-def run_workflow(request: DesignRequest) -> WorkflowState:
-    """Run offline from a fresh, validated request; return a typed final state.
+def run_workflow(
+    request: DesignRequest,
+    *,
+    interpret_free_text: bool = False,
+    allow_live_requirements: bool = False,
+    interpreter: Callable[..., RequirementsResult] | None = None,
+) -> WorkflowState:
+    """Run from a fresh request, with optional, separately gated interpretation.
 
-    No retry loop, persistence, LLM/client, C01, callbacks or remote tracing.
+    Default execution remains offline. Live interpretation requires explicit
+    mode, feature flag, API key and per-call authorization. DI is trusted code.
+    No retry loop, persistence, C01, callbacks or remote tracing.
     The four nodes execute at most once; recursion_limit is an extra backstop.
     Caller objects and environment are unchanged. LangGraph's internal execution
     IDs are excluded from the deterministic result; placement uses its own seed.
     """
+    if (
+        type(interpret_free_text) is not bool
+        or type(allow_live_requirements) is not bool
+    ):
+        raise ValueError("Interpretation mode and authorization must be boolean")
     request = DesignRequest.model_validate(request).model_copy(deep=True)
     initial = WorkflowState(request=request)
     # Override even an externally configured LangSmith tracing environment locally.
     with tracing_context(enabled=False):
-        result = _build_workflow().invoke(
+        result = _build_workflow(
+            interpret_free_text=interpret_free_text,
+            allow_live_requirements=allow_live_requirements,
+            interpreter=interpreter,
+        ).invoke(
             dict(initial),
             {"recursion_limit": 6, "callbacks": []},
         )

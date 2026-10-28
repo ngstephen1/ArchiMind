@@ -2,8 +2,9 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 07A complete — deterministic LangGraph backend foundation.**
-Task 07B is recommended next; Task 06E2 remains separate proposed renderer work.
+**Current milestone: Task 07B complete — optional gated Requirements Interpreter.**
+Live model behavior is unverified. Task 07C is recommended next; Task 06E2 remains
+separate proposed renderer work.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
@@ -28,7 +29,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 06E1 — Realistic 3D architectural room foundation | Complete | Canonical scene contract, genuine wall openings, shared chair instances, labeled placeholders, independent opt-in room; 23 new Python/18 new frontend tests |
 | Task 06E2 | Proposed rendering work | Curated asset bindings and room interaction refinements; not implemented |
 | Task 07A — LangGraph workflow foundation | Complete, deterministic backend only | Typed state, four future-agent roles, independent spatial critique, fixture styling, bounded conditional execution, offline CLI, 38 tests |
-| Task 07B — OpenAI-backed Requirements Interpreter | Recommended next | No model integration or natural-language interpretation implemented yet |
+| Task 07B — OpenAI-backed Requirements Interpreter | Complete backend; live behavior unverified | Gated Responses/Pydantic extraction, canonical evidence/catalog conversion, clarification, optional graph adapter, 77 mock-only tests |
+| Task 07C — OpenAI-backed Layout Designer | Recommended next | Layout design remains deterministic; not implemented |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -52,8 +54,9 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; no furniture editing or camera-pose persistence across A/B switches |
 | Experimental realistic room | Local Three.js room, four walls with real holes, glazing, procedural floor, two textured chairs and a labeled desk placeholder | Independent fixed sample; rotation 0; no generator connection or detailed-mesh validity claim; legacy single-chair mode retained |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
-| Workflow orchestration | Backend-only LangGraph requirements → layout → critique → styling graph | Four deterministic future-agent roles; no LLMs, free-form parsing, UI connection, persistence or automatic revisions |
-| LLM agents / API | Not implemented | No model-provider calls; no API key required |
+| Workflow orchestration | Backend-only LangGraph requirements → layout → critique → styling graph | Structured path remains deterministic; explicit free-text mode can use separately gated interpretation; no UI connection/persistence/revisions |
+| Requirements interpretation | Optional OpenAI Responses API with structured extraction and canonical conversion | Disabled by default; explicit per-call authorization/key required; only rectangular bedrooms/studios and a three-item furniture catalog; verified with mocks only |
+| Other LLM agents | Not implemented | Layout Designer, Spatial Critic and Interior Stylist remain deterministic |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
 ## What the app currently shows
@@ -558,9 +561,76 @@ to label agent reasoning as planned, and its phase metric stays at Task 06E1.
 No live model call, API credential use, dataset or asset download occurred.
 Unrelated `.agents/` and `.claude/` directories remain untouched and uncommitted.
 
+## Task 07B optional Requirements Interpreter
+
+The [interpreter guide](REQUIREMENTS_AGENT.md) records the software implementation,
+contracts, model support sources, configuration, mocked examples and limitations.
+The official **openai 3.40.0** SDK is pinned. It uses `responses.parse` with
+Pydantic Structured Outputs. Default model **gpt-5.4-mini-2026-03-17** and allowed
+aliases/models have documentation-verified Responses/Structured Outputs support;
+account access and live extraction accuracy have not been tested.
+
+`RequirementsSchema` captures room type/shape, original lengths/units with source
+quotes, furniture types/quantities/dimensions, doors/windows, style, hard/soft
+preferences, ambiguity, assumptions and unsupported features. It is extraction
+metadata; existing canonical Pydantic models are reused for the prepared design.
+Python checks numeric/unit evidence and converts feet using 0.3048 m/ft.
+Only sample-catalog queen bed, desk and wardrobe dimensions may fill omitted
+furniture dimensions, with every default disclosed. Room/opening measurements
+are not invented. Missing information returns `needs_clarification`; unsupported
+furniture/shapes/rooms/additional hard constraints stop before generation.
+Style and soft preferences are preserved without claiming generator enforcement.
+
+The adapter is disabled by default (`ARCHIMIND_ENABLE_OPENAI_REQUIREMENTS=0`).
+Live use also requires exact per-call authorization, a verified model and an
+environment API key. Codex CLI login provides no API authorization. One request,
+zero retries, 30-second timeout, bounded input/output, no tools, fixed instructions
+separate from user data, and typed sanitized failures keep the integration scoped.
+No API credential value or raw provider error is returned/logged by the adapter.
+No .env file is loaded automatically; only the placeholder template was updated.
+
+LangGraph adds explicit `interpret_free_text=True` mode and forwards separate
+`allow_live_requirements` authorization. Existing structured inputs bypass the
+interpreter, and 07A prose metadata behavior remains the default. State adds the
+typed interpretation result and necessary terminal/error statuses. Ready data is
+reconverted and checked at the handoff; assumptions and retained preferences enter
+the trace. Non-ready results terminate without generation. The other three nodes'
+algorithms and all spatial/generator code are unchanged.
+
+Actual offline CLI `python -m archimind.examples.interpret_bedroom` reports
+**ready (offline_fixture)** → workflow **succeeded**, **2 candidates in 9/500
+attempts**, selected index **0**. It uses a fixed mock client, temporarily scoped
+fixture settings/key, and marks the result as offline with no claimed live model.
+It is not a fallback for unavailable API calls. Full JSON reconstructs the typed
+workflow state. The trace includes catalog assumptions followed by the existing
+generated → approved → fixture-styled decisions.
+
+Final local verification: **708 passed in 29.14s**, preserving all 631 prior tests
+and adding 63 adapter/conversion plus 14 workflow integration cases. **27 frontend
+tests passed**, syntax/build passed, and committed bundles were unchanged.
+Editable installation and pip compatibility passed. Ruff lint/format passed.
+Streamlit health returned **HTTP 200 ok**. Real SDK mock-HTTP
+tests exercise schema serialization and successful/refused/incomplete/malformed
+responses; network attempts are blocked in new tests. The offline CLI was executed.
+
+Checkpoint A `e05cce8681599dbfde442a463c5b722079bf801b` was pushed to `origin/main`;
+[GitHub Actions passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40613614693).
+The final checkpoint adds graph integration, the offline CLI, stronger SDK tests
+and documentation. No live API/C01 request, new asset, dataset, UI redesign,
+rendering change, spatial algorithm change or persistent store was introduced.
+Unrelated `.agents/` and `.claude/` content remains untouched and uncommitted.
+
+Limits: mock verification does not establish real-model semantic accuracy or
+account availability. Evidence checks cannot prove intent/negation or detect every
+omitted requirement. Catalog defaults are demonstration values; additional hard
+constraints are unsupported, style/preferences are not enforced, and existing
+spatial approximations do not establish vertical/ergonomic/code compliance.
+The SDK buffers/parses before the application response-size check; it is not a
+streaming memory quota. Live evaluation remains separate future work.
+
 ## Next milestone
 
-**Task 07B — OpenAI-Backed Requirements Interpreter Agent** is recommended next.
+**Task 07C — OpenAI-Backed Layout Designer Agent** is recommended next.
 It is not implemented here. Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 

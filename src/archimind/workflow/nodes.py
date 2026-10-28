@@ -1,5 +1,10 @@
-"""Four deterministic future-agent roles; no prompts, models or external calls."""
+"""Optional requirements interpretation; three unchanged deterministic roles."""
 
+from collections.abc import Callable
+
+from archimind.agents.requirements_agent import interpret_requirements
+from archimind.agents.requirements_conversion import prepare_requirements
+from archimind.agents.requirements_schemas import RequirementsResult
 from archimind.geometry import (
     AccessibilityValidationReport,
     LayoutGenerationResult,
@@ -68,9 +73,73 @@ def stop(
     )
 
 
-def requirements_interpreter(state: WorkflowState) -> dict:
-    """Accept canonical structured requirements; prose alone is not interpreted."""
+def requirements_interpreter(
+    state: WorkflowState,
+    *,
+    interpret_free_text: bool = False,
+    allow_live: bool = False,
+    interpreter: Callable[..., RequirementsResult] | None = None,
+) -> dict:
+    """Canonical input takes precedence; free-text interpretation is explicit.
+
+    The default retains 07A's prose-as-metadata behavior. Trusted callable DI is
+    available for offline demonstrations; description data cannot choose it.
+    """
     if state.request.specification is None:
+        if interpret_free_text and state.request.original_request:
+            description = state.request.original_request
+            result = RequirementsResult.model_validate(
+                (interpreter or interpret_requirements)(
+                    description, allow_live=allow_live
+                )
+            )
+            if result.status == "ready":
+                verified = prepare_requirements(
+                    result.extraction, description, mode=result.mode, model=result.model
+                )
+                if (
+                    verified.status != "ready"
+                    or verified.specification != result.specification
+                ):
+                    raise ValueError("Interpretation and canonical conversion disagree")
+                style = verified.extraction.style
+                message = (
+                    f"Requirements ready via {verified.mode}; canonical specification prepared. "
+                    f"Assumptions: {' | '.join(verified.assumptions)} "
+                    f"Style retained: {style.text if style else 'unspecified'}; "
+                    f"{len(verified.extraction.soft_preferences)} soft preference(s) retained, not enforced."
+                )
+                return transition(
+                    state,
+                    "requirements_interpreter",
+                    "accepted",
+                    message,
+                    interpretation=verified,
+                    design=verified.specification.model_copy(deep=True),
+                )
+            statuses = {
+                "needs_clarification": (
+                    "needs_clarification",
+                    "requirements_clarification",
+                ),
+                "unsupported": ("unsupported", "unsupported"),
+                "unavailable": ("unavailable", "requirements_unavailable"),
+                "error": ("failed", "requirements_error"),
+            }
+            status, code = statuses[result.status]
+            details = " | ".join(result.clarifications) or (
+                result.error.message
+                if result.error
+                else "Unsupported requirements; review interpretation limitations."
+            )
+            return stop(
+                state,
+                "requirements_interpreter",
+                code,
+                details,
+                status=status,
+                interpretation=result,
+            )
         return stop(
             state,
             "requirements_interpreter",

@@ -1,4 +1,4 @@
-"""Backend-only deterministic workflow foundation; no LLM-powered agents yet."""
+"""Backend workflow with optional gated requirements interpretation."""
 
 from archimind.workflow.graph import run_workflow
 from archimind.workflow.state import (

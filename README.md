@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07A: deterministic workflow foundation. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07B: optional Requirements Interpreter. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07A — LangGraph workflow foundation (backend only)**
+> **Current stage · Task 07B — Optional OpenAI Requirements Interpreter (backend only)**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -48,18 +48,19 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > 3D samples. Selecting Layout A/B updates both generated views from the same
 > candidate. Plotly remains the default renderer; an opt-in Three.js experiment
 > now displays a room with genuine openings, shared textured chairs, and explicit
-> procedural furniture placeholders. A separate deterministic LangGraph backend
+> procedural furniture placeholders. A separate LangGraph backend
 > coordinates requirements, layout design, spatial critique and fixture styling.
-> These are future agent roles; no LLM-powered reasoning is implemented yet.
-> A full asset catalog, AI reasoning,
+> Only requirements interpretation now has an optional, disabled-by-default
+> OpenAI path. The other three nodes remain deterministic; live model behavior
+> has not been tested. A full asset catalog, further agent reasoning,
 > persistence, and export remain planned.
-> **No API key is required.**
+> **No API key is required for the app, structured workflow or offline demonstrations.**
 
-Tasks **01–06E1 and 07A are complete**, including the isolated architectural room
-experiment and backend workflow. The
+Tasks **01–06E1, 07A and 07B are complete**, including the isolated architectural
+room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**631 passing Python tests**: all 593 previous cases plus 38 workflow cases,
+**708 passing Python tests**: all 631 previous cases plus 77 interpreter/integration cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -357,10 +358,10 @@ chair studio. For the full app use `python -m streamlit run app.py`.
 
 Task 07A adds four future agent roles coordinated by LangGraph:
 **Requirements Interpreter → Layout Designer → Spatial Critic → Interior Stylist**.
-They currently run deterministic Python code. Structured `RoomDesign` requirements
+The default path runs deterministic Python code. Structured `RoomDesign` requirements
 enter the existing generator; the critic independently checks each actual layout
 with Shapely at zero overlap tolerance; the stylist adds explicit fixture metadata.
-No LLM, natural-language interpretation, live C01 request or remote tracing is used.
+This structured-input path uses no LLM, live C01 request or remote tracing.
 
 ```bash
 python -m archimind.examples.workflow_bedroom
@@ -375,8 +376,36 @@ has no Streamlit integration, persistence or automatic revision loop. The app's
 existing phase metric remains Task 06E1 because its UI is unchanged.
 
 See the [workflow guide](docs/developer/WORKFLOW.md) for contracts, failure behavior,
-actual demonstration output, tests and limitations. Next agent milestone:
-**Task 07B — OpenAI-Backed Requirements Interpreter Agent**.
+actual demonstration output, tests and limitations.
+
+### Optional Requirements Interpreter — Task 07B
+
+The [interpreter guide](docs/developer/REQUIREMENTS_AGENT.md) describes a gated
+Responses API adapter with Pydantic Structured Outputs and canonical conversion.
+It extracts room dimensions, supported furniture/quantities, openings, style,
+constraints, preferences and ambiguities. Python converts feet to meters and
+applies explicitly disclosed sample-catalog furniture defaults. Missing room or
+door information requires clarification; unsupported furniture and additional
+unenforceable hard constraints stop safely.
+
+```bash
+python -m archimind.examples.interpret_bedroom
+python -m archimind.examples.interpret_bedroom --json
+```
+
+This CLI is **offline and mocked**: no credentials or API requests are needed.
+It prepares the specified bedroom, then the unchanged generator/critic produce
+two approved candidates in nine attempts. The first trace records assumptions;
+the other three roles remain deterministic, including fixture styling.
+
+Live API interpretation requires both `ARCHIMIND_ENABLE_OPENAI_REQUIREMENTS=1`
+and explicit per-call authorization. LangGraph additionally requires
+`interpret_free_text=True`; its default preserves 07A's prose-as-metadata behavior.
+Canonical inputs always bypass the model. `ARCHIMIND_OPENAI_MODEL` selects a
+documentation-verified model from the allowlist, defaulting to
+`gpt-5.4-mini-2026-03-17`. No live model call was made for verification.
+
+Next agent milestone: **Task 07C — OpenAI-Backed Layout Designer Agent**.
 
 ## Models and coordinates
 
@@ -862,7 +891,8 @@ and verification record.
 - [x] **Task 06E1 · Realistic 3D Architectural Room Foundation** — canonical room scene, true wall openings, shared chair instances, labeled placeholders, independent opt-in demo.
 - [ ] **Task 06E2** — separate proposed rendering work: curated asset bindings and room interaction.
 - [x] **Task 07A · LangGraph Workflow Foundation** — backend-only, deterministic requirements/design/critique/styling nodes, bounded execution and typed trace; no LLMs.
-- [ ] **Task 07B · OpenAI-Backed Requirements Interpreter Agent** — recommended next agent milestone.
+- [x] **Task 07B · OpenAI-Backed Requirements Interpreter Agent** — optional gated Responses extraction, evidence/catalog conversion, clarification, typed failures and mocked verification; live behavior unverified.
+- [ ] **Task 07C · OpenAI-Backed Layout Designer Agent** — recommended next agent milestone.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.
@@ -878,9 +908,10 @@ implemented separately as C01. It is disabled by default
 and is limited to local single-user testing. It returns unvalidated suggestions;
 there is no advisor UI or automatic placement application.
 
-`.env.example` documents a future `OPENAI_API_KEY` placeholder. The current app does
-not load environment files or use an API key. Keep real credentials in ignored
-local files when a later integration needs them.
+`.env.example` documents optional API settings with interpretation disabled.
+ArchiMind does not load environment files automatically. The optional interpreter
+reads `OPENAI_API_KEY` from the process environment only after authorization gates
+pass. Codex CLI authentication is separate. The Streamlit app uses no API key.
 
 Local virtual environments, secrets, caches, databases, generated renders, and
 temporary outputs are excluded from Git.

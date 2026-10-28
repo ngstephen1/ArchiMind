@@ -1,5 +1,10 @@
 # Deterministic workflow foundation — Task 07A
 
+This guide records the original 07A milestone and its preserved structured-input
+path. Task 07B adds an explicitly selected, separately gated
+[Requirements Interpreter](REQUIREMENTS_AGENT.md). Its other three nodes remain
+deterministic, and the 07A CLI still runs offline without an API key.
+
 This is a backend-only LangGraph workflow for four future agent roles. All nodes
 are deterministic Python components. No LLM reasoning, natural-language parsing,
 model request, C01 invocation, subprocess, chat or automatic revision is involved.
@@ -174,5 +179,6 @@ circulation, no ergonomic/height/function or architectural code certification.
 No natural-language intelligence, model provider, UI integration, persistence,
 automatic retries/revisions or real styling assessment is delivered here.
 
-Recommended next: **Task 07B — OpenAI-Backed Requirements Interpreter Agent**.
-It is not implemented in Task 07A.
+Task 07B is now implemented separately; see the
+[Requirements Interpreter guide](REQUIREMENTS_AGENT.md).
+Recommended next: **Task 07C — OpenAI-Backed Layout Designer Agent**.

@@ -1,4 +1,4 @@
-"""JSON-ready contracts for deterministic orchestration, not LLM reasoning.
+"""JSON-ready contracts for bounded orchestration and optional interpretation.
 
 RoomDesign and the generator/validator reports remain the canonical contracts.
 No coordinates, units, identity rules or spatial algorithms are redefined here.
@@ -8,6 +8,7 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from archimind.agents.requirements_schemas import RequirementsResult
 from archimind.geometry import (
     MAX_GENERATION_ATTEMPTS,
     AccessibilityConfig,
@@ -28,6 +29,8 @@ ExecutionStatus = Literal[
     "infeasible",
     "exhausted",
     "rejected",
+    "needs_clarification",
+    "unavailable",
 ]
 MAX_WORKFLOW_ITERATIONS = 1
 MAX_NODE_EXECUTIONS = 4
@@ -46,7 +49,10 @@ class StylingPreferences(_Contract):
 
 
 class DesignRequest(_Contract):
-    """Structured input. Optional prose is retained verbatim, never interpreted.
+    """Structured input with optional prose retained verbatim.
+
+    Prose is metadata by default; the runner's explicit free-text mode can invoke
+    the separately gated Requirements Interpreter.
 
     Missing specification is a traced requirements failure. Malformed canonical
     data/options raise Pydantic ValidationError before graph execution. Explicit
@@ -81,6 +87,9 @@ class WorkflowError(_Contract):
         "no_approved_candidates",
         "iteration_limit",
         "node_error",
+        "requirements_clarification",
+        "requirements_unavailable",
+        "requirements_error",
     ]
     message: str = Field(min_length=1)
 
@@ -123,6 +132,7 @@ class WorkflowState(_Contract):
     """
 
     request: DesignRequest
+    interpretation: RequirementsResult | None = None
     design: RoomDesign | None = None
     generation: LayoutGenerationResult | None = None
     reviews: list[CandidateReview] = Field(default_factory=list, max_length=2)
@@ -145,6 +155,14 @@ class WorkflowState(_Contract):
 
     @model_validator(mode="after")
     def validate_handoffs(self) -> Self:
+        if self.interpretation is not None:
+            if self.interpretation.status == "ready":
+                if self.design != self.interpretation.specification:
+                    raise ValueError(
+                        "Working specification must match ready interpretation"
+                    )
+            elif self.design is not None or self.approved_design is not None:
+                raise ValueError("Unready interpretation cannot supply a design")
         if [item.sequence for item in self.trace] != list(
             range(1, len(self.trace) + 1)
         ):
