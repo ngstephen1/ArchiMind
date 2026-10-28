@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 28, 2026**.
 
-**Current milestone: Task 07F complete — optional selected-layout Streamlit styling panel.**
-Live model behavior is unverified. Material rendering and Task 06E2 remain
+**Current milestone: Task 07F complete, with an optional catalog-color preview POC.**
+Live model behavior is unverified. Physical materials/textures and Task 06E2 remain
 separate future renderer work.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -67,6 +67,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Interior style planning | Optional standalone E1 adapter and E2 final graph node return checked catalog colors/finishes for one approved selected candidate | Separate appearance metadata; no material rendering, physical assets or performance certification |
 | Workflow stylist | Deterministic fixture by default; independently gated E1 plan or explicit safe fixture fallback | Original geometry/score/reports/selection preserved; unsafe selections rejected; mock/API/fixture provenance explicit |
 | Streamlit styling panel | Optional section after selected-layout validation, with fixture action, catalog themes/palette preview and preference text | AI disabled by default; server flag plus one-request authorization and click required; A/B/input changes clear results; no rendered materials |
+| Catalog-color preview POC | Opt-in wall/floor/furniture tint on existing selected Plotly 3D meshes | Accepted bound catalog plan required; no geometry changes, textures, new assets or accent placement; fixture fallback stays untinted |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
 ## What the app currently shows
@@ -1109,11 +1110,65 @@ catalog, zero-rotation and single-room limitations remain; real model quality,
 account availability, conversational input, persistence and material rendering
 are unverified/unimplemented. Pre-existing `.agents/` and `.claude/` remain untouched.
 
+## Catalog-color mapping proof of concept
+
+[Preview guide](STYLE_COLOR_PREVIEW.md) documents `render_styled_design_3d` and the
+new **Preview catalog colors in selected 3D view** checkbox. The optional adapter
+starts from the original furnished Plotly figure and changes only wall/floor and
+furniture colors plus a separate preview metadata record. The checkbox starts
+off and can restore the original view. It is offered only for accepted E1/E2
+catalog plans; fixture/fallback output cannot invent a plan or activate it.
+
+Strict output/catalog validation, exact source `RoomDesign` equality, furniture
+ID coverage and explicit mock/API provenance are required. The rendering step
+does not run AI, generation or the spatial validation engine; workflow approval
+remains authoritative. Source models, scores, complete reports, vertices,
+triangles, room/opening gaps, IDs, dimensions, camera, ranges, aspect ratio,
+lighting, opacity, hover and legend stay unchanged. The original metadata plan
+retains `rendered=False`; the new figure records its preview separately.
+
+Every part of a furniture object receives its one finish color, including bed
+pillows/mattress and wardrobe handles. Component finishes, textures and PBR are
+not implemented. Glass/opening outlines retain their existing appearance and
+accents remain unplaced metadata. The 2D, standalone and experimental Three.js
+views are unchanged. A/B changes, new generation, input changes and new requests
+clear the preview. Old/malformed plans revert safely to the original 3D view.
+
+The baseline at `480af08` passed **1,191 in 75.77s**. The new suite adds **28**
+cases: all themes/both candidates, exact figure preservation except colors,
+catalog/provenance/ID rejection, stale-layout rejection, source immutability,
+no backend work on preview changes, reversal/reset and offline exports. Focused
+tests: **28 passed in 11.14s**. Full suite: **1,219 passed in 82.51s**, preserving
+all prior tests. Ruff lint/format, pip dependency check and Streamlit health
+**HTTP 200** passed. Frontend **27/27**, syntax and build passed with unchanged
+committed rendering bundles. No dependencies, canonical models, layout/scoring
+or spatial algorithms were changed.
+
+`python -m archimind.examples.preview_style_colors --output output/style-color-preview.html`
+exports a self-contained, explicitly **OFFLINE MOCK** preview using the existing
+mock client. Its assertions preserve Layout A/index 0 and score **67.721925**,
+geometry/camera and full workflow/advice data. All nine workflow/agent/preview
+examples passed text/JSON checks. Source/wheel contents and installed-wheel
+offline preview assertions passed outside the repository with network and real
+clients blocked; temporary package artifacts were removed.
+
+Actual browser inspection at **1440 × 1000** and **390 × 844** verified catalog
+colors, unchanged camera metadata, reversal and clearing on Layout B, with no
+horizontal page overflow or application console error. The existing non-fatal
+Plotly Canvas2D advisory remains. Verification used a temporary mock-only app with
+real-client construction blocked. Screenshots and exported HTML are outside the
+repository in `/Users/macbook/Hack/.playwright-mcp/archimind-color-preview/`.
+The implementation checkpoint is `c51984b`; generated artifacts are not committed.
+
+No live model requests, new assets, dataset integration, training or separate
+course write-up occurred. Existing constructed room layouts remain the data
+source. `.agents/` and `.claude/` remain untouched and uncommitted.
+
 ## Next milestone
 
-A separately reviewed **material-color mapping proof of concept** is recommended
-next, using existing checked metadata without geometry changes. No renderer work
-or conversational interface was implemented by Task 07F.
+Review the limited flat-color proof of concept before separately choosing
+component materials, dataset/asset integration or another renderer. Conversational
+input remains unimplemented.
 Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 

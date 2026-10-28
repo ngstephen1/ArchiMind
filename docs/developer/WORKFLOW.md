@@ -14,7 +14,9 @@ deterministic Python component. In that mode no LLM reasoning, natural-language 
 model request, C01 invocation, subprocess, chat or automatic revision is involved.
 Task 07F exposes a separate selected-layout styling entry point in Streamlit,
 reusing final E2 steps without invoking this full graph or generating layouts.
-Both rendering systems remain unchanged; broader multi-agent interaction is future work.
+Default rendering geometry remains unchanged. A separate optional
+[catalog-color preview](STYLE_COLOR_PREVIEW.md) consumes checked style metadata;
+broader multi-agent interaction is future work.
 
 ## Dependencies and API
 

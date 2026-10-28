@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07F — Optional Streamlit Styling Panel**
+> **Current stage · Styling panel and catalog-color preview POC**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -61,8 +61,9 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > colors and finish representations through the existing E1 adapter. Fresh checks
 > before and after styling preserve the selected geometry, score and reports.
 > Failed AI styling uses an explicitly labeled safe fixture fallback. A checked
-> plan is separate metadata; no material choices have been applied to either
-> renderer. A compact Streamlit panel now offers fixture styling or separately
+> plan stays separate metadata. An opt-in Plotly 3D preview maps its catalog colors
+> onto existing meshes, preserving geometry. No physical materials or textures
+> are applied. The panel offers fixture styling or separately
 > authorized AI requests for the selected layout, with catalog themes, palette
 > previews and explicit provenance. Live model behavior has not been tested.
 > A full asset catalog, further agent reasoning,
@@ -73,7 +74,7 @@ Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1, 07D2, 07E1, 07E2 and 07F are comp
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**1,191 passing Python tests**: all 1,136 previous cases plus 55 selected-styling/UI cases,
+**1,219 passing Python tests**: all 1,191 previous cases plus 28 color-preview cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -590,9 +591,29 @@ never regenerates layouts or changes coordinates, reports, scores or either view
 A/B switches, successful regeneration and styling-input changes clear results and
 consent. Failed generation preserves the previous selection/style; changing only
 the pending seed does not replace the displayed generation. All recommendations
-are **metadata only**: colors and materials are not applied to the 2D/3D views.
+stay separate metadata. Accepted plans offer an optional catalog-color preview
+in the selected Plotly 3D view, described below.
 See the [panel guide](docs/developer/INTERIOR_STYLIST_WORKFLOW.md#task-07f--streamlit-selected-layout-panel)
 for API, session and fallback details. No live requests were used in verification.
+
+### Catalog-color preview — proof of concept
+
+An accepted style plan can recolor the selected Plotly 3D walls, floor and
+furniture. **Preview catalog colors in selected 3D view** starts off and is
+reversible. Geometry, camera, openings, IDs, dimensions, selection, scores and
+reports stay unchanged. The 2D and experimental Three.js views keep their colors.
+Fixture fallback never invents a catalog plan or activates this preview.
+
+```bash
+python -m archimind.examples.preview_style_colors
+python -m archimind.examples.preview_style_colors --output output/style-color-preview.html
+```
+
+This permanently offline mock produces self-contained HTML without an API key or
+CDN. It preserves Layout A's **67.721925** score and verifies geometry preservation.
+One flat tint colors every part of each furniture object; accents stay metadata.
+No textures, physical materials, photorealistic output, new assets or datasets
+are added. See the [preview guide](docs/developer/STYLE_COLOR_PREVIEW.md).
 
 ## Models and coordinates
 

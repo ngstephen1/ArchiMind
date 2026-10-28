@@ -7,7 +7,8 @@ candidate, revise scores/reports or improve verified circulation. Task 07E2 now
 integrates this existing adapter as an optional final LangGraph step; see the
 [workflow guide](INTERIOR_STYLIST_WORKFLOW.md) for opt-ins, provenance and explicit
 fixture fallback. Task 07F now exposes selected-layout styling in Streamlit. The
-deterministic backend default and both renderers remain unchanged.
+deterministic backend default remains unchanged. A separate opt-in
+[Plotly color preview](STYLE_COLOR_PREVIEW.md) now consumes checked metadata.
 
 ## Contracts and API
 
@@ -82,8 +83,8 @@ checked after parsing; a valid token from another palette/surface is still rejec
 The 15 tokens cover five wall colors, four floor appearances and six furniture
 finish categories. Color hex values come exclusively from Python catalog records.
 Each record exposes `future_mapping="flat_color_metadata"` and
-`physical_asset_available=False`. These tokens could support a future color mapping;
-neither Plotly nor Three.js mapping is implemented. No texture/asset URL or file is
+`physical_asset_available=False`. These tokens support an optional Plotly flat-color
+preview. Three.js material mapping remains unimplemented. No texture/asset URL or file is
 present, downloaded or selected. Wood/metal/fabric/stone names describe appearance
 only, not a verified physical product, component construction or performance.
 

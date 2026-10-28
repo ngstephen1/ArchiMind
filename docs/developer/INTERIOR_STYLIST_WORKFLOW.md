@@ -3,8 +3,9 @@
 E2 reuses the [E1 adapter, catalog and grounding](INTERIOR_STYLIST_AGENT.md) as
 an optional final LangGraph node. The default four-node workflow remains offline,
 with the same neutral/warm/cool fixture palette and selected geometry. Task 07F
-adds the selected-layout Streamlit panel below. Neither renderer applies the
-appearance metadata; the full four-role workflow remains a separate backend API.
+adds the selected-layout Streamlit panel below. A separate optional
+[color preview](STYLE_COLOR_PREVIEW.md) consumes accepted plans in the selected
+Plotly 3D chart; the full four-role workflow stays a separate backend API.
 
 ## API and authorization
 
@@ -143,7 +144,7 @@ handoffs, safe fallback, other optional roles, immutability, isolated determinis
 runs, strict JSON and CLI output. No live model behavior or quality is verified.
 
 Plans remain **metadata only** (`rendered=False`, no physical assets). No realistic
-materials, renderer mapping, geometry changes, conversational UI, persistence or
+materials, geometry changes, conversational UI, persistence or
 automatic revision is implemented. The catalog's small vocabulary and E1's
 preference/geometry limits remain. Task 07F exposes only selected-layout styling,
 not conversational input, other AI agents, revisions or material rendering.
@@ -190,7 +191,9 @@ Results identify the selected layout and original score, with one of these sourc
 
 Accepted plans show theme/palette, wall/floor representations, furniture-ID finish
 assignments, accents, preference notes and limitations. Catalog colors are metadata,
-not a rendering preview. Fixture and fallback output never claim those plans exist.
+not physical material rendering. The optional catalog-color preview is a separate
+explicit step in the selected Plotly 3D view. Fixture and fallback output have no
+catalog finish plan and retain the original colors.
 Raw exceptions, provider diagnostics, credentials and full request/context payloads
 are not displayed. Recoverable failures retain the current layout for another
 explicit request; unsafe candidates receive no approved styling result.
