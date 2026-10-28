@@ -1164,11 +1164,66 @@ No live model requests, new assets, dataset integration, training or separate
 course write-up occurred. Existing constructed room layouts remain the data
 source. `.agents/` and `.claude/` remain untouched and uncommitted.
 
+## Task 08B — qualified, embedding-ready furniture metadata
+
+The [08A source register](../data/FURNITURE_SOURCE_REGISTER.md) qualifies two ABO
+product records for acquisition investigation. The independent `archimind.assets`
+package now represents both as metadata-qualified records in the versioned
+`archimind-furniture` catalog (`1.0.0`, schema `1`). The [workflow guide](WORKFLOW.md#qualified-furniture-metadata--task-08b)
+documents the public API, qualification boundaries and future retrieval contract.
+
+| Product | Canonical category / subtype | W × D × H (m) | Rendering |
+| --- | --- | --- | --- |
+| Stone & Beam Charles, Sod | chair / armchair | 0.9906 × 0.9906 × 0.9652 | Not qualified; no acquired GLB |
+| AmazonBasics five-shelf bookcase, Espresso | storage / bookcase | 0.659892 × 0.381762 × 1.891792 | Not qualified; no acquired GLB |
+
+Strict frozen records preserve original measurements, Decimal-checked conversions,
+explicit axes, source evidence/snapshot hashes, identities/variants and CC BY 4.0
+rights/attribution. Unknown dataset revision is distinct from the known 08A
+qualification commit. Published dimension claims are not independent physical
+measurements. Missing/uncertain evidence, duplicate keys/IDs, category/variant
+conflicts, unsafe render references and unsupported approval claims fail closed.
+
+`load_catalog()` reads only a fixed packaged resource. The canonical furniture
+factory creates fresh zero-rotation specifications, with no placement, validation,
+score changes or modification of stored designs. Ordinary app/workflow behavior,
+geometry, renderers and Streamlit controls remain unchanged.
+
+Deterministic search documents contain reviewed names, categories/subtypes,
+aliases, usage, variants and IDs. Original marketing titles stay in provenance;
+description/material/style/color fields remain unknown. No style or physical
+color is inferred from the names Sod/Espresso. Future index keys include catalog,
+record and text versions plus a text digest. No embeddings, retrieval service,
+new agent, database, dependency or live model request is introduced.
+
+Both render qualifications remain `not_evaluated`; verified mesh bounds,
+orientation, anchors, local paths, bindings and model hashes are null. Source
+conventions are reported, not inspected. The original Sheen Chair remains an
+independent illustrative fixture. Bed, desk and wardrobe coverage is still absent.
+
+Verification commands are in the workflow guide. Catalog tests cover offline
+validation/factory boundaries and match the frozen 08A evidence. The separate
+packaging regression builds source/wheel artifacts offline, verifies catalog and
+existing-asset bytes, installs the wheel without dependencies/network and loads
+it outside the repository. No source data or historical audit evidence is changed.
+
+Task 08B local verification: **85 catalog tests + 1 packaging regression passed**
+(86 focused cases in 3.48s); full suite **1,305 passed in 80.69s**, retaining all
+1,219 baseline tests. Ruff lint/format (111 files), `pip check`, frontend
+syntax/build and committed-bundle equality passed; frontend **27 passed, 0 failed,
+0 skipped**. Streamlit health returned HTTP 200 `ok`. The catalog checkpoint
+`ec646ac` also passed [CI](https://github.com/ngstephen1/ArchiMind/actions/runs/40761660929).
+No live provider/Codex requests, embeddings or asset downloads were used.
+
 ## Next milestone
 
-Review the limited flat-color proof of concept before separately choosing
-component materials, dataset/asset integration or another renderer. Conversational
-input remains unimplemented.
+Review Task 08B before separately authorizing **08C — curated asset inspection**.
+The Charles armchair is the smaller first acquisition candidate (4,252,440 bytes
+advertised by 08A HEAD metadata, 2048 px textures). Actual integrity, mesh bounds,
+placement, resource use and renderer compatibility still need verification; the
+metadata comparison does not permit silent scaling or canonical footprint changes.
+The bookcase also needs texture-budget preparation. Neither is render-ready.
+Conversational input remains unimplemented.
 Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 

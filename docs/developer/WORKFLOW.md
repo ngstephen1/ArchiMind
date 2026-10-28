@@ -198,5 +198,120 @@ fallback and selection provenance. Task 07D1 adds a standalone
 [AI design critic](SPATIAL_CRITIC_AGENT.md), now integrated as an optional advisory
 node by [Task 07D2](SPATIAL_CRITIC_WORKFLOW.md). Default structured execution remains
 deterministic. E1 adds the standalone [Interior Stylist](INTERIOR_STYLIST_AGENT.md),
-without replacing the fixture or changing routing. Recommended next: **Task 07E2 —
-Optional Interior Stylist workflow integration**.
+without replacing the fixture or changing routing. Task 07E2 adds the
+[optional final stylist route](INTERIOR_STYLIST_WORKFLOW.md); Task 07F exposes
+selected-layout styling separately in Streamlit.
+
+## Qualified furniture metadata — Task 08B
+
+`archimind.assets` is an independent, offline product catalog. Neither
+`run_workflow()` nor the active UI reads it. It adds no retrieval, embedding,
+generation, rendering or agent integration. The source qualification record is
+[Task 08A](../data/FURNITURE_SOURCE_REGISTER.md).
+
+The packaged catalog `archimind-furniture`, version `1.0.0`, schema `1`, contains
+two metadata-qualified records:
+
+| Stable asset ID | Category / subtype | Width × depth × height (m) |
+| --- | --- | --- |
+| `abo-b075x2x4xs-amazon-com` | chair / armchair, Sod variant | 0.9906 × 0.9906 × 0.9652 |
+| `abo-b07pqs58xn-amazon-com` | storage / bookcase, Espresso variant | 0.659892 × 0.381762 × 1.891792 |
+
+These are reviewed ABO-published item measurements, not independent metrology.
+Original inch measurements, explicit width/length/height axis assignments,
+source snapshots, product/variant identity and CC BY 4.0 attribution are retained.
+The unknown dataset revision stays null; the separate 08A qualification commit
+and evidence hashes are known. Bookcase does not mean wardrobe. No bed, desk or
+wardrobe is qualified, and Sheen Chair remains a separate illustrative fixture.
+
+```python
+from archimind.assets import furniture_from_catalog, load_catalog
+
+catalog = load_catalog()  # fixed importlib.resources JSON; no path/URL argument
+record = catalog.get_record("abo-b075x2x4xs-amazon-com")
+proposed = furniture_from_catalog(
+    record.asset_id,
+    furniture_id="new-chair",
+    name="Charles armchair",
+    x_m=1.0,
+    y_m=2.0,
+)
+assert proposed.rotation_deg == 0
+assert record.render_qualified is False
+```
+
+The factory returns fresh canonical `Furniture`; positions retain the southwest
+origin, X east, Y north and meters. Finite negative/out-of-room positions remain
+representable. This is a proposed specification, not approval that it fits.
+Only a later explicit generation/validation operation can establish spatial
+validity. Existing layouts, geometry rules, reports and scores are never edited.
+
+Records and their nested containers are immutable. The loader fails completely
+on malformed JSON, duplicate keys/IDs, unsupported versions, missing evidence,
+conflicting categories/variants, uncertain rights or incorrect conversions.
+Source URLs are inert evidence references and are never fetched. Validation
+checks recorded consistency; source qualification rests on the reviewed 08A
+evidence, not an online truth check or a cryptographic attestation of a supplier.
+
+Both records have `qualification="metadata_qualified"` and render status
+`not_evaluated`. Model hash, local GLB path, verified bounds/orientation/anchor
+and render-asset binding are null. Source-reported glTF conventions are labeled
+uninspected. 08B rejects render-qualified claims and non-null render evidence;
+08C must introduce and verify its complete rendering contract. A source GLB URL
+is not a renderable asset, and no new model bytes have been acquired.
+
+### Future retrieval contract
+
+The following is future architecture. 08B implements only the authoritative
+catalog lookup and specification factory.
+
+```mermaid
+flowchart LR
+    Q[Natural-language query] --> I[Structured intent]
+    I --> F[Hard eligibility and category filters]
+    F --> S[Semantic and keyword retrieval]
+    S --> C[Authoritative catalog lookup]
+    C --> D[Dimension compatibility]
+    D --> G[Explicit layout generation]
+    G --> V[Deterministic spatial validation]
+    V --> R[Approved asset rendering]
+```
+
+`record.search_document()` has a fixed version-1 format and deterministic
+alias/tag ordering. It includes reviewed names, category/subtype, usage,
+variant and identifiers. Original marketing titles stay in provenance. The two
+records have unknown descriptions, materials, colors and styles (`None`), so
+these are omitted. Sod/Espresso are variant labels, not inferred physical colors.
+An attribute requires separate reviewed source-field evidence; marketing titles,
+appearance inference and AI-generated enrichment cannot qualify it.
+
+Future index entries must retain this immutable reference:
+
+```python
+index_key = (
+    catalog.catalog_id,
+    catalog.catalog_version,
+    record.asset_id,
+    record.asset_version,
+    catalog.search_document_version,
+    record.search_document_sha256,
+)
+```
+
+Embeddings/keyword indexes are derived caches. Resolve every hit back to the
+authoritative versioned catalog, then enforce license, category and dimension
+compatibility. Never reuse published catalog/record versions for changed data;
+bump the search-document version for a changed text contract. Numeric dimensions
+remain structured fields. Similarity cannot override rights or geometry, and
+only separately render-qualified assets may be loaded for realistic rendering.
+No vectors, model downloads, semantic matching, vector database, SQLite index or
+live service are implemented here.
+
+```bash
+python -m pytest -q tests/test_asset_catalog.py tests/test_asset_catalog_packaging.py
+```
+
+The focused suite blocks network/client/process operations. The separate packaging
+test intentionally runs the existing offline build/install toolchain, checks
+source/wheel resource inclusion and unchanged legacy assets, then loads the wheel
+outside the repository with network/process audit guards.
