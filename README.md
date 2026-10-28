@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07E2: optional interior styling in LangGraph. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07F: optional selected-layout styling panel. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07E2 — Optional Interior Stylist in LangGraph**
+> **Current stage · Task 07F — Optional Streamlit Styling Panel**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -62,16 +62,18 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > before and after styling preserve the selected geometry, score and reports.
 > Failed AI styling uses an explicitly labeled safe fixture fallback. A checked
 > plan is separate metadata; no material choices have been applied to either
-> renderer. Live model behavior has not been tested.
+> renderer. A compact Streamlit panel now offers fixture styling or separately
+> authorized AI requests for the selected layout, with catalog themes, palette
+> previews and explicit provenance. Live model behavior has not been tested.
 > A full asset catalog, further agent reasoning,
 > persistence, and export remain planned.
-> **No API key is required for the app, structured workflow or offline demonstrations.**
+> **No API key is required for the default app, fixture styling or offline demonstrations.**
 
-Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1, 07D2, 07E1 and 07E2 are complete**, including the isolated architectural
+Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1, 07D2, 07E1, 07E2 and 07F are complete**, including the isolated architectural
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**1,136 passing Python tests**: all 1,075 previous cases plus 61 stylist workflow cases,
+**1,191 passing Python tests**: all 1,136 previous cases plus 55 selected-styling/UI cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -383,8 +385,9 @@ The default sample completes with two candidates in nine attempts and returns a
 typed result plus ordered activity trace. One generation iteration and four nodes
 bound execution; unsupported/infeasible requests and empty search results terminate
 safely. Original data is preserved; styling never moves furniture. The workflow
-has no Streamlit integration, persistence or automatic revision loop. The app's
-existing phase metric remains Task 06E1 because its UI is unchanged.
+retains its separate backend entry point, with no persistence or automatic revision
+loop. Task 07F now exposes only the existing selected-layout styling steps in
+Streamlit; it does not rerun this four-role workflow or regenerate layouts.
 
 See the [workflow guide](docs/developer/WORKFLOW.md) for contracts, failure behavior,
 actual demonstration output, tests and limitations.
@@ -562,9 +565,34 @@ fresh deterministic approval remains safe. Unsafe selections terminate without
 an approved design. At most seven nodes execute, with no retry or regeneration
 for styling. JSON round-trips and all original tests are preserved.
 
-No live API behavior, realistic material rendering or conversational UI is
-implemented or verified. Recommended next: a separately scoped Streamlit workflow
-panel with explicit opt-ins and visible mock/API/fixture provenance.
+Live API behavior, realistic material rendering and conversational UI remain
+unverified or unimplemented. Task 07F now exposes the narrow styling path below.
+
+### Selected-layout styling panel — Task 07F
+
+After generating and selecting Layout A/B, scroll below **Spatial Validation
+Summary** to **Interior Styling — Optional**. Choose **Show fixture styling** for
+the existing neutral preset, with no API key or model request.
+
+For optional AI styling, enable its checkbox, choose a catalog theme, inspect the
+matching palette preview and enter optional appearance preferences. Server-side
+`ARCHIMIND_ENABLE_OPENAI_STYLIST=1`, existing key/model configuration, a separate
+**Authorize one OpenAI request** checkbox and an explicit request click are all
+required. Consent resets after every attempt. The UI never changes environment
+settings; `.env` files are not loaded automatically.
+
+The result identifies the selected layout and distinguishes checked AI output,
+mocked output, direct fixture output and fixture fallback. Failed requests retain
+sanitized outcomes and permit an explicit retry without losing the layout.
+Fresh spatial/specification/report/score checks reject unsafe selections. Styling
+never regenerates layouts or changes coordinates, reports, scores or either viewer.
+
+A/B switches, successful regeneration and styling-input changes clear results and
+consent. Failed generation preserves the previous selection/style; changing only
+the pending seed does not replace the displayed generation. All recommendations
+are **metadata only**: colors and materials are not applied to the 2D/3D views.
+See the [panel guide](docs/developer/INTERIOR_STYLIST_WORKFLOW.md#task-07f--streamlit-selected-layout-panel)
+for API, session and fallback details. No live requests were used in verification.
 
 ## Models and coordinates
 
@@ -1010,6 +1038,7 @@ ArchiMind/
 │   │   ├── layout_recommendation.py  Approved-only C1 handoff and safe fallback
 │   │   ├── spatial_critique.py   Read-only D1 handoff, provenance and safe fallback
 │   │   ├── interior_styling.py   E1 final handoff, fresh approval and fixture fallback
+│   │   ├── selected_styling.py   Verify/style existing A/B selection without generation
 │   │   └── nodes.py             Requirements, generation, critique and fixture styling
 │   └── examples/
 │       ├── __init__.py           Public example factory
@@ -1070,6 +1099,7 @@ and verification record.
 - [x] **Task 07D2 · AI critic graph integration** — optional traced review after deterministic approval/advice; challenge never switches selection.
 - [x] **Task 07E1 · Standalone Interior Stylist agent** — controlled catalog metadata, verified selected layout, conflicts/clarification and mocked verification.
 - [x] **Task 07E2 · Interior Stylist workflow integration** — optional final E1 node, fresh approval, immutable selected data and explicit fixture fallback.
+- [x] **Task 07F · Streamlit styling panel** — selected-layout handoff, catalog theme/preferences, one-request authorization and clear fixture/AI provenance.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

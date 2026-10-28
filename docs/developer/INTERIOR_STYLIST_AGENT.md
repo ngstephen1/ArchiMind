@@ -6,7 +6,8 @@ metadata**: it cannot move furniture, change dimensions/openings, select another
 candidate, revise scores/reports or improve verified circulation. Task 07E2 now
 integrates this existing adapter as an optional final LangGraph step; see the
 [workflow guide](INTERIOR_STYLIST_WORKFLOW.md) for opt-ins, provenance and explicit
-fixture fallback. The deterministic default, Streamlit and both renderers remain unchanged.
+fixture fallback. Task 07F now exposes selected-layout styling in Streamlit. The
+deterministic backend default and both renderers remain unchanged.
 
 ## Contracts and API
 
@@ -197,4 +198,5 @@ remain unverified/unimplemented. Existing single-room/zero-rotation spatial limi
 still apply. **Task 07E2 is now complete**: the optional
 [workflow integration](INTERIOR_STYLIST_WORKFLOW.md) reuses this adapter and
 preserves selected geometry and deterministic approval. A separately scoped
-Streamlit workflow panel is recommended next; no conversational UI is added here.
+Streamlit workflow panel is now available through Task 07F; no conversational UI
+or material rendering is added.

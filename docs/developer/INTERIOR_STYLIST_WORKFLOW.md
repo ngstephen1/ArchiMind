@@ -2,8 +2,9 @@
 
 E2 reuses the [E1 adapter, catalog and grounding](INTERIOR_STYLIST_AGENT.md) as
 an optional final LangGraph node. The default four-node workflow remains offline,
-with the same neutral/warm/cool fixture palette and selected geometry. Neither
-Streamlit nor either renderer invokes this workflow or applies its appearance metadata.
+with the same neutral/warm/cool fixture palette and selected geometry. Task 07F
+adds the selected-layout Streamlit panel below. Neither renderer applies the
+appearance metadata; the full four-role workflow remains a separate backend API.
 
 ## API and authorization
 
@@ -144,5 +145,89 @@ runs, strict JSON and CLI output. No live model behavior or quality is verified.
 Plans remain **metadata only** (`rendered=False`, no physical assets). No realistic
 materials, renderer mapping, geometry changes, conversational UI, persistence or
 automatic revision is implemented. The catalog's small vocabulary and E1's
-preference/geometry limits remain. A separately scoped Streamlit workflow panel
-is recommended next, with explicit provenance and independent AI opt-ins.
+preference/geometry limits remain. Task 07F exposes only selected-layout styling,
+not conversational input, other AI agents, revisions or material rendering.
+
+## Task 07F — Streamlit selected-layout panel
+
+Generate alternatives, choose **Layout A** or **Layout B**, and scroll below its
+spatial validation summary to **Interior Styling — Optional**. The selected
+candidate continues to supply the existing synchronized 2D/3D views.
+
+- **Show fixture styling** is always available for a passing selection. It uses
+  the existing neutral fixture, with no API key or model invocation. It is a preset;
+  AI theme/preferences do not control its ivory/slate/natural-oak suggestions.
+- **Enable AI-assisted styling** starts unchecked. When enabled, choose a catalog
+  theme (default Neutral), inspect its matching palette preview and optionally
+  enter up to 400 characters of appearance preferences. Choices come from the
+  existing immutable catalog; its current one-palette-per-theme structure is
+  displayed read-only rather than as a redundant selector.
+- AI requests also require server configuration, a separately checked
+  **Authorize one OpenAI request** control, and an explicit **Request AI styling**
+  click. The toggle alone authorizes nothing. Consent is consumed before invocation
+  and reset after each attempt; retrying requires fresh consent and another click.
+
+The server must receive the existing stylist flag, API key and allowlisted model
+through its environment. `.env` files are **not** automatically loaded. The panel
+does not enter/display keys or environment values and cannot change feature flags.
+When the feature is unavailable, AI submission is disabled while the fixture
+remains usable. Other AI flags never enable additional roles through this panel.
+
+```bash
+cd /Users/macbook/Hack/ArchiMind
+source .venv/bin/activate
+python -m streamlit run app.py
+```
+
+Results identify the selected layout and original score, with one of these sources:
+
+| Display | Meaning |
+| --- | --- |
+| Deterministic fixture — AI was not requested | Explicit offline preset action |
+| AI stylist — API response | Checked E1 output with `mode="api_response"` |
+| Mocked AI stylist — offline fixture | Trusted test/example injection; never a live quality claim |
+| Deterministic fixture fallback | AI unavailable, rejected, failed or needing clarification; its outcome remains visible and no AI plan is fabricated |
+
+Accepted plans show theme/palette, wall/floor representations, furniture-ID finish
+assignments, accents, preference notes and limitations. Catalog colors are metadata,
+not a rendering preview. Fixture and fallback output never claim those plans exist.
+Raw exceptions, provider diagnostics, credentials and full request/context payloads
+are not displayed. Recoverable failures retain the current layout for another
+explicit request; unsafe candidates receive no approved styling result.
+
+### Selected-layout API and session behavior
+
+The public `style_selected_layout(request, generation, selected_candidate_index,
+*, use_ai_stylist=False, allow_live_stylist=False, interior_stylist=None)` returns
+the existing `WorkflowState`. It reuses deterministic critique, E2's shared fresh
+verification and guarded E1 handoff, and the existing fixture node. It never calls
+generation, the full `run_workflow`, Requirements Interpreter, Layout Advisor,
+AI critic or Codex. `selection_source="user_selection"` distinguishes the caller's
+original A/B index from automatic ranking; prior provenance rules remain intact.
+
+The complete input generation result, candidate ordering, geometry, reports and
+scores are preserved. Only actual verification/styling steps are traced; generation
+iteration count remains zero. Fixture requests receive fresh checks too. Failed,
+unknown, stale or altered checks/scores cannot be repaired by fixture output.
+
+Styling lives in separate per-session state, bound to the specification, stored
+generation, selected index and submitted inputs. A/B switches, successful
+regeneration and styling-input changes clear results and consent. Switching back
+does not restore old results. A failed generation preserves the previous result,
+selection and associated styling. Editing the pending generation seed leaves the
+displayed generation/style intact; requests use its original seed/configuration.
+Normal reruns and view/input changes make no styling or spatial-validation calls.
+
+Only button submissions enqueue work. Pending requests are consumed once, guarded
+against in-flight duplicates and discarded if their binding is stale. No shared
+model-response cache, persistence, automatic retry or background worker is added.
+Refresh/disconnect can clear the browser session.
+
+```bash
+python -m pytest -q tests/test_interior_styling_ui.py
+python -m pytest -q tests/test_layout_generation_ui.py tests/test_layout_sync.py
+```
+
+All AI verification uses mocks. The real app's default/fixture path, mocked AI
+presentation, desktop/narrow controls and stale-result behavior are checked without
+live API usage. Real account availability and recommendation quality remain unverified.

@@ -12,8 +12,9 @@ and test counts below are historical unless stated otherwise.
 The default is a backend-only LangGraph workflow for four roles, each a
 deterministic Python component. In that mode no LLM reasoning, natural-language parsing,
 model request, C01 invocation, subprocess, chat or automatic revision is involved.
-Streamlit and both rendering systems are unchanged and do not invoke this graph.
-The existing app still labels multi-agent reasoning as future work.
+Task 07F exposes a separate selected-layout styling entry point in Streamlit,
+reusing final E2 steps without invoking this full graph or generating layouts.
+Both rendering systems remain unchanged; broader multi-agent interaction is future work.
 
 ## Dependencies and API
 
