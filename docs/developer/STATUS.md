@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 06D complete — isolated textured-chair renderer experiment.**
-Task 06E is recommended next. The Task 03 preview, Task 05B comparison, and
+**Current milestone: Task 06E1 complete — experimental architectural room foundation.**
+Task 06E2 is recommended next. The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
 advisor with offline tests. C02 remains a separate proposed integration.
@@ -24,7 +24,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 06B — 3D furniture visualization | Complete | Bounded bed/desk/wardrobe/generic meshes, furnished scene, fixed-sample app preview, 43 new tests, and browser verification |
 | Task 06C — Selected 2D/3D layout synchronization | Complete | Exact selected candidate feeds both views, compact camera framing, 13 new tests, and desktop/mobile verification |
 | Task 06D — Realistic 3D asset/renderer proof of concept | Complete | One CC0 textured chair, pinned local Three.js bundle, opt-in Components V2 viewer, standalone fallback, 29 Python/9 frontend tests |
-| Task 06E — Realistic 3D room/asset catalog | Recommended next | Not implemented |
+| Task 06E1 — Realistic 3D architectural room foundation | Complete | Canonical scene contract, genuine wall openings, shared chair instances, labeled placeholders, independent opt-in room; 23 new Python/18 new frontend tests |
+| Task 06E2 | Recommended next | Scope to be agreed; curated asset bindings and room interaction refinements suggested |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -46,6 +47,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | 3D structure | Floor, four zero-thickness walls, real door/window gaps, optional blue glazing, and orbit/zoom/pan | No 3D furniture, ceiling slab, reveals, or synchronization with selected layouts |
 | 3D furniture | Bed frame/mattress/pillows, desk tabletop/legs, wardrobe/plinth/panels/handles, and generic solids | Rotation 0 only; at most 100 items; generated selection and separate fixed sample; no rendering-based validity claim |
 | Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; no furniture editing or camera-pose persistence across A/B switches |
+| Experimental realistic room | Local Three.js room, four walls with real holes, glazing, procedural floor, two textured chairs and a labeled desk placeholder | Independent fixed sample; rotation 0; no generator connection or detailed-mesh validity claim; legacy single-chair mode retained |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
 | Agents / API | Not implemented | No LangGraph or OpenAI calls; no API key required |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
@@ -53,7 +55,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 ## What the app currently shows
 
 The original branding and canonical **2D Floor Plan Preview** remain. The phase
-metric now reads Task 06D, and planned-capabilities text reflects current support.
+metric now reads Task 06E1, and planned-capabilities text reflects current support.
 Below the sample, **AI-Assisted Room Layout Generator** presents Room Information,
 Layout Generation Controls, Generated Alternatives, Selected 2D Floor Plan,
 Selected 3D Furnished Room, and
@@ -430,10 +432,69 @@ Checkpoint A `d72eea0d8185194bc71122452c14dc97b5aaefb2` was verified, pushed to
 Streamlit opt-in section, app tests, mounting/lifecycle refinements and docs.
 Unrelated agent directories and generated screenshots remain excluded.
 
+## Task 06E1 architectural room foundation
+
+The [room guide](REALISTIC_ROOM.md) records the version-2 scene contract,
+wall geometry, shared-resource lifecycle, local commands and limits. The original
+`RoomDesign` supplies all architectural dimensions and coordinates. The typed,
+immutable catalog still contains exactly one existing GLB, `sheen-chair`.
+No canonical model, Plotly renderer, validator, generator, bedroom fixture,
+generated alternative, C01 integration or dependency version changed.
+
+Enable **Load experimental realistic viewer** and select **Architectural room**.
+The independent 5 × 4 × 2.7 m room has a south door, north window with glass,
+two separately fitted chairs and a clearly labeled blue desk placeholder.
+**Single chair (06D)** preserves the original demonstration. Wall meshes exclude
+the actual opening rectangles; glass and outlines are separate meshes. All
+measurements remain meters with `(x,y,z) -> (x,z,-y)`; models are uniformly scaled.
+Front-wall and canonical-footprint controls accompany orbit/zoom/pan/reset.
+
+Actual Chromium inspection at 1440 × 1000 and 390 × 844 verified room framing,
+openings, textured instances, the extra placeholder, camera controls and reset,
+and readable coordinate rows. At mobile width the component was 347 px wide
+with a 360 px scene and no horizontal overflow. A/B switches retained identical
+scene metrics with zero new network requests. Original single-chair mode rendered.
+With non-local requests blocked the full room still rendered; none were attempted.
+Simulated GLB 404 produced one request, a `partial` result, three explicit
+placeholders and intact room geometry. Removing the fault restored textured
+rendering. An empty room rendered its structure with zero GLB requests.
+Normal console: zero errors and one existing Plotly Canvas2D advisory; injected
+404 intentionally produced a resource error. Screenshots remain ignored under
+`output/task06e1/`.
+
+Observed scene: one GLB load, two chair instances sharing four source geometries,
+one procedural object, 79,884 furniture triangles and 18 wall triangles.
+Measured local room setup ranged from about 0.38–2.19 seconds across inspected
+mounts (includes loading/initialization, not a controlled FPS or memory benchmark).
+The two uniform scales were 1.028361 and 0.907377, leaving declared footprints
+unchanged. No additional asset was downloaded.
+
+Final Python verification: **593 passed in 22.02s**, retaining all 570 baseline
+tests and adding 23 scene/component cases. Frontend: **27 passed**, retaining all
+9 baseline cases; syntax and production build passed. Pip reported no broken
+requirements; Ruff lint passed and all 50 Python files were already formatted.
+Streamlit health returned **HTTP 200 ok**. The Components V2 registration now
+mounts via JS/CSS directly, removing a literal HTML filename previously exposed
+by the installed component API. The standalone pages keep their own hosts.
+Wheel contents and an isolated target installation verified the room assets and
+the single checksum-verified GLB.
+
+Core checkpoint `1abdc6a37a3f485cd538d78cf188a8fef54660b4` was pushed to
+`origin/main`; [GitHub Actions passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40608045325).
+The final integration checkpoint adds the Streamlit mode selection, compatibility
+tests, label/shadow refinements and updated documentation.
+
+Limits: zero rotation only, 24 furniture objects, 128 openings, bounded dimensions;
+no wall thickness, door swing, ceiling slab, asset library, editing, persistence,
+automatic-generation connection, agent action or detailed-mesh spatial validation.
+Transparent surfaces may exhibit sorting artifacts. Real mobile devices and
+other browser engines are unverified; hardware performance remains unbenchmarked.
+Unrelated `.agents/` and `.claude/` content remains untouched and uncommitted.
+
 ## Next milestone
 
-**Task 06E — Realistic 3D Room and Furniture Asset Catalog** is recommended next. It is not
-implemented here. Rotated-footprint support, furniture
+**Task 06E2** is recommended next: agree a focused scope for curated asset bindings
+and room interaction refinements. It is not implemented here. Rotated-footprint support, furniture
 editing, persistence, export, and agents remain separate future work.
 
 For setup, local commands, coordinates, and renderer usage, see the

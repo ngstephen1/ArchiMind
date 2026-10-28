@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06D: experimental textured chair viewer. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06E1: experimental architectural room. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,22 +40,24 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 06D — Realistic 3D asset and renderer proof of concept**
+> **Current stage · Task 06E1 — Realistic 3D architectural room foundation**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
 > Task 03 sample preview remains available, alongside clearly labeled standalone
 > 3D samples. Selecting Layout A/B updates both generated views from the same
 > candidate. Plotly remains the default renderer; an opt-in Three.js experiment
-> now displays one local textured chair. A full asset catalog, AI reasoning,
+> now displays a room with genuine openings, shared textured chairs, and explicit
+> procedural furniture placeholders. A full asset catalog, AI reasoning,
 > persistence, and export remain planned.
 > **No API key is required.**
 
-Tasks **01–06D are complete**, including the isolated renderer proof of concept. The
+Tasks **01–06E1 are complete**, including the isolated architectural room experiment. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**570 passing Python tests**: all 541 previous cases plus 29 asset/component cases,
-and **9 frontend tests** for mapping, uniform fit, trusted inputs, and GLB structure.
+**593 passing Python tests**: all 570 previous cases plus 23 scene/component cases,
+and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
+independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
 The header is an original concept illustration, not an application screenshot or a
 generated design.
@@ -301,14 +303,20 @@ or live Codex functionality.
 
 ### Realistic 3D Viewer — Experimental
 
-Enable **Load experimental chair viewer** at the bottom of the app to load one
-real textured **Sheen Chair**. It uses a separate Components V2 / Three.js viewer;
+Enable **Load experimental realistic viewer** at the bottom of the app. The default
+**Architectural room** mode shows a 5 × 4 × 2.7 m room with four walls, a south
+door gap, north window with glass, two real textured **Sheen Chair** instances,
+and a blue desk placeholder. Orbit, zoom, pan, reset, front-wall visibility,
+footprint controls, and actual coordinates are available.
+It uses a separate Components V2 / Three.js viewer;
 the synchronized Plotly A/B viewer remains the default and is unchanged.
-This is an independent chair studio sample, not another generated bedroom layout.
+This is an independent fixed sample. It does not follow automatic generation.
+**Single chair (06D)** retains the original studio demonstration.
 
-The [implementation and verification guide](docs/developer/REALISTIC_VIEWER.md)
-covers setup, coordinate mapping, performance, limitations, and the standalone
-fallback. The GLB is **4,125,648 bytes**, by Eric Chadwick, © 2020 Wayfair, LLC,
+The [room implementation guide](docs/developer/REALISTIC_ROOM.md) covers the typed
+contract, mesh gaps, shared resources, browser verification and limits; the
+[original asset guide](docs/developer/REALISTIC_VIEWER.md) records provenance.
+The GLB is **4,125,648 bytes**, by Eric Chadwick, © 2020 Wayfair, LLC,
 licensed **CC0-1.0**, from
 [Khronos glTF Sample Assets](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/8f492390ddc7a2ae221a1369ef560589cf8c70fb/Models/SheenChair).
 Its source, revision, checksum, download date, and license notices are bundled
@@ -319,14 +327,18 @@ npm dependencies and a lockfile. The committed build works offline after Python
 setup; Node/npm are needed only to rebuild or run frontend tests. No CDN, HDRI
 download, or model API is used at runtime. The viewer preserves supplied PBR
 materials and embedded textures, uses procedural environment lighting and filtered
-shadows, and displays loading/error states and a canonical footprint outline.
+shadows, and displays loading/error states and canonical footprint outlines.
+One GLB load supplies independent chair instances. Missing assets leave the
+architecture visible with explicitly labeled placeholders.
 
 ArchiMind `(x,y,z)` maps to Three.js `(x,z,-y)`. The native Y-up model faces
 canonical south. It is grounded and uniformly fitted into the declared volume
 without changing canonical position/dimensions. Unused space is explicit; the
 rendered detailed mesh has not passed spatial or building-code validation.
 
-The experiment remains one rotation-0 chair. It requires WebGL 2; Chromium desktop
+The experiment supports rotation 0 only and bounded scenes of up to 24 objects.
+There is no wall thickness, door swing, or detailed-mesh validation.
+It requires WebGL 2; Chromium desktop
 and narrow viewport rendering were inspected. Real devices and other browser
 engines remain untested. Standalone launch:
 
@@ -334,7 +346,8 @@ engines remain untested. Standalone launch:
 python -m http.server 8512 --bind 127.0.0.1 --directory src/archimind/_viewer_assets
 ```
 
-Open `http://127.0.0.1:8512`. For the full app use `python -m streamlit run app.py`.
+Open `http://127.0.0.1:8512/room.html` for the room, or `/index.html` for the original
+chair studio. For the full app use `python -m streamlit run app.py`.
 
 ## Models and coordinates
 
@@ -810,7 +823,8 @@ and verification record.
 - [x] **Task 06B · 3D furniture visualization** — bounded meshes and independent furnished sample.
 - [x] **Task 06C · Synchronize Selected 2D and 3D Layouts** — one stored candidate supplies both views; compact furnished camera framing.
 - [x] **Task 06D · Realistic 3D Asset and Renderer Proof of Concept** — one licensed textured chair, local Three.js bundle, isolated opt-in component.
-- [ ] **Task 06E · Realistic 3D Room and Furniture Asset Catalog** — recommended next milestone.
+- [x] **Task 06E1 · Realistic 3D Architectural Room Foundation** — canonical room scene, true wall openings, shared chair instances, labeled placeholders, independent opt-in demo.
+- [ ] **Task 06E2** — recommended next: refine curated asset bindings and room interaction, with scope agreed before implementation.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

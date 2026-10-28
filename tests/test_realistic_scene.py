@@ -193,3 +193,68 @@ def test_invalid_numeric_data_is_rejected_before_component_mount():
     design.furniture[0].x_m = float("inf")
     with pytest.raises(ValidationError):
         scene.scene_payload(design)
+
+
+def _app():
+    from pathlib import Path
+
+    from streamlit.testing.v1 import AppTest
+
+    return AppTest.from_file(
+        str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=30
+    ).run()
+
+
+def test_streamlit_room_default_is_fixed_and_independent_of_layout_generation(
+    monkeypatch,
+):
+    from archimind.ui import layout_generation as ui
+
+    generator = Mock(wraps=ui.generate_layout_candidates)
+    monkeypatch.setattr(ui, "generate_layout_candidates", generator)
+    app = _app()
+    before = [chart.proto.spec for chart in app.get("plotly_chart")]
+    app.checkbox(key="experimental_chair_enabled").check().run()
+    assert not app.exception
+    assert app.radio(key="experimental_scene_mode").value == "Architectural room"
+    proto = app.get("bidi_component")[0].proto
+    assert json.loads(proto.json) == scene.scene_payload(create_sample_realistic_room())
+    assert not proto.html_content  # JS mounts directly; no literal HTML filename in UI.
+    generator.assert_not_called()
+    assert [chart.proto.spec for chart in app.get("plotly_chart")] == before
+    scene_before = proto.json
+    app.button(key="generate_layouts").click().run()
+    app.radio(key="selected_layout").set_value("Layout B").run()
+    assert app.get("bidi_component")[0].proto.json == scene_before
+    assert app.radio(key="selected_layout").value == "Layout B"
+
+
+def test_streamlit_legacy_mode_still_uses_original_version_one_data():
+    app = _app()
+    app.checkbox(key="experimental_chair_enabled").check().run()
+    app.radio(key="experimental_scene_mode").set_value("Single chair (06D)").run()
+    assert not app.exception
+    component = app.get("bidi_component")[0]
+    assert component.key == "experimental-chair"
+    assert json.loads(component.proto.json) == legacy.viewer_payload(
+        create_sample_chair()
+    )
+    app.radio(key="experimental_scene_mode").set_value("Architectural room").run()
+    assert app.get("bidi_component")[0].key == "experimental-room"
+
+
+def test_streamlit_missing_asset_preserves_architectural_scene(monkeypatch):
+    monkeypatch.setattr(
+        legacy,
+        "verify_asset",
+        Mock(side_effect=legacy.ViewerAssetError("private-path")),
+    )
+    app = _app()
+    app.checkbox(key="experimental_chair_enabled").check().run()
+    assert not app.exception and not app.error
+    payload = json.loads(app.get("bidi_component")[0].proto.json)
+    assert payload["unavailable_assets"] == ["sheen-chair"]
+    assert len(payload["design"]["furniture"]) == 3
+    assert payload["design"]["room"]["doors"]
+    assert "private-path" not in json.dumps(payload)
+    assert len(app.get("plotly_chart")) == 3

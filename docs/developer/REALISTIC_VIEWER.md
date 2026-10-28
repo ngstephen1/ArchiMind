@@ -1,5 +1,10 @@
 # Realistic 3D Viewer — Experimental (Task 06D)
 
+This guide records the original single-chair milestone. Task 06E1 adds the
+[architectural room foundation](REALISTIC_ROOM.md). In Streamlit, enable **Load
+experimental realistic viewer** and choose **Single chair (06D)** to inspect the
+original mode; **Architectural room** is the new default experiment.
+
 This is an isolated, reversible one-asset experiment. Plotly renderers, synchronized
 A/B selection, canonical models, spatial validation and layout generation remain
 unchanged. C01 stays disabled; no live model or image-generation API is used.
@@ -100,7 +105,8 @@ source .venv/bin/activate
 python -m streamlit run app.py
 ```
 
-Enable **Load experimental chair viewer** beneath the experimental heading. It is
+Enable **Load experimental realistic viewer** beneath the experimental heading,
+then choose **Single chair (06D)**. It is
 unchecked initially, so normal Plotly usage does not allocate another WebGL
 renderer. The component registers file-backed JS/CSS from its dedicated package
 asset directory and mounts trusted JSON data; there is no script interpolation.
@@ -154,5 +160,5 @@ material-variant UI, asset catalog, full room structure, saving or agent actions
 WebGL 2 is required and GPU memory depends on decoded textures, not just GLB file
 size. Three.js/Streamlit upgrades need a fresh build and browser verification.
 
-Recommended next: **Task 06E — Realistic 3D Room and Furniture Asset Catalog**.
-It is not implemented automatically by this task.
+The architectural portion is now delivered as **Task 06E1**; see the
+[room guide](REALISTIC_ROOM.md). A full asset library remains future work.

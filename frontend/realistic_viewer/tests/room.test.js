@@ -118,3 +118,16 @@ test('rapid remount reuses loaded asset; missing asset is explicit and has no au
   await assert.rejects(handle.promise,/missing/);handle.release();await wait();assert.equal(broken.loads,1);
   assert.throws(()=>broken.acquire('https://invalid'));
 });
+test('cleanup aborts the last pending load and disposes a late decoded model once',{timeout:1000},async()=>{
+  let signal,disposals=0,finish;
+  const disposed=new Promise(resolve=>{finish=resolve;});
+  const model={name:'late decode'};
+  const pool=createAssetPool(async(id,s)=>{
+    signal=s;
+    // A decode already in progress can finish even after fetch cancellation.
+    return new Promise(resolve=>s.addEventListener('abort',()=>resolve(model),{once:true}));
+  },value=>{assert.equal(value,model);disposals++;finish();},0);
+  const handle=pool.acquire('sheen-chair');await Promise.resolve();
+  handle.release();handle.release();await disposed;
+  assert.equal(signal.aborted,true);assert.equal(disposals,1);
+});

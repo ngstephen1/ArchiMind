@@ -20,7 +20,7 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 06D")
+    phase.metric("Current development phase", "Task 06E1")
     status.metric("Application status", "Running")
 
     st.divider()
@@ -92,33 +92,54 @@ def main() -> None:
     st.divider()
     st.subheader("Realistic 3D Viewer — Experimental")
     st.caption(
-        "One independent, locally bundled textured chair. This experiment does not "
-        "replace or follow the selected Plotly layout. Detailed mesh geometry "
-        "has not been spatially validated."
+        "Independent architectural room experiment with shared textured chairs "
+        "and labeled procedural placeholders. It does not follow generated layouts. "
+        "Detailed mesh geometry has not been spatially validated."
     )
     st.markdown(
         "Asset: [Sheen Chair](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/"
         "8f492390ddc7a2ae221a1369ef560589cf8c70fb/Models/SheenChair) · "
         "Eric Chadwick, © 2020 Wayfair, LLC · CC0-1.0 · 4.13 MB."
     )
-    if st.checkbox("Load experimental chair viewer", key="experimental_chair_enabled"):
+    # Preserve the existing opt-in preference for current sessions.
+    if st.checkbox(
+        "Load experimental realistic viewer", key="experimental_chair_enabled"
+    ):
         from archimind.examples.sample_chair import create_sample_chair
         from archimind.render.realistic_viewer import (
             ViewerAssetError,
             render_realistic_viewer,
         )
 
-        sample = create_sample_chair()
-        st.write("Room: 3.2 × 2.8 × 2.7 m. X east, Y north, Z up; distances in meters.")
+        mode = st.radio(
+            "Experimental scene",
+            ["Architectural room", "Single chair (06D)"],
+            key="experimental_scene_mode",
+        )
         try:
-            render_realistic_viewer(sample)
+            if mode == "Architectural room":
+                from archimind.examples.sample_realistic_room import (
+                    create_sample_realistic_room,
+                )
+                from archimind.render.realistic_scene import render_realistic_scene
+
+                st.caption(
+                    "Fixed sample: two instances of the existing chair GLB and a desk "
+                    "placeholder. Front walls are translucent; turn them off for a cutaway view."
+                )
+                render_realistic_scene(create_sample_realistic_room())
+            else:
+                st.caption(
+                    "Original Task 06D single-chair studio; independent of the room experiment."
+                )
+                render_realistic_viewer(create_sample_chair())
         except (ViewerAssetError, ValueError):
             st.error(
                 "The experimental viewer's local asset or configuration is unavailable. "
                 "The existing Plotly views remain available."
             )
     else:
-        st.info("Enable the experiment to load the local chair and its WebGL viewer.")
+        st.info("Enable the experiment to load the local architectural room viewer.")
 
 
 if __name__ == "__main__":

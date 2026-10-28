@@ -197,7 +197,7 @@ def test_enabled_streamlit_component_does_not_change_plotly_or_layouts():
     app.checkbox(key="experimental_chair_enabled").check().run()
     assert not app.exception and not app.error
     assert len(app.get("bidi_component")) == 1
-    assert app.get("bidi_component")[0].key == "experimental-chair"
+    assert app.get("bidi_component")[0].key == "experimental-room"
     assert [chart.proto.spec for chart in app.get("plotly_chart")] == before
     app.button(key="generate_layouts").click().run()
     app.radio(key="selected_layout").set_value("Layout B").run()
@@ -214,6 +214,7 @@ def test_streamlit_missing_asset_is_safe_and_sanitized(monkeypatch):
     monkeypatch.setattr(viewer, "verify_asset", missing)
     app = _app()
     app.checkbox(key="experimental_chair_enabled").check().run()
+    app.radio(key="experimental_scene_mode").set_value("Single chair (06D)").run()
     assert not app.exception
     assert "local asset or configuration is unavailable" in app.error[0].value
     assert "private-path" not in app.error[0].value

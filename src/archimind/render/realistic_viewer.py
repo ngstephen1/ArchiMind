@@ -137,7 +137,6 @@ def _component():
         "archimind.realistic_viewer",
         js="viewer.js",
         css="viewer.css",
-        html="viewer.html",
     )
 
 

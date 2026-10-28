@@ -30,8 +30,8 @@ function plankTexture(){
   const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;texture.repeat.set(2,2);return texture;
 }
 function placeholderLabel(f){
-  const c=document.createElement('canvas');c.width=512;c.height=64;const ctx=c.getContext('2d');ctx.fillStyle='#ffffffee';ctx.fillRect(0,0,512,64);ctx.fillStyle='#284951';ctx.font='26px system-ui';ctx.textAlign='center';ctx.fillText(`${f.name.slice(0,24)} · placeholder`,256,42,500);
-  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false}));sprite.position.set(...toThree([f.x_m+f.width_m/2,f.y_m+f.depth_m/2,f.height_m+.16]));sprite.scale.set(1.45,.18,1);return sprite;
+  const c=document.createElement('canvas');c.width=512;c.height=64;const ctx=c.getContext('2d');ctx.fillStyle='#ffffffee';ctx.fillRect(0,0,512,64);ctx.fillStyle='#284951';ctx.font='36px system-ui';ctx.textAlign='center';ctx.fillText(`${f.name.slice(0,24)} · placeholder`,256,42,500);
+  const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,depthWrite:false,toneMapped:false}));sprite.renderOrder=100;sprite.position.set(...toThree([f.x_m+f.width_m/2,f.y_m+f.depth_m/2,f.height_m+.16]));sprite.scale.set(1.85,.32,1);return sprite;
 }
 export function mountRoomViewer(host,input){
   const root=document.createElement('section');root.dataset.viewer='realistic-room';
@@ -63,7 +63,7 @@ export function mountRoomViewer(host,input){
     for(const wall of ['south','east','north','west']){
       const panels=quads.filter(q=>q.wall===wall);if(!panels.length)continue;
       const front=['south','east'].includes(wall);const mesh=new THREE.Mesh(quadGeometry(panels.map(q=>q.points)),new THREE.MeshStandardMaterial({color:'#e1e2dc',roughness:.9,side:THREE.DoubleSide,transparent:true,opacity:front?.2:.85,depthWrite:false}));
-      mesh.name=wall;mesh.userData={kind:'wall',wall,panels:panels.length};mesh.receiveShadow=true;walls.add(mesh);
+      mesh.name=wall;mesh.userData={kind:'wall',wall,panels:panels.length};mesh.castShadow=true;mesh.receiveShadow=true;walls.add(mesh);
     }
     for(const o of [...room.doors,...room.windows]){
       const points=openingQuad(room,o),window=o.sill_height_m!==undefined;
