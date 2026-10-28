@@ -133,6 +133,7 @@ def render_layout_generator(specification: RoomDesign) -> None:
         if result is not None:
             st.info("The previous generation result and selection have been kept.")
     if result is None:
+        reset_styling()
         st.info("Choose a seed and click Generate Layouts to create alternatives.")
         return
 
@@ -143,6 +144,7 @@ def render_layout_generator(specification: RoomDesign) -> None:
             f"still use seed {result.seed}; click Generate Layouts to replace them."
         )
     if not result.candidates:
+        reset_styling()
         st.info("No validated alternatives are available to display.")
         return
 
@@ -177,6 +179,7 @@ def render_layout_generator(specification: RoomDesign) -> None:
     )
     candidate = result.candidates[labels.index(selected)]
     if candidate.validation.status != "passed":
+        reset_styling()
         st.error(
             "This alternative has no passing spatial report and cannot be displayed."
         )
