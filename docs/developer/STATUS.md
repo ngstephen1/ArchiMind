@@ -1215,14 +1215,47 @@ syntax/build and committed-bundle equality passed; frontend **27 passed, 0 faile
 `ec646ac` also passed [CI](https://github.com/ngstephen1/ArchiMind/actions/runs/40761660929).
 No live provider/Codex requests, embeddings or asset downloads were used.
 
+## Task 08C — inspection complete; Charles rendering blocked
+
+The [qualification report](../data/ASSET_QUALIFICATION_08C.md) and paired JSON
+record one authorized Charles GLB acquisition into external quarantine. Received
+bytes: **4,252,440**, SHA-256
+`62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645`.
+Primary identity, variant, item dimensions and CC BY 4.0 release terms were
+revalidated. Actual decoded W/D/H are **0.9961048961 × 1.0019413233 ×
+0.9760930538 m**, independently cross-checked using Three.js. The model passes
+the 2%/1 cm agreement check but exceeds the canonical envelope by **5.50 / 11.34 /
+10.89 mm**. Strict containment at **1e-6 m** fails. No product mesh is approved,
+packaged or served; the model was not resized and canonical dimensions are intact.
+
+The new offline `archimind.assets.inspection` module and
+`scripts/inspect_furniture_assets.py` inspect bounded static embedded GLBs without
+downloads or rendering approval. Synthetic tests cover malformed data, actual
+bounds, transforms, strict containment, resource budgets and sanitized failures.
+The immutable 08B catalog remains schema/version **1 / 1.0.0**, with its historical
+render fields null; the separate receipt records the rejection. Sheen, A/B views,
+generation, geometry, UI and renderer code remain unchanged.
+
+A temporary external fixture used explicit `None` bindings: two Charles-sized
+boxes and a desk, **0 textured meshes and 0 GLB loads**. Desktop 1440 × 1000 and
+narrow 390 × 844 inspection confirmed framing, orbit/zoom/reset, controls and
+openings with no console errors/warnings. Narrow in-scene labels overlap; the
+object list is readable. This does not verify product appearance or image
+decoding and is not physical-phone testing. Screenshots stay outside Git.
+
+Final local suite: **1,380 passed in 80.12s** (all 1,305 prior cases plus 75 new
+inspection cases). Source/wheel and isolated installed-inspector regression passed.
+Frontend **27 passed, 0 failed, 0 skipped**; syntax/build and committed bundle
+equality, Ruff lint/format, dependency compatibility and Streamlit HTTP 200 health
+checks passed. See the qualification receipt for exact commands and limitations.
+
 ## Next milestone
 
-Review Task 08B before separately authorizing **08C — curated asset inspection**.
-The Charles armchair is the smaller first acquisition candidate (4,252,440 bytes
-advertised by 08A HEAD metadata, 2048 px textures). Actual integrity, mesh bounds,
-placement, resource use and renderer compatibility still need verification; the
-metadata comparison does not permit silent scaling or canonical footprint changes.
-The bookcase also needs texture-budget preparation. Neither is render-ready.
+Review the **blocked 08C** result. Resolve the source's model/product dimension
+discrepancy with independent authoritative evidence or separately qualify another
+source under 08A. Do not enlarge a footprint or scale a mesh merely to pass.
+The bookcase is deferred without acquisition because its reported 4096 px images
+exceed the 2048 px limit. **08D remains blocked**; neither product is render-ready.
 Conversational input remains unimplemented.
 Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.

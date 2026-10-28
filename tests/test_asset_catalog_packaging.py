@@ -31,6 +31,7 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
     preserved = [
         catalog_path,
         "archimind/assets/catalog.py",
+        "archimind/assets/inspection.py",
         "archimind/assets/__init__.py",
         "archimind/_viewer_assets/viewer.js",
         "archimind/_viewer_assets/furniture/SheenChair.glb",
@@ -43,8 +44,10 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         for name in preserved:
             assert archive.read(name) == (ROOT / "src" / name).read_bytes()
         assert not any(n.endswith("/.env") for n in archive.namelist())
+        assert not any("B075X2X4XS" in n for n in archive.namelist())
     with tarfile.open(sdist) as archive:
         names = archive.getnames()
+        assert any(n.endswith("/scripts/inspect_furniture_assets.py") for n in names)
         for name in preserved:
             member = next(n for n in names if n.endswith("/src/" + name))
             assert (
@@ -89,13 +92,21 @@ sys.addaudithook(offline)
 import archimind
 import archimind.assets.catalog as module
 from archimind.assets import load_catalog, furniture_from_catalog
+import archimind.assets.inspection as inspection
 assert Path(archimind.__file__).resolve().is_relative_to(target)
 assert Path(module.__file__).resolve().is_relative_to(target)
+assert Path(inspection.__file__).resolve().is_relative_to(target)
 catalog = load_catalog()
 assert len(catalog.records) == 2
 assert catalog.catalog_version == '1.0.0'
 assert all(not r.render_qualified for r in catalog.records)
 assert all(r.source.source_revision is None for r in catalog.records)
+try:
+    inspection.inspect_furniture_asset(Path('does-not-exist.glb'), catalog.records[0])
+except inspection.InspectionError as error:
+    assert str(error) == 'asset_unavailable'
+else:
+    raise AssertionError('Missing local asset was accepted')
 item = furniture_from_catalog(catalog.records[0].asset_id,
     furniture_id='isolated', name='Chair', x_m=-1.0, y_m=20.0)
 assert (item.width_m, item.depth_m, item.height_m) == (.9906, .9906, .9652)
