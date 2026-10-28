@@ -186,5 +186,7 @@ Task 07B is now implemented separately; see the
 [Requirements Interpreter guide](REQUIREMENTS_AGENT.md).
 Task 07C1 adds [standalone layout advice](LAYOUT_AGENT.md). Task 07C2 now adds an
 explicitly opted-in [advisor route](LAYOUT_WORKFLOW.md) after critique, with safe
-fallback and selection provenance. Recommended next: **Task 07D — Spatial Critic
-agent**. Default structured execution remains deterministic.
+fallback and selection provenance. Task 07D1 adds a standalone
+[AI design critic](SPATIAL_CRITIC_AGENT.md); routing remains unchanged.
+Recommended next: **Task 07D2 — AI critic graph integration**. Default structured
+execution remains deterministic.

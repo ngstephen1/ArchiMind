@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 07C2 complete — optional post-critic workflow recommendation.**
-Live model behavior is unverified. Task 07D is recommended next; Task 06E2 remains
+**Current milestone: Task 07D1 complete — standalone evidence-grounded AI design critique.**
+Live model behavior is unverified. Task 07D2 is recommended next; Task 06E2 remains
 separate proposed renderer work.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -32,7 +32,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 07B — OpenAI-backed Requirements Interpreter | Complete backend; live behavior unverified | Gated Responses/Pydantic extraction, canonical evidence/catalog conversion, clarification, optional graph adapter, 77 mock-only tests |
 | Task 07C1 — OpenAI-powered Layout Designer advice | Complete standalone; live behavior unverified | Existing-candidate recommendation/abstention, grounded fact refs, preserved scores/reports, 65 offline tests; no graph integration |
 | Task 07C2 — Layout Designer graph integration | Complete backend; live behavior unverified | Optional approved-candidate selection after critique, grounded handoff, provenance, deterministic fallback and 50 new offline tests |
-| Task 07D — Spatial Critic agent | Recommended next | Not implemented; deterministic spatial validation remains authoritative |
+| Task 07D1 — AI Spatial Design Critic | Complete standalone; live behavior unverified | Strict evidence-based observations, independent support/challenge, preference tradeoffs and abstention; deterministic reports authoritative |
+| Task 07D2 — AI critic graph integration | Recommended next | Not implemented; graph routing remains the verified C2 workflow |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -59,7 +60,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Workflow orchestration | Default requirements → generation → critique → styling; optional advisor between critique and styling | Four default/five advised nodes, separate opt-ins and live gates; no UI connection/persistence/revisions |
 | Requirements interpretation | Optional OpenAI Responses API with structured extraction and canonical conversion | Disabled by default; explicit per-call authorization/key required; only rectangular bedrooms/studios and a three-item furniture catalog; verified with mocks only |
 | Layout recommendation | Optional standalone C1 adapter and C2 post-critic workflow handoff | Default-off; only critic-approved candidates, Python-grounded facts and safe deterministic fallback; no UI connection or live verification |
-| Other LLM agents | Not implemented | Generation, independent Spatial Critic and fixture Interior Stylist remain deterministic |
+| AI design critique | Standalone gated feedback on validated alternatives and optional designer advice | At most three grounded observations; no geometry approval, candidate selection, graph routing or UI integration; live behavior unverified |
+| Other LLM agents | Not implemented | Generation, independent spatial validation and fixture Interior Stylist remain deterministic |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
 ## What the app currently shows
@@ -749,10 +751,74 @@ new agent, persistence or automatic geometry revision were added or activated.
 Live quality/account availability is unverified; small candidate/rationale sets,
 trusted-code DI and existing planar/spatial approximations remain limitations.
 
+## Task 07D1 standalone AI Spatial Design Critic
+
+[Developer guide](SPATIAL_CRITIC_AGENT.md) documents the API, contracts, grounding,
+limits, failure handling and commands. `critique_design` embeds the existing C1
+canonical packet and accepts optional designer advice and additional constraints.
+Strict structured output contains controlled categories, candidate/object/evidence
+refs, comparison relations, preference assessments and a recommendation stance.
+Python renders at most three substantive observations and all measured values.
+
+The critic reuses C1 independent candidate/report checks and opening metrics,
+verifies scores with the existing deterministic helper, and adds Shapely wall-gap
+and scoped spatial-check facts. Returned observations must match exact evidence,
+objects and candidate order. Designer advice must equal C1's grounded output for
+the same packet. Invented metrics, forged context/reports/scores, unsupported IDs
+and inconsistent comparisons or recommendation stances are rejected.
+
+Support/challenge is allowed only under a real comparative advantage of the
+recommended/other candidate under a stated proxy. A challenge is not a spatial
+violation. Preference tradeoffs need different categories favoring different
+candidates. Unknown/unsupported judgments remain unverified; wholly unsupported
+requests require abstention or an information request. Additional hard constraints
+are retained but never certified by the advisory output.
+
+`ARCHIMIND_ENABLE_OPENAI_CRITIC=0` is the default. Exact per-call live authorization,
+the feature flag, validated/bounded inputs and existing key/model preflight are
+required. The adapter reuses the fixed client/allowlist, 30-second request timeout,
+zero retries, no tools, no storage/background execution and sanitized error patterns.
+Inputs/context are each capped at 65,536 UTF-8 bytes; responses use the existing
+4,096-token and 131,072-byte limits. SDK buffering precedes the byte check.
+
+`python -m archimind.examples.critique_layout` runs the canonical 5 × 4 m bedroom,
+seed 42, through the unchanged default graph, then invokes C1 and D1 mocked
+adapters outside it. The critic supports B's **0 m** desk/window gap versus A's
+**2.532114 m**, while retaining A's higher score **67.721925** versus **67.614973**
+and usable-space ratio **0.596524064171** versus **0.595187165775**. Actual daylight,
+ergonomics, furniture usability, code compliance and full preference satisfaction
+remain unverified. The workflow selection remains A/index 0, designer proposal B/index 1;
+all candidate geometry/scores/reports are preserved and JSON round-trips pass.
+
+Checkpoint A: `80cde69fa103ddcc35deb117da0e0024a3e57ad0` contains the schemas,
+grounding, adapter and first 93 offline tests;
+[GitHub Actions passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40619689170).
+The example/documentation checkpoint adds CLI/demo and mixed usability coverage.
+
+Verification: baseline rerun **823 passed in 31.43s**, with **27 frontend tests**
+passing. Final local run **920 passed in 43.30s**, preserving all 823 cases and
+adding **97 critic tests**. The 27 frontend tests, frontend syntax/build,
+editable `.[dev]` installation, Ruff lint/format, pip compatibility and real
+Streamlit health (**HTTP 200 ok**) all passed. Committed frontend bundles are
+unchanged. Checkpoint A CI verified **916 tests in 58.79s** and 27 frontend tests.
+Tests prohibit network attempts and use mocked clients, including actual SDK
+mock-HTTP parsing, typed provider errors/refusals, input/context limits,
+grounded support/challenge, forged reports/scores/evidence/recommendations,
+unsupported/mixed usability judgments, abstention/information requests,
+immutability, JSON, existing-agent compatibility and actual offline CLI execution.
+
+No live OpenAI or C01 call, new dependency, geometry-generation algorithm, model,
+LangGraph routing, Streamlit/rendering change, asset, dataset, persistence or revision
+loop was introduced. Unrelated `.agents/` and `.claude/` remain untouched.
+Live model quality/account availability, general preference interpretation and
+architectural suitability are not established by mocks; existing spatial and
+small candidate/rationale-set limitations still apply.
+
 ## Next milestone
 
-**Task 07D — Spatial Critic agent** is recommended next, with deterministic
-validation authoritative. It is not implemented here. Task 06E2 rendering refinements, rotated-footprint
+**Task 07D2 — Optional AI Spatial Design Critic integration into LangGraph** is
+recommended next, retaining deterministic approval and explicit usage gates.
+It is not implemented here. Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 
 For setup, local commands, coordinates, and renderer usage, see the

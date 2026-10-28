@@ -1,7 +1,10 @@
 """Offline critic tests verify real evidence/immutability, not plausible prose."""
 
 import json
+import os
 import socket
+import subprocess
+import sys
 from types import SimpleNamespace
 from unittest.mock import Mock
 
@@ -410,6 +413,7 @@ def test_inconsistent_designer_recommendation_is_rejected(
         "Ensure an ergonomic workstation.",
         "Certify code compliance.",
         "Make the room quiet and beautiful.",
+        "Improve furniture usability near a window.",
     ],
 )
 def test_unsupported_preferences_cannot_be_marked_satisfied(
@@ -933,3 +937,54 @@ def test_oversized_context_is_rejected_even_when_request_fits(
     monkeypatch.setattr(grounding, "MAX_REQUEST_BYTES", request_size + 1)
     assert call(request_data, api_mock).error.code == "oversized_request"
     api_mock[0].assert_not_called()
+
+
+def test_offline_demo_restores_environment_and_preserves_workflow_selection(
+    monkeypatch, offline
+):
+    from archimind.examples.critique_layout import offline_critique
+
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_CRITIC", "0")
+    monkeypatch.setenv("OPENAI_API_KEY", "do-not-use-real-key")
+    before = dict(os.environ)
+    workflow, critique = offline_critique()
+    assert dict(os.environ) == before
+    assert workflow.selected_candidate_index == 0 and len(workflow.trace) == 4
+    assert critique.mode == "offline_fixture" and critique.model is None
+    assert critique.context.request.layout_recommendation.proposal.candidate_index == 1
+    assert "do-not-use-real-key" not in critique.model_dump_json()
+    offline.assert_not_called()
+
+
+@pytest.mark.parametrize("json_output", [True, False])
+def test_actual_offline_critic_cli_uses_mocked_clients_only(json_output):
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "archimind.examples.critique_layout",
+            *(["--json"] if json_output else []),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env={"PATH": os.defpath, "PYTHONNOUSERSITE": "1", "LANGSMITH_TRACING": "false"},
+    )
+    assert process.returncode == 0 and process.stderr == ""
+    if json_output:
+        payload = json.loads(process.stdout)
+        assert payload["mode"] == "offline_mock"
+        workflow = json.dumps(payload["workflow"])
+        critique = SpatialCriticResult.model_validate_json(
+            json.dumps(payload["critique"])
+        )
+        assert json.loads(workflow)["selected_candidate_index"] == 0
+        assert (
+            critique.context.request.layout.generation.model_dump(mode="json")
+            == payload["workflow"]["generation"]
+        )
+        assert critique.mode == "offline_fixture" and critique.model is None
+    else:
+        assert "zero live OpenAI requests" in process.stdout
+        assert "workflow selection remains Layout A (index 0)" in process.stdout
+        assert "67.614973" in process.stdout and "67.721925" in process.stdout

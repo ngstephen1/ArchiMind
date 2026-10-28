@@ -161,5 +161,6 @@ and actual offline CLI output.
 Limits remain C1's small candidate/rationale set and the spatial engine's single
 rectangular room, zero rotation and conservative clearance approximations.
 No UI integration, persistence, automatic revisions or new agent was added.
-Recommended next: **Task 07D — Spatial Critic agent**, retaining deterministic
-validation as the authority. Implementation awaits a separately scoped task.
+Task 07D1 now provides a separate [AI design critic](SPATIAL_CRITIC_AGENT.md),
+without changing this graph. Recommended next: **Task 07D2 — Optional AI critic
+graph integration**, retaining deterministic validation as the authority.

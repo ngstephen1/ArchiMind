@@ -147,7 +147,7 @@ def _preference_categories(text: str) -> set[str]:
     Other user intent must be clarified rather than certified through a metric.
     """
     if re.search(
-        r"\b(?:daylight|sunlight|illuminance|lux|ergonom\w*|code|certif\w*|safety|usable desk|desk usability)\b",
+        r"\b(?:daylight|sunlight|illuminance|lux|ergonom\w*|code|certif\w*|safety|usability|usable desk|functional access|reachab\w*)\b",
         text,
         re.I,
     ):

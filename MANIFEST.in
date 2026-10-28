@@ -14,3 +14,4 @@ include docs/developer/WORKFLOW.md
 include docs/developer/REQUIREMENTS_AGENT.md
 include docs/developer/LAYOUT_AGENT.md
 include docs/developer/LAYOUT_WORKFLOW.md
+include docs/developer/SPATIAL_CRITIC_AGENT.md
