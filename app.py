@@ -20,14 +20,14 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 06C")
+    phase.metric("Current development phase", "Task 06D")
     status.metric("Application status", "Running")
 
     st.divider()
     st.subheader("Planned capabilities")
     st.markdown(
         "- AI-assisted room planning\n"
-        "- Realistic 3D furniture assets\n"
+        "- Full 3D furniture asset catalog\n"
         "- Multi-agent collaboration\n"
         "- Versioned projects and export"
     )
@@ -88,6 +88,37 @@ def main() -> None:
             "Rendering does not establish spatial validity. "
             "Synchronized selected-layout views appear in the generator section above."
         )
+
+    st.divider()
+    st.subheader("Realistic 3D Viewer — Experimental")
+    st.caption(
+        "One independent, locally bundled textured chair. This experiment does not "
+        "replace or follow the selected Plotly layout. Detailed mesh geometry "
+        "has not been spatially validated."
+    )
+    st.markdown(
+        "Asset: [Sheen Chair](https://github.com/KhronosGroup/glTF-Sample-Assets/tree/"
+        "8f492390ddc7a2ae221a1369ef560589cf8c70fb/Models/SheenChair) · "
+        "Eric Chadwick, © 2020 Wayfair, LLC · CC0-1.0 · 4.13 MB."
+    )
+    if st.checkbox("Load experimental chair viewer", key="experimental_chair_enabled"):
+        from archimind.examples.sample_chair import create_sample_chair
+        from archimind.render.realistic_viewer import (
+            ViewerAssetError,
+            render_realistic_viewer,
+        )
+
+        sample = create_sample_chair()
+        st.write("Room: 3.2 × 2.8 × 2.7 m. X east, Y north, Z up; distances in meters.")
+        try:
+            render_realistic_viewer(sample)
+        except (ViewerAssetError, ValueError):
+            st.error(
+                "The experimental viewer's local asset or configuration is unavailable. "
+                "The existing Plotly views remain available."
+            )
+    else:
+        st.info("Enable the experiment to load the local chair and its WebGL viewer.")
 
 
 if __name__ == "__main__":

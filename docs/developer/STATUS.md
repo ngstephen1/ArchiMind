@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 06C complete — synchronized selected 2D/3D layouts.**
-Task 06D is recommended next. The Task 03 preview, Task 05B comparison, and
+**Current milestone: Task 06D complete — isolated textured-chair renderer experiment.**
+Task 06E is recommended next. The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
 advisor with offline tests. C02 remains a separate proposed integration.
@@ -23,7 +23,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Optional C01 — Codex CLI advisor backend | Complete, live behavior unverified | Typed suggestions, fixed isolated read-only invocation, default-off and per-call gates, bounded I/O, sanitized failures, and 53 mocked tests |
 | Task 06B — 3D furniture visualization | Complete | Bounded bed/desk/wardrobe/generic meshes, furnished scene, fixed-sample app preview, 43 new tests, and browser verification |
 | Task 06C — Selected 2D/3D layout synchronization | Complete | Exact selected candidate feeds both views, compact camera framing, 13 new tests, and desktop/mobile verification |
-| Task 06D — Realistic 3D asset/renderer proof of concept | Recommended next | Not implemented |
+| Task 06D — Realistic 3D asset/renderer proof of concept | Complete | One CC0 textured chair, pinned local Three.js bundle, opt-in Components V2 viewer, standalone fallback, 29 Python/9 frontend tests |
+| Task 06E — Realistic 3D room/asset catalog | Recommended next | Not implemented |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -52,7 +53,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 ## What the app currently shows
 
 The original branding and canonical **2D Floor Plan Preview** remain. The phase
-metric now reads Task 06C, and planned-capabilities text reflects current support.
+metric now reads Task 06D, and planned-capabilities text reflects current support.
 Below the sample, **AI-Assisted Room Layout Generator** presents Room Information,
 Layout Generation Controls, Generated Alternatives, Selected 2D Floor Plan,
 Selected 3D Furnished Room, and
@@ -384,9 +385,54 @@ compared against `e455efe`; only UI synchronization, furnished-scene presentatio
 tests, and software documentation changed. Screenshots, secrets, and unrelated
 agent directories are excluded from the checkpoint.
 
+## Task 06D realistic renderer proof of concept
+
+The [realistic-viewer guide](REALISTIC_VIEWER.md) records architecture, launch
+commands, asset provenance, coordinate mapping, observed performance, browser
+verification, and remaining limits. Plotly is unchanged and remains the default.
+An opt-in **Realistic 3D Viewer — Experimental** section loads one independent
+chair studio sample using Streamlit Components V2. No dataset, full-room migration,
+new agent, live Codex call, or image-generation API is included.
+
+The Sheen Chair by Eric Chadwick / Wayfair is CC0-1.0, pinned to the Khronos asset
+repository revision. Its original 4,125,648-byte GLB contains four meshes, 39,936
+triangles and seven embedded images. Supplied fabric, wood, metal and label
+materials remain intact. Ten active texture objects were observed in the loaded
+scene (some image resources are reused with different texture transforms).
+Source/license/checksum/date records and license texts are bundled with the model.
+
+Canonical `(x,y,z)` maps to Three.js `(x,z,-y)`. Uniform scale 1.028361 grounds
+and centers the model in the unchanged 0.85 × 0.70 × 0.85 m declared volume at
+X/Y 1.1/0.8 m. Actual fitted W/D/H is approximately 0.850 × 0.586 × 0.706 m.
+The footprint outline makes unused volume visible. Detailed mesh validity is
+not inferred from canonical footprint validation.
+
+Actual browser inspection verified the textured chair, shadows, responsive
+desktop/mobile framing, orbit, wheel zoom, right-drag pan, reset, loading state,
+missing-asset error, and normal recovery. Local-only rendering also succeeded
+with all non-local requests blocked. The independent chair remained available
+while Layout B was selected in the unchanged Plotly viewer. Screenshots are
+ignored local artifacts under `output/task06d/`. Normal rendering: no console
+errors; one existing Plotly readback advisory. Fault injection intentionally
+produced a 404 and a clear viewer error, then was removed.
+
+Final verification: **570 passed in 20.09s**, preserving all 541 previous cases
+and adding 29 focused asset/component cases. Frontend: **9 passed**, syntax and
+production build checks passed, npm audit reported zero vulnerabilities. Pip:
+no broken requirements; Ruff lint/format passed. Streamlit health: HTTP **200 ok**.
+Wheel build, contents and an isolated target installation verified the bundled
+asset. Python dependencies are unchanged; only pinned frontend dependencies and
+component package-data configuration were added. CI now verifies the frontend
+tests/build and rejects stale committed bundles.
+
+Checkpoint A `d72eea0d8185194bc71122452c14dc97b5aaefb2` was verified, pushed to
+`origin/main`, and passed GitHub Actions. The integration checkpoint adds the
+Streamlit opt-in section, app tests, mounting/lifecycle refinements and docs.
+Unrelated agent directories and generated screenshots remain excluded.
+
 ## Next milestone
 
-**Task 06D — Realistic 3D Asset and Renderer Proof of Concept** is recommended next. It is not
+**Task 06E — Realistic 3D Room and Furniture Asset Catalog** is recommended next. It is not
 implemented here. Rotated-footprint support, furniture
 editing, persistence, export, and agents remain separate future work.
 

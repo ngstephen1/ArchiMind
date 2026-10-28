@@ -3,6 +3,7 @@
 import hashlib
 import json
 import struct
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
@@ -171,3 +172,50 @@ def test_bundled_assets_have_no_runtime_cdn_imports():
     assert 'import("https:' not in bundle
     assert (viewer.ASSET_DIR / "THIRD_PARTY_NOTICES.txt").is_file()
     assert (viewer.ASSET_DIR / "viewer.js.LEGAL.txt").is_file()
+
+
+def _app():
+    from streamlit.testing.v1 import AppTest
+
+    return AppTest.from_file(
+        str(Path(__file__).resolve().parents[1] / "app.py"), default_timeout=30
+    ).run()
+
+
+def test_experimental_demo_is_opt_in_and_existing_plots_remain():
+    app = _app()
+    assert not app.exception
+    assert "Realistic 3D Viewer — Experimental" in [h.value for h in app.subheader]
+    assert app.checkbox(key="experimental_chair_enabled").value is False
+    assert not app.get("bidi_component")
+    assert len(app.get("plotly_chart")) == 3
+
+
+def test_enabled_streamlit_component_does_not_change_plotly_or_layouts():
+    app = _app()
+    before = [chart.proto.spec for chart in app.get("plotly_chart")]
+    app.checkbox(key="experimental_chair_enabled").check().run()
+    assert not app.exception and not app.error
+    assert len(app.get("bidi_component")) == 1
+    assert app.get("bidi_component")[0].key == "experimental-chair"
+    assert [chart.proto.spec for chart in app.get("plotly_chart")] == before
+    app.button(key="generate_layouts").click().run()
+    app.radio(key="selected_layout").set_value("Layout B").run()
+    assert not app.exception
+    assert len(app.get("plotly_chart")) == 5
+    assert len(app.get("bidi_component")) == 1
+    assert app.radio(key="selected_layout").value == "Layout B"
+
+
+def test_streamlit_missing_asset_is_safe_and_sanitized(monkeypatch):
+    def missing():
+        raise viewer.ViewerAssetError("private-path")
+
+    monkeypatch.setattr(viewer, "verify_asset", missing)
+    app = _app()
+    app.checkbox(key="experimental_chair_enabled").check().run()
+    assert not app.exception
+    assert "local asset or configuration is unavailable" in app.error[0].value
+    assert "private-path" not in app.error[0].value
+    assert not app.get("bidi_component")
+    assert len(app.get("plotly_chart")) == 3

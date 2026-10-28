@@ -91,3 +91,68 @@ integrity check, not a universal glTF validator or an upload security boundary.
 - [GLTFLoader](https://threejs.org/docs/pages/GLTFLoader.html)
 - [OrbitControls](https://threejs.org/docs/pages/OrbitControls.html)
 - [WebGLRenderer](https://threejs.org/docs/pages/WebGLRenderer.html)
+
+## Streamlit demonstration and actual verification
+
+```bash
+cd /Users/macbook/Hack/ArchiMind
+source .venv/bin/activate
+python -m streamlit run app.py
+```
+
+Enable **Load experimental chair viewer** beneath the experimental heading. It is
+unchecked initially, so normal Plotly usage does not allocate another WebGL
+renderer. The component registers file-backed JS/CSS from its dedicated package
+asset directory and mounts trusted JSON data; there is no script interpolation.
+The existing bedroom fixture, Plotly renderers and synchronization, schemas,
+spatial validators, layout generator, and C01 source remain unchanged.
+
+Observed in actual Chromium browser inspection:
+
+- Desktop 1440 px and mobile-width 390 px: textured chair visible and unclipped,
+  footprint/labels readable, no page overflow. Physical touch devices, Safari and
+  Firefox have not been tested.
+- Four meshes, 39,936 triangles, four active materials, seven embedded images,
+  ten active texture objects. The normal-map/wood/fabric surface detail, curved
+  upholstery, tuft buttons and shaped legs improve on Plotly's schematic cuboids.
+- Orbit, wheel zoom, right-drag pan, footprint toggle and reset operate locally.
+  Floor edges can enter the view while orbiting; this is a finite floor, not a full
+  room interior. Filtered shadows are visible; this is raster PBR, not path tracing.
+- Loading state was inspected by delaying the GLB request. A deliberate GLB 404
+  produced the explicit error without a replacement model. Recovery was verified.
+- Rendering succeeded with non-local requests blocked; no external origin was
+  requested. Normal console: no errors, with the existing Plotly Canvas2D advisory.
+  The intentional fault test generated the expected 404, removed afterward.
+- Initial standalone local load/setup/first-render observation: **3.06 s**.
+  Subsequent Streamlit mounts: approximately **0.31–0.33 s** with warm browser/GPU
+  caches. These measurements begin at component mounting and exclude the JS module
+  download/parse before mounting; they are observations, not FPS or cross-device
+  benchmarks. Camera interaction appeared responsive; no FPS benchmark was run.
+
+Screenshots (local, ignored): `output/task06d/streamlit-desktop.png`,
+`streamlit-mobile.png`, `standalone-desktop.png`, `loading-state.png`, and
+`missing-asset-state.png`.
+
+Final checks: **570 passed in 20.09s**, all 541 prior cases retained plus 29 new
+Python cases; **9 frontend tests passed**; frontend syntax/build and npm audit
+passed (zero vulnerabilities); pip check, Ruff lint/format, and real Streamlit
+health check passed. A wheel was built, inspected and installed in an isolated
+temporary target to verify packaged assets. Node/npm are build-time requirements
+only. CI rebuilds the frontend and checks for bundle drift.
+
+## Suitability and limits
+
+This is a suitable basis for a small curated room viewer: local glTF loading, PBR,
+coordinate mapping, proportional fitting, packaging and controls work together.
+Expanding it requires per-asset provenance and orientation/bounds metadata,
+resource budgets, progressive loading, selection synchronization, representative
+browser/device tests and a deliberate policy for detailed-mesh spatial checks.
+It does not yet prove multi-asset performance or collision/clearance correctness.
+
+Remain within the one-chair experiment: rotation 0, no uploads, arbitrary URLs,
+material-variant UI, asset catalog, full room structure, saving or agent actions.
+WebGL 2 is required and GPU memory depends on decoded textures, not just GLB file
+size. Three.js/Streamlit upgrades need a fresh build and browser verification.
+
+Recommended next: **Task 06E — Realistic 3D Room and Furniture Asset Catalog**.
+It is not implemented automatically by this task.

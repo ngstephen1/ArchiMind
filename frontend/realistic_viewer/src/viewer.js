@@ -48,7 +48,7 @@ export function mountViewer(host, input) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = .85;
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFShadowMap;
     renderer.domElement.setAttribute('aria-label', 'Textured Sheen Chair, canonical footprint and neutral floor');
@@ -58,13 +58,14 @@ export function mountViewer(host, input) {
     const pmrem = new THREE.PMREMGenerator(renderer);
     environmentTarget = pmrem.fromScene(environment, .04);
     scene.environment = environmentTarget.texture;
+    scene.environmentIntensity = .75;
     disposeObject(environment); pmrem.dispose();
-    scene.add(new THREE.HemisphereLight(0xf2f6ff, 0xa79a86, 2.0));
-    const sun = new THREE.DirectionalLight(0xfff4e5, 3.0);
+    scene.add(new THREE.HemisphereLight(0xf2f6ff, 0xa79a86, .9));
+    const sun = new THREE.DirectionalLight(0xfff4e5, 2.7);
     sun.position.set(f.x_m + 2, 4, -f.y_m + 2); sun.target.position.set(...toThree([f.x_m, f.y_m, .4]));
     sun.castShadow = true; sun.shadow.mapSize.set(2048, 2048);
     Object.assign(sun.shadow.camera, {left: -4, right: 4, top: 4, bottom: -4, near: .1, far: 15});
-    sun.shadow.bias = -.0002; sun.shadow.normalBias = .015; sun.shadow.radius = 3;
+    sun.shadow.bias = -.0002; sun.shadow.normalBias = .003; sun.shadow.radius = 3;
     scene.add(sun, sun.target);
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(r.width_m, r.depth_m),
       new THREE.MeshStandardMaterial({color: '#d9d4c9', roughness: .9, metalness: 0}));
@@ -78,10 +79,13 @@ export function mountViewer(host, input) {
     root.querySelector('.outline').onchange = e => { footprint.visible = e.target.checked; };
     const target = new THREE.Vector3(f.x_m+f.width_m/2, f.height_m*.48, -f.y_m-f.depth_m/2);
     const camera = new THREE.PerspectiveCamera(38, 1, .02, 100);
-    const distance = Math.max(f.width_m, f.depth_m, f.height_m) * 2.65;
+    const distance = Math.max(f.width_m, f.depth_m, f.height_m) * 2.35;
     const reset = () => {
+      const damping = controls.enableDamping;
+      controls.enableDamping = false; controls.update();
       camera.position.copy(target).add(new THREE.Vector3(distance*.78, distance*.5, distance));
       controls.target.copy(target); controls.update();
+      controls.enableDamping = damping;
     };
     controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true; controls.dampingFactor = .08;
