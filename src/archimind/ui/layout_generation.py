@@ -17,7 +17,12 @@ from archimind.geometry import (
     validate_accessibility,
 )
 from archimind.models import RoomDesign
-from archimind.render import render_design_3d, render_floorplan
+from archimind.render import (
+    StyleColorPreviewError,
+    render_design_3d,
+    render_floorplan,
+    render_styled_design_3d,
+)
 from archimind.ui.interior_styling import render_interior_styling, reset_styling
 
 RESULT_KEY = "layout_generation_result"
@@ -218,14 +223,7 @@ def render_layout_generator(specification: RoomDesign) -> None:
             "Drag to orbit; use the modebar to zoom, pan, or reset. "
             "Toggle Walls if a hover target is obscured."
         )
-        st.plotly_chart(
-            render_design_3d(candidate.design),
-            width="stretch",
-            theme=None,
-            key="generated-design-3d",
-            config={"scrollZoom": True, "displaylogo": False},
-            alt=f"{selected}: synchronized 3D bedroom with the selected furniture positions and unchanged room openings.",
-        )
+        selected_scene = st.empty()
 
     st.markdown("### Spatial Validation Summary")
     report = candidate.validation
@@ -252,4 +250,22 @@ def render_layout_generator(specification: RoomDesign) -> None:
         "Door approaches are rectangular approximations; actual swing geometry "
         "and building-code compliance are outside this prototype."
     )
-    render_interior_styling(specification, result, labels.index(selected))
+    advice = render_interior_styling(specification, result, labels.index(selected))
+    if advice is not None:
+        try:
+            figure = render_styled_design_3d(candidate.design, advice)
+        except StyleColorPreviewError:
+            st.warning(
+                "The color plan does not match this layout. Showing the original 3D view."
+            )
+            figure = render_design_3d(candidate.design)
+    else:
+        figure = render_design_3d(candidate.design)
+    selected_scene.plotly_chart(
+        figure,
+        width="stretch",
+        theme=None,
+        key="generated-design-3d",
+        config={"scrollZoom": True, "displaylogo": False},
+        alt=f"{selected}: synchronized 3D bedroom with the selected furniture positions and unchanged room openings.",
+    )

@@ -106,9 +106,9 @@ CONFLICTS = {
     "unsupported_performance_claim": "Material performance, safety, daylight, ergonomics and circulation improvements are not evaluated by style metadata.",
 }
 LIMITATIONS = [
-    "Appearance metadata only; no material, color or finish has been applied to Plotly or Three.js.",
+    "Appearance metadata only; applying a preview requires a separate explicit rendering step.",
     "No physical material assets, texture files, procurement specifications or performance evidence are provided.",
-    "Catalog colors could support a future flat-color mapping; no renderer mapping is implemented here.",
+    "Catalog colors support an optional Plotly flat-color preview; physical material and texture mapping are not provided.",
     "Geometry, positions, dimensions, openings, selected candidate, scores and spatial reports remain unchanged.",
     "Aesthetic choices do not improve or recertify verified circulation, daylight, ergonomics or code compliance.",
     "Preference notes are subjective interpretations, not verified satisfaction or general language understanding.",

@@ -12,6 +12,7 @@ from archimind.agents.interior_stylist_catalog import (
     PALETTES,
     THEMES,
 )
+from archimind.agents.interior_stylist_schemas import InteriorStylistResult
 from archimind.geometry import LayoutGenerationResult
 from archimind.models import RoomDesign
 from archimind.workflow import DesignRequest, WorkflowState, style_selected_layout
@@ -26,6 +27,7 @@ ENABLE_KEY = "interior_styling_enabled"
 THEME_KEY = "interior_styling_theme"
 PREFERENCE_KEY = "interior_styling_preferences"
 CONSENT_KEY = "interior_styling_consent"
+PREVIEW_KEY = "interior_styling_color_preview"
 
 
 def _clear_request() -> None:
@@ -33,6 +35,7 @@ def _clear_request() -> None:
     for key in (RESULT_KEY, ERROR_KEY, PENDING_KEY):
         st.session_state.pop(key, None)
     st.session_state[CONSENT_KEY] = False
+    st.session_state[PREVIEW_KEY] = False
 
 
 def reset_styling() -> None:
@@ -62,6 +65,7 @@ def _queue(context: str, ai: bool) -> None:
         return
     consent = st.session_state.get(CONSENT_KEY) is True
     st.session_state[CONSENT_KEY] = False
+    st.session_state[PREVIEW_KEY] = False
     st.session_state.pop(ERROR_KEY, None)
     if ai and (
         st.session_state.get(ENABLE_KEY) is not True
@@ -147,7 +151,7 @@ def render_interior_styling(
     specification: RoomDesign,
     generation: LayoutGenerationResult,
     selected_candidate_index: int,
-) -> None:
+) -> InteriorStylistResult | None:
     """No validation, generation or model invocation happens without a button click."""
     layout = _layout_binding(specification, generation, selected_candidate_index)
     if st.session_state.get(LAYOUT_KEY) != layout:
@@ -156,7 +160,12 @@ def render_interior_styling(
     label = f"Layout {'AB'[selected_candidate_index]}"
     st.markdown("### Interior Styling — Optional")
     st.caption(
-        f"{label} · Appearance suggestions only. Materials are not applied to the 2D or 3D views."
+        f"{label} · "
+        + (
+            "Flat catalog colors are previewed in the selected Plotly 3D view. No textures or physical materials are applied."
+            if st.session_state.get(PREVIEW_KEY)
+            else "Appearance suggestions only. Materials are not applied to the 2D or 3D views."
+        )
     )
     ai = st.checkbox(
         "Enable AI-assisted styling", key=ENABLE_KEY, on_change=_clear_request
@@ -284,6 +293,14 @@ def render_interior_styling(
     stored = st.session_state.get(RESULT_KEY)
     if stored is not None and stored[0] == context:
         _show_result(stored[1], label)
+        result = stored[1]
+        if result.status == "succeeded" and result.ai_styling.source == "ai":
+            if st.checkbox(
+                "Preview catalog colors in selected 3D view",
+                key=PREVIEW_KEY,
+                help="Changes colors only. One finish per furniture object; accents remain metadata. No model call or layout generation.",
+            ):
+                return result.ai_styling.result
     elif not st.session_state.get(ERROR_KEY):
         st.info(
             f"No styling requested for {label}. Choose the fixture or explicitly enable AI styling."
