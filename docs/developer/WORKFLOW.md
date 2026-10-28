@@ -90,8 +90,9 @@ flowchart LR
 
 The default has one generation iteration and four node executions. All edges
 advance or terminate; there is no retry/back edge. A guard rejects a second
-generation iteration. Current C2 bounds allow four default/five advised nodes,
-with recursion limit 7 as an extra backstop; the default still executes four.
+generation iteration. Current D2 bounds allow four default, five with either AI
+node, or six with both, with recursion limit 8 as an extra backstop. The default
+still executes four; see the [critic workflow guide](SPATIAL_CRITIC_WORKFLOW.md).
 The generator retains its 32-furniture/10,000-attempt and accessibility limits;
 the workflow introduces no alternative placement/geometry implementation.
 
@@ -187,6 +188,6 @@ Task 07B is now implemented separately; see the
 Task 07C1 adds [standalone layout advice](LAYOUT_AGENT.md). Task 07C2 now adds an
 explicitly opted-in [advisor route](LAYOUT_WORKFLOW.md) after critique, with safe
 fallback and selection provenance. Task 07D1 adds a standalone
-[AI design critic](SPATIAL_CRITIC_AGENT.md); routing remains unchanged.
-Recommended next: **Task 07D2 — AI critic graph integration**. Default structured
-execution remains deterministic.
+[AI design critic](SPATIAL_CRITIC_AGENT.md), now integrated as an optional advisory
+node by [Task 07D2](SPATIAL_CRITIC_WORKFLOW.md). Default structured execution remains
+deterministic. Recommended next: **Task 07E — Interior Stylist agent**.

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07D1: standalone evidence-grounded design critique. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07D2: optional advisory critique in LangGraph. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07D1 — Standalone AI Spatial Design Critic**
+> **Current stage · Task 07D2 — Optional AI Spatial Critic workflow integration**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -53,20 +53,20 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > Requirements interpretation has an optional, disabled-by-default OpenAI path.
 > Optional layout advice now runs after independent critique and before styling,
 > selecting only an approved existing candidate using grounded evidence. The
-> default four-node path stays deterministic; explicit opt-in adds a fifth node
-> with safe deterministic fallback. A separate optional AI critic now explains
-> measured tradeoffs, supports or challenges recommendations and discloses missing
-> evidence. Its output is advisory; deterministic validation remains authoritative.
-> The critic is not yet connected to the graph. Live model behavior has not been tested.
+> default four-node path stays deterministic; explicit opt-ins add either AI node
+> for five nodes, or both for six. The optional AI critic explains measured
+> tradeoffs, supports or challenges recommendations and discloses missing evidence.
+> Its feedback cannot change the selected candidate. Deterministic validation
+> remains authoritative. Live model behavior has not been tested.
 > A full asset catalog, further agent reasoning,
 > persistence, and export remain planned.
 > **No API key is required for the app, structured workflow or offline demonstrations.**
 
-Tasks **01–06E1, 07A, 07B, 07C1, 07C2 and 07D1 are complete**, including the isolated architectural
+Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1 and 07D2 are complete**, including the isolated architectural
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**920 passing Python tests**: all 823 previous cases plus 97 AI-critic cases,
+**984 passing Python tests**: all 920 previous cases plus 64 critic-workflow cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -473,12 +473,38 @@ The **offline mock** supports B's desk/window proximity while noting A's higher
 existing score and usable-space ratio. Daylight, ergonomics and desk usability
 remain unverified. The default workflow still selects A; the designer's advisory
 proposal stays B. Both complete candidate geometries, scores and validation
-reports remain identical. LangGraph routing and Streamlit are unchanged.
+reports remain identical. This standalone demonstration preserves default routing
+and is separate from the optional D2 route below. Streamlit is unchanged.
 
 `ARCHIMIND_ENABLE_OPENAI_CRITIC=0` is the default. Live use needs the flag, exact
 per-call `allow_live_usage=True`, valid bounded inputs and the existing API key/model
-preflight. No live request was made. Recommended next: **Task 07D2 — Optional AI
-critic integration into LangGraph**, keeping deterministic approval authoritative.
+preflight. No live request was made.
+
+### Optional AI critic workflow — Task 07D2
+
+The [critic workflow guide](docs/developer/SPATIAL_CRITIC_WORKFLOW.md) describes
+the new **Deterministic Critic → optional Layout Advisor → optional AI Spatial
+Critic → Stylist** paths. The AI critic reviews the selected approved candidate
+and accepted recommendation, if present. Support, challenge, information requests,
+abstention and errors preserve that selection. Invalid output is rejected; safe
+fallback uses the existing deterministic approval without claiming AI approval.
+
+```bash
+python -m archimind.examples.critiqued_workflow
+python -m archimind.examples.critiqued_workflow --json
+```
+
+The **offline mocked** scenarios select A in four default nodes, B with support
+in six nodes, and B with a grounded challenge in six nodes. B's original score
+stays **67.614973**; all candidate geometries/scores and deterministic reports are
+identical. Critic-only and advisor-only modes each use five nodes. State records
+the reviewed source index, local index map, actual result/status, provenance and
+failure reason. The critic has no selection-update code path.
+
+Live critic usage requires `ARCHIMIND_ENABLE_OPENAI_CRITIC=1`, `use_ai_critic=True`
+and exact per-call `allow_live_critic=True`, plus existing key/model preflight.
+Disabled/unrequested critique invokes no adapter, including injected callables.
+Recommended next: **Task 07E — Interior Stylist agent**.
 
 ## Models and coordinates
 
@@ -917,13 +943,15 @@ ArchiMind/
 │   │   ├── state.py             Typed requests, handoffs, critiques, trace and result
 │   │   ├── graph.py             LangGraph conditional orchestration and error guards
 │   │   ├── layout_recommendation.py  Approved-only C1 handoff and safe fallback
+│   │   ├── spatial_critique.py   Read-only D1 handoff, provenance and safe fallback
 │   │   └── nodes.py             Requirements, generation, critique and fixture styling
 │   └── examples/
 │       ├── __init__.py           Public example factory
 │       ├── sample_bedroom.py     Reproducible canonical-model bedroom
 │       ├── generate_bedroom.py   Original request and generated-alternatives CLI
 │       ├── workflow_bedroom.py   Default offline result/trace/JSON demonstration
-│       └── advised_workflow.py   Default versus advised comparison using a mock
+│       ├── advised_workflow.py   Default versus advised comparison using a mock
+│       └── critiqued_workflow.py Default, supported B and challenged B mocks
 ├── tests/
 │   ├── test_smoke.py             Package and application checks
 │   ├── test_models.py            Model tests and bedroom fixture
@@ -971,7 +999,8 @@ and verification record.
 - [x] **Task 07C1 · OpenAI-Powered Layout Designer Agent** — standalone, default-off candidate recommendation with grounded facts, immutable layouts and mocked verification.
 - [x] **Task 07C2 · LangGraph Layout Designer integration** — optional post-critic selection, grounded provenance, safe deterministic fallback and offline demonstration.
 - [x] **Task 07D1 · Standalone AI Spatial Design Critic** — evidence-grounded support/challenge, preference tradeoffs, abstention and mocked verification.
-- [ ] **Task 07D2 · AI critic graph integration** — recommended next; deterministic validation remains authoritative.
+- [x] **Task 07D2 · AI critic graph integration** — optional traced review after deterministic approval/advice; challenge never switches selection.
+- [ ] **Task 07E · Interior Stylist agent** — recommended next; preserve selected canonical geometry and deterministic approval.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

@@ -2,8 +2,8 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 07D1 complete — standalone evidence-grounded AI design critique.**
-Live model behavior is unverified. Task 07D2 is recommended next; Task 06E2 remains
+**Current milestone: Task 07D2 complete — optional advisory critic in LangGraph.**
+Live model behavior is unverified. Task 07E is recommended next; Task 06E2 remains
 separate proposed renderer work.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -33,7 +33,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 07C1 — OpenAI-powered Layout Designer advice | Complete standalone; live behavior unverified | Existing-candidate recommendation/abstention, grounded fact refs, preserved scores/reports, 65 offline tests; no graph integration |
 | Task 07C2 — Layout Designer graph integration | Complete backend; live behavior unverified | Optional approved-candidate selection after critique, grounded handoff, provenance, deterministic fallback and 50 new offline tests |
 | Task 07D1 — AI Spatial Design Critic | Complete standalone; live behavior unverified | Strict evidence-based observations, independent support/challenge, preference tradeoffs and abstention; deterministic reports authoritative |
-| Task 07D2 — AI critic graph integration | Recommended next | Not implemented; graph routing remains the verified C2 workflow |
+| Task 07D2 — AI critic graph integration | Complete backend; live behavior unverified | Independent optional critic after deterministic approval/advice, grounded read-only review, safe fallback, 64 new tests and three offline scenarios |
+| Task 07E — Interior Stylist agent | Recommended next | Not implemented; existing fixture styling remains deterministic |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -57,10 +58,10 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; no furniture editing or camera-pose persistence across A/B switches |
 | Experimental realistic room | Local Three.js room, four walls with real holes, glazing, procedural floor, two textured chairs and a labeled desk placeholder | Independent fixed sample; rotation 0; no generator connection or detailed-mesh validity claim; legacy single-chair mode retained |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
-| Workflow orchestration | Default requirements → generation → critique → styling; optional advisor between critique and styling | Four default/five advised nodes, separate opt-ins and live gates; no UI connection/persistence/revisions |
+| Workflow orchestration | Default requirements → generation → deterministic critique → styling; independently optional advisor and AI critic | Four default/five with either AI node/six with both, separate opt-ins and live gates; no UI connection/persistence/revisions |
 | Requirements interpretation | Optional OpenAI Responses API with structured extraction and canonical conversion | Disabled by default; explicit per-call authorization/key required; only rectangular bedrooms/studios and a three-item furniture catalog; verified with mocks only |
 | Layout recommendation | Optional standalone C1 adapter and C2 post-critic workflow handoff | Default-off; only critic-approved candidates, Python-grounded facts and safe deterministic fallback; no UI connection or live verification |
-| AI design critique | Standalone gated feedback on validated alternatives and optional designer advice | At most three grounded observations; no geometry approval, candidate selection, graph routing or UI integration; live behavior unverified |
+| AI design critique | Standalone D1 adapter and optional D2 workflow node review the approved selected candidate | At most three grounded observations; challenge/failure cannot change selection or deterministic approval; no UI integration or live verification |
 | Other LLM agents | Not implemented | Generation, independent spatial validation and fixture Interior Stylist remain deterministic |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
@@ -814,11 +815,83 @@ Live model quality/account availability, general preference interpretation and
 architectural suitability are not established by mocks; existing spatial and
 small candidate/rationale-set limitations still apply.
 
+## Task 07D2 optional workflow critique
+
+[Workflow critic guide](SPATIAL_CRITIC_WORKFLOW.md) records API/state, routes,
+mapping, gates, fallback, limits and commands. The default path remains four nodes.
+Advisor-only and critic-only modes use five nodes; enabling both uses six, ordered
+Requirements → Generation → Deterministic Critic → Advisor → AI Critic → Stylist.
+Each routing node has only conditional outgoing routing, avoiding duplicate
+execution. One generation iteration, a six-node bound and recursion backstop 8
+limit execution; no retry or revision loop is introduced.
+
+One nested `SpatialCritiqueState` records opt-in, execution/status, reviewed source
+index, packet mapping, checked D1 result and failure reason. Existing selection
+fields remain authoritative and old JSON defaults to no critique. D1's request
+adds optional `reviewed_candidate_index=None` to explicitly focus on the selected
+local candidate without fabricating a designer recommendation. Normal critique
+must cite target evidence; abstention/information requests may lack conclusions.
+
+Only independently approved candidates enter the copied D1 packet, reusing the
+C2 filtering/mapping helpers. Original IDs, coordinates, geometry, scores and
+deterministic reports are preserved. Accepted C2 advice is passed exactly; skipped,
+abstained, rejected or failed advisor responses are omitted. Context/result must
+match existing D1 preparation and interpretation. Bad refs, targets, facts,
+provenance or explanations are rejected and retained as sanitized typed failures.
+Deterministic violations and unknown checks remain visible in original reviews.
+
+Support, challenge, information requests, abstention and safe failure all retain
+the selected candidate and source. The AI critic node has no selection-update
+code path; only metadata/trace updates. With no safe independent selection it
+terminates. Subsequent styling failure preserves critique history while clearing
+final approval. Trace distinguishes deterministic approval, optional advice,
+critic execution/stance/provenance, final unchanged selection/source and styling.
+
+Live critique requires `ARCHIMIND_ENABLE_OPENAI_CRITIC=1`, `use_ai_critic=True` and
+exact `allow_live_critic=True`, plus D1 key/model/input preflight. Disabled or
+unrequested critique calls no adapter, including DI. The two AI feature flags
+are independent. Offline DI stays explicitly labeled, with model `None`. D1's
+provider handling, limits and no-tools/client configuration are reused.
+
+`python -m archimind.examples.critiqued_workflow` uses the canonical bedroom and
+seed 42 with factored existing C1/D1 mocked clients. Scenario A selects A/index 0,
+score **67.721925**, in four nodes with no AI invocation. Scenario B selects B/index 1,
+score **67.614973**, in six nodes with support for its **0 m** desk/window gap versus
+A's **2.532114 m**. Scenario C records a grounded challenge using A's actual higher
+score and usable-space ratio, but still selects B with the same score in six nodes.
+All scenarios retain identical candidate geometries/scores and deterministic
+reviews. Input immutability, environment restoration and JSON round-trips pass.
+
+Verification: baseline **920 passed in 33.81s**, plus **27 frontend tests**.
+Final local run **984 passed in 36.81s**, preserving all 920 cases and adding
+**64 D2 tests**. The 27 frontend tests, syntax/build, Ruff lint/format, pip
+compatibility and real Streamlit health (**HTTP 200 ok**) passed. Frontend bundles
+are unchanged. The prior C2 bound assertion now checks its five-node execution
+against D2's expanded six-node maximum; no original test was removed.
+
+Checkpoint A `631321b00c76711f13a385eb26fb274da1d9311c` contains state, routing,
+integration, backward-compatible target scoping and the first 58 cases, verified
+with **978 tests in 39.18s** before push;
+[GitHub Actions passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40622683656).
+The demonstration/documentation checkpoint adds six demo/independent-flag/styling
+failure cases. Tests block networking and use mock clients, including actual D1
+adapter success/timeout, all paths/counts, support/challenge/abstention/errors,
+forged data, safe fallback, filtered indices, no selection change, old JSON,
+free-text compatibility, isolation/concurrency and actual offline CLI execution.
+
+No live OpenAI/C01 request, new agent/dependency, geometry/generation algorithm,
+score change, furniture modification, UI/renderer change, asset, dataset or
+persistent storage was introduced. `.agents/` and `.claude/` remain untouched and
+uncommitted. Remaining limits include unverified live quality/account access,
+trusted-code DI, conservative preference vocabulary and inherited planar/spatial
+approximations. No daylight, ergonomics, furniture-function or code certification
+is established by these tests or mocks.
+
 ## Next milestone
 
-**Task 07D2 — Optional AI Spatial Design Critic integration into LangGraph** is
-recommended next, retaining deterministic approval and explicit usage gates.
-It is not implemented here. Task 06E2 rendering refinements, rotated-footprint
+**Task 07E — Interior Stylist agent** is recommended next, preserving selected
+canonical geometry and deterministic approval. It is not implemented here.
+Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 
 For setup, local commands, coordinates, and renderer usage, see the

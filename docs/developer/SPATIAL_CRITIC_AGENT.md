@@ -4,8 +4,9 @@
 validated alternatives. It can support or challenge a designer's recommendation,
 identify preference tradeoffs, request information or abstain. **It cannot approve
 geometry, select a replacement candidate or change any design data.** The existing
-deterministic Spatial Critic remains authoritative. LangGraph routing is unchanged;
-integration belongs to Task 07D2. Streamlit and renderers do not invoke this agent.
+deterministic Spatial Critic remains authoritative. [Task 07D2](SPATIAL_CRITIC_WORKFLOW.md)
+now optionally invokes this adapter in LangGraph; default routing stays unchanged.
+Streamlit and renderers do not invoke this agent.
 
 | Component | Responsibility |
 | --- | --- |
@@ -43,6 +44,12 @@ generator candidates with positions/dimensions, reports, scores and preferences.
 It also accepts up to eight `explicit_constraints` and an optional checked
 `LayoutAdviceResult`. Additional hard constraints are retained and reported as
 **unverified**, rather than silently converted into new geometry rules.
+
+D2 adds optional `reviewed_candidate_index=None` to focus analysis on an existing
+packet-local candidate. The default preserves D1 inputs/old JSON. A normal critique
+must include evidence for the target; abstention/information requests may lack
+measurable conclusions. Any designer recommendation must select the same target.
+This field does not change candidate selection or spatial approval.
 
 The optional recommendation must describe the exact supplied packet/preferences,
 have explicit provenance and equal C1's canonical grounded interpretation. An
@@ -213,6 +220,7 @@ python -m archimind.examples.critique_layout
 **No live OpenAI or Codex request was made.** Live quality/account availability,
 general intent interpretation, functional furniture access, vertical geometry,
 actual daylight/ergonomics and certification remain unverified. Existing spatial
-approximations and small candidate/rationale sets still apply. Recommend **Task
-07D2: optional AI critic integration into LangGraph**, preserving deterministic
-approval and explicit usage gates. No D2 routing or revision loop is implemented.
+approximations and small candidate/rationale sets still apply. The optional
+[D2 workflow route](SPATIAL_CRITIC_WORKFLOW.md) is now implemented with deterministic
+approval and explicit usage gates. Recommend **Task 07E — Interior Stylist agent**.
+No revision loop is implemented. Verification counts above record D1.

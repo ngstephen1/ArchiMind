@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="440" viewBox="0 0 1200 440" role="img" aria-labelledby="title description">
   <title id="title">ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning</title>
-  <desc id="description">An animated architectural blueprint with an isometric bedroom, a moving scan line, and pulsing survey points. Task 07D1: standalone evidence-grounded design critique. Concept illustration, not application output.</desc>
+  <desc id="description">An animated architectural blueprint with an isometric bedroom, a moving scan line, and pulsing survey points. Task 07D2: optional advisory critique in LangGraph. Concept illustration, not application output.</desc>
   <defs>
     <linearGradient id="background" x2="1" y2="1"><stop stop-color="#0B1725"/><stop offset="1" stop-color="#112C36"/></linearGradient>
     <linearGradient id="floor-fill" x2="1" y2="1"><stop stop-color="#14343E"/><stop offset="1" stop-color="#102531"/></linearGradient>
@@ -38,7 +38,7 @@
     <text x="52" y="312" fill="#91A8AF" font-size="16">Thoughtful spaces. Structured foundations.</text>
     <rect x="52" y="357" width="258" height="34" rx="17" fill="#173D39" stroke="#32675A"/>
     <circle cx="70" cy="374" r="3.5" fill="#77E0BB"/>
-    <text x="83" y="378" fill="#BCE7D7" font-size="10.5" font-weight="600" letter-spacing="0.6">TASK 07D1 / DESIGN CRITIC</text>
+    <text x="83" y="378" fill="#BCE7D7" font-size="10.5" font-weight="600" letter-spacing="0.6">TASK 07D2 / WORKFLOW CRITIC</text>
     <text x="331" y="378" fill="#97ADB1" font-size="11" class="mono">schema first. space next.</text>
     <!-- Concept illustration, distinct from the application's 2D preview. -->
     <path d="M750 269 960 356 1132 253 922 168Z" fill="url(#floor-fill)" stroke="#477F80" stroke-width="1.5"/>

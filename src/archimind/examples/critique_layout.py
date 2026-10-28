@@ -20,27 +20,21 @@ from archimind.examples.advise_layout import offline_layout_advisor
 from archimind.workflow import DesignRequest, WorkflowState, run_workflow
 
 
-def offline_critique() -> tuple[WorkflowState, SpatialCriticResult]:
-    """Reuse C1's mock; critique its proposal outside the unchanged default graph.
+def offline_spatial_critic(
+    request: SpatialCriticRequest,
+    *,
+    allow_live_usage: bool = False,
+    stance: str = "supports",
+) -> SpatialCriticResult:
+    """Reusable D1 mock for the canonical two-candidate bedroom, never live.
 
     This is fixed fixture evidence, not model-quality evaluation or an automatic
-    substitute for failed live requests. Both adapters always use mocked clients.
-    Environment settings are restored; no live CLI mode is exposed.
+    substitute for failed live requests. The client is always mocked. The usage
+    argument is accepted for workflow DI compatibility, not used to enable live
+    access. Settings are restored; candidates are supplied, never regenerated.
     """
-    workflow = run_workflow(
-        DesignRequest(specification=create_sample_bedroom(), seed=42)
-    )
-    before = workflow.model_dump_json()
-    layout = LayoutAdviceRequest(
-        specification=workflow.design,
-        generation=workflow.generation,
-        soft_preferences=[
-            "Prefer the desk near the north-facing window while maintaining a spacious room."
-        ],
-    )
-    advice = offline_layout_advisor(layout)
-    assert advice.mode == "offline_fixture" and advice.proposal.candidate_index == 1
-    request = SpatialCriticRequest(layout=layout, layout_recommendation=advice)
+    if stance not in ("supports", "challenges"):
+        raise ValueError("Fixture supports only grounded support/challenge cases")
     request_before = request.model_dump_json()
 
     # The model fixture selects existing refs and qualitative codes only. Python
@@ -71,8 +65,8 @@ def offline_critique() -> tuple[WorkflowState, SpatialCriticResult]:
                 "observation_indices": [0, 2],
             }
         ],
-        recommendation_stance="supports",
-        stance_observation_indices=[0],
+        recommendation_stance=stance,
+        stance_observation_indices=[0] if stance == "supports" else [1, 2],
     )
     response = SimpleNamespace(
         status="completed",
@@ -102,15 +96,36 @@ def offline_critique() -> tuple[WorkflowState, SpatialCriticResult]:
             deep=True,
         )
     )
-    assert result.status == "evaluated" and result.recommendation_stance == "supports"
+    assert result.status == "evaluated" and result.recommendation_stance == stance
     assert request.model_dump_json() == request_before
+    assert SpatialCriticResult.model_validate_json(result.model_dump_json()) == result
+    return result
+
+
+def offline_critique() -> tuple[WorkflowState, SpatialCriticResult]:
+    """Original standalone demo; default graph selection stays separate from advice."""
+    workflow = run_workflow(
+        DesignRequest(specification=create_sample_bedroom(), seed=42)
+    )
+    before = workflow.model_dump_json()
+    layout = LayoutAdviceRequest(
+        specification=workflow.design,
+        generation=workflow.generation,
+        soft_preferences=[
+            "Prefer the desk near the north-facing window while maintaining a spacious room."
+        ],
+    )
+    advice = offline_layout_advisor(layout)
+    assert advice.mode == "offline_fixture" and advice.proposal.candidate_index == 1
+    result = offline_spatial_critic(
+        SpatialCriticRequest(layout=layout, layout_recommendation=advice)
+    )
     assert result.context.request.layout.generation == workflow.generation
     assert workflow.model_dump_json() == before
     assert len(workflow.trace) == 4 and workflow.selected_candidate_index == 0
     assert result.context.request.layout_recommendation == advice
     assert workflow.generation.candidates[1].score.total == 67.614973
     assert all(review.accepted for review in workflow.reviews)
-    assert SpatialCriticResult.model_validate_json(result.model_dump_json()) == result
     return workflow, result
 
 

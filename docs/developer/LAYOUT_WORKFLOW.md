@@ -20,7 +20,8 @@ flowchart LR
 
 Only conditional outgoing edges are used on routing nodes. The stylist alone has
 a static edge to END. There is one generation iteration, no back edge or advisor
-retry, at most **four default/five advised nodes**, and a recursion backstop of 7.
+retry. C2 uses four default/five advised nodes. D2 extends the shared bound to six
+nodes and recursion backstop 8, adding an independently optional critic afterward.
 Generation, requirements and critique failures preserve existing termination.
 
 ## API and state
@@ -161,6 +162,7 @@ and actual offline CLI output.
 Limits remain C1's small candidate/rationale set and the spatial engine's single
 rectangular room, zero rotation and conservative clearance approximations.
 No UI integration, persistence, automatic revisions or new agent was added.
-Task 07D1 now provides a separate [AI design critic](SPATIAL_CRITIC_AGENT.md),
-without changing this graph. Recommended next: **Task 07D2 — Optional AI critic
-graph integration**, retaining deterministic validation as the authority.
+Task 07D1 provides the [AI design critic](SPATIAL_CRITIC_AGENT.md), now optionally
+invoked after this advisor by [D2](SPATIAL_CRITIC_WORKFLOW.md). A critique or challenge
+never changes the accepted selection. Recommended next: **Task 07E — Interior Stylist
+agent**, retaining deterministic validation as the authority.

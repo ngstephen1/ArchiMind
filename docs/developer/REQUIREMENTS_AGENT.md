@@ -186,5 +186,6 @@ npm --prefix frontend/realistic_viewer run build
 Task 07C1 adds [Layout Designer advice](LAYOUT_AGENT.md), now optionally integrated
 after critique by [Task 07C2](LAYOUT_WORKFLOW.md). The interpreter's own gates and
 default workflow behavior are preserved. The separate
-[Task 07D1 critic](SPATIAL_CRITIC_AGENT.md) is now implemented; recommended next:
-**Task 07D2 — AI critic graph integration**, keeping deterministic validation authoritative.
+[Task 07D1 critic](SPATIAL_CRITIC_AGENT.md) is now optionally integrated by
+[D2](SPATIAL_CRITIC_WORKFLOW.md). Recommended next: **Task 07E — Interior Stylist
+agent**, keeping deterministic validation authoritative.

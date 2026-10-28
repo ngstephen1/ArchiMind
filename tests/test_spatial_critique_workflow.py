@@ -1,7 +1,10 @@
 """D2: actual LangGraph/geometry, trusted offline fixtures, no network access."""
 
 import json
+import os
 import socket
+import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -929,3 +932,108 @@ def test_explicit_target_prevents_a_critique_of_only_another_candidate(
         result.spatial_critique.status == "evaluated"
         and result.selected_candidate_index == 0
     )
+
+
+@pytest.mark.parametrize("disabled", ["layout", "critic"])
+def test_agent_feature_flags_are_independent_with_both_workflow_opt_ins(
+    monkeypatch, request_data, disabled
+):
+    enabled(monkeypatch)
+    monkeypatch.setenv(
+        "ARCHIMIND_ENABLE_OPENAI_LAYOUT"
+        if disabled == "layout"
+        else "ARCHIMIND_ENABLE_OPENAI_CRITIC",
+        "0",
+    )
+    advisor, critic = Mock(side_effect=mock_advisor), Mock(side_effect=mock_critic)
+    result = run_workflow(
+        request_data,
+        use_ai_layout=True,
+        use_ai_critic=True,
+        layout_advisor=advisor,
+        spatial_critic=critic,
+    )
+    assert result.status == "succeeded" and len(result.trace) == 5
+    assert advisor.call_count == int(disabled != "layout")
+    assert critic.call_count == int(disabled != "critic")
+    assert result.selected_candidate_index == (0 if disabled == "layout" else 1)
+
+
+def test_stylist_failure_preserves_critique_history_and_clears_selection(
+    monkeypatch, request_data
+):
+    enabled(monkeypatch)
+    stylist = Mock(side_effect=RuntimeError("secret material settings"))
+    monkeypatch.setattr(nodes, "interior_stylist", stylist)
+    result = run_workflow(
+        request_data,
+        use_ai_layout=True,
+        use_ai_critic=True,
+        layout_advisor=mock_advisor,
+        spatial_critic=mock_critic,
+    )
+    assert result.status == "failed" and result.error.node == "interior_stylist"
+    assert (
+        result.selected_candidate_index
+        is result.approved_design
+        is result.selection_source
+        is None
+    )
+    assert (
+        result.spatial_critique.status == "evaluated"
+        and result.spatial_critique.candidate_index == 1
+    )
+    assert len(result.trace) == 6 and "secret material" not in result.model_dump_json()
+    stylist.assert_called_once()
+
+
+def test_offline_three_scenario_demo_restores_environment_and_preserves_data(
+    monkeypatch, offline
+):
+    from archimind.examples.critiqued_workflow import offline_critiqued_workflows
+
+    monkeypatch.setenv("OPENAI_API_KEY", "do-not-use-real-key")
+    before = dict(os.environ)
+    first = offline_critiqued_workflows()
+    assert dict(os.environ) == before
+    assert first == offline_critiqued_workflows()
+    assert [state.selected_candidate_index for state in first.values()] == [0, 1, 1]
+    assert [len(state.trace) for state in first.values()] == [4, 6, 6]
+    for state in first.values():
+        assert "do-not-use-real-key" not in state.model_dump_json()
+        assert state.generation == first["scenario_a"].generation
+    offline.assert_not_called()
+
+
+@pytest.mark.parametrize("json_output", [False, True])
+def test_actual_critiqued_workflow_cli_is_offline(json_output):
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "archimind.examples.critiqued_workflow",
+            *(["--json"] if json_output else []),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env={"PATH": os.defpath, "PYTHONNOUSERSITE": "1", "LANGSMITH_TRACING": "false"},
+    )
+    assert process.returncode == 0 and process.stderr == ""
+    if json_output:
+        payload = json.loads(process.stdout)
+        assert payload["mode"] == "offline_mock"
+        states = [
+            WorkflowState.model_validate_json(json.dumps(payload[f"scenario_{key}"]))
+            for key in "abc"
+        ]
+        assert [state.selected_candidate_index for state in states] == [0, 1, 1]
+        assert [len(state.trace) for state in states] == [4, 6, 6]
+        assert states[2].spatial_critique.result.recommendation_stance == "challenges"
+    else:
+        assert "zero live OpenAI requests" in process.stdout
+        assert "Scenario A: Layout A" in process.stdout
+        assert (
+            "Scenario C: Layout B" in process.stdout
+            and "critic challenges" in process.stdout
+        )
