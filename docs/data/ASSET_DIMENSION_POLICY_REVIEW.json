@@ -754,7 +754,7 @@
       "script_sha256": "30ec687620788b9a67fdfe3e467a386a8e92540248f30d1578a6c0d4ddf25c50"
     },
     "ruff_lint": "passed",
-    "ruff_format": "115 files already formatted",
+    "ruff_format": "passed after formatting review examples; 116 files already formatted",
     "pip_check": "No broken requirements found.",
     "streamlit_health": "HTTP 200 ok",
     "source_wheel_installed_loading": "passed as part of focused packaging regression",
@@ -768,7 +768,14 @@
       ]
     },
     "report_appendices": "Both Python appendices executed successfully; source topology and exact arithmetic reproduced",
-    "comparison_receipt": "Standard-library JSON/decision/hash validation passed; finite data and source preservation verified"
+    "comparison_receipt": "Standard-library JSON/decision/hash validation passed; finite data and source preservation verified",
+    "initial_ci": {
+      "commit": "aeb53ad6ed9d7eb91fb2a2cde6ee1ed5222c5072",
+      "url": "https://github.com/ngstephen1/ArchiMind/actions/runs/40788114791",
+      "conclusion": "failure",
+      "reason": "Unformatted Python examples added to Markdown after local format preflight",
+      "correction": "Format report examples, re-execute them and rerun Ruff; documentation only"
+    }
   },
   "evidence_artifacts": {
     "analysis_script_sha256": "3065d66fdae87fc3a0176fb69c54a98ed89a7e4edc515f5a9e3de5306758c49a",

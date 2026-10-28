@@ -401,7 +401,7 @@ for either proposed next step.
 | Focused Python inspection/catalog/packaging/render/model/geometry regressions | **435 passed in 11.15s**, no failures/skips |
 | Offline arithmetic/topology checks | **6 passed** (standard-library review checks; not six new application tests) |
 | Frontend syntax/tests | Passed; **27 passed, 0 failed, 0 skipped** |
-| Ruff lint/format | Passed; 115 files already formatted |
+| Ruff lint/format | Passed after formatting both review examples; 116 files already formatted |
 | Dependency compatibility | No broken requirements found |
 | Streamlit headless health | HTTP **200 ok** |
 | Source/wheel + isolated installed loading | Passed within focused packaging regression |
@@ -429,7 +429,12 @@ unchanged; `.agents/` and `.claude/` remain untracked and untouched. Source/manu
 bytes, page renderings and review scripts stay outside Git. The exact calculations
 and deterministic source topology can be reproduced with the appendices below;
 original model access remains subject to its source license and acquisition scope.
-Final commit/CI identities belong in the delivery response, avoiding a self-hash.
+Initial review checkpoint `aeb53ad` failed [CI formatting](https://github.com/ngstephen1/ArchiMind/actions/runs/40788114791)
+because the report's Python examples were added after the local formatting check.
+The correction formats only those examples, re-executes both appendices and reruns
+lint/format checks. No production file, test or acceptance gate is changed to
+resolve the failure. Final commit/CI identities belong in the delivery response,
+avoiding a self-hash.
 
 ## Appendix A - reproduce the exact arithmetic without applying it
 
@@ -442,29 +447,29 @@ from fractions import Fraction
 from decimal import Decimal, localcontext
 from pathlib import Path
 
-r = json.loads(Path('docs/data/ASSET_DIMENSION_POLICY_REVIEW.json').read_text())
-a = r['arithmetic']
-p = list(map(Fraction, a['physical_wdh_m']))
-m = list(map(Fraction, a['mesh_wdh_exact_m']))
+r = json.loads(Path("docs/data/ASSET_DIMENSION_POLICY_REVIEW.json").read_text())
+a = r["arithmetic"]
+p = list(map(Fraction, a["physical_wdh_m"]))
+m = list(map(Fraction, a["mesh_wdh_exact_m"]))
 s = min(pi / mi for pi, mi in zip(p, m))
 assert s == Fraction(1731198976, 1751019375) == p[1] / m[1]
 assert all(mi * s <= pi for mi, pi in zip(m, p))
 assert m[1] * (s + Fraction(1, 10**12)) > p[1]
 assert len(set(pi / mi for pi, mi in zip(p, m))) == 3
-assert list(map(Fraction, a['planning_envelope_wdh_exact_m'])) == [
+assert list(map(Fraction, a["planning_envelope_wdh_exact_m"])) == [
     max(pi, mi) for pi, mi in zip(p, m)
 ]
-assert a['applied_scale'] is None and a['derived_glb_sha256'] is None
-assert not r['decision']['policy_B_authorized']
-assert not r['decision']['policy_C_authorized']
+assert a["applied_scale"] is None and a["derived_glb_sha256"] is None
+assert not r["decision"]["policy_B_authorized"]
+assert not r["decision"]["policy_C_authorized"]
 with localcontext() as ctx:
     ctx.prec = 60
     decimal = lambda q: Decimal(q.numerator) / Decimal(q.denominator)
-    print('uniform factor:', decimal(s))
-    for pi, mi, expected in zip(p, m, a['calibrated_minus_published_wdh_mm']):
+    print("uniform factor:", decimal(s))
+    for pi, mi, expected in zip(p, m, a["calibrated_minus_published_wdh_mm"]):
         error_mm = (decimal(mi) * decimal(s) - decimal(pi)) * 1000
-        assert abs(error_mm - Decimal(expected)) < Decimal('1e-50')
-        print('size, signed error mm:', decimal(mi * s), error_mm)
+        assert abs(error_mm - Decimal(expected)) < Decimal("1e-50")
+        print("size, signed error mm:", decimal(mi * s), error_mm)
 ```
 
 ## Appendix B - reproduce source topology without editing the GLB
@@ -481,42 +486,47 @@ import json
 import struct
 from pathlib import Path
 
-path = Path('/path/to/authorized/B075X2X4XS.glb')
+path = Path("/path/to/authorized/B075X2X4XS.glb")
 before = path.read_bytes()
 assert hashlib.sha256(before).hexdigest() == (
-    '62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645'
+    "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645"
 )
-n = struct.unpack_from('<I', before, 12)[0]
-d = json.loads(before[20:20+n])
-assert len(d['scenes']) == len(d['nodes']) == len(d['meshes']) == 1
-node = d['nodes'][0]
-assert node['translation'] == [0, 0, 0] and node['scale'] == [1, 1, 1]
-assert node['rotation'] == [0, 0, 0, 1] and node['mesh'] == 0
-primitive = d['meshes'][0]['primitives'][0]
-a = d['accessors'][primitive['attributes']['POSITION']]
-v = d['bufferViews'][a['bufferView']]
-ia = d['accessors'][primitive['indices']]
-iv = d['bufferViews'][ia['bufferView']]
-assert a['componentType'] == 5126 and ia['componentType'] == 5123
-assert not a.get('byteOffset', 0) and not ia.get('byteOffset', 0)
-assert v.get('byteStride', 12) == 12
+n = struct.unpack_from("<I", before, 12)[0]
+d = json.loads(before[20 : 20 + n])
+assert len(d["scenes"]) == len(d["nodes"]) == len(d["meshes"]) == 1
+node = d["nodes"][0]
+assert node["translation"] == [0, 0, 0] and node["scale"] == [1, 1, 1]
+assert node["rotation"] == [0, 0, 0, 1] and node["mesh"] == 0
+primitive = d["meshes"][0]["primitives"][0]
+a = d["accessors"][primitive["attributes"]["POSITION"]]
+v = d["bufferViews"][a["bufferView"]]
+ia = d["accessors"][primitive["indices"]]
+iv = d["bufferViews"][ia["bufferView"]]
+assert a["componentType"] == 5126 and ia["componentType"] == 5123
+assert not a.get("byteOffset", 0) and not ia.get("byteOffset", 0)
+assert v.get("byteStride", 12) == 12
 start = 20 + n + 8
-points = [struct.unpack_from('<3f', before, start + v['byteOffset'] + 12*i)
-          for i in range(a['count'])]
-indices = struct.unpack_from('<' + 'H'*ia['count'], before,
-                             start + iv['byteOffset'])
+points = [
+    struct.unpack_from("<3f", before, start + v["byteOffset"] + 12 * i)
+    for i in range(a["count"])
+]
+indices = struct.unpack_from("<" + "H" * ia["count"], before, start + iv["byteOffset"])
 faces = list(zip(indices[::3], indices[1::3], indices[2::3]))
 assert len(set(indices)) == len(points) == 23412
 
+
 def count_components(points, faces, weld=False):
     parent = list(range(len(points)))
+
     def find(i):
         while parent[i] != i:
             parent[i] = parent[parent[i]]
             i = parent[i]
         return i
+
     def union(a, b):
         parent[find(a)] = find(b)
+
     if weld:
         first = {}
         for i, point in enumerate(points):
@@ -529,9 +539,13 @@ def count_components(points, faces, weld=False):
         union(a, c)
     return len({find(i) for i in range(len(points))})
 
+
 assert count_components(points, faces) == 39
 assert count_components(points, faces, True) == 12
-print('native bounds:', [min(p[i] for p in points) for i in range(3)],
-      [max(p[i] for p in points) for i in range(3)])
+print(
+    "native bounds:",
+    [min(p[i] for p in points) for i in range(3)],
+    [max(p[i] for p in points) for i in range(3)],
+)
 assert path.read_bytes() == before
 ```
