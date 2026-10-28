@@ -20,7 +20,7 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 06E1")
+    phase.metric("Current development phase", "Task 07F")
     status.metric("Application status", "Running")
 
     st.divider()
@@ -33,7 +33,7 @@ def main() -> None:
     )
     st.caption(
         "These capabilities are planned. Deterministic layout generation, "
-        "spatial validation, synchronized selected 2D/3D layouts, and standalone sample previews are available below."
+        "spatial validation, synchronized selected 2D/3D layouts, optional interior styling, and standalone sample previews are available below."
     )
 
     st.divider()

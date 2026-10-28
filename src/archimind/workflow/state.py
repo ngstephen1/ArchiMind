@@ -345,7 +345,9 @@ class WorkflowState(_Contract):
     )
     spatial_critique: SpatialCritiqueState = Field(default_factory=SpatialCritiqueState)
     ai_styling: AIStylingState = Field(default_factory=AIStylingState)
-    selection_source: Literal["deterministic", "ai_recommendation"] | None = None
+    selection_source: (
+        Literal["deterministic", "ai_recommendation", "user_selection"] | None
+    ) = None
     selected_candidate_index: int | None = Field(default=None, ge=0, le=1)
     approved_design: RoomDesign | None = None
     styling: StylingMetadata | None = None
@@ -442,14 +444,26 @@ class WorkflowState(_Contract):
                     "Selected candidate must retain its authoritative critique"
                 )
             original = self.layout_recommendation.deterministic_candidate_index
-            if original is None or not any(
-                review.candidate_index == original and review.accepted
-                for review in self.reviews
+            if self.selection_source != "user_selection" and (
+                original is None
+                or not any(
+                    review.candidate_index == original and review.accepted
+                    for review in self.reviews
+                )
             ):
                 raise ValueError(
                     "Original deterministic selection must be critic-approved"
                 )
-            if self.selection_source == "deterministic":
+            if self.selection_source == "user_selection":
+                if (
+                    original is not None
+                    or self.layout_recommendation.requested
+                    or self.spatial_critique.requested
+                ):
+                    raise ValueError(
+                        "User selection cannot claim an advisor or deterministic selection"
+                    )
+            elif self.selection_source == "deterministic":
                 if (
                     selected != original
                     or self.layout_recommendation.status == "recommended"

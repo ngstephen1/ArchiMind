@@ -19,6 +19,32 @@ from archimind.workflow.layout_recommendation import _approved, advisor_preferen
 from archimind.workflow.state import AIStylingState, WorkflowState
 
 
+def selection_is_safe(state: WorkflowState) -> bool:
+    """Current E2 approval gate, shared with selected-layout fixture requests."""
+    try:
+        selected = state.selected_candidate_index
+        if not _approved(state, selected):
+            return False
+        candidate = state.generation.candidates[selected]
+        if (
+            state.approved_design != candidate.design
+            or candidate.validation.config != state.request.accessibility
+        ):
+            return False
+        actual = validate_accessibility(
+            candidate.design.model_copy(deep=True),
+            config=state.request.accessibility.model_copy(deep=True),
+            area_tolerance_m2=0.0,
+        )
+        return (
+            actual.status == "passed"
+            and actual == candidate.validation
+            and _score(candidate.design.room, actual) == candidate.score
+        )
+    except Exception:
+        return False
+
+
 def stylist_policy(state: WorkflowState, *, allow_live: bool) -> AIStylingState:
     """All E2 invocations, including trusted offline fixtures, need explicit consent."""
     metadata = state.ai_styling.model_copy(deep=True)
@@ -89,27 +115,7 @@ def interior_styling(
     before = state.model_dump(include=fields)
 
     def safe_selection():
-        if state.model_dump(include=fields) != before or not _approved(state, selected):
-            return False
-        candidate = state.generation.candidates[selected]
-        if (
-            state.approved_design != candidate.design
-            or candidate.validation.config != state.request.accessibility
-        ):
-            return False
-        try:
-            actual = validate_accessibility(
-                candidate.design.model_copy(deep=True),
-                config=state.request.accessibility.model_copy(deep=True),
-                area_tolerance_m2=0.0,
-            )
-            return (
-                actual.status == "passed"
-                and actual == candidate.validation
-                and _score(candidate.design.room, actual) == candidate.score
-            )
-        except Exception:
-            return False
+        return state.model_dump(include=fields) == before and selection_is_safe(state)
 
     def failure(code, *, status="error"):
         return InteriorStylistResult(

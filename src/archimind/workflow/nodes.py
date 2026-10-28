@@ -269,7 +269,9 @@ def _preserves_specification(original: RoomDesign, candidate: RoomDesign) -> boo
     ) == fixed_furniture(candidate)
 
 
-def spatial_critic(state: WorkflowState) -> dict:
+def spatial_critic(
+    state: WorkflowState, *, selected_candidate_index: int | None = None
+) -> dict:
     """Re-check actual candidates at zero tolerance; claimed reports cannot approve."""
     if state.generation is None or state.design is None:
         raise ValueError("Missing generation handoff")
@@ -302,20 +304,34 @@ def spatial_critic(state: WorkflowState) -> dict:
                 reason=reason,
             )
         )
-    selected = next(
-        (review.candidate_index for review in reviews if review.accepted), None
+    selected = (
+        next((review.candidate_index for review in reviews if review.accepted), None)
+        if selected_candidate_index is None
+        else next(
+            (
+                review.candidate_index
+                for review in reviews
+                if review.accepted
+                and review.candidate_index == selected_candidate_index
+            ),
+            None,
+        )
     )
     if selected is None:
         return stop(
             state,
             "spatial_critic",
             "no_approved_candidates",
-            "No candidate passed independent spatial and specification checks.",
+            "No requested candidate passed independent spatial and specification checks.",
             status="rejected",
             reviews=reviews,
         )
     advisor_state = advisor_policy(state).model_copy(
-        update={"deterministic_candidate_index": selected}
+        update={
+            "deterministic_candidate_index": selected
+            if selected_candidate_index is None
+            else None
+        }
     )
     critique_state = critic_policy(state)
     advisor_note = (
@@ -326,6 +342,8 @@ def spatial_critic(state: WorkflowState) -> dict:
     )
     if critique_state.requested:
         advisor_note += f" AI spatial critique requested: {critique_state.status}; reason={critique_state.reason or 'eligible'}; executed=False."
+    if selected_candidate_index is not None:
+        advisor_note = " Caller selection retained; selection source user_selection; no generation or AI layout advice executed."
     return transition(
         state,
         "spatial_critic",
@@ -336,7 +354,9 @@ def spatial_critic(state: WorkflowState) -> dict:
         layout_recommendation=advisor_state,
         spatial_critique=critique_state,
         selected_candidate_index=selected,
-        selection_source="deterministic",
+        selection_source="deterministic"
+        if selected_candidate_index is None
+        else "user_selection",
         approved_design=state.generation.candidates[selected].design.model_copy(
             deep=True
         ),

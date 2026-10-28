@@ -18,6 +18,7 @@ from archimind.geometry import (
 )
 from archimind.models import RoomDesign
 from archimind.render import render_design_3d, render_floorplan
+from archimind.ui.interior_styling import render_interior_styling, reset_styling
 
 RESULT_KEY = "layout_generation_result"
 ERROR_KEY = "layout_generation_error"
@@ -74,8 +75,8 @@ def render_layout_generator(specification: RoomDesign) -> None:
     st.subheader("AI-Assisted Room Layout Generator")
     st.write(
         "Generate reproducible furniture arrangements with deterministic seeded "
-        "placement and spatial checks. Multi-agent reasoning is planned for a "
-        "later phase."
+        "placement and spatial checks. Optional interior styling is available "
+        "for the selected layout below."
     )
     st.markdown("### Room Information")
     room = specification.room
@@ -120,6 +121,7 @@ def render_layout_generator(specification: RoomDesign) -> None:
                 "Could not generate layouts. Please try again."
             )
         else:
+            reset_styling()
             st.session_state[RESULT_KEY] = result
             st.session_state[SELECTION_KEY] = "Layout A"
             st.session_state.pop(ERROR_KEY, None)
@@ -247,3 +249,4 @@ def render_layout_generator(specification: RoomDesign) -> None:
         "Door approaches are rectangular approximations; actual swing geometry "
         "and building-code compliance are outside this prototype."
     )
+    render_interior_styling(specification, result, labels.index(selected))
