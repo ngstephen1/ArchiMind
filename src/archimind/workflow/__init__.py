@@ -1,4 +1,4 @@
-"""Backend workflow with optional gated requirements interpretation."""
+"""Backend workflow with separately gated requirements and layout advice."""
 
 from archimind.workflow.graph import run_workflow
 from archimind.workflow.state import (

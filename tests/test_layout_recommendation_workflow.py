@@ -1,7 +1,10 @@
 """C2 uses real orchestration/geometry, mocked advice, and no network access."""
 
 import json
+import os
 import socket
+import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -23,6 +26,7 @@ from archimind.agents.layout_schemas import (
 )
 from archimind.agents.requirements_schemas import Preference
 from archimind.examples import create_sample_bedroom
+from archimind.examples.advised_workflow import offline_workflow_comparison
 from archimind.examples.interpret_bedroom import offline_interpreter
 from archimind.examples.requirements_fixture import SAMPLE_REQUEST, sample_extraction
 from archimind.geometry import generate_layout_candidates, validate_accessibility
@@ -628,3 +632,57 @@ def test_advisor_cannot_execute_twice(monkeypatch, request_data):
     assert second.status == "failed" and second.error.code == "iteration_limit"
     assert second.selected_candidate_index is None
     advisor.assert_called_once()
+
+
+def test_offline_demo_reuses_existing_mock_and_restores_environment(
+    monkeypatch, offline
+):
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_LAYOUT", "0")
+    monkeypatch.setenv("OPENAI_API_KEY", "do-not-use-real-key")
+    before = dict(os.environ)
+    deterministic, recommended = offline_workflow_comparison()
+    assert dict(os.environ) == before
+    assert deterministic.selected_candidate_index == 0
+    assert recommended.selected_candidate_index == 1
+    assert recommended.layout_recommendation.advice.mode == "offline_fixture"
+    assert "do-not-use-real-key" not in recommended.model_dump_json()
+    offline.assert_not_called()
+
+
+@pytest.mark.parametrize("json_output", [False, True])
+def test_actual_advised_demo_cli_is_offline_and_reproducible(json_output):
+    process = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "archimind.examples.advised_workflow",
+            *(["--json"] if json_output else []),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        env={"PATH": os.defpath, "PYTHONNOUSERSITE": "1", "LANGSMITH_TRACING": "false"},
+    )
+    assert process.returncode == 0 and process.stderr == ""
+    if json_output:
+        payload = json.loads(process.stdout)
+        assert payload["mode"] == "offline_mock"
+        default = WorkflowState.model_validate_json(
+            json.dumps(payload["deterministic"])
+        )
+        advised = WorkflowState.model_validate_json(json.dumps(payload["recommended"]))
+        assert (
+            default.selected_candidate_index == 0
+            and advised.selected_candidate_index == 1
+        )
+        assert (
+            default.generation == advised.generation
+            and default.reviews == advised.reviews
+        )
+    else:
+        assert (
+            "OFFLINE MOCK" in process.stdout
+            and "zero live OpenAI requests" in process.stdout
+        )
+        assert "Default: Layout A (index 0)" in process.stdout
+        assert "Advised: Layout B (index 1); score 67.614973" in process.stdout

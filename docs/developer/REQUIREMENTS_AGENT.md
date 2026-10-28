@@ -183,6 +183,7 @@ npm --prefix frontend/realistic_viewer run check
 npm --prefix frontend/realistic_viewer run build
 ```
 
-Task 07C1 now adds separate [Layout Designer advice](LAYOUT_AGENT.md).
-No other LLM-powered workflow role is integrated into the graph yet.
-Recommended next: **Task 07C2 — LangGraph Layout Designer integration**.
+Task 07C1 adds [Layout Designer advice](LAYOUT_AGENT.md), now optionally integrated
+after critique by [Task 07C2](LAYOUT_WORKFLOW.md). The interpreter's own gates and
+default workflow behavior are preserved. Recommended next: **Task 07D — Spatial
+Critic agent**, keeping deterministic validation authoritative.

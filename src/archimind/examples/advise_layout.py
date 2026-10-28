@@ -1,4 +1,4 @@
-"""07C1 offline mock: compare real candidates without live API access or workflow edits."""
+"""07C1 offline mock and reusable fixture advisor; no live API access."""
 
 import argparse
 import os
@@ -9,24 +9,25 @@ from unittest.mock import Mock, patch
 from archimind.agents import requirements_agent as api
 from archimind.agents.layout_agent import recommend_layout
 from archimind.agents.layout_grounding import prepare_layout_context
-from archimind.agents.layout_schemas import LayoutAdviceRequest, LayoutProposal
+from archimind.agents.layout_schemas import (
+    LayoutAdviceRequest,
+    LayoutAdviceResult,
+    LayoutProposal,
+)
 from archimind.examples import create_sample_bedroom
 from archimind.geometry import generate_layout_candidates
 
 
-def offline_layout_advice():
-    """A fixed mock client proposes a candidate using actual fixture geometry.
+def offline_layout_advisor(
+    request: LayoutAdviceRequest, *, allow_live: bool = False
+) -> LayoutAdviceResult:
+    """Reuse the fixed C1 mock client on supplied, already generated candidates.
 
     This is not model-quality evidence and never substitutes for an unavailable
     real API. The client factory is always mocked and settings are restored.
+    ``allow_live`` is accepted for workflow DI compatibility; this fixture cannot
+    make live requests. It does not regenerate layouts or change the request.
     """
-    design = create_sample_bedroom()
-    generation = generate_layout_candidates(design.room, design.furniture)
-    request = LayoutAdviceRequest(
-        specification=design,
-        generation=generation,
-        soft_preferences=["Prefer the desk near the north-wall window."],
-    )
     before = request.model_dump_json()
     context = prepare_layout_context(request)
     # Deterministic fixture construction, explicitly not a fabricated live response.
@@ -45,7 +46,10 @@ def offline_layout_advice():
         candidate_index=best.candidate_index,
         rationale_code="window_proximity",
         evidence_refs=[best.ref],
-        preference_assessments=[{"preference_index": 0, "judgment": "favored"}],
+        preference_assessments=[
+            {"preference_index": index, "judgment": "favored"}
+            for index in range(len(request.soft_preferences))
+        ],
         limitation_codes=["daylight_not_evaluated", "ergonomics_not_evaluated"],
     )
     response = SimpleNamespace(
@@ -70,10 +74,23 @@ def offline_layout_advice():
             request, allow_live=True, client_factory=Mock(return_value=client)
         )
     assert request.model_dump_json() == before
-    assert result.context.request.generation == generation
+    assert result.context.request.generation == request.generation
     client.responses.parse.assert_called_once()
     return result.model_copy(
         update={"mode": "offline_fixture", "model": None}, deep=True
+    )
+
+
+def offline_layout_advice():
+    """Original standalone C1 demonstration; generation happens only here."""
+    design = create_sample_bedroom()
+    generation = generate_layout_candidates(design.room, design.furniture)
+    return offline_layout_advisor(
+        LayoutAdviceRequest(
+            specification=design,
+            generation=generation,
+            soft_preferences=["Prefer the desk near the north-wall window."],
+        )
     )
 
 

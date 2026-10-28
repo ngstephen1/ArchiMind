@@ -1,4 +1,8 @@
-"""Standalone gated Layout Designer advice; never applied to LangGraph or geometry."""
+"""Gated Layout Designer advice, reusable standalone or after workflow critique.
+
+This adapter returns recommendations only; it never changes geometry or performs
+workflow selection. The optional C2 handoff owns final candidate selection.
+"""
 
 import os
 from collections.abc import Callable

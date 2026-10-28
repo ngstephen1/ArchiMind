@@ -3,8 +3,9 @@
 This optional adapter compares **existing generator candidates** against soft
 preferences and proposes an index or explicitly abstains. It never generates
 positions, changes geometry/scores/reports, applies a selection, or approves a
-design. **It is not connected to LangGraph.** Its existing Layout Designer node,
-Spatial Critic, Requirements Interpreter and Stylist behavior is unchanged.
+design. The optional [Task 07C2 workflow handoff](LAYOUT_WORKFLOW.md) now reuses it
+after independent critique to select an approved candidate. The adapter itself
+still returns advice only; the default graph skips it entirely.
 No live OpenAI request was made; all model-response verification uses mocks.
 
 ## Contracts and API
@@ -148,4 +149,5 @@ mock output, existing Requirements Interpreter compatibility and actual CLI JSON
 Known limits: no live account/model-quality verification, no new layout search,
 small candidate set, limited rationale vocabulary, subjective preference matching,
 zero rotation, inherited planar spatial approximations, no daylight/ergonomic or
-building-code certification. Graph integration is **Task 07C2**, not this task.
+building-code certification. See [Task 07C2](LAYOUT_WORKFLOW.md) for the separately
+gated graph integration and current verification results; counts above record C1.

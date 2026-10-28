@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07C1: standalone Layout Designer advice. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07C2: optional approved-candidate workflow advice. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07C1 — Optional standalone Layout Designer advice**
+> **Current stage · Task 07C2 — Optional Layout Designer workflow recommendation**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -51,18 +51,19 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > procedural furniture placeholders. A separate LangGraph backend
 > coordinates requirements, layout design, spatial critique and fixture styling.
 > Requirements interpretation has an optional, disabled-by-default OpenAI path.
-> A separate optional Layout Designer can recommend an existing candidate using
-> grounded evidence. It is not connected to LangGraph; the other three workflow
-> nodes remain deterministic. Live model behavior has not been tested.
+> Optional layout advice now runs after independent critique and before styling,
+> selecting only an approved existing candidate using grounded evidence. The
+> default four-node path stays deterministic; explicit opt-in adds a fifth node
+> with safe deterministic fallback. Live model behavior has not been tested.
 > A full asset catalog, further agent reasoning,
 > persistence, and export remain planned.
 > **No API key is required for the app, structured workflow or offline demonstrations.**
 
-Tasks **01–06E1, 07A, 07B and 07C1 are complete**, including the isolated architectural
+Tasks **01–06E1, 07A, 07B, 07C1 and 07C2 are complete**, including the isolated architectural
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**773 passing Python tests**: all 708 previous cases plus 65 layout-advisor cases,
+**823 passing Python tests**: all 773 previous cases plus 50 workflow-advisor cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -428,7 +429,30 @@ no daylight or ergonomic claim and still requires independent Spatial Critic
 approval. `ARCHIMIND_ENABLE_OPENAI_LAYOUT=0` is the default; live use requires
 explicit per-call authorization and an API key. No live request was made.
 
-Next milestone: **Task 07C2 — Integrate Layout Designer recommendations into LangGraph**.
+### Optional workflow recommendation — Task 07C2
+
+The [workflow-advisor guide](docs/developer/LAYOUT_WORKFLOW.md) documents the
+additional **Spatial Critic → Layout Advisor → Stylist** route. The default path
+skips the advisor entirely. Workflow opt-in, the existing feature flag and explicit
+per-call live authorization are separate gates. No live usage was performed.
+
+```bash
+python -m archimind.examples.workflow_bedroom
+python -m archimind.examples.advised_workflow
+python -m archimind.examples.advised_workflow --json
+```
+
+The comparison is **offline and mocked**, reusing the C1 fixture. Default execution
+selects A/index 0 in four nodes; advised execution selects B/index 1 in five nodes
+after critic approval. B retains score **67.614973**; both complete candidate
+geometries, scores and critic reports are identical between runs. State records
+the original choice, proposed index, grounded rationale/tradeoffs and final
+selection source. Abstention/errors/rejected advice preserve the independently
+approved deterministic choice and record the actual outcome. Invalid or unverified
+advice cannot change the selection. The Streamlit app remains unchanged.
+
+Recommended next: **Task 07D — Spatial Critic agent**, keeping deterministic
+validation authoritative.
 
 ## Models and coordinates
 
@@ -752,11 +776,13 @@ claim. Task 05B exposes these same results in Streamlit alongside the Task 03 pr
 | Data | Pydantic 2.14.1 | Room, opening, furniture, and design schemas |
 | Visualization | Plotly 7.1.0 | Metric 2D plans and structural/furniture 3D meshes from canonical models |
 | Spatial geometry | Shapely 2.2.0 | Zero-rotation furniture containment and overlap checks |
+| Backend orchestration | LangGraph 1.2.18 | Bounded default workflow and optional post-critic recommendation |
+| Optional model adapter | OpenAI SDK 3.40.0 | Separately gated requirements interpretation and candidate advice; mock-verified |
 | Testing | pytest 9.1.1 | Smoke, model, renderer, and preview integration tests |
 | Code quality | Ruff 0.17.3 | Linting and formatting |
 | Packaging | build 1.6.1 + setuptools | Wheel and source distributions |
 
-Streamlit, Pydantic, Plotly, and Shapely are runtime dependencies. pytest, Ruff, and build are
+Streamlit, Pydantic, Plotly, Shapely, LangGraph and OpenAI are runtime dependencies. pytest, Ruff, and build are
 development extras. Required transitive dependencies install automatically;
 future tools are not added to project requirements prematurely.
 
@@ -764,8 +790,7 @@ future tools are not added to project requirements prematurely.
 
 | Capability | Proposed technology |
 | :--- | :--- |
-| Agent orchestration | LangGraph + OpenAI API |
-| 3D furniture visualization | Plotly |
+| Further agent reasoning | Existing LangGraph + OpenAI backend |
 | 3D export | Trimesh |
 | Local persistence | SQLite |
 
@@ -862,15 +887,17 @@ ArchiMind/
 │   │   ├── __init__.py           Public Streamlit presentation helper
 │   │   └── layout_generation.py  Button-driven generation, state, and comparison
 │   ├── workflow/
-│   │   ├── __init__.py           Public deterministic workflow API
+│   │   ├── __init__.py           Public workflow API with optional gated advice
 │   │   ├── state.py             Typed requests, handoffs, critiques, trace and result
 │   │   ├── graph.py             LangGraph conditional orchestration and error guards
-│   │   └── nodes.py             Four deterministic future-agent roles
+│   │   ├── layout_recommendation.py  Approved-only C1 handoff and safe fallback
+│   │   └── nodes.py             Requirements, generation, critique and fixture styling
 │   └── examples/
 │       ├── __init__.py           Public example factory
 │       ├── sample_bedroom.py     Reproducible canonical-model bedroom
 │       ├── generate_bedroom.py   Original request and generated-alternatives CLI
-│       └── workflow_bedroom.py   Offline workflow result/trace/JSON demonstration
+│       ├── workflow_bedroom.py   Default offline result/trace/JSON demonstration
+│       └── advised_workflow.py   Default versus advised comparison using a mock
 ├── tests/
 │   ├── test_smoke.py             Package and application checks
 │   ├── test_models.py            Model tests and bedroom fixture
@@ -916,7 +943,8 @@ and verification record.
 - [x] **Task 07A · LangGraph Workflow Foundation** — backend-only, deterministic requirements/design/critique/styling nodes, bounded execution and typed trace; no LLMs.
 - [x] **Task 07B · OpenAI-Backed Requirements Interpreter Agent** — optional gated Responses extraction, evidence/catalog conversion, clarification, typed failures and mocked verification; live behavior unverified.
 - [x] **Task 07C1 · OpenAI-Powered Layout Designer Agent** — standalone, default-off candidate recommendation with grounded facts, immutable layouts and mocked verification.
-- [ ] **Task 07C2 · LangGraph Layout Designer integration** — recommended next; workflow behavior remains unchanged.
+- [x] **Task 07C2 · LangGraph Layout Designer integration** — optional post-critic selection, grounded provenance, safe deterministic fallback and offline demonstration.
+- [ ] **Task 07D · Spatial Critic agent** — recommended next; deterministic validation remains authoritative.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

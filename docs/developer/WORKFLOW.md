@@ -1,12 +1,14 @@
 # Deterministic workflow foundation — Task 07A
 
 This guide records the original 07A milestone and its preserved structured-input
-path. Task 07B adds an explicitly selected, separately gated
-[Requirements Interpreter](REQUIREMENTS_AGENT.md). Its other three nodes remain
-deterministic, and the 07A CLI still runs offline without an API key.
+path. Task 07B adds a separately gated
+[Requirements Interpreter](REQUIREMENTS_AGENT.md). Task 07C2 adds optional
+[post-critic layout advice](LAYOUT_WORKFLOW.md). The default 07A CLI still runs
+four deterministic nodes offline without an API key. Original milestone output
+and test counts below are historical unless stated otherwise.
 
-This is a backend-only LangGraph workflow for four future agent roles. All nodes
-are deterministic Python components. No LLM reasoning, natural-language parsing,
+The default is a backend-only LangGraph workflow for four roles, each a
+deterministic Python component. In that mode no LLM reasoning, natural-language parsing,
 model request, C01 invocation, subprocess, chat or automatic revision is involved.
 Streamlit and both rendering systems are unchanged and do not invoke this graph.
 The existing app still labels multi-agent reasoning as future work.
@@ -86,9 +88,10 @@ flowchart LR
 
 ## Bounds, failures and serialization
 
-There is one generation iteration and at most four node executions. All edges
+The default has one generation iteration and four node executions. All edges
 advance or terminate; there is no retry/back edge. A guard rejects a second
-generation iteration, and LangGraph's recursion limit of 6 is an extra backstop.
+generation iteration. Current C2 bounds allow four default/five advised nodes,
+with recursion limit 7 as an extra backstop; the default still executes four.
 The generator retains its 32-furniture/10,000-attempt and accessibility limits;
 the workflow introduces no alternative placement/geometry implementation.
 
@@ -181,5 +184,7 @@ automatic retries/revisions or real styling assessment is delivered here.
 
 Task 07B is now implemented separately; see the
 [Requirements Interpreter guide](REQUIREMENTS_AGENT.md).
-Task 07C1 adds [standalone layout advice](LAYOUT_AGENT.md) without changing this
-graph. Recommended next: **Task 07C2 — LangGraph Layout Designer integration**.
+Task 07C1 adds [standalone layout advice](LAYOUT_AGENT.md). Task 07C2 now adds an
+explicitly opted-in [advisor route](LAYOUT_WORKFLOW.md) after critique, with safe
+fallback and selection provenance. Recommended next: **Task 07D — Spatial Critic
+agent**. Default structured execution remains deterministic.
