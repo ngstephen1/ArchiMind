@@ -8,6 +8,7 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
+from archimind.agents.layout_schemas import LayoutAdviceResult, PreferenceText
 from archimind.agents.requirements_schemas import RequirementsResult
 from archimind.geometry import (
     MAX_GENERATION_ATTEMPTS,
@@ -18,7 +19,11 @@ from archimind.geometry import (
 from archimind.models import RoomDesign
 
 NodeName = Literal[
-    "requirements_interpreter", "layout_designer", "spatial_critic", "interior_stylist"
+    "requirements_interpreter",
+    "layout_designer",
+    "spatial_critic",
+    "layout_advisor",
+    "interior_stylist",
 ]
 ExecutionStatus = Literal[
     "pending",
@@ -33,7 +38,7 @@ ExecutionStatus = Literal[
     "unavailable",
 ]
 MAX_WORKFLOW_ITERATIONS = 1
-MAX_NODE_EXECUTIONS = 4
+MAX_NODE_EXECUTIONS = 5
 
 
 class _Contract(BaseModel):
@@ -66,14 +71,23 @@ class DesignRequest(_Contract):
     max_attempts: int = Field(default=500, ge=0, le=MAX_GENERATION_ATTEMPTS)
     accessibility: AccessibilityConfig = Field(default_factory=AccessibilityConfig)
     styling_preferences: StylingPreferences = Field(default_factory=StylingPreferences)
+    soft_preferences: list[PreferenceText] = Field(default_factory=list, max_length=8)
 
 
 class AgentActivity(_Contract):
-    """Deterministic activity of a future agent role; no timestamps or LLM claims."""
+    """Ordered role decisions; mock/API selection provenance is explicit."""
 
     sequence: int = Field(ge=1, le=MAX_NODE_EXECUTIONS)
     node: NodeName
-    decision: Literal["accepted", "generated", "approved", "styled", "stopped"]
+    decision: Literal[
+        "accepted",
+        "generated",
+        "approved",
+        "recommended",
+        "fallback",
+        "styled",
+        "stopped",
+    ]
     message: str = Field(min_length=1)
 
 
@@ -123,10 +137,76 @@ class StylingMetadata(_Contract):
     limitation: str = "Metadata only; no geometry, assets or rendering are changed."
 
 
+class LayoutRecommendationState(_Contract):
+    """Selection provenance; checked advice reuses the C1 output contract.
+
+    ``executed`` records an adapter invocation, not proof of live model usage.
+    Candidate indices are original generator indices; ``candidate_indices`` maps
+    the advice context's local indices to those original indices.
+    """
+
+    requested: bool = False
+    status: Literal[
+        "not_requested",
+        "pending",
+        "disabled",
+        "skipped",
+        "recommended",
+        "abstained",
+        "unavailable",
+        "error",
+        "rejected",
+    ] = "not_requested"
+    executed: bool = False
+    deterministic_candidate_index: int | None = Field(default=None, ge=0, le=1)
+    proposed_candidate_index: int | None = Field(default=None, ge=0, le=1)
+    candidate_indices: list[int] = Field(default_factory=list, max_length=2)
+    advice: LayoutAdviceResult | None = None
+    reason: str | None = None
+
+    @model_validator(mode="after")
+    def validate_advisor_state(self) -> Self:
+        if (self.status == "not_requested") != (not self.requested):
+            raise ValueError("Advisor request and execution status disagree")
+        if self.executed and self.status in (
+            "not_requested",
+            "pending",
+            "disabled",
+            "skipped",
+        ):
+            raise ValueError("A skipped advisor cannot have executed")
+        if len(set(self.candidate_indices)) != len(self.candidate_indices) or any(
+            type(index) is not int or index not in (0, 1)
+            for index in self.candidate_indices
+        ):
+            raise ValueError("Advisor index mapping must contain unique source indices")
+        if self.advice is not None and self.advice.status != self.status:
+            raise ValueError(
+                "Advisor metadata must preserve the checked response status"
+            )
+        if self.status == "recommended":
+            if (
+                not self.executed
+                or self.advice is None
+                or self.proposed_candidate_index is None
+            ):
+                raise ValueError("Recommendation requires executed, checked advice")
+            local = self.advice.proposal.candidate_index
+            if (
+                local is None
+                or local >= len(self.candidate_indices)
+                or self.candidate_indices[local] != self.proposed_candidate_index
+            ):
+                raise ValueError(
+                    "Proposed source index must match advisor-local mapping"
+                )
+        return self
+
+
 class WorkflowState(_Contract):
     """Explicit sequential handoffs; lists use replacement, never shared reducers.
 
-    One generation iteration, at most four node executions, no automatic retry.
+    One generation iteration, four default/five advised nodes, no automatic retry.
     A partial generator result may succeed if a candidate passes independent
     critique; exhaustion without candidates is an explicit terminal outcome.
     """
@@ -136,6 +216,10 @@ class WorkflowState(_Contract):
     design: RoomDesign | None = None
     generation: LayoutGenerationResult | None = None
     reviews: list[CandidateReview] = Field(default_factory=list, max_length=2)
+    layout_recommendation: LayoutRecommendationState = Field(
+        default_factory=LayoutRecommendationState
+    )
+    selection_source: Literal["deterministic", "ai_recommendation"] | None = None
     selected_candidate_index: int | None = Field(default=None, ge=0, le=1)
     approved_design: RoomDesign | None = None
     styling: StylingMetadata | None = None
@@ -143,6 +227,7 @@ class WorkflowState(_Contract):
         "requirements_interpreter",
         "layout_designer",
         "spatial_critic",
+        "layout_advisor",
         "interior_stylist",
         "complete",
     ] = "requirements_interpreter"
@@ -152,6 +237,23 @@ class WorkflowState(_Contract):
     )
     error: WorkflowError | None = None
     iteration_count: int = Field(default=0, ge=0, le=MAX_WORKFLOW_ITERATIONS)
+
+    @model_validator(mode="before")
+    @classmethod
+    def upgrade_legacy_selection(cls, value):
+        """Old serialized states have no advisor/source fields; infer their defaults."""
+        if (
+            isinstance(value, dict)
+            and value.get("selected_candidate_index") is not None
+        ):
+            value = dict(value)
+            if "selection_source" not in value:
+                value["selection_source"] = "deterministic"
+            if "layout_recommendation" not in value:
+                value["layout_recommendation"] = {
+                    "deterministic_candidate_index": value["selected_candidate_index"]
+                }
+        return value
 
     @model_validator(mode="after")
     def validate_handoffs(self) -> Self:
@@ -191,6 +293,51 @@ class WorkflowState(_Contract):
                 raise ValueError("Approved design must equal the selected candidate")
             if approved.report.room_id != self.approved_design.room.id:
                 raise ValueError("Approved report must describe the selected room")
+            if approved.report != self.generation.candidates[selected].validation:
+                raise ValueError(
+                    "Selected candidate must retain its authoritative critique"
+                )
+            original = self.layout_recommendation.deterministic_candidate_index
+            if original is None or not any(
+                review.candidate_index == original and review.accepted
+                for review in self.reviews
+            ):
+                raise ValueError(
+                    "Original deterministic selection must be critic-approved"
+                )
+            if self.selection_source == "deterministic":
+                if (
+                    selected != original
+                    or self.layout_recommendation.status == "recommended"
+                ):
+                    raise ValueError(
+                        "Deterministic selection must retain the original without accepted AI advice"
+                    )
+            elif self.selection_source == "ai_recommendation":
+                metadata = self.layout_recommendation
+                if (
+                    metadata.status != "recommended"
+                    or selected != metadata.proposed_candidate_index
+                ):
+                    raise ValueError("AI source requires an accepted recommendation")
+                advice_candidates = (
+                    metadata.advice.context.request.generation.candidates
+                )
+                if len(advice_candidates) != len(metadata.candidate_indices):
+                    raise ValueError("Advisor context and source mapping must agree")
+                for local, source in enumerate(metadata.candidate_indices):
+                    if (
+                        source >= len(self.generation.candidates)
+                        or advice_candidates[local]
+                        != self.generation.candidates[source]
+                    ):
+                        raise ValueError(
+                            "Advisor candidates must equal immutable source candidates"
+                        )
+            else:
+                raise ValueError("Selection needs an explicit source")
+        elif self.selection_source is not None:
+            raise ValueError("A selection source requires a final selected candidate")
         if self.styling is not None and selected is None:
             raise ValueError("Styling requires an approved design")
         if self.status == "succeeded" and (

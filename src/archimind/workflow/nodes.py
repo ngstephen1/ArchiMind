@@ -12,6 +12,7 @@ from archimind.geometry import (
     validate_accessibility,
 )
 from archimind.models import RoomDesign
+from archimind.workflow.layout_recommendation import advisor_policy
 from archimind.workflow.state import (
     MAX_WORKFLOW_ITERATIONS,
     AgentActivity,
@@ -59,6 +60,19 @@ def stop(
     status: ExecutionStatus = "failed",
     **updates: object,
 ) -> dict:
+    if (
+        state.layout_recommendation.requested
+        and state.layout_recommendation.status == "pending"
+    ):
+        updates.setdefault(
+            "layout_recommendation",
+            state.layout_recommendation.model_copy(
+                update={
+                    "status": "skipped",
+                    "reason": "workflow_terminated_before_advisor",
+                }
+            ),
+        )
     return transition(
         state,
         node,
@@ -67,6 +81,7 @@ def stop(
         status=status,
         error=WorkflowError(node=node, code=code, message=message),
         selected_candidate_index=None,
+        selection_source=None,
         approved_design=None,
         styling=None,
         **updates,
@@ -278,13 +293,25 @@ def spatial_critic(state: WorkflowState) -> dict:
             status="rejected",
             reviews=reviews,
         )
+    advisor_state = advisor_policy(state).model_copy(
+        update={"deterministic_candidate_index": selected}
+    )
+    advisor_note = (
+        f" AI layout recommendation requested: {advisor_state.status}; "
+        f"reason={advisor_state.reason or 'eligible'}; current source deterministic."
+        if advisor_state.requested
+        else " AI layout recommendation not requested; selection source deterministic."
+    )
     return transition(
         state,
         "spatial_critic",
         "approved",
-        f"Reviewed {len(reviews)} candidate(s); selected approved candidate {selected} (zero-based).",
+        f"Reviewed {len(reviews)} candidate(s); selected approved candidate {selected} (zero-based)."
+        + advisor_note,
         reviews=reviews,
+        layout_recommendation=advisor_state,
         selected_candidate_index=selected,
+        selection_source="deterministic",
         approved_design=state.generation.candidates[selected].design.model_copy(
             deep=True
         ),
