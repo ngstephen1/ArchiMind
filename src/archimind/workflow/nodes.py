@@ -13,6 +13,7 @@ from archimind.geometry import (
 )
 from archimind.models import RoomDesign
 from archimind.workflow.layout_recommendation import advisor_policy
+from archimind.workflow.spatial_critique import critic_policy
 from archimind.workflow.state import (
     MAX_WORKFLOW_ITERATIONS,
     AgentActivity,
@@ -60,6 +61,16 @@ def stop(
     status: ExecutionStatus = "failed",
     **updates: object,
 ) -> dict:
+    if state.spatial_critique.requested and state.spatial_critique.status == "pending":
+        updates.setdefault(
+            "spatial_critique",
+            state.spatial_critique.model_copy(
+                update={
+                    "status": "skipped",
+                    "reason": "workflow_terminated_before_critic",
+                }
+            ),
+        )
     if (
         state.layout_recommendation.requested
         and state.layout_recommendation.status == "pending"
@@ -296,12 +307,15 @@ def spatial_critic(state: WorkflowState) -> dict:
     advisor_state = advisor_policy(state).model_copy(
         update={"deterministic_candidate_index": selected}
     )
+    critique_state = critic_policy(state)
     advisor_note = (
         f" AI layout recommendation requested: {advisor_state.status}; "
         f"reason={advisor_state.reason or 'eligible'}; current source deterministic."
         if advisor_state.requested
         else " AI layout recommendation not requested; selection source deterministic."
     )
+    if critique_state.requested:
+        advisor_note += f" AI spatial critique requested: {critique_state.status}; reason={critique_state.reason or 'eligible'}; executed=False."
     return transition(
         state,
         "spatial_critic",
@@ -310,6 +324,7 @@ def spatial_critic(state: WorkflowState) -> dict:
         + advisor_note,
         reviews=reviews,
         layout_recommendation=advisor_state,
+        spatial_critique=critique_state,
         selected_candidate_index=selected,
         selection_source="deterministic",
         approved_design=state.generation.candidates[selected].design.model_copy(
@@ -332,7 +347,12 @@ def interior_stylist(state: WorkflowState) -> dict:
         state,
         "interior_stylist",
         "styled",
-        f"Attached deterministic {theme} styling metadata; geometry unchanged.",
+        f"Attached deterministic {theme} styling metadata; geometry unchanged."
+        + (
+            f" Final selected candidate {state.selected_candidate_index}; source {state.selection_source}; AI critique advisory only."
+            if state.spatial_critique.requested
+            else ""
+        ),
         status="succeeded",
         styling=StylingMetadata(
             theme=theme,

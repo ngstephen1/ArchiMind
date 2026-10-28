@@ -10,6 +10,7 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from archimind.agents.layout_schemas import LayoutAdviceResult, PreferenceText
 from archimind.agents.requirements_schemas import RequirementsResult
+from archimind.agents.spatial_critic_schemas import SpatialCriticResult
 from archimind.geometry import (
     MAX_GENERATION_ATTEMPTS,
     AccessibilityConfig,
@@ -23,6 +24,7 @@ NodeName = Literal[
     "layout_designer",
     "spatial_critic",
     "layout_advisor",
+    "ai_spatial_critic",
     "interior_stylist",
 ]
 ExecutionStatus = Literal[
@@ -38,7 +40,7 @@ ExecutionStatus = Literal[
     "unavailable",
 ]
 MAX_WORKFLOW_ITERATIONS = 1
-MAX_NODE_EXECUTIONS = 5
+MAX_NODE_EXECUTIONS = 6
 
 
 class _Contract(BaseModel):
@@ -85,6 +87,7 @@ class AgentActivity(_Contract):
         "approved",
         "recommended",
         "fallback",
+        "reviewed",
         "styled",
         "stopped",
     ]
@@ -203,10 +206,73 @@ class LayoutRecommendationState(_Contract):
         return self
 
 
+class SpatialCritiqueState(_Contract):
+    """Advisory execution, independent of selection and deterministic approval.
+
+    Candidate index is the original generator index; candidate_indices maps D1's
+    local packet indices to originals. Executed means adapter invocation, not
+    evidence of live API usage. D1 owns assessment, stance and observations.
+    """
+
+    requested: bool = False
+    status: Literal[
+        "not_requested",
+        "pending",
+        "disabled",
+        "skipped",
+        "evaluated",
+        "abstained",
+        "unavailable",
+        "error",
+        "rejected",
+    ] = "not_requested"
+    executed: bool = False
+    candidate_index: int | None = Field(default=None, ge=0, le=1)
+    candidate_indices: list[int] = Field(default_factory=list, max_length=2)
+    result: SpatialCriticResult | None = None
+    reason: str | None = None
+
+    @model_validator(mode="after")
+    def coherent_critique(self) -> Self:
+        if (self.status == "not_requested") != (not self.requested):
+            raise ValueError("Critic request and execution status disagree")
+        if self.executed and self.status in (
+            "not_requested",
+            "pending",
+            "disabled",
+            "skipped",
+        ):
+            raise ValueError("A skipped critic cannot have executed")
+        if len(set(self.candidate_indices)) != len(self.candidate_indices) or any(
+            type(index) is not int or index not in (0, 1)
+            for index in self.candidate_indices
+        ):
+            raise ValueError("Critic mapping must contain unique source indices")
+        if self.result is not None and self.result.status != (
+            "error" if self.status == "rejected" else self.status
+        ):
+            raise ValueError("Critic metadata must preserve the actual response status")
+        if self.status in ("evaluated", "abstained"):
+            if (
+                not self.executed
+                or self.result is None
+                or self.candidate_index not in self.candidate_indices
+            ):
+                raise ValueError(
+                    "A critique needs execution, a checked result and target mapping"
+                )
+            if (
+                self.result.context.request.reviewed_candidate_index
+                != self.candidate_indices.index(self.candidate_index)
+            ):
+                raise ValueError("Critic target must match the local-to-source mapping")
+        return self
+
+
 class WorkflowState(_Contract):
     """Explicit sequential handoffs; lists use replacement, never shared reducers.
 
-    One generation iteration, four default/five advised nodes, no automatic retry.
+    One generation iteration, four to six nodes, no automatic retry.
     A partial generator result may succeed if a candidate passes independent
     critique; exhaustion without candidates is an explicit terminal outcome.
     """
@@ -219,6 +285,7 @@ class WorkflowState(_Contract):
     layout_recommendation: LayoutRecommendationState = Field(
         default_factory=LayoutRecommendationState
     )
+    spatial_critique: SpatialCritiqueState = Field(default_factory=SpatialCritiqueState)
     selection_source: Literal["deterministic", "ai_recommendation"] | None = None
     selected_candidate_index: int | None = Field(default=None, ge=0, le=1)
     approved_design: RoomDesign | None = None
@@ -228,6 +295,7 @@ class WorkflowState(_Contract):
         "layout_designer",
         "spatial_critic",
         "layout_advisor",
+        "ai_spatial_critic",
         "interior_stylist",
         "complete",
     ] = "requirements_interpreter"
@@ -338,6 +406,49 @@ class WorkflowState(_Contract):
                 raise ValueError("Selection needs an explicit source")
         elif self.selection_source is not None:
             raise ValueError("A selection source requires a final selected candidate")
+        critique = self.spatial_critique
+        if critique.candidate_index is not None:
+            if self.generation is None or critique.candidate_index >= len(
+                self.generation.candidates
+            ):
+                raise ValueError("Critic target must exist")
+            if selected is not None and selected != critique.candidate_index:
+                raise ValueError("AI critique cannot change the selected candidate")
+        if critique.status in ("evaluated", "abstained"):
+            packet = critique.result.context.request
+            candidates = packet.layout.generation.candidates
+            if len(candidates) != len(critique.candidate_indices):
+                raise ValueError("Critic packet and source mapping must agree")
+            for local, source in enumerate(critique.candidate_indices):
+                if (
+                    source >= len(self.generation.candidates)
+                    or candidates[local] != self.generation.candidates[source]
+                ):
+                    raise ValueError(
+                        "Critic candidates must equal immutable source candidates"
+                    )
+                if not any(
+                    review.candidate_index == source
+                    and review.accepted
+                    and review.report == candidates[local].validation
+                    for review in self.reviews
+                ):
+                    raise ValueError(
+                        "Critic candidates require authoritative deterministic approval"
+                    )
+            expected_advice = (
+                self.layout_recommendation.advice
+                if self.layout_recommendation.status == "recommended"
+                else None
+            )
+            if packet.layout_recommendation != expected_advice or (
+                expected_advice is not None
+                and self.layout_recommendation.proposed_candidate_index
+                != critique.candidate_index
+            ):
+                raise ValueError(
+                    "Critic recommendation must equal the accepted advisor selection"
+                )
         if self.styling is not None and selected is None:
             raise ValueError("Styling requires an approved design")
         if self.status == "succeeded" and (

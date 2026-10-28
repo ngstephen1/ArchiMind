@@ -51,6 +51,12 @@ def prepare_critic_context(request: SpatialCriticRequest) -> SpatialCriticContex
                 advice.status not in ("recommended", "abstained")
                 or advice.context != layout
                 or advice.mode == "not_evaluated"
+                or (
+                    advice.status == "recommended"
+                    and request.reviewed_candidate_index is not None
+                    and advice.proposal.candidate_index
+                    != request.reviewed_candidate_index
+                )
                 or (advice.mode == "offline_fixture" and advice.model is not None)
                 or (
                     advice.mode == "api_response"
@@ -285,6 +291,19 @@ def interpret_critic_proposal(
                 explanation=text,
                 evidence=cited,
             )
+        )
+
+    target = context.request.reviewed_candidate_index
+    if (
+        target is not None
+        and proposal.decision == "critique"
+        and not any(
+            observation.evidence and f"candidate-{target}" in observation.candidate_ids
+            for observation in observations
+        )
+    ):
+        raise ValueError(
+            "Critique must discuss the requested candidate's measured evidence"
         )
 
     assessments = proposal.preference_assessments

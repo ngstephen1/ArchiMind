@@ -48,6 +48,16 @@ class SpatialCriticRequest(Contract):
         default_factory=list, max_length=8
     )
     layout_recommendation: LayoutAdviceResult | None = None
+    reviewed_candidate_index: Index | None = None
+
+    @model_validator(mode="after")
+    def valid_review_target(self) -> Self:
+        if (
+            self.reviewed_candidate_index is not None
+            and self.reviewed_candidate_index >= len(self.layout.generation.candidates)
+        ):
+            raise ValueError("Reviewed candidate must exist in the supplied packet")
+        return self
 
 
 class CriticEvidence(Contract):

@@ -173,7 +173,7 @@ def test_recommendation_follows_critic_and_styles_exact_original_candidate(
     assert result.generation.candidates[1].score.total == 67.614973
     assert request_data.model_dump_json() == before
     assert [event.node for event in result.trace] == ADVISED_NODES
-    assert len(result.trace) == MAX_NODE_EXECUTIONS == 5
+    assert len(result.trace) == 5 and MAX_NODE_EXECUTIONS == 6
     assert result.iteration_count == 1
     assert result.layout_recommendation.candidate_indices == [0, 1]
     assert result.layout_recommendation.deterministic_candidate_index == 0

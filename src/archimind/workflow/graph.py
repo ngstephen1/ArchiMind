@@ -8,12 +8,15 @@ from langsmith import tracing_context
 
 from archimind.agents.layout_schemas import LayoutAdviceResult
 from archimind.agents.requirements_schemas import RequirementsResult
+from archimind.agents.spatial_critic_schemas import SpatialCriticResult
 from archimind.workflow import nodes
 from archimind.workflow.layout_recommendation import layout_recommendation
+from archimind.workflow.spatial_critique import spatial_critique
 from archimind.workflow.state import (
     DesignRequest,
     LayoutRecommendationState,
     NodeName,
+    SpatialCritiqueState,
     WorkflowState,
 )
 
@@ -46,7 +49,15 @@ def _continue(state: WorkflowState) -> str:
 def _after_critic(state: WorkflowState) -> str:
     if state.status != "running":
         return "stop"
-    return "advisor" if state.layout_recommendation.status == "pending" else "stylist"
+    if state.layout_recommendation.status == "pending":
+        return "advisor"
+    return _after_advisor(state)
+
+
+def _after_advisor(state: WorkflowState) -> str:
+    if state.status != "running":
+        return "stop"
+    return "critique" if state.spatial_critique.status == "pending" else "stylist"
 
 
 def _build_workflow(
@@ -56,6 +67,8 @@ def _build_workflow(
     interpreter: Callable[..., RequirementsResult] | None = None,
     allow_live_layout: bool = False,
     layout_advisor: Callable[..., LayoutAdviceResult] | None = None,
+    allow_live_critic: bool = False,
+    spatial_critic: Callable[..., SpatialCriticResult] | None = None,
 ):
     """Build fresh internal orchestration; there is no global graph/checkpointer."""
     graph = StateGraph(WorkflowState)
@@ -81,6 +94,12 @@ def _build_workflow(
                 advisor=layout_advisor,
             ),
         ),
+        (
+            "ai_spatial_critic",
+            partial(
+                spatial_critique, allow_live=allow_live_critic, critic=spatial_critic
+            ),
+        ),
         ("interior_stylist", nodes.interior_stylist),
     )
     for name, operation in roles:
@@ -95,10 +114,20 @@ def _build_workflow(
     graph.add_conditional_edges(
         "spatial_critic",
         _after_critic,
-        {"advisor": "layout_advisor", "stylist": "interior_stylist", "stop": END},
+        {
+            "advisor": "layout_advisor",
+            "critique": "ai_spatial_critic",
+            "stylist": "interior_stylist",
+            "stop": END,
+        },
     )
     graph.add_conditional_edges(
-        "layout_advisor", _continue, {"next": "interior_stylist", "stop": END}
+        "layout_advisor",
+        _after_advisor,
+        {"critique": "ai_spatial_critic", "stylist": "interior_stylist", "stop": END},
+    )
+    graph.add_conditional_edges(
+        "ai_spatial_critic", _continue, {"next": "interior_stylist", "stop": END}
     )
     graph.add_edge("interior_stylist", END)
     return graph.compile()
@@ -113,6 +142,9 @@ def run_workflow(
     use_ai_layout: bool = False,
     allow_live_layout: bool = False,
     layout_advisor: Callable[..., LayoutAdviceResult] | None = None,
+    use_ai_critic: bool = False,
+    allow_live_critic: bool = False,
+    spatial_critic: Callable[..., SpatialCriticResult] | None = None,
 ) -> WorkflowState:
     """Run from a fresh request with separately gated interpretation and advice.
 
@@ -122,7 +154,9 @@ def run_workflow(
     An explicit trusted offline fixture may run without live authorization, but
     cannot bypass the workflow opt-in or environment feature flag.
     No retry loop, persistence, C01, callbacks or remote tracing.
-    Four default/five optional nodes execute at most once; recursion is bounded.
+    Critique additionally requires use_ai_critic, its environment flag and exact
+    allow_live_critic authorization for API use. It cannot change selection.
+    Four default, five with one AI node, six with both; each runs at most once.
     Caller objects and environment are unchanged. LangGraph's internal execution
     IDs are excluded from the deterministic result; placement uses its own seed.
     """
@@ -131,6 +165,8 @@ def run_workflow(
         or type(allow_live_requirements) is not bool
         or type(use_ai_layout) is not bool
         or type(allow_live_layout) is not bool
+        or type(use_ai_critic) is not bool
+        or type(allow_live_critic) is not bool
     ):
         raise ValueError("Workflow modes and authorization must be boolean")
     request = DesignRequest.model_validate(request).model_copy(deep=True)
@@ -139,6 +175,10 @@ def run_workflow(
         layout_recommendation=LayoutRecommendationState(
             requested=use_ai_layout,
             status="pending" if use_ai_layout else "not_requested",
+        ),
+        spatial_critique=SpatialCritiqueState(
+            requested=use_ai_critic,
+            status="pending" if use_ai_critic else "not_requested",
         ),
     )
     # Override even an externally configured LangSmith tracing environment locally.
@@ -149,8 +189,10 @@ def run_workflow(
             interpreter=interpreter,
             allow_live_layout=allow_live_layout,
             layout_advisor=layout_advisor,
+            allow_live_critic=allow_live_critic,
+            spatial_critic=spatial_critic,
         ).invoke(
             dict(initial),
-            {"recursion_limit": 7, "callbacks": []},
+            {"recursion_limit": 8, "callbacks": []},
         )
     return WorkflowState.model_validate(result)
