@@ -3,6 +3,7 @@
 from archimind.workflow.graph import run_workflow
 from archimind.workflow.state import (
     AgentActivity,
+    AIStylingState,
     CandidateReview,
     DesignRequest,
     LayoutRecommendationState,
@@ -14,6 +15,7 @@ from archimind.workflow.state import (
 )
 
 __all__ = [
+    "AIStylingState",
     "AgentActivity",
     "CandidateReview",
     "DesignRequest",

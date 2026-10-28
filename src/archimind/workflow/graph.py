@@ -6,13 +6,16 @@ from functools import partial
 from langgraph.graph import END, START, StateGraph
 from langsmith import tracing_context
 
+from archimind.agents.interior_stylist_schemas import InteriorStylistResult
 from archimind.agents.layout_schemas import LayoutAdviceResult
 from archimind.agents.requirements_schemas import RequirementsResult
 from archimind.agents.spatial_critic_schemas import SpatialCriticResult
 from archimind.workflow import nodes
+from archimind.workflow.interior_styling import interior_styling, stylist_policy
 from archimind.workflow.layout_recommendation import layout_recommendation
 from archimind.workflow.spatial_critique import spatial_critique
 from archimind.workflow.state import (
+    AIStylingState,
     DesignRequest,
     LayoutRecommendationState,
     NodeName,
@@ -57,7 +60,17 @@ def _after_critic(state: WorkflowState) -> str:
 def _after_advisor(state: WorkflowState) -> str:
     if state.status != "running":
         return "stop"
-    return "critique" if state.spatial_critique.status == "pending" else "stylist"
+    return (
+        "critique"
+        if state.spatial_critique.status == "pending"
+        else _before_styling(state)
+    )
+
+
+def _before_styling(state: WorkflowState) -> str:
+    if state.status != "running":
+        return "stop"
+    return "ai_stylist" if state.ai_styling.status == "pending" else "stylist"
 
 
 def _build_workflow(
@@ -69,6 +82,8 @@ def _build_workflow(
     layout_advisor: Callable[..., LayoutAdviceResult] | None = None,
     allow_live_critic: bool = False,
     spatial_critic: Callable[..., SpatialCriticResult] | None = None,
+    allow_live_stylist: bool = False,
+    interior_stylist: Callable[..., InteriorStylistResult] | None = None,
 ):
     """Build fresh internal orchestration; there is no global graph/checkpointer."""
     graph = StateGraph(WorkflowState)
@@ -101,6 +116,14 @@ def _build_workflow(
             ),
         ),
         ("interior_stylist", nodes.interior_stylist),
+        (
+            "ai_interior_stylist",
+            partial(
+                interior_styling,
+                allow_live=allow_live_stylist,
+                stylist=interior_stylist,
+            ),
+        ),
     )
     for name, operation in roles:
         graph.add_node(name, _guard(name, operation))
@@ -118,16 +141,31 @@ def _build_workflow(
             "advisor": "layout_advisor",
             "critique": "ai_spatial_critic",
             "stylist": "interior_stylist",
+            "ai_stylist": "ai_interior_stylist",
             "stop": END,
         },
     )
     graph.add_conditional_edges(
         "layout_advisor",
         _after_advisor,
-        {"critique": "ai_spatial_critic", "stylist": "interior_stylist", "stop": END},
+        {
+            "critique": "ai_spatial_critic",
+            "stylist": "interior_stylist",
+            "ai_stylist": "ai_interior_stylist",
+            "stop": END,
+        },
     )
     graph.add_conditional_edges(
-        "ai_spatial_critic", _continue, {"next": "interior_stylist", "stop": END}
+        "ai_spatial_critic",
+        _before_styling,
+        {
+            "stylist": "interior_stylist",
+            "ai_stylist": "ai_interior_stylist",
+            "stop": END,
+        },
+    )
+    graph.add_conditional_edges(
+        "ai_interior_stylist", _continue, {"next": "interior_stylist", "stop": END}
     )
     graph.add_edge("interior_stylist", END)
     return graph.compile()
@@ -145,6 +183,9 @@ def run_workflow(
     use_ai_critic: bool = False,
     allow_live_critic: bool = False,
     spatial_critic: Callable[..., SpatialCriticResult] | None = None,
+    use_ai_stylist: bool = False,
+    allow_live_stylist: bool = False,
+    interior_stylist: Callable[..., InteriorStylistResult] | None = None,
 ) -> WorkflowState:
     """Run from a fresh request with separately gated interpretation and advice.
 
@@ -156,7 +197,9 @@ def run_workflow(
     No retry loop, persistence, C01, callbacks or remote tracing.
     Critique additionally requires use_ai_critic, its environment flag and exact
     allow_live_critic authorization for API use. It cannot change selection.
-    Four default, five with one AI node, six with both; each runs at most once.
+    Styling requires use_ai_stylist, its feature flag and exact allow_live_stylist
+    consent, including trusted offline injections (which never use a live client).
+    Four default, at most seven with advisors and a fixture fallback; no retries.
     Caller objects and environment are unchanged. LangGraph's internal execution
     IDs are excluded from the deterministic result; placement uses its own seed.
     """
@@ -167,6 +210,8 @@ def run_workflow(
         or type(allow_live_layout) is not bool
         or type(use_ai_critic) is not bool
         or type(allow_live_critic) is not bool
+        or type(use_ai_stylist) is not bool
+        or type(allow_live_stylist) is not bool
     ):
         raise ValueError("Workflow modes and authorization must be boolean")
     request = DesignRequest.model_validate(request).model_copy(deep=True)
@@ -180,7 +225,12 @@ def run_workflow(
             requested=use_ai_critic,
             status="pending" if use_ai_critic else "not_requested",
         ),
+        ai_styling=AIStylingState(
+            requested=use_ai_stylist,
+            status="pending" if use_ai_stylist else "not_requested",
+        ),
     )
+    initial.ai_styling = stylist_policy(initial, allow_live=allow_live_stylist)
     # Override even an externally configured LangSmith tracing environment locally.
     with tracing_context(enabled=False):
         result = _build_workflow(
@@ -191,8 +241,10 @@ def run_workflow(
             layout_advisor=layout_advisor,
             allow_live_critic=allow_live_critic,
             spatial_critic=spatial_critic,
+            allow_live_stylist=allow_live_stylist,
+            interior_stylist=interior_stylist,
         ).invoke(
             dict(initial),
-            {"recursion_limit": 8, "callbacks": []},
+            {"recursion_limit": 9, "callbacks": []},
         )
     return WorkflowState.model_validate(result)

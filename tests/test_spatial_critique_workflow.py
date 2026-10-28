@@ -246,7 +246,7 @@ def test_all_four_modes_preserve_selection_data_and_execution_bounds(
         spatial_critic=critic,
     )
     assert result.status == "succeeded"
-    assert len(result.trace) == count <= MAX_NODE_EXECUTIONS == 6
+    assert len(result.trace) == count <= MAX_NODE_EXECUTIONS == 7
     expected_nodes = (
         BASE_NODES
         + (["layout_advisor"] if advisor_on else [])

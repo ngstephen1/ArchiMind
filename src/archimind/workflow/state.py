@@ -4,10 +4,19 @@ RoomDesign and the generator/validator reports remain the canonical contracts.
 No coordinates, units, identity rules or spatial algorithms are redefined here.
 """
 
+import json
 from typing import Literal, Self
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    ValidationInfo,
+    field_validator,
+    model_validator,
+)
 
+from archimind.agents.interior_stylist_schemas import InteriorStylistResult
 from archimind.agents.layout_schemas import LayoutAdviceResult, PreferenceText
 from archimind.agents.requirements_schemas import RequirementsResult
 from archimind.agents.spatial_critic_schemas import SpatialCriticResult
@@ -25,6 +34,7 @@ NodeName = Literal[
     "spatial_critic",
     "layout_advisor",
     "ai_spatial_critic",
+    "ai_interior_stylist",
     "interior_stylist",
 ]
 ExecutionStatus = Literal[
@@ -40,7 +50,7 @@ ExecutionStatus = Literal[
     "unavailable",
 ]
 MAX_WORKFLOW_ITERATIONS = 1
-MAX_NODE_EXECUTIONS = 6
+MAX_NODE_EXECUTIONS = 7
 
 
 class _Contract(BaseModel):
@@ -74,6 +84,7 @@ class DesignRequest(_Contract):
     accessibility: AccessibilityConfig = Field(default_factory=AccessibilityConfig)
     styling_preferences: StylingPreferences = Field(default_factory=StylingPreferences)
     soft_preferences: list[PreferenceText] = Field(default_factory=list, max_length=8)
+    style_request: PreferenceText | None = None
 
 
 class AgentActivity(_Contract):
@@ -269,10 +280,57 @@ class SpatialCritiqueState(_Contract):
         return self
 
 
+class AIStylingState(_Contract):
+    """E1 owns the checked plan; execution is not evidence of live API usage."""
+
+    requested: bool = False
+    status: Literal[
+        "not_requested",
+        "pending",
+        "disabled",
+        "skipped",
+        "styled",
+        "needs_clarification",
+        "unavailable",
+        "error",
+        "rejected",
+    ] = "not_requested"
+    executed: bool = False
+    source: Literal["ai", "deterministic_fixture"] | None = None
+    candidate_index: int | None = Field(default=None, ge=0, le=1)
+    result: InteriorStylistResult | None = None
+    reason: str | None = None
+
+    @model_validator(mode="after")
+    def coherent_styling(self) -> Self:
+        if (self.status == "not_requested") != (not self.requested):
+            raise ValueError("Stylist request and status disagree")
+        if self.executed and self.status in (
+            "not_requested",
+            "pending",
+            "disabled",
+            "skipped",
+        ):
+            raise ValueError("A skipped stylist cannot have executed")
+        if self.result is not None and self.result.status != (
+            "error" if self.status == "rejected" else self.status
+        ):
+            raise ValueError(
+                "Stylist metadata must preserve the checked response status"
+            )
+        if self.status in ("styled", "needs_clarification") and (
+            not self.executed or self.result is None or self.candidate_index is None
+        ):
+            raise ValueError("Evaluated styling needs execution, result and target")
+        if (self.source == "ai") != (self.status == "styled"):
+            raise ValueError("AI source requires a checked style plan")
+        return self
+
+
 class WorkflowState(_Contract):
     """Explicit sequential handoffs; lists use replacement, never shared reducers.
 
-    One generation iteration, four to six nodes, no automatic retry.
+    One generation iteration, at most seven nodes, no automatic retry.
     A partial generator result may succeed if a candidate passes independent
     critique; exhaustion without candidates is an explicit terminal outcome.
     """
@@ -286,6 +344,7 @@ class WorkflowState(_Contract):
         default_factory=LayoutRecommendationState
     )
     spatial_critique: SpatialCritiqueState = Field(default_factory=SpatialCritiqueState)
+    ai_styling: AIStylingState = Field(default_factory=AIStylingState)
     selection_source: Literal["deterministic", "ai_recommendation"] | None = None
     selected_candidate_index: int | None = Field(default=None, ge=0, le=1)
     approved_design: RoomDesign | None = None
@@ -296,6 +355,7 @@ class WorkflowState(_Contract):
         "spatial_critic",
         "layout_advisor",
         "ai_spatial_critic",
+        "ai_interior_stylist",
         "interior_stylist",
         "complete",
     ] = "requirements_interpreter"
@@ -306,10 +366,26 @@ class WorkflowState(_Contract):
     error: WorkflowError | None = None
     iteration_count: int = Field(default=0, ge=0, le=MAX_WORKFLOW_ITERATIONS)
 
+    @field_validator("ai_styling", mode="before")
+    @classmethod
+    def preserve_style_json_mode(cls, value, info: ValidationInfo):
+        # The legacy before-validator materializes JSON into Python containers.
+        # Re-enter JSON validation for E1's immutable tuple-based catalog rather
+        # than relaxing its strict Python contract or changing that schema.
+        if info.mode == "json" and isinstance(value, dict):
+            return AIStylingState.model_validate_json(json.dumps(value))
+        return value
+
     @model_validator(mode="before")
     @classmethod
     def upgrade_legacy_selection(cls, value):
         """Old serialized states have no advisor/source fields; infer their defaults."""
+        if (
+            isinstance(value, dict)
+            and "ai_styling" not in value
+            and value.get("styling") is not None
+        ):
+            value = {**value, "ai_styling": {"source": "deterministic_fixture"}}
         if (
             isinstance(value, dict)
             and value.get("selected_candidate_index") is not None
@@ -451,8 +527,29 @@ class WorkflowState(_Contract):
                 )
         if self.styling is not None and selected is None:
             raise ValueError("Styling requires an approved design")
+        styling = self.ai_styling
+        if styling.result is not None and styling.result.context is not None:
+            if (
+                self.generation is None
+                or styling.candidate_index is None
+                or styling.candidate_index >= len(self.generation.candidates)
+                or styling.result.context.request.candidate
+                != self.generation.candidates[styling.candidate_index]
+                or selected != styling.candidate_index
+            ):
+                raise ValueError(
+                    "Style context must retain the selected source candidate"
+                )
+        if self.styling is not None and styling.source != "deterministic_fixture":
+            raise ValueError("Fixture metadata requires explicit fixture provenance")
+        if styling.source == "ai" and (self.styling is not None or selected is None):
+            raise ValueError(
+                "AI styling is separate from fixture metadata and needs selection"
+            )
         if self.status == "succeeded" and (
-            self.stage != "complete" or self.styling is None or self.error is not None
+            self.stage != "complete"
+            or (self.styling is None and styling.source != "ai")
+            or self.error is not None
         ):
             raise ValueError("Success requires completed styling without an error")
         if self.status in ("pending", "running", "succeeded"):

@@ -61,6 +61,16 @@ def stop(
     status: ExecutionStatus = "failed",
     **updates: object,
 ) -> dict:
+    if state.ai_styling.requested and state.ai_styling.status == "pending":
+        updates.setdefault(
+            "ai_styling",
+            state.ai_styling.model_copy(
+                update={
+                    "status": "skipped",
+                    "reason": "workflow_terminated_before_stylist",
+                }
+            ),
+        )
     if state.spatial_critique.requested and state.spatial_critique.status == "pending":
         updates.setdefault(
             "spatial_critique",
@@ -352,8 +362,17 @@ def interior_stylist(state: WorkflowState) -> dict:
             f" Final selected candidate {state.selected_candidate_index}; source {state.selection_source}; AI critique advisory only."
             if state.spatial_critique.requested
             else ""
+        )
+        + (
+            f" AI styling {state.ai_styling.status}; executed={state.ai_styling.executed}; "
+            f"reason={state.ai_styling.reason}; style source deterministic_fixture."
+            if state.ai_styling.requested
+            else ""
         ),
         status="succeeded",
+        ai_styling=state.ai_styling.model_copy(
+            update={"source": "deterministic_fixture"}
+        ),
         styling=StylingMetadata(
             theme=theme,
             palette=palettes[theme],
