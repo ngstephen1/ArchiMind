@@ -1,0 +1,178 @@
+# Deterministic workflow foundation — Task 07A
+
+This is a backend-only LangGraph workflow for four future agent roles. All nodes
+are deterministic Python components. No LLM reasoning, natural-language parsing,
+model request, C01 invocation, subprocess, chat or automatic revision is involved.
+Streamlit and both rendering systems are unchanged and do not invoke this graph.
+The existing app still labels multi-agent reasoning as future work.
+
+## Dependencies and API
+
+The runtime pins **LangGraph 1.2.18**, a non-yanked production/stable release
+requiring Python >=3.10; local execution uses Python 3.11.13 and Pydantic 2.14.1.
+The supported `StateGraph`, `START`/`END`, `add_conditional_edges`, `compile` and
+`invoke` APIs were checked against the installed version and the official
+[Graph API](https://docs.langchain.com/oss/python/langgraph/graph-api) and
+[Pydantic state guide](https://docs.langchain.com/oss/python/langgraph/use-graph-api#use-pydantic-models-for-graph-state).
+See [release metadata](https://pypi.org/project/langgraph/1.2.18/).
+
+LangGraph installs its required transitive packages, including `langchain-core`
+and LangSmith; no model-provider SDK or higher-level `langchain` package is added.
+The runner uses the installed LangSmith `tracing_context(enabled=False)` to
+disable remote tracing even when the caller enables it. No callbacks, store,
+checkpointer or external service is configured. The caller's context/environment
+is restored after execution. Internal LangGraph run IDs are excluded from result
+data and traces; only declared seed and deterministic domain results are returned.
+
+```python
+from archimind.examples import create_sample_bedroom
+from archimind.workflow import DesignRequest, WorkflowState, run_workflow
+
+request = DesignRequest(specification=create_sample_bedroom(), seed=42)
+result = run_workflow(request)
+assert result.status == "succeeded"
+assert WorkflowState.model_validate_json(result.model_dump_json()) == result
+```
+
+## State and responsibility contracts
+
+| Contract | Contents and boundary |
+| --- | --- |
+| `DesignRequest` | Optional original prose; structured canonical `RoomDesign`; seed, 1–2 candidates, 0–10,000 attempts; canonical `AccessibilityConfig`; fixture styling preference |
+| `WorkflowState` | Original request, canonical working specification, `LayoutGenerationResult`, individual critiques, selected index and approved design, styling, stage/status, activity trace, typed error, iteration count |
+| `CandidateReview` | Candidate index, newly computed `AccessibilityValidationReport`, acceptance and reason; failed/unverified reports cannot be accepted |
+| `StylingPreferences` / `StylingMetadata` | Neutral/warm/cool fixture selector and explicit `deterministic_fixture` palette/material notes; no rendered materials or geometry changes |
+| `AgentActivity` / `WorkflowError` | Ordered role/decision/message records and sanitized node-specific failure codes; no timestamps, secrets or raw exception text |
+
+Canonical IDs, dimensions and coordinates are not redefined. All geometry remains
+meters from the southwest origin, X east, Y north, Z up. The original specification
+is retained unchanged. The existing generator replaces requested X/Y positions;
+input positions are not fixed anchors. Candidate room geometry, furniture IDs,
+names, categories, dimensions and rotations must match the specification.
+
+Malformed canonical data/options raise Pydantic `ValidationError` before graph
+execution. A missing specification, including prose-only input, instead returns
+a traced `missing_specification` failure. Explicit empty-furniture requests are
+supported by the existing backend. No prose is interpreted or sent elsewhere.
+
+```mermaid
+flowchart LR
+    S([Start]) --> R[Requirements Interpreter]
+    R -->|structured input| L[Layout Designer]
+    L -->|candidates exist| C[Spatial Critic]
+    C -->|independently approved| I[Interior Stylist]
+    I --> F([Final result])
+    R -->|missing input / error| E([Terminal failure])
+    L -->|unsupported / infeasible / empty exhaustion / error| E
+    C -->|none approved / error| E
+    I -->|error| E
+```
+
+1. **Requirements Interpreter** revalidates and copies structured requirements.
+2. **Layout Designer** calls `generate_layout_candidates` exactly once with the
+   requested seed/config/budget; it reuses search, scoring and geometry logic.
+3. **Spatial Critic** re-runs `validate_accessibility` for every actual candidate
+   with the requested config and **zero overlap tolerance**. It rejects failed or
+   unverified checks, changed specifications and disagreement with supplied reports.
+   It selects the first approved candidate in the generator's ranked order.
+   Advisory door-clearance warnings remain advisory and are preserved in reports.
+4. **Interior Stylist** attaches deterministic fixture metadata to that approved
+   design. It does not alter candidate coordinates, reports, scores or assets.
+
+## Bounds, failures and serialization
+
+There is one generation iteration and at most four node executions. All edges
+advance or terminate; there is no retry/back edge. A guard rejects a second
+generation iteration, and LangGraph's recursion limit of 6 is an extra backstop.
+The generator retains its 32-furniture/10,000-attempt and accessibility limits;
+the workflow introduces no alternative placement/geometry implementation.
+
+Outcomes are `succeeded`, `failed`, `unsupported`, `infeasible`, `exhausted` or
+`rejected`; `pending`/`running` describe intermediate states. Search exhaustion
+does not prove infeasibility. A partial result with one valid candidate can still
+complete the workflow; its original `search_exhausted` generation status remains
+visible. With no candidate, exhaustion terminates before critique/styling.
+
+Node exceptions terminate immediately with a sanitized `node_error`, retaining
+the preceding trace. Failure clears the selected/approved design and styling,
+including when a styling exception follows a successful critique. Completed
+handoffs and the final result are explicitly Pydantic-validated because LangGraph
+does not automatically validate every node/output update. Success requires an
+existing, independently approved selection and completed styling.
+
+No mutable workflow singleton exists. Caller input and API arguments are copied;
+each invocation builds a fresh graph and state. JSON includes all original data,
+candidate layouts, independent reports, decisions and fixture metadata. Repeated
+fixed-seed invocations return identical domain output, including trace messages.
+
+## Reproducible CLI demonstration
+
+```bash
+cd /Users/macbook/Hack/ArchiMind
+source .venv/bin/activate
+python -m archimind.examples.workflow_bedroom
+python -m archimind.examples.workflow_bedroom --seed 42 --theme warm --json
+```
+
+Actual default output:
+
+```text
+Task 07A deterministic workflow (no LLM calls)
+Status: succeeded
+Generation: complete; 2 candidates; 9/500 attempts
+Selected candidate: 0 (zero-based)
+Independent spatial checks: passed
+  desk: X/Y (0, 1.36) m; W/D/H 1.2/0.6/0.75 m
+  queen-bed: X/Y (3.4, 1.69) m; W/D/H 1.6/2/0.6 m
+  wardrobe: X/Y (0, 3.4) m; W/D/H 1.5/0.6/2 m
+Styling: neutral (deterministic_fixture)
+Trace:
+  1. requirements_interpreter [accepted] Accepted structured room and 3 furniture requests.
+  2. layout_designer [generated] Generated 2 candidate(s) in 9 attempt(s); generator outcome: complete.
+  3. spatial_critic [approved] Reviewed 2 candidate(s); selected approved candidate 0 (zero-based).
+  4. interior_stylist [styled] Attached deterministic neutral styling metadata; geometry unchanged.
+```
+
+`--json` prints the complete typed state. Exit code 0 means workflow success,
+1 means a terminal workflow failure, and 2 means invalid CLI arguments. For a
+bounded failure demonstration use `--max-attempts 0`: status `exhausted`, no
+approved design, two trace entries and exit code 1. CLI output is not persisted
+unless the caller explicitly redirects it.
+
+## Verification and remaining scope
+
+`tests/test_workflow.py` has 38 offline cases using real LangGraph, Shapely and
+generator APIs, plus controlled fault injection. They cover order/handoffs,
+forged/failed/unverified reports, preserved identities and dimensions, a valid
+second candidate, partial/unsupported/infeasible/exhausted outcomes, iteration
+bounds, exceptions, styling immutability, concurrent isolation, JSON round-trip,
+tracing suppression and real CLI exit/JSON behavior. In-process workflow tests
+block socket connections/DNS and fail on attempted network access.
+
+Final local checks: **631 passed in 23.75s** (593 prior + 38 workflow), all **27
+frontend tests passed**, syntax/build passed with unchanged bundles. Editable
+installation and `pip check` passed; Ruff lint/format passed (56 Python files).
+The real headless Streamlit health check returned **HTTP 200 ok**.
+Wheel contents include all workflow modules and the CLI, with the pinned LangGraph
+dependency in metadata. The readable CLI output above was checked against execution.
+
+```bash
+python -m pip install -e ".[dev]"
+python -m pytest -q
+python -m pip check
+python -m ruff check .
+python -m ruff format --check .
+python scripts/check_health.py
+npm --prefix frontend/realistic_viewer test
+npm --prefix frontend/realistic_viewer run check
+npm --prefix frontend/realistic_viewer run build
+```
+
+Limits remain those of the existing conservative spatial engine: rectangular,
+single-room, zero-rotation layouts, rectangular door approaches, square-occupant
+circulation, no ergonomic/height/function or architectural code certification.
+No natural-language intelligence, model provider, UI integration, persistence,
+automatic retries/revisions or real styling assessment is delivered here.
+
+Recommended next: **Task 07B — OpenAI-Backed Requirements Interpreter Agent**.
+It is not implemented in Task 07A.

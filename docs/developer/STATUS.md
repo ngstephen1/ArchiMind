@@ -2,8 +2,9 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 06E1 complete — experimental architectural room foundation.**
-Task 06E2 is recommended next. The Task 03 preview, Task 05B comparison, and
+**Current milestone: Task 07A complete — deterministic LangGraph backend foundation.**
+Task 07B is recommended next; Task 06E2 remains separate proposed renderer work.
+The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
 advisor with offline tests. C02 remains a separate proposed integration.
@@ -25,7 +26,9 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 06C — Selected 2D/3D layout synchronization | Complete | Exact selected candidate feeds both views, compact camera framing, 13 new tests, and desktop/mobile verification |
 | Task 06D — Realistic 3D asset/renderer proof of concept | Complete | One CC0 textured chair, pinned local Three.js bundle, opt-in Components V2 viewer, standalone fallback, 29 Python/9 frontend tests |
 | Task 06E1 — Realistic 3D architectural room foundation | Complete | Canonical scene contract, genuine wall openings, shared chair instances, labeled placeholders, independent opt-in room; 23 new Python/18 new frontend tests |
-| Task 06E2 | Recommended next | Scope to be agreed; curated asset bindings and room interaction refinements suggested |
+| Task 06E2 | Proposed rendering work | Curated asset bindings and room interaction refinements; not implemented |
+| Task 07A — LangGraph workflow foundation | Complete, deterministic backend only | Typed state, four future-agent roles, independent spatial critique, fixture styling, bounded conditional execution, offline CLI, 38 tests |
+| Task 07B — OpenAI-backed Requirements Interpreter | Recommended next | No model integration or natural-language interpretation implemented yet |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -49,7 +52,8 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; no furniture editing or camera-pose persistence across A/B switches |
 | Experimental realistic room | Local Three.js room, four walls with real holes, glazing, procedural floor, two textured chairs and a labeled desk placeholder | Independent fixed sample; rotation 0; no generator connection or detailed-mesh validity claim; legacy single-chair mode retained |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
-| Agents / API | Not implemented | No LangGraph or OpenAI calls; no API key required |
+| Workflow orchestration | Backend-only LangGraph requirements → layout → critique → styling graph | Four deterministic future-agent roles; no LLMs, free-form parsing, UI connection, persistence or automatic revisions |
+| LLM agents / API | Not implemented | No model-provider calls; no API key required |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
 ## What the app currently shows
@@ -491,11 +495,74 @@ Transparent surfaces may exhibit sorting artifacts. Real mobile devices and
 other browser engines are unverified; hardware performance remains unbenchmarked.
 Unrelated `.agents/` and `.claude/` content remains untouched and uncommitted.
 
+## Task 07A deterministic workflow foundation
+
+The [workflow guide](WORKFLOW.md) documents the actual software contracts, API,
+demonstration, failure semantics and local testing commands. LangGraph **1.2.18**
+is pinned as a runtime dependency; its current Graph API and Python >=3.10 support
+were verified. Existing pinned Python/frontend versions are unchanged. Required
+LangGraph dependencies include `langchain-core` and LangSmith; no model-provider
+SDK is added, and remote tracing is disabled per invocation.
+
+`DesignRequest` retains optional original prose plus a canonical `RoomDesign`,
+seed/budget/config and styling preference. `WorkflowState` carries that original
+request, canonical working specification, `LayoutGenerationResult`, individual
+`CandidateReview` records, approved selection, fixture styling, stage/status,
+ordered `AgentActivity` trace, `WorkflowError` and a bounded iteration count.
+Completed handoffs and final outputs are explicitly Pydantic-validated and JSON
+serializable. No new architectural model or placement/geometry algorithm exists.
+
+The four deterministic roles are:
+
+1. Requirements Interpreter: revalidate/copy structured data; prose-only requests
+   terminate with `missing_specification`.
+2. Layout Designer: one call to the existing seeded generator, preserving requested
+   options and the original input; retain complete/partial/failure generation data.
+3. Spatial Critic: re-run the actual accessibility API at zero overlap tolerance,
+   reject failed/unverified checks, altered identities/dimensions/room or mismatched
+   claimed reports, then select the first independently approved ranked candidate.
+4. Interior Stylist: attach neutral/warm/cool deterministic fixture metadata without
+   changing coordinates, assets, scores or validation reports.
+
+One generation iteration, a four-node acyclic graph and recursion limit 6 bound
+execution. Unsupported/infeasible inputs terminate safely; empty search exhaustion
+is distinguished from proved infeasibility. A partial result can complete if one
+candidate passes critique. Exceptions return sanitized errors and clear any final
+selection/styling. There is no retry/revision loop, persistence or mutable workflow
+singleton. Repeated fixed-seed results and concurrent runs are isolated.
+
+Actual CLI `python -m archimind.examples.workflow_bedroom`: **succeeded**, two
+alternatives found in **9/500 attempts**, candidate **0** selected, independently
+passing spatial report, neutral `deterministic_fixture` styling. Selected X/Y in
+meters: desk **(0, 1.36)**, queen-bed **(3.4, 1.69)**, wardrobe **(0, 3.4)**.
+Trace decisions: requirements **accepted** → layout **generated** → critique
+**approved** → styling **styled**. Complete JSON reconstructs the typed state.
+`--max-attempts 0` returns `exhausted`, no approved design and exit code 1.
+
+Final local verification: **631 passed in 23.75s**, preserving all 593 previous
+Python tests plus 38 workflow cases. Frontend **27 passed**, syntax/build passed
+with unchanged committed bundles. Editable installation, pip compatibility,
+Ruff lint and format (56 files) passed. Streamlit health returned **HTTP 200 ok**.
+Tests block socket/DNS access and verify no attempted in-process networking,
+remote tracing, subprocess/C01 call or mutation. Actual CLI subprocess tests cover
+success/exhaustion JSON and exit codes. Workflow tests additionally cover forged
+reports, changed specifications, partial outcomes, errors and concurrent isolation.
+
+Core checkpoint `4ea8dfe8d49703eb44fa83a07b4b7b9fb3a6aafa` was pushed to
+`origin/main`; [GitHub Actions passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40611699419).
+The final checkpoint adds the CLI, broader acceptance tests and documentation.
+
+Streamlit, all renderers/assets, canonical models, spatial algorithms, generator,
+sample bedroom and optional C01 implementation remain unchanged. The app continues
+to label agent reasoning as planned, and its phase metric stays at Task 06E1.
+No live model call, API credential use, dataset or asset download occurred.
+Unrelated `.agents/` and `.claude/` directories remain untouched and uncommitted.
+
 ## Next milestone
 
-**Task 06E2** is recommended next: agree a focused scope for curated asset bindings
-and room interaction refinements. It is not implemented here. Rotated-footprint support, furniture
-editing, persistence, export, and agents remain separate future work.
+**Task 07B — OpenAI-Backed Requirements Interpreter Agent** is recommended next.
+It is not implemented here. Task 06E2 rendering refinements, rotated-footprint
+support, furniture editing, persistence and export remain separate future work.
 
 For setup, local commands, coordinates, and renderer usage, see the
 [project README](../../README.md).

@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 06E1: experimental architectural room. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07A: deterministic workflow foundation. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 06E1 — Realistic 3D architectural room foundation**
+> **Current stage · Task 07A — LangGraph workflow foundation (backend only)**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -48,14 +48,18 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > 3D samples. Selecting Layout A/B updates both generated views from the same
 > candidate. Plotly remains the default renderer; an opt-in Three.js experiment
 > now displays a room with genuine openings, shared textured chairs, and explicit
-> procedural furniture placeholders. A full asset catalog, AI reasoning,
+> procedural furniture placeholders. A separate deterministic LangGraph backend
+> coordinates requirements, layout design, spatial critique and fixture styling.
+> These are future agent roles; no LLM-powered reasoning is implemented yet.
+> A full asset catalog, AI reasoning,
 > persistence, and export remain planned.
 > **No API key is required.**
 
-Tasks **01–06E1 are complete**, including the isolated architectural room experiment. The
+Tasks **01–06E1 and 07A are complete**, including the isolated architectural room
+experiment and backend workflow. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**593 passing Python tests**: all 570 previous cases plus 23 scene/component cases,
+**631 passing Python tests**: all 593 previous cases plus 38 workflow cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -348,6 +352,31 @@ python -m http.server 8512 --bind 127.0.0.1 --directory src/archimind/_viewer_as
 
 Open `http://127.0.0.1:8512/room.html` for the room, or `/index.html` for the original
 chair studio. For the full app use `python -m streamlit run app.py`.
+
+## Deterministic workflow — backend only
+
+Task 07A adds four future agent roles coordinated by LangGraph:
+**Requirements Interpreter → Layout Designer → Spatial Critic → Interior Stylist**.
+They currently run deterministic Python code. Structured `RoomDesign` requirements
+enter the existing generator; the critic independently checks each actual layout
+with Shapely at zero overlap tolerance; the stylist adds explicit fixture metadata.
+No LLM, natural-language interpretation, live C01 request or remote tracing is used.
+
+```bash
+python -m archimind.examples.workflow_bedroom
+python -m archimind.examples.workflow_bedroom --seed 42 --theme warm --json
+```
+
+The default sample completes with two candidates in nine attempts and returns a
+typed result plus ordered activity trace. One generation iteration and four nodes
+bound execution; unsupported/infeasible requests and empty search results terminate
+safely. Original data is preserved; styling never moves furniture. The workflow
+has no Streamlit integration, persistence or automatic revision loop. The app's
+existing phase metric remains Task 06E1 because its UI is unchanged.
+
+See the [workflow guide](docs/developer/WORKFLOW.md) for contracts, failure behavior,
+actual demonstration output, tests and limitations. Next agent milestone:
+**Task 07B — OpenAI-Backed Requirements Interpreter Agent**.
 
 ## Models and coordinates
 
@@ -780,10 +809,16 @@ ArchiMind/
 │   ├── ui/
 │   │   ├── __init__.py           Public Streamlit presentation helper
 │   │   └── layout_generation.py  Button-driven generation, state, and comparison
+│   ├── workflow/
+│   │   ├── __init__.py           Public deterministic workflow API
+│   │   ├── state.py             Typed requests, handoffs, critiques, trace and result
+│   │   ├── graph.py             LangGraph conditional orchestration and error guards
+│   │   └── nodes.py             Four deterministic future-agent roles
 │   └── examples/
 │       ├── __init__.py           Public example factory
 │       ├── sample_bedroom.py     Reproducible canonical-model bedroom
-│       └── generate_bedroom.py   Original request and generated-alternatives CLI
+│       ├── generate_bedroom.py   Original request and generated-alternatives CLI
+│       └── workflow_bedroom.py   Offline workflow result/trace/JSON demonstration
 ├── tests/
 │   ├── test_smoke.py             Package and application checks
 │   ├── test_models.py            Model tests and bedroom fixture
@@ -795,7 +830,8 @@ ArchiMind/
 │   ├── test_room_3d.py           Coordinates, wall triangles, gaps, and 3D integration
 │   ├── test_furniture_3d.py      Bounds, surfaces, dimensions, and numeric limits
 │   ├── test_design_3d.py         Scene composition, 2D correspondence, and app preview
-│   └── test_layout_sync.py       Selected object identity, matching geometry, session states, and framing
+│   ├── test_layout_sync.py       Selected object identity, matching geometry, session states, and framing
+│   └── test_workflow.py          Offline orchestration, critiques, isolation and CLI tests
 ├── scripts/check_health.py      Temporary server health check
 ├── docs/
 │   ├── assets/                  README artwork and logo badges
@@ -824,7 +860,9 @@ and verification record.
 - [x] **Task 06C · Synchronize Selected 2D and 3D Layouts** — one stored candidate supplies both views; compact furnished camera framing.
 - [x] **Task 06D · Realistic 3D Asset and Renderer Proof of Concept** — one licensed textured chair, local Three.js bundle, isolated opt-in component.
 - [x] **Task 06E1 · Realistic 3D Architectural Room Foundation** — canonical room scene, true wall openings, shared chair instances, labeled placeholders, independent opt-in demo.
-- [ ] **Task 06E2** — recommended next: refine curated asset bindings and room interaction, with scope agreed before implementation.
+- [ ] **Task 06E2** — separate proposed rendering work: curated asset bindings and room interaction.
+- [x] **Task 07A · LangGraph Workflow Foundation** — backend-only, deterministic requirements/design/critique/styling nodes, bounded execution and typed trace; no LLMs.
+- [ ] **Task 07B · OpenAI-Backed Requirements Interpreter Agent** — recommended next agent milestone.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

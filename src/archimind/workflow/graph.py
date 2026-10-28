@@ -57,7 +57,8 @@ def run_workflow(request: DesignRequest) -> WorkflowState:
 
     No retry loop, persistence, LLM/client, C01, callbacks or remote tracing.
     The four nodes execute at most once; recursion_limit is an extra backstop.
-    Caller objects and global environment/RNG state are never changed.
+    Caller objects and environment are unchanged. LangGraph's internal execution
+    IDs are excluded from the deterministic result; placement uses its own seed.
     """
     request = DesignRequest.model_validate(request).model_copy(deep=True)
     initial = WorkflowState(request=request)
