@@ -33,7 +33,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 07C1 — OpenAI-powered Layout Designer advice | Complete standalone; live behavior unverified | Existing-candidate recommendation/abstention, grounded fact refs, preserved scores/reports, 65 offline tests; no graph integration |
 | Task 07C2 — Layout Designer graph integration | Complete backend; live behavior unverified | Optional approved-candidate selection after critique, grounded handoff, provenance, deterministic fallback and 50 new offline tests |
 | Task 07D1 — AI Spatial Design Critic | Complete standalone; live behavior unverified | Strict evidence-based observations, independent support/challenge, preference tradeoffs and abstention; deterministic reports authoritative |
-| Task 07D2 — AI critic graph integration | Complete backend; live behavior unverified | Independent optional critic after deterministic approval/advice, grounded read-only review, safe fallback, 64 new tests and three offline scenarios |
+| Task 07D2 — AI critic graph integration | Complete backend; live behavior unverified | Independent optional critic after deterministic approval/advice, grounded read-only review, fresh fallback verification, 66 new tests and three offline scenarios |
 | Task 07E — Interior Stylist agent | Recommended next | Not implemented; existing fixture styling remains deterministic |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
@@ -863,8 +863,7 @@ All scenarios retain identical candidate geometries/scores and deterministic
 reviews. Input immutability, environment restoration and JSON round-trips pass.
 
 Verification: baseline **920 passed in 33.81s**, plus **27 frontend tests**.
-Final local run **984 passed in 36.81s**, preserving all 920 cases and adding
-**64 D2 tests**. The 27 frontend tests, syntax/build, Ruff lint/format, pip
+The demonstration checkpoint passed **984 tests in 36.81s**. The 27 frontend tests, syntax/build, Ruff lint/format, pip
 compatibility and real Streamlit health (**HTTP 200 ok**) passed. Frontend bundles
 are unchanged. The prior C2 bound assertion now checks its five-node execution
 against D2's expanded six-node maximum; no original test was removed.
@@ -878,6 +877,18 @@ failure cases. Tests block networking and use mock clients, including actual D1
 adapter success/timeout, all paths/counts, support/challenge/abstention/errors,
 forged data, safe fallback, filtered indices, no selection change, old JSON,
 free-text compatibility, isolation/concurrency and actual offline CLI execution.
+
+Checkpoint B `3f4bc30f1694c79c977e173bdf70ce747941a3ca` contains the demo and
+documentation; [GitHub Actions passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40623105874).
+Final hardening adds fresh selected-geometry verification before critic invocation
+and before continuing, using the existing accessibility API. Stale passing reports
+cannot permit unsafe fallback if both source/approved copies are altered. A failed
+fresh check clears final selection and accurately retains actual adapter execution
+with a typed invalid-candidates result. Two new tests cover alteration before
+invocation and during an error response; **66 D2 tests** now preserve all 920
+baseline cases for **986 total tests**. The focused suite passed in **6.09s**.
+Final full local verification passed **986 tests in 39.20s**, with Ruff lint/format,
+pip compatibility and real Streamlit health (**HTTP 200 ok**) passing again.
 
 No live OpenAI/C01 request, new agent/dependency, geometry/generation algorithm,
 score change, furniture modification, UI/renderer change, asset, dataset or

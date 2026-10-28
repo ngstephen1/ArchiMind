@@ -121,6 +121,13 @@ remains `ai_recommendation`; a deterministic choice remains `deterministic`.
 Neither label claims AI spatial approval. Later styling failure still clears the
 final selection while preserving critique history for diagnosis.
 
+The selected geometry is freshly checked through the existing accessibility API
+before critic invocation and again before continuing to styling. A stale passing
+report cannot authorize fallback after in-memory geometry changes. Failed fresh
+verification terminates with no selected/approved design; an invocation that
+already occurred remains explicitly recorded with a typed invalid-candidates
+result. These are read-only calls to the existing engine, not new spatial rules.
+
 Trace events identify deterministic approval and critic eligibility, advisor
 recommendation if used, critic invocation/outcome/stance/provenance, reviewed
 original index, unchanged final selection/source and styling completion. No fake

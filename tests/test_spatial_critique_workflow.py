@@ -1037,3 +1037,42 @@ def test_actual_critiqued_workflow_cli_is_offline(json_output):
             "Scenario C: Layout B" in process.stdout
             and "critic challenges" in process.stdout
         )
+
+
+@pytest.mark.parametrize("when", ["before_invocation", "during_failure"])
+def test_stale_passing_reports_cannot_authorize_unsafe_fallback(
+    monkeypatch, request_data, when
+):
+    enabled(monkeypatch)
+    state = critic_state(request_data)
+
+    def alter_both_design_copies():
+        state.generation.candidates[0].design.furniture[0].x_m = -1.0
+        state.approved_design.furniture[0].x_m = -1.0
+
+    def fail(request, **kwargs):
+        alter_both_design_copies()
+        return SpatialCriticResult(
+            status="error",
+            assessment="Timeout",
+            error=SpatialCriticError(code="timeout", message="Timeout"),
+        )
+
+    critic = Mock(side_effect=fail)
+    if when == "before_invocation":
+        alter_both_design_copies()
+    result = WorkflowState.model_validate(
+        {**dict(state), **spatial_critique(state, critic=critic)}
+    )
+    assert result.status == "rejected" and result.error.code == "no_approved_candidates"
+    assert (
+        result.selected_candidate_index
+        is result.approved_design
+        is result.selection_source
+        is None
+    )
+    assert critic.call_count == int(when == "during_failure")
+    assert result.spatial_critique.executed == (when == "during_failure")
+    if when == "during_failure":
+        assert result.spatial_critique.result.error.code == "invalid_candidates"
+        assert result.spatial_critique.reason == "unsafe_selection"

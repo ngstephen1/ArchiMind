@@ -66,7 +66,7 @@ Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1 and 07D2 are complete**, including
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**984 passing Python tests**: all 920 previous cases plus 64 critic-workflow cases,
+**986 passing Python tests**: all 920 previous cases plus 66 critic-workflow cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 

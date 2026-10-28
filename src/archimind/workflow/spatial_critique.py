@@ -13,6 +13,7 @@ from archimind.agents.spatial_critic_schemas import (
     SpatialCriticRequest,
     SpatialCriticResult,
 )
+from archimind.geometry import validate_accessibility
 from archimind.workflow.layout_recommendation import (
     _advisory_request,
     _approved,
@@ -64,10 +65,23 @@ def spatial_critique(
         )
 
     def safe_selection():
-        return (
+        if not (
             _approved(state, selected)
             and state.approved_design == state.generation.candidates[selected].design
-        )
+        ):
+            return False
+        try:
+            actual = validate_accessibility(
+                state.approved_design.model_copy(deep=True),
+                config=state.request.accessibility.model_copy(deep=True),
+                area_tolerance_m2=0.0,
+            )
+            return (
+                actual.status == "passed"
+                and actual == state.generation.candidates[selected].validation
+            )
+        except Exception:
+            return False
 
     if not safe_selection():
         return stop(
@@ -80,12 +94,31 @@ def spatial_critique(
 
     def finish(status, reason, *, executed, result=None, indices=None):
         if not safe_selection():
+            unsafe = SpatialCriticResult(
+                status="error",
+                assessment="Selected layout failed fresh deterministic verification.",
+                error=SpatialCriticError(
+                    code="invalid_candidates",
+                    message="Selected layout failed fresh deterministic verification.",
+                ),
+            )
             return stop(
                 state,
                 "ai_spatial_critic",
                 "no_approved_candidates",
                 "The selected candidate no longer matches its authoritative critique.",
                 status="rejected",
+                spatial_critique=metadata.model_copy(
+                    update={
+                        "status": "rejected",
+                        "executed": executed,
+                        "candidate_index": selected,
+                        "candidate_indices": indices or [],
+                        "result": unsafe,
+                        "reason": "unsafe_selection",
+                    },
+                    deep=True,
+                ),
             )
         updated = metadata.model_copy(
             update={
