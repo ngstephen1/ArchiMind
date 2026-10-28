@@ -20,8 +20,10 @@ flowchart LR
 
 Only conditional outgoing edges are used on routing nodes. The stylist alone has
 a static edge to END. There is one generation iteration, no back edge or advisor
-retry. C2 uses four default/five advised nodes. D2 extends the shared bound to six
-nodes and recursion backstop 8, adding an independently optional critic afterward.
+retry. C2 uses four default/five advised nodes. D2 adds an independently optional
+critic afterward. [E2 styling](INTERIOR_STYLIST_WORKFLOW.md) now extends the shared
+bound to seven nodes and recursion backstop 9; AI success replaces the fixture,
+while safe AI failure can add a fixture step.
 Generation, requirements and critique failures preserve existing termination.
 
 ## API and state
@@ -165,5 +167,6 @@ No UI integration, persistence, automatic revisions or new agent was added.
 Task 07D1 provides the [AI design critic](SPATIAL_CRITIC_AGENT.md), now optionally
 invoked after this advisor by [D2](SPATIAL_CRITIC_WORKFLOW.md). A critique or challenge
 never changes the accepted selection. E1 now adds a separate
-[Interior Stylist](INTERIOR_STYLIST_AGENT.md); recommended next: **Task 07E2 —
-Optional stylist workflow integration**, retaining deterministic validation as the authority.
+[Interior Stylist](INTERIOR_STYLIST_AGENT.md); the optional
+[E2 final workflow step](INTERIOR_STYLIST_WORKFLOW.md) now reuses it, retaining
+deterministic validation as the authority. Default fixture behavior is preserved.

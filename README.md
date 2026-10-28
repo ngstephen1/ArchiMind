@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07E1: standalone catalog-based interior style planning. Animated architectural concept illustration." width="100%" />
+  <img src="docs/assets/archimind-hero.svg" alt="ArchiMind AI — Multi-Agent Interior Design and 3D Spatial Planning. Task 07E2: optional interior styling in LangGraph. Animated architectural concept illustration." width="100%" />
 </p>
 
 <p align="center">
@@ -40,7 +40,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
 | Available now | Available now | Interactive sample available |
 
-> **Current stage · Task 07E1 — Standalone AI Interior Stylist**
+> **Current stage · Task 07E2 — Optional Interior Stylist in LangGraph**
 >
 > Generate and select bedroom alternatives in Streamlit, inspect their coordinates
 > and heuristic scores, and review their spatial validation reports. The original
@@ -53,23 +53,25 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 > Requirements interpretation has an optional, disabled-by-default OpenAI path.
 > Optional layout advice now runs after independent critique and before styling,
 > selecting only an approved existing candidate using grounded evidence. The
-> default four-node path stays deterministic; explicit opt-ins add either AI node
-> for five nodes, or both for six. The optional AI critic explains measured
+> default four-node path stays deterministic; explicit opt-ins add layout advice
+> and independent AI critique. The optional AI critic explains measured
 > tradeoffs, supports or challenges recommendations and discloses missing evidence.
 > Its feedback cannot change the selected candidate. Deterministic validation
-> remains authoritative. A standalone Interior Stylist now plans catalog colors
-> and finish representations for an approved selected room. Its metadata is separate
-> from geometry; the graph's stylist remains the deterministic fixture. No material
-> choices have been applied to either renderer. Live model behavior has not been tested.
+> remains authoritative. The optional final Interior Stylist now plans catalog
+> colors and finish representations through the existing E1 adapter. Fresh checks
+> before and after styling preserve the selected geometry, score and reports.
+> Failed AI styling uses an explicitly labeled safe fixture fallback. A checked
+> plan is separate metadata; no material choices have been applied to either
+> renderer. Live model behavior has not been tested.
 > A full asset catalog, further agent reasoning,
 > persistence, and export remain planned.
 > **No API key is required for the app, structured workflow or offline demonstrations.**
 
-Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1, 07D2 and 07E1 are complete**, including the isolated architectural
+Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1, 07D2, 07E1 and 07E2 are complete**, including the isolated architectural
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
 capability boundaries, and the verified baseline. The current local suite contains
-**1,075 passing Python tests**: all 986 previous cases plus 89 Interior Stylist cases,
+**1,136 passing Python tests**: all 1,075 previous cases plus 61 stylist workflow cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.
 
@@ -530,13 +532,39 @@ light oak floor/furniture representations and muted sage accents. Its original
 score stays **67.721925**; complete candidate geometry, coordinates, validation
 and workflow selection are identical before/after. `rendered=False` and
 `physical_asset_available=False` distinguish appearance metadata from physical
-assets or actual Plotly/Three.js output. Existing graph routing/fixture styling
-remain unchanged; integration belongs to Task 07E2.
+assets or actual Plotly/Three.js output. The standalone demonstration remains
+separate; E2 adds the optional graph route below.
 
 `ARCHIMIND_ENABLE_OPENAI_STYLIST=0` is the default. Live usage requires exact
 per-call `allow_live_usage=True`, the feature flag and existing key/model/input
-preflight. No live request was made. Recommended next: **Task 07E2 — Optional
-Interior Stylist workflow integration**.
+preflight. No live request was made.
+
+### Optional workflow Interior Stylist — Task 07E2
+
+The [workflow stylist guide](docs/developer/INTERIOR_STYLIST_WORKFLOW.md) documents
+`DesignRequest.style_request` and `run_workflow(..., use_ai_stylist=True,
+allow_live_stylist=True)`. The existing stylist flag must also be `1`. All three
+gates are required, including for explicit trusted mocks; other AI roles remain
+independently opted in. Default callers retain the same four-node fixture path.
+
+```bash
+python -m archimind.examples.styled_workflow
+python -m archimind.examples.styled_workflow --json
+```
+
+This permanently offline example compares A: default fixture, B: explicitly
+mocked Scandinavian plan, and C: simulated timeout with fixture fallback.
+Each retains Layout A, its complete geometry/reports and score **67.721925**.
+AI success replaces the fixture; its plan lives at `ai_styling.result.plan`
+with `source="ai"` and explicit `mode="offline_fixture"` mock provenance.
+Failures retain sanitized typed errors and run the existing fixture only while
+fresh deterministic approval remains safe. Unsafe selections terminate without
+an approved design. At most seven nodes execute, with no retry or regeneration
+for styling. JSON round-trips and all original tests are preserved.
+
+No live API behavior, realistic material rendering or conversational UI is
+implemented or verified. Recommended next: a separately scoped Streamlit workflow
+panel with explicit opt-ins and visible mock/API/fixture provenance.
 
 ## Models and coordinates
 
@@ -981,6 +1009,7 @@ ArchiMind/
 │   │   ├── graph.py             LangGraph conditional orchestration and error guards
 │   │   ├── layout_recommendation.py  Approved-only C1 handoff and safe fallback
 │   │   ├── spatial_critique.py   Read-only D1 handoff, provenance and safe fallback
+│   │   ├── interior_styling.py   E1 final handoff, fresh approval and fixture fallback
 │   │   └── nodes.py             Requirements, generation, critique and fixture styling
 │   └── examples/
 │       ├── __init__.py           Public example factory
@@ -989,7 +1018,8 @@ ArchiMind/
 │       ├── workflow_bedroom.py   Default offline result/trace/JSON demonstration
 │       ├── advised_workflow.py   Default versus advised comparison using a mock
 │       ├── critiqued_workflow.py Default, supported B and challenged B mocks
-│       └── style_bedroom.py      Standalone catalog style mock, unchanged layout
+│       ├── style_bedroom.py      Standalone catalog style mock, unchanged layout
+│       └── styled_workflow.py    Fixture, mocked style plan and safe fallback
 ├── tests/
 │   ├── test_smoke.py             Package and application checks
 │   ├── test_models.py            Model tests and bedroom fixture
@@ -1039,7 +1069,7 @@ and verification record.
 - [x] **Task 07D1 · Standalone AI Spatial Design Critic** — evidence-grounded support/challenge, preference tradeoffs, abstention and mocked verification.
 - [x] **Task 07D2 · AI critic graph integration** — optional traced review after deterministic approval/advice; challenge never switches selection.
 - [x] **Task 07E1 · Standalone Interior Stylist agent** — controlled catalog metadata, verified selected layout, conflicts/clarification and mocked verification.
-- [ ] **Task 07E2 · Interior Stylist workflow integration** — recommended next; preserve selected canonical geometry and deterministic approval.
+- [x] **Task 07E2 · Interior Stylist workflow integration** — optional final E1 node, fresh approval, immutable selected data and explicit fixture fallback.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

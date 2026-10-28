@@ -18,21 +18,16 @@ from archimind.examples import create_sample_bedroom
 from archimind.workflow import DesignRequest, WorkflowState, run_workflow
 
 
-def offline_style_bedroom() -> tuple[WorkflowState, InteriorStylistResult]:
-    """Style the default graph's selected candidate outside LangGraph.
+def offline_interior_stylist(
+    request: InteriorStylistRequest, *, allow_live_usage: bool = False
+) -> InteriorStylistResult:
+    """Reusable E1 mock on a supplied candidate; no generation or live client.
 
     The API client is always a mock, regardless of existing environment settings.
     This is fixed fixture evidence, never a fallback for an unavailable provider.
+    The usage argument is accepted for workflow injection compatibility; it
+    cannot enable live requests in this example. Environment settings are restored.
     """
-    workflow = run_workflow(
-        DesignRequest(specification=create_sample_bedroom(), seed=42)
-    )
-    before = workflow.model_dump_json()
-    selected = workflow.selected_candidate_index
-    request = InteriorStylistRequest(
-        candidate=workflow.generation.candidates[selected],
-        style_request="Scandinavian bedroom with warm white walls, light oak furniture, and muted sage accents.",
-    )
     request_before = request.model_dump_json()
     proposal = InteriorStyleProposal(
         decision="style",
@@ -46,7 +41,13 @@ def offline_style_bedroom() -> tuple[WorkflowState, InteriorStylistResult]:
         ],
         accent_ids=["muted_sage"],
         rationale_code="finish_consistency",
-        preference_assessments=[{"preference_index": 0, "judgment": "favored"}],
+        preference_assessments=[
+            {
+                "preference_index": index,
+                "judgment": "favored" if index == 0 else "unverified",
+            }
+            for index in range(1 + len(request.soft_preferences))
+        ],
         conflict_codes=[],
     )
     response = SimpleNamespace(
@@ -75,8 +76,26 @@ def offline_style_bedroom() -> tuple[WorkflowState, InteriorStylistResult]:
         result.model_copy(update={"mode": "offline_fixture", "model": None}, deep=True)
     )
     assert result.status == "styled" and result.plan.rendered is False
-    assert workflow.model_dump_json() == before
     assert request.model_dump_json() == request_before
+    assert result.context.request.candidate == request.candidate
+    assert InteriorStylistResult.model_validate_json(result.model_dump_json()) == result
+    return result
+
+
+def offline_style_bedroom() -> tuple[WorkflowState, InteriorStylistResult]:
+    """Original E1 standalone demonstration; generation happens only here."""
+    workflow = run_workflow(
+        DesignRequest(specification=create_sample_bedroom(), seed=42)
+    )
+    before = workflow.model_dump_json()
+    selected = workflow.selected_candidate_index
+    result = offline_interior_stylist(
+        InteriorStylistRequest(
+            candidate=workflow.generation.candidates[selected],
+            style_request="Scandinavian bedroom with warm white walls, light oak furniture, and muted sage accents.",
+        )
+    )
+    assert workflow.model_dump_json() == before
     assert result.context.request.candidate == workflow.generation.candidates[selected]
     assert result.context.request.candidate.design == workflow.approved_design
     assert (
@@ -85,7 +104,6 @@ def offline_style_bedroom() -> tuple[WorkflowState, InteriorStylistResult]:
     assert result.context.request.candidate.score.total == 67.721925
     assert workflow.selected_candidate_index == 0 and len(workflow.trace) == 4
     assert workflow.styling.source == "deterministic_fixture"
-    assert InteriorStylistResult.model_validate_json(result.model_dump_json()) == result
     return workflow, result
 
 

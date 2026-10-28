@@ -2,8 +2,9 @@
 
 Last reviewed and locally verified: **October 27, 2026**.
 
-**Current milestone: Task 07E1 complete — standalone catalog-based AI Interior Stylist.**
-Live model behavior is unverified. Task 07E2 is recommended next; Task 06E2 remains
+**Current milestone: Task 07E2 complete — optional final Interior Stylist in LangGraph.**
+Live model behavior is unverified. A separately scoped Streamlit workflow panel is
+recommended next; Task 06E2 remains
 separate proposed renderer work.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -35,7 +36,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 07D1 — AI Spatial Design Critic | Complete standalone; live behavior unverified | Strict evidence-based observations, independent support/challenge, preference tradeoffs and abstention; deterministic reports authoritative |
 | Task 07D2 — AI critic graph integration | Complete backend; live behavior unverified | Independent optional critic after deterministic approval/advice, grounded read-only review, fresh fallback verification, 66 new tests and three offline scenarios |
 | Task 07E1 — Standalone AI Interior Stylist | Complete backend; live behavior unverified | Five-theme immutable catalog, verified selected candidate, controlled finish/accent metadata, conflicts/clarification and 89 new offline tests |
-| Task 07E2 — Interior Stylist workflow integration | Recommended next | Not implemented; existing graph fixture styling remains deterministic |
+| Task 07E2 — Interior Stylist workflow integration | Complete backend; live behavior unverified | Optional final E1 node, fresh approval, separate checked plan/provenance and safe explicit fixture fallback; 61 new integration/demo tests |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status
@@ -59,12 +60,12 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; no furniture editing or camera-pose persistence across A/B switches |
 | Experimental realistic room | Local Three.js room, four walls with real holes, glazing, procedural floor, two textured chairs and a labeled desk placeholder | Independent fixed sample; rotation 0; no generator connection or detailed-mesh validity claim; legacy single-chair mode retained |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
-| Workflow orchestration | Default requirements → generation → deterministic critique → styling; independently optional advisor and AI critic | Four default/five with either AI node/six with both, separate opt-ins and live gates; no UI connection/persistence/revisions |
+| Workflow orchestration | Default requirements → generation → deterministic critique → fixture; independently optional advisor, AI critic and final E1 styling | Four default; up to seven with advice, critique and failed AI styling followed by fixture; separate opt-ins/authorization; no UI/persistence/revisions |
 | Requirements interpretation | Optional OpenAI Responses API with structured extraction and canonical conversion | Disabled by default; explicit per-call authorization/key required; only rectangular bedrooms/studios and a three-item furniture catalog; verified with mocks only |
 | Layout recommendation | Optional standalone C1 adapter and C2 post-critic workflow handoff | Default-off; only critic-approved candidates, Python-grounded facts and safe deterministic fallback; no UI connection or live verification |
 | AI design critique | Standalone D1 adapter and optional D2 workflow node review the approved selected candidate | At most three grounded observations; challenge/failure cannot change selection or deterministic approval; no UI integration or live verification |
-| Interior style planning | Optional standalone E1 adapter returns catalog colors/finishes for one approved selected candidate | Separate appearance metadata; no graph integration, material rendering, physical assets or performance certification |
-| Workflow stylist | Existing deterministic fixture | Standalone E1 does not replace it; E2 integration remains future work |
+| Interior style planning | Optional standalone E1 adapter and E2 final graph node return checked catalog colors/finishes for one approved selected candidate | Separate appearance metadata; no material rendering, physical assets or performance certification |
+| Workflow stylist | Deterministic fixture by default; independently gated E1 plan or explicit safe fixture fallback | Original geometry/score/reports/selection preserved; unsafe selections rejected; mock/API/fixture provenance explicit |
 | Optional Codex advisor | Backend only, disabled by default | Local single-user CLI integration; no UI or automatic application; no live request made |
 
 ## What the app currently shows
@@ -975,10 +976,74 @@ Unrelated `.agents/` and `.claude/` remain untouched/uncommitted. Live quality/a
 availability, general intent matching and physical performance are unverified.
 The small catalog, one finish per object and existing spatial limits still apply.
 
+## Task 07E2 optional final workflow styling
+
+[Workflow stylist guide](INTERIOR_STYLIST_WORKFLOW.md) documents the additive
+`DesignRequest.style_request`, `AIStylingState` and conditional final E1 handoff.
+The existing `interior_stylist` node remains the default fixture. An authorized
+`ai_interior_stylist` replaces it on checked success; safe failure runs the fixture
+afterward with explicit provenance. One generation iteration and a seven-node
+maximum (recursion backstop 9) cover advice, critique, attempted styling and fallback.
+
+Styling requires `use_ai_stylist=True`, existing flag
+`ARCHIMIND_ENABLE_OPENAI_STYLIST=1`, and exact per-call
+`allow_live_stylist=True`, including trusted offline injection. Disabled or
+unauthorized requests do not invoke the AI node. Other roles retain independent
+opt-ins and gates. `ai_styling.result` reuses E1's checked result/plan; its mode and
+model distinguish mock/API provenance. AI success leaves legacy fixture `styling`
+empty. Fallback preserves the typed error/clarification result and labels both
+style-source fields `deterministic_fixture`; it never invents an AI plan.
+
+Before and after invocation, the existing validator reruns at zero tolerance and
+the original score is verified through the existing helper. E2 compares full
+authoritative workflow data and retains the original selection, room/openings,
+furniture IDs/coordinates/dimensions/rotations, scores, reports and prior advice.
+E1 grounding verifies exact context, immutable catalog values, ID coverage and
+canonical explanations. A stale, invalid, unverified or changed selection stops
+without an approved design; a fixture cannot rehabilitate unsafe geometry.
+Strict JSON round-trips retain E1 catalog tuples and legacy fixture provenance.
+
+`python -m archimind.examples.styled_workflow [--json]` demonstrates A: default
+fixture, B: explicitly mocked Scandinavian `scandi_warm_sage` plan, and C:
+simulated timeout with labeled fixture fallback. A and B execute four nodes, C
+five. All retain Layout A/index 0, original score **67.721925**, complete geometry
+and reports. The E1 mock was extracted into a reusable example helper receiving
+an existing candidate, with no regeneration or live-client fallback. Its original
+standalone CLI remains compatible. No demo option can enable a live request.
+
+Actual baseline: `main` at `2b93cc1`, synchronized with origin, **1,075 passed in
+41.32s**. Checkpoint A `5c83c30` passed **1,133 tests in 45.02s** locally and
+[GitHub Actions](https://github.com/ngstephen1/ArchiMind/actions/runs/40627621163)
+passed **1,133 in 84.22s**, frontend 27/27 and health 200.
+
+Final local verification: **1,136 passed in 49.79s**, preserving all 1,075 previous
+cases and adding **61** workflow/demo cases. The combined E1/E2 focused run passed
+**150 tests in 7.53s**. Ruff lint and formatting (**97 files**) passed; `pip check`
+reported no broken requirements; Streamlit health returned **HTTP 200**.
+Frontend **27/27** tests, syntax and production build passed, with no rendering
+bundle differences. Existing workflow, interpretation, advice, critique and E1
+demo CLIs plus the E2 CLI passed in text/JSON modes; the generation CLI returned
+valid JSON with its expected completion summary on stderr.
+
+Source archive and wheel builds passed with the new workflow module/demo,
+integration tests and guide present in their appropriate distributions. No
+secrets, unrelated agent directories, virtual environment, caches or node modules
+were included. Installed-wheel A/B/C and strict JSON ran outside the repository
+with DNS/socket connections and real-client creation blocked. Temporary package
+artifacts were removed. MANIFEST includes the new workflow guide.
+
+No canonical model, generator, spatial algorithm, app or renderer was modified.
+No dependency/provider, live OpenAI/Codex request, material application, chat,
+revision, persistence or separate course write-up was added. The existing small
+catalog and spatial assumptions remain. All AI quality/account availability is
+unverified; appearance metadata is not realistic rendered material. Unrelated
+`.agents/` and `.claude/` remain untouched and uncommitted.
+
 ## Next milestone
 
-**Task 07E2 — Optional Interior Stylist workflow integration** is recommended next,
-preserving selected canonical geometry and deterministic approval. It is not implemented here.
+A separately scoped **Streamlit workflow panel** is recommended next, exposing
+existing structured workflow results, independent opt-ins and explicit provenance.
+The conversational interface is not implemented by E2.
 Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.
 

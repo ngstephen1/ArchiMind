@@ -3,9 +3,10 @@
 The optional `recommend_style` adapter plans colors and finish representations for
 one existing, spatially approved `LayoutCandidate`. Its output is **separate
 metadata**: it cannot move furniture, change dimensions/openings, select another
-candidate, revise scores/reports or improve verified circulation. LangGraph routing,
-the deterministic Stylist fixture, Streamlit and both renderers are unchanged.
-Workflow integration belongs to Task 07E2.
+candidate, revise scores/reports or improve verified circulation. Task 07E2 now
+integrates this existing adapter as an optional final LangGraph step; see the
+[workflow guide](INTERIOR_STYLIST_WORKFLOW.md) for opt-ins, provenance and explicit
+fixture fallback. The deterministic default, Streamlit and both renderers remain unchanged.
 
 ## Contracts and API
 
@@ -104,7 +105,9 @@ ergonomic and spatial-improvement requests must remain unverified. Such preferen
 produce explicit limitations; styling cannot recertify geometry or claim improved
 circulation. Clarification requires null/empty style choices and unverified
 assessments, with reasons such as mixed themes, unavailable material or missing
-details. No unavailable model output is replaced with a fixture.
+details. The standalone adapter never replaces unavailable model output with a
+fixture. E2 may run the separately labeled existing workflow fixture while
+retaining the typed failure and providing no AI plan.
 
 ## API gates and failure handling
 
@@ -191,5 +194,7 @@ python -m build --no-isolation
 **No live OpenAI or C01 request was made.** Live style quality/account availability,
 general intent matching, physical assets, performance and visual material rendering
 remain unverified/unimplemented. Existing single-room/zero-rotation spatial limits
-still apply. Recommend **Task 07E2 — optional Interior Stylist workflow integration**,
-preserving selected geometry and deterministic approval. Stop at standalone E1.
+still apply. **Task 07E2 is now complete**: the optional
+[workflow integration](INTERIOR_STYLIST_WORKFLOW.md) reuses this adapter and
+preserves selected geometry and deterministic approval. A separately scoped
+Streamlit workflow panel is recommended next; no conversational UI is added here.

@@ -16,8 +16,11 @@ successful advisory review or a safe fallback. Streamlit and renderers are uncha
 The node name `spatial_critic` remains the deterministic validator; the advisory
 node is `ai_spatial_critic`. Routing uses one conditional outgoing edge mechanism
 per routing node, with no mixed static edge that could launch a second path.
-There is one generation iteration, a six-node maximum, recursion backstop 8,
-and no retry/back edge. Requirements, generation and unsafe-selection failures
+The table describes D2 with fixture styling. E2 optionally replaces that final
+step with the existing AI stylist; safe AI failure adds a fixture step. The
+current shared maximum is seven nodes, recursion backstop 9 and one generation
+iteration, with no retry/back edge; see the [E2 guide](INTERIOR_STYLIST_WORKFLOW.md).
+Requirements, generation and unsafe-selection failures
 terminate before advisory review. The default path invokes neither AI adapter.
 
 ## API and independent authorization
@@ -186,7 +189,7 @@ Live model quality/account availability is unverified. D1's limited preference
 vocabulary and planar geometry assumptions still apply; no actual daylight,
 ergonomics, furniture usability or code certification is established. There is no
 UI integration, persistence, revision loop or automatic furniture modification.
-Task 07E1 now provides the standalone [Interior Stylist](INTERIOR_STYLIST_AGENT.md),
-without changing this graph's fixture styling. Recommended next: **Task 07E2 —
-Optional Interior Stylist workflow integration**, preserving selected canonical
-geometry and deterministic approval. D2 stops at advisory integration.
+Task 07E1 provides the standalone [Interior Stylist](INTERIOR_STYLIST_AGENT.md),
+now reused by the optional [E2 final styling node](INTERIOR_STYLIST_WORKFLOW.md).
+Default fixture styling, selected canonical geometry and deterministic approval
+are preserved; D2's advisory authority is unchanged.

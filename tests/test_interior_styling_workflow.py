@@ -3,6 +3,8 @@
 import json
 import os
 import socket
+import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -749,3 +751,58 @@ def test_state_rejects_ai_plan_for_different_selected_candidate(
     result.ai_styling.candidate_index = 1
     with pytest.raises(ValidationError, match="selected source candidate"):
         WorkflowState.model_validate(result)
+
+
+def test_offline_demo_reuses_e1_mock_with_identical_candidates_and_environment(offline):
+    from archimind.examples.styled_workflow import offline_styled_workflows
+
+    before = dict(os.environ)
+    scenarios = offline_styled_workflows()
+    first, second, third = scenarios.values()
+    assert first.styling.source == third.styling.source == "deterministic_fixture"
+    assert second.ai_styling.result.plan.theme_id == "scandinavian"
+    assert second.ai_styling.result.mode == "offline_fixture"
+    assert (
+        third.ai_styling.result.error.code == "timeout"
+        and third.ai_styling.result.plan is None
+    )
+    assert first.generation == second.generation == third.generation
+    assert first.reviews == second.reviews == third.reviews
+    assert first.approved_design == second.approved_design == third.approved_design
+    assert dict(os.environ) == before
+    offline.assert_not_called()
+
+
+@pytest.mark.parametrize("as_json", [False, True])
+def test_offline_demo_cli_blocks_network_and_real_client(as_json):
+    script = """
+import runpy
+import sys
+from unittest.mock import Mock, patch
+sys.argv = ['styled_workflow'] + (['--json'] if sys.argv[1] == '1' else [])
+with patch('socket.socket.connect', side_effect=AssertionError('No network')), patch('socket.getaddrinfo', side_effect=AssertionError('No DNS')), patch('archimind.agents.requirements_agent._client', Mock(side_effect=AssertionError('No live client'))):
+    runpy.run_module('archimind.examples.styled_workflow', run_name='__main__')
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", script, "1" if as_json else "0"],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=True,
+    )
+    assert result.stderr == ""
+    if as_json:
+        payload = json.loads(result.stdout)
+        assert payload["mode"] == "offline_mock"
+        for name in ("scenario_a", "scenario_b", "scenario_c"):
+            restored = WorkflowState.model_validate_json(json.dumps(payload[name]))
+            assert restored.status == "succeeded"
+        assert (
+            payload["scenario_b"]["ai_styling"]["result"]["mode"] == "offline_fixture"
+        )
+    else:
+        assert "OFFLINE MOCK" in result.stdout and "zero live" in result.stdout
+        assert (
+            "C simulates a timeout" in result.stdout
+            and "identical across A/B/C" in result.stdout
+        )

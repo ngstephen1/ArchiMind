@@ -3,7 +3,9 @@
 This guide records the original 07A milestone and its preserved structured-input
 path. Task 07B adds a separately gated
 [Requirements Interpreter](REQUIREMENTS_AGENT.md). Task 07C2 adds optional
-[post-critic layout advice](LAYOUT_WORKFLOW.md). The default 07A CLI still runs
+[post-critic layout advice](LAYOUT_WORKFLOW.md). Task 07D2 adds independent
+[AI critique](SPATIAL_CRITIC_WORKFLOW.md); Task 07E2 adds an optional final
+[Interior Stylist](INTERIOR_STYLIST_WORKFLOW.md). The default 07A CLI still runs
 four deterministic nodes offline without an API key. Original milestone output
 and test counts below are historical unless stated otherwise.
 
@@ -45,10 +47,11 @@ assert WorkflowState.model_validate_json(result.model_dump_json()) == result
 
 | Contract | Contents and boundary |
 | --- | --- |
-| `DesignRequest` | Optional original prose; structured canonical `RoomDesign`; seed, 1–2 candidates, 0–10,000 attempts; canonical `AccessibilityConfig`; fixture styling preference |
+| `DesignRequest` | Optional original prose; structured canonical `RoomDesign`; seed, 1–2 candidates, 0–10,000 attempts; canonical `AccessibilityConfig`; fixture styling preference; optional bounded `style_request` and soft preferences |
 | `WorkflowState` | Original request, canonical working specification, `LayoutGenerationResult`, individual critiques, selected index and approved design, styling, stage/status, activity trace, typed error, iteration count |
 | `CandidateReview` | Candidate index, newly computed `AccessibilityValidationReport`, acceptance and reason; failed/unverified reports cannot be accepted |
 | `StylingPreferences` / `StylingMetadata` | Neutral/warm/cool fixture selector and explicit `deterministic_fixture` palette/material notes; no rendered materials or geometry changes |
+| `AIStylingState` | Separate opt-in execution/source/status, selected target, checked E1 result/plan and sanitized fallback reason; never canonical geometry |
 | `AgentActivity` / `WorkflowError` | Ordered role/decision/message records and sanitized node-specific failure codes; no timestamps, secrets or raw exception text |
 
 Canonical IDs, dimensions and coordinates are not redefined. All geometry remains
@@ -90,9 +93,10 @@ flowchart LR
 
 The default has one generation iteration and four node executions. All edges
 advance or terminate; there is no retry/back edge. A guard rejects a second
-generation iteration. Current D2 bounds allow four default, five with either AI
-node, or six with both, with recursion limit 8 as an extra backstop. The default
-still executes four; see the [critic workflow guide](SPATIAL_CRITIC_WORKFLOW.md).
+generation iteration. Current E2 bounds allow seven nodes with both advisory
+nodes, attempted AI styling and a fixture fallback; recursion limit 9 is an extra
+backstop. AI styling success replaces the fixture. The default still executes
+four; see the [stylist workflow guide](INTERIOR_STYLIST_WORKFLOW.md) for all modes.
 The generator retains its 32-furniture/10,000-attempt and accessibility limits;
 the workflow introduces no alternative placement/geometry implementation.
 
