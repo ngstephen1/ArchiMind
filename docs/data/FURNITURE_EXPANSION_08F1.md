@@ -222,15 +222,23 @@ unchanged; the receipt lists their SHA-256 values.
 Pre-expansion suite: **1,754 passed in 126.73s**. Checkpoint 1: **1,773 passed in
 139.19s**, focused catalog/source **104 passed**, and offline packaging **1 passed**.
 Checkpoint 2 source/catalog/packaging coverage: **113 passed in 10.31s**.
-Final full regression, health, frontend and packaging results will be added at the
-release checkpoint. No new visual behavior exists; no new browser acceptance is
+Final local release verification: **1,781 Python tests passed in 125.07s**,
+including all 1,754 baseline tests and 27 new source/evidence tests. **75 frontend
+tests passed**, zero failures/skips. Syntax/build, unchanged bundle, Ruff lint/format
+(174 files), dependency compatibility, product registry, existing asset integrity,
+Streamlit **HTTP 200**, offline source/wheel builds and no-index/no-dependency
+isolated outside-repository installation/loading all passed. Research records,
+reports and the frozen source snapshot are included in the source distribution,
+and excluded from runtime wheel resources. The temporary health server stopped. No new visual behavior exists; no new browser acceptance is
 claimed. Existing renderer/Streamlit regressions still apply.
 
 ## G. Git delivery
 
 Checkpoint 1: `5d194367b47906a1bcd5aececdd293dc5a99f587`,
 [source expansion CI passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40870065472).
-Checkpoints 2/3 and their actual CI outcomes are reported in the delivery response;
+Checkpoint 2: `fad7fb269a0f2497cd950e4041b65d676572f5b6`,
+[review-preparation CI passed](https://github.com/ngstephen1/ArchiMind/actions/runs/40871417603).
+Checkpoint 3 and its actual CI outcome are reported in the delivery response;
 a document cannot contain its own future commit hash without changing that hash.
 Only intended research data/docs, source-distribution metadata and focused tests
 are staged. `.agents/`, `.claude/`, unrelated files and existing model bytes remain
@@ -253,3 +261,20 @@ untouched. No force-push or history rewrite is permitted.
 
 No 08F2, acquisition, new embeddings, production semantic retrieval or 08R2 work
 was started. **Stop after 08F1 for review.**
+
+
+## Exact changed files across 08F1
+
+- `MANIFEST.in`
+- `README.md`
+- `data/catalogs/furniture_source_candidates.json`
+- `data/catalogs/furniture_source_candidates_08a.json`
+- `docs/data/FURNITURE_EXPANSION_08F1.json`
+- `docs/data/FURNITURE_EXPANSION_08F1.md`
+- `docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md`
+- `docs/data/FURNITURE_SOURCE_REGISTER.md`
+- `docs/developer/FURNITURE_RETRIEVAL_ARCHITECTURE.md`
+- `docs/developer/STATUS.md`
+- `tests/test_asset_catalog.py`
+- `tests/test_asset_catalog_packaging.py`
+- `tests/test_furniture_source_expansion.py`

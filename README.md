@@ -1148,6 +1148,17 @@ choice; no rendering choice resizes or revalidates the layout. Plotly stays the
 default. See the [catalog workflow guide](docs/developer/FURNITURE_CATALOG_UI.md)
 for exact dimensions, provenance, failure policy, state and verification.
 
+## Furniture source expansion and owner review
+
+Task **08F1** adds 25 source-research candidates while preserving all 32 historical
+records. Three new source-qualified leads cover a desk, a wardrobe and a nightstand;
+no reviewed bed qualifies. The active application still has **two products** and
+Charles remains its only render-qualified product. No model was acquired or index
+updated. Source qualification does not prove native envelope containment or scene
+resource compatibility. The [expansion findings](docs/data/FURNITURE_EXPANSION_08F1.md)
+include exact evidence and a [blank 24-prompt owner-review packet](docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md).
+Independent relevance review remains pending.
+
 ## Offline semantic retrieval experiment
 
 Task **08R1** benchmarks one pinned BGE-small encoder through FastEmbed on local
@@ -1214,6 +1225,7 @@ and verification record.
 - [x] **Task 08C-R2 · First native-scale product** — one Charles GLB qualified and packaged, isolated two-chair scene, verified fallbacks and legacy compatibility.
 - [x] **Task 08D · Selected-layout Three.js** — exact selected A/B geometry, a Plotly/Three.js selector, explicit product evidence and honest placeholders.
 - [x] **Task 08E · Catalog-sized specifications and selection** — explicit preparation/review, catalog-sized generation, frozen provenance and compatible display choices; no implicit resizing.
+- [x] **Task 08F1 · Source shortlist and human-review preparation** — three new source-qualified leads, preserved historical evidence and blank review forms; active catalog unchanged.
 - [x] **Task 08R1 · Offline embedding/hybrid benchmark** — one isolated CPU encoder, frozen development/held-out judgments and measured abstention trade-offs; production integration deferred.
 - [x] **Task 08R0 · Offline retrieval contract and baselines** — current hard filters, keyword/FTS5 comparison, isolated synthetic fixtures and auditable metrics; no vector database or UI wiring.
 - [ ] Export.

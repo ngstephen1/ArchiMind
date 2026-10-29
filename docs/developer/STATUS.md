@@ -2,7 +2,7 @@
 
 Last reviewed: **October 29, 2026**.
 
-**Current milestone: Task 08R1 offline CPU embedding and hybrid benchmark complete; production semantic admission deferred. The application remains at its unchanged 08E UI.**
+**Current milestone: Task 08F1 source expansion and owner-review preparation complete; source-only leads are not active products. The application remains at its unchanged 08E UI, and production semantic admission remains deferred.**
 Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -1474,3 +1474,41 @@ passed. Ruff lint/format (171 files), default/experiment dependency checks,
 Streamlit HTTP 200, registry/integrity, unchanged bundle, offline source/wheel
 builds and outside-repository installed-wheel loading passed. No model is needed
 for CI. Final commit/CI identities are reported in the delivery response.
+
+
+## Task 08F1 — source expansion and owner-review preparation
+
+The source register now has **57 records**, retaining all 32 historical records
+and adding 25. Thirty detailed product/domain investigations produced **3 new
+acquisition-eligible source leads, 19 needs-evidence and 8 exclusions**. The new
+shortlist is Movian Belaya desk B074L4976T, Movian Morava wardrobe B07H8JN9QF and
+Rivet nightstand B07B4VXXJC. No bed qualifies. Seventeen of the 30 reviewed records
+have checked published-dimension contracts; that is not 17 validated models.
+
+The entire 08A candidate JSON is preserved byte-for-byte in a frozen research
+snapshot. The existing catalog test retains its original assertions against that
+snapshot; new tests validate the expanded register. Active catalog/search text,
+planning envelopes, releases, renderer assets, geometry, UI and frozen 08R0/08R1
+results remain unchanged: **two packaged products, one planning-qualified and one
+render-qualified product (Charles)**. New source leads do not enter the application.
+
+Research received **9,948,621 metadata bytes**, below 10 MiB, with at most 1 MiB per
+response. Thirty model HEAD requests read zero bodies. No assets, images, textures,
+archives, dependencies or encoders were acquired. The three new leads meet individual
+source/resource screens, but their combined reported texture estimate is 192 MiB,
+above the existing 128 MiB scene limit. Actual decoding, placement and any approved
+reservation require later inspection, not silent fitting or relaxed budgets.
+
+The [24-prompt owner-first packet](../data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md)
+contains blank judgments and no model scores. Completed human reviews: **zero**.
+Source-only/prospective discussion is separate from current-application eligibility.
+A future category-contract/catalog admission review is justified before separately
+authorized asset qualification, with Belaya first. No 08F2, acquisition, embeddings
+or 08R2 work was started. See [full evidence and limits](../data/FURNITURE_EXPANSION_08F1.md).
+
+Final local release: **1,781 Python tests passed in 125.07s**, preserving all 1,754
+baseline tests plus 27 new source/evidence tests; **75 frontend tests passed**.
+Syntax/build, bundle equivalence, Ruff lint/format (174 files), dependency checks,
+registry/asset integrity, Streamlit HTTP 200, source/wheel builds and isolated
+installed-wheel checks passed. Checkpoints 1 and 2 passed CI; final delivery
+identities and CI are reported in the response.

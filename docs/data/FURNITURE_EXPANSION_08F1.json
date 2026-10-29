@@ -11107,17 +11107,100 @@
       "passed": 1,
       "seconds": 10.68
     },
-    "final_verification": "pending_checkpoint_3",
+    "final_verification": "passed",
     "checkpoint_2_focused_and_packaging": {
       "passed": 113,
       "seconds": 10.31
+    },
+    "final_python": {
+      "passed": 1781,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 125.07,
+      "baseline_tests_preserved": 1754,
+      "new_source_validation_tests": 27
+    },
+    "frontend": {
+      "passed": 75,
+      "failed": 0,
+      "skipped": 0,
+      "syntax": "passed",
+      "build": "passed",
+      "bundle": "byte_identical"
+    },
+    "release_checks": {
+      "frontend_syntax": {
+        "exit_code": 0
+      },
+      "frontend_tests": {
+        "exit_code": 0
+      },
+      "frontend_build": {
+        "exit_code": 0
+      },
+      "bundle_unchanged": {
+        "exit_code": 0
+      },
+      "lint": {
+        "exit_code": 0
+      },
+      "format": {
+        "exit_code": 0
+      },
+      "dependencies": {
+        "exit_code": 0
+      },
+      "registry": {
+        "exit_code": 0
+      },
+      "health": {
+        "exit_code": 0
+      },
+      "diff_check": {
+        "exit_code": 0
+      }
+    },
+    "packaging": {
+      "offline_source_wheel_builds": "passed",
+      "no_index_no_deps_install": "passed",
+      "outside_repository_installed_wheel_loading": "passed",
+      "research_and_snapshot_in_source_distribution": true,
+      "research_and_snapshot_in_runtime_wheel": false,
+      "test_in_final_full_suite": true
+    },
+    "health": "HTTP 200 ok; temporary server stopped",
+    "lint": "passed",
+    "format": "passed; 174 files already formatted",
+    "dependencies": "pip check: no broken requirements",
+    "visual": "No new UI or rendering behavior; no new browser acceptance claimed",
+    "final_receipt_and_packaging_recheck": {
+      "passed": 28,
+      "seconds": 6.69
     }
   },
   "delivery": {
     "checkpoint_1_commit": "5d194367b47906a1bcd5aececdd293dc5a99f587",
     "checkpoint_1_ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/40870065472",
     "final_commit_and_ci": "Reported in final delivery response to avoid self-reference",
-    "checkpoint_1_ci_status": "success"
+    "checkpoint_1_ci_status": "success",
+    "checkpoint_2_commit": "fad7fb269a0f2497cd950e4041b65d676572f5b6",
+    "checkpoint_2_ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/40871417603",
+    "checkpoint_2_ci_status": "success",
+    "changed_files": [
+      "MANIFEST.in",
+      "README.md",
+      "data/catalogs/furniture_source_candidates.json",
+      "data/catalogs/furniture_source_candidates_08a.json",
+      "docs/data/FURNITURE_EXPANSION_08F1.json",
+      "docs/data/FURNITURE_EXPANSION_08F1.md",
+      "docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md",
+      "docs/data/FURNITURE_SOURCE_REGISTER.md",
+      "docs/developer/FURNITURE_RETRIEVAL_ARCHITECTURE.md",
+      "docs/developer/STATUS.md",
+      "tests/test_asset_catalog.py",
+      "tests/test_asset_catalog_packaging.py",
+      "tests/test_furniture_source_expansion.py"
+    ]
   },
   "non_actions": {
     "new_assets_acquired": false,

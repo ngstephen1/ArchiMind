@@ -279,3 +279,27 @@ judgments, expand rights-cleared furniture coverage, predeclare a fresh evaluati
 and show an acceptable FP/FN operating point. Do not adjust the frozen threshold
 to the held-out misses or claim that a database can solve the relevance problem.
 The application remains the explicit 08E catalog-selection workflow.
+
+
+## 08F1 source research and review boundary
+
+[08F1](../data/FURNITURE_EXPANSION_08F1.md) expands the **research register** to
+57 records, with three new source-qualified leads and no packaged-catalog change.
+The original source JSON is frozen separately so the existing two records retain
+their qualification revision/hash. The active corpus, search documents and all
+08R0/08R1 artifacts stay unchanged. No new retrieval effectiveness is measured.
+
+Belaya desk, Morava wardrobe and the Rivet nightstand have checked published item
+claims and same-ID model metadata; native meshes, placement and approved envelopes
+remain unverified. Reported texture costs also prevent assuming all three can share
+one scene under current limits. The current catalog contract accepts only
+CHAIR/SHELF and armchair/bookcase. New source categories require an explicitly
+reviewed contract/version and new immutable qualification bindings before admission;
+registry membership cannot bypass `load_catalog()` or current eligibility.
+
+The owner-first 24-prompt packet is pending and unevaluated. Human eligibility and
+relevance fields remain blank; prospective leads are not active preparation options.
+Any later benchmark needs actual independent judgments, scope review and a new
+freeze. Do not rebuild existing vectors, rewrite old judgments or claim the broader
+shortlist solves unsupported-query abstention. 08F1 authorizes no acquisition,
+new embeddings, semantic UI or 08R2 integration.
