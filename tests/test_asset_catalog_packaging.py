@@ -34,6 +34,10 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/assets/inspection.py",
         "archimind/assets/render_qualification.py",
         "archimind/assets/render_assets.py",
+        "archimind/assets/selection.py",
+        "archimind/render/selected_realistic.py",
+        "archimind/ui/realistic_view.py",
+        "archimind/ui/product_fixture.py",
         "archimind/assets/product_render_release.json",
         "archimind/assets/charles_visual_review.json",
         "archimind/render/product_scene.py",
@@ -69,6 +73,13 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         assert any(n.endswith("/scripts/build_product_registry.py") for n in names)
         assert any(
             n.endswith("/docs/developer/CHARLES_PRODUCT_RENDERING.md") for n in names
+        )
+        assert any(
+            n.endswith("/docs/developer/SELECTED_REALISTIC_LAYOUTS.md") for n in names
+        )
+        assert any(
+            n.endswith("/docs/data/SELECTED_LAYOUT_08D_VERIFICATION.json")
+            for n in names
         )
         assert any(
             n.endswith("/docs/data/ASSET_QUALIFICATION_08CR2.json") for n in names
@@ -179,6 +190,17 @@ bindings = {f.id: release.asset_id if f.category == 'chair' else None for f in r
 assert product_scene_payload(room, asset_bindings=bindings)['schema_version'] == 3
 assert not any(n.startswith(('langgraph', 'fastembed', 'chromadb'))
                for n in sys.modules)
+from archimind.render.selected_realistic import build_selected_realistic_scene
+from archimind.assets.selection import build_render_bindings
+from archimind.examples.sample_product_room import create_sample_product_fixture
+fixture = create_sample_product_fixture()
+prepared = build_selected_realistic_scene(fixture.design,
+    planning_bindings={p.furniture_id:p for p in fixture.planning_bindings})
+assert sum(b.asset_id is not None for b in prepared.resolution.bindings) == 2
+assert prepared.scene.design.model_dump(mode='json') == fixture.design.model_dump(mode='json')
+assert all(b.asset_id is None for b in build_render_bindings(room).bindings)
+assert Path(sys.modules['archimind.assets.selection'].__file__).resolve().is_relative_to(target)
+assert Path(sys.modules['archimind.render.selected_realistic'].__file__).resolve().is_relative_to(target)
 print('INSTALLED_CATALOG_AND_PRODUCT_OK')
 """
     result = subprocess.run(

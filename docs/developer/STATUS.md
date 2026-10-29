@@ -2,7 +2,7 @@
 
 Last reviewed and locally verified: **October 28, 2026**.
 
-**Current milestone: Task 08C-R2 complete, one qualified native-scale Charles product in an isolated experimental scene.**
+**Current milestone: Task 08D complete, selected A/B layouts synchronized with Plotly and optional Three.js.**
 Live model behavior is unverified. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -1325,3 +1325,45 @@ and safe placeholders. No automatic binding/resizing of current A/B items is
 implemented. Bed, desk and wardrobe models remain unqualified; the bookcase is
 deferred for 4096 px textures. No further assets, embeddings, new agents or
 dataset pipeline were acquired or implemented.
+
+## Task 08D — selected canonical layout in Three.js
+
+The 3D selector now offers **Plotly schematic** (default) or **Realistic Three.js**,
+while the 2D floor plan remains visible. Every active view receives the actual
+stored candidate. No render action generates, spatially validates, rescores or
+calls AI. Camera/cutaway settings survive A/B changes within the same room;
+identical reruns keep the same scene. New successful generation advances the
+render revision and replaces stored product evidence; failure preserves the
+previous result, selection and render context. Styling safeguards are unchanged.
+
+The default bedroom's three items lack explicit product evidence and remain
+labeled placeholders. Charles requires its immutable planning sidecar and current
+qualified release; dimensions/category alone cannot select it. The separate
+Charles fixture retains its factory sidecars, passes the real accessibility
+validator and caches only its report/fingerprint per session. Its two native-scale
+meshes share one source geometry; missing/corrupt responses safely fall back and
+recover after reopening. No new model was acquired.
+
+Final local results: **1,556 Python tests passed in 94.81s**; **75 frontend tests
+passed**, zero failures/skips. Ruff lint/format (137 files), dependencies, health
+HTTP 200, source/wheel packaging, isolated installed adapter/asset checks, registry
+projection and unchanged-bundle verification passed. All 1,507 baseline tests are
+preserved; the existing smoke assertion's development-phase label was updated to
+08D. New tests cover identity/evidence, A/B and pending inputs, failures, empty
+results, separate sessions, fixture gating, lifecycle and camera behavior.
+
+Actual Chromium desktop 1440×1000 and resized 390×844 inspections confirmed
+canonical agreement, readable labels, controls, placeholders and recovery. The
+347 px component has no horizontal overflow. Normal rendering had zero unexpected
+console errors and the existing Plotly advisory; one intentional HTTP 404 was
+recorded during fault injection. Source hot-reloading during development produced
+one stale-class session error; the final checks used a clean server with fixed
+source. Physical phones and sustained device performance remain unverified.
+
+See [selected-layout guide](SELECTED_REALISTIC_LAYOUTS.md) and
+[verification receipt](../data/SELECTED_LAYOUT_08D_VERIFICATION.json) for exact
+interfaces, browser data, screenshots, file inventory and checkpoint CI links.
+08E may now be scoped to explicit catalog-sized specifications and compatible
+choices before generation. Bed/desk/wardrobe coverage, bookcase texture limits,
+and a broader rights-cleared catalog remain gaps. No 08E controls, retrieval,
+embeddings, new AI functionality or dataset integration were implemented.

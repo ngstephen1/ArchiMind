@@ -24,3 +24,6 @@ include docs/developer/PLANNING_ENVELOPES.md
 include docs/developer/CHARLES_PRODUCT_RENDERING.md
 include docs/data/ASSET_QUALIFICATION_08CR2.md
 include docs/data/ASSET_QUALIFICATION_08CR2.json
+
+include docs/developer/SELECTED_REALISTIC_LAYOUTS.md
+include docs/data/SELECTED_LAYOUT_08D_VERIFICATION.json

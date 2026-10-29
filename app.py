@@ -20,7 +20,7 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 07F")
+    phase.metric("Current development phase", "Task 08D")
     status.metric("Application status", "Running")
 
     st.divider()
@@ -129,11 +129,9 @@ def main() -> None:
                 )
                 render_realistic_scene(create_sample_realistic_room())
             elif mode == "Charles product (08C-R2)":
-                from archimind.assets.render_qualification import CHARLES_ID
-                from archimind.examples.sample_product_room import (
-                    create_sample_product_room,
+                from archimind.ui.product_fixture import (
+                    render_validated_product_fixture,
                 )
-                from archimind.render.product_scene import render_product_scene
 
                 st.caption(
                     "Fixed product demonstration, independent of A/B layouts: two Charles "
@@ -150,14 +148,7 @@ def main() -> None:
                     "Dataset builders: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, "
                     "Himanshu Arora, Jasmine Collins and Jitendra Malik. No endorsement implied."
                 )
-                design = create_sample_product_room()
-                render_product_scene(
-                    design,
-                    asset_bindings={
-                        f.id: CHARLES_ID if f.category == "chair" else None
-                        for f in design.furniture
-                    },
-                )
+                render_validated_product_fixture()
             else:
                 st.caption(
                     "Original Task 06D single-chair studio; independent of the room experiment."

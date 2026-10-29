@@ -1116,6 +1116,22 @@ See the [planning-envelope guide](docs/developer/PLANNING_ENVELOPES.md) and
 [product rendering guide](docs/developer/CHARLES_PRODUCT_RENDERING.md) for exact
 coordinates, CC BY 4.0 attribution, resource budgets, packaging and limitations.
 
+## Selected-layout realistic view
+
+Generate alternatives, select Layout A or B, then choose **Realistic Three.js**
+under **Selected 3D Furnished Room**. The 2D plan stays visible. Plotly remains the
+default; all views use the same stored candidate, with no generation, spatial
+validation or rescoring on a view change. A/B switches preserve the Three.js
+camera and cutaway controls; Reset fits the current layout.
+
+Normal bedrooms currently show labeled bed, desk and wardrobe placeholders.
+Charles is used only with an explicit, current planning sidecar; matching a
+category or size is insufficient. The separate **Charles product (08C-R2)**
+demonstration now passes deterministic fixture validation and exercises the same
+adapter. Styling colors remain a Plotly preview; Three.js retains source materials.
+See the [selected-layout guide](docs/developer/SELECTED_REALISTIC_LAYOUTS.md)
+for API/state contracts, verification and known limits.
+
 ## Roadmap
 
 See [project status](docs/developer/STATUS.md) for the detailed capability matrix
@@ -1147,7 +1163,8 @@ and verification record.
 - [x] **Task 08C / 08C-R · Inspection and dimension review** — Charles native mesh measured; published-envelope rendering rejected; source discrepancy and policy options documented.
 - [x] **Task 08C-R1 · Approved planning-envelope contract** — explicit backend-only Policy B, one Charles metadata reference, immutable evidence and fresh specification factory; no product render approval.
 - [x] **Task 08C-R2 · First native-scale product** — one Charles GLB qualified and packaged, isolated two-chair scene, verified fallbacks and legacy compatibility.
-- [ ] **Task 08D · Selected-layout product rendering** — separate compatible binding work; existing candidate geometry must stay unchanged.
+- [x] **Task 08D · Selected-layout Three.js** — exact selected A/B geometry, a Plotly/Three.js selector, explicit product evidence and honest placeholders.
+- [ ] **Task 08E · Catalog-sized specifications and selection** — separately reviewed product choices before generation; no implicit resizing.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

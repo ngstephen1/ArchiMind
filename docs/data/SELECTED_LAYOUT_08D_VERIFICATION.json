@@ -1,0 +1,412 @@
+{
+  "task": "08D",
+  "status": "passed_local_verification",
+  "browser_comparison": {
+    "summaries": [
+      {
+        "label": "Layout A",
+        "two": [
+          {
+            "id": "desk",
+            "min": [
+              0,
+              1.36
+            ],
+            "max": [
+              1.2,
+              1.96
+            ]
+          },
+          {
+            "id": "queen-bed",
+            "min": [
+              3.4,
+              1.69
+            ],
+            "max": [
+              5,
+              3.69
+            ]
+          },
+          {
+            "id": "wardrobe",
+            "min": [
+              0,
+              3.4
+            ],
+            "max": [
+              1.5,
+              4
+            ]
+          }
+        ],
+        "plot": [
+          {
+            "id": "desk",
+            "min": [
+              0,
+              1.36,
+              0
+            ],
+            "max": [
+              1.2,
+              1.96,
+              0.75
+            ]
+          },
+          {
+            "id": "queen-bed",
+            "min": [
+              3.4,
+              1.69,
+              0
+            ],
+            "max": [
+              5,
+              3.69,
+              0.6
+            ]
+          },
+          {
+            "id": "wardrobe",
+            "min": [
+              0,
+              3.4,
+              0
+            ],
+            "max": [
+              1.5,
+              4,
+              2
+            ]
+          }
+        ]
+      },
+      {
+        "label": "Layout B",
+        "two": [
+          {
+            "id": "desk",
+            "min": [
+              3.74,
+              3.4
+            ],
+            "max": [
+              4.94,
+              4
+            ]
+          },
+          {
+            "id": "queen-bed",
+            "min": [
+              1.96,
+              0
+            ],
+            "max": [
+              3.56,
+              2
+            ]
+          },
+          {
+            "id": "wardrobe",
+            "min": [
+              0,
+              3.4
+            ],
+            "max": [
+              1.5,
+              4
+            ]
+          }
+        ],
+        "plot": [
+          {
+            "id": "desk",
+            "min": [
+              3.74,
+              3.4,
+              0
+            ],
+            "max": [
+              4.94,
+              4,
+              0.75
+            ]
+          },
+          {
+            "id": "queen-bed",
+            "min": [
+              1.96,
+              0,
+              0
+            ],
+            "max": [
+              3.56,
+              2,
+              0.6
+            ]
+          },
+          {
+            "id": "wardrobe",
+            "min": [
+              0,
+              3.4,
+              0
+            ],
+            "max": [
+              1.5,
+              4,
+              2
+            ]
+          }
+        ]
+      }
+    ],
+    "threeCanonical": [
+      {
+        "id": "desk",
+        "x_m": 3.74,
+        "y_m": 3.4,
+        "width_m": 1.2,
+        "depth_m": 0.6,
+        "height_m": 0.75
+      },
+      {
+        "id": "queen-bed",
+        "x_m": 1.96,
+        "y_m": 0,
+        "width_m": 1.6,
+        "depth_m": 2,
+        "height_m": 0.6
+      },
+      {
+        "id": "wardrobe",
+        "x_m": 0,
+        "y_m": 3.4,
+        "width_m": 1.5,
+        "depth_m": 0.6,
+        "height_m": 2
+      }
+    ],
+    "threeMatchesPlotly": true,
+    "loadMs": 172.09999999403954,
+    "assetLoads": 0
+  },
+  "checked_utc": "2026-10-29T01:22:58.647547+00:00",
+  "baseline_commit": "ef62234b3f40d789fdcb8dc80a8d8e88ed7f1434",
+  "baseline": {
+    "python": 1507,
+    "frontend": 68
+  },
+  "verification": {
+    "python": {
+      "passed": 1556,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 94.81
+    },
+    "integration_python": {
+      "passed": 1547,
+      "seconds": 99.46
+    },
+    "frontend": {
+      "passed": 75,
+      "failed": 0,
+      "skipped": 0
+    },
+    "ruff": "lint passed; 137 files already formatted",
+    "dependencies": "No broken requirements found",
+    "health": "HTTP 200 ok",
+    "bundle": "Rebuilt production viewer equals committed integration checkpoint; product registry --check passed",
+    "packaging": "Offline sdist/wheel build, exact bytes, isolated no-deps/no-index installation and outside-repository selected adapter loading passed; focused packaging 1 passed in 5.00 seconds"
+  },
+  "browser": {
+    "engine": "desktop Chromium; resized narrow Chromium, not physical mobile",
+    "desktop": [
+      1440,
+      1000
+    ],
+    "narrow": [
+      390,
+      844
+    ],
+    "narrow_component_width_px": 347,
+    "horizontal_overflow": false,
+    "normal_generated_products": 0,
+    "normal_generated_placeholders": 3,
+    "normal_generated_glb_loads": 0,
+    "selected_setup_ms": [
+      150.3,
+      104.8,
+      184.8,
+      172.1
+    ],
+    "fixture": {
+      "spatial_status": "passed",
+      "spatial_issues": 0,
+      "real_instances": 2,
+      "desk_placeholders": 1,
+      "scale": 1.0,
+      "shared_geometry_count": 1,
+      "new_glb_loads": 1,
+      "product_triangles": 85412,
+      "unique_texture_estimate_bytes": 67108860,
+      "setup_ms": 655.0
+    },
+    "failure_tests": {
+      "missing_http_status": 404,
+      "missing_placeholders": 3,
+      "missing_setup_ms": 122.3,
+      "corrupt_http_status": 200,
+      "corrupt_placeholders": 3,
+      "corrupt_setup_ms": 181.7,
+      "recovery_real_instances": 2,
+      "recovery_placeholders": 1,
+      "recovery_setup_ms": 351.2,
+      "after_recovery_canvases": 1
+    },
+    "camera": {
+      "ab_viewpoint_preserved": true,
+      "cutaway_preserved": true,
+      "orbit_zoom_reset_verified": true,
+      "reset_returns_initial_pose": true,
+      "one_canvas_after_replacement": true
+    },
+    "ordinary_rerun": {
+      "pending_seed_edit_kept_same_dom_node": true,
+      "same_camera": true,
+      "stored_generation_seed": 42,
+      "pending_seed": 43
+    },
+    "independent_contexts": {
+      "second_session_initially_empty": true,
+      "second_session_default": "Layout A / Plotly schematic",
+      "first_session_unchanged": "Layout B / Realistic Three.js"
+    },
+    "console": {
+      "normal_unexpected_errors": 0,
+      "advisories": [
+        "Existing Plotly Canvas2D willReadFrequently advisory"
+      ],
+      "fault_injection_expected_errors": [
+        "One deliberately injected Charles HTTP 404"
+      ],
+      "unexpected_webgl_cleanup_errors": 0
+    },
+    "limitations": [
+      "No physical-device, sustained FPS, GPU memory or leak benchmark.",
+      "Development source hot-reload produced one stale Pydantic class/session error; final browser checks used a clean restarted server with source watching disabled. No canonical model or serializer workaround was introduced.",
+      "No manufacturer-fidelity, calibrated material/color or architectural-code certification claim."
+    ],
+    "successful_regeneration": {
+      "same_seed": 42,
+      "old_scene_cleanup": "complete",
+      "old_scene_disconnected": true,
+      "selected_layout_reset": "Layout A",
+      "three_preference_preserved": true,
+      "camera_reframed": true,
+      "viewer_count": 1
+    }
+  },
+  "source_asset": {
+    "asset_id": "abo-b075x2x4xs-amazon-com",
+    "render_version": "1.0.0",
+    "sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+    "bytes": 4252440,
+    "acquired_during_08D": false
+  },
+  "checkpoints": [
+    {
+      "commit": "bd0d77c9c39c626e1545b1d111000f6dd1b7a8ef",
+      "ci": "passed",
+      "url": "https://github.com/ngstephen1/ArchiMind/actions/runs/40798514148"
+    },
+    {
+      "commit": "ef28ecc0dd9e2af59b37b35cd517fad37607df28",
+      "ci": "passed",
+      "url": "https://github.com/ngstephen1/ArchiMind/actions/runs/40799119566"
+    }
+  ],
+  "screenshots": [
+    {
+      "filename": "08d-a-desktop.png",
+      "sha256": "efbb42454c2f7ed737dd18894d86379c7852f5b3f10912ab90badc2a0263813d",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-b-desktop.png",
+      "sha256": "828bd1b97d40b708627a530a8c65a65caeb922ac8847ab3cfc6c81d67bd719a5",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-a-narrow.png",
+      "sha256": "9b49e09e90e382a7b532dd0857f0ad52f836d1c99d0778763aebc93d8e64e0e6",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-b-narrow.png",
+      "sha256": "c99064e18086f5540e74efe8850fc60029adba0c3ffc297d70b00aecc075f3fc",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-charles-desktop.png",
+      "sha256": "335b6f53b158ece13399a770f9dc70b46c5a8cdf50ab42145d58de79bf683dfb",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-charles-narrow.png",
+      "sha256": "131dfe0b2d6d5bcb0ebb8c977028ef6776ae8b8720fbda4ff50ce1a5796c4d3e",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-missing-narrow.png",
+      "sha256": "c3a1e34989fb69af9ab694976040a40e20d1062f4a6a66d6d45a912a3b141a8c",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-corrupt-narrow.png",
+      "sha256": "c3a1e34989fb69af9ab694976040a40e20d1062f4a6a66d6d45a912a3b141a8c",
+      "outside_git": true
+    },
+    {
+      "filename": "08d-recovered-narrow.png",
+      "sha256": "73cb7959c082c29f47ef8443756606d70b9029085ed14f8700df002018ed4e09",
+      "outside_git": true
+    }
+  ],
+  "changed_files": [
+    "MANIFEST.in",
+    "README.md",
+    "app.py",
+    "docs/data/SELECTED_LAYOUT_08D_VERIFICATION.json",
+    "docs/developer/CHARLES_PRODUCT_RENDERING.md",
+    "docs/developer/REALISTIC_ROOM.md",
+    "docs/developer/SELECTED_REALISTIC_LAYOUTS.md",
+    "docs/developer/STATUS.md",
+    "frontend/realistic_viewer/package.json",
+    "frontend/realistic_viewer/src/main.js",
+    "frontend/realistic_viewer/src/room_viewer.js",
+    "frontend/realistic_viewer/src/scene_lifecycle.js",
+    "frontend/realistic_viewer/tests/lifecycle.test.js",
+    "src/archimind/_viewer_assets/viewer.js",
+    "src/archimind/assets/selection.py",
+    "src/archimind/examples/sample_product_room.py",
+    "src/archimind/render/product_scene.py",
+    "src/archimind/render/selected_realistic.py",
+    "src/archimind/ui/layout_generation.py",
+    "src/archimind/ui/product_fixture.py",
+    "src/archimind/ui/realistic_view.py",
+    "tests/test_asset_catalog_packaging.py",
+    "tests/test_product_fixture.py",
+    "tests/test_selected_realistic.py",
+    "tests/test_selected_realistic_ui.py",
+    "tests/test_smoke.py"
+  ],
+  "preservation": {
+    "protected_source_files_byte_identical": 45,
+    "canonical_rules_changed": false,
+    "new_dependencies": false,
+    "live_ai_or_codex_calls": false,
+    "protected_directories": ".agents/ and .claude/ remain untracked and untouched"
+  }
+}

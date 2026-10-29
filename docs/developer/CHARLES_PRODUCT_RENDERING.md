@@ -68,3 +68,12 @@ python -m streamlit run app.py
 ```
 
 08D may be separately scoped to explicit compatible B-sized specifications and safe placeholders. Existing A/B furniture must never be resized for a mesh. Bed, desk and wardrobe still lack qualified assets; the bookcase is deferred because of 4096 px textures. No selected-layout integration, embeddings, new AI or further acquisition was implemented here.
+
+## Task 08D follow-up
+
+Selected A/B layouts now have an optional Three.js view using this same renderer.
+Normal bedroom items remain placeholders without explicit product evidence. The
+standalone Charles fixture now retains its planning sidecars and caches a real
+spatial report per session; its geometry and native asset remain unchanged.
+Legacy contracts and demonstrations stay supported. Current state/lifecycle
+behavior and verification are in the [selected-layout guide](SELECTED_REALISTIC_LAYOUTS.md).

@@ -257,3 +257,54 @@ def test_empty_generation_unmounts_without_discarding_view_preference(spies):
     assert a.session_state[view.REVISION_KEY] == old_revision + 1
     assert a.session_state[ui.RESULT_KEY].candidates == []
     assert a.session_state[view.VIEW_KEY] == view.THREE_VIEW
+
+
+def test_unsupported_rotation_is_explicit_and_not_coerced(spies):
+    a = three(generate(app()))
+    result = a.session_state[ui.RESULT_KEY]
+    result.candidates[0].design.furniture[0].rotation_deg = 90
+    before = result.model_dump_json()
+    calls = (
+        spies.generator.call_count,
+        spies.validator.call_count,
+        spies.three.call_count,
+    )
+    a.run()
+    assert not a.exception
+    assert any("unsupported rotation" in e.value for e in a.error)
+    assert (
+        spies.generator.call_count,
+        spies.validator.call_count,
+        spies.three.call_count,
+    ) == calls
+    assert result.model_dump_json() == before
+
+
+def test_altered_generation_invalidates_stored_binding_context(spies):
+    a = three(generate(app()))
+    result = a.session_state[ui.RESULT_KEY]
+    snapshot = a.session_state[view.SNAPSHOT_KEY]
+    result.candidates[0].score.total -= 0.001
+    before = result.model_dump_json()
+    a.run()
+    assert not a.exception
+    assert any("stale or incompatible" in e.value for e in a.warning)
+    assert not spies.three.call_args.kwargs["planning_bindings"]
+    assert a.session_state[view.SNAPSHOT_KEY] is snapshot
+    assert result.model_dump_json() == before
+
+
+def test_invalid_submitted_sidecar_is_not_snapshotted():
+    spec = create_sample_bedroom()
+    p = furniture_from_planning_envelope(
+        CHARLES_ID, furniture_id="c", name="Charles", x_m=1.0, y_m=1.0
+    )
+    spec.furniture = [p.furniture]
+    result = ui._generate(spec, 42)
+    snap = view.snapshot_generation(
+        spec,
+        result,
+        1,
+        {"c": p.binding.model_copy(update={"metadata_sha256": "0" * 64})},
+    )
+    assert snap.invalid_evidence and not snap.bindings

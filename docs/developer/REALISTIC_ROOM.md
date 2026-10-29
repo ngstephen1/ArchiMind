@@ -126,3 +126,12 @@ verification figures are historical; current product qualification, resource
 checks, licenses, packaging and browser evidence are documented in the
 [product guide](CHARLES_PRODUCT_RENDERING.md). Only the illustrative Sheen path
 fits a mesh; product placement cannot call that function.
+
+## Task 08D follow-up
+
+Selected A/B layouts now have an optional Three.js view using this same renderer.
+Normal bedroom items remain placeholders without explicit product evidence. The
+standalone Charles fixture now retains its planning sidecars and caches a real
+spatial report per session; its geometry and native asset remain unchanged.
+Legacy contracts and demonstrations stay supported. Current state/lifecycle
+behavior and verification are in the [selected-layout guide](SELECTED_REALISTIC_LAYOUTS.md).
