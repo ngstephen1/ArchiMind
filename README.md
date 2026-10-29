@@ -1106,10 +1106,15 @@ distinct. `furniture_from_catalog()` still uses the original published dimension
 
 The native-scale box is reserved conservatively before explicit generation;
 existing layouts, validators and scores are unchanged. There is no automatic
-clearance margin, mesh scaling or rendered product approval. The current UI does
-not invoke this API. See the [planning-envelope guide](docs/developer/PLANNING_ENVELOPES.md)
-for exact rules, Charles measurements, offline usage, invalidation and remaining
-08C-R2 rendering gates.
+clearance margin or mesh scaling. Task **08C-R2** separately qualifies the original
+Charles GLB for native-scale rendering in an isolated experimental room. Enable
+**Load experimental realistic viewer → Charles product (08C-R2)** to see two
+real armchairs and a labeled desk placeholder. This does not follow or resize
+A/B candidates. Published dimensions and historical catalog/planning flags remain
+unchanged; a digest-bound render release records the completed visual gates.
+See the [planning-envelope guide](docs/developer/PLANNING_ENVELOPES.md) and
+[product rendering guide](docs/developer/CHARLES_PRODUCT_RENDERING.md) for exact
+coordinates, CC BY 4.0 attribution, resource budgets, packaging and limitations.
 
 ## Roadmap
 
@@ -1141,7 +1146,8 @@ and verification record.
 - [x] **Task 08B · Qualified furniture metadata** — two immutable product records, published dimensions and explicit catalog factory.
 - [x] **Task 08C / 08C-R · Inspection and dimension review** — Charles native mesh measured; published-envelope rendering rejected; source discrepancy and policy options documented.
 - [x] **Task 08C-R1 · Approved planning-envelope contract** — explicit backend-only Policy B, one Charles metadata reference, immutable evidence and fresh specification factory; no product render approval.
-- [ ] **Task 08C-R2 / 08D** — separate native-scale rendering qualification and selected-layout integration, requiring new authorization.
+- [x] **Task 08C-R2 · First native-scale product** — one Charles GLB qualified and packaged, isolated two-chair scene, verified fallbacks and legacy compatibility.
+- [ ] **Task 08D · Selected-layout product rendering** — separate compatible binding work; existing candidate geometry must stay unchanged.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

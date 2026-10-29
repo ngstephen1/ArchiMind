@@ -504,5 +504,83 @@
     "Not image pixel decoding or natural-front verification.",
     "No real mesh approval until browser gates pass.",
     "Published product dimensions and historical physical-box rejection unchanged."
-  ]
+  ],
+  "final_release": {
+    "status": "render_approved_native_scale_with_documented_limits",
+    "release_path": "src/archimind/assets/product_render_release.json",
+    "release_metadata_sha256": "a2aa2007730e0276691a7959e71fb50c8af51a34577d1b0c3f6acd0df19480a8",
+    "visual_review_path": "src/archimind/assets/charles_visual_review.json",
+    "visual_review_sha256": "5b8aa085bef18a38da0e4c993b41ea25f9d0030c5476d30e037aecdfde1f6b78",
+    "asset_id": "abo-b075x2x4xs-amazon-com",
+    "render_version": "1.0.0",
+    "scope": "isolated_experimental_scene_only_no_08D",
+    "historical_technical_snapshot_preserved": true
+  },
+  "delivery_verification": {
+    "python": {
+      "passed": 1507,
+      "failed": 0,
+      "skipped": 0,
+      "seconds": 86.21
+    },
+    "frontend": {
+      "passed": 68,
+      "failed": 0,
+      "skipped": 0
+    },
+    "packaging": "offline sdist+wheel, exact contents and isolated installed-wheel integrity/V3 verified by full suite; separate focused packaging run passed in 5.60 seconds",
+    "lint": "Ruff passed; 129 files already formatted",
+    "dependencies": "pip check: no broken requirements",
+    "streamlit_health": "HTTP 200 ok",
+    "bundle": "production rebuild matched committed checkpoint-2 viewer assets; registry projection check passed",
+    "streamlit_browser": {
+      "desktop": [
+        1440,
+        1000
+      ],
+      "narrow": [
+        390,
+        844
+      ],
+      "narrow_component_width_px": 347,
+      "horizontal_overflow": false,
+      "final_setup_ms": 344.9,
+      "final_console_errors": 0,
+      "final_console_advisories": [
+        "Existing Plotly Canvas2D willReadFrequently advisory"
+      ],
+      "local_asset_status": 200,
+      "legacy_choices": "Architectural room and Single chair (06D) loaded; return to Charles succeeds",
+      "screenshots": [
+        {
+          "filename": "08cr2-final-streamlit-desktop.png",
+          "sha256": "a5e7d4d35516c1395a81b9aa85a401a3f7765bd8cd7f9e2316512944d4ecf729",
+          "stored_outside_git": true
+        },
+        {
+          "filename": "08cr2-final-streamlit-narrow.png",
+          "sha256": "c5b57e949a7d564864d4ef1e32d6c0377f94cea8501349e6d4d7817fc70b197f",
+          "stored_outside_git": true
+        }
+      ]
+    },
+    "aggregate_browser": {
+      "instances": 8,
+      "product_triangles": 341648,
+      "result": "all 8 placeholders, zero GLB loads"
+    },
+    "preservation": "39 selected protected tracked source files byte-identical; complete tracked diff confined to declared files; untracked .agents/.claude left untouched",
+    "checkpoints": [
+      {
+        "commit": "01dcd77c0338e75ad876384568d7701480d2d053",
+        "ci_url": "https://github.com/ngstephen1/ArchiMind/actions/runs/40794073487",
+        "ci": "passed: 1484 Python / 27 frontend"
+      },
+      {
+        "commit": "93b2b9f51159ebc57b11a9452b2c15da74718f3a",
+        "ci_url": "https://github.com/ngstephen1/ArchiMind/actions/runs/40795254059",
+        "ci": "passed"
+      }
+    ]
+  }
 }

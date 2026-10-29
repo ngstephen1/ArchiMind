@@ -20,3 +20,7 @@ include docs/developer/INTERIOR_STYLIST_AGENT.md
 include docs/developer/INTERIOR_STYLIST_WORKFLOW.md
 include docs/developer/STYLE_COLOR_PREVIEW.md
 include docs/developer/PLANNING_ENVELOPES.md
+
+include docs/developer/CHARLES_PRODUCT_RENDERING.md
+include docs/data/ASSET_QUALIFICATION_08CR2.md
+include docs/data/ASSET_QUALIFICATION_08CR2.json

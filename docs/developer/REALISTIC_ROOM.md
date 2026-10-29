@@ -115,3 +115,14 @@ There is no full asset library, wall thickness, ceiling slab, door swing,
 architectural certification, detailed-mesh validation, saving or agent behavior.
 Translucent surfaces can have sorting artifacts. WebGL 2 is required; full-device
 and multi-engine compatibility/performance require separate testing.
+
+## 08C-R2 native product extension
+
+The V2/Sheen behavior above remains supported. A separate **Charles product
+(08C-R2)** choice now reuses this room renderer through a strict V3 ID-only
+envelope, with two unit-scale product meshes in Policy B boxes and a desk
+placeholder. It remains independent of A/B selection. The original 06E1
+verification figures are historical; current product qualification, resource
+checks, licenses, packaging and browser evidence are documented in the
+[product guide](CHARLES_PRODUCT_RENDERING.md). Only the illustrative Sheen path
+fits a mesh; product placement cannot call that function.

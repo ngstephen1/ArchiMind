@@ -2,9 +2,8 @@
 
 Last reviewed and locally verified: **October 28, 2026**.
 
-**Current milestone: Task 08C-R1 complete, backend-only Policy B planning envelopes.**
-Live model behavior is unverified. Physical materials/textures and Task 06E2 remain
-separate future renderer work.
+**Current milestone: Task 08C-R2 complete, one qualified native-scale Charles product in an isolated experimental scene.**
+Live model behavior is unverified. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
@@ -1290,3 +1289,39 @@ support, furniture editing, persistence and export remain separate future work.
 
 For setup, local commands, coordinates, and renderer usage, see the
 [project README](../../README.md).
+
+## Task 08C-R2 — first native-scale real product
+
+The official Charles/Sod B075X2X4XS GLB was freshly retrieved alone, verified at
+4,252,440 bytes / SHA-256 `62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645`,
+and approved in a separate digest-bound render release after actual desktop and
+narrow Chromium inspection. Original published dimensions, catalog/planning
+snapshots, geometry, A/B generation/selection, scores, Plotly and AI are unchanged.
+
+The experimental selector now offers a fixed two-Charles/desk-placeholder room
+using V3 ID/version/envelope bindings, fixed local bytes, streaming integrity
+checks, actual decoded bounds/material/image verification and unit scale only.
+The illustrative V1/V2 Sheen scenes retain fitting behavior. Budgets are unchanged;
+two Charles instances share one source, 67,108,860 estimated texture bytes and
+85,412 product triangles. Eight instances trigger all-product placeholders before
+any load. Missing/corrupt assets are explicit and recover on a later remount.
+
+Full integration verification: **1,507 Python tests passed in 88.78s**, including
+all 1,477 baseline cases; **68 frontend tests passed**, no failures/skips. The
+source/wheel and isolated installed-package regression has been extended to
+verify the approved Charles file, notices, metadata and V3 path while preserving
+the catalog's SDK-free import check. The existing renderer imports optional
+styling SDK types; provider construction/network/process work remain blocked in
+the installed render check. Final verification: **1,507 passed in 86.21s**, **68 frontend passed**, Ruff lint/format (129 files), pip compatibility, health HTTP 200, exact bundle/registry, offline packaging and isolated installed product checks passed. Full evidence is in the paired R2 report.
+
+See [qualification receipt](../data/ASSET_QUALIFICATION_08CR2.md) and
+[product rendering guide](CHARLES_PRODUCT_RENDERING.md) for exact data, files,
+local commands and limitations. Browser setup times are observations, not device
+benchmarks. No physical phone, calibrated color, independent metrology, sustained
+GPU-memory/FPS or architectural certification claim is made.
+
+08D may be separately scoped to explicit compatible planning-sized specifications
+and safe placeholders. No automatic binding/resizing of current A/B items is
+implemented. Bed, desk and wardrobe models remain unqualified; the bookcase is
+deferred for 4096 px textures. No further assets, embeddings, new agents or
+dataset pipeline were acquired or implemented.

@@ -32,6 +32,17 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         catalog_path,
         "archimind/assets/catalog.py",
         "archimind/assets/inspection.py",
+        "archimind/assets/render_qualification.py",
+        "archimind/assets/render_assets.py",
+        "archimind/assets/product_render_release.json",
+        "archimind/assets/charles_visual_review.json",
+        "archimind/render/product_scene.py",
+        "archimind/examples/sample_product_room.py",
+        "archimind/_viewer_assets/furniture/CharlesArmchair.glb",
+        "archimind/_viewer_assets/furniture/CHARLES_PROVENANCE.json",
+        "archimind/_viewer_assets/furniture/ABO_ATTRIBUTION.txt",
+        "archimind/_viewer_assets/furniture/ABO_SOURCE_README.md",
+        "archimind/_viewer_assets/furniture/ABO_LICENSE_CC_BY_4.0.txt",
         "archimind/assets/planning_envelopes.py",
         "archimind/assets/planning_envelopes.json",
         "archimind/assets/__init__.py",
@@ -45,11 +56,24 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
     with zipfile.ZipFile(wheel) as archive:
         for name in preserved:
             assert archive.read(name) == (ROOT / "src" / name).read_bytes()
+        assert {Path(n).name for n in archive.namelist() if n.endswith(".glb")} == {
+            "SheenChair.glb",
+            "CharlesArmchair.glb",
+        }
+        assert sum(n.endswith("/CharlesArmchair.glb") for n in archive.namelist()) == 1
         assert not any(n.endswith("/.env") for n in archive.namelist())
         assert not any("B075X2X4XS" in n for n in archive.namelist())
     with tarfile.open(sdist) as archive:
         names = archive.getnames()
         assert any(n.endswith("/scripts/inspect_furniture_assets.py") for n in names)
+        assert any(n.endswith("/scripts/build_product_registry.py") for n in names)
+        assert any(
+            n.endswith("/docs/developer/CHARLES_PRODUCT_RENDERING.md") for n in names
+        )
+        assert any(
+            n.endswith("/docs/data/ASSET_QUALIFICATION_08CR2.json") for n in names
+        )
+        assert sum(n.endswith("/CharlesArmchair.glb") for n in names) == 1
         assert any(n.endswith("/docs/developer/PLANNING_ENVELOPES.md") for n in names)
         for name in preserved:
             member = next(n for n in names if n.endswith("/src/" + name))
@@ -129,7 +153,33 @@ binding.validate_furniture(fresh)
 assert type(binding).model_validate_json(binding.model_dump_json()) == binding
 assert not any(n.startswith(('openai', 'langgraph', 'fastembed', 'chromadb'))
                for n in sys.modules)
-print('INSTALLED_CATALOG_OK')
+from archimind.assets.render_assets import (
+    product_release, product_asset_path, verify_product_asset, product_projection)
+from archimind.examples.sample_product_room import create_sample_product_room
+# The existing render package imports optional styling SDK types. Catalog imports
+# above stay SDK-free; renderer verification must never construct a provider.
+import openai
+def provider_forbidden(*args, **kwargs):
+    raise AssertionError('Rendering attempted a live provider')
+openai.OpenAI = openai.AsyncOpenAI = openai.Client = openai.AsyncClient = provider_forbidden
+from archimind.render.product_scene import product_scene_payload
+import archimind.assets.render_assets as render_module
+assert Path(render_module.__file__).resolve().is_relative_to(target)
+release = product_release()
+assert release.render_qualified and release.asset_id == envelope.asset_id
+assert product_asset_path().resolve().is_relative_to(target)
+assert product_asset_path().stat().st_size == 4252440
+technical = verify_product_asset()
+assert technical['inspection']['original_sha256'] == release.source_glb_sha256
+assert technical['envelope']['metadata_sha256'] == release.envelope_sha256
+projection = product_projection()[release.asset_id]
+assert projection['bytes'] == 4252440 and projection['triangles'] == 42706
+room = create_sample_product_room()
+bindings = {f.id: release.asset_id if f.category == 'chair' else None for f in room.furniture}
+assert product_scene_payload(room, asset_bindings=bindings)['schema_version'] == 3
+assert not any(n.startswith(('langgraph', 'fastembed', 'chromadb'))
+               for n in sys.modules)
+print('INSTALLED_CATALOG_AND_PRODUCT_OK')
 """
     result = subprocess.run(
         [sys.executable, "-I", "-c", code, str(target)],
@@ -140,4 +190,4 @@ print('INSTALLED_CATALOG_OK')
         text=True,
         timeout=30,
     )
-    assert result.stdout.strip() == "INSTALLED_CATALOG_OK"
+    assert result.stdout.strip() == "INSTALLED_CATALOG_AND_PRODUCT_OK"

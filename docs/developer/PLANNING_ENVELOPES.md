@@ -162,9 +162,9 @@ original dimensions. A historical sidecar may fail current eligibility checks
 when its catalog changes, but is never automatically migrated or used to rewrite
 the old design. Historical evidence files remain unchanged.
 
-## Boundaries and 08C-R2 prerequisites
+## Historical R1 boundaries and 08C-R2 prerequisites
 
-Charles is **planning-approved**, not render-qualified. The catalog still reports
+At the R1 checkpoint, Charles was **planning-approved**, not render-qualified. The catalog still reports
 no render-qualified product and the original physical-envelope inspection still
 reports its historical rejection. No new room choice, Three.js path, Plotly behavior,
 renderer binding or asset was introduced. Policy C remains prohibited.
@@ -218,3 +218,13 @@ passed. [Schema checkpoint CI](https://github.com/ngstephen1/ArchiMind/actions/r
 and [factory checkpoint CI](https://github.com/ngstephen1/ArchiMind/actions/runs/40791341648)
 passed. Final checkpoint/CI identities are reported at delivery; R1 stops before
 acquisition or rendering.
+
+## R2 follow-up
+
+Task 08C-R2 has now independently qualified the original Charles bytes for an
+isolated native-scale rendering scene. The R1 snapshots, factory, product facts,
+exact B proof and original false render flags above remain unchanged. Current
+render approval comes only from the separate digest-bound release, not this
+planning record. See [native-scale product rendering](CHARLES_PRODUCT_RENDERING.md)
+for the trusted binding, actual browser evidence, limits and packaging. No A/B
+selected-layout integration follows automatically; that remains 08D.
