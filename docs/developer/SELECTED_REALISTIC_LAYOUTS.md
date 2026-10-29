@@ -161,3 +161,16 @@ they exist; the guide cannot contain its own future commit hash.
 - `tests/test_selected_realistic.py`
 - `tests/test_selected_realistic_ui.py`
 - `tests/test_smoke.py`
+
+
+## 08E extension — explicit catalog preparation
+
+The selected-layout adapter/V3 geometry contract above is unchanged. The new
+[catalog workflow](FURNITURE_CATALOG_UI.md) supplies explicit Charles planning
+sidecars only after preparation/review and generation. `GenerationRenderSnapshot`
+also freezes submitted source JSON and product assignments; styling never reads
+pending next-specification controls. Mesh/placeholder choices are render-only,
+session/generation-bound and available only for compatible current Charles
+bindings. Bookcase metadata is separate and cannot grant product rendering.
+The original 08D verification section remains historical; new checks are recorded
+in the [08E receipt](../data/CATALOG_GENERATION_08E_VERIFICATION.json).

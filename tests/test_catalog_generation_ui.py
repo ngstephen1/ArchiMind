@@ -229,3 +229,49 @@ def test_independent_sessions_and_generic_chairs_cannot_gain_mesh(spies):
     )
     assert not any(s.key.startswith("product_representation:") for s in a.selectbox)
     assert b.radio(key=view.VIEW_KEY).value == view.PLOTLY_VIEW
+
+
+def test_catalog_styling_uses_committed_input_after_mode_and_seed_changes(spies):
+    a = generate(prepare(catalog(app(), manual=False)))
+    a.button(key="show_fixture_styling").click().run()
+    original = a.session_state[styling.RESULT_KEY]
+    snapshot = a.session_state[view.SNAPSHOT_KEY]
+    assert original[1].approved_design is not None
+    a.selectbox(key=controls.MODE_KEY).set_value(controls.PROCEDURAL).run()
+    a.number_input(key="layout_seed").set_value(101).run()
+    assert a.session_state[styling.RESULT_KEY] == original
+    assert (
+        spies.styling.call_args.args[0].model_dump_json()
+        == snapshot.source_specification_json
+    )
+    a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+    key = f"product_representation:1:catalog:{CHARLES_ID}:1"
+    a.selectbox(key=key).set_value("Procedural placeholder").run()
+    assert a.session_state[styling.RESULT_KEY] == original
+    assert a.session_state[view.SNAPSHOT_KEY] is snapshot
+
+
+def test_evidence_loss_blocks_next_generation_without_replacing_current(
+    spies, monkeypatch
+):
+    from archimind.assets import specifications
+
+    a = generate(prepare(catalog(app(), manual=False)))
+    result, snapshot = (
+        a.session_state[ui.RESULT_KEY],
+        a.session_state[view.SNAPSHOT_KEY],
+    )
+    original = specifications.load_catalog
+    monkeypatch.setattr(
+        specifications, "load_catalog", Mock(side_effect=ValueError("secret-token"))
+    )
+    a.run()
+    assert a.button(key="generate_layouts").disabled
+    assert (
+        a.session_state[ui.RESULT_KEY] is result
+        and a.session_state[view.SNAPSHOT_KEY] is snapshot
+    )
+    assert not a.exception and "secret-token" not in str([e.value for e in a.error])
+    monkeypatch.setattr(specifications, "load_catalog", original)
+    a.run()
+    assert not a.button(key="generate_layouts").disabled

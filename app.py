@@ -20,7 +20,7 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 08D")
+    phase.metric("Current development phase", "Task 08E")
     status.metric("Application status", "Running")
 
     st.divider()

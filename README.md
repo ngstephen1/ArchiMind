@@ -1124,13 +1124,29 @@ default; all views use the same stored candidate, with no generation, spatial
 validation or rescoring on a view change. A/B switches preserve the Three.js
 camera and cutaway controls; Reset fits the current layout.
 
-Normal bedrooms currently show labeled bed, desk and wardrobe placeholders.
+The default procedural bedroom shows labeled bed, desk and wardrobe placeholders.
 Charles is used only with an explicit, current planning sidecar; matching a
 category or size is insufficient. The separate **Charles product (08C-R2)**
 demonstration now passes deterministic fixture validation and exercises the same
 adapter. Styling colors remain a Plotly preview; Three.js retains source materials.
 See the [selected-layout guide](docs/developer/SELECTED_REALISTIC_LAYOUTS.md)
 for API/state contracts, verification and known limits.
+
+## Catalog-sized specifications
+
+Choose **Specification for next generation → Catalog selection** to retain or
+remove the procedural items and optionally add one Charles armchair and one
+Espresso bookcase. Use **Prepare new specification → Review → Generate Layouts**.
+Pending edits leave displayed results and styling unchanged; generation uses the
+reviewed dimensions and freezes its submitted specification/provenance.
+
+Charles reserves its approved Policy B envelope and can use its native-scale
+mesh. The bookcase uses its published dimensions and remains a named storage
+placeholder. Published measurements are checked claims, not independent physical
+measurements. Compatible Charles instances offer a mesh/placeholder display
+choice; no rendering choice resizes or revalidates the layout. Plotly stays the
+default. See the [catalog workflow guide](docs/developer/FURNITURE_CATALOG_UI.md)
+for exact dimensions, provenance, failure policy, state and verification.
 
 ## Roadmap
 
@@ -1164,7 +1180,7 @@ and verification record.
 - [x] **Task 08C-R1 · Approved planning-envelope contract** — explicit backend-only Policy B, one Charles metadata reference, immutable evidence and fresh specification factory; no product render approval.
 - [x] **Task 08C-R2 · First native-scale product** — one Charles GLB qualified and packaged, isolated two-chair scene, verified fallbacks and legacy compatibility.
 - [x] **Task 08D · Selected-layout Three.js** — exact selected A/B geometry, a Plotly/Three.js selector, explicit product evidence and honest placeholders.
-- [ ] **Task 08E · Catalog-sized specifications and selection** — separately reviewed product choices before generation; no implicit resizing.
+- [x] **Task 08E · Catalog-sized specifications and selection** — explicit preparation/review, catalog-sized generation, frozen provenance and compatible display choices; no implicit resizing.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

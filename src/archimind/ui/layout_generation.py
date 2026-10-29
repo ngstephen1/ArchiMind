@@ -112,7 +112,7 @@ def render_layout_generator(
         f"× {room.ceiling_height_m:g} m high"
     )
     st.write(
-        "Requested furniture: "
+        "Procedural base furniture: "
         + ", ".join(item.name for item in specification.furniture)
     )
     st.write(

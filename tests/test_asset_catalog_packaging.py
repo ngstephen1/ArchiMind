@@ -35,6 +35,8 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/assets/render_qualification.py",
         "archimind/assets/render_assets.py",
         "archimind/assets/selection.py",
+        "archimind/assets/specifications.py",
+        "archimind/ui/furniture_assets.py",
         "archimind/render/selected_realistic.py",
         "archimind/ui/realistic_view.py",
         "archimind/ui/product_fixture.py",
@@ -86,6 +88,11 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         )
         assert sum(n.endswith("/CharlesArmchair.glb") for n in names) == 1
         assert any(n.endswith("/docs/developer/PLANNING_ENVELOPES.md") for n in names)
+        assert any(n.endswith("/docs/developer/FURNITURE_CATALOG_UI.md") for n in names)
+        assert any(
+            n.endswith("/docs/data/CATALOG_GENERATION_08E_VERIFICATION.json")
+            for n in names
+        )
         for name in preserved:
             member = next(n for n in names if n.endswith("/src/" + name))
             assert (
@@ -201,6 +208,20 @@ assert prepared.scene.design.model_dump(mode='json') == fixture.design.model_dum
 assert all(b.asset_id is None for b in build_render_bindings(room).bindings)
 assert Path(sys.modules['archimind.assets.selection'].__file__).resolve().is_relative_to(target)
 assert Path(sys.modules['archimind.render.selected_realistic'].__file__).resolve().is_relative_to(target)
+from archimind.assets import catalog_product_options, prepare_catalog_specification, specification_is_current
+from archimind.examples import create_sample_bedroom
+base = create_sample_bedroom()
+options = catalog_product_options()
+assert options[0].render_qualified and not options[1].render_qualified
+submission = prepare_catalog_specification(base,
+    retained_manual_ids=tuple(f.id for f in base.furniture),
+    product_ids=tuple(o.record.asset_id for o in options))
+assert len(submission.design().furniture) == 5 and len(submission.planning_bindings) == 1
+assert specification_is_current(submission, base,
+    retained_manual_ids=submission.retained_manual_ids, product_ids=submission.product_ids)
+assert submission.design().furniture[3].id == 'catalog:abo-b075x2x4xs-amazon-com:1'
+assert submission.assignments[1].product_id == 'B07PQS58XN'
+assert Path(sys.modules['archimind.assets.specifications'].__file__).resolve().is_relative_to(target)
 print('INSTALLED_CATALOG_AND_PRODUCT_OK')
 """
     result = subprocess.run(

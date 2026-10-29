@@ -141,3 +141,36 @@ def test_stale_selection_geometry_evidence_or_tampering_require_preparation(
         ),
     )
     assert not api.specification_is_current(p, base, **args)
+
+
+def test_render_release_absence_does_not_invent_approval(monkeypatch):
+    from archimind.assets import render_assets
+
+    def missing():
+        raise ValueError("private path and token")
+
+    monkeypatch.setattr(render_assets, "product_release", missing)
+    chair, book = api.catalog_product_options()
+    assert chair.preparation_available and not chair.render_qualified
+    assert not book.render_qualified
+    p = prepare()
+    assert len(p.planning_bindings) == 1
+
+
+def test_preparation_never_changes_existing_validation_or_score(monkeypatch):
+    import archimind.geometry as geometry
+
+    base = create_sample_bedroom()
+    generated = geometry.generate_layout_candidates(base.room, base.furniture)
+    before = generated.model_dump_json()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("Preparation attempted generation or spatial checking")
+
+    monkeypatch.setattr(geometry, "generate_layout_candidates", forbidden)
+    monkeypatch.setattr(geometry, "validate_accessibility", forbidden)
+    p = prepare(
+        generated.candidates[0].design, retained=("queen-bed", "desk", "wardrobe")
+    )
+    assert len(p.design().furniture) == 5
+    assert generated.model_dump_json() == before

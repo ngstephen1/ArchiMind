@@ -30,12 +30,20 @@ def metric(values) -> str:
     )
 
 
+def _retain_hidden_choices() -> None:
+    # Streamlit discards widget-owned keys when their panel cannot be rendered.
+    for key in list(st.session_state):
+        if key.startswith(("keep_manual:", "catalog_product:")):
+            st.session_state[key] = st.session_state[key]
+
+
 def render_furniture_assets(base: RoomDesign) -> PendingSpecification:
     """Preparing changes only pending state. Generate remains the confirmation."""
     mode = st.selectbox(
         "Specification for next generation", [PROCEDURAL, CATALOG], key=MODE_KEY
     )
     if mode == PROCEDURAL:
+        _retain_hidden_choices()
         return PendingSpecification(False, None)
     st.caption(
         "Next specification only. Current alternatives stay unchanged until Generate Layouts returns a new outcome."
@@ -44,6 +52,7 @@ def render_furniture_assets(base: RoomDesign) -> PendingSpecification:
     try:
         options = catalog_product_options()
     except Exception:
+        _retain_hidden_choices()
         st.error(
             "The furniture catalog is unavailable. Choose the procedural specification or try again."
         )
@@ -134,7 +143,10 @@ def render_furniture_assets(base: RoomDesign) -> PendingSpecification:
                 "Identity": assignments[f.id].product_id
                 if f.id in assignments
                 else f.id,
-                "Dimension basis": assignments[f.id].dimension_basis
+                "Dimension basis": {
+                    "planning_envelope_B": "Policy B planning reservation",
+                    "published_item_dimensions": "Published item dimensions",
+                }[assignments[f.id].dimension_basis]
                 if f.id in assignments
                 else "retained manual dimensions",
                 "Generation size": metric((f.width_m, f.depth_m, f.height_m)),

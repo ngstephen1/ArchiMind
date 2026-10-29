@@ -2,7 +2,7 @@
 
 Last reviewed and locally verified: **October 28, 2026**.
 
-**Current milestone: Task 08D complete, selected A/B layouts synchronized with Plotly and optional Three.js.**
+**Current milestone: Task 08E complete, explicit catalog selection and reviewed catalog-sized generation.**
 Live model behavior is unverified. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -1367,3 +1367,40 @@ interfaces, browser data, screenshots, file inventory and checkpoint CI links.
 choices before generation. Bed/desk/wardrobe coverage, bookcase texture limits,
 and a broader rights-cleared catalog remain gaps. No 08E controls, retrieval,
 embeddings, new AI functionality or dataset integration were implemented.
+
+
+## Task 08E — reviewed catalog inputs and generation
+
+The default procedural path remains one-click. Optional catalog selection retains
+or removes manual bed/desk/wardrobe inputs and adds at most one Charles armchair
+and one Espresso bookcase. Preparation is pure schema/evidence work; explicit
+Generate confirms the reviewed input. Published item claims, Charles's Policy B
+reservation and current mesh approval have separate labels. Empty reviewed inputs
+are supported with an honest single-distinct-arrangement limitation.
+
+Submitted source JSON, product provenance and sidecars are frozen with the
+revision/digest-bound generation snapshot. Pending inputs and seed changes do not
+replace current results or matching styling; styling uses that stored source.
+Exceptions preserve prior context; all normal outcomes replace it, even zero
+candidates. Compatible Charles mesh/placeholder choices persist across A/B and
+reset on replacement. Bookcase remains a storage placeholder, not a wardrobe.
+Plotly is still default; 08D camera/lifecycle and exact candidate handoff remain.
+
+No canonical geometry, validator, generator, scoring, catalog/search evidence,
+render release, GLB, Three.js source/bundle or dependency changed. No acquisition,
+embedding, retrieval index or live AI work was performed. This is two curated
+ABO records with one approved mesh, not dataset-wide integration.
+
+See [the workflow guide](FURNITURE_CATALOG_UI.md) and
+[08E verification receipt](../data/CATALOG_GENERATION_08E_VERIFICATION.json) for
+exact local checks, browser evidence, file inventory and checkpoint CI. Historical
+08A–08D results below/above retain their original scope and counts. Stop after
+08E; larger catalogs and dataset-grounded generation require separate review.
+
+08E final local verification: **1,581 Python tests passed in 123.42s** (25 new
+tests; all 1,556 prior tests preserved), **75 frontend tests passed, 0 failed or
+skipped**. Ruff lint/format (143 files), pip compatibility, registry/bundle
+equality, Streamlit HTTP 200, asset integrity and offline source/wheel/isolated
+installation checks passed. Browser views were inspected at 1440×1000 and
+390×844; screenshots are outside Git. First two checkpoints have green CI; the
+final commit/CI links are reported in the delivery response.

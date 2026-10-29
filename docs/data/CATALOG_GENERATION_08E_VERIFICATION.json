@@ -1,0 +1,365 @@
+{
+  "task": "08E",
+  "status": "passed_local_release_verification",
+  "baseline": "2ccd073fe4322a275a897f5811530501ee559eb9",
+  "scope": {
+    "new_products": 0,
+    "new_assets": 0,
+    "new_dependencies": 0,
+    "live_ai_calls": 0,
+    "mesh_scale": 1.0,
+    "canonical_geometry_changed": false
+  },
+  "protected_files": {
+    "count": 67,
+    "all_byte_identical_to_baseline": true,
+    "sha256": "08ffcf5edba8e04621d80c8ca8a10a5b36655f5f5cd83db7faad650854f65aa8",
+    "files": {
+      "data/catalogs/furniture_source_candidates.json": "cb3d5b7a7382a31ec96ec709f4fdcf6f90d9202275fe41f40c04391dc53ddc5d",
+      "frontend/realistic_viewer/build.mjs": "5a4e87adb0a8814553167f049e74be7f0f68f281a2f991838558a0a90dc73455",
+      "frontend/realistic_viewer/package-lock.json": "00ddb3aaf64fe5359fc697964912bf888f8c49192e5ce11550aa196b79a6650c",
+      "frontend/realistic_viewer/package.json": "b7c522d4da88bb53c3ca64a42bf735e362a6af89b51d53d8e47bc15b34f9fe29",
+      "frontend/realistic_viewer/src/asset_pool.js": "aabeb8d0f809089e1197d96a7807663b2796b5608694e4f3fb2cd42d0507f8a7",
+      "frontend/realistic_viewer/src/geometry.js": "dd674f1fcd6d99e9582451041cd854f6ce97d47f4a7482db9ee34b87c547452e",
+      "frontend/realistic_viewer/src/index.html": "cfb91c42044c4ea8d07ee57f6616b0eef998a9edd6ed4d4922ccef704bf56c2e",
+      "frontend/realistic_viewer/src/main.js": "7969851e6cab6909e3c5f9e0472ff0a3a3679d501b90a2f7e56366ca6f83a281",
+      "frontend/realistic_viewer/src/product_assets.js": "18e963b367024c71ce37920db4f3e669d14ba72c3940156b23a72211a2359139",
+      "frontend/realistic_viewer/src/product_registry.js": "dbce178dde780949d6b7fe90e5c40473e4789f8325fb93ac03d503c46d027a8a",
+      "frontend/realistic_viewer/src/room.html": "41dc46588cc8155920a44971d02c7d08b863fa1f50bdf5362ee6deeb08215801",
+      "frontend/realistic_viewer/src/room_geometry.js": "f1d7a82c8c1759f6a30abf380ddbe161eb1871e07b0be6e2a49efd13ff718a9e",
+      "frontend/realistic_viewer/src/room_objects.js": "13701603aa1c3b08c7a8409aa9fd0bf057c4a1123d9e6161f54341823ca87153",
+      "frontend/realistic_viewer/src/room_viewer.js": "3d53e8525263228d4347181d2ff97820cdde5d9614ae858edcc6e308836e9b97",
+      "frontend/realistic_viewer/src/scene_lifecycle.js": "296b079800053f295ba0953803a5bef3c8ad6fd23b06b8851b40028d60d03690",
+      "frontend/realistic_viewer/src/standalone-room.js": "bfb0b71794447ef563faa8147d3c9f7929e3900ef001ae7eb6ddbb754ac7ffda",
+      "frontend/realistic_viewer/src/standalone.js": "f103b9a77fd910a082e42e386f261de3147d99bd9a4b1530b4ffee32c129d579",
+      "frontend/realistic_viewer/src/viewer.css": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
+      "frontend/realistic_viewer/src/viewer.js": "6777cb2aba1d1fc2a49f89ec21430182ed86cb2b1bdda406c53cc0f17b64464c",
+      "frontend/realistic_viewer/tests/geometry.test.js": "7d096d7cbeb3cecd49c5b10041696825bb9ac409ca611a2974a8d9b8a57bd7ff",
+      "frontend/realistic_viewer/tests/lifecycle.test.js": "b569db341f165e5f72a8a0e9ffa4cd62fa60e1589a2f1bc070d2032077036193",
+      "frontend/realistic_viewer/tests/product.test.js": "010cdd9988989de62deb3b79c0980255a98075f109a859ec15e6ec7685ed2e9d",
+      "frontend/realistic_viewer/tests/room.test.js": "6f24b3de023ec69f79b6d7cb580b1cfb5a10fa307a81d3ed613a58db0f591b01",
+      "pyproject.toml": "d6ab2dfb6bae0fd26a6c2efc7fdc08224ed0f94da52ac657c92f2d0b8c36864e",
+      "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": "274b12859cec8f4023ef0fffb742a2cf7c169137c81aa1c050ced36a071d4a1f",
+      "src/archimind/_viewer_assets/furniture/ABO_ATTRIBUTION.txt": "97c84b22c835b42eb323942d4ec89d592b9e7072b990a70125dbd0bb2ab17bed",
+      "src/archimind/_viewer_assets/furniture/ABO_LICENSE_CC_BY_4.0.txt": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+      "src/archimind/_viewer_assets/furniture/ABO_SOURCE_README.md": "6c52f9fdcc807a34fd92961cc09454aecaaabbb26327145953f203b9f2cebb71",
+      "src/archimind/_viewer_assets/furniture/CC-BY-4.0.txt": "c8041334a99cb48852b2139253cbde5f8ac87e27f124aed51223e0d5bf0080eb",
+      "src/archimind/_viewer_assets/furniture/CC0-1.0.txt": "a43fc2004d1e073f1107a1f6146664d08dae6cea93cb828742a4bec6da828e91",
+      "src/archimind/_viewer_assets/furniture/CHARLES_PROVENANCE.json": "960fcdcef3e3966185b7a50a2d16fd393be97a98f784a89ff02bd955f2cacb63",
+      "src/archimind/_viewer_assets/furniture/CharlesArmchair.glb": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+      "src/archimind/_viewer_assets/furniture/PROVENANCE.json": "d2b40549cd7806edf1a048662ae2e6db3521a48703c89b7f3a30fc4e95d0d56a",
+      "src/archimind/_viewer_assets/furniture/README.md": "e6a53141d769e5c3c7148f26245816ed7d842c646946b48b994e7d0adc7594ba",
+      "src/archimind/_viewer_assets/furniture/SheenChair.glb": "f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399",
+      "src/archimind/_viewer_assets/furniture/UPSTREAM_LICENSE.md": "52912ef39b0f19a2bf816de4fc5a161d058c334a912633f5470cf2c83e9c10c5",
+      "src/archimind/_viewer_assets/index.html": "cfb91c42044c4ea8d07ee57f6616b0eef998a9edd6ed4d4922ccef704bf56c2e",
+      "src/archimind/_viewer_assets/room-design.json": "0324c3b6e8341b2ead814c3195aa0b4e0ab560ac838c2c12980af44683f5f90c",
+      "src/archimind/_viewer_assets/room.html": "41dc46588cc8155920a44971d02c7d08b863fa1f50bdf5362ee6deeb08215801",
+      "src/archimind/_viewer_assets/sample-design.json": "02825dc40a9a1b43ed6d5a5c6c513bfafa02a869a1504e1f551babec0e371a56",
+      "src/archimind/_viewer_assets/standalone-room.js": "bfb0b71794447ef563faa8147d3c9f7929e3900ef001ae7eb6ddbb754ac7ffda",
+      "src/archimind/_viewer_assets/standalone.js": "f103b9a77fd910a082e42e386f261de3147d99bd9a4b1530b4ffee32c129d579",
+      "src/archimind/_viewer_assets/viewer.css": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
+      "src/archimind/_viewer_assets/viewer.js": "c4422cdde95e76081fafe57206f74641d9d6dc1247f9d58ea4a03bfe2786607f",
+      "src/archimind/_viewer_assets/viewer.js.LEGAL.txt": "cc7cc7e2f53d5db0235ab2226e85fc6e91655161573b39813b41bb00e5919674",
+      "src/archimind/assets/charles_visual_review.json": "0c7be9904cdd03d7fe3aed6d7be21ebc0d43d47b9692c73fae5105405288d55d",
+      "src/archimind/assets/furniture_catalog.json": "c1116a65558b2781f1ac979920dbd0b0b683dfdcc314681a70d8639ed87880dd",
+      "src/archimind/assets/planning_envelopes.json": "116e0e526f4f86941add2eae03530f5d6b7e0ec97aafe682188b44a2b2dd1f5c",
+      "src/archimind/assets/product_render_release.json": "70a680b2dd894ae0cde00251d060081b1117b847ddba3fd496feef095947082b",
+      "src/archimind/geometry/__init__.py": "9f52963b2cbf11bbcb51c5835e355cd5cd0f90ca0c1d230e909a9fb5885d000c",
+      "src/archimind/geometry/accessibility.py": "23908f4879dff33abaca2da6600b53055a1968f9396d9210147b32337a99e09d",
+      "src/archimind/geometry/footprints.py": "2caa084f6c6009430634254e84c1aadb1e47acbb0d6abd492e1f6bbc77520fdb",
+      "src/archimind/geometry/layout_generator.py": "d689fe2beabf06f597e65be8b7d0b5a8db5d57a6daedfd50f62761a4954edb80",
+      "src/archimind/geometry/validator.py": "b2719c9ebd20a23b13071f962a28b6f93590bd7c3ff77a237aba7feb5c648e41",
+      "src/archimind/models/__init__.py": "7b94461568c34fef96cdd8824766be7821c109a43d2b60acc1546c8cae1ad2bd",
+      "src/archimind/models/furniture.py": "e69002dd3e225f95cc4d021a2d18d7df9f9e5b5a7d547577f614fc4a06ed5d1c",
+      "src/archimind/models/room.py": "a5907badd844772d08c406b3913cbc8f5560a39af250baeecacd064365b64608",
+      "src/archimind/render/__init__.py": "75a0d9ff2f06459224e69f83c0f8c20cf87601d23ca94f3bc07acd0acfe62b5d",
+      "src/archimind/render/design_3d.py": "db8dd4f39a0e6b3c3b2f3fcc9447fee862590432b19ba4296bbe7c04479e408f",
+      "src/archimind/render/floorplan_2d.py": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",
+      "src/archimind/render/furniture_3d.py": "91b5e218c050e9a6d25b23a138651a82b6ce76fa3c0c9d984f2136e4fe4f35f0",
+      "src/archimind/render/product_scene.py": "3e87b943ba3bf429f58c53ff3587738336c89d8a9272fb601ec9e226b9a4c6d8",
+      "src/archimind/render/realistic_scene.py": "9fc6b28a61e7d65e96bcc57f599b82122ad2faf0e2575089bd5c83894c5e2b5c",
+      "src/archimind/render/realistic_viewer.py": "c5d21706fafc4135e9abdfce6ec914e29d7207f8f79668ed386d84940a273cf7",
+      "src/archimind/render/room_3d.py": "f6977f7ab2a52b959a1bf5424ae1929ce1b05cfb5f15ec0420a7db7616de1c95",
+      "src/archimind/render/selected_realistic.py": "8bd21ec824d0e85a0652fbf21176cef5056f6eafd6f9a850216d085a431983ae",
+      "src/archimind/render/style_colors.py": "b36a837d860fe906b42ec52ad5f05e4d487e16a53873385e4803633edafed9f0"
+    }
+  },
+  "verification": {
+    "earlier_full_python": "1577 passed in 116.13s",
+    "final_python": "1581 passed in 123.42s (0:02:03), 0 failures; 25 additional tests over 1556 baseline",
+    "frontend": "75 passed, 0 failed, 0 skipped",
+    "syntax": "passed",
+    "bundle": "byte-identical after production build",
+    "registry": "passed --check",
+    "dependencies": "No broken requirements found",
+    "health": "HTTP 200 ok",
+    "packaging": "source/wheel offline build, no-index isolated installation and outside-repository catalog/product/preparation loading passed",
+    "ruff": "lint passed; 143 files already formatted",
+    "final_targeted_ui_and_packaging": "14 passed in 23.14s; includes offline source/wheel build and outside-repository installed loading"
+  },
+  "browser": {
+    "engine": "Chromium via Playwright",
+    "desktop": [
+      1440,
+      1000
+    ],
+    "narrow": [
+      390,
+      844
+    ],
+    "physical_mobile_tested": false,
+    "scenarios": [
+      "procedural generation",
+      "Charles-only generation, 2 valid candidates in 5 attempts",
+      "five-item mixed generation, 2 valid candidates in 198 attempts",
+      "A/B camera unchanged",
+      "pending edits preserve canonical geometry/camera and disable Generate until prepared",
+      "native Charles scale 1.0",
+      "one approved product and four placeholders in mixed scene",
+      "bookcase metadata-only storage",
+      "404 asset -> five placeholders; restore -> one textured and four placeholders",
+      "same-size corrupt response -> placeholders",
+      "independent browser context has no generated results",
+      "local temporary exception/zero-result fixture; exception preserves B, normal zero replaces, normal retry recovers"
+    ],
+    "load_observations_ms": [
+      436.7,
+      188.2,
+      184.7,
+      431.3
+    ],
+    "load_notes": "One local sample per mount, cold/warm/pool conditions differ; no benchmark or sustained-memory claim. Mixed unique encoded GLB 4252440 bytes, decoded textures estimate 67108860 bytes, 42706 product triangles.",
+    "console": "Normal product flows: 0 errors, 1 existing Plotly readback advisory. Injected 404 produced one intentional failed-resource error. Corrupt asset rejected without a provider/model request.",
+    "screenshots": [
+      {
+        "path": "/Users/macbook/Hack/08e-asset-recovery-narrow.png",
+        "sha256": "28e0559f339ee44cefd6961aaa68dddd1bcc5d7f7c56720e50fcbea725ba9c26"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-charles-desktop.png",
+        "sha256": "0726a482d758fa7d364bd3d325f798d37bd681ed59723f4b74f3cd39b68ca55a"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-charles-mesh-desktop.png",
+        "sha256": "4f33ab2310fdde0287c7e5b3ae0aa2e7e448346b837523834bb2b8add8897f63"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-exception-fixture-desktop.png",
+        "sha256": "2143d88bf16cd8ad0fe10f9b732fde9c55dbab144643b9d3ab36efd1a0f6f5e7"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-exception-fixture-narrow.png",
+        "sha256": "a1ac4bfb164613976dd8fbbca75003c551c7d6c7fb8b79636f941122fcb5b5ee"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-final-mixed-desktop.png",
+        "sha256": "2d0d04d23122b7e4185a95a182128ee325e186138414afbe7f9a9110a3970ca1"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-final-mixed-narrow.png",
+        "sha256": "4d287374564fc119cb815630108c706496c5de848d4f28a755495570df15cc9a"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-missing-asset-narrow.png",
+        "sha256": "3673f12a05609166d9437ce21752189be7a23dd1174340359a34ddc1cc09ee75"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-mixed-desktop.png",
+        "sha256": "2d0d04d23122b7e4185a95a182128ee325e186138414afbe7f9a9110a3970ca1"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-mixed-narrow.png",
+        "sha256": "9906c5f954ff221f818a69ffe11ef4caef9f6de72818f699935606c76dfaa031"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-review-desktop.png",
+        "sha256": "8d6653173658c54cabf85c2ffdb7cc20613b271dfe457795374145df30127e5f"
+      },
+      {
+        "path": "/Users/macbook/Hack/08e-review-narrow.png",
+        "sha256": "96defdafe8fcfb96b7f8ead90ea64d779cd41f89020bb7dd0a56dd377a0055d9"
+      }
+    ],
+    "layout_b_comparison": {
+      "label": "Layout B",
+      "two": [
+        {
+          "id": "catalog:abo-b075x2x4xs-amazon-com:1",
+          "min": [
+            0.57,
+            2.9980586767196655
+          ],
+          "max": [
+            1.5661048960685728,
+            4
+          ]
+        },
+        {
+          "id": "catalog:abo-b07pqs58xn-amazon-com:1",
+          "min": [
+            4.340108,
+            0.33
+          ],
+          "max": [
+            5,
+            0.711762
+          ]
+        },
+        {
+          "id": "desk",
+          "min": [
+            3.41,
+            1.23
+          ],
+          "max": [
+            4.61,
+            1.83
+          ]
+        },
+        {
+          "id": "queen-bed",
+          "min": [
+            0.72,
+            0.79
+          ],
+          "max": [
+            2.3200000000000003,
+            2.79
+          ]
+        },
+        {
+          "id": "wardrobe",
+          "min": [
+            3.5,
+            2.54
+          ],
+          "max": [
+            5,
+            3.14
+          ]
+        }
+      ],
+      "three": [
+        {
+          "id": "catalog:abo-b075x2x4xs-amazon-com:1",
+          "min": [
+            0.57,
+            2.9980586767196655
+          ],
+          "max": [
+            1.5661048960685728,
+            4
+          ]
+        },
+        {
+          "id": "catalog:abo-b07pqs58xn-amazon-com:1",
+          "min": [
+            4.340108,
+            0.33
+          ],
+          "max": [
+            5,
+            0.711762
+          ]
+        },
+        {
+          "id": "desk",
+          "min": [
+            3.41,
+            1.23
+          ],
+          "max": [
+            4.61,
+            1.83
+          ]
+        },
+        {
+          "id": "queen-bed",
+          "min": [
+            0.72,
+            0.79
+          ],
+          "max": [
+            2.3200000000000003,
+            2.79
+          ]
+        },
+        {
+          "id": "wardrobe",
+          "min": [
+            3.5,
+            2.54
+          ],
+          "max": [
+            5,
+            3.14
+          ]
+        }
+      ],
+      "exactFootprints": true,
+      "textured": 1,
+      "placeholders": 4,
+      "bodyOverflow": false
+    },
+    "additional_checks": {
+      "mixed_layout_a_plotly_3d_matches_three_canonical_volume": true,
+      "orbit_zoom_reset": true,
+      "narrow_no_page_overflow": true,
+      "final_server_no_widget_duplication_warnings": true,
+      "generation_fault_fixture_is_not_application_code": true
+    }
+  },
+  "delivery": [
+    {
+      "commit": "ee455f11e526e5a8262d50ce70191e7a3e1bc64d",
+      "ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/40803800433",
+      "conclusion": "success"
+    },
+    {
+      "commit": "27073433be5d514da8a8ed9a2e71f92ce1da4368",
+      "ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/40804282420",
+      "conclusion": "success"
+    }
+  ],
+  "commands": [
+    ".venv/bin/python -m pytest -q",
+    ".venv/bin/python -m ruff check .",
+    ".venv/bin/python -m ruff format --check .",
+    ".venv/bin/python -m pip check",
+    ".venv/bin/python scripts/check_health.py",
+    "npm --prefix frontend/realistic_viewer run check",
+    "npm --prefix frontend/realistic_viewer test",
+    "npm --prefix frontend/realistic_viewer run build",
+    "git diff --exit-code -- src/archimind/_viewer_assets",
+    ".venv/bin/python scripts/build_product_registry.py --check",
+    ".venv/bin/python -m pytest -q tests/test_asset_catalog_packaging.py"
+  ],
+  "limitations": [
+    "Two metadata-qualified products, only Charles has an approved mesh",
+    "Published dimensions are source claims, not independent measurements",
+    "Zero rotation and unchanged bounded deterministic layout search",
+    "No embedding index or dataset-scale ingestion",
+    "Fault-injection generation harness is outside production code",
+    "Final commit/CI are reported in delivery response; no self-referential commit hash",
+    "Dense Three.js placeholder labels can overlap; resized Chromium is not physical-device testing"
+  ],
+  "files_changed": [
+    "MANIFEST.in",
+    "README.md",
+    "app.py",
+    "docs/data/CATALOG_GENERATION_08E_VERIFICATION.json",
+    "docs/developer/FURNITURE_CATALOG_UI.md",
+    "docs/developer/SELECTED_REALISTIC_LAYOUTS.md",
+    "docs/developer/STATUS.md",
+    "src/archimind/assets/__init__.py",
+    "src/archimind/assets/specifications.py",
+    "src/archimind/ui/furniture_assets.py",
+    "src/archimind/ui/layout_generation.py",
+    "src/archimind/ui/realistic_view.py",
+    "tests/test_asset_catalog_packaging.py",
+    "tests/test_catalog_generation_ui.py",
+    "tests/test_catalog_specifications.py",
+    "tests/test_furniture_assets_ui.py",
+    "tests/test_smoke.py"
+  ]
+}
