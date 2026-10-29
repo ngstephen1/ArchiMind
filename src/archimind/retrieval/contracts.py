@@ -5,6 +5,7 @@ from typing import Annotated, Literal, Protocol
 from urllib.parse import urlsplit
 
 from pydantic import (
+    AfterValidator,
     BaseModel,
     ConfigDict,
     Field,
@@ -14,7 +15,14 @@ from pydantic import (
     model_validator,
 )
 
-Text = Annotated[str, Field(max_length=1024)]
+
+def _single_line(value: str) -> str:
+    if value != value.strip() or any(ord(c) < 32 for c in value):
+        raise ValueError("Retrieval text must be trimmed and single-line")
+    return value
+
+
+Text = Annotated[str, Field(max_length=1024), AfterValidator(_single_line)]
 Identifier = Annotated[
     str, Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9][A-Za-z0-9:_-]*$")
 ]
@@ -176,9 +184,14 @@ class FurnitureSearchHit(Frozen):
         if len(set(self.evidence_urls)) != len(self.evidence_urls):
             raise ValueError("Duplicate evidence")
         for url in self.evidence_urls:
-            p = urlsplit(url)
+            try:
+                p = urlsplit(url)
+                valid_port = p.port in (None, 443)
+            except ValueError:
+                raise ValueError("Invalid evidence URL") from None
             if (
-                p.scheme != "https"
+                not valid_port
+                or p.scheme != "https"
                 or not p.hostname
                 or p.username is not None
                 or p.password is not None
@@ -204,6 +217,11 @@ class FurnitureSearchResult(Frozen):
             or len(self.hits) > self.request.top_k
         ):
             raise ValueError("Result status/count mismatch")
+        if self.status in ("matches", "empty") and (
+            self.request.catalog_id != self.identity.catalog_id
+            or self.request.catalog_version not in (None, self.identity.catalog_version)
+        ):
+            raise ValueError("Result does not satisfy requested catalog identity")
         ids = [h.reference.asset_id for h in self.hits]
         if len(ids) != len(set(ids)) or [h.rank for h in self.hits] != list(
             range(1, len(self.hits) + 1)

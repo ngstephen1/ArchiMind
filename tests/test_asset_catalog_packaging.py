@@ -36,6 +36,11 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/assets/render_assets.py",
         "archimind/assets/selection.py",
         "archimind/assets/specifications.py",
+        "archimind/retrieval/__init__.py",
+        "archimind/retrieval/contracts.py",
+        "archimind/retrieval/eligibility.py",
+        "archimind/retrieval/lexical.py",
+        "archimind/retrieval/evaluation.py",
         "archimind/ui/furniture_assets.py",
         "archimind/render/selected_realistic.py",
         "archimind/ui/realistic_view.py",
@@ -68,6 +73,7 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         }
         assert sum(n.endswith("/CharlesArmchair.glb") for n in archive.namelist()) == 1
         assert not any(n.endswith("/.env") for n in archive.namelist())
+        assert not any("furniture_retrieval_synthetic" in n for n in archive.namelist())
         assert not any("B075X2X4XS" in n for n in archive.namelist())
     with tarfile.open(sdist) as archive:
         names = archive.getnames()
@@ -93,6 +99,15 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             n.endswith("/docs/data/CATALOG_GENERATION_08E_VERIFICATION.json")
             for n in names
         )
+        for required in (
+            "/data/benchmarks/furniture_retrieval_queries.json",
+            "/data/benchmarks/furniture_retrieval_synthetic.json",
+            "/scripts/evaluate_furniture_retrieval.py",
+            "/docs/developer/FURNITURE_RETRIEVAL_ARCHITECTURE.md",
+            "/docs/data/RETRIEVAL_BASELINE_08R0.md",
+            "/docs/data/RETRIEVAL_BASELINE_08R0.json",
+        ):
+            assert any(n.endswith(required) for n in names)
         for name in preserved:
             member = next(n for n in names if n.endswith("/src/" + name))
             assert (
@@ -171,6 +186,17 @@ binding.validate_furniture(fresh)
 assert type(binding).model_validate_json(binding.model_dump_json()) == binding
 assert not any(n.startswith(('openai', 'langgraph', 'fastembed', 'chromadb'))
                for n in sys.modules)
+from archimind.retrieval import (
+    FurnitureSearchRequest, FurnitureSearchFilters, LexicalRetrievalProvider, resolve_result)
+import archimind.retrieval.lexical as retrieval_module
+assert Path(retrieval_module.__file__).resolve().is_relative_to(target)
+provider = LexicalRetrievalProvider()
+retrieved = provider.search(FurnitureSearchRequest(query='Charles armchair'))
+assert retrieved.hits[0].reference.asset_id == 'abo-b075x2x4xs-amazon-com'
+assert resolve_result(retrieved)[0].record.source.product_id == 'B075X2X4XS'
+assert not provider.search(FurnitureSearchRequest(query='queen bed')).hits
+assert not provider.search(FurnitureSearchRequest(query='bookcase', required_qualification='render')).hits
+assert not any(n.startswith(('openai', 'langgraph', 'fastembed', 'chromadb', 'onnxruntime')) for n in sys.modules)
 from archimind.assets.render_assets import (
     product_release, product_asset_path, verify_product_asset, product_projection)
 from archimind.examples.sample_product_room import create_sample_product_room

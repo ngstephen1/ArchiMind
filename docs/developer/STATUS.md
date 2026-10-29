@@ -2,7 +2,7 @@
 
 Last reviewed and locally verified: **October 28, 2026**.
 
-**Current milestone: Task 08E complete, explicit catalog selection and reviewed catalog-sized generation.**
+**Current milestone: Task 08R0 complete, offline furniture retrieval contracts and evaluation. The application remains at its unchanged 08E UI.**
 Live model behavior is unverified. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -1404,3 +1404,42 @@ equality, Streamlit HTTP 200, asset integrity and offline source/wheel/isolated
 installation checks passed. Browser views were inspected at 1440×1000 and
 390×844; screenshots are outside Git. First two checkpoints have green CI; the
 final commit/CI links are reported in the delivery response.
+
+
+## Task 08R0 — offline retrieval contract and evaluation
+
+New backend-only `archimind.retrieval` contracts/provider return stable qualified
+IDs, current evidence and explainable reasons. Hard gates cover identities,
+versions, rights, verified attributes/functions, dimensions and qualification.
+Default bounds use actual 08E generation reservations. Published-only fact finding
+cannot pass the preparation handoff without an explicit different intent.
+Stale/current source checks never repair or mutate prior layouts.
+
+The Python lexical baseline and optional in-memory SQLite FTS5 comparison use
+reviewed search text only. There is no persistent production database, embedding,
+model download, AI call or UI/LangGraph wiring. Existing canonical geometry,
+generation/scoring, rendering and 08E state are unchanged. The application's phase
+label therefore stays 08E. Future retrieval consumers must still prepare/review
+and explicitly generate through that existing API.
+
+Benchmark: 38 real queries (20 positive, 17 negative, one version check) over two
+ABO products; 24 separately reported synthetic queries over eight artificial
+products. Both real methods: recall/MRR/NDCG@2 0.90, P@2 0.475 with fixed-k
+precision, category 2/2, hard violations 0/19 and unauthorized IDs 0/19. Two real
+paraphrases are missed. Synthetic mechanics do not inflate real effectiveness;
+judgments are agent-authored with no independent human adjudication.
+
+See [architecture](FURNITURE_RETRIEVAL_ARCHITECTURE.md),
+[baseline findings](../data/RETRIEVAL_BASELINE_08R0.md) and the accompanying JSON
+receipt for exact metric denominators, failure cases, local CPU timings, source
+references, replay commands and delivery checkpoints. Final verification is
+recorded after execution; a separate bounded 08R1 encoder benchmark and 08F source
+qualification are recommendations, not tasks executed here.
+
+Final 08R0 local verification: **1,688 Python tests passed in 108.64s**, including
+107 new retrieval checks and all 1,581 prior tests; **75 frontend tests passed,
+zero failures/skips**. Ruff (155 formatted files), dependencies, health HTTP 200,
+bundle/registry equality and offline source/wheel/isolated-install checks passed.
+The 124 protected baseline production/frontend/catalog/dependency files are
+byte-identical. The first two checkpoints have green CI; final release CI and
+commit identity are reported in the delivery response. Stop after 08R0.

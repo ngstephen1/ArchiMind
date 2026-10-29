@@ -270,3 +270,71 @@ def test_result_resolution_rechecks_filters_not_only_product_identity():
     )
     with pytest.raises(api.RetrievalError, match="ineligible"):
         api.resolve_result(result)
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "https://evidence.invalid:bad/notice",
+        "https://evidence.invalid:8080/notice",
+        "https://user:secret@evidence.invalid/notice",
+        "https://evidence.invalid/model.gltf",
+    ],
+)
+def test_invalid_source_locations_are_not_search_evidence(url):
+    h = make_hit()
+    with pytest.raises(ValueError):
+        FurnitureSearchHit.model_validate(
+            h.model_copy(update={"evidence_urls": (url,)})
+        )
+
+
+def test_nested_messages_are_single_line_and_models_cannot_be_promoted():
+    h = make_hit()
+    with pytest.raises(ValueError):
+        FurnitureSearchHit.model_validate(
+            h.model_copy(update={"reasons": ("line\nbreak",)})
+        )
+    book = make_hit(BOOKCASE_ID).model_copy(update={"qualification": "render"})
+    with pytest.raises(api.RetrievalError):
+        api.resolve_hit(book, api.build_index().identity)
+
+
+def test_index_input_size_is_bounded():
+    from archimind.retrieval.eligibility import IndexedDocument
+
+    index = api.build_index()
+    with pytest.raises(ValueError):
+        IndexedDocument(reference=index.documents[0].reference, text="x" * 16385)
+
+
+def test_empty_results_still_require_current_identity():
+    index = api.build_index()
+    result = FurnitureSearchResult(
+        request=FurnitureSearchRequest(query="queen bed"),
+        identity=index.identity,
+        algorithm="test_v1",
+        status="empty",
+        hits=(),
+        reasons=("no_match",),
+    )
+    assert api.resolve_result(result) == ()
+    stale = result.model_copy(
+        update={
+            "identity": result.identity.model_copy(update={"snapshot_id": "0" * 64})
+        }
+    )
+    with pytest.raises(api.RetrievalError):
+        api.resolve_result(stale)
+
+
+def test_empty_response_cannot_disguise_requested_version_mismatch():
+    with pytest.raises(ValueError):
+        FurnitureSearchResult(
+            request=FurnitureSearchRequest(query="chair", catalog_version="0.9.0"),
+            identity=api.build_index().identity,
+            algorithm="test_v1",
+            status="empty",
+            hits=(),
+            reasons=("no_match",),
+        )

@@ -48,9 +48,9 @@
         "unavailable_queries": 0,
         "latency_ms": {
           "samples": 114,
-          "p50": 4.746208,
-          "p95": 6.434792,
-          "max": 64.762042
+          "p50": 4.659354,
+          "p95": 5.564,
+          "max": 6.974792
         },
         "ranking_shortfalls": [
           "real:r18",
@@ -92,9 +92,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            6.764291,
-            5.296291,
-            4.962417
+            6.974792,
+            4.996167,
+            5.199958
           ]
         },
         {
@@ -127,9 +127,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.182167,
-            4.936917,
-            4.7955
+            5.114916,
+            5.2215,
+            4.976166
           ]
         },
         {
@@ -162,9 +162,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.951291,
-            5.29725,
-            5.41175
+            4.7125,
+            4.707542,
+            4.694625
           ]
         },
         {
@@ -197,9 +197,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.555875,
-            8.666125,
-            64.762042
+            4.64175,
+            4.704792,
+            4.675167
           ]
         },
         {
@@ -232,9 +232,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.708542,
-            6.124583,
-            6.834
+            4.641542,
+            4.6595,
+            5.00325
           ]
         },
         {
@@ -267,9 +267,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.149333,
-            4.944208,
-            4.869875
+            4.762875,
+            4.659208,
+            4.624791
           ]
         },
         {
@@ -302,9 +302,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.942792,
-            5.377792,
-            4.9285
+            5.564,
+            5.963083,
+            5.340542
           ]
         },
         {
@@ -337,9 +337,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.231042,
-            4.790958,
-            4.871
+            5.018541,
+            4.810583,
+            5.030459
           ]
         },
         {
@@ -372,9 +372,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.42225,
-            5.009042,
-            4.867333
+            5.383666,
+            4.808542,
+            5.449583
           ]
         },
         {
@@ -407,9 +407,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            12.477375,
-            4.890458,
-            4.807458
+            5.192334,
+            5.698166,
+            6.236041
           ]
         },
         {
@@ -442,9 +442,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.4695,
-            5.045958,
-            5.344083
+            5.253417,
+            6.031125,
+            5.491834
           ]
         },
         {
@@ -477,9 +477,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            6.434792,
-            5.732084,
-            4.764708
+            5.199958,
+            4.826875,
+            4.81425
           ]
         },
         {
@@ -512,9 +512,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.832416,
-            4.66875,
-            4.6955
+            4.945083,
+            4.759959,
+            4.804584
           ]
         },
         {
@@ -547,9 +547,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.720875,
-            4.667208,
-            4.821208
+            4.977542,
+            4.827083,
+            4.989542
           ]
         },
         {
@@ -582,9 +582,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.708333,
-            4.7755,
-            4.851458
+            4.801875,
+            4.685167,
+            4.799583
           ]
         },
         {
@@ -617,9 +617,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.685125,
-            4.896875,
-            4.794959
+            4.634292,
+            4.7005,
+            4.720458
           ]
         },
         {
@@ -654,9 +654,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.7715,
-            4.926875,
-            4.79325
+            4.840875,
+            5.063792,
+            4.91625
           ]
         },
         {
@@ -685,9 +685,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.698125,
-            4.5525,
-            4.559958
+            4.96175,
+            4.803291,
+            4.703709
           ]
         },
         {
@@ -716,9 +716,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.605708,
-            4.511208,
-            4.467875
+            4.641375,
+            4.477542,
+            4.432167
           ]
         },
         {
@@ -747,9 +747,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.64,
-            4.547125,
-            4.54925
+            4.468875,
+            4.432917,
+            4.349666
           ]
         },
         {
@@ -778,9 +778,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.57675,
-            4.529541,
-            4.510375
+            4.434084,
+            4.363833,
+            4.39325
           ]
         },
         {
@@ -810,9 +810,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.499458,
-            4.50725,
-            4.576208
+            4.382708,
+            4.376083,
+            4.711708
           ]
         },
         {
@@ -843,9 +843,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.621666,
-            4.529875,
-            4.796833
+            4.426291,
+            4.41775,
+            4.3615
           ]
         },
         {
@@ -874,9 +874,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.087958,
-            4.703459,
-            4.555125
+            4.379833,
+            4.453,
+            4.404666
           ]
         },
         {
@@ -905,9 +905,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.557167,
-            4.700416,
-            4.615875
+            4.382917,
+            4.78325,
+            4.612209
           ]
         },
         {
@@ -936,9 +936,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.787,
-            4.72175,
-            4.603333
+            4.714333,
+            4.401875,
+            4.426542
           ]
         },
         {
@@ -967,9 +967,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.643542,
-            4.565,
-            4.610625
+            4.390833,
+            4.33725,
+            4.363292
           ]
         },
         {
@@ -998,9 +998,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.580625,
-            4.56275,
-            4.572791
+            4.862791,
+            4.551583,
+            4.434167
           ]
         },
         {
@@ -1030,9 +1030,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.5615,
-            4.581042,
-            4.559375
+            4.38825,
+            4.362667,
+            4.42
           ]
         },
         {
@@ -1061,9 +1061,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.614291,
-            4.599792,
-            4.491333
+            4.409083,
+            4.431583,
+            4.776083
           ]
         },
         {
@@ -1092,9 +1092,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.299917,
-            5.380959,
-            5.007416
+            4.576208,
+            4.60075,
+            4.566292
           ]
         },
         {
@@ -1125,9 +1125,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.887833,
-            5.112875,
-            5.876
+            4.61475,
+            4.494,
+            4.397292
           ]
         },
         {
@@ -1156,9 +1156,9 @@
           "version_correct": true,
           "deterministic": true,
           "latency_ms": [
-            4.6645,
-            4.555,
-            4.474958
+            4.42,
+            4.361,
+            4.351625
           ]
         },
         {
@@ -1187,9 +1187,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.645125,
-            4.659334,
-            4.518458
+            4.627542,
+            4.416833,
+            4.457209
           ]
         },
         {
@@ -1218,9 +1218,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.561167,
-            4.795791,
-            4.722334
+            4.622959,
+            4.40925,
+            4.424417
           ]
         },
         {
@@ -1249,9 +1249,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.740291,
-            4.752125,
-            4.577333
+            4.382875,
+            4.42025,
+            4.439416
           ]
         },
         {
@@ -1280,9 +1280,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.625916,
-            4.594208,
-            4.568667
+            4.382875,
+            4.359542,
+            4.430917
           ]
         },
         {
@@ -1315,9 +1315,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.650375,
-            4.602292,
-            4.610125
+            4.738667,
+            4.787834,
+            4.8905
           ]
         }
       ]
@@ -1356,9 +1356,9 @@
         "unavailable_queries": 0,
         "latency_ms": {
           "samples": 114,
-          "p50": 5.1379375,
-          "p95": 6.355,
-          "max": 8.320875
+          "p50": 5.105021,
+          "p95": 5.704875,
+          "max": 6.35475
         },
         "ranking_shortfalls": [
           "real:r18",
@@ -1400,9 +1400,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            6.003584,
-            5.184084,
-            5.130625
+            5.395667,
+            5.132792,
+            5.118459
           ]
         },
         {
@@ -1435,9 +1435,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.976042,
-            4.978917,
-            4.989542
+            5.000375,
+            5.307541,
+            5.422
           ]
         },
         {
@@ -1470,9 +1470,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.013333,
-            5.39575,
-            5.114542
+            5.358084,
+            5.536334,
+            5.444166
           ]
         },
         {
@@ -1505,9 +1505,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.159083,
-            5.344083,
-            5.201166
+            5.35825,
+            5.200167,
+            5.627916
           ]
         },
         {
@@ -1540,9 +1540,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.023958,
-            5.004375,
-            5.002875
+            5.267667,
+            5.412875,
+            5.30475
           ]
         },
         {
@@ -1575,9 +1575,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.978458,
-            4.961541,
-            5.010625
+            5.399083,
+            5.527958,
+            5.182708
           ]
         },
         {
@@ -1610,9 +1610,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.043125,
-            5.020125,
-            5.047625
+            5.911834,
+            5.33425,
+            5.213
           ]
         },
         {
@@ -1645,9 +1645,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.98,
-            4.970208,
-            4.933625
+            5.357208,
+            5.224916,
+            5.642209
           ]
         },
         {
@@ -1680,9 +1680,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.947208,
-            4.990333,
-            5.010291
+            5.170625,
+            5.612167,
+            5.619916
           ]
         },
         {
@@ -1715,9 +1715,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.968416,
-            5.017958,
-            5.277625
+            5.425709,
+            5.366625,
+            5.408792
           ]
         },
         {
@@ -1750,9 +1750,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.080416,
-            5.015834,
-            5.332291
+            5.252875,
+            5.117042,
+            5.215459
           ]
         },
         {
@@ -1785,9 +1785,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.384541,
-            5.241792,
-            5.430666
+            5.415584,
+            5.380083,
+            5.75575
           ]
         },
         {
@@ -1820,9 +1820,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.097417,
-            5.108,
-            5.009625
+            5.67025,
+            5.26125,
+            5.19975
           ]
         },
         {
@@ -1855,9 +1855,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.039458,
-            5.094125,
-            5.153125
+            5.172084,
+            5.222375,
+            5.320375
           ]
         },
         {
@@ -1890,9 +1890,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.053375,
-            5.030583,
-            5.06825
+            5.6675,
+            5.517584,
+            5.509042
           ]
         },
         {
@@ -1925,9 +1925,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.975083,
-            4.968333,
-            5.01775
+            5.287375,
+            5.715125,
+            5.704875
           ]
         },
         {
@@ -1962,9 +1962,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            8.092542,
-            5.434416,
-            5.393542
+            6.35475,
+            5.734375,
+            5.617583
           ]
         },
         {
@@ -1993,9 +1993,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            6.1885,
-            7.352417,
-            5.1315
+            5.093,
+            4.99,
+            5.121292
           ]
         },
         {
@@ -2024,9 +2024,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            4.980333,
-            5.046334,
-            5.072833
+            4.921875,
+            4.77675,
+            5.371875
           ]
         },
         {
@@ -2055,9 +2055,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.037292,
-            5.667167,
-            5.911625
+            4.603083,
+            4.601375,
+            4.671667
           ]
         },
         {
@@ -2086,9 +2086,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.17125,
-            5.153125,
-            5.171041
+            4.741,
+            4.727958,
+            4.486083
           ]
         },
         {
@@ -2118,9 +2118,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.316959,
-            4.911959,
-            5.07975
+            4.585125,
+            4.54325,
+            4.494334
           ]
         },
         {
@@ -2151,9 +2151,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.115625,
-            4.907958,
-            4.878667
+            4.991959,
+            4.600292,
+            4.472667
           ]
         },
         {
@@ -2182,9 +2182,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.739875,
-            5.061792,
-            4.912625
+            4.482,
+            4.462791,
+            4.527125
           ]
         },
         {
@@ -2213,9 +2213,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.688458,
-            5.250375,
-            4.872458
+            4.508291,
+            4.480584,
+            4.928041
           ]
         },
         {
@@ -2244,9 +2244,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.511334,
-            5.472166,
-            5.567
+            4.537834,
+            4.451625,
+            4.428917
           ]
         },
         {
@@ -2275,9 +2275,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            7.60425,
-            5.109417,
-            5.13625
+            4.425375,
+            4.454667,
+            4.382875
           ]
         },
         {
@@ -2306,9 +2306,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.402375,
-            5.237417,
-            5.149833
+            4.480125,
+            4.658625,
+            4.455542
           ]
         },
         {
@@ -2338,9 +2338,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.358042,
-            5.139625,
-            5.130333
+            4.400125,
+            4.372583,
+            4.440917
           ]
         },
         {
@@ -2369,9 +2369,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.415458,
-            5.237,
-            6.206708
+            4.455791,
+            4.488208,
+            4.514709
           ]
         },
         {
@@ -2400,9 +2400,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.816708,
-            5.606125,
-            5.434375
+            4.829917,
+            4.864667,
+            4.755
           ]
         },
         {
@@ -2433,9 +2433,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.467958,
-            5.614667,
-            5.23725
+            4.537291,
+            4.549917,
+            4.430417
           ]
         },
         {
@@ -2464,9 +2464,9 @@
           "version_correct": true,
           "deterministic": true,
           "latency_ms": [
-            5.684375,
-            6.808667,
-            5.071292
+            4.529333,
+            4.42275,
+            4.438375
           ]
         },
         {
@@ -2495,9 +2495,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.194667,
-            8.320875,
-            6.046333
+            4.445542,
+            4.454625,
+            4.449875
           ]
         },
         {
@@ -2526,9 +2526,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            6.355,
-            5.559166,
-            5.002875
+            4.929667,
+            4.93925,
+            4.793917
           ]
         },
         {
@@ -2557,9 +2557,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.72075,
-            5.293666,
-            5.206834
+            5.149209,
+            4.949833,
+            4.966875
           ]
         },
         {
@@ -2588,9 +2588,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.336083,
-            4.997708,
-            4.961958
+            4.867167,
+            4.825625,
+            5.158541
           ]
         },
         {
@@ -2623,9 +2623,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            5.460375,
-            5.14725,
-            5.05075
+            5.388167,
+            5.419667,
+            5.449541
           ]
         }
       ]
@@ -2664,9 +2664,9 @@
         "unavailable_queries": 0,
         "latency_ms": {
           "samples": 72,
-          "p50": 0.1422705,
-          "p95": 0.345958,
-          "max": 2.897708
+          "p50": 0.1559375,
+          "p95": 0.310209,
+          "max": 3.118917
         },
         "ranking_shortfalls": [
           "synthetic:s03",
@@ -2709,9 +2709,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.261709,
-            0.200167,
-            0.194917
+            0.2585,
+            0.209291,
+            0.204166
           ]
         },
         {
@@ -2748,9 +2748,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.25525,
-            0.255291,
-            0.252917
+            0.287125,
+            0.279541,
+            0.277541
           ]
         },
         {
@@ -2785,9 +2785,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.242291,
-            0.230791,
-            0.234667
+            0.264666,
+            0.254625,
+            0.253583
           ]
         },
         {
@@ -2824,9 +2824,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.287,
-            0.280083,
-            0.281083
+            0.319,
+            0.310209,
+            0.311
           ]
         },
         {
@@ -2859,9 +2859,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.147125,
-            0.142041,
-            0.1395
+            0.159375,
+            0.1555,
+            0.150959
           ]
         },
         {
@@ -2894,9 +2894,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.146625,
-            0.138833,
-            0.139166
+            0.162417,
+            0.153709,
+            0.156542
           ]
         },
         {
@@ -2929,9 +2929,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.143209,
-            0.135625,
-            0.136459
+            0.159291,
+            0.153667,
+            0.156834
           ]
         },
         {
@@ -2964,9 +2964,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.183625,
-            0.177958,
-            0.186416
+            0.208875,
+            0.292334,
+            0.256667
           ]
         },
         {
@@ -2999,9 +2999,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.138167,
-            0.134208,
-            0.133542
+            0.169833,
+            0.158625,
+            0.156375
           ]
         },
         {
@@ -3034,9 +3034,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.153584,
-            0.22625,
-            0.191
+            0.173542,
+            0.167,
+            0.167167
           ]
         },
         {
@@ -3073,9 +3073,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.266209,
-            0.270083,
-            0.3695
+            0.302167,
+            0.296042,
+            0.29525
           ]
         },
         {
@@ -3104,9 +3104,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.090875,
-            0.077416,
-            0.077167
+            0.089709,
+            0.083334,
+            0.081334
           ]
         },
         {
@@ -3135,9 +3135,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.0775,
-            0.073292,
-            0.07325
+            0.082,
+            0.08,
+            0.079958
           ]
         },
         {
@@ -3166,9 +3166,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.082,
-            0.079459,
-            0.102959
+            0.085334,
+            0.082167,
+            0.082084
           ]
         },
         {
@@ -3197,9 +3197,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.062667,
-            0.062834,
-            0.060167
+            0.070958,
+            0.066834,
+            0.072416
           ]
         },
         {
@@ -3228,9 +3228,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.0785,
-            0.075666,
-            0.07275
+            0.078417,
+            0.076208,
+            0.075708
           ]
         },
         {
@@ -3259,9 +3259,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.077209,
-            0.089416,
-            0.0725
+            0.079125,
+            0.077417,
+            0.07775
           ]
         },
         {
@@ -3290,9 +3290,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.176666,
-            0.175208,
-            0.1425
+            0.154292,
+            0.149584,
+            0.14575
           ]
         },
         {
@@ -3321,9 +3321,9 @@
           "version_correct": true,
           "deterministic": true,
           "latency_ms": [
-            0.067791,
-            0.063833,
-            0.062041
+            0.07275,
+            0.066417,
+            0.066292
           ]
         },
         {
@@ -3352,9 +3352,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.134917,
-            0.14,
-            0.137916
+            0.149458,
+            0.136166,
+            0.137875
           ]
         },
         {
@@ -3387,9 +3387,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.165791,
-            0.14825,
-            0.140667
+            0.161292,
+            0.15525,
+            0.152625
           ]
         },
         {
@@ -3424,9 +3424,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            2.897708,
-            0.345958,
-            0.461
+            3.118917,
+            0.308875,
+            0.259541
           ]
         },
         {
@@ -3455,9 +3455,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.144167,
-            0.129083,
-            0.095584
+            0.102,
+            0.09075,
+            0.089333
           ]
         },
         {
@@ -3492,9 +3492,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.21275,
-            0.255042,
-            0.21025
+            0.218708,
+            0.206125,
+            0.204666
           ]
         }
       ]
@@ -3533,9 +3533,9 @@
         "unavailable_queries": 0,
         "latency_ms": {
           "samples": 72,
-          "p50": 0.3925415,
-          "p95": 0.601042,
-          "max": 0.691459
+          "p50": 0.3190415,
+          "p95": 0.495125,
+          "max": 0.55725
         },
         "ranking_shortfalls": [
           "synthetic:s03",
@@ -3578,9 +3578,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.633375,
-            0.539583,
-            0.544417
+            0.55725,
+            0.437541,
+            0.425
           ]
         },
         {
@@ -3617,9 +3617,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.545667,
-            0.525875,
-            0.526833
+            0.468916,
+            0.451791,
+            0.433541
           ]
         },
         {
@@ -3654,9 +3654,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.571792,
-            0.552041,
-            0.56625
+            0.477542,
+            0.469666,
+            0.439333
           ]
         },
         {
@@ -3693,9 +3693,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.613416,
-            0.595209,
-            0.691459
+            0.507583,
+            0.500208,
+            0.495125
           ]
         },
         {
@@ -3728,9 +3728,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.39275,
-            0.386459,
-            0.343125
+            0.319875,
+            0.310834,
+            0.30425
           ]
         },
         {
@@ -3763,9 +3763,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.465125,
-            0.403083,
-            0.358792
+            0.340166,
+            0.335458,
+            0.329333
           ]
         },
         {
@@ -3798,9 +3798,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.350791,
-            0.440458,
-            0.387792
+            0.334041,
+            0.320209,
+            0.307959
           ]
         },
         {
@@ -3833,9 +3833,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.431583,
-            0.511708,
-            0.453125
+            0.40525,
+            0.381625,
+            0.379459
           ]
         },
         {
@@ -3868,9 +3868,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.396125,
-            0.366542,
-            0.601042
+            0.319584,
+            0.314458,
+            0.2975
           ]
         },
         {
@@ -3903,9 +3903,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.493334,
-            0.523375,
-            0.392333
+            0.326125,
+            0.312166,
+            0.304792
           ]
         },
         {
@@ -3942,9 +3942,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.540791,
-            0.4965,
-            0.520958
+            0.441458,
+            0.440083,
+            0.43975
           ]
         },
         {
@@ -3973,9 +3973,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.276416,
-            0.256375,
-            0.376917
+            0.234208,
+            0.220625,
+            0.2245
           ]
         },
         {
@@ -4004,9 +4004,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.285209,
-            0.277833,
-            0.2845
+            0.223292,
+            0.213208,
+            0.215292
           ]
         },
         {
@@ -4035,9 +4035,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.2865,
-            0.253167,
-            0.242625
+            0.227791,
+            0.215333,
+            0.209459
           ]
         },
         {
@@ -4066,9 +4066,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.080917,
-            0.064416,
-            0.065458
+            0.066084,
+            0.063125,
+            0.062875
           ]
         },
         {
@@ -4097,9 +4097,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.257459,
-            0.234875,
-            0.298459
+            0.226084,
+            0.209542,
+            0.21075
           ]
         },
         {
@@ -4128,9 +4128,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.301833,
-            0.291916,
-            0.304208
+            0.214958,
+            0.21475,
+            0.215417
           ]
         },
         {
@@ -4159,9 +4159,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.405125,
-            0.407083,
-            0.447167
+            0.34875,
+            0.325417,
+            0.319542
           ]
         },
         {
@@ -4190,9 +4190,9 @@
           "version_correct": true,
           "deterministic": true,
           "latency_ms": [
-            0.071792,
-            0.063958,
-            0.066041
+            0.072709,
+            0.066584,
+            0.063375
           ]
         },
         {
@@ -4221,9 +4221,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.356875,
-            0.403333,
-            0.359167
+            0.324125,
+            0.318541,
+            0.314708
           ]
         },
         {
@@ -4256,9 +4256,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.366875,
-            0.349917,
-            0.364458
+            0.31625,
+            0.304041,
+            0.303416
           ]
         },
         {
@@ -4293,9 +4293,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.512375,
-            0.470166,
-            0.518666
+            0.457292,
+            0.448459,
+            0.4425
           ]
         },
         {
@@ -4324,9 +4324,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.102209,
-            0.090416,
-            0.086542
+            0.097292,
+            0.089083,
+            0.089542
           ]
         },
         {
@@ -4361,9 +4361,9 @@
           "version_correct": null,
           "deterministic": true,
           "latency_ms": [
-            0.486917,
-            0.449875,
-            0.426166
+            0.37875,
+            0.364875,
+            0.364375
           ]
         }
       ]

@@ -1148,6 +1148,29 @@ choice; no rendering choice resizes or revalidates the layout. Plotly stays the
 default. See the [catalog workflow guide](docs/developer/FURNITURE_CATALOG_UI.md)
 for exact dimensions, provenance, failure policy, state and verification.
 
+## Offline furniture retrieval baseline
+
+Task **08R0** provides strict immutable search contracts, current catalog/rights/
+dimension/qualification filters, deterministic Python keyword ranking and an
+optional in-memory SQLite FTS5 comparison. Retrieval returns qualified IDs and
+evidence; it does not select products in Streamlit, generate layouts or fetch models.
+The default fit check uses the actual generation reservation, not a smaller
+published box. Preparation consumers re-resolve results against current evidence.
+
+The offline benchmark separates **38 real queries over two products** from
+**24 synthetic queries over eight artificial products**. Both real lexical
+baselines have recall@2 **0.90**, with zero observed hard-filter violations or
+unauthorized IDs in this small fixture set; both miss two semantic paraphrases.
+Judgments are agent-authored, not independent expert evaluation. No vector model
+was tested and no embedding dependency was added. See the
+[architecture guide](docs/developer/FURNITURE_RETRIEVAL_ARCHITECTURE.md) and
+[actual benchmark findings](docs/data/RETRIEVAL_BASELINE_08R0.md).
+
+Run `python scripts/evaluate_furniture_retrieval.py --output /tmp/08r0-results.json`
+with the project virtual environment. The output must be a new filename; the tool
+never creates an index or downloads a model. 08R1 embedding evaluation, 08R2 UI
+integration and 08F catalog expansion remain separately scoped future tasks.
+
 ## Roadmap
 
 See [project status](docs/developer/STATUS.md) for the detailed capability matrix
@@ -1181,6 +1204,7 @@ and verification record.
 - [x] **Task 08C-R2 · First native-scale product** — one Charles GLB qualified and packaged, isolated two-chair scene, verified fallbacks and legacy compatibility.
 - [x] **Task 08D · Selected-layout Three.js** — exact selected A/B geometry, a Plotly/Three.js selector, explicit product evidence and honest placeholders.
 - [x] **Task 08E · Catalog-sized specifications and selection** — explicit preparation/review, catalog-sized generation, frozen provenance and compatible display choices; no implicit resizing.
+- [x] **Task 08R0 · Offline retrieval contract and baselines** — current hard filters, keyword/FTS5 comparison, isolated synthetic fixtures and auditable metrics; no vector database or UI wiring.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.

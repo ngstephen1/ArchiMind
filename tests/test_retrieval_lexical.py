@@ -188,3 +188,23 @@ def test_document_digest_excludes_marketing_and_source_model_locations():
         )
     with pytest.raises(ValueError):
         api.LexicalRetrievalProvider(algorithm="arbitrary-command")
+
+
+def test_missing_entire_sqlite_capability_preserves_python_baseline(monkeypatch):
+    monkeypatch.setattr(api, "sqlite3", None)
+    assert not api.fts5_available()
+    assert (
+        api.LexicalRetrievalProvider()
+        .search(FurnitureSearchRequest(query="chair"))
+        .hits
+    )
+    result = api.LexicalRetrievalProvider(algorithm="sqlite_fts5_bm25_v1").search(
+        FurnitureSearchRequest(query="chair")
+    )
+    assert result.status == "unavailable" and not result.hits
+
+
+def test_untyped_index_is_not_an_authority_override():
+    for value in ({}, "index-file", False):
+        with pytest.raises(authority.RetrievalError):
+            api.LexicalRetrievalProvider(index=value)

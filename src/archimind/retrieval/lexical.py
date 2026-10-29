@@ -2,7 +2,11 @@
 
 import math
 import re
-import sqlite3
+
+try:
+    import sqlite3
+except ImportError:  # Some Python builds omit the optional SQLite extension.
+    sqlite3 = None
 from collections import Counter
 from contextlib import closing
 from typing import Literal
@@ -34,6 +38,8 @@ def tokens(text: str) -> tuple[str, ...]:
 
 
 def fts5_available() -> bool:
+    if sqlite3 is None:
+        return False
     try:
         with closing(sqlite3.connect(":memory:")) as db:
             db.execute("CREATE VIRTUAL TABLE probe USING fts5(text)")
@@ -42,19 +48,14 @@ def fts5_available() -> bool:
         return False
 
 
-def rank_documents(
-    documents: tuple[IndexedDocument, ...], query: str, algorithm: Algorithm
-) -> tuple[tuple[str, float], ...]:
-    """Rank an already eligible corpus, with all normalized query terms required.
+class FTS5Unavailable(RuntimeError):
+    """Optional local ranking capability is unavailable; no automatic substitute."""
 
-    Blank query is a structured browse. Unsupported vocabulary has no substitute.
-    Scores have algorithm-specific meanings and must not be compared across engines.
-    """
-    terms = tuple(sorted(set(tokens(query))))
-    if query and not terms:
-        return ()
-    corpus = {d.reference.asset_id: tokens(d.text) for d in documents}
-    if algorithm == "sqlite_fts5_bm25_v1":
+
+def _sqlite_rank(corpus, terms):
+    if sqlite3 is None:
+        raise FTS5Unavailable("SQLite is unavailable")
+    try:
         with closing(sqlite3.connect(":memory:")) as db:
             db.execute(
                 "CREATE VIRTUAL TABLE docs USING fts5(asset_id UNINDEXED, text, tokenize='unicode61 remove_diacritics 0')"
@@ -71,6 +72,25 @@ def rank_documents(
                 ).fetchall()
             else:
                 rows = [(key, 0.0) for key in corpus]
+        return rows
+    except sqlite3.Error:
+        raise FTS5Unavailable("FTS5 is unavailable") from None
+
+
+def rank_documents(
+    documents: tuple[IndexedDocument, ...], query: str, algorithm: Algorithm
+) -> tuple[tuple[str, float], ...]:
+    """Rank an already eligible corpus, with all normalized query terms required.
+
+    Blank query is a structured browse. Unsupported vocabulary has no substitute.
+    Scores have algorithm-specific meanings and must not be compared across engines.
+    """
+    terms = tuple(sorted(set(tokens(query))))
+    if query and not terms:
+        return ()
+    corpus = {d.reference.asset_id: tokens(d.text) for d in documents}
+    if algorithm == "sqlite_fts5_bm25_v1":
+        rows = _sqlite_rank(corpus, terms)
     elif algorithm == "python_bm25_v1":
         rows = []
         avg = sum(map(len, corpus.values())) / len(corpus) if corpus else 1.0
@@ -108,6 +128,8 @@ class LexicalRetrievalProvider:
     ):
         if algorithm not in ("python_bm25_v1", "sqlite_fts5_bm25_v1"):
             raise ValueError("Unsupported offline ranking algorithm")
+        if index is not None and not isinstance(index, RetrievalIndex):
+            raise RetrievalError("Invalid retrieval snapshot")
         self.index = index if index is not None else build_index()
         self.algorithm = algorithm
 
@@ -156,7 +178,7 @@ class LexicalRetrievalProvider:
         )
         try:
             ranked = rank_documents(documents, request.query, self.algorithm)
-        except sqlite3.Error:
+        except FTS5Unavailable:
             return result("unavailable", ("fts5_unavailable",))
         hits = tuple(
             FurnitureSearchHit(

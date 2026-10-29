@@ -3,7 +3,6 @@
 import hashlib
 import math
 import platform
-import sqlite3
 import statistics
 import time
 from typing import Literal
@@ -28,9 +27,11 @@ from archimind.retrieval.eligibility import (
     resolve_hit,
 )
 from archimind.retrieval.lexical import (
+    FTS5Unavailable,
     LexicalRetrievalProvider,
     fts5_available,
     rank_documents,
+    sqlite3,
 )
 
 
@@ -174,7 +175,7 @@ class SyntheticRetrievalProvider:
         )
         try:
             ranked = rank_documents(docs, request.query, self.algorithm)
-        except sqlite3.Error:
+        except FTS5Unavailable:
             return result("unavailable", reason="fts5_unavailable")
         refs = {d.reference.asset_id: d.reference for d in docs}
         hits = tuple(
@@ -492,7 +493,7 @@ def run_benchmark(
             python=platform.python_version(),
             system=platform.system(),
             machine=platform.machine(),
-            sqlite=sqlite3.sqlite_version,
+            sqlite=sqlite3.sqlite_version if sqlite3 is not None else None,
             fts5=available_fts,
         ),
         repeats=repeats,

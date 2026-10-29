@@ -34,3 +34,6 @@ include docs/data/CATALOG_GENERATION_08E_VERIFICATION.json
 include data/benchmarks/furniture_retrieval_queries.json
 include data/benchmarks/furniture_retrieval_synthetic.json
 include docs/data/RETRIEVAL_BASELINE_08R0.json
+
+include docs/developer/FURNITURE_RETRIEVAL_ARCHITECTURE.md
+include docs/data/RETRIEVAL_BASELINE_08R0.md

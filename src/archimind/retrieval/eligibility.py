@@ -5,7 +5,7 @@ import json
 import unicodedata
 from decimal import Decimal
 
-from pydantic import model_validator
+from pydantic import Field, model_validator
 
 from archimind.assets.catalog import FurnitureAssetRecord
 from archimind.assets.specifications import (
@@ -41,12 +41,12 @@ def normalized(value: str) -> str:
 
 class IndexedDocument(Frozen):
     reference: CatalogReference
-    text: str
+    text: str = Field(min_length=1, max_length=16384)
 
 
 class RetrievalIndex(Frozen):
     identity: IndexIdentity
-    documents: tuple[IndexedDocument, ...]
+    documents: tuple[IndexedDocument, ...] = Field(min_length=1, max_length=64)
 
     @model_validator(mode="after")
     def consistent_snapshot(self):
@@ -257,6 +257,8 @@ def resolve_result(
             for_preparation
             and result.request.dimension_basis != "generation_reservation"
         ):
+            raise ValueError
+        if build_index().identity != result.identity:
             raise ValueError
         options = tuple(resolve_hit(h, result.identity) for h in result.hits)
         if any(eligibility_reasons(result.request, o) for o in options) or (
