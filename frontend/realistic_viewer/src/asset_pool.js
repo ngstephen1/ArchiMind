@@ -1,10 +1,11 @@
 // A small reference-counted cache. Instance transforms never mutate shared assets.
-export function createAssetPool(load,dispose,graceMs=250){
+export function createAssetPool(load,dispose,graceMs=250,allowedIds=['sheen-chair']){
+  const allowed=new Set(allowedIds);
   const records=new Map();let loads=0;
   return {
     get loads(){return loads;},
     acquire(id){
-      if(id!=='sheen-chair')throw Error('Untrusted asset ID');
+      if(!allowed.has(id))throw Error('Untrusted asset ID');
       let record=records.get(id);
       if(!record){
         record={refs:0,timer:null,controller:new AbortController()};records.set(id,record);loads++;

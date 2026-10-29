@@ -1,0 +1,56 @@
+{
+  "asset_id": "abo-b075x2x4xs-amazon-com",
+  "render_version": "1.0.0",
+  "product": "Stone & Beam Charles armchair",
+  "variant": "Sod",
+  "asin": "B075X2X4XS",
+  "manufacturer_model_number": "LTD26020C",
+  "dataset": "Amazon Berkeley Objects",
+  "source_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/S/B075X2X4XS.glb",
+  "source_revision": null,
+  "sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+  "size_bytes": 4252440,
+  "acquisition": [
+    {
+      "url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+      "status": 200,
+      "retrieved_utc": "2026-10-29T00:24:04.352389+00:00",
+      "body_bytes": 14527,
+      "sha256": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+      "etag_not_sha256": "\"29f6d6758af09d75babd5c4960f7e64d\"",
+      "last_modified": "Mon, 26 Jun 2023 11:36:14 GMT"
+    },
+    {
+      "url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+      "status": 200,
+      "retrieved_utc": "2026-10-29T00:24:04.496478+00:00",
+      "body_bytes": 5158,
+      "sha256": "01d8c8b2ea90ab30b29979f77e7550deccc4a2b981ee71d4f5ee3ffdb894db86",
+      "etag_not_sha256": "\"2ba7055df7d875a8badbdcb23ca2b91f\"",
+      "last_modified": "Mon, 17 Jul 2023 17:02:14 GMT"
+    },
+    {
+      "url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/S/B075X2X4XS.glb",
+      "status": 200,
+      "retrieved_utc": "2026-10-29T00:24:04.897294+00:00",
+      "body_bytes": 4252440,
+      "sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+      "etag_not_sha256": "\"409963d4d47700bc94b3f6faa8c0f04e\"",
+      "last_modified": "Thu, 17 Jun 2021 08:05:47 GMT"
+    }
+  ],
+  "license_id": "CC-BY-4.0",
+  "license_url": "https://creativecommons.org/licenses/by/4.0/",
+  "license_text": "ABO_LICENSE_CC_BY_4.0.txt",
+  "attribution_notice": "ABO_ATTRIBUTION.txt",
+  "modifications": "Original GLB bytes unchanged. Runtime only: documented translation for center/floor anchoring and canonical pose. No scaling, deformation or material changes.",
+  "release_receipt": "archimind/assets/product_render_release.json",
+  "technical_evidence": "docs/data/ASSET_QUALIFICATION_08CR2.json",
+  "visual_evidence": "archimind/assets/charles_visual_review.json",
+  "rights_limits": "No endorsement; trademarks and individual mesh authorship not independently cleared; no physical product fidelity certification.",
+  "packaged_readme": {
+    "modification": "Whitespace normalized only; source words and notices retained.",
+    "source_sha256": "01d8c8b2ea90ab30b29979f77e7550deccc4a2b981ee71d4f5ee3ffdb894db86",
+    "packaged_sha256": "6c52f9fdcc807a34fd92961cc09454aecaaabbb26327145953f203b9f2cebb71"
+  }
+}

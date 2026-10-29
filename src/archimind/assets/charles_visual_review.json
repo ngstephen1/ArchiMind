@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "task": "08C-R2",
+  "checked_utc": "2026-10-29T00:29:51.866499+00:00",
+  "status": "passed_with_documented_limits",
+  "asset_id": "abo-b075x2x4xs-amazon-com",
+  "source_glb_sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+  "envelope_sha256": "30a126d99a56e03d8259ce147a36ce607bd652cda0d0dfae303b14a544687fc6",
+  "review_type": "same_agent_browser_and_numeric_review",
+  "browser": "desktop Chromium and resized narrow Chromium, not physical mobile",
+  "viewports": [
+    [
+      1440,
+      1000
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "required_checks": {
+    "embedded_images_decoded": true,
+    "materials_reviewed": true,
+    "front_faces_canonical_south": true,
+    "up_is_vertical": true,
+    "floor_contact": true,
+    "metric_envelope_containment": true,
+    "desktop_framing": true,
+    "narrow_framing": true,
+    "walls_and_openings": true,
+    "orbit_zoom_reset_cutaway": true,
+    "missing_asset_fallback": true,
+    "corrupt_asset_fallback": true,
+    "recovery": true,
+    "shared_resources": true,
+    "idempotent_cleanup": true
+  },
+  "observations": [
+    "Brown leather-like source appearance, rolled arms, seat/back cushions and turned legs; visually compatible with the source Charles description. Color/material not independently physically certified.",
+    "Front seating surface faces native +Z/canonical south. Rear upholstery observed by orbit; translucent rear wall can obscure it. No geometry orientation adjustment.",
+    "Both instances scale exactly 1, floor Y=0; 42706 triangles each, one shared geometry and one asset load. Numeric world bounds differ at sub-ULP arithmetic levels only.",
+    "Initial full 5x4x2.7 room and openings fit desktop and narrow frames; labels wrap and page scrolls. Narrow detail benefits from zoom.",
+    "Missing and corrupt byte simulations produce two chair placeholders plus the intentional desk placeholder; normal remount restores the two meshes.",
+    "An early repeated-cleanup context-loss warning was fixed with an idempotent guard. Fresh final private review: zero warnings/errors. Earlier favicon 404 removed by private data favicon."
+  ],
+  "metrics": {
+    "first_cold_scene_setup_ms": 2659.3,
+    "later_http_cached_setup_ms": [
+      261.7,
+      240.7,
+      243.6
+    ],
+    "missing_setup_ms": 128.1,
+    "corrupt_setup_ms": 109.2,
+    "unique_encoded_bytes": 4252440,
+    "unique_texture_bytes_estimate": 67108860,
+    "instantiated_product_triangles": 85412,
+    "shared_geometry_count": 1
+  },
+  "screenshots": [
+    {
+      "filename": "08cr2-qualified-desktop.png",
+      "sha256": "f84f736374818b40e777816ca0ca070589fedfc97cf3357731f3b9ce2fa73360",
+      "stored_outside_git": true
+    },
+    {
+      "filename": "08cr2-qualified-narrow.png",
+      "sha256": "ac00e27e9f01119402cb27409b93f7ad582ca469025a4af97bb676844987dcf3",
+      "stored_outside_git": true
+    },
+    {
+      "filename": "08cr2-private-front-detail.png",
+      "sha256": "0c645eadd9c44188f119b65531547e74c58fb9beccb6ed163aa646ed7d997865",
+      "stored_outside_git": true
+    },
+    {
+      "filename": "08cr2-private-orbit.png",
+      "sha256": "8b19d4b7d35ee97a902bc1e98382ca5c8a50bbb5e3447f381497ca3b597107bd",
+      "stored_outside_git": true
+    },
+    {
+      "filename": "08cr2-private-fallback.png",
+      "sha256": "e0f53965a6690bd438cff72e2666de881e4d1ebc6c8ab0de4bc4bf3d76e09594",
+      "stored_outside_git": true
+    }
+  ],
+  "reviewed_source_sha256": {
+    "frontend/realistic_viewer/src/product_assets.js": "18e963b367024c71ce37920db4f3e669d14ba72c3940156b23a72211a2359139",
+    "frontend/realistic_viewer/src/room_viewer.js": "011df1d671b057a66077557d6ea7d01318bf5b5f47a61a62f9334c44cc49aa9a",
+    "frontend/realistic_viewer/src/asset_pool.js": "aabeb8d0f809089e1197d96a7807663b2796b5608694e4f3fb2cd42d0507f8a7",
+    "frontend/realistic_viewer/src/room_geometry.js": "f1d7a82c8c1759f6a30abf380ddbe161eb1871e07b0be6e2a49efd13ff718a9e"
+  },
+  "limitations": [
+    "Not independent human approval, manufacturer metrology, calibrated material/color certification or physical-device performance.",
+    "No product photo acquired; identity rests on exact official ASIN/model bytes plus existing listing join and recognizable source-consistent geometry.",
+    "No sustained GPU-memory, frame-rate or leak benchmark; lifecycle ownership is tested separately.",
+    "Historical catalog and planning qualification flags retain their original scope; this is a separate render release."
+  ]
+}

@@ -113,7 +113,7 @@ def main() -> None:
 
         mode = st.radio(
             "Experimental scene",
-            ["Architectural room", "Single chair (06D)"],
+            ["Architectural room", "Single chair (06D)", "Charles product (08C-R2)"],
             key="experimental_scene_mode",
         )
         try:
@@ -128,6 +128,36 @@ def main() -> None:
                     "placeholder. Front walls are translucent; turn them off for a cutaway view."
                 )
                 render_realistic_scene(create_sample_realistic_room())
+            elif mode == "Charles product (08C-R2)":
+                from archimind.assets.render_qualification import CHARLES_ID
+                from archimind.examples.sample_product_room import (
+                    create_sample_product_room,
+                )
+                from archimind.render.product_scene import render_product_scene
+
+                st.caption(
+                    "Fixed product demonstration, independent of A/B layouts: two Charles "
+                    "armchairs at native scale 1.0 in approved planning envelopes, plus a desk "
+                    "placeholder. Published product dimensions remain unchanged. "
+                    "This scene is not an optimized or architecturally certified layout."
+                )
+                st.markdown(
+                    "[Charles, Sod — ABO B075X2X4XS](https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/S/B075X2X4XS.glb) · "
+                    "Amazon.com and ABO contributors · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) · "
+                    "Original GLB unchanged, 4.25 MB. Full attribution accompanies the packaged asset."
+                )
+                st.caption(
+                    "Dataset builders: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, "
+                    "Himanshu Arora, Jasmine Collins and Jitendra Malik. No endorsement implied."
+                )
+                design = create_sample_product_room()
+                render_product_scene(
+                    design,
+                    asset_bindings={
+                        f.id: CHARLES_ID if f.category == "chair" else None
+                        for f in design.furniture
+                    },
+                )
             else:
                 st.caption(
                     "Original Task 06D single-chair studio; independent of the room experiment."

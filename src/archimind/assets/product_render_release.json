@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "asset_id": "abo-b075x2x4xs-amazon-com",
+  "render_version": "1.0.0",
+  "render_qualified": true,
+  "policy": "native_scale_1_planning_envelope_B",
+  "envelope_sha256": "30a126d99a56e03d8259ce147a36ce607bd652cda0d0dfae303b14a544687fc6",
+  "inspection_sha256": "3ab3b103e8cbaa4b93cd05b825d0a5d4ab819cd62e12b2e5b253aa07c479fd5d",
+  "catalog_record_sha256": "1ddddd5fb5bedd4be8968106501bf56b40e1599693e22d9e575794157f685119",
+  "source_glb_sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+  "filename": "CharlesArmchair.glb",
+  "visual_review_sha256": "5b8aa085bef18a38da0e4c993b41ea25f9d0030c5476d30e037aecdfde1f6b78",
+  "license_id": "CC-BY-4.0",
+  "bytes_unchanged": true
+}

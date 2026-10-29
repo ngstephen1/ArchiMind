@@ -8,16 +8,25 @@ import {validateScene,wallQuads,openingQuad,cameraFrame,canonicalVolume} from '.
 import {createAssetPool} from './asset_pool.js';
 import {fittedInstance,placeholder,footprint,instanceMetrics,quadGeometry} from './room_objects.js';
 
+import {PRODUCT_ASSETS,boundedProductBytes,verifyDecodedProduct,nativeProductInstance,productSceneBudget} from './product_assets.js';
+
 const ASSET_URL=new URL('./furniture/SheenChair.glb',import.meta.url);
 const pool=createAssetPool(async(id,signal)=>{
-  const response=await fetch(ASSET_URL,{signal});if(!response.ok)throw Error('Asset unavailable');
+  const product=PRODUCT_ASSETS[id];
+  const url=product?new URL(`./furniture/${product.filename}`,import.meta.url):ASSET_URL;
+  const response=await fetch(url,{signal});if(!response.ok)throw Error('Asset unavailable');
+  if(product){
+    const bytes=await boundedProductBytes(response,product);let model;
+    try{model=(await new GLTFLoader().parseAsync(bytes,'')).scene;verifyDecodedProduct(model,product);if(signal.aborted)throw Error('Canceled');return model;}
+    catch(error){if(model)disposeObject(model);throw error;}
+  }
   const bytes=await response.arrayBuffer();
   if(bytes.byteLength>15*1024*1024||new DataView(bytes).getUint32(0,true)!==0x46546c67)throw Error('Invalid asset');
   const model=(await new GLTFLoader().parseAsync(bytes,'')).scene;
   const size=new THREE.Box3().setFromObject(model).getSize(new THREE.Vector3());
   if(!size.toArray().every(v=>Number.isFinite(v)&&v>0)){disposeObject(model);throw Error('Empty asset');}
   return model;
-},disposeObject);
+},disposeObject,250,['sheen-chair',...Object.keys(PRODUCT_ASSETS)]);
 function plankTexture(){
   const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d');
   let seed=17;const random=()=>{seed=(1664525*seed+1013904223)>>>0;return seed/4294967296;};
@@ -41,16 +50,17 @@ export function mountRoomViewer(host,input){
   const owned=new THREE.Group(),instances=new THREE.Group(),footprints=new THREE.Group(),walls=new THREE.Group();
   const releases=[];const start=performance.now();
   const cleanup=()=>{
+    if(disposed)return;
     disposed=true;cancelAnimationFrame(frame);resizeObserver?.disconnect();visibility?.disconnect();controls?.dispose();
     // GLB instances share resources. Only their pool owns/disposes those resources.
     instances.clear();owned.traverse(o=>o.shadow?.dispose?.());disposeObject(owned);envTarget?.dispose();releases.forEach(release=>release());
-    renderer?.dispose();renderer?.forceContextLoss();root.remove();
+    renderer?.dispose();renderer?.forceContextLoss();root.dataset.cleanup='complete';root.remove();
   };
   const fail=()=>{status.textContent='Room viewer unavailable: invalid scene data or WebGL 2 unavailable.';status.dataset.state='error';root.dataset.state='error';};
   try{
     const data=validateScene(input),room=data.design.room,fs=[...data.design.furniture].sort((a,b)=>a.id.localeCompare(b.id));
     const bindings=new Map(data.asset_bindings.map(b=>[b.furniture_id,b.asset_id]));root.dataset.state='loading';
-    root.querySelector('.room-info').textContent=`${room.name} · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · X east, Y north, Z up. Canonical data; detailed mesh validity is not established.`;
+    root.querySelector('.room-info').textContent=`${room.name} · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · X east, Y north, Z up. ${data.schema_version===3?'Charles: ABO B075X2X4XS (Sod), CC BY 4.0; native scale 1.0, Policy B envelope. Standalone demonstration, not a generated layout.':'Canonical data; illustrative fitted mesh validity is not established.'}`;
     scene=new THREE.Scene();scene.background=new THREE.Color('#e9edf0');scene.add(owned,instances);owned.add(walls,footprints);
     renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
     renderer.domElement.setAttribute('aria-label','Experimental room with wall openings, textured chairs and labeled procedural furniture');stage.prepend(renderer.domElement);
@@ -84,19 +94,24 @@ export function mountRoomViewer(host,input){
     (async()=>{
       const sourceModels=new Map(),failed=new Set(data.unavailable_assets),loadsBefore=pool.loads;
       const assetIds=[...new Set(data.asset_bindings.map(b=>b.asset_id).filter(Boolean))];
+      const budget=data.schema_version===3?productSceneBudget(data.asset_bindings):null;
+      if(budget&&!budget.passed)assetIds.forEach(id=>failed.add(id));
       await Promise.all(assetIds.filter(id=>!failed.has(id)).map(async id=>{const handle=pool.acquire(id);releases.push(handle.release);try{sourceModels.set(id,await handle.promise);}catch{failed.add(id);}}));
       if(disposed)return;
       const metrics=[];let failedInstances=0;
       for(const f of fs){
         const id=bindings.get(f.id),source=sourceModels.get(id);let object,kind;
-        if(source){object=fittedInstance(source,f);kind='textured';instances.add(object);}
-        else{object=placeholder(f);kind=id?'asset_unavailable_placeholder':'procedural_placeholder';owned.add(object,placeholderLabel(f));if(id)failedInstances++;}
+        if(source){
+          try{object=PRODUCT_ASSETS[id]?nativeProductInstance(source,f,PRODUCT_ASSETS[id]):fittedInstance(source,f);kind='textured';instances.add(object);}
+          catch{failed.add(id);}
+        }
+        if(!object){object=placeholder(f);kind=id?'asset_unavailable_placeholder':'procedural_placeholder';owned.add(object,placeholderLabel(f));if(id)failedInstances++;}
         metrics.push(instanceMetrics(object,f,kind));
-        const row=document.createElement('li');row.textContent=`${f.name} · ${f.id} · ${f.category} · X/Y (${f.x_m}, ${f.y_m}) · W/D/H ${f.width_m} × ${f.depth_m} × ${f.height_m} m · ${kind.replaceAll('_',' ')}`;root.querySelector('.objects').appendChild(row);
+        const row=document.createElement('li');row.textContent=`${f.name} · ${f.id} · ${f.category} · X/Y (${f.x_m}, ${f.y_m}) · W/D/H ${f.width_m} × ${f.depth_m} × ${f.height_m} m · ${kind.replaceAll('_',' ')}${id&&failed.has(id)?(budget&&!budget.passed?' (scene resource budget exceeded)':' (local asset unavailable or failed qualification)'):PRODUCT_ASSETS[id]?' · native-scale Charles, Sod, CC BY 4.0':''}`;root.querySelector('.objects').appendChild(row);
       }
       renderer.render(scene,camera);
       const geometries=new Set();instances.traverse(o=>{if(o.isMesh)geometries.add(o.geometry);});
-      const result={instances:metrics,furnitureCount:fs.length,texturedInstances:metrics.filter(m=>m.kind==='textured').length,placeholderInstances:metrics.filter(m=>m.kind!=='textured').length,assetLoadsThisMount:pool.loads-loadsBefore,uniqueAssetIds:assetIds.length,sharedAssetGeometries:geometries.size,loadMs:performance.now()-start,wallPanels:quads.map(q=>({wall:q.wall,left:q.left,right:q.right,bottom:q.bottom,top:q.top})),doors:room.doors,windows:room.windows,roomDimensions:[room.width_m,room.depth_m,room.ceiling_height_m],structuralTriangles:quads.length*2,triangles:metrics.reduce((s,m)=>s+m.triangles,0)};
+      const result={productBudget:budget,instances:metrics,furnitureCount:fs.length,texturedInstances:metrics.filter(m=>m.kind==='textured').length,placeholderInstances:metrics.filter(m=>m.kind!=='textured').length,assetLoadsThisMount:pool.loads-loadsBefore,uniqueAssetIds:assetIds.length,sharedAssetGeometries:geometries.size,loadMs:performance.now()-start,wallPanels:quads.map(q=>({wall:q.wall,left:q.left,right:q.right,bottom:q.bottom,top:q.top})),doors:room.doors,windows:room.windows,roomDimensions:[room.width_m,room.depth_m,room.ceiling_height_m],structuralTriangles:quads.length*2,triangles:metrics.reduce((s,m)=>s+m.triangles,0)};
       root.dataset.metrics=JSON.stringify(result);root.querySelector('.metrics').textContent=`${fs.length} objects · ${result.texturedInstances} textured / ${result.placeholderInstances} placeholder · ${result.assetLoadsThisMount} new GLB load(s) · room setup ${(result.loadMs/1000).toFixed(2)} s`;
       root.dataset.state=failedInstances?'partial':'ready';status.dataset.state=root.dataset.state;status.textContent=failedInstances?'Room loaded; textured asset unavailable. Labeled placeholders shown.':'Experimental room loaded';
     })().catch(()=>{if(!disposed)fail();});

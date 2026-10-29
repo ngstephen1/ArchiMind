@@ -1,8 +1,15 @@
 import {toThree} from './geometry.js';
+import {validateProductBindings} from './product_assets.js';
 const keys=(o,names)=>o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).sort().join(',')===names.sort().join(',');
 const text=v=>typeof v==='string'&&v.trim().length>0&&v.length<=256;
 const finite=(v,lo,hi)=>typeof v==='number'&&Number.isFinite(v)&&v>=lo&&v<=hi;
 export function validateScene(data) {
+  if(data?.schema_version===3){
+    if(!keys(data,['schema_version','design','asset_bindings','unavailable_assets']))throw Error('Invalid product scene');
+    validateProductBindings(data);
+    validateScene({...data,schema_version:2,asset_bindings:data.asset_bindings.map(b=>({furniture_id:b.furniture_id,asset_id:null})),unavailable_assets:[]});
+    return data;
+  }
   if(!keys(data,['schema_version','design','asset_bindings','unavailable_assets'])||data.schema_version!==2||
     !keys(data.design,['room','furniture','name'])||!keys(data.design.room,['id','name','width_m','depth_m','ceiling_height_m','doors','windows']))throw Error('Invalid architectural scene');
   const {room:r,furniture:fs,name}=data.design;

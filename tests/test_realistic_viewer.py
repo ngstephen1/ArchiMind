@@ -27,7 +27,10 @@ def test_asset_provenance_file_and_model_license():
     for name in ("README.md", "UPSTREAM_LICENSE.md", "CC0-1.0.txt", "CC-BY-4.0.txt"):
         assert (path.parent / name).is_file()
     assert "CC-BY-4.0" in (path.parent / "README.md").read_text()
-    assert len(list(viewer.ASSET_DIR.rglob("*.glb"))) == 1
+    assert {p.name for p in viewer.ASSET_DIR.rglob("*.glb")} == {
+        "SheenChair.glb",
+        "CharlesArmchair.glb",
+    }
 
 
 def test_glb_contains_actual_geometry_pbr_materials_and_embedded_images():
