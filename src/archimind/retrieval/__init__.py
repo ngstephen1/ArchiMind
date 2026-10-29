@@ -25,3 +25,7 @@ __all__ = [
     "resolve_hit",
     "resolve_result",
 ]
+
+from archimind.retrieval.lexical import LexicalRetrievalProvider
+
+__all__ += ["LexicalRetrievalProvider"]

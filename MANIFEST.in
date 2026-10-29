@@ -30,3 +30,7 @@ include docs/data/SELECTED_LAYOUT_08D_VERIFICATION.json
 
 include docs/developer/FURNITURE_CATALOG_UI.md
 include docs/data/CATALOG_GENERATION_08E_VERIFICATION.json
+
+include data/benchmarks/furniture_retrieval_queries.json
+include data/benchmarks/furniture_retrieval_synthetic.json
+include docs/data/RETRIEVAL_BASELINE_08R0.json

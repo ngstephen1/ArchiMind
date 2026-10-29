@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "catalog_id": "synthetic:08r0",
+  "catalog_version": "1.0.0",
+  "scope": "synthetic_fixture",
+  "notice": "Artificial ranking/filter fixtures only. No real product, source rights, planning or render qualification; never acquire or pass to 08E.",
+  "products": [
+    {
+      "asset_id": "synthetic:bed-queen",
+      "name": "Queen platform bed",
+      "category": "bed",
+      "variant": "Fixture bed-queen",
+      "width_m": 1.6,
+      "depth_m": 2.0,
+      "height_m": 0.6,
+      "uses": [
+        "sleeping"
+      ],
+      "materials": [
+        "wood"
+      ],
+      "styles": [
+        "minimal"
+      ],
+      "colors": [
+        "natural"
+      ],
+      "qualification": "synthetic_fixture"
+    },
+    {
+      "asset_id": "synthetic:chair-reading",
+      "name": "Upholstered reading chair",
+      "category": "chair",
+      "variant": "Fixture chair-reading",
+      "width_m": 0.8,
+      "depth_m": 0.8,
+      "height_m": 0.9,
+      "uses": [
+        "seating",
+        "reading"
+      ],
+      "materials": [
+        "fabric"
+      ],
+      "styles": [
+        "modern"
+      ],
+      "colors": [
+        "blue"
+      ],
+      "qualification": "synthetic_fixture"
+    },
+    {
+      "asset_id": "synthetic:desk-oak-large",
+      "name": "Large oak executive desk",
+      "category": "desk",
+      "variant": "Fixture desk-oak-large",
+      "width_m": 1.8,
+      "depth_m": 0.8,
+      "height_m": 0.76,
+      "uses": [
+        "work"
+      ],
+      "materials": [
+        "oak"
+      ],
+      "styles": [
+        "classic"
+      ],
+      "colors": [
+        "brown"
+      ],
+      "qualification": "synthetic_fixture"
+    },
+    {
+      "asset_id": "synthetic:desk-oak-small",
+      "name": "Compact oak writing desk",
+      "category": "desk",
+      "variant": "Fixture desk-oak-small",
+      "width_m": 0.9,
+      "depth_m": 0.5,
+      "height_m": 0.75,
+      "uses": [
+        "writing",
+        "work"
+      ],
+      "materials": [
+        "oak"
+      ],
+      "styles": [
+        "minimal"
+      ],
+      "colors": [
+        "natural"
+      ],
+      "qualification": "synthetic_fixture"
+    },
+    {
+      "asset_id": "synthetic:desk-steel",
+      "name": "Steel writing desk",
+      "category": "desk",
+      "variant": "Fixture desk-steel",
+      "width_m": 1.2,
+      "depth_m": 0.6,
+      "height_m": 0.75,
+      "uses": [
+        "writing",
+        "work"
+      ],
+      "materials": [
+        "steel"
+      ],
+      "styles": [
+        "industrial"
+      ],
+      "colors": [
+        "black"
+      ],
+      "qualification": "synthetic_fixture"
+    },
+    {
+      "asset_id": "synthetic:storage-bookcase",
+      "name": "Open oak bookcase",
+      "category": "storage",
+      "variant": "Fixture storage-bookcase",
+      "width_m": 0.7,
+      "depth_m": 0.35,
+      "height_m": 1.8,
+      "uses": [
+        "book storage"
+      ],
+      "materials": [
+        "oak"
+      ],
+      "styles": [
+        "minimal"
+      ],
+      "colors": [
+        "natural"
+      ],
+      "qualification": "synthetic_fixture"
+    },
+    {
+      "asset_id": "synthetic:storage-wardrobe",
+      "name": "Bedroom wardrobe",
+      "category": "storage",
+      "variant": "Fixture storage-wardrobe",
+      "width_m": 1.5,
+      "depth_m": 0.6,
+      "height_m": 2.0,
+      "uses": [
+        "clothes storage"
+      ],
+      "materials": [
+        "wood"
+      ],
+      "styles": [
+        "modern"
+      ],
+      "colors": [
+        "white"
+      ],
+      "qualification": "synthetic_fixture"
+    },
+    {
+      "asset_id": "synthetic:table-low",
+      "name": "Low coffee table",
+      "category": "table",
+      "variant": "Fixture table-low",
+      "width_m": 1.0,
+      "depth_m": 0.6,
+      "height_m": 0.4,
+      "uses": [
+        "coffee"
+      ],
+      "materials": [
+        "wood"
+      ],
+      "styles": [
+        "modern"
+      ],
+      "colors": [
+        "brown"
+      ],
+      "qualification": "synthetic_fixture"
+    }
+  ]
+}

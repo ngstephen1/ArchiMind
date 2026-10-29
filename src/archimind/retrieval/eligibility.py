@@ -243,7 +243,9 @@ def resolve_hit(
         raise RetrievalError("Retrieval reference is stale or unauthorized") from None
 
 
-def resolve_result(result) -> tuple[CatalogProductOption, ...]:
+def resolve_result(
+    result, *, for_preparation: bool = True
+) -> tuple[CatalogProductOption, ...]:
     """Recheck IDs, current evidence and hard filters before a future UI handoff."""
     from archimind.retrieval.contracts import FurnitureSearchResult
 
@@ -251,8 +253,15 @@ def resolve_result(result) -> tuple[CatalogProductOption, ...]:
         result = FurnitureSearchResult.model_validate(result)
         if result.identity.scope != "real" or result.status not in ("matches", "empty"):
             raise ValueError
+        if (
+            for_preparation
+            and result.request.dimension_basis != "generation_reservation"
+        ):
+            raise ValueError
         options = tuple(resolve_hit(h, result.identity) for h in result.hits)
-        if any(eligibility_reasons(result.request, o) for o in options):
+        if any(eligibility_reasons(result.request, o) for o in options) or (
+            for_preparation and any(not o.preparation_available for o in options)
+        ):
             raise ValueError
         return options
     except (ValueError, TypeError):
