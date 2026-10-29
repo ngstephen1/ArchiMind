@@ -76,8 +76,9 @@ def product_scene_payload(
     design: RoomDesign, *, asset_bindings: Mapping[str, str | None]
 ) -> dict:
     """Explicit complete ID bindings only; no implicit category substitution."""
-    release = product_release()
-    e = load_planning_envelope(CHARLES_ID)
+    has_products = any(asset_bindings.values())
+    release = product_release() if has_products else None
+    e = load_planning_envelope(CHARLES_ID) if has_products else None
     return ProductScene(
         design=design,
         asset_bindings=[
@@ -99,9 +100,20 @@ def render_product_scene(
     key: str = "experimental-product-room",
 ) -> None:
     payload = product_scene_payload(design, asset_bindings=asset_bindings)
+    mount_product_payload(payload, key=key)
+
+
+def mount_product_payload(payload: dict, *, key: str) -> dict:
+    """Shared trusted V3 mounting path, including integrity fallback.
+
+    Return the effective payload so wrappers can report actual backend failures.
+    No spatial validation or generation is performed here.
+    """
+    payload = ProductScene.model_validate(payload).model_dump(mode="json")
     if any(b["asset_id"] for b in payload["asset_bindings"]):
         try:
             verify_product_asset()
         except ProductQualificationError:
             payload["unavailable_assets"] = [CHARLES_ID]
     _component()(data=payload, key=key)
+    return payload
