@@ -1,0 +1,508 @@
+{
+  "task": "08C-R2",
+  "checkpoint": "technical_requalification",
+  "acquisition": [
+    {
+      "url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+      "status": 200,
+      "retrieved_utc": "2026-10-29T00:24:04.352389+00:00",
+      "body_bytes": 14527,
+      "sha256": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+      "etag_not_sha256": "\"29f6d6758af09d75babd5c4960f7e64d\"",
+      "last_modified": "Mon, 26 Jun 2023 11:36:14 GMT"
+    },
+    {
+      "url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+      "status": 200,
+      "retrieved_utc": "2026-10-29T00:24:04.496478+00:00",
+      "body_bytes": 5158,
+      "sha256": "01d8c8b2ea90ab30b29979f77e7550deccc4a2b981ee71d4f5ee3ffdb894db86",
+      "etag_not_sha256": "\"2ba7055df7d875a8badbdcb23ca2b91f\"",
+      "last_modified": "Mon, 17 Jul 2023 17:02:14 GMT"
+    },
+    {
+      "url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/S/B075X2X4XS.glb",
+      "status": 200,
+      "retrieved_utc": "2026-10-29T00:24:04.897294+00:00",
+      "body_bytes": 4252440,
+      "sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+      "etag_not_sha256": "\"409963d4d47700bc94b3f6faa8c0f04e\"",
+      "last_modified": "Thu, 17 Jun 2021 08:05:47 GMT"
+    }
+  ],
+  "technical": {
+    "status": "automated_pass_visual_pending",
+    "render_qualified": false,
+    "inspection": {
+      "schema_version": 1,
+      "status": "rejected",
+      "render_qualified": false,
+      "asset_id": "abo-b075x2x4xs-amazon-com",
+      "asset_version": "1.0.0",
+      "source_product_id": "B075X2X4XS",
+      "source_model_id": "B075X2X4XS",
+      "source_model_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/S/B075X2X4XS.glb",
+      "original_size_bytes": 4252440,
+      "original_sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+      "expected_hash_checked": true,
+      "gltf_version": "2.0",
+      "units": "glTF_meters_convention",
+      "native_bounds_three": {
+        "min_xyz": [
+          -0.4980524480342865,
+          0.0,
+          -0.5010772347450256
+        ],
+        "max_xyz": [
+          0.4980524480342865,
+          0.976093053817749,
+          0.5008640885353088
+        ]
+      },
+      "normalized_bounds_three": {
+        "min_xyz": [
+          -0.4980524480342865,
+          0.0,
+          -0.5009706616401672
+        ],
+        "max_xyz": [
+          0.4980524480342865,
+          0.976093053817749,
+          0.5009706616401672
+        ]
+      },
+      "canonical_mesh_bounds": {
+        "min_xyz": [
+          -0.002752448034286481,
+          -0.005670661640167218,
+          0.0
+        ],
+        "max_xyz": [
+          0.9933524480342866,
+          0.9962706616401673,
+          0.976093053817749
+        ]
+      },
+      "canonical_envelope": {
+        "min_xyz": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "max_xyz": [
+          0.9906,
+          0.9906,
+          0.9652
+        ]
+      },
+      "physical_dimensions_wdh_m": [
+        0.9906,
+        0.9906,
+        0.9652
+      ],
+      "dimension_deltas_wdh_m": [
+        0.005504896068572962,
+        0.011341323280334437,
+        0.010893053817749077
+      ],
+      "dimension_tolerances_wdh_m": [
+        0.019812,
+        0.019812,
+        0.019303999999999998
+      ],
+      "normalization_scale": 1.0,
+      "normalization_orientation": "identity_Y_up_Z_front_source_convention",
+      "normalization_translation_three": [
+        -0.0,
+        -0.0,
+        0.00010657310485839844
+      ],
+      "placement_translation_three": [
+        0.4953,
+        0.0,
+        -0.4953
+      ],
+      "authored_world_matrices_row_major": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "mesh_definitions": 1,
+      "mesh_instances": 1,
+      "primitive_instances": 1,
+      "triangles_per_instance": 42706,
+      "material_count": 1,
+      "texture_count": 3,
+      "images": [
+        {
+          "image_index": 0,
+          "mime_type": "image/png",
+          "width": 2048,
+          "height": 2048,
+          "container_check": "png_chunks_crc"
+        },
+        {
+          "image_index": 1,
+          "mime_type": "image/jpeg",
+          "width": 2048,
+          "height": 2048,
+          "container_check": "jpeg_headers_eoi"
+        },
+        {
+          "image_index": 2,
+          "mime_type": "image/jpeg",
+          "width": 2048,
+          "height": 2048,
+          "container_check": "jpeg_headers_eoi"
+        }
+      ],
+      "estimated_unique_texture_bytes": 67108860,
+      "extensions_used": [],
+      "extensions_required": [],
+      "external_resources": false,
+      "gates": [
+        {
+          "name": "physical_size_agreement",
+          "status": "passed"
+        },
+        {
+          "name": "canonical_envelope",
+          "status": "failed"
+        },
+        {
+          "name": "encoded_asset_bytes",
+          "status": "passed"
+        },
+        {
+          "name": "asset_triangles",
+          "status": "passed"
+        },
+        {
+          "name": "texture_dimensions",
+          "status": "passed"
+        },
+        {
+          "name": "decoded_texture_bytes",
+          "status": "passed"
+        }
+      ],
+      "deferred_checks": [
+        "image_pixel_decode",
+        "natural_front_visual_confirmation",
+        "material_visual_review",
+        "renderer_compatibility",
+        "device_performance"
+      ]
+    },
+    "envelope": {
+      "schema_version": 1,
+      "envelope_id": "abo-b075x2x4xs-amazon-com:planning-envelope",
+      "envelope_version": "1.0.0",
+      "catalog_id": "archimind-furniture",
+      "catalog_schema_version": 1,
+      "catalog_version": "1.0.0",
+      "catalog_record_sha256": "1ddddd5fb5bedd4be8968106501bf56b40e1599693e22d9e575794157f685119",
+      "asset_id": "abo-b075x2x4xs-amazon-com",
+      "asset_version": "1.0.0",
+      "product_id": "B075X2X4XS",
+      "model_id": "B075X2X4XS",
+      "variant_id": "B075X2X4XS",
+      "variant_label": "Sod",
+      "published_dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 38.0,
+            "unit": "inches"
+          },
+          {
+            "source_field": "length",
+            "value": 39.0,
+            "unit": "inches"
+          },
+          {
+            "source_field": "width",
+            "value": 39.0,
+            "unit": "inches"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "width"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "length"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "Whole-item fields width -> canonical width, length -> depth, height -> height; independently compared with same-ID native X/Y/Z extents and product text.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 0.9906,
+        "depth_m": 0.9906,
+        "height_m": 0.9652
+      },
+      "evidence": {
+        "inspection_receipt_id": "08C:charles:2026-10-28:inspection-v1",
+        "inspection_receipt_sha256": "3ab3b103e8cbaa4b93cd05b825d0a5d4ab819cd62e12b2e5b253aa07c479fd5d",
+        "qualification_report_sha256": "76572768405747a5a29b62a762ef69c5d991e8375fba24e415197471b2d727ac",
+        "source_glb_sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+        "source_hash_basis": "received_bytes_sha256_in_08C",
+        "inspection": {
+          "schema_version": 1,
+          "status": "rejected",
+          "render_qualified": false,
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "asset_version": "1.0.0",
+          "source_product_id": "B075X2X4XS",
+          "source_model_id": "B075X2X4XS",
+          "source_model_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/S/B075X2X4XS.glb",
+          "original_size_bytes": 4252440,
+          "original_sha256": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+          "expected_hash_checked": true,
+          "gltf_version": "2.0",
+          "units": "glTF_meters_convention",
+          "native_bounds_three": {
+            "min_xyz": [
+              -0.4980524480342865,
+              0.0,
+              -0.5010772347450256
+            ],
+            "max_xyz": [
+              0.4980524480342865,
+              0.976093053817749,
+              0.5008640885353088
+            ]
+          },
+          "normalized_bounds_three": {
+            "min_xyz": [
+              -0.4980524480342865,
+              0.0,
+              -0.5009706616401672
+            ],
+            "max_xyz": [
+              0.4980524480342865,
+              0.976093053817749,
+              0.5009706616401672
+            ]
+          },
+          "canonical_mesh_bounds": {
+            "min_xyz": [
+              -0.002752448034286481,
+              -0.005670661640167218,
+              0.0
+            ],
+            "max_xyz": [
+              0.9933524480342866,
+              0.9962706616401673,
+              0.976093053817749
+            ]
+          },
+          "canonical_envelope": {
+            "min_xyz": [
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_xyz": [
+              0.9906,
+              0.9906,
+              0.9652
+            ]
+          },
+          "physical_dimensions_wdh_m": [
+            0.9906,
+            0.9906,
+            0.9652
+          ],
+          "dimension_deltas_wdh_m": [
+            0.005504896068572962,
+            0.011341323280334437,
+            0.010893053817749077
+          ],
+          "dimension_tolerances_wdh_m": [
+            0.019812,
+            0.019812,
+            0.019303999999999998
+          ],
+          "normalization_scale": 1.0,
+          "normalization_orientation": "identity_Y_up_Z_front_source_convention",
+          "normalization_translation_three": [
+            -0.0,
+            -0.0,
+            0.00010657310485839844
+          ],
+          "placement_translation_three": [
+            0.4953,
+            0.0,
+            -0.4953
+          ],
+          "authored_world_matrices_row_major": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "mesh_definitions": 1,
+          "mesh_instances": 1,
+          "primitive_instances": 1,
+          "triangles_per_instance": 42706,
+          "material_count": 1,
+          "texture_count": 3,
+          "images": [
+            {
+              "image_index": 0,
+              "mime_type": "image/png",
+              "width": 2048,
+              "height": 2048,
+              "container_check": "png_chunks_crc"
+            },
+            {
+              "image_index": 1,
+              "mime_type": "image/jpeg",
+              "width": 2048,
+              "height": 2048,
+              "container_check": "jpeg_headers_eoi"
+            },
+            {
+              "image_index": 2,
+              "mime_type": "image/jpeg",
+              "width": 2048,
+              "height": 2048,
+              "container_check": "jpeg_headers_eoi"
+            }
+          ],
+          "estimated_unique_texture_bytes": 67108860,
+          "extensions_used": [],
+          "extensions_required": [],
+          "external_resources": false,
+          "gates": [
+            {
+              "name": "physical_size_agreement",
+              "status": "passed"
+            },
+            {
+              "name": "canonical_envelope",
+              "status": "failed"
+            },
+            {
+              "name": "encoded_asset_bytes",
+              "status": "passed"
+            },
+            {
+              "name": "asset_triangles",
+              "status": "passed"
+            },
+            {
+              "name": "texture_dimensions",
+              "status": "passed"
+            },
+            {
+              "name": "decoded_texture_bytes",
+              "status": "passed"
+            }
+          ],
+          "deferred_checks": [
+            "image_pixel_decode",
+            "natural_front_visual_confirmation",
+            "material_visual_review",
+            "renderer_compatibility",
+            "device_performance"
+          ]
+        }
+      },
+      "qualification": {
+        "status": "planning_approved",
+        "policy_id": "archimind-conservative-planning-envelope",
+        "policy_version": "1.0.0",
+        "owner_decision_id": "08C-R1-policy-B",
+        "owner_decision_sha256": "cca6bcd209c2859dd461dcc565d5e8e2886dc96717c825e7ff08f660e8ae0ff7",
+        "scope": "fresh_backend_specifications_only",
+        "orientation_evidence": "08C_numeric_axes_and_source_front_convention",
+        "natural_front_visually_verified": false,
+        "functional_clearance_evaluated": false,
+        "render_qualified": false
+      },
+      "placement": {
+        "units": "meters",
+        "native_up": "+Y",
+        "native_front": "+Z",
+        "canonical_mapping": "X,-Z,Y",
+        "anchor": "floor_center",
+        "furniture_yaw_deg": 0,
+        "scale_xyz": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "normalization_translation_three_m": [
+          -0.0,
+          -0.0,
+          0.00010657310485839844
+        ],
+        "envelope_origin_offset_three_m": [
+          0.4980524480342865,
+          0.0,
+          -0.5009706616401672
+        ]
+      },
+      "planning_dimensions": {
+        "width_m": 0.996104896068573,
+        "depth_m": 1.0019413232803345,
+        "height_m": 0.9760930538177491
+      },
+      "rounding_rule": "outward_binary64_and_decimal_meters_v1",
+      "metadata_sha256": "30a126d99a56e03d8259ce147a36ce607bd652cda0d0dfae303b14a544687fc6"
+    },
+    "corner_check": "eight_corners_exact_rational_no_epsilon",
+    "renderer_scale": 1.0
+  },
+  "visual_review": null,
+  "approved_binding": null,
+  "limitations": [
+    "Not image pixel decoding or natural-front verification.",
+    "No real mesh approval until browser gates pass.",
+    "Published product dimensions and historical physical-box rejection unchanged."
+  ]
+}
