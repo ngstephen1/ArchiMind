@@ -76,3 +76,32 @@ def test_declared_threshold_grid_uses_development_only():
         assert policy.mode == "abstain_all"
     with pytest.raises(ValueError):
         choose_policy(cases, [], "a" * 64)
+
+
+def test_calibration_exact_boundary_and_all_abstain_fallback():
+    from types import SimpleNamespace
+
+    positive = SimpleNamespace(
+        judgments=(SimpleNamespace(asset_id="p"),),
+        request=SimpleNamespace(query="seat"),
+    )
+    negative = SimpleNamespace(
+        judgments=(), request=SimpleNamespace(query="unavailable")
+    )
+
+    def result(score):
+        return SimpleNamespace(
+            status="matches",
+            hits=(
+                SimpleNamespace(reference=SimpleNamespace(asset_id="p"), score=score),
+            ),
+        )
+
+    policy, _ = choose_policy(
+        (positive, negative), (result(0.9), result(0.8)), "a" * 64
+    )
+    assert policy.minimum_cosine == 0.8  # .6 < threshold <= .8; highest wins.
+    policy, _ = choose_policy(
+        (positive, negative), (result(0.9), result(1.0)), "a" * 64
+    )
+    assert policy.mode == "abstain_all" and policy.minimum_cosine is None

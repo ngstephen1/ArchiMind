@@ -115,3 +115,14 @@ def test_inference_exception_sanitized(monkeypatch, tmp_path):
     model.embed.side_effect = ValueError("private-path")
     with pytest.raises(EmbeddingError, match="Local encoder execution failed"):
         encoder.encode_queries(("seat",))
+
+
+def test_missing_optional_distribution_does_not_import_model_sdk(monkeypatch, tmp_path):
+    setup_sdk(monkeypatch)
+
+    def missing(name):
+        raise module.importlib.metadata.PackageNotFoundError(name)
+
+    monkeypatch.setattr(module.importlib.metadata, "version", missing)
+    with pytest.raises(EmbeddingError, match="dependencies are unavailable"):
+        module.FastEmbedCPUEncoder(tmp_path)

@@ -41,6 +41,11 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/retrieval/eligibility.py",
         "archimind/retrieval/lexical.py",
         "archimind/retrieval/evaluation.py",
+        "archimind/retrieval/embedding_index.py",
+        "archimind/retrieval/semantic.py",
+        "archimind/retrieval/offline_encoder.py",
+        "archimind/retrieval/embedding_experiment.py",
+        "archimind/retrieval/hybrid.py",
         "archimind/ui/furniture_assets.py",
         "archimind/render/selected_realistic.py",
         "archimind/ui/realistic_view.py",
@@ -75,6 +80,10 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         assert not any(n.endswith("/.env") for n in archive.namelist())
         assert not any("furniture_retrieval_synthetic" in n for n in archive.namelist())
         assert not any("B075X2X4XS" in n for n in archive.namelist())
+        assert not any(
+            n.endswith((".onnx", ".f32")) or "furniture_embedding_" in n
+            for n in archive.namelist()
+        )
     with tarfile.open(sdist) as archive:
         names = archive.getnames()
         assert any(n.endswith("/scripts/inspect_furniture_assets.py") for n in names)
@@ -108,6 +117,19 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             "/docs/data/RETRIEVAL_BASELINE_08R0.json",
         ):
             assert any(n.endswith(required) for n in names)
+        for required in (
+            "/data/benchmarks/furniture_embedding_development_08r1.json",
+            "/data/benchmarks/furniture_embedding_held_out_08r1.json",
+            "/scripts/acquire_furniture_encoder.py",
+            "/scripts/build_furniture_embedding_index.py",
+            "/scripts/evaluate_furniture_embeddings.py",
+            "/docs/data/RETRIEVAL_EMBEDDING_08R1.md",
+            "/docs/data/RETRIEVAL_EMBEDDING_08R1.json",
+            "/docs/data/ENCODER_ACQUISITION_08R1.json",
+            "/docs/data/ENCODER_ENVIRONMENT_08R1.json",
+        ):
+            assert any(n.endswith(required) for n in names)
+        assert not any(n.endswith((".onnx", ".f32")) for n in names)
         for name in preserved:
             member = next(n for n in names if n.endswith("/src/" + name))
             assert (
@@ -197,6 +219,40 @@ assert resolve_result(retrieved)[0].record.source.product_id == 'B075X2X4XS'
 assert not provider.search(FurnitureSearchRequest(query='queen bed')).hits
 assert not provider.search(FurnitureSearchRequest(query='bookcase', required_qualification='render')).hits
 assert not any(n.startswith(('openai', 'langgraph', 'fastembed', 'chromadb', 'onnxruntime')) for n in sys.modules)
+from archimind.retrieval.embedding_index import EmbeddingError, build_embedding_index
+from archimind.retrieval.semantic import SemanticRetrievalProvider, AbstentionPolicy
+from archimind.retrieval.hybrid import HybridRetrievalProvider
+from archimind.retrieval.offline_encoder import FastEmbedCPUEncoder
+for name in ('embedding_index', 'semantic', 'hybrid', 'offline_encoder'):
+    assert Path(sys.modules['archimind.retrieval.'+name].__file__).resolve().is_relative_to(target)
+try:
+    FastEmbedCPUEncoder(Path('no-model-cache'))
+except EmbeddingError:
+    pass
+else:
+    raise AssertionError('Missing encoder cache was accepted')
+assert not any(n.startswith(('fastembed', 'onnxruntime', 'tokenizers')) for n in sys.modules)
+import numpy as np
+from archimind.retrieval.embedding_index import EncoderSpec, ModelArtifact
+class TinyEncoder:
+    spec = EncoderSpec(model_name='BAAI/bge-small-en-v1.5',
+        upstream_repository='BAAI/bge-small-en-v1.5', upstream_revision='0'*40,
+        artifact_repository='Qdrant/bge-small-en-v1.5-onnx-Q', artifact_revision='0'*40,
+        fastembed_version='test', onnxruntime_version='test', numpy_version=np.__version__,
+        tokenizers_version='test', execution_kind='test_double',
+        artifacts=(ModelArtifact(filename='test.onnx', size_bytes=1, sha256='0'*64),))
+    def encode_documents(self, texts): return np.eye(384, dtype=np.float32)[:len(texts)]
+    def encode_queries(self, texts): return np.eye(384, dtype=np.float32)[:1]
+from archimind.retrieval import build_index
+encoder = TinyEncoder()
+corpus = build_index()
+semantic = SemanticRetrievalProvider(index=build_embedding_index(corpus, encoder),
+    encoder=encoder, policy=AbstentionPolicy(mode='threshold', minimum_cosine=-1.0, method='test_double'))
+request = FurnitureSearchRequest(query='Charles armchair')
+assert len(resolve_result(semantic.search(request))) == 2
+hybrid = HybridRetrievalProvider(provider, semantic, corpus=corpus)
+assert len(resolve_result(hybrid.search(request))) == 2
+assert not any(n.startswith(('fastembed', 'onnxruntime', 'tokenizers')) for n in sys.modules)
 from archimind.assets.render_assets import (
     product_release, product_asset_path, verify_product_asset, product_projection)
 from archimind.examples.sample_product_room import create_sample_product_room

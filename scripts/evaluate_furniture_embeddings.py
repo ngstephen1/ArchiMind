@@ -84,6 +84,7 @@ def main():
     parser.add_argument("--policy", type=Path, required=True)
     parser.add_argument("--policy-sha256")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--hybrid", action="store_true")
     args = parser.parse_args()
     if args.output.exists() or (
         args.phase == "calibrate"
@@ -199,6 +200,15 @@ def main():
                     else SyntheticRetrievalProvider(
                         synthetic, algorithm="sqlite_fts5_bm25_v1"
                     )
+                )
+            if args.hybrid:
+                from archimind.retrieval.hybrid import HybridRetrievalProvider
+
+                providers["hybrid_rrf60_v1"] = HybridRetrievalProvider(
+                    lexical,
+                    semantic(scope, policy),
+                    corpus=corpus,
+                    fixture_catalog=synthetic if scope == "synthetic_fixture" else None,
                 )
             refs = {d.reference.asset_id: d.reference for d in corpus.documents}
             cats = (

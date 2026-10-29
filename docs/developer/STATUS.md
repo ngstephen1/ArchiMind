@@ -1,9 +1,9 @@
 # Project status
 
-Last reviewed and locally verified: **October 28, 2026**.
+Last reviewed: **October 29, 2026**.
 
-**Current milestone: Task 08R0 complete, offline furniture retrieval contracts and evaluation. The application remains at its unchanged 08E UI.**
-Live model behavior is unverified. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
+**Current milestone: Task 08R1 offline CPU embedding and hybrid benchmark complete; production semantic admission deferred. The application remains at its unchanged 08E UI.**
+Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
@@ -1443,3 +1443,34 @@ bundle/registry equality and offline source/wheel/isolated-install checks passed
 The 124 protected baseline production/frontend/catalog/dependency files are
 byte-identical. The first two checkpoints have green CI; final release CI and
 commit identity are reported in the delivery response. Stop after 08R0.
+
+
+## Task 08R1 — offline semantic and hybrid benchmark
+
+One official FastEmbed representation of BAAI/bge-small-en-v1.5 ran locally on
+Apple M1 CPU only. No weights or vectors enter the package; no new default
+dependency, UI, generator, geometry, styling, asset or catalog/search-document
+change. Derived indices bind exact current source and model evidence. Source
+resolution stays mandatory before any future specification preparation.
+
+Development and held-out splits were frozen before real inference, authored by
+the implementation agent with no independent human adjudication. The real 0.75
+threshold was sealed before test scoring. Original real recall: BM25/FTS5 .90,
+frozen cosine .35, RRF .90. Held-out real recall: .125, .0, .125 respectively.
+Raw cosine found all real positives but produced 4/17 original and 4/8 held-out
+negative-query false positives. Frozen synthetic/hybrid also produced 1/6 held-out
+negative-query false positives. Hard filters/leakage remained zero in observed
+outputs; those checks do not certify relevance. All results remain provisional.
+
+[Full findings](../data/RETRIEVAL_EMBEDDING_08R1.md) and the paired JSON preserve
+per-query results, frozen policy/model/corpus identities, resources and recovery
+notes. Keep exact NumPy for offline experiments. No measured case for Chroma or
+pgvector exists. Human-reviewed abstention and expanded qualified furniture
+coverage precede unrestricted 08R2. No 08R2/08F work was started.
+
+Final local release: **1,754 Python tests passed in 117.49s**, including 173
+retrieval tests (66 new, all 1,688 baseline tests retained); **75 frontend tests**
+passed. Ruff lint/format (171 files), default/experiment dependency checks,
+Streamlit HTTP 200, registry/integrity, unchanged bundle, offline source/wheel
+builds and outside-repository installed-wheel loading passed. No model is needed
+for CI. Final commit/CI identities are reported in the delivery response.

@@ -1,9 +1,11 @@
-# Offline furniture retrieval — 08R0
+# Offline furniture retrieval — 08R0 and 08R1
 
 08R0 adds an offline retrieval contract, current-evidence eligibility, a keyword
 baseline and an evaluation harness. It does **not** connect retrieval to Streamlit
-or LangGraph. No embedding package, model, vector database, asset or dependency
-was acquired. Current catalog JSON remains authoritative; a derived index cannot
+or LangGraph. During 08R0 no embedding package, model, vector database, asset or
+dependency was acquired. 08R1 subsequently measured one isolated CPU encoder; see
+the [experiment findings](../data/RETRIEVAL_EMBEDDING_08R1.md). Current catalog JSON remains authoritative;
+a derived index cannot
 supply dimensions, rights, a mesh URL, a room pose or render approval.
 
 ## Existing boundaries reused
@@ -217,20 +219,63 @@ Before any vector provider is admitted:
 
 ## Task boundaries
 
-**08R1, separately authorized:** one pinned CPU encoder, exact cosine baseline,
-lexical/semantic/hybrid comparison on unchanged gold sets plus independently
-reviewed held-out paraphrases, same filters, actual resource measurements, no UI
-or production indexing. Two real products remain a sanity check only.
+**08R1, completed:** one pinned CPU encoder, exact NumPy cosine and rank-only RRF
+were measured offline. The held-out labels were agent-authored, without independent
+human review. Frozen real cosine recall was 0/8 on held-out positives; raw cosine
+returned products on 4/8 negatives. RRF matched lexical real recall with higher
+latency and inherited a synthetic false positive. Keep semantic/hybrid experimental;
+two real products do not justify a vector database or unrestricted 08R2 admission.
 
 **08R2, separately authorized:** parse structured requirements → resolve hard
 constraints → retrieve/currently resolve IDs → show evidence → call the existing
 `prepare_catalog_specification()` → review → explicit Generate → unchanged
 validation → selected renderer. Never update an existing candidate from a hit.
 Keep catalog/seed/source/styling state rules from 08E. This pipeline is documented,
-not implemented by 08R0.
+not implemented by 08R0 or 08R1.
 
 **08F, separate data work:** qualify more rights-cleared, dimension-grounded
 bed/desk/storage products and genuinely sourced attributes before expecting useful
 catalog-wide retrieval. Render qualification is independent. No source ingestion,
-08R1/R2/08F work, live request, model download or vector indexing is authorized by
-this guide.
+08R2/08F work, live request, further model download or production vector indexing
+is authorized by this guide.
+
+## 08R1 measured implementation and remaining gates
+
+`embedding_index.py` stores immutable normalized `(N,384)` float32 arrays with
+complete row/model/corpus bindings, hash-checked manifests and explicit snapshot
+read/write calls. `offline_encoder.py` uses only one pinned local FastEmbed ONNX
+model. It is never imported by application initialization or ordinary catalog
+search. No optional package entered the default dependency set.
+
+`semantic.py` applies current hard eligibility before inference and rechecks
+source evidence after inference. A blank query is explicit structured browse,
+not an embedding of an empty request. Cosine maps to nonnegative contract scores
+as `(cosine + 1)/2`; this is not a probability. The algorithm ID binds encoder and
+policy digests. `resolve_result()` still revalidates current facts and hard filters
+before a future specification handoff. Unstructured intent is a separate weakness:
+no parser or hard-constraint extraction was added by this experiment.
+
+`hybrid.py` fuses stable eligible IDs using equal-weight `1/(60 + rank)` terms.
+It requests up to 50 results from each ranker (current experiment corpus limit
+64), never adds score magnitudes, and explicitly unions accepted contributions.
+A single-ranker hit is labeled; unavailable/stale rankers do not silently fall
+back. Both component results and the final real result pass current source
+resolution. Artificial fixtures use a separate benchmark gate and cannot resolve
+into real specifications. The benchmark's synthetic adapter is not a public
+production-catalog provider.
+
+The two real vectors require 3,072 bytes; measured exact ranking is far cheaper
+than current evidence checks and encoder inference. Keep exact NumPy for this
+experiment. Chroma offers persistence/filtering, but no measured current need
+justifies its dependencies or synchronization burden. PostgreSQL/pgvector becomes
+worth evaluation when transactional shared catalog joins, concurrent multi-user
+updates and operational backup requirements actually exist, or measured scale
+breaches declared exact-search latency/RAM limits. Neither database was installed
+or performance-tested. Current manifest bounds would need an explicit review
+before scaling beyond this small experimental corpus.
+
+Before unrestricted 08R2: obtain independent human-reviewed relevance/abstention
+judgments, expand rights-cleared furniture coverage, predeclare a fresh evaluation
+and show an acceptable FP/FN operating point. Do not adjust the frozen threshold
+to the held-out misses or claim that a database can solve the relevance problem.
+The application remains the explicit 08E catalog-selection workflow.
