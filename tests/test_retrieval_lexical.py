@@ -30,8 +30,8 @@ def provider(request):
         ("bookshelf", (BOOKCASE_ID,)),
         ("B07PQS58XN", (BOOKCASE_ID,)),
         ("queen bed", ()),
-        ("writing desk", ()),
-        ("wardrobe", ()),
+        ("writing desk", ("abo-b074l4976t-amazon-co-uk",)),
+        ("wardrobe", ("abo-b07h8jn9qf-amazon-co-uk",)),
         ("Charles Blue", ()),
         ("leather armchair", ()),
         ("https://evil.invalid/model.glb", ()),
@@ -52,7 +52,7 @@ def test_keyword_matching_no_substitution(provider, query, expected):
         (dict(category="storage"), "metadata", (BOOKCASE_ID,)),
         (dict(category="storage"), "render", ()),
         (dict(category="chair", max_width_m=0.9906), "metadata", ()),
-        (dict(required_use="wardrobe"), "metadata", ()),
+        (dict(required_use="wardrobe"), "metadata", ("abo-b07h8jn9qf-amazon-co-uk",)),
         (dict(materials=("leather",)), "metadata", ()),
         (dict(styles=("classic",)), "metadata", ()),
         (dict(colors=("Espresso",)), "metadata", ()),
@@ -93,13 +93,16 @@ def test_tie_order_top_k_and_serialization_are_deterministic(provider):
     before = provider.index.model_dump_json()
     results = [provider.search(request).model_dump_json() for _ in range(3)]
     assert results == [results[0]] * 3
-    assert provider.search(request).hits[0].reference.asset_id == CHARLES_ID
+    assert (
+        provider.search(request).hits[0].reference.asset_id
+        == "abo-b074l4976t-amazon-co-uk"
+    )
     assert before == provider.index.model_dump_json()
     assert (
         provider.search(FurnitureSearchRequest(query="", top_k=2))
         .hits[1]
         .reference.asset_id
-        == BOOKCASE_ID
+        == CHARLES_ID
     )
 
 

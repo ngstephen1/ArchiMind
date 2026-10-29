@@ -273,7 +273,12 @@ def ranking_metrics(
     )
 
 
-def evaluate_provider(provider, cases, *, identity, references, categories, repeats=3):
+def evaluate_provider(
+    provider, cases, *, identity, references, categories, repeats=3, historical=False
+):
+    from archimind.retrieval.historical import resolve_historical_hit
+
+    hit_resolver = resolve_historical_hit if historical else resolve_hit
     if type(repeats) is not int or not 2 <= repeats <= 20:
         raise ValueError("Use 2..20 determinism repetitions")
     records = []
@@ -304,7 +309,7 @@ def evaluate_provider(provider, cases, *, identity, references, categories, repe
             )
             if not bad and hit.scope == "real":
                 try:
-                    resolve_hit(hit, result.identity)
+                    hit_resolver(hit, result.identity)
                 except ValueError:
                     bad = True
             unauthorized += int(bad)
@@ -415,11 +420,26 @@ def evaluate_provider(provider, cases, *, identity, references, categories, repe
 
 
 def run_benchmark(
-    benchmark: RetrievalBenchmark, synthetic: SyntheticCatalog, *, repeats=3
+    benchmark: RetrievalBenchmark,
+    synthetic: SyntheticCatalog,
+    *,
+    repeats=3,
+    historical=False,
 ):
     benchmark = RetrievalBenchmark.model_validate(benchmark)
     synthetic = SyntheticCatalog.model_validate(synthetic)
-    real_index = build_index()
+    from archimind.retrieval.eligibility import current_options
+    from archimind.retrieval.historical import (
+        HistoricalLexicalProvider,
+        historical_index,
+        historical_options,
+    )
+
+    real_index = historical_index() if historical else build_index()
+    options = historical_options() if historical else current_options()
+    provider_type = (
+        HistoricalLexicalProvider if historical else LexicalRetrievalProvider
+    )
     if (
         benchmark.real_index_identity != real_index.identity
         or benchmark.synthetic_catalog_digest != digest(synthetic)
@@ -433,10 +453,8 @@ def run_benchmark(
         cases = tuple(c for c in benchmark.cases if c.scope == scope)
         index = real_index if scope == "real" else synthetic.index()
         refs = {d.reference.asset_id: d.reference for d in index.documents}
-        from archimind.retrieval.eligibility import current_options
-
         categories = (
-            {o.record.asset_id: o.record.category for o in current_options()}
+            {o.record.asset_id: o.record.category for o in options}
             if scope == "real"
             else {p.asset_id: p.category for p in synthetic.products}
         )
@@ -455,7 +473,7 @@ def run_benchmark(
                 }
                 continue
             provider = (
-                LexicalRetrievalProvider(index=index, algorithm=algorithm)
+                provider_type(index=index, algorithm=algorithm)
                 if scope == "real"
                 else SyntheticRetrievalProvider(synthetic, algorithm=algorithm)
             )
@@ -469,6 +487,7 @@ def run_benchmark(
                     references=refs,
                     categories=categories,
                     repeats=repeats,
+                    historical=historical,
                 ),
             }
     deterministic = {
@@ -485,6 +504,7 @@ def run_benchmark(
     }
     return dict(
         task="08R0",
+        catalog_scope="historical_1.0.0" if historical else "active",
         benchmark_version=benchmark.benchmark_version,
         benchmark_digest=digest(benchmark),
         synthetic_fixture_digest=digest(synthetic),

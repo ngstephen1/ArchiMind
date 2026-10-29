@@ -264,7 +264,7 @@ def test_catalog_changes_invalidate_stored_envelope_without_editing_it(
 ):
     before = envelope.model_dump_json()
     catalog = load_catalog().model_copy(update={"catalog_version": "1.1.0"})
-    monkeypatch.setattr(module, "load_catalog", lambda: catalog)
+    monkeypatch.setattr(module, "load_catalog", lambda **kwargs: catalog)
     with pytest.raises(ValidationError):
         PlanningEnvelope.model_validate_json(before)
     assert envelope.model_dump_json() == before

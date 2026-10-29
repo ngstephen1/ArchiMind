@@ -162,7 +162,10 @@ def test_hard_filters_do_not_invent_evidence(asset, filters, reasons):
 
 
 def test_dimensions_qualification_and_verified_uses():
-    chair, book = api.current_options()
+    chair, book = (
+        next(o for o in api.current_options() if o.record.asset_id == key)
+        for key in (CHARLES_ID, BOOKCASE_ID)
+    )
     assert not api.eligibility_reasons(
         FurnitureSearchRequest(
             query="", filters=FurnitureSearchFilters(required_use="accent chair")
@@ -245,7 +248,10 @@ def test_unknown_planning_stays_unevaluated(monkeypatch):
         raise ValueError("private unavailable path")
 
     monkeypatch.setattr(specifications, "load_planning_envelope", missing)
-    chair, book = api.current_options()
+    chair, book = (
+        next(o for o in api.current_options() if o.record.asset_id == key)
+        for key in (CHARLES_ID, BOOKCASE_ID)
+    )
     assert not chair.preparation_available and not chair.render_qualified
     assert "preparation_unavailable" in api.eligibility_reasons(
         FurnitureSearchRequest(query=""), chair

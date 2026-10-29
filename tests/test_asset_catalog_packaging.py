@@ -30,6 +30,8 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
     catalog_path = "archimind/assets/furniture_catalog.json"
     preserved = [
         catalog_path,
+        "archimind/assets/furniture_catalog_1_0_0.json",
+        "archimind/retrieval/historical.py",
         "archimind/assets/catalog.py",
         "archimind/assets/inspection.py",
         "archimind/assets/render_qualification.py",
@@ -189,7 +191,9 @@ assert Path(archimind.__file__).resolve().is_relative_to(target)
 assert Path(module.__file__).resolve().is_relative_to(target)
 assert Path(inspection.__file__).resolve().is_relative_to(target)
 assert Path(planning.__file__).resolve().is_relative_to(target)
-catalog = load_catalog()
+catalog = load_catalog(version="1.0.0")
+assert len(load_catalog().records) == 5
+assert load_catalog().catalog_version == "1.1.0"
 assert len(catalog.records) == 2
 assert catalog.catalog_version == '1.0.0'
 assert all(not r.render_qualified for r in catalog.records)
@@ -257,9 +261,9 @@ corpus = build_index()
 semantic = SemanticRetrievalProvider(index=build_embedding_index(corpus, encoder),
     encoder=encoder, policy=AbstentionPolicy(mode='threshold', minimum_cosine=-1.0, method='test_double'))
 request = FurnitureSearchRequest(query='Charles armchair')
-assert len(resolve_result(semantic.search(request))) == 2
+assert len(resolve_result(semantic.search(request))) == 5
 hybrid = HybridRetrievalProvider(provider, semantic, corpus=corpus)
-assert len(resolve_result(hybrid.search(request))) == 2
+assert len(resolve_result(hybrid.search(request))) == 5
 assert not any(n.startswith(('fastembed', 'onnxruntime', 'tokenizers')) for n in sys.modules)
 from archimind.assets.render_assets import (
     product_release, product_asset_path, verify_product_asset, product_projection)
@@ -301,7 +305,8 @@ assert Path(sys.modules['archimind.render.selected_realistic'].__file__).resolve
 from archimind.assets import catalog_product_options, prepare_catalog_specification, specification_is_current
 from archimind.examples import create_sample_bedroom
 base = create_sample_bedroom()
-options = catalog_product_options()
+options = catalog_product_options(catalog_version="1.0.0")
+assert len(catalog_product_options()) == 5
 assert options[0].render_qualified and not options[1].render_qualified
 submission = prepare_catalog_specification(base,
     retained_manual_ids=tuple(f.id for f in base.furniture),

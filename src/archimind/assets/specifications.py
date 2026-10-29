@@ -56,7 +56,7 @@ class CatalogProductOption(_Frozen):
 class ProductAssignment(_Frozen):
     furniture_id: str
     furniture_name: str
-    category: Literal["chair", "storage"]
+    category: Literal["chair", "storage", "desk", "wardrobe", "table"]
     asset_id: str
     asset_version: str
     catalog_id: str
@@ -105,11 +105,13 @@ class PreparedCatalogSpecification(_Frozen):
         return RoomDesign.model_validate_json(self.source_specification_json)
 
 
-def catalog_product_options() -> tuple[CatalogProductOption, ...]:
+def catalog_product_options(
+    *, catalog_version: str | None = None
+) -> tuple[CatalogProductOption, ...]:
     """Read fixed packaged evidence; unknown planning/render evidence stays unavailable."""
     from archimind.assets.render_assets import product_release
 
-    catalog = load_catalog()
+    catalog = load_catalog(version=catalog_version)
     options = []
     for record in catalog.records:
         dimensions, planning_digest, release_digest = None, None, None
@@ -142,7 +144,7 @@ def catalog_product_options() -> tuple[CatalogProductOption, ...]:
                 preparation_available=(
                     dimensions is not None
                     if record.asset_id == CHARLES_ID
-                    else record.asset_id == BOOKCASE_ID
+                    else record.qualification == "metadata_qualified"
                 ),
             )
         )

@@ -48,6 +48,12 @@ class HybridRetrievalProvider:
             )[:24]
         )
 
+    def _current_index(self):
+        return build_index()
+
+    def _resolve(self, result):
+        return resolve_result(result, for_preparation=False)
+
     def search(self, request):
         request = FurnitureSearchRequest.model_validate(request)
 
@@ -63,7 +69,7 @@ class HybridRetrievalProvider:
 
         expanded = request.model_copy(update={"top_k": 50})
         try:
-            if self.fixture_gate is None and build_index() != self.corpus:
+            if self.fixture_gate is None and self._current_index() != self.corpus:
                 return result("stale_index", reason="hybrid_catalog_stale")
             outcomes = tuple(
                 FurnitureSearchResult.model_validate(p.search(expanded))
@@ -93,7 +99,7 @@ class HybridRetrievalProvider:
             candidates = {}
             for outcome in outcomes:
                 if self.fixture_gate is None:
-                    resolve_result(outcome, for_preparation=False)
+                    self._resolve(outcome)
                 for hit in outcome.hits:
                     key = hit.reference.asset_id
                     if refs.get(key) != hit.reference or (
@@ -130,7 +136,7 @@ class HybridRetrievalProvider:
             )
             final = result("matches" if hits else "empty", hits)
             if self.fixture_gate is None:
-                resolve_result(final, for_preparation=False)
+                self._resolve(final)
             return final
         except (ValueError, TypeError, OSError, RuntimeError, ImportError):
             return result("unavailable", reason="hybrid_source_validation_failed")

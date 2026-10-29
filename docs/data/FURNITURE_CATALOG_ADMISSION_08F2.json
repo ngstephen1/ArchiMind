@@ -1,13 +1,61 @@
 {
   "schema_version": 1,
   "task": "08F2",
-  "status": "contract_extended_admission_pending",
+  "status": "metadata_admitted",
   "baseline_commit": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
   "historical_catalog_sha256": "c1116a65558b2781f1ac979920dbd0b0b683dfdcc314681a70d8639ed87880dd",
   "authorized_migrations": {
     "src/archimind/assets/catalog.py": {
       "before_sha256": "d784340ce05e713cc7328f122afd573e9cb7f0d999c6fe3ee07255377029193f",
-      "after_sha256": "09e34b3562504799c11dcd50862214acb26e96316b3aa616e2b7c5b0d6af627c"
+      "after_sha256": "920806d53b562c8ed3eb7474a37a55f6f565cf58cd38ddd7a481e526bfa2ca37"
+    },
+    "src/archimind/assets/furniture_catalog.json": {
+      "before_sha256": "c1116a65558b2781f1ac979920dbd0b0b683dfdcc314681a70d8639ed87880dd",
+      "after_sha256": "3535c9911ec0f4f844d82647c12af615965b8daef106d16ba753dc98a7d439ad"
+    },
+    "src/archimind/assets/planning_envelopes.py": {
+      "before_sha256": "e1eeed53ae8c8ba61f1292b690e4bf533c5437666d0bacf975256ffbd906ff60",
+      "after_sha256": "7d4ad4dbe251558616c0e0301bdb4c87c1989001b96b7c974318d3099913a907"
+    },
+    "src/archimind/assets/specifications.py": {
+      "before_sha256": "1206c462c999629b3d84f72b1b4aa88119b6419e41d9f306129b0c906f076dbe",
+      "after_sha256": "690ab9f9090375e48e76d7516212457c32e082aef71cb2bc6c9eb3e517f944ae"
+    },
+    "src/archimind/retrieval/eligibility.py": {
+      "before_sha256": "a60b6997d113a1ccbf356af51e60353734ef7efbd827911fc0b2ec814e6dcc54",
+      "after_sha256": "7441775575d509ef6c55fcba2bda330adaa6784702444b2c73bfe7d0304c541a"
+    },
+    "src/archimind/retrieval/embedding_experiment.py": {
+      "before_sha256": "b7134e2ea109ed0d55c7b32cf4718306f71800f106616491905f7c8a13f64f8e",
+      "after_sha256": "aa12e87921ed7a5ad35d72e7ceeb3db69781a917ec745dbe4fa0377b971c9a39"
+    },
+    "src/archimind/retrieval/embedding_index.py": {
+      "before_sha256": "82b91c5802a161c5a94d28b3ac600497860ace759132b4d194f44f220297e5e4",
+      "after_sha256": "4d47695088ec76cd006dd5e8511682d999c6b82ac85ef4f3182f5cbf111b4ab5"
+    },
+    "src/archimind/retrieval/evaluation.py": {
+      "before_sha256": "d8bbdb5e09ea071e7f3b2187330eb910884c13c9a224747b8835ae41065e5925",
+      "after_sha256": "a932394e2607641465d419e2467060e1beb0aaf0df33a518153746841c5a43f2"
+    },
+    "src/archimind/retrieval/hybrid.py": {
+      "before_sha256": "2c33fe748e241dcd4a290ccb49fa8476fc57c71c23d330c8db35cd908dd72b99",
+      "after_sha256": "4cddb61b78b56e91c4a1921a414900465af5ef213fbf85e8fc14940deff5f767"
+    },
+    "src/archimind/retrieval/lexical.py": {
+      "before_sha256": "1a30baf5bfb9b2c9c75f288e8a1f0bb21e2546206b8729356e6a6897d16a6fa8",
+      "after_sha256": "a5727a00ad13935ddeee656ab35d96afab41d773cde4ced43af6a5e9573c0397"
+    },
+    "src/archimind/retrieval/semantic.py": {
+      "before_sha256": "5b5a211b501a322ba116b8499b80d148c24d54b6042a4d7016cebbea85e54d25",
+      "after_sha256": "508921d81ca1f529a3d6205c997d4d18e78e68538dd318f59610b4b750bd90ef"
+    },
+    "src/archimind/ui/furniture_assets.py": {
+      "before_sha256": "8a3280e690f020b06aae0628ddb6fde71290b7def6c238a651aaf9b0359bbb42",
+      "after_sha256": "ec2cbf81dc475246ba9eb8a05fce74beed0a7bb2c11255237bceef461db53ccf"
+    },
+    "src/archimind/ui/realistic_view.py": {
+      "before_sha256": "fc7457044171d4f9f932090a9eb3529adde7efa16b345a5c3eeb708d9c1ef9e5",
+      "after_sha256": "fd49fc5ef6e2254fd7ec86dc07dcdc564b987b094cad499e0de9d73bd6fffa0c"
     }
   },
   "verification": {
@@ -21,6 +69,387 @@
     "pip_check": "passed",
     "registry": "passed",
     "health_http": 200,
-    "viewer_bundle": "byte_identical"
+    "viewer_bundle": "byte_identical",
+    "checkpoint2_python_before_final_hardening": {
+      "passed": 1811,
+      "seconds": 139.65
+    },
+    "checkpoint2": {
+      "python_passed": 1816,
+      "python_seconds": 141.5,
+      "focused_passed": 77,
+      "focused_seconds": 13.82,
+      "ruff": "passed",
+      "frontend_passed": 75,
+      "health": "HTTP 200; local browser app",
+      "packaging": "offline builds and isolated install passed within full suite"
+    }
+  },
+  "catalog": {
+    "id": "archimind-furniture",
+    "schema_version": 2,
+    "version": "1.1.0",
+    "sha256": "3535c9911ec0f4f844d82647c12af615965b8daef106d16ba753dc98a7d439ad",
+    "record_versions": "1.0.0; original record bodies unchanged",
+    "search_document_version": 1,
+    "metadata_count": 5,
+    "planning_count": 1,
+    "render_count": 1
+  },
+  "source_authority": {
+    "revision": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+    "files": {
+      "data/catalogs/furniture_source_candidates.json": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+      "docs/data/FURNITURE_EXPANSION_08F1.json": "d362f6deccc186aaff5a5dec752d739ae3c6f986580fae08af08f885136e4e37"
+    }
+  },
+  "admissions": [
+    {
+      "asset_id": "abo-b074l4976t-amazon-co-uk",
+      "record_digest": "e53ea735e094c49ce9fa432dbf9432cc86a6984e111d7a27a9aa6dfc65eb0387",
+      "source_product_id": "B074L4976T",
+      "marketplace": "amazon.co.uk",
+      "variant": "Oak",
+      "manufacturer_models": [
+        "T80505PL05LVO"
+      ],
+      "source_category": "DESK",
+      "category": "desk",
+      "subtype": "writing desk",
+      "listing_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+      "listing_line": 1065,
+      "listing_record_sha256": "88a03e76a40a382beb895740e9f576142e7fc1811cd34996ff9432f98e1ee86a",
+      "metadata_response_sha256": "e83bd63b93c0d23bab3707db985604a7f43ab9532c76efb26558afd7accc2a69",
+      "source_qualification_sha256": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+      "source_qualification_revision": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 75.0,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "length",
+            "value": 80.0,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "width",
+            "value": 160.0,
+            "unit": "centimeters"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "width"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "length"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "width_m <- item_dimensions.width; depth_m <- item_dimensions.length; height_m <- item_dimensions.height; reviewed source text and reported native X/Y/Z comparison; actual pose/orientation not inspected.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 1.6,
+        "depth_m": 0.8,
+        "height_m": 0.75
+      },
+      "qualification": "metadata_only",
+      "planning_envelope": null,
+      "render_release": null,
+      "search_document": "Name: Movian Belaya writing desk \u2014 Oak\nCategory: desk\nType: writing desk\nAliases: desk; writing desk\nUsage: study; writing\nVariant: Oak\nAsset ID: abo-b074l4976t-amazon-co-uk\nProduct ID: B074L4976T\nSource model ID: B074L4976T",
+      "search_document_sha256": "cf0ff7fc22d7ea4d7cef20b011c8fb656d9ffff97a7b3c697d6e3a24994d27f7",
+      "rights": "ABO CC-BY-4.0 with attribution, license/change notices, no endorsement; no new asset rights inspection",
+      "blockers_to_metadata_admission": []
+    },
+    {
+      "asset_id": "abo-b07b4vxxjc-amazon-com",
+      "record_digest": "7ceaecb5a8fde505653acb285acf08e3a5bd5f352b405437e7a3a14486b27ca3",
+      "source_product_id": "B07B4VXXJC",
+      "marketplace": "amazon.com",
+      "variant": "Brown",
+      "manufacturer_models": [
+        "320-C070-052"
+      ],
+      "source_category": "TABLE",
+      "category": "table",
+      "subtype": "nightstand",
+      "listing_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz",
+      "listing_line": 110,
+      "listing_record_sha256": "d5567b1505b4a0b9cfaf739523a68af851cfd4d246d4a3b2a507dc142e3aaa58",
+      "metadata_response_sha256": "1dc40c158c021af6e6e69a11ab8f979fe1eb8c4b3ec62979c42b09075dcac240",
+      "source_qualification_sha256": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+      "source_qualification_revision": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 24.0,
+            "unit": "inches"
+          },
+          {
+            "source_field": "length",
+            "value": 17.0,
+            "unit": "inches"
+          },
+          {
+            "source_field": "width",
+            "value": 24.0,
+            "unit": "inches"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "width"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "length"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "width_m <- item_dimensions.width; depth_m <- item_dimensions.length; height_m <- item_dimensions.height; reviewed source text and reported native X/Y/Z comparison; actual pose/orientation not inspected.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 0.6096,
+        "depth_m": 0.4318,
+        "height_m": 0.6096
+      },
+      "qualification": "metadata_only",
+      "planning_envelope": null,
+      "render_release": null,
+      "search_document": "Name: Rivet bedside nightstand \u2014 Brown\nCategory: table\nType: nightstand\nAliases: bedside table; nightstand\nUsage: bedside use\nVariant: Brown\nAsset ID: abo-b07b4vxxjc-amazon-com\nProduct ID: B07B4VXXJC\nSource model ID: B07B4VXXJC",
+      "search_document_sha256": "eba4ea9a9a7484abaa408ae5f99d5e5597da6d1e7e8087f79c8256affdc83fbc",
+      "rights": "ABO CC-BY-4.0 with attribution, license/change notices, no endorsement; no new asset rights inspection",
+      "blockers_to_metadata_admission": []
+    },
+    {
+      "asset_id": "abo-b07h8jn9qf-amazon-co-uk",
+      "record_digest": "e9b15cbe0aec475c1e78e2c0c34269406b417d663c40578309947919fce31b92",
+      "source_product_id": "B07H8JN9QF",
+      "marketplace": "amazon.co.uk",
+      "variant": "Oak Sonoma",
+      "manufacturer_models": [
+        "M4-R3181/R3181-20"
+      ],
+      "source_category": "CABINET",
+      "category": "wardrobe",
+      "subtype": "wardrobe",
+      "listing_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+      "listing_line": 1852,
+      "listing_record_sha256": "1fd7347453668acc7d7c4e478bdf7361921f3bf16c84d61ecf4a39ab1da52810",
+      "metadata_response_sha256": "e83bd63b93c0d23bab3707db985604a7f43ab9532c76efb26558afd7accc2a69",
+      "source_qualification_sha256": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+      "source_qualification_revision": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 212.0,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "length",
+            "value": 200.0,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "width",
+            "value": 59.0,
+            "unit": "centimeters"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "length"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "width"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "width_m <- item_dimensions.length; depth_m <- item_dimensions.width; height_m <- item_dimensions.height; reviewed source text and reported native X/Y/Z comparison; actual pose/orientation not inspected.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 2.0,
+        "depth_m": 0.59,
+        "height_m": 2.12
+      },
+      "qualification": "metadata_only",
+      "planning_envelope": null,
+      "render_release": null,
+      "search_document": "Name: Movian Morava wardrobe \u2014 Oak Sonoma\nCategory: wardrobe\nType: wardrobe\nAliases: wardrobe\nUsage: clothing storage\nVariant: Oak Sonoma\nAsset ID: abo-b07h8jn9qf-amazon-co-uk\nProduct ID: B07H8JN9QF\nSource model ID: B07H8JN9QF",
+      "search_document_sha256": "a162715882e2f1ab0187253d4c3ab1ca64cdb40dbf8fd060052add0fd2f28f81",
+      "rights": "ABO CC-BY-4.0 with attribution, license/change notices, no endorsement; no new asset rights inspection",
+      "blockers_to_metadata_admission": []
+    }
+  ],
+  "retrieval": {
+    "current_index": {
+      "scope": "real",
+      "catalog_id": "archimind-furniture",
+      "catalog_version": "1.1.0",
+      "catalog_digest": "556f8782a1f58dfb77bfde81a3afa730c7524863d009ebdfc6201b2746df8503",
+      "evidence_digest": "a4727e276f76b99105bc2cf752abf8121936db523f0995f01bc073f08ac6fd44",
+      "search_document_version": 1,
+      "index_format_version": 1,
+      "snapshot_id": "42ce712d55f0a6f766d01e373e2e041f6b6035b5e183dc9a30a6f7ef87334334"
+    },
+    "historical_index": {
+      "scope": "real",
+      "catalog_id": "archimind-furniture",
+      "catalog_version": "1.0.0",
+      "catalog_digest": "b93a7511e4085a247f9fee468629657118210ceacaa18762a55630595f224bb0",
+      "evidence_digest": "bcbc3c171945e9329bbebeb6eec272a6cce204078a804e4d433789eb90046411",
+      "search_document_version": 1,
+      "index_format_version": 1,
+      "snapshot_id": "75868dd7f81ac7b3300959e866cec0393338e93f5450886106a2d8eb2da440f8"
+    },
+    "historical_lexical_signature": "6063a66e344188f60f2469453c19b3d21fd7a44ef4bb99b99c89b81bd3b34d31",
+    "new_real_encoder_calls": 0,
+    "new_retrieval_effectiveness_evaluation": false,
+    "replay_requires_explicit_historical": true
+  },
+  "human_review": {
+    "existing_packet": "docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md",
+    "status": "pending_unevaluated",
+    "completed_judgments": 0,
+    "proposed_future_review_snapshot": "archimind-furniture/1.1.0; requires new scope confirmation and human-authored judgments; old 1.0.0 current/prospective columns unchanged"
+  },
+  "generation": {
+    "fixture": "Existing 5 x 4 x 2.7 m bedroom and unchanged door/window",
+    "seed": 42,
+    "attempt_budget": 500,
+    "new_three": {
+      "status": "complete",
+      "candidates": 2,
+      "attempts": 8,
+      "scores": [
+        79.203287,
+        78.296791
+      ]
+    },
+    "new_three_plus_charles_and_manual_bed": {
+      "status": "complete",
+      "candidates": 2,
+      "attempts": 102,
+      "scores": [
+        56.447838,
+        17.139016
+      ]
+    },
+    "architectural_certification": false
+  },
+  "budgets": {
+    "per_asset_encoded_bytes": 15728640,
+    "unique_scene_encoded_bytes": 52428800,
+    "per_asset_triangles": 100000,
+    "instantiated_triangles": 300000,
+    "texture_dimension_px": 2048,
+    "unique_decoded_texture_bytes": 134217728,
+    "source_reported_three_asset_texture_estimate": 201326592,
+    "combined_render_approved": false
+  },
+  "non_actions": {
+    "downloads": 0,
+    "new_model_assets": 0,
+    "new_planning_envelopes": 0,
+    "new_render_approvals": 0,
+    "real_encoder_runs": 0,
+    "live_AI_calls": 0,
+    "human_labels_added": 0,
+    "geometry_or_scoring_changes": false
+  },
+  "frozen_files": {
+    "docs/data/ASSET_QUALIFICATION_08CR2.md": "5bd7d68ce663df52eeded9fe2dc831579406b9cd99bb2221ca781f3ed894732e",
+    "docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md": "d576f1d3d3d809a9ae9249b075282f5ea5f983395f9bfbfc27a79d575cbe1dbe",
+    "docs/data/RETRIEVAL_BASELINE_08R0.json": "1c7ef9cd163512852482875a78d907499c15f189a37c95c188f724b3dd6de459",
+    "docs/data/CATALOG_GENERATION_08E_VERIFICATION.json": "fdfd25e7552dcd636d1ae8400de44923e00e0833c35cab819b4d6efa7cff081b",
+    "docs/data/RETRIEVAL_EMBEDDING_08R1.json": "0a0f727199b40b5fc0365e6be2dfb67b22d9806fba1e23d71a251ae8fca93811",
+    "docs/data/SELECTED_LAYOUT_08D_VERIFICATION.json": "ced3a98a45fb22e0c82e27e1a59dd2e821ac221823977ca0d803883ab7a60077",
+    "docs/data/RETRIEVAL_EMBEDDING_08R1.md": "0cb3146882f57156966e372acc40bae2bcafc1db4683ba60528a450b0e07d44f",
+    "docs/data/ASSET_DIMENSION_POLICY_REVIEW.json": "e9d851c8cdc215813c0f1e85f8c8a3e16b4b28851118f14dd7c3f9013ce2bffb",
+    "docs/data/FURNITURE_EXPANSION_08F1.json": "d362f6deccc186aaff5a5dec752d739ae3c6f986580fae08af08f885136e4e37",
+    "docs/data/RETRIEVAL_BASELINE_08R0.md": "3ea13a4e29ba3a773f007ec27b3eb9ce66246aac13fc0dd5d351e783ff808b53",
+    "docs/data/ASSET_QUALIFICATION_08C.json": "76572768405747a5a29b62a762ef69c5d991e8375fba24e415197471b2d727ac",
+    "docs/data/FURNITURE_EXPANSION_08F1.md": "76ef81dd2cb2935f91404a878e6bbd57173d727140d6bec2720a447f77edca5b",
+    "docs/data/ENCODER_ACQUISITION_08R1.json": "9722f376af832811bed264a03c9b7dfc593c27d8c3463d0331cbc2fe0614217d",
+    "docs/data/ASSET_DIMENSION_POLICY_REVIEW.md": "54d62184ee39099561757426c51d8e7127ee22ced0d65ead89fa871ba640d4d5",
+    "docs/data/ASSET_QUALIFICATION_08C.md": "6e478483c7c6f20fcf1d7688a1fd471e657541f6594561b8f6431ba254224220",
+    "docs/data/FURNITURE_SOURCE_REGISTER.md": "2e614f988fc604fcbfb2c1d448416039a03dd5d123941bdf669ad1dbc9eb90bb",
+    "docs/data/ASSET_QUALIFICATION_08CR2.json": "a394df0110f6f6c943a1b8b98223405320279afbc320ea7ac0579670407dff76",
+    "docs/data/ENCODER_ENVIRONMENT_08R1.json": "8ecf6a7b17364867f505667e7dab3b4e76ac022a421b6d020ad75c3a36a0f0c2",
+    "data/benchmarks/furniture_embedding_held_out_08r1.json": "e219d29f10de791627acfc573bb2108d8074f937d105b72b2a9e534f85ecd088",
+    "data/benchmarks/furniture_retrieval_synthetic.json": "823d841070031322a86f3f6acb35c87b1bca0d91e9db8f50d24d5c37d1dac23a",
+    "data/benchmarks/furniture_retrieval_queries.json": "fa6ebe2e1d57d5deaedab9cdd6e7b6254e723afaa6da86e8a577ed68db567d24",
+    "data/benchmarks/furniture_embedding_development_08r1.json": "1800c1932ba13373de8e62a189a53393e71c97699a19fef288047180528fac29",
+    "src/archimind/_viewer_assets/room.html": "41dc46588cc8155920a44971d02c7d08b863fa1f50bdf5362ee6deeb08215801",
+    "src/archimind/_viewer_assets/index.html": "cfb91c42044c4ea8d07ee57f6616b0eef998a9edd6ed4d4922ccef704bf56c2e",
+    "src/archimind/_viewer_assets/sample-design.json": "02825dc40a9a1b43ed6d5a5c6c513bfafa02a869a1504e1f551babec0e371a56",
+    "src/archimind/_viewer_assets/standalone.js": "f103b9a77fd910a082e42e386f261de3147d99bd9a4b1530b4ffee32c129d579",
+    "src/archimind/_viewer_assets/viewer.js": "c4422cdde95e76081fafe57206f74641d9d6dc1247f9d58ea4a03bfe2786607f",
+    "src/archimind/_viewer_assets/room-design.json": "0324c3b6e8341b2ead814c3195aa0b4e0ab560ac838c2c12980af44683f5f90c",
+    "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": "274b12859cec8f4023ef0fffb742a2cf7c169137c81aa1c050ced36a071d4a1f",
+    "src/archimind/_viewer_assets/viewer.css": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
+    "src/archimind/_viewer_assets/standalone-room.js": "bfb0b71794447ef563faa8147d3c9f7929e3900ef001ae7eb6ddbb754ac7ffda",
+    "src/archimind/_viewer_assets/viewer.js.LEGAL.txt": "cc7cc7e2f53d5db0235ab2226e85fc6e91655161573b39813b41bb00e5919674",
+    "src/archimind/_viewer_assets/furniture/CHARLES_PROVENANCE.json": "960fcdcef3e3966185b7a50a2d16fd393be97a98f784a89ff02bd955f2cacb63",
+    "src/archimind/_viewer_assets/furniture/CC-BY-4.0.txt": "c8041334a99cb48852b2139253cbde5f8ac87e27f124aed51223e0d5bf0080eb",
+    "src/archimind/_viewer_assets/furniture/PROVENANCE.json": "d2b40549cd7806edf1a048662ae2e6db3521a48703c89b7f3a30fc4e95d0d56a",
+    "src/archimind/_viewer_assets/furniture/UPSTREAM_LICENSE.md": "52912ef39b0f19a2bf816de4fc5a161d058c334a912633f5470cf2c83e9c10c5",
+    "src/archimind/_viewer_assets/furniture/SheenChair.glb": "f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399",
+    "src/archimind/_viewer_assets/furniture/CC0-1.0.txt": "a43fc2004d1e073f1107a1f6146664d08dae6cea93cb828742a4bec6da828e91",
+    "src/archimind/_viewer_assets/furniture/ABO_ATTRIBUTION.txt": "97c84b22c835b42eb323942d4ec89d592b9e7072b990a70125dbd0bb2ab17bed",
+    "src/archimind/_viewer_assets/furniture/README.md": "e6a53141d769e5c3c7148f26245816ed7d842c646946b48b994e7d0adc7594ba",
+    "src/archimind/_viewer_assets/furniture/ABO_LICENSE_CC_BY_4.0.txt": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+    "src/archimind/_viewer_assets/furniture/ABO_SOURCE_README.md": "6c52f9fdcc807a34fd92961cc09454aecaaabbb26327145953f203b9f2cebb71",
+    "src/archimind/_viewer_assets/furniture/CharlesArmchair.glb": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+    "src/archimind/assets/planning_envelopes.json": "116e0e526f4f86941add2eae03530f5d6b7e0ec97aafe682188b44a2b2dd1f5c",
+    "data/catalogs/furniture_source_candidates.json": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+    "data/catalogs/furniture_source_candidates_08a.json": "cb3d5b7a7382a31ec96ec709f4fdcf6f90d9202275fe41f40c04391dc53ddc5d"
+  },
+  "delivery": {
+    "checkpoint1": {
+      "commit": "0a2fd8c54331489a3720caeca24cbf774aa757fb",
+      "ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/40954559708",
+      "status": "passed"
+    }
   }
 }

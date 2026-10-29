@@ -275,3 +275,54 @@ def test_evidence_loss_blocks_next_generation_without_replacing_current(
     monkeypatch.setattr(specifications, "load_catalog", original)
     a.run()
     assert not a.button(key="generate_layouts").disabled
+
+
+def test_new_metadata_products_review_generate_and_pending_edits(spies):
+    products = (
+        "abo-b074l4976t-amazon-co-uk",
+        "abo-b07b4vxxjc-amazon-com",
+        "abo-b07h8jn9qf-amazon-co-uk",
+    )
+    a = catalog(app(), products=products, manual=False)
+    assert all(
+        not a.checkbox(key=f"catalog_product:{key}").disabled for key in products
+    )
+    assert (
+        len([c for c in a.checkbox if c.key and c.key.startswith("catalog_product:")])
+        == 5
+    )
+    assert not spies.generator.called and not spies.validator.called
+    assert (
+        sum("Approved planning envelope: unavailable" in c.value for c in a.caption)
+        == 4
+    )
+    prepare(a)
+    prepared = a.session_state[controls.PREPARED_KEY]
+    assert len(prepared.assignments) == 3 and not prepared.planning_bindings
+    generate(a)
+    assert not a.exception
+    result = a.session_state[ui.RESULT_KEY]
+    before = result.model_dump_json()
+    assert result.status == "complete" and len(result.candidates) == 2
+    snapshot = a.session_state[view.SNAPSHOT_KEY]
+    assert len(snapshot.assignments) == 3 and not snapshot.bindings
+    assert {p.category for p in snapshot.assignments} == {"desk", "table", "wardrobe"}
+    assert all(p.catalog_version == "1.1.0" for p in snapshot.assignments)
+    assert not any("Metadata-only bookcase" in c.value for c in a.caption)
+    calls = spies.generator.call_count, spies.validator.call_count
+    a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+    assert all(
+        b["asset_id"] is None
+        for b in spies.component.call_args.kwargs["data"]["asset_bindings"]
+    )
+    a.radio(key=ui.SELECTION_KEY).set_value("Layout B").run()
+    assert spies.three.call_args.args[0] is result.candidates[1].design
+    a.checkbox(key=f"catalog_product:{products[0]}").uncheck().run()
+    assert a.button(key="generate_layouts").disabled
+    assert a.session_state[ui.RESULT_KEY].model_dump_json() == before
+    assert a.session_state[view.SNAPSHOT_KEY] is snapshot
+    assert (spies.generator.call_count, spies.validator.call_count) == calls
+    assert (
+        spies.styling.call_args.args[0].model_dump_json()
+        == snapshot.source_specification_json
+    )

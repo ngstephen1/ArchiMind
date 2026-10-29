@@ -40,7 +40,7 @@ def test_invalid_embedding_vectors(values):
 
 def test_normalization_exact_documents_and_immutable_rows(tmp_path):
     corpus = build_index()
-    encoder = FixedEncoder(np.ones((2, 384), dtype=np.float32) * 3)
+    encoder = FixedEncoder(np.ones((len(corpus.documents), 384), dtype=np.float32) * 3)
     index = build_embedding_index(corpus, encoder)
     assert encoder.document_inputs == [document_texts(corpus)]
     assert "\n" in encoder.document_inputs[0][0]

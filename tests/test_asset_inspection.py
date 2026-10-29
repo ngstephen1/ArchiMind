@@ -552,5 +552,5 @@ def test_reports_deterministic_inputs_catalog_geometry_and_placeholder_unchanged
     assert record.model_dump_json() == metadata
     assert validate_accessibility(design).model_dump_json() == validation
     assert {f.id: None for f in design.furniture} == bindings
-    assert load_catalog().catalog_version == "1.0.0"
+    assert load_catalog(version="1.0.0").catalog_version == "1.0.0"
     assert all(not r.render_qualified for r in load_catalog().records)

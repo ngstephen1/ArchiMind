@@ -292,8 +292,11 @@ class PlanningEnvelope(_Frozen):
 
     @model_validator(mode="after")
     def conservative_and_current(self) -> Self:
-        catalog = load_catalog()
+        catalog = load_catalog(version=self.catalog_version)
         record = catalog.get_record(self.asset_id)
+        # An old release proof survives only while the active record is identical.
+        if load_catalog().get_record(self.asset_id) != record:
+            raise ValueError("Planning evidence no longer matches active product.")
         inspection = self.evidence.inspection
         if (
             (self.catalog_id, self.catalog_schema_version, self.catalog_version)
@@ -380,7 +383,9 @@ def qualify_planning_envelope(
     """
     try:
         evidence = PlanningEnvelopeEvidence.model_validate(evidence)
-        catalog = load_catalog()
+        # Existing owner-approved Policy B evidence belongs to release 1.0.0.
+        # New metadata cannot manufacture a planning qualification.
+        catalog = load_catalog(version="1.0.0")
         record = catalog.get_record(asset_id)
         placement = PlanningEnvelopePlacement(
             units="meters",

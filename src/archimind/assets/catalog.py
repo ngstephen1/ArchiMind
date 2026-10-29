@@ -380,6 +380,11 @@ class FurnitureAssetRecord(_Frozen):
             }
         )
         category, subtype, aliases, uses = rules[self.source.original_category]
+        if subtype in ("writing desk", "wardrobe", "nightstand") and any(
+            getattr(self.search, field) is not None
+            for field in ("description", "materials", "colors", "styles")
+        ):
+            raise ValueError("08F2 admission has no qualified descriptive attributes.")
         # Reviewed Morava frontage is source length, not source width.
         width_axis, depth_axis = (
             ("length", "width") if subtype == "wardrobe" else ("width", "length")
@@ -468,11 +473,11 @@ class FurnitureCatalog(_Frozen):
 def load_catalog(*, version: str | None = None) -> FurnitureCatalog:
     """Load the fixed package resource, never a caller-supplied path or URL."""
     try:
-        if version not in (None, "1.0.0"):
+        if version not in (None, "1.0.0", "1.1.0"):
             raise CatalogError("Unknown catalog release.")
         filename = (
             "furniture_catalog.json"
-            if version is None
+            if version in (None, "1.1.0")
             else "furniture_catalog_1_0_0.json"
         )
         data = resources.files("archimind.assets").joinpath(filename).read_bytes()
@@ -484,6 +489,12 @@ def load_catalog(*, version: str | None = None) -> FurnitureCatalog:
             != "c1116a65558b2781f1ac979920dbd0b0b683dfdcc314681a70d8639ed87880dd"
         ):
             raise CatalogError("Historical catalog integrity mismatch.")
+        if (
+            version in (None, "1.1.0")
+            and hashlib.sha256(data).hexdigest()
+            != "3535c9911ec0f4f844d82647c12af615965b8daef106d16ba753dc98a7d439ad"
+        ):
+            raise CatalogError("Active catalog integrity mismatch.")
         return FurnitureCatalog.model_validate_json(data)
     except (OSError, ValueError, TypeError, RecursionError):
         raise CatalogError("Furniture catalog is unavailable or invalid.") from None

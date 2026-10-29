@@ -19,6 +19,11 @@ def main():
         help="Create a new JSON result file; existing files are not overwritten",
     )
     parser.add_argument("--repeats", type=int, default=3)
+    parser.add_argument(
+        "--historical",
+        action="store_true",
+        help="Explicit frozen two-product replay; never current-catalog effectiveness",
+    )
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1] / "data" / "benchmarks"
 
@@ -35,7 +40,9 @@ def main():
     fixtures = SyntheticCatalog.model_validate_json(
         read("furniture_retrieval_synthetic.json")
     )
-    result = run_benchmark(benchmark, fixtures, repeats=args.repeats)
+    result = run_benchmark(
+        benchmark, fixtures, repeats=args.repeats, historical=args.historical
+    )
     encoded = json.dumps(result, indent=2, allow_nan=False) + "\n"
     if args.output:
         with args.output.open("x") as stream:

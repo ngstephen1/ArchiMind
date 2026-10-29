@@ -220,15 +220,14 @@ def evidence_urls(option: CatalogProductOption) -> tuple[str, ...]:
     )
 
 
-def resolve_hit(
-    hit: FurnitureSearchHit, identity: IndexIdentity
+def _resolve_hit(
+    hit: FurnitureSearchHit, identity: IndexIdentity, options
 ) -> CatalogProductOption:
     """Resolve current authority before any future 08E handoff; never follow hit URLs."""
     try:
         hit = FurnitureSearchHit.model_validate(hit)
         if hit.scope != "real":
             raise ValueError
-        options = current_options()
         if RetrievalIndex.from_options(options).identity != identity:
             raise ValueError
         option = next(o for o in options if o.record.asset_id == hit.reference.asset_id)
@@ -243,8 +242,8 @@ def resolve_hit(
         raise RetrievalError("Retrieval reference is stale or unauthorized") from None
 
 
-def resolve_result(
-    result, *, for_preparation: bool = True
+def _resolve_result(
+    result, *, options, for_preparation: bool = True
 ) -> tuple[CatalogProductOption, ...]:
     """Recheck IDs, current evidence and hard filters before a future UI handoff."""
     from archimind.retrieval.contracts import FurnitureSearchResult
@@ -258,9 +257,9 @@ def resolve_result(
             and result.request.dimension_basis != "generation_reservation"
         ):
             raise ValueError
-        if build_index().identity != result.identity:
+        if RetrievalIndex.from_options(options).identity != result.identity:
             raise ValueError
-        options = tuple(resolve_hit(h, result.identity) for h in result.hits)
+        options = tuple(_resolve_hit(h, result.identity, options) for h in result.hits)
         if any(eligibility_reasons(result.request, o) for o in options) or (
             for_preparation and any(not o.preparation_available for o in options)
         ):
@@ -268,3 +267,19 @@ def resolve_result(
         return options
     except (ValueError, TypeError):
         raise RetrievalError("Search result is stale or ineligible") from None
+
+
+def resolve_hit(
+    hit: FurnitureSearchHit, identity: IndexIdentity
+) -> CatalogProductOption:
+    """Only active authority may resolve a hit for application use."""
+    return _resolve_hit(hit, identity, current_options())
+
+
+def resolve_result(
+    result, *, for_preparation: bool = True
+) -> tuple[CatalogProductOption, ...]:
+    """Historical results remain stale here, including empty results."""
+    return _resolve_result(
+        result, options=current_options(), for_preparation=for_preparation
+    )

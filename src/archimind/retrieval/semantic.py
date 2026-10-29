@@ -71,6 +71,9 @@ class SemanticRetrievalProvider:
             )[:24]
         )
 
+    def _options(self):
+        return current_options()
+
     def search(self, request: FurnitureSearchRequest) -> FurnitureSearchResult:
         request = FurnitureSearchRequest.model_validate(request)
         start = time.perf_counter_ns()
@@ -96,7 +99,7 @@ class SemanticRetrievalProvider:
                 "unavailable", ("synthetic_requires_isolated_benchmark_provider",)
             )
         try:
-            options = current_options()
+            options = self._options()
             current = RetrievalIndex.from_options(options)
         except RetrievalError:
             return result("unavailable", ("catalog_authority_unavailable",))
@@ -140,7 +143,7 @@ class SemanticRetrievalProvider:
             return result("unavailable", ("local_encoder_unavailable_or_invalid",))
         astart = time.perf_counter_ns()
         try:
-            after = current_options()
+            after = self._options()
             if RetrievalIndex.from_options(after) != corpus:
                 return result("stale_index", ("catalog_changed_during_encoding",))
             eligible = {

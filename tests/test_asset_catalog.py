@@ -24,7 +24,7 @@ from archimind.geometry import generate_layout_candidates, validate_accessibilit
 from archimind.models import Furniture
 
 ROOT = Path(__file__).resolve().parents[1]
-RESOURCE = ROOT / "src/archimind/assets/furniture_catalog.json"
+RESOURCE = ROOT / "src/archimind/assets/furniture_catalog_1_0_0.json"
 CHAIR = "abo-b075x2x4xs-amazon-com"
 BOOKCASE = "abo-b07pqs58xn-amazon-com"
 
@@ -61,7 +61,7 @@ def set_path(obj, path, value):
 
 
 def test_load_identity_order_and_json_round_trip():
-    catalog = load_catalog()
+    catalog = load_catalog(version="1.0.0")
     assert catalog.catalog_id == "archimind-furniture"
     assert catalog.catalog_version == "1.0.0"
     assert catalog.schema_version == catalog.search_document_version == 1
@@ -81,7 +81,7 @@ def test_records_match_frozen_08a_evidence():
         if c["decision"] == "eligible_for_acquisition"
     }
     assert set(eligible) == {CHAIR, BOOKCASE}
-    for record in load_catalog().records:
+    for record in load_catalog(version="1.0.0").records:
         c = eligible[record.asset_id]
         assert record.source.product_id == c["identity"]["product_id"]
         assert record.source.model_id == c["identity"]["model_id"]
@@ -127,7 +127,7 @@ def test_records_match_frozen_08a_evidence():
 
 
 def test_deep_immutability():
-    c = load_catalog()
+    c = load_catalog(version="1.0.0")
     for obj, key, value in [
         (c, "catalog_version", "9.0.0"),
         (c.records[0], "asset_version", "9.0.0"),
@@ -265,7 +265,10 @@ def test_search_documents_only_reviewed_fields_and_stable_index_keys(raw):
     catalog = parse(raw)
     for r in catalog.records:
         text = r.search_document()
-        assert text == load_catalog().get_record(r.asset_id).search_document()
+        assert (
+            text
+            == load_catalog(version="1.0.0").get_record(r.asset_id).search_document()
+        )
         assert r.search_document_sha256 == hashlib.sha256(text.encode()).hexdigest()
         assert r.source.original_title not in text
         assert "https://" not in text and "CC-BY" not in text
@@ -310,7 +313,7 @@ def test_only_explicitly_qualified_attributes_can_enter_search(raw):
     ],
 )
 def test_search_document_version_one_contract(asset_id, expected):
-    catalog = load_catalog()
+    catalog = load_catalog(version="1.0.0")
     assert catalog.search_document_version == 1
     assert catalog.get_record(asset_id).search_document() == expected
 
@@ -406,7 +409,7 @@ def test_loader_and_lookup_errors_are_sanitized(monkeypatch):
         "secret-token /private/path"
     )
     with pytest.raises(CatalogError) as error:
-        load_catalog()
+        load_catalog(version="1.0.0")
     assert str(error.value) == "Furniture catalog is unavailable or invalid."
     resource.joinpath.return_value.read_bytes.side_effect = None
     for data in (
@@ -417,7 +420,7 @@ def test_loader_and_lookup_errors_are_sanitized(monkeypatch):
     ):
         resource.joinpath.return_value.read_bytes.return_value = data
         with pytest.raises(CatalogError) as error:
-            load_catalog()
+            load_catalog(version="1.0.0")
         assert "secret-token" not in str(error.value)
 
 

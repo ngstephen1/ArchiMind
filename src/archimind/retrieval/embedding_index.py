@@ -126,12 +126,18 @@ def normalized_vectors(values, *, rows: int):
     return (matrix / norms).astype("<f4")
 
 
-def document_texts(corpus: RetrievalIndex) -> tuple[str, ...]:
+def document_texts(corpus: RetrievalIndex, *, historical=False) -> tuple[str, ...]:
     """Use exact existing reviewed text, preserving real-document line breaks."""
     if corpus.identity.scope == "real":
-        if build_index() != corpus:
+        from archimind.retrieval.historical import historical_index, historical_options
+
+        index = historical_index() if historical else build_index()
+        if index != corpus:
             raise EmbeddingError("Corpus is stale")
-        options = {o.record.asset_id: o for o in current_options()}
+        options = {
+            o.record.asset_id: o
+            for o in (historical_options() if historical else current_options())
+        }
         texts = tuple(
             options[d.reference.asset_id].record.search_document()
             for d in corpus.documents
@@ -210,11 +216,11 @@ class EmbeddingIndex:
 
 
 def build_embedding_index(
-    corpus: RetrievalIndex, encoder: TextEncoder
+    corpus: RetrievalIndex, encoder: TextEncoder, *, historical=False
 ) -> EmbeddingIndex:
     corpus = RetrievalIndex.model_validate(corpus)
     spec = EncoderSpec.model_validate(encoder.spec)
-    texts = document_texts(corpus)
+    texts = document_texts(corpus, historical=historical)
     values = normalized_vectors(encoder.encode_documents(texts), rows=len(texts))
     raw = values.tobytes(order="C")
     fields = dict(
@@ -246,7 +252,7 @@ def write_embedding_index(index: EmbeddingIndex, directory: Path) -> None:
 
 
 def read_embedding_index(
-    directory: Path, *, encoder: EncoderSpec, corpus: RetrievalIndex
+    directory: Path, *, encoder: EncoderSpec, corpus: RetrievalIndex, historical=False
 ) -> EmbeddingIndex:
     try:
         if (
@@ -263,7 +269,8 @@ def read_embedding_index(
         if (
             manifest.encoder != encoder
             or manifest.corpus != corpus
-            or manifest.input_texts_digest != digest(document_texts(corpus))
+            or manifest.input_texts_digest
+            != digest(document_texts(corpus, historical=historical))
         ):
             raise ValueError
         with (directory / "vectors.f32").open("rb") as f:

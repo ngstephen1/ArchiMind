@@ -274,7 +274,7 @@ def test_legacy_edit_duplicate_order_and_bad_counts_rejected():
 def test_no_wardrobe_bookcase_or_render_promotion():
     from archimind.assets.specifications import catalog_product_options
 
-    current = catalog_product_options()
+    current = catalog_product_options(catalog_version="1.0.0")
     assert tuple(o.record.asset_id for o in current) == (
         "abo-b075x2x4xs-amazon-com",
         "abo-b07pqs58xn-amazon-com",

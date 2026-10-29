@@ -17,7 +17,9 @@ from archimind.retrieval.semantic import AbstentionPolicy
 
 
 def inputs():
-    return benchmark_inputs(Path(__file__).resolve().parents[1] / "data/benchmarks")
+    return benchmark_inputs(
+        Path(__file__).resolve().parents[1] / "data/benchmarks", historical=True
+    )
 
 
 def test_frozen_split_counts_and_distinct_case_ids():

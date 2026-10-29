@@ -31,8 +31,14 @@ def prepare(base=None, retained=(), products=(api.CHARLES_ID, api.BOOKCASE_ID)):
 
 def test_discovery_uses_current_release_without_rewriting_catalog():
     options = api.catalog_product_options()
-    assert [o.record.asset_id for o in options] == [api.CHARLES_ID, api.BOOKCASE_ID]
-    chair, book = options
+    assert len(options) == 5
+    assert [o.record.asset_id for o in options] == sorted(
+        o.record.asset_id for o in options
+    )
+    chair, book = (
+        next(o for o in options if o.record.asset_id == key)
+        for key in (api.CHARLES_ID, api.BOOKCASE_ID)
+    )
     assert chair.render_qualified and not chair.record.render_qualified
     assert chair.planning_dimensions.wdh == (
         0.996104896068573,
@@ -110,7 +116,9 @@ def test_unavailable_planning_never_uses_published_charles_size(monkeypatch):
         "load_planning_envelope",
         lambda *args: (_ for _ in ()).throw(ValueError("secret")),
     )
-    assert not api.catalog_product_options()[0].preparation_available
+    assert not next(
+        o for o in api.catalog_product_options() if o.record.asset_id == api.CHARLES_ID
+    ).preparation_available
     with pytest.raises(api.SpecificationError, match="planning evidence"):
         prepare()
     assert len(prepare(products=(api.BOOKCASE_ID,)).design().furniture) == 1
@@ -150,7 +158,10 @@ def test_render_release_absence_does_not_invent_approval(monkeypatch):
         raise ValueError("private path and token")
 
     monkeypatch.setattr(render_assets, "product_release", missing)
-    chair, book = api.catalog_product_options()
+    chair, book = (
+        next(o for o in api.catalog_product_options() if o.record.asset_id == key)
+        for key in (api.CHARLES_ID, api.BOOKCASE_ID)
+    )
     assert chair.preparation_available and not chair.render_qualified
     assert not book.render_qualified
     p = prepare()
@@ -174,3 +185,47 @@ def test_preparation_never_changes_existing_validation_or_score(monkeypatch):
     )
     assert len(p.design().furniture) == 5
     assert generated.model_dump_json() == before
+
+
+@pytest.mark.parametrize("mixed", [False, True])
+def test_new_products_generate_without_geometry_or_existing_result_changes(mixed):
+    from archimind.assets.selection import build_render_bindings
+    from archimind.geometry import generate_layout_candidates, validate_accessibility
+    from archimind.render.selected_realistic import build_selected_realistic_scene
+
+    base = create_sample_bedroom()
+    existing = generate_layout_candidates(base.room, base.furniture, seed=42)
+    before = existing.model_dump_json()
+    ids = [
+        "abo-b074l4976t-amazon-co-uk",
+        "abo-b07h8jn9qf-amazon-co-uk",
+        "abo-b07b4vxxjc-amazon-com",
+    ]
+    if mixed:
+        ids.append(api.CHARLES_ID)
+    p = prepare(base, retained=("queen-bed",) if mixed else (), products=ids)
+    d = p.design()
+    first = generate_layout_candidates(d.room, d.furniture, seed=42)
+    second = generate_layout_candidates(d.room, d.furniture, seed=42)
+    assert first == second and first.attempts_used <= 500
+    assert first.status == "complete" and len(first.candidates) == 2
+    for candidate in first.candidates:
+        assert validate_accessibility(candidate.design).status == "passed"
+        for assignment in p.assignments:
+            assignment.validate_furniture(
+                next(
+                    f
+                    for f in candidate.design.furniture
+                    if f.id == assignment.furniture_id
+                )
+            )
+        bindings = {b.furniture_id: b for b in p.planning_bindings}
+        resolution = build_render_bindings(candidate.design, planning_bindings=bindings)
+        assert sum(b.asset_id is not None for b in resolution.bindings) == int(mixed)
+        scene = build_selected_realistic_scene(
+            candidate.design, planning_bindings=bindings
+        )
+        assert (
+            scene.scene.design.model_dump_json() == candidate.design.model_dump_json()
+        )
+    assert existing.model_dump_json() == before

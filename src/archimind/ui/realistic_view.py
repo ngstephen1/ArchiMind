@@ -138,6 +138,8 @@ def render_stored_provenance(result: LayoutGenerationResult) -> None:
                 if a.dimension_basis == "published_item_dimensions":
                     st.caption(
                         "Metadata-only bookcase: correctly sized storage placeholder; no wardrobe or approved product mesh."
+                        if a.asset_id == "abo-b07pqs58xn-amazon-com"
+                        else f"Metadata-only {a.furniture_name}: published-sized procedural placeholder; no approved planning envelope or product mesh."
                     )
 
 

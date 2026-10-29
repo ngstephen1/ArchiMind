@@ -133,6 +133,9 @@ class LexicalRetrievalProvider:
         self.index = index if index is not None else build_index()
         self.algorithm = algorithm
 
+    def _options(self):
+        return current_options()
+
     def search(self, request: FurnitureSearchRequest) -> FurnitureSearchResult:
         request = FurnitureSearchRequest.model_validate(request)
 
@@ -147,7 +150,7 @@ class LexicalRetrievalProvider:
             )
 
         try:
-            options = current_options()
+            options = self._options()
             current = RetrievalIndex.from_options(options)
         except RetrievalError:
             return result("unavailable", ("catalog_authority_unavailable",))

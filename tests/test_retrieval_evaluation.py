@@ -145,8 +145,8 @@ def test_fixture_ranking_and_dimensions_do_not_use_real_catalog(inputs):
 
 def test_benchmark_run_actual_counts_safety_and_determinism(inputs):
     benchmark, synthetic = inputs
-    first = api.run_benchmark(benchmark, synthetic, repeats=2)
-    second = api.run_benchmark(benchmark, synthetic, repeats=2)
+    first = api.run_benchmark(benchmark, synthetic, repeats=2, historical=True)
+    second = api.run_benchmark(benchmark, synthetic, repeats=2, historical=True)
     assert first["semantic_output_digest"] == second["semantic_output_digest"]
     for key, report in first["reports"].items():
         if not report["available"]:
@@ -224,6 +224,6 @@ def test_stale_benchmark_and_mixed_gold_are_rejected(inputs):
 def test_missing_optional_fts_does_not_hide_python_results(inputs, monkeypatch):
     benchmark, synthetic = inputs
     monkeypatch.setattr(api, "fts5_available", lambda: False)
-    result = api.run_benchmark(benchmark, synthetic, repeats=2)
+    result = api.run_benchmark(benchmark, synthetic, repeats=2, historical=True)
     assert result["reports"]["real/python_bm25_v1"]["available"]
     assert not result["reports"]["real/sqlite_fts5_bm25_v1"]["available"]

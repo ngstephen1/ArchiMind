@@ -1,9 +1,146 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "catalog_id": "archimind-furniture",
-  "catalog_version": "1.0.0",
+  "catalog_version": "1.1.0",
   "search_document_version": 1,
   "records": [
+    {
+      "asset_id": "abo-b074l4976t-amazon-co-uk",
+      "asset_version": "1.0.0",
+      "qualification": "metadata_qualified",
+      "category": "desk",
+      "subtype": "writing desk",
+      "variant_label": "Oak",
+      "rotation_deg": 0,
+      "source": {
+        "dataset": "Amazon Berkeley Objects",
+        "product_id": "B074L4976T",
+        "model_id": "B074L4976T",
+        "marketplace_domain": "amazon.co.uk",
+        "manufacturer_model_numbers": [
+          "T80505PL05LVO"
+        ],
+        "variant_label": "Oak",
+        "original_category": "DESK",
+        "original_title": "Amazon Brand - Movian Belaya Classic Desk with Curved Top, 80 x 160 x 75cm, Light Brown Oak-Effect",
+        "metadata_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+        "model_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/T/B074L4976T.glb",
+        "source_revision": null,
+        "source_last_modified": "Wed, 16 Jun 2021 17:41:07 GMT",
+        "source_etag": "\"aeeeddfd17121ddfaee2909de5ba23f3\"",
+        "listing_line": 1065,
+        "listing_record_sha256": "88a03e76a40a382beb895740e9f576142e7fc1811cd34996ff9432f98e1ee86a",
+        "metadata_snapshot_sha256": "e83bd63b93c0d23bab3707db985604a7f43ab9532c76efb26558afd7accc2a69",
+        "model_index_sha256": "90d061c3e3efa555a55bfc8ed7fc55cdb322086397443de1b33e91f7924d7d92",
+        "qualification_candidate_id": "abo-b074l4976t-amazon-co-uk",
+        "qualification_revision": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+        "qualification_file_sha256": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+        "qualification_date": "2026-10-29"
+      },
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 75,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "length",
+            "value": 80,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "width",
+            "value": 160,
+            "unit": "centimeters"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "width"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "length"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "width_m <- item_dimensions.width; depth_m <- item_dimensions.length; height_m <- item_dimensions.height; reviewed source text and reported native X/Y/Z comparison; actual pose/orientation not inspected.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 1.6,
+        "depth_m": 0.8,
+        "height_m": 0.75
+      },
+      "legal": {
+        "status": "verified",
+        "license_id": "CC-BY-4.0",
+        "license_url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+        "copyright": "Amazon.com (dataset attribution); individual mesh author not separately specified",
+        "creator": null,
+        "attribution": "Amazon.com; ABO dataset contributors: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, Himanshu Arora, Arnab Dhua, Xi (Brian) Zhang, Tomas Yago-Vicente, Jasmine Collins, Shubham Goel, Jitendra Malik. No endorsement.",
+        "modification_notice": "Selected metadata extracted and normalized; reviewed names/search terms added. No model, texture or image downloaded or modified. Preserve notices, link CC BY 4.0 and indicate later modifications.",
+        "restrictions": [
+          "Published copyright license is verified, not independent chain-of-title or trademark clearance.",
+          "No asset bytes or model-specific logos/embedded notices inspected."
+        ],
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#download",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#attribution",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+        ],
+        "public_browser_delivery": true,
+        "redistribution": true,
+        "commercial_use": true
+      },
+      "search": {
+        "reviewed_name": "Movian Belaya writing desk — Oak",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz"
+        ],
+        "aliases": [
+          "desk",
+          "writing desk"
+        ],
+        "usage_tags": [
+          "writing",
+          "study"
+        ],
+        "description": null,
+        "materials": null,
+        "colors": null,
+        "styles": null
+      },
+      "source_conventions": {
+        "status": "source_reported_uninspected",
+        "units": "meters",
+        "up": "+Y",
+        "front": "+Z",
+        "floor_anchor": "For floor-standing source models: centered in X/Z, minimum Y at zero; not verified for the actual asset.",
+        "evidence_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+      },
+      "rendering": {
+        "status": "not_evaluated",
+        "model_asset_id": null,
+        "model_sha256": null,
+        "verified_bounds": null,
+        "verified_orientation": null,
+        "verified_anchor": null,
+        "local_glb_path": null
+      }
+    },
     {
       "asset_id": "abo-b075x2x4xs-amazon-com",
       "asset_version": "1.0.0",
@@ -116,6 +253,277 @@
         ],
         "usage_tags": [
           "seating"
+        ],
+        "description": null,
+        "materials": null,
+        "colors": null,
+        "styles": null
+      },
+      "source_conventions": {
+        "status": "source_reported_uninspected",
+        "units": "meters",
+        "up": "+Y",
+        "front": "+Z",
+        "floor_anchor": "For floor-standing source models: centered in X/Z, minimum Y at zero; not verified for the actual asset.",
+        "evidence_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+      },
+      "rendering": {
+        "status": "not_evaluated",
+        "model_asset_id": null,
+        "model_sha256": null,
+        "verified_bounds": null,
+        "verified_orientation": null,
+        "verified_anchor": null,
+        "local_glb_path": null
+      }
+    },
+    {
+      "asset_id": "abo-b07b4vxxjc-amazon-com",
+      "asset_version": "1.0.0",
+      "qualification": "metadata_qualified",
+      "category": "table",
+      "subtype": "nightstand",
+      "variant_label": "Brown",
+      "rotation_deg": 0,
+      "source": {
+        "dataset": "Amazon Berkeley Objects",
+        "product_id": "B07B4VXXJC",
+        "model_id": "B07B4VXXJC",
+        "marketplace_domain": "amazon.com",
+        "manufacturer_model_numbers": [
+          "320-C070-052"
+        ],
+        "variant_label": "Brown",
+        "original_category": "TABLE",
+        "original_title": "Amazon Brand – Rivet Modern Wood and Antique Mirror Panel Bedside Nightstand, Brass Finish, 24\", Brown",
+        "metadata_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz",
+        "model_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/C/B07B4VXXJC.glb",
+        "source_revision": null,
+        "source_last_modified": "Wed, 16 Jun 2021 17:41:07 GMT",
+        "source_etag": "\"c0036c5d84a3f424dacbb162f89031a6\"",
+        "listing_line": 110,
+        "listing_record_sha256": "d5567b1505b4a0b9cfaf739523a68af851cfd4d246d4a3b2a507dc142e3aaa58",
+        "metadata_snapshot_sha256": "1dc40c158c021af6e6e69a11ab8f979fe1eb8c4b3ec62979c42b09075dcac240",
+        "model_index_sha256": "90d061c3e3efa555a55bfc8ed7fc55cdb322086397443de1b33e91f7924d7d92",
+        "qualification_candidate_id": "abo-b07b4vxxjc-amazon-com",
+        "qualification_revision": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+        "qualification_file_sha256": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+        "qualification_date": "2026-10-29"
+      },
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 24,
+            "unit": "inches"
+          },
+          {
+            "source_field": "length",
+            "value": 17,
+            "unit": "inches"
+          },
+          {
+            "source_field": "width",
+            "value": 24,
+            "unit": "inches"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "width"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "length"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "width_m <- item_dimensions.width; depth_m <- item_dimensions.length; height_m <- item_dimensions.height; reviewed source text and reported native X/Y/Z comparison; actual pose/orientation not inspected.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 0.6096,
+        "depth_m": 0.4318,
+        "height_m": 0.6096
+      },
+      "legal": {
+        "status": "verified",
+        "license_id": "CC-BY-4.0",
+        "license_url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+        "copyright": "Amazon.com (dataset attribution); individual mesh author not separately specified",
+        "creator": null,
+        "attribution": "Amazon.com; ABO dataset contributors: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, Himanshu Arora, Arnab Dhua, Xi (Brian) Zhang, Tomas Yago-Vicente, Jasmine Collins, Shubham Goel, Jitendra Malik. No endorsement.",
+        "modification_notice": "Selected metadata extracted and normalized; reviewed names/search terms added. No model, texture or image downloaded or modified. Preserve notices, link CC BY 4.0 and indicate later modifications.",
+        "restrictions": [
+          "Published copyright license is verified, not independent chain-of-title or trademark clearance.",
+          "No asset bytes or model-specific logos/embedded notices inspected."
+        ],
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#download",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#attribution",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+        ],
+        "public_browser_delivery": true,
+        "redistribution": true,
+        "commercial_use": true
+      },
+      "search": {
+        "reviewed_name": "Rivet bedside nightstand — Brown",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz"
+        ],
+        "aliases": [
+          "nightstand",
+          "bedside table"
+        ],
+        "usage_tags": [
+          "bedside use"
+        ],
+        "description": null,
+        "materials": null,
+        "colors": null,
+        "styles": null
+      },
+      "source_conventions": {
+        "status": "source_reported_uninspected",
+        "units": "meters",
+        "up": "+Y",
+        "front": "+Z",
+        "floor_anchor": "For floor-standing source models: centered in X/Z, minimum Y at zero; not verified for the actual asset.",
+        "evidence_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+      },
+      "rendering": {
+        "status": "not_evaluated",
+        "model_asset_id": null,
+        "model_sha256": null,
+        "verified_bounds": null,
+        "verified_orientation": null,
+        "verified_anchor": null,
+        "local_glb_path": null
+      }
+    },
+    {
+      "asset_id": "abo-b07h8jn9qf-amazon-co-uk",
+      "asset_version": "1.0.0",
+      "qualification": "metadata_qualified",
+      "category": "wardrobe",
+      "subtype": "wardrobe",
+      "variant_label": "Oak Sonoma",
+      "rotation_deg": 0,
+      "source": {
+        "dataset": "Amazon Berkeley Objects",
+        "product_id": "B07H8JN9QF",
+        "model_id": "B07H8JN9QF",
+        "marketplace_domain": "amazon.co.uk",
+        "manufacturer_model_numbers": [
+          "M4-R3181/R3181-20"
+        ],
+        "variant_label": "Oak Sonoma",
+        "original_category": "CABINET",
+        "original_title": "Amazon Brand - Movian Morava 4-Door 2-Drawer Wardrobe with Mirrors, 200 x 59 x 212cm, Light Brown Oak-Effect",
+        "metadata_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+        "model_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/F/B07H8JN9QF.glb",
+        "source_revision": null,
+        "source_last_modified": "Wed, 16 Jun 2021 17:41:07 GMT",
+        "source_etag": "\"aeeeddfd17121ddfaee2909de5ba23f3\"",
+        "listing_line": 1852,
+        "listing_record_sha256": "1fd7347453668acc7d7c4e478bdf7361921f3bf16c84d61ecf4a39ab1da52810",
+        "metadata_snapshot_sha256": "e83bd63b93c0d23bab3707db985604a7f43ab9532c76efb26558afd7accc2a69",
+        "model_index_sha256": "90d061c3e3efa555a55bfc8ed7fc55cdb322086397443de1b33e91f7924d7d92",
+        "qualification_candidate_id": "abo-b07h8jn9qf-amazon-co-uk",
+        "qualification_revision": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+        "qualification_file_sha256": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+        "qualification_date": "2026-10-29"
+      },
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 212,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "length",
+            "value": 200,
+            "unit": "centimeters"
+          },
+          {
+            "source_field": "width",
+            "value": 59,
+            "unit": "centimeters"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "length"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "width"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "width_m <- item_dimensions.length; depth_m <- item_dimensions.width; height_m <- item_dimensions.height; reviewed source text and reported native X/Y/Z comparison; actual pose/orientation not inspected.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 2.0,
+        "depth_m": 0.59,
+        "height_m": 2.12
+      },
+      "legal": {
+        "status": "verified",
+        "license_id": "CC-BY-4.0",
+        "license_url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+        "copyright": "Amazon.com (dataset attribution); individual mesh author not separately specified",
+        "creator": null,
+        "attribution": "Amazon.com; ABO dataset contributors: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, Himanshu Arora, Arnab Dhua, Xi (Brian) Zhang, Tomas Yago-Vicente, Jasmine Collins, Shubham Goel, Jitendra Malik. No endorsement.",
+        "modification_notice": "Selected metadata extracted and normalized; reviewed names/search terms added. No model, texture or image downloaded or modified. Preserve notices, link CC BY 4.0 and indicate later modifications.",
+        "restrictions": [
+          "Published copyright license is verified, not independent chain-of-title or trademark clearance.",
+          "No asset bytes or model-specific logos/embedded notices inspected."
+        ],
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#download",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#attribution",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+        ],
+        "public_browser_delivery": true,
+        "redistribution": true,
+        "commercial_use": true
+      },
+      "search": {
+        "reviewed_name": "Movian Morava wardrobe — Oak Sonoma",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz"
+        ],
+        "aliases": [
+          "wardrobe"
+        ],
+        "usage_tags": [
+          "clothing storage"
         ],
         "description": null,
         "materials": null,

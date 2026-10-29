@@ -25,7 +25,7 @@ SPLIT_HASHES = {
 }
 
 
-def benchmark_inputs(root: Path):
+def benchmark_inputs(root: Path, *, historical=False):
     def read(name):
         with (root / name).open("rb") as stream:
             raw = stream.read(1024 * 1024 + 1)
@@ -38,8 +38,11 @@ def benchmark_inputs(root: Path):
     synthetic = SyntheticCatalog.model_validate_json(
         read("furniture_retrieval_synthetic.json")
     )
+    from archimind.retrieval.historical import historical_index
+
+    corpus = historical_index() if historical else build_index()
     if (
-        original.real_index_identity != build_index().identity
+        original.real_index_identity != corpus.identity
         or original.synthetic_catalog_digest != digest(synthetic)
     ):
         raise ValueError("Reviewed benchmark corpus is stale")

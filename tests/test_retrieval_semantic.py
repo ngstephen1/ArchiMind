@@ -39,12 +39,12 @@ def test_exact_cosine_ties_contract_and_input_preservation():
     before = p.index.vector_bytes
     first = p.search(request)
     assert (
-        len(first.hits) == 2
+        len(first.hits) == 5
         and first.hits[0].reference.asset_id < first.hits[1].reference.asset_id
     )
     assert first.hits[0].score == first.hits[1].score
     assert p.search(request) == first and p.index.vector_bytes == before
-    assert len(resolve_result(first)) == 2
+    assert len(resolve_result(first)) == 5
     assert type(first).model_validate_json(first.model_dump_json()) == first
 
 
@@ -59,7 +59,7 @@ def test_exact_cosine_ties_contract_and_input_preservation():
         (dict(materials=("leather",)), "metadata", 0),
         (dict(styles=("modern",)), "metadata", 0),
         (dict(asset_id="unknown"), "metadata", 0),
-        (dict(required_use="wardrobe"), "metadata", 0),
+        (dict(required_use="wardrobe"), "metadata", 1),
     ],
 )
 def test_hard_filters_before_embedding(filters, qual, count):
@@ -78,7 +78,7 @@ def test_hard_filters_before_embedding(filters, qual, count):
 
 def test_threshold_abstains_without_fabricating_fallback():
     q = np.zeros(384, dtype=np.float32)
-    q[2] = 1
+    q[10] = 1
     p = provider(q, 0.1)
     assert not p.search(FurnitureSearchRequest(query="no relevant item")).hits
     p.policy = AbstentionPolicy(mode="abstain_all", method="unconfigured")

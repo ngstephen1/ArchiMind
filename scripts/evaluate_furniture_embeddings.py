@@ -85,6 +85,11 @@ def main():
     parser.add_argument("--policy-sha256")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--hybrid", action="store_true")
+    parser.add_argument(
+        "--historical",
+        action="store_true",
+        help="Explicit frozen 1.0.0 replay; never evaluate old judgments on new products",
+    )
     args = parser.parse_args()
     if args.output.exists() or (
         args.phase == "calibrate"
@@ -94,8 +99,23 @@ def main():
     if args.phase == "evaluate" and not args.policy_sha256:
         parser.error("Evaluation requires the externally sealed policy SHA-256")
     root = Path(__file__).resolve().parents[1] / "data" / "benchmarks"
-    synthetic, splits = benchmark_inputs(root)
-    corpora = {"real": build_index(), "synthetic_fixture": synthetic.index()}
+    from archimind.retrieval.historical import (
+        HistoricalHybridProvider,
+        HistoricalLexicalProvider,
+        HistoricalSemanticProvider,
+        historical_index,
+        historical_options,
+    )
+
+    synthetic, splits = benchmark_inputs(root, historical=args.historical)
+    real_corpus = historical_index() if args.historical else build_index()
+    lexical_type = (
+        HistoricalLexicalProvider if args.historical else LexicalRetrievalProvider
+    )
+    semantic_type = (
+        HistoricalSemanticProvider if args.historical else SemanticRetrievalProvider
+    )
+    corpora = {"real": real_corpus, "synthetic_fixture": synthetic.index()}
     guard = offline_bootstrap()
     start = time.perf_counter()
     encoder = FastEmbedCPUEncoder(args.model_directory)
@@ -109,20 +129,23 @@ def main():
         args.index_directory.mkdir(exist_ok=False)
         for scope, corpus in corpora.items():
             start = time.perf_counter()
-            indexes[scope] = build_embedding_index(corpus, encoder)
+            indexes[scope] = build_embedding_index(
+                corpus, encoder, historical=args.historical
+            )
             builds[scope] = time.perf_counter() - start
             write_embedding_index(indexes[scope], args.index_directory / scope)
     else:
         for scope, corpus in corpora.items():
             indexes[scope] = read_embedding_index(
-                args.index_directory / scope, encoder=encoder.spec, corpus=corpus
+                args.index_directory / scope,
+                encoder=encoder.spec,
+                corpus=corpus,
+                historical=args.historical,
             )
 
     def semantic(scope, policy):
         return (
-            SemanticRetrievalProvider(
-                index=indexes[scope], encoder=encoder, policy=policy
-            )
+            semantic_type(index=indexes[scope], encoder=encoder, policy=policy)
             if scope == "real"
             else FixtureSemanticProvider(synthetic, indexes[scope], encoder, policy)
         )
@@ -182,7 +205,7 @@ def main():
                 json.dumps(sealed["policies"][scope])
             )
             lexical = (
-                LexicalRetrievalProvider(index=corpus)
+                lexical_type(index=corpus)
                 if scope == "real"
                 else SyntheticRetrievalProvider(synthetic)
             )
@@ -193,9 +216,7 @@ def main():
             }
             if fts5_available():
                 providers["sqlite_fts5_bm25_v1"] = (
-                    LexicalRetrievalProvider(
-                        index=corpus, algorithm="sqlite_fts5_bm25_v1"
-                    )
+                    lexical_type(index=corpus, algorithm="sqlite_fts5_bm25_v1")
                     if scope == "real"
                     else SyntheticRetrievalProvider(
                         synthetic, algorithm="sqlite_fts5_bm25_v1"
@@ -204,7 +225,11 @@ def main():
             if args.hybrid:
                 from archimind.retrieval.hybrid import HybridRetrievalProvider
 
-                providers["hybrid_rrf60_v1"] = HybridRetrievalProvider(
+                providers["hybrid_rrf60_v1"] = (
+                    HistoricalHybridProvider
+                    if args.historical and scope == "real"
+                    else HybridRetrievalProvider
+                )(
                     lexical,
                     semantic(scope, policy),
                     corpus=corpus,
@@ -212,7 +237,12 @@ def main():
                 )
             refs = {d.reference.asset_id: d.reference for d in corpus.documents}
             cats = (
-                {o.record.asset_id: o.record.category for o in current_options()}
+                {
+                    o.record.asset_id: o.record.category
+                    for o in (
+                        historical_options() if args.historical else current_options()
+                    )
+                }
                 if scope == "real"
                 else {p.asset_id: p.category for p in synthetic.products}
             )
@@ -224,6 +254,7 @@ def main():
                     references=refs,
                     categories=cats,
                     repeats=3,
+                    historical=args.historical,
                 )
                 add_error_rates(report, cases)
                 if hasattr(provider, "timings"):
@@ -235,6 +266,7 @@ def main():
     summary = dict(
         schema_version=1,
         phase=args.phase,
+        catalog_scope="historical_1.0.0" if args.historical else "active",
         policy_sha256=policy_checksum,
         policy=sealed,
         encoder=encoder.spec.model_dump(mode="json"),

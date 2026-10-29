@@ -81,7 +81,7 @@ def render_furniture_assets(base: RoomDesign) -> PendingSpecification:
                 )
             else:
                 st.caption(
-                    "Published item dimensions used for planning · Product mesh: unavailable; procedural placeholder only."
+                    "Published item dimensions used for generation · Approved planning envelope: unavailable · Product mesh: unavailable; procedural placeholder only."
                 )
             if not option.preparation_available:
                 st.warning(

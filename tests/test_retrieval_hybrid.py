@@ -46,10 +46,10 @@ def test_real_hybrid_preserves_refs_and_uses_explicit_union():
     provider = HybridRetrievalProvider(lexical, semantic, corpus=corpus)
     request = FurnitureSearchRequest(query="Charles armchair")
     result = provider.search(request)
-    assert len(result.hits) == 2 and len(resolve_result(result)) == 2
+    assert len(result.hits) == 5 and len(resolve_result(result)) == 5
     assert result.hits[0].reference.asset_id == "abo-b075x2x4xs-amazon-com"
-    assert result.hits[0].score == 2 / 61
-    assert "ranker_2_rank_2" in result.hits[1].reasons
+    assert result.hits[0].score == 1 / 61 + 1 / 62
+    assert "ranker_2_rank_1" in result.hits[1].reasons
     assert provider.search(request) == result
     assert type(result).model_validate_json(result.model_dump_json()) == result
     # Changing raw component score magnitudes cannot affect RRF.
@@ -139,7 +139,7 @@ def test_synthetic_requires_explicit_isolated_gate():
     from archimind.retrieval.evaluation import SyntheticRetrievalProvider
 
     catalog, _ = benchmark_inputs(
-        Path(__file__).resolve().parents[1] / "data/benchmarks"
+        Path(__file__).resolve().parents[1] / "data/benchmarks", historical=True
     )
     corpus = catalog.index()
     lexical = SyntheticRetrievalProvider(catalog)
