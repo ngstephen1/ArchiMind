@@ -1,0 +1,94 @@
+{
+  "model_name": "BAAI/bge-small-en-v1.5",
+  "upstream_revision": "5c38ec7c405ec4b44b94cc5a9bb96e735b38267a",
+  "artifact_repository": "Qdrant/bge-small-en-v1.5-onnx-Q",
+  "artifact_revision": "aa8f8b060edb00e03bfdd08813a2949946c8ba55",
+  "license_id": "MIT",
+  "weight_download_budget_bytes": 262144000,
+  "actual_weight_bytes": 66465124,
+  "actual_all_artifact_bytes": 67508369,
+  "elapsed_seconds": 3.6609494169970276,
+  "artifacts": [
+    {
+      "filename": "README.md",
+      "sha256": "01e220eed6921254f7e086bb3506d1c03f019f5f747bb9ac2f6ec5ce541edc12",
+      "size_bytes": 900,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/README.md",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "900"
+    },
+    {
+      "filename": "config.json",
+      "sha256": "13582bcf2effc85b7bf3d3f5532e686bc1c9ce86bb009d10f0ec33cbe92299dd",
+      "size_bytes": 706,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/config.json",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "706"
+    },
+    {
+      "filename": "model_optimized.onnx",
+      "sha256": "51f1bd0addd6e859e42c2c8021a5e5461385bb676a649f4b269aa445449f2431",
+      "size_bytes": 66465124,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/model_optimized.onnx",
+      "redirect_host": "us.aws.cdn.hf.co",
+      "declared_content_length": "66465124"
+    },
+    {
+      "filename": "ort_config.json",
+      "sha256": "99881c45e073696289224931dd48694398bc6bcd1fe7cb7018bca1e0cc00e1fc",
+      "size_bytes": 1272,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/ort_config.json",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "1272"
+    },
+    {
+      "filename": "special_tokens_map.json",
+      "sha256": "5d5b662e421ea9fac075174bb0688ee0d9431699900b90662acd44b2a350503a",
+      "size_bytes": 695,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/special_tokens_map.json",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "695"
+    },
+    {
+      "filename": "tokenizer.json",
+      "sha256": "d241a60d5e8f04cc1b2b3e9ef7a4921b27bf526d9f6050ab90f9267a1f9e5c66",
+      "size_bytes": 711396,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/tokenizer.json",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "711396"
+    },
+    {
+      "filename": "tokenizer_config.json",
+      "sha256": "0b29c7bfc889e53b36d9dd3e686dd4300f6525110eaa98c76a5dafceb2029f53",
+      "size_bytes": 1242,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/tokenizer_config.json",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "1242"
+    },
+    {
+      "filename": "vocab.txt",
+      "sha256": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3",
+      "size_bytes": 231508,
+      "source_url": "https://huggingface.co/Qdrant/bge-small-en-v1.5-onnx-Q/resolve/aa8f8b060edb00e03bfdd08813a2949946c8ba55/vocab.txt",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "231508"
+    },
+    {
+      "filename": "upstream_README.md",
+      "sha256": "ddb964361a55c6e5dfca6361615854b260c9c960205d04c7520151aaa1d75837",
+      "size_bytes": 94783,
+      "source_url": "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/README.md",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "94783"
+    },
+    {
+      "filename": "upstream_config.json",
+      "sha256": "094f8e891b932f2000c92cfc663bac4c62069f5d8af5b5278c4306aef3084750",
+      "size_bytes": 743,
+      "source_url": "https://huggingface.co/BAAI/bge-small-en-v1.5/resolve/5c38ec7c405ec4b44b94cc5a9bb96e735b38267a/config.json",
+      "redirect_host": "huggingface.co",
+      "declared_content_length": "743"
+    }
+  ],
+  "notice": "One official FastEmbed quantized ONNX representation. Original upstream float weights were not acquired. No source equivalence or independent license adjudication claim."
+}

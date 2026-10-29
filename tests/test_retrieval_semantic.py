@@ -127,3 +127,16 @@ def test_direct_ranker_rejects_invalid_query_vectors(query):
     p = provider()
     with pytest.raises(EmbeddingError):
         rank_cosine(p.index, query, set(p.index.manifest.row_asset_ids), -1)
+
+
+def test_structured_browse_does_not_encode_or_claim_semantics():
+    p = provider()
+    p.policy = AbstentionPolicy(mode="abstain_all", method="unconfigured")
+    result = p.search(
+        FurnitureSearchRequest(
+            query="", filters=FurnitureSearchFilters(category="chair")
+        )
+    )
+    assert len(result.hits) == 1 and not p.encoder.query_inputs
+    assert "structured_browse" in result.hits[0].reasons
+    assert len(resolve_result(result)) == 1

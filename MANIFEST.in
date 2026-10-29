@@ -40,3 +40,8 @@ include docs/data/RETRIEVAL_BASELINE_08R0.md
 
 include data/benchmarks/furniture_embedding_development_08r1.json
 include data/benchmarks/furniture_embedding_held_out_08r1.json
+
+include docs/data/ENCODER_ACQUISITION_08R1.json
+include docs/data/ENCODER_ENVIRONMENT_08R1.json
+include docs/data/RETRIEVAL_EMBEDDING_08R1.md
+include docs/data/RETRIEVAL_EMBEDDING_08R1.json

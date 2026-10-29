@@ -119,21 +119,26 @@ class SemanticRetrievalProvider:
                 tuple(sorted({v for values in decisions.values() for v in values}))
                 or ("no_eligible_products",),
             )
-        if self.policy.mode == "abstain_all":
+        if self.policy.mode == "abstain_all" and request.query:
             return result("empty", ("semantic_policy_abstains",))
         try:
-            qstart = time.perf_counter_ns()
-            query = normalized_vectors(
-                self.encoder.encode_queries((request.query,)), rows=1
-            )[0]
-            timing["embedding_ms"] = (time.perf_counter_ns() - qstart) / 1e6
-            rstart = time.perf_counter_ns()
-            ranked = rank_cosine(
-                self.index, query, set(eligible), self.policy.minimum_cosine
-            )
-            timing["ranking_ms"] = (time.perf_counter_ns() - rstart) / 1e6
+            if request.query:
+                qstart = time.perf_counter_ns()
+                query = normalized_vectors(
+                    self.encoder.encode_queries((request.query,)), rows=1
+                )[0]
+                timing["embedding_ms"] = (time.perf_counter_ns() - qstart) / 1e6
+                rstart = time.perf_counter_ns()
+                ranked = rank_cosine(
+                    self.index, query, set(eligible), self.policy.minimum_cosine
+                )
+                timing["ranking_ms"] = (time.perf_counter_ns() - rstart) / 1e6
+            else:
+                # Explicit structured browse is not a semantic relevance claim.
+                ranked = tuple((key, 0.0) for key in sorted(eligible))
         except (ValueError, TypeError, OSError, RuntimeError, ImportError):
             return result("unavailable", ("local_encoder_unavailable_or_invalid",))
+        astart = time.perf_counter_ns()
         try:
             after = current_options()
             if RetrievalIndex.from_options(after) != corpus:
@@ -145,6 +150,7 @@ class SemanticRetrievalProvider:
             }
         except RetrievalError:
             return result("unavailable", ("catalog_authority_unavailable",))
+        timing["authority_ms"] += (time.perf_counter_ns() - astart) / 1e6
         # Recheck source eligibility before constructing every result as a defense
         # against later ranker changes. Preparation must still resolve_result().
         hits = tuple(
@@ -156,7 +162,9 @@ class SemanticRetrievalProvider:
                 score=round((cosine + 1) / 2, 12),
                 reasons=(
                     "hard_filters_passed",
-                    "exact_cosine_soft_relevance",
+                    "exact_cosine_soft_relevance"
+                    if request.query
+                    else "structured_browse",
                     "test_double_encoder"
                     if self.encoder.spec.execution_kind == "test_double"
                     else "pinned_local_cpu_encoder",
