@@ -3,6 +3,10 @@
 **Current research register: 57 records, including 25 new candidates from 30 detailed
 08F1 investigations. Three new acquisition-eligible source records; no bed qualifies.**
 
+Current detail: [08F1 report](FURNITURE_EXPANSION_08F1.md),
+[request/evidence receipt](FURNITURE_EXPANSION_08F1.json), and
+[blank owner-review packet](FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md).
+
 The active application still contains **two metadata-qualified products**, with
 **one planning-envelope-qualified and one render-qualified product (Charles)**.
 Nothing below expands that packaged catalog. The 08F1 appendix follows the preserved
@@ -237,6 +241,9 @@ A later inspection/reconciliation task must preserve both quantities and derive 
 planning reservation through the approved process. Do not shrink or silently resize
 it. Belaya's reported height/depth also slightly exceed the published dimensions;
 all three require actual-file containment/placement inspection.
+Their combined source-reported RGBA+mipmap estimate is 192 MiB for distinct assets,
+above the 128 MiB scene limit. Individual source qualification is not permission to
+render all three together; actual decoded costs and aggregate budgets need review.
 
 ## Candidate decisions and primary locators
 

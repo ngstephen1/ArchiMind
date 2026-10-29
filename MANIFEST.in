@@ -49,3 +49,6 @@ include docs/data/RETRIEVAL_EMBEDDING_08R1.json
 include data/catalogs/furniture_source_candidates.json
 include data/catalogs/furniture_source_candidates_08a.json
 include docs/data/FURNITURE_SOURCE_REGISTER.md
+include docs/data/FURNITURE_EXPANSION_08F1.md
+include docs/data/FURNITURE_EXPANSION_08F1.json
+include docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md

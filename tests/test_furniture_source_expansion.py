@@ -292,3 +292,213 @@ def test_no_wardrobe_bookcase_or_render_promotion():
     assert (
         display["decision"] == "excluded" and display["canonical_category"] == "storage"
     )
+
+
+RECEIPT = ROOT / "docs/data/FURNITURE_EXPANSION_08F1.json"
+PACKET = ROOT / "docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md"
+
+
+def validate_review(review, document):
+    assert review["status"] == "pending_human_review_unevaluated"
+    assert review["completed_human_reviews"] == 0
+    assert (
+        not review["benchmark_created"] and not review["existing_benchmarks_modified"]
+    )
+    assert review["protocol"] == "owner_first_optional_second_reviewer_and_adjudication"
+    cases = review["queries"]
+    assert len(cases) == review["query_count"] == 24
+    assert {q["query_id"] for q in cases} == {
+        f"{group}{n:02d}" for group in "CP" for n in range(1, 13)
+    }
+    assert len({q["prompt"].casefold() for q in cases}) == 24
+    for q in cases:
+        assert q["authorship"] == "implementation_agent"
+        for key in (
+            "reviewer_identity_or_role",
+            "review_date",
+            "hard_eligibility",
+            "semantic_relevance",
+            "query_outcome",
+            "rationale",
+            "second_review",
+            "adjudication",
+        ):
+            assert q[key] is None
+        assert "score" not in q and "judgments" not in q and "proposed_label" not in q
+        assert document.count("### " + q["query_id"] + "\n") == 1
+        assert document.count("**Prompt:** " + q["prompt"]) == 1
+    assert document.count("| Primary | | | | | | |") == 24
+    assert document.count("| Optional second | | | | | | |") == 24
+    assert "Completed human reviews: 0" in document
+    assert "PENDING HUMAN REVIEW — UNEVALUATED" in document
+    assert "not a new gold benchmark" in document
+
+
+def test_human_packet_is_blank_and_disjoint_from_frozen_queries():
+    review = parse(RECEIPT.read_text())["human_review"]
+    document = PACKET.read_text()
+    validate_review(review, document)
+    assert hashlib.sha256(PACKET.read_bytes()).hexdigest() == review["sha256"]
+    assert sum(q["scope"] == "current_application" for q in review["queries"]) == 12
+    assert sum(q["scope"] == "prospective_discussion" for q in review["queries"]) == 12
+    original = set()
+    for filename in (
+        "furniture_retrieval_queries.json",
+        "furniture_embedding_development_08r1.json",
+        "furniture_embedding_held_out_08r1.json",
+    ):
+        original.update(
+            " ".join(c["request"]["query"].casefold().split())
+            for c in parse((ROOT / "data/benchmarks" / filename).read_text())["cases"]
+        )
+    assert not original & {
+        " ".join(q["prompt"].casefold().split()) for q in review["queries"]
+    }
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("reviewer_identity_or_role", "fabricated-owner"),
+        ("review_date", "2026-10-29"),
+        ("hard_eligibility", "eligible"),
+        ("semantic_relevance", "relevant"),
+        ("adjudication", "approved"),
+    ],
+)
+def test_fake_human_review_is_rejected(field, value):
+    review = parse(RECEIPT.read_text())["human_review"]
+    review["queries"][0][field] = value
+    with pytest.raises(AssertionError):
+        validate_review(review, PACKET.read_text())
+
+
+def test_source_receipt_budget_stage_counts_and_primary_joins():
+    report = parse(RECEIPT.read_text())
+    audit = report["transfer_audit"]
+    requests = audit["requests"]
+    assert len(requests) == audit["implementation_request_count"] == 52
+    assert len({r["name"] for r in requests}) == 52
+    assert (
+        sum(r["body_bytes"] for r in requests)
+        == audit["actual_body_bytes"]
+        == 9948621
+        <= audit["total_limit_bytes"]
+        == 10 * 1024 * 1024
+    )
+    assert (
+        max(r["body_bytes"] for r in requests)
+        == audit["maximum_response_body_bytes"]
+        == 1024 * 1024
+    )
+    assert (
+        sum(r["method"] == "HEAD" for r in requests)
+        == audit["model_head_requests"]
+        == 30
+    )
+    for r in requests:
+        assert r["url"].startswith("https://") and "error" not in r
+        assert r["body_bytes"] <= 1024 * 1024
+        if r["url"].endswith(".glb"):
+            assert r["method"] == "HEAD" and r["body_bytes"] == 0
+        if "listings/metadata/" in r["url"]:
+            assert r["status"] == 206 and r["requested_range"]
+    coverage = report["coverage"]
+    assert (coverage["task_total"], coverage["new_ids"], coverage["revisited_ids"]) == (
+        30,
+        25,
+        5,
+    )
+    assert coverage["current_task_decisions"] == {
+        "eligible_for_acquisition": 3,
+        "needs_evidence": 19,
+        "excluded": 8,
+    }
+    assert {k: v["investigated"] for k, v in coverage["by_group"].items()} == {
+        "bed": 8,
+        "desk": 8,
+        "wardrobe_dresser": 8,
+        "additional": 6,
+    }
+    assert (
+        coverage["active_packaged_metadata_qualified"],
+        coverage["active_planning_envelope_qualified"],
+        coverage["active_render_qualified"],
+    ) == (2, 1, 1)
+    assert not any(
+        coverage[k]
+        for k in (
+            "new_packaged_metadata_qualified",
+            "new_planning_envelope_qualified",
+            "new_render_qualified",
+        )
+    )
+    registry = {c["candidate_id"]: c for c in parse(REGISTRY.read_text())["candidates"]}
+    investigations = report["investigations"]
+    assert len(investigations) == len({i["candidate_id"] for i in investigations}) == 30
+    assert report["source_excerpts_are_partial"] is True
+    assert (
+        report["resource_screen"]["shortlist_combined_reported_texture_estimate_bytes"]
+        == 192 * 1024 * 1024
+    )
+    assert (
+        report["resource_screen"]["shortlist_combined_estimate_exceeds_scene_limit"]
+        is True
+    )
+    for i in investigations:
+        source, model, assessment = (
+            i["source_excerpts"],
+            i["model_index_row"],
+            i["assessment"],
+        )
+        assert (
+            source["3dmodel_id"]
+            == model["3dmodel_id"]
+            == assessment["identity"]["model_id"]
+        )
+        assert source["item_id"] == assessment["identity"]["product_id"]
+        assert source["domain_name"] == assessment["identity"]["marketplace_domain"]
+        assert (
+            i["record_sha256"]
+            == assessment["source"]["listing_line_sha256_excluding_newline"]
+        )
+        assert assessment["source"]["model_url"].endswith("/" + model["path"])
+        assert all(
+            i["future_search_attributes"][k] is None
+            for k in ("materials", "colors", "styles", "description")
+        )
+        if i["is_new"]:
+            assert assessment == registry[i["candidate_id"]]
+        for original in assessment["dimensions"]["original_item_fields"]:
+            value = source["item_dimensions"][original["source_field"]]
+            assert (original["value"], original["unit"]) == (
+                value["value"],
+                value["unit"],
+            )
+    assert {
+        c["candidate_id"] for c in report["new_acquisition_shortlist"]
+    } == NEW_ELIGIBLE.keys()
+    assert not report["material_corrections_to_historical_evidence"]
+    assert all(
+        r["original_record_unchanged"] and not r["qualification_outcome_changed"]
+        for r in report["reassessments"]
+    )
+
+
+def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
+    report = parse(RECEIPT.read_text())
+    pins = report["preservation"]
+    assert pins["verified_count"] == len(pins["baseline_files"]) == 142
+    for path, expected in pins["baseline_files"].items():
+        file = (ROOT / path).resolve()
+        assert file.is_relative_to(ROOT) and not path.startswith(
+            (".agents/", ".claude/")
+        )
+        assert hashlib.sha256(file.read_bytes()).hexdigest() == expected
+    register = (ROOT / "docs/data/FURNITURE_SOURCE_REGISTER.md").read_text()
+    start = register.index("# Furniture source qualification register — Task 08A")
+    end = register.index("\n\n---\n\n# 08F1", start)
+    assert (
+        hashlib.sha256(register[start:end].encode()).hexdigest()
+        == report["historical_snapshot"]["historical_register_body_sha256"]
+    )
