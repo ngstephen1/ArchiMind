@@ -25,15 +25,19 @@ from archimind.render import (
     render_floorplan,
     render_styled_design_3d,
 )
+from archimind.ui.furniture_assets import CATALOG, PROCEDURAL, render_furniture_assets
 from archimind.ui.interior_styling import render_interior_styling, reset_styling
 from archimind.ui.realistic_view import (
+    OVERRIDES_KEY,
     PLOTLY_VIEW,
     REVISION_KEY,
     SNAPSHOT_KEY,
     THREE_VIEW,
     VIEW_KEY,
     render_selected_layout_view,
+    render_stored_provenance,
     snapshot_generation,
+    stored_source_specification,
 )
 
 RESULT_KEY = "layout_generation_result"
@@ -120,6 +124,7 @@ def render_layout_generator(
     )
 
     st.markdown("### Layout Generation Controls")
+    pending = render_furniture_assets(specification)
     seed = int(
         st.number_input(
             "Random seed",
@@ -134,22 +139,45 @@ def render_layout_generator(
     st.caption(
         "Up to two alternatives. Furniture dimensions and openings are preserved; rotation is 0°."
     )
-    if st.button("Generate Layouts", type="primary", key="generate_layouts"):
+    if st.button(
+        "Generate Layouts",
+        type="primary",
+        key="generate_layouts",
+        disabled=pending.catalog_mode and pending.prepared is None,
+    ):
         try:
             with st.spinner("Generating and checking layouts…"):
-                result = _generate(specification, seed)
+                submitted = (
+                    pending.prepared.design()
+                    if pending.prepared is not None
+                    else specification
+                )
+                proofs = (
+                    {p.furniture_id: p for p in pending.prepared.planning_bindings}
+                    if pending.prepared is not None
+                    else planning_bindings
+                )
+                result = _generate(submitted, seed)
+                revision = st.session_state.get(REVISION_KEY, 0) + 1
+                snapshot = snapshot_generation(
+                    submitted,
+                    result,
+                    revision,
+                    proofs,
+                    assignments=pending.prepared.assignments
+                    if pending.prepared is not None
+                    else (),
+                    source_mode=CATALOG if pending.catalog_mode else PROCEDURAL,
+                )
         except Exception:
             logging.getLogger(__name__).exception("Layout generation failed")
             st.session_state[ERROR_KEY] = (
                 "Could not generate layouts. Please try again."
             )
         else:
-            revision = st.session_state.get(REVISION_KEY, 0) + 1
-            snapshot = snapshot_generation(
-                specification, result, revision, planning_bindings
-            )
             st.session_state[REVISION_KEY] = revision
             st.session_state[SNAPSHOT_KEY] = snapshot
+            st.session_state.pop(OVERRIDES_KEY, None)
             reset_styling()
             st.session_state[RESULT_KEY] = result
             st.session_state[SELECTION_KEY] = "Layout A"
@@ -166,6 +194,7 @@ def render_layout_generator(
         st.info("Choose a seed and click Generate Layouts to create alternatives.")
         return
 
+    render_stored_provenance(result)
     _show_outcome(result)
     if seed != result.seed:
         st.info(
@@ -284,7 +313,15 @@ def render_layout_generator(
         "Door approaches are rectangular approximations; actual swing geometry "
         "and building-code compliance are outside this prototype."
     )
-    advice = render_interior_styling(specification, result, labels.index(selected))
+    try:
+        source = stored_source_specification(result, specification)
+    except ValueError:
+        st.error(
+            "The stored source specification is unavailable. Generate again before requesting styling."
+        )
+        advice = None
+    else:
+        advice = render_interior_styling(source, result, labels.index(selected))
     if view == THREE_VIEW:
         with selected_scene.container():
             render_selected_layout_view(candidate.design, result, selected)

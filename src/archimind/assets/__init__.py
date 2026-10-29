@@ -39,3 +39,23 @@ __all__ = [
     "load_planning_envelope",
     "qualify_planning_envelope",
 ]
+
+from archimind.assets.specifications import (
+    CatalogProductOption,
+    PreparedCatalogSpecification,
+    ProductAssignment,
+    SpecificationError,
+    catalog_product_options,
+    prepare_catalog_specification,
+    specification_is_current,
+)
+
+__all__ += [
+    "CatalogProductOption",
+    "PreparedCatalogSpecification",
+    "ProductAssignment",
+    "SpecificationError",
+    "catalog_product_options",
+    "prepare_catalog_specification",
+    "specification_is_current",
+]
