@@ -1,0 +1,280 @@
+{
+  "schema_version": 1,
+  "catalog_id": "archimind-furniture",
+  "catalog_version": "1.0.0",
+  "search_document_version": 1,
+  "records": [
+    {
+      "asset_id": "abo-b075x2x4xs-amazon-com",
+      "asset_version": "1.0.0",
+      "qualification": "metadata_qualified",
+      "category": "chair",
+      "subtype": "armchair",
+      "variant_label": "Sod",
+      "rotation_deg": 0,
+      "source": {
+        "dataset": "Amazon Berkeley Objects",
+        "product_id": "B075X2X4XS",
+        "model_id": "B075X2X4XS",
+        "marketplace_domain": "amazon.com",
+        "manufacturer_model_numbers": [
+          "LTD26020C"
+        ],
+        "variant_label": "Sod",
+        "original_category": "CHAIR",
+        "original_title": "Amazon Brand – Stone & Beam Charles Classic Oversized Leather Accent Arm Chair, 39\"W, Sod",
+        "metadata_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz",
+        "model_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/S/B075X2X4XS.glb",
+        "source_revision": null,
+        "source_last_modified": "Wed, 16 Jun 2021 17:41:07 GMT",
+        "source_etag": "\"edf9415d0c5fb2d130a1d49f60d5fd1f\"",
+        "listing_line": 242,
+        "listing_record_sha256": "f98a699bf5a8540b8e1fad18233bb94b940d21a617b7cb670768733c36bcb99a",
+        "metadata_snapshot_sha256": "12a0f37f5dd743b9eeeb5b98365efa1461e800bf5692c61b4865f3f82f54b458",
+        "model_index_sha256": "90d061c3e3efa555a55bfc8ed7fc55cdb322086397443de1b33e91f7924d7d92",
+        "qualification_candidate_id": "abo-b075x2x4xs-amazon-com",
+        "qualification_revision": "c9f1941a16985e775ff4923acc344a3d9bdb23dd",
+        "qualification_file_sha256": "cb3d5b7a7382a31ec96ec709f4fdcf6f90d9202275fe41f40c04391dc53ddc5d",
+        "qualification_date": "2026-10-28"
+      },
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 38,
+            "unit": "inches"
+          },
+          {
+            "source_field": "length",
+            "value": 39,
+            "unit": "inches"
+          },
+          {
+            "source_field": "width",
+            "value": 39,
+            "unit": "inches"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "width"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "length"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "Whole-item fields width -> canonical width, length -> depth, height -> height; independently compared with same-ID native X/Y/Z extents and product text.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 0.9906,
+        "depth_m": 0.9906,
+        "height_m": 0.9652
+      },
+      "legal": {
+        "status": "verified",
+        "license_id": "CC-BY-4.0",
+        "license_url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+        "copyright": "Amazon.com (dataset attribution); individual mesh author not separately specified",
+        "creator": null,
+        "attribution": "Amazon.com; ABO dataset contributors: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, Himanshu Arora, Arnab Dhua, Xi (Brian) Zhang, Tomas Yago-Vicente, Jasmine Collins, Shubham Goel, Jitendra Malik. No endorsement.",
+        "modification_notice": "Selected metadata extracted and normalized; reviewed names/search terms added. No model, texture or image downloaded or modified. Preserve notices, link CC BY 4.0 and indicate later modifications.",
+        "restrictions": [
+          "Published copyright license is verified, not independent chain-of-title or trademark clearance.",
+          "No asset bytes or model-specific logos/embedded notices inspected."
+        ],
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#download",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#attribution",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+        ],
+        "public_browser_delivery": true,
+        "redistribution": true,
+        "commercial_use": true
+      },
+      "search": {
+        "reviewed_name": "Stone & Beam Charles armchair — Sod",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        ],
+        "aliases": [
+          "armchair",
+          "accent chair"
+        ],
+        "usage_tags": [
+          "seating"
+        ],
+        "description": null,
+        "materials": null,
+        "colors": null,
+        "styles": null
+      },
+      "source_conventions": {
+        "status": "source_reported_uninspected",
+        "units": "meters",
+        "up": "+Y",
+        "front": "+Z",
+        "floor_anchor": "For floor-standing source models: centered in X/Z, minimum Y at zero; not verified for the actual asset.",
+        "evidence_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+      },
+      "rendering": {
+        "status": "not_evaluated",
+        "model_asset_id": null,
+        "model_sha256": null,
+        "verified_bounds": null,
+        "verified_orientation": null,
+        "verified_anchor": null,
+        "local_glb_path": null
+      }
+    },
+    {
+      "asset_id": "abo-b07pqs58xn-amazon-com",
+      "asset_version": "1.0.0",
+      "qualification": "metadata_qualified",
+      "category": "storage",
+      "subtype": "bookcase",
+      "variant_label": "Espresso",
+      "rotation_deg": 0,
+      "source": {
+        "dataset": "Amazon Berkeley Objects",
+        "product_id": "B07PQS58XN",
+        "model_id": "B07PQS58XN",
+        "marketplace_domain": "amazon.com",
+        "manufacturer_model_numbers": [
+          "SH01-0606-008-SG-A05"
+        ],
+        "variant_label": "Espresso",
+        "original_category": "SHELF",
+        "original_title": "AmazonBasics Classic 5-Shelf Open Bookcase Organizer with Solid Rubber Wood Frame - Espresso",
+        "metadata_url": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz",
+        "model_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/N/B07PQS58XN.glb",
+        "source_revision": null,
+        "source_last_modified": "Wed, 16 Jun 2021 17:41:07 GMT",
+        "source_etag": "\"edf9415d0c5fb2d130a1d49f60d5fd1f\"",
+        "listing_line": 191,
+        "listing_record_sha256": "899c8f102de91519323adea30711ed455d5226acbf4bfca87615e5ec1e9aef46",
+        "metadata_snapshot_sha256": "12a0f37f5dd743b9eeeb5b98365efa1461e800bf5692c61b4865f3f82f54b458",
+        "model_index_sha256": "90d061c3e3efa555a55bfc8ed7fc55cdb322086397443de1b33e91f7924d7d92",
+        "qualification_candidate_id": "abo-b07pqs58xn-amazon-com",
+        "qualification_revision": "c9f1941a16985e775ff4923acc344a3d9bdb23dd",
+        "qualification_file_sha256": "cb3d5b7a7382a31ec96ec709f4fdcf6f90d9202275fe41f40c04391dc53ddc5d",
+        "qualification_date": "2026-10-28"
+      },
+      "dimensions": {
+        "status": "verified",
+        "kind": "item",
+        "uncertainty": "published_claim_not_independent_measurement",
+        "original": [
+          {
+            "source_field": "height",
+            "value": 74.48,
+            "unit": "inches"
+          },
+          {
+            "source_field": "length",
+            "value": 15.03,
+            "unit": "inches"
+          },
+          {
+            "source_field": "width",
+            "value": 25.98,
+            "unit": "inches"
+          }
+        ],
+        "axis_map": [
+          {
+            "target": "width_m",
+            "source_field": "width"
+          },
+          {
+            "target": "depth_m",
+            "source_field": "length"
+          },
+          {
+            "target": "height_m",
+            "source_field": "height"
+          }
+        ],
+        "axis_evidence": "Whole-item fields width -> canonical width, length -> depth, height -> height; independently compared with same-ID native X/Y/Z extents and product text.",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/metadata/3dmodels.csv.gz"
+        ],
+        "width_m": 0.659892,
+        "depth_m": 0.381762,
+        "height_m": 1.891792
+      },
+      "legal": {
+        "status": "verified",
+        "license_id": "CC-BY-4.0",
+        "license_url": "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+        "copyright": "Amazon.com (dataset attribution); individual mesh author not separately specified",
+        "creator": null,
+        "attribution": "Amazon.com; ABO dataset contributors: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, Himanshu Arora, Arnab Dhua, Xi (Brian) Zhang, Tomas Yago-Vicente, Jasmine Collins, Shubham Goel, Jitendra Malik. No endorsement.",
+        "modification_notice": "Selected metadata extracted and normalized; reviewed names/search terms added. No model, texture or image downloaded or modified. Preserve notices, link CC BY 4.0 and indicate later modifications.",
+        "restrictions": [
+          "Published copyright license is verified, not independent chain-of-title or trademark clearance.",
+          "No asset bytes or model-specific logos/embedded notices inspected."
+        ],
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#download",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/index.html#attribution",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt",
+          "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+        ],
+        "public_browser_delivery": true,
+        "redistribution": true,
+        "commercial_use": true
+      },
+      "search": {
+        "reviewed_name": "AmazonBasics five-shelf bookcase — Espresso",
+        "evidence_urls": [
+          "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        ],
+        "aliases": [
+          "bookcase",
+          "bookshelf"
+        ],
+        "usage_tags": [
+          "book storage"
+        ],
+        "description": null,
+        "materials": null,
+        "colors": null,
+        "styles": null
+      },
+      "source_conventions": {
+        "status": "source_reported_uninspected",
+        "units": "meters",
+        "up": "+Y",
+        "front": "+Z",
+        "floor_anchor": "For floor-standing source models: centered in X/Z, minimum Y at zero; not verified for the actual asset.",
+        "evidence_url": "https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md"
+      },
+      "rendering": {
+        "status": "not_evaluated",
+        "model_asset_id": null,
+        "model_sha256": null,
+        "verified_bounds": null,
+        "verified_orientation": null,
+        "verified_anchor": null,
+        "local_glb_path": null
+      }
+    }
+  ]
+}

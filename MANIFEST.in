@@ -52,3 +52,6 @@ include docs/data/FURNITURE_SOURCE_REGISTER.md
 include docs/data/FURNITURE_EXPANSION_08F1.md
 include docs/data/FURNITURE_EXPANSION_08F1.json
 include docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md
+
+include docs/data/FURNITURE_CATALOG_ADMISSION_08F2.md
+include docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json

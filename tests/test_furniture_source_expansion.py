@@ -489,7 +489,16 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     report = parse(RECEIPT.read_text())
     pins = report["preservation"]
     assert pins["verified_count"] == len(pins["baseline_files"]) == 142
+    # 08F1's receipt remains historical. Later explicitly authorized code migrations
+    # must bind both its old hash and the exact new bytes; all other pins stay strict.
+    migrations = parse(
+        (ROOT / "docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json").read_text()
+    )["authorized_migrations"]
+    assert set(migrations) <= pins["baseline_files"].keys()
     for path, expected in pins["baseline_files"].items():
+        if path in migrations:
+            assert migrations[path]["before_sha256"] == expected
+            expected = migrations[path]["after_sha256"]
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")

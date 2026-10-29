@@ -126,7 +126,7 @@ class SourceProvenance(_Frozen):
     marketplace_domain: Annotated[str, Field(pattern=r"^amazon\.[a-z.]+$")]
     manufacturer_model_numbers: tuple[Text, ...] = Field(min_length=1)
     variant_label: Text
-    original_category: Literal["CHAIR", "SHELF"]
+    original_category: Literal["CHAIR", "SHELF", "DESK", "CABINET", "TABLE"]
     original_title: Text
     metadata_url: EvidenceURL
     model_url: EvidenceURL
@@ -340,8 +340,8 @@ class FurnitureAssetRecord(_Frozen):
     asset_id: Text
     asset_version: Version
     qualification: Literal["metadata_qualified"]
-    category: Literal["chair", "storage"]
-    subtype: Literal["armchair", "bookcase"]
+    category: Literal["chair", "storage", "desk", "wardrobe", "table"]
+    subtype: Literal["armchair", "bookcase", "writing desk", "wardrobe", "nightstand"]
     variant_label: Text
     rotation_deg: StrictInt = Field(ge=0, le=0)
     source: SourceProvenance
@@ -362,7 +362,28 @@ class FurnitureAssetRecord(_Frozen):
                 {"book storage"},
             ),
         }
+        rules.update(
+            {
+                "DESK": (
+                    "desk",
+                    "writing desk",
+                    {"desk", "writing desk"},
+                    {"writing", "study"},
+                ),
+                "CABINET": ("wardrobe", "wardrobe", {"wardrobe"}, {"clothing storage"}),
+                "TABLE": (
+                    "table",
+                    "nightstand",
+                    {"nightstand", "bedside table"},
+                    {"bedside use"},
+                ),
+            }
+        )
         category, subtype, aliases, uses = rules[self.source.original_category]
+        # Reviewed Morava frontage is source length, not source width.
+        width_axis, depth_axis = (
+            ("length", "width") if subtype == "wardrobe" else ("width", "length")
+        )
         if (
             self.asset_id != self.source.qualification_candidate_id
             or self.variant_label != self.source.variant_label
@@ -372,7 +393,7 @@ class FurnitureAssetRecord(_Frozen):
             or self.source.metadata_url not in self.dimensions.evidence_urls
             or self.source.metadata_url not in self.search.evidence_urls
             or {a.target: a.source_field for a in self.dimensions.axis_map}
-            != {"width_m": "width", "depth_m": "length", "height_m": "height"}
+            != {"width_m": width_axis, "depth_m": depth_axis, "height_m": "height"}
         ):
             raise ValueError("Inconsistent product qualification evidence.")
         return self
@@ -410,7 +431,7 @@ class FurnitureAssetRecord(_Frozen):
 
 
 class FurnitureCatalog(_Frozen):
-    schema_version: StrictInt = Field(ge=1, le=1)
+    schema_version: StrictInt = Field(ge=1, le=2)
     catalog_id: Literal["archimind-furniture"]
     catalog_version: Version
     search_document_version: StrictInt = Field(ge=1, le=1)
@@ -418,6 +439,12 @@ class FurnitureCatalog(_Frozen):
 
     @model_validator(mode="after")
     def unique_records(self) -> Self:
+        if self.schema_version == 1 and any(
+            r.subtype not in ("armchair", "bookcase") for r in self.records
+        ):
+            raise ValueError("Schema 1 supports historical categories only.")
+        if self.schema_version == 2 and self.catalog_version != "1.1.0":
+            raise ValueError("Schema 2 requires the reviewed 1.1.0 release.")
         ids = [record.asset_id for record in self.records]
         identities = [
             (r.source.product_id, r.source.marketplace_domain, r.variant_label)
@@ -438,16 +465,25 @@ class FurnitureCatalog(_Frozen):
         raise CatalogError("Catalog asset was not found.")
 
 
-def load_catalog() -> FurnitureCatalog:
+def load_catalog(*, version: str | None = None) -> FurnitureCatalog:
     """Load the fixed package resource, never a caller-supplied path or URL."""
     try:
-        data = (
-            resources.files("archimind.assets")
-            .joinpath("furniture_catalog.json")
-            .read_bytes()
+        if version not in (None, "1.0.0"):
+            raise CatalogError("Unknown catalog release.")
+        filename = (
+            "furniture_catalog.json"
+            if version is None
+            else "furniture_catalog_1_0_0.json"
         )
+        data = resources.files("archimind.assets").joinpath(filename).read_bytes()
         if not 0 < len(data) <= MAX_CATALOG_BYTES:
             raise CatalogError("Invalid catalog size.")
+        if (
+            version == "1.0.0"
+            and hashlib.sha256(data).hexdigest()
+            != "c1116a65558b2781f1ac979920dbd0b0b683dfdcc314681a70d8639ed87880dd"
+        ):
+            raise CatalogError("Historical catalog integrity mismatch.")
         return FurnitureCatalog.model_validate_json(data)
     except (OSError, ValueError, TypeError, RecursionError):
         raise CatalogError("Furniture catalog is unavailable or invalid.") from None
