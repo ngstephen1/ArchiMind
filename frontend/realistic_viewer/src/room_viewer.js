@@ -42,11 +42,11 @@ function placeholderLabel(f){
   const c=document.createElement('canvas');c.width=512;c.height=64;const ctx=c.getContext('2d');ctx.fillStyle='#ffffffee';ctx.fillRect(0,0,512,64);ctx.fillStyle='#284951';ctx.font='36px system-ui';ctx.textAlign='center';ctx.fillText(`${f.name.slice(0,24)} · placeholder`,256,42,500);
   const sprite=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),depthTest:false,depthWrite:false,toneMapped:false}));sprite.renderOrder=100;sprite.position.set(...toThree([f.x_m+f.width_m/2,f.y_m+f.depth_m/2,f.height_m+.16]));sprite.scale.set(1.85,.32,1);return sprite;
 }
-export function mountRoomViewer(host,input){
+export function mountRoomViewer(host,input,{viewState=null}={}){
   const root=document.createElement('section');root.dataset.viewer='realistic-room';
   root.innerHTML=`<div class="stage room-stage"><div class="status" role="status">Loading architectural room…</div></div><div class="toolbar"><button class="reset" type="button">Reset camera</button><label><input type="checkbox" class="front" checked> Front walls</label><label><input type="checkbox" class="outlines" checked> Canonical footprints</label></div><p class="room-info"></p><ul class="objects"></ul><p class="metrics" aria-live="polite"></p>`;
   host.appendChild(root);const stage=root.querySelector('.stage'),status=root.querySelector('.status');
-  let renderer,scene,controls,envTarget,resizeObserver,visibility,frame,disposed=false,visible=true,userCamera=false;
+  let renderer,scene,camera,controls,envTarget,resizeObserver,visibility,frame,disposed=false,visible=true,userCamera=false;
   const owned=new THREE.Group(),instances=new THREE.Group(),footprints=new THREE.Group(),walls=new THREE.Group();
   const releases=[];const start=performance.now();
   const cleanup=()=>{
@@ -60,7 +60,7 @@ export function mountRoomViewer(host,input){
   try{
     const data=validateScene(input),room=data.design.room,fs=[...data.design.furniture].sort((a,b)=>a.id.localeCompare(b.id));
     const bindings=new Map(data.asset_bindings.map(b=>[b.furniture_id,b.asset_id]));root.dataset.state='loading';
-    root.querySelector('.room-info').textContent=`${room.name} · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · X east, Y north, Z up. ${data.schema_version===3?'Charles: ABO B075X2X4XS (Sod), CC BY 4.0; native scale 1.0, Policy B envelope. Standalone demonstration, not a generated layout.':'Canonical data; illustrative fitted mesh validity is not established.'}`;
+    root.querySelector('.room-info').textContent=`${room.name} · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · X east, Y north, Z up. ${data.schema_version===3?'Canonical layout. Only explicitly approved product bindings use native-scale meshes; other objects are labeled placeholders.':'Canonical data; illustrative fitted mesh validity is not established.'}`;
     scene=new THREE.Scene();scene.background=new THREE.Color('#e9edf0');scene.add(owned,instances);owned.add(walls,footprints);
     renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
     renderer.domElement.setAttribute('aria-label','Experimental room with wall openings, textured chairs and labeled procedural furniture');stage.prepend(renderer.domElement);
@@ -85,10 +85,17 @@ export function mountRoomViewer(host,input){
     const bounds=new THREE.Box3(new THREE.Vector3(0,0,-room.depth_m),new THREE.Vector3(room.width_m,room.ceiling_height_m,0));
     for(const f of fs){const b=canonicalVolume(f);bounds.expandByPoint(new THREE.Vector3(...b.min));bounds.expandByPoint(new THREE.Vector3(...b.max));footprints.add(footprint(f));}
     bounds.expandByScalar(.12);
-    const camera=new THREE.PerspectiveCamera(42,1,.02,200);controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=.5;controls.maxDistance=120;controls.maxPolarAngle=Math.PI*.49;
+    camera=new THREE.PerspectiveCamera(42,1,.02,200);controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.dampingFactor=.08;controls.minDistance=.5;controls.maxDistance=120;controls.maxPolarAngle=Math.PI*.49;
     controls.addEventListener('start',()=>{userCamera=true;});controls.addEventListener('change',()=>{root.dataset.camera=JSON.stringify({position:camera.position.toArray(),target:controls.target.toArray()});});
     const reset=()=>{const damping=controls.enableDamping;controls.enableDamping=false;controls.update();const view=cameraFrame(bounds.min.toArray(),bounds.max.toArray(),camera.aspect,camera.fov);camera.position.set(...view.position);controls.target.set(...view.target);controls.update();controls.enableDamping=damping;userCamera=false;};root.querySelector('.reset').onclick=reset;
     const resize=()=>{const w=Math.max(1,stage.clientWidth),h=Math.max(1,stage.clientHeight);camera.aspect=w/h;camera.updateProjectionMatrix();renderer.setSize(w,h,false);if(!userCamera)reset();};resizeObserver=new ResizeObserver(resize);resizeObserver.observe(stage);resize();
+    const vector=v=>Array.isArray(v)&&v.length===3&&v.every(x=>Number.isFinite(x)&&Math.abs(x)<10000);
+    if(viewState&&vector(viewState.position)&&vector(viewState.target)){
+      camera.position.set(...viewState.position);controls.target.set(...viewState.target);controls.update();userCamera=viewState.userCamera===true;
+      for(const [selector,key] of [['.front','front'],['.outlines','outlines']])if(typeof viewState[key]==='boolean'){
+        const input=root.querySelector(selector);input.checked=viewState[key];input.dispatchEvent(new Event('change'));
+      }
+    }
     visibility=new IntersectionObserver(entries=>{visible=entries[0].isIntersecting;});visibility.observe(stage);
     const animate=()=>{if(disposed)return;frame=requestAnimationFrame(animate);if(visible){controls.update();renderer.render(scene,camera);}};animate();
     (async()=>{
@@ -116,5 +123,9 @@ export function mountRoomViewer(host,input){
       root.dataset.state=failedInstances?'partial':'ready';status.dataset.state=root.dataset.state;status.textContent=failedInstances?'Room loaded; textured asset unavailable. Labeled placeholders shown.':'Experimental room loaded';
     })().catch(()=>{if(!disposed)fail();});
   }catch{fail();}
+  cleanup.captureView=()=>!disposed&&camera&&controls?{
+    position:camera.position.toArray(),target:controls.target.toArray(),userCamera,
+    front:root.querySelector('.front').checked,outlines:root.querySelector('.outlines').checked,
+  }:null;
   return cleanup;
 }

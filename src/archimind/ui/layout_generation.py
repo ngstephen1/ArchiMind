@@ -8,9 +8,11 @@ Browser refresh/disconnect can clear session state; there is no durable storage.
 """
 
 import logging
+from typing import Mapping
 
 import streamlit as st
 
+from archimind.assets.planning_envelopes import PlanningFurnitureBinding
 from archimind.geometry import (
     LayoutGenerationResult,
     generate_layout_candidates,
@@ -24,6 +26,15 @@ from archimind.render import (
     render_styled_design_3d,
 )
 from archimind.ui.interior_styling import render_interior_styling, reset_styling
+from archimind.ui.realistic_view import (
+    PLOTLY_VIEW,
+    REVISION_KEY,
+    SNAPSHOT_KEY,
+    THREE_VIEW,
+    VIEW_KEY,
+    render_selected_layout_view,
+    snapshot_generation,
+)
 
 RESULT_KEY = "layout_generation_result"
 ERROR_KEY = "layout_generation_error"
@@ -71,12 +82,19 @@ def _show_outcome(result: LayoutGenerationResult) -> None:
     )
 
 
-def render_layout_generator(specification: RoomDesign) -> None:
+def render_layout_generator(
+    specification: RoomDesign,
+    *,
+    planning_bindings: Mapping[str, PlanningFurnitureBinding] | None = None,
+) -> None:
     """Compare stored layouts; one selected candidate supplies both renderers.
 
     Selection does not copy, regenerate, or spatially revalidate candidate data.
     Renderer schema checks remain part of their existing public contracts.
     """
+    # Retain the user's view preference even when an empty result hides its widget.
+    if VIEW_KEY in st.session_state:
+        st.session_state[VIEW_KEY] = st.session_state[VIEW_KEY]
     st.subheader("AI-Assisted Room Layout Generator")
     st.write(
         "Generate reproducible furniture arrangements with deterministic seeded "
@@ -126,6 +144,12 @@ def render_layout_generator(specification: RoomDesign) -> None:
                 "Could not generate layouts. Please try again."
             )
         else:
+            revision = st.session_state.get(REVISION_KEY, 0) + 1
+            snapshot = snapshot_generation(
+                specification, result, revision, planning_bindings
+            )
+            st.session_state[REVISION_KEY] = revision
+            st.session_state[SNAPSHOT_KEY] = snapshot
             reset_styling()
             st.session_state[RESULT_KEY] = result
             st.session_state[SELECTION_KEY] = "Layout A"
@@ -190,6 +214,13 @@ def render_layout_generator(specification: RoomDesign) -> None:
         )
         return
 
+    if any(item.rotation_deg != 0 for item in candidate.design.furniture):
+        reset_styling()
+        st.error(
+            "The selected layout contains an unsupported rotation. Faithful 2D/3D rendering requires rotation zero."
+        )
+        return
+
     st.markdown("### Selected 2D Floor Plan")
     st.write(f"**{selected}** · Heuristic score: **{candidate.score.total:.6f} / 100**")
     st.plotly_chart(
@@ -223,6 +254,9 @@ def render_layout_generator(specification: RoomDesign) -> None:
             "Drag to orbit; use the modebar to zoom, pan, or reset. "
             "Toggle Walls if a hover target is obscured."
         )
+        view = st.radio(
+            "3D view", [PLOTLY_VIEW, THREE_VIEW], horizontal=True, key=VIEW_KEY
+        )
         selected_scene = st.empty()
 
     st.markdown("### Spatial Validation Summary")
@@ -251,21 +285,25 @@ def render_layout_generator(specification: RoomDesign) -> None:
         "and building-code compliance are outside this prototype."
     )
     advice = render_interior_styling(specification, result, labels.index(selected))
-    if advice is not None:
-        try:
-            figure = render_styled_design_3d(candidate.design, advice)
-        except StyleColorPreviewError:
-            st.warning(
-                "The color plan does not match this layout. Showing the original 3D view."
-            )
-            figure = render_design_3d(candidate.design)
+    if view == THREE_VIEW:
+        with selected_scene.container():
+            render_selected_layout_view(candidate.design, result, selected)
     else:
-        figure = render_design_3d(candidate.design)
-    selected_scene.plotly_chart(
-        figure,
-        width="stretch",
-        theme=None,
-        key="generated-design-3d",
-        config={"scrollZoom": True, "displaylogo": False},
-        alt=f"{selected}: synchronized 3D bedroom with the selected furniture positions and unchanged room openings.",
-    )
+        if advice is not None:
+            try:
+                figure = render_styled_design_3d(candidate.design, advice)
+            except StyleColorPreviewError:
+                st.warning(
+                    "The color plan does not match this layout. Showing the original 3D view."
+                )
+                figure = render_design_3d(candidate.design)
+        else:
+            figure = render_design_3d(candidate.design)
+        selected_scene.plotly_chart(
+            figure,
+            width="stretch",
+            theme=None,
+            key="generated-design-3d",
+            config={"scrollZoom": True, "displaylogo": False},
+            alt=f"{selected}: synchronized 3D bedroom with the selected furniture positions and unchanged room openings.",
+        )
