@@ -2,7 +2,7 @@
 
 Last reviewed and locally verified: **October 28, 2026**.
 
-**Current milestone: Task 07F complete, with an optional catalog-color preview POC.**
+**Current milestone: Task 08C-R1 complete, backend-only Policy B planning envelopes.**
 Live model behavior is unverified. Physical materials/textures and Task 06E2 remain
 separate future renderer work.
 The Task 03 preview, Task 05B comparison, and
@@ -1249,13 +1249,41 @@ Frontend **27 passed, 0 failed, 0 skipped**; syntax/build and committed bundle
 equality, Ruff lint/format, dependency compatibility and Streamlit HTTP 200 health
 checks passed. See the qualification receipt for exact commands and limitations.
 
+## Task 08C-R1 - explicit planning-envelope contract
+
+The owner-approved backend Policy B now keeps published product measurements,
+inspected mesh bounds and planning reservations separate. The [guide](PLANNING_ENVELOPES.md)
+documents strict immutable schemas, fixed packaged metadata, pinned source/receipt
+digests, current catalog/version checks and an explicit fresh-specification factory.
+Original catalog bytes and `furniture_from_catalog` behavior are unchanged.
+
+Charles's new reserved W/D/H are **0.996104896068573 x 1.0019413232803345 x
+0.9760930538177491 m**. Exact corner checks establish native-scale containment under
+the recorded floor/center anchor, with only deterministic outward numeric rounding.
+No 2% margin, functional clearance or visual calibration is inferred. Factory
+results contain a new canonical item and immutable evidence binding; they do not
+replace stored layouts, run generation or claim spatial validity.
+
+There are **97 new offline envelope tests**, covering authority, hashes, versions,
+axes/anchors, strict containment, invalid metadata, immutable sidecars and the
+unchanged old factory, candidates, reports and scores. Source/wheel and isolated
+installed-package checks include the reference metadata and actual new factory.
+Final local verification: **1,477 passed in 80.71s**, preserving all 1,380 baseline
+cases and adding 97 envelope cases. Frontend **27 passed, 0 failed, 0 skipped**;
+syntax/build and unchanged-bundle checks passed. Ruff lint/format (119 files),
+`pip check`, Streamlit HTTP 200 health, source/wheel builds and isolated installed
+factory/resource loading passed. No GLB acquisition, new render qualification,
+Policy C, retrieval, UI change or live model call occurred.
+
 ## Next milestone
 
-Review the **blocked 08C** result. Resolve the source's model/product dimension
-discrepancy with independent authoritative evidence or separately qualify another
-source under 08A. Do not enlarge a footprint or scale a mesh merely to pass.
-The bookcase is deferred without acquisition because its reported 4096 px images
-exceed the 2048 px limit. **08D remains blocked**; neither product is render-ready.
+Review Task 08C-R1 before separately authorizing **08C-R2 native-scale rendering
+qualification**. Charles has sufficient backend envelope evidence for that next
+investigation, but real bytes/decoded bounds, front/materials/image decoding,
+runtime placement/resources, private desktop/narrow review and safe renderer
+bindings still require approval. No product is render-qualified; **08D remains
+blocked**. Bookcase acquisition/preparation is still deferred, including its
+4096 px textures and source-dimension/configuration questions.
 Conversational input remains unimplemented.
 Task 06E2 rendering refinements, rotated-footprint
 support, furniture editing, persistence and export remain separate future work.

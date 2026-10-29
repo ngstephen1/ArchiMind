@@ -32,6 +32,8 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         catalog_path,
         "archimind/assets/catalog.py",
         "archimind/assets/inspection.py",
+        "archimind/assets/planning_envelopes.py",
+        "archimind/assets/planning_envelopes.json",
         "archimind/assets/__init__.py",
         "archimind/_viewer_assets/viewer.js",
         "archimind/_viewer_assets/furniture/SheenChair.glb",
@@ -48,6 +50,7 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
     with tarfile.open(sdist) as archive:
         names = archive.getnames()
         assert any(n.endswith("/scripts/inspect_furniture_assets.py") for n in names)
+        assert any(n.endswith("/docs/developer/PLANNING_ENVELOPES.md") for n in names)
         for name in preserved:
             member = next(n for n in names if n.endswith("/src/" + name))
             assert (
@@ -93,9 +96,12 @@ import archimind
 import archimind.assets.catalog as module
 from archimind.assets import load_catalog, furniture_from_catalog
 import archimind.assets.inspection as inspection
+import archimind.assets.planning_envelopes as planning
+from archimind.assets import load_planning_envelope, furniture_from_planning_envelope
 assert Path(archimind.__file__).resolve().is_relative_to(target)
 assert Path(module.__file__).resolve().is_relative_to(target)
 assert Path(inspection.__file__).resolve().is_relative_to(target)
+assert Path(planning.__file__).resolve().is_relative_to(target)
 catalog = load_catalog()
 assert len(catalog.records) == 2
 assert catalog.catalog_version == '1.0.0'
@@ -111,6 +117,16 @@ item = furniture_from_catalog(catalog.records[0].asset_id,
     furniture_id='isolated', name='Chair', x_m=-1.0, y_m=20.0)
 assert (item.width_m, item.depth_m, item.height_m) == (.9906, .9906, .9652)
 assert (item.x_m, item.y_m, item.rotation_deg) == (-1.0, 20.0, 0)
+envelope = load_planning_envelope(catalog.records[0].asset_id)
+fresh, binding = furniture_from_planning_envelope(envelope.asset_id,
+    furniture_id='reserved', name='Charles', x_m=-1.0, y_m=20.0)
+assert (fresh.width_m, fresh.depth_m, fresh.height_m) == (
+    .996104896068573, 1.0019413232803345, .9760930538177491)
+assert (fresh.x_m, fresh.y_m, fresh.rotation_deg) == (-1.0, 20.0, 0)
+assert binding.envelope.published_dimensions.width_m == .9906
+assert not binding.envelope.qualification.render_qualified
+binding.validate_furniture(fresh)
+assert type(binding).model_validate_json(binding.model_dump_json()) == binding
 assert not any(n.startswith(('openai', 'langgraph', 'fastembed', 'chromadb'))
                for n in sys.modules)
 print('INSTALLED_CATALOG_OK')

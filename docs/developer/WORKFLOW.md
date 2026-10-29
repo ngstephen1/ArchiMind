@@ -315,3 +315,25 @@ The focused suite blocks network/client/process operations. The separate packagi
 test intentionally runs the existing offline build/install toolchain, checks
 source/wheel resource inclusion and unchanged legacy assets, then loads the wheel
 outside the repository with network/process audit guards.
+
+## Explicit planning specifications - Task 08C-R1
+
+The 08B section above records its original metadata-only boundary. 08C subsequently
+inspected Charles in external quarantine and rejected its published-envelope fit.
+The owner has now approved Policy B for an explicit backend-only planning contract.
+See [planning envelopes](PLANNING_ENVELOPES.md) for the current API and proof.
+
+`furniture_from_catalog` still copies published measurements. The separate
+`furniture_from_planning_envelope` returns new canonical Furniture with the
+conservative reserved dimensions and an immutable binding retaining original
+product facts, measured bounds, anchor, source hash, inspection digest and policy/
+catalog versions. It never edits an old design, generates a room or validates its
+placement. Existing generation/validation must be invoked explicitly on a fresh
+specification. Geometry and scores of stored candidates remain unchanged.
+
+Only Charles has an approved planning record. Old canonical JSON remains readable;
+stale sidecars fail current eligibility rather than rewriting layouts. Recomputing
+a digest cannot approve an unknown receipt or model hash. No model is render-
+qualified, no product GLB is packaged and no UI, renderer, retrieval or live-agent
+integration is added. Policy C remains excluded. Future rendering must verify real
+bytes and placement against the binding before source/visual approval in 08C-R2.

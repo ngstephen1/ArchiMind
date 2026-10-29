@@ -19,3 +19,4 @@ include docs/developer/SPATIAL_CRITIC_WORKFLOW.md
 include docs/developer/INTERIOR_STYLIST_AGENT.md
 include docs/developer/INTERIOR_STYLIST_WORKFLOW.md
 include docs/developer/STYLE_COLOR_PREVIEW.md
+include docs/developer/PLANNING_ENVELOPES.md

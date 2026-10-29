@@ -798,8 +798,9 @@ fails the default 0.6 m clearance, while a 0.7 m alternative route passes.
 | `RoomDesign` | `room`, `furniture`, `name` |
 
 IDs are caller-supplied nonblank strings. Furniture categories are nonblank strings;
-there is no catalog integration yet. Lists default to empty, design names to
-`None`, and rotations to `0`.
+the canonical schema remains independent of catalog metadata. Explicit catalog and
+planning-envelope factories create fresh specifications. Lists default to empty,
+design names to `None`, and rotations to `0`.
 
 [Pydantic strict validation](https://docs.pydantic.dev/latest/concepts/strict_mode/)
 rejects numeric strings and booleans as distances. Python integer distances are
@@ -1094,6 +1095,22 @@ ArchiMind/
 └── README.md
 ```
 
+## Product facts and conservative planning envelopes
+
+The independent furniture catalog retains two source-qualified ABO product records.
+Task 08C-R1 adds an explicit backend-only Policy B API for the Charles armchair:
+`furniture_from_planning_envelope()` returns a fresh canonical item plus immutable
+source/inspection/version evidence. Published dimensions, measured mesh bounds,
+reserved planning dimensions and the new item's canonical dimensions remain
+distinct. `furniture_from_catalog()` still uses the original published dimensions.
+
+The native-scale box is reserved conservatively before explicit generation;
+existing layouts, validators and scores are unchanged. There is no automatic
+clearance margin, mesh scaling or rendered product approval. The current UI does
+not invoke this API. See the [planning-envelope guide](docs/developer/PLANNING_ENVELOPES.md)
+for exact rules, Charles measurements, offline usage, invalidation and remaining
+08C-R2 rendering gates.
+
 ## Roadmap
 
 See [project status](docs/developer/STATUS.md) for the detailed capability matrix
@@ -1121,6 +1138,10 @@ and verification record.
 - [x] **Task 07E1 · Standalone Interior Stylist agent** — controlled catalog metadata, verified selected layout, conflicts/clarification and mocked verification.
 - [x] **Task 07E2 · Interior Stylist workflow integration** — optional final E1 node, fresh approval, immutable selected data and explicit fixture fallback.
 - [x] **Task 07F · Streamlit styling panel** — selected-layout handoff, catalog theme/preferences, one-request authorization and clear fixture/AI provenance.
+- [x] **Task 08B · Qualified furniture metadata** — two immutable product records, published dimensions and explicit catalog factory.
+- [x] **Task 08C / 08C-R · Inspection and dimension review** — Charles native mesh measured; published-envelope rendering rejected; source discrepancy and policy options documented.
+- [x] **Task 08C-R1 · Approved planning-envelope contract** — explicit backend-only Policy B, one Charles metadata reference, immutable evidence and fresh specification factory; no product render approval.
+- [ ] **Task 08C-R2 / 08D** — separate native-scale rendering qualification and selected-layout integration, requiring new authorization.
 - [ ] Export.
 - [ ] Multi-agent collaboration and targeted design revisions.
 - [ ] Versioned persistence and a reproducible offline demonstration.
