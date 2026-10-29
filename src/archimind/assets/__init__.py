@@ -7,6 +7,19 @@ from archimind.assets.catalog import (
     furniture_from_catalog,
     load_catalog,
 )
+from archimind.assets.planning_envelopes import (
+    PlanningDimensions,
+    PlanningEnvelope,
+    PlanningEnvelopeError,
+    PlanningEnvelopeEvidence,
+    PlanningEnvelopePlacement,
+    PlanningEnvelopeQualification,
+    PlanningFurnitureBinding,
+    PlanningFurnitureSpecification,
+    furniture_from_planning_envelope,
+    load_planning_envelope,
+    qualify_planning_envelope,
+)
 
 __all__ = [
     "CatalogError",
@@ -14,4 +27,15 @@ __all__ = [
     "FurnitureCatalog",
     "furniture_from_catalog",
     "load_catalog",
+    "PlanningDimensions",
+    "PlanningEnvelope",
+    "PlanningEnvelopeError",
+    "PlanningEnvelopeEvidence",
+    "PlanningEnvelopePlacement",
+    "PlanningEnvelopeQualification",
+    "PlanningFurnitureBinding",
+    "PlanningFurnitureSpecification",
+    "furniture_from_planning_envelope",
+    "load_planning_envelope",
+    "qualify_planning_envelope",
 ]

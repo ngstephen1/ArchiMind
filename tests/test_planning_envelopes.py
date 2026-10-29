@@ -268,3 +268,235 @@ def test_catalog_changes_invalidate_stored_envelope_without_editing_it(
     with pytest.raises(ValidationError):
         PlanningEnvelope.model_validate_json(before)
     assert envelope.model_dump_json() == before
+
+
+def test_fixed_packaged_reference_matches_rebuilt_qualification(envelope):
+    from archimind.assets import load_planning_envelope
+
+    loaded = load_planning_envelope(CHAIR)
+    assert loaded == envelope
+    assert loaded.evidence.inspection.normalization_scale == 1
+    assert all(not r.render_qualified for r in load_catalog().records)
+
+
+@pytest.mark.parametrize(
+    "asset",
+    [
+        "unknown",
+        "../secret",
+        "https://example.com/secret",
+        "abo-b07pqs58xn-amazon-com",
+        True,
+    ],
+)
+def test_loader_has_no_unqualified_asset_fallback(asset):
+    with pytest.raises(PlanningEnvelopeError) as error:
+        module.load_planning_envelope(asset)
+    assert error.value.code == "envelope_not_found"
+
+
+@pytest.mark.parametrize(
+    "kind",
+    [
+        "empty",
+        "oversized",
+        "broken",
+        "duplicate_key",
+        "version",
+        "duplicates",
+        "hash",
+        "missing",
+    ],
+)
+def test_bad_packaged_metadata_fails_completely(monkeypatch, kind):
+    import io
+
+    resource = ROOT / "src/archimind/assets/planning_envelopes.json"
+    raw = json.loads(resource.read_text())
+    if kind == "version":
+        raw["schema_version"] = 2
+    elif kind == "duplicates":
+        raw["envelopes"].append(copy.deepcopy(raw["envelopes"][0]))
+    elif kind == "hash":
+        raw["envelopes"][0]["evidence"]["source_glb_sha256"] = "0" * 64
+    body = json.dumps(raw).encode()
+    if kind == "empty":
+        body = b""
+    elif kind == "oversized":
+        body = b" " * (512 * 1024 + 1)
+    elif kind == "broken":
+        body = b"SECRET_TOKEN"
+    elif kind == "duplicate_key":
+        body = b'{"schema_version":1,"schema_version":1}'
+    original = module.resources.files
+
+    class BadResource:
+        def open(self, mode):
+            if kind == "missing":
+                raise OSError("SECRET_PATH")
+            return io.BytesIO(body)
+
+    class Root:
+        def joinpath(self, name):
+            return (
+                BadResource()
+                if name == "planning_envelopes.json"
+                else original("archimind.assets").joinpath(name)
+            )
+
+    monkeypatch.setattr(module.resources, "files", lambda package: Root())
+    with pytest.raises(PlanningEnvelopeError) as error:
+        module.load_planning_envelope(CHAIR)
+    assert error.value.code == "envelope_metadata_unavailable"
+    assert "SECRET" not in str(error.value)
+
+
+def test_fresh_explicit_factory_preserves_inputs_and_immutable_sidecar():
+    from archimind.assets import (
+        PlanningFurnitureBinding,
+        furniture_from_planning_envelope,
+    )
+    from archimind.models import Furniture
+
+    args = dict(furniture_id="chair instance", name=" Charles A ", x_m=-2.5, y_m=20.0)
+    first = furniture_from_planning_envelope(CHAIR, **args)
+    second = furniture_from_planning_envelope(CHAIR, **args)
+    assert first.furniture is not second.furniture
+    assert first.furniture == second.furniture
+    f, binding = first
+    assert (f.id, f.name, f.x_m, f.y_m, f.rotation_deg) == (
+        "chair instance",
+        " Charles A ",
+        -2.5,
+        20,
+        0,
+    )
+    assert (
+        f.width_m,
+        f.depth_m,
+        f.height_m,
+    ) == binding.envelope.planning_dimensions.wdh
+    assert binding.canonical_dimensions == binding.envelope.planning_dimensions
+    assert binding.envelope.published_dimensions.width_m == 0.9906
+    assert Furniture.model_validate_json(f.model_dump_json()) == f
+    assert (
+        PlanningFurnitureBinding.model_validate_json(binding.model_dump_json())
+        == binding
+    )
+    assert binding.metadata_sha256 == second.binding.metadata_sha256
+    binding.validate_furniture(f)
+    first.furniture.width_m = 0.99
+    with pytest.raises(PlanningEnvelopeError):
+        binding.validate_furniture(first.furniture)
+    assert second.furniture.width_m == 0.996104896068573
+    with pytest.raises(ValidationError):
+        binding.canonical_dimensions.width_m = 0.99
+
+
+@pytest.mark.parametrize("rotation", [90, 180, 270, -90, True, 0.0, "0"])
+def test_factory_rejects_every_unsupported_yaw(rotation):
+    with pytest.raises(PlanningEnvelopeError) as error:
+        module.furniture_from_planning_envelope(
+            CHAIR, furniture_id="a", name="A", x_m=0, y_m=0, rotation_deg=rotation
+        )
+    assert error.value.code == "unsupported_yaw"
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        dict(x_m=float("nan")),
+        dict(y_m=float("inf")),
+        dict(name=" "),
+        dict(furniture_id=""),
+        dict(x_m="1"),
+    ],
+)
+def test_factory_rejects_invalid_canonical_inputs(changes):
+    values = dict(furniture_id="a", name="A", x_m=0, y_m=0)
+    values.update(changes)
+    with pytest.raises(PlanningEnvelopeError) as error:
+        module.furniture_from_planning_envelope(CHAIR, **values)
+    assert error.value.code == "invalid_planning_specification"
+
+
+def test_factory_performs_no_generation_geometry_or_rendering(monkeypatch):
+    from archimind.geometry import accessibility, layout_generator, validator
+    from archimind.render import realistic_scene
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("No geometry/generation/rendering from factory")
+
+    monkeypatch.setattr(layout_generator, "generate_layout_candidates", forbidden)
+    monkeypatch.setattr(validator, "validate_layout", forbidden)
+    monkeypatch.setattr(accessibility, "validate_accessibility", forbidden)
+    monkeypatch.setattr(realistic_scene, "render_realistic_scene", forbidden)
+    result = module.furniture_from_planning_envelope(
+        CHAIR, furniture_id="a", name="A", x_m=100, y_m=-200
+    )
+    assert (result.furniture.x_m, result.furniture.y_m) == (100, -200)
+
+
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("id", "other"),
+        ("name", "Other"),
+        ("category", "desk"),
+        ("rotation_deg", 90),
+        ("width_m", 0.9906),
+        ("depth_m", 0.9906),
+        ("height_m", 0.9652),
+        ("x_m", float("inf")),
+    ],
+)
+def test_binding_detects_tampered_furniture(field, value):
+    result = module.furniture_from_planning_envelope(
+        CHAIR, furniture_id="a", name="A", x_m=0, y_m=0
+    )
+    changed = result.furniture.model_copy(update={field: value})
+    with pytest.raises(PlanningEnvelopeError) as error:
+        result.binding.validate_furniture(changed)
+    assert error.value.code == "furniture_binding_mismatch"
+
+
+def test_existing_spatial_rules_see_larger_reservation():
+    from archimind.geometry import validate_layout
+    from archimind.models import Room, RoomDesign
+
+    old = furniture_from_catalog(CHAIR, furniture_id="a", name="A", x_m=0, y_m=0)
+    proposed = module.furniture_from_planning_envelope(
+        CHAIR, furniture_id="a", name="A", x_m=0, y_m=0
+    )
+    room = Room(id="room", name="Room", width_m=0.995, depth_m=2, ceiling_height_m=2.7)
+    old_design = RoomDesign(room=room, furniture=[old])
+    report = validate_layout(old_design)
+    assert report.status == "passed"
+    before = old_design.model_dump_json(), report.model_dump_json()
+    assert (
+        validate_layout(RoomDesign(room=room, furniture=[proposed.furniture])).status
+        == "failed"
+    )
+    assert (old_design.model_dump_json(), report.model_dump_json()) == before
+
+
+def test_existing_candidate_scores_reports_and_specification_stay_unchanged():
+    from archimind.examples import create_sample_bedroom
+    from archimind.geometry import generate_layout_candidates, validate_accessibility
+
+    design = create_sample_bedroom()
+    result = generate_layout_candidates(design.room, design.furniture, seed=42)
+    assert result.candidates
+    before = design.model_dump_json(), result.model_dump_json()
+    proposed = module.furniture_from_planning_envelope(
+        CHAIR, furniture_id="new-chair", name="Charles", x_m=1, y_m=1
+    )
+    proposed.binding.validate_furniture(proposed.furniture)
+    assert (design.model_dump_json(), result.model_dump_json()) == before
+    for candidate in result.candidates:
+        assert validate_accessibility(candidate.design).status == "passed"
+    # Explicit generation of a fresh request uses the original unchanged engine.
+    new = generate_layout_candidates(design.room, [proposed.furniture], seed=42)
+    assert new.candidates
+    proposed.binding.validate_furniture(new.candidates[0].design.furniture[0])
+    assert (design.model_dump_json(), result.model_dump_json()) == before

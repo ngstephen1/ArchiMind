@@ -10,7 +10,8 @@ import itertools
 import json
 import math
 from fractions import Fraction
-from typing import Literal, Self
+from importlib import resources
+from typing import Literal, NamedTuple, Self
 
 from pydantic import (
     BaseModel,
@@ -32,6 +33,7 @@ from archimind.assets.catalog import (
     load_catalog,
 )
 from archimind.assets.inspection import AssetInspection
+from archimind.models import Furniture
 
 POLICY_ID = "archimind-conservative-planning-envelope"
 POLICY_VERSION = "1.0.0"
@@ -442,3 +444,136 @@ def qualify_planning_envelope(
         return PlanningEnvelope(**data, metadata_sha256=_digest(serializable))
     except (ValueError, TypeError, OverflowError, RecursionError, CatalogError):
         raise PlanningEnvelopeError("unqualified_envelope") from None
+
+
+class PlanningEnvelopeLibrary(_Frozen):
+    schema_version: StrictInt = Field(ge=1, le=1)
+    envelopes: tuple[PlanningEnvelope, ...] = Field(min_length=1, max_length=64)
+
+    @model_validator(mode="after")
+    def unique_ordered_ids(self) -> Self:
+        ids = [item.asset_id for item in self.envelopes]
+        if ids != sorted(set(ids)):
+            raise ValueError("Duplicate or unordered planning-envelope identities.")
+        return self
+
+
+def load_planning_envelope(asset_id: str) -> PlanningEnvelope:
+    """Resolve a fixed packaged record; no caller path/URL or runtime GLB read."""
+    try:
+        resource = resources.files("archimind.assets").joinpath(
+            "planning_envelopes.json"
+        )
+        with resource.open("rb") as stream:
+            data = stream.read(512 * 1024 + 1)
+        if not 0 < len(data) <= 512 * 1024:
+            raise ValueError
+        library = PlanningEnvelopeLibrary.model_validate_json(data)
+    except (OSError, ValueError, TypeError, RecursionError):
+        raise PlanningEnvelopeError("envelope_metadata_unavailable") from None
+    for envelope in library.envelopes:
+        if type(asset_id) is str and envelope.asset_id == asset_id:
+            return envelope
+    raise PlanningEnvelopeError("envelope_not_found")
+
+
+class PlanningFurnitureBinding(_Frozen):
+    """Immutable evidence paired with a fresh, mutable canonical Furniture.
+
+    Position remains authoritative in the canonical object. An explicit future
+    generation may place the item elsewhere while keeping its ID and geometry;
+    this binding neither stores an independent pose nor approves that placement.
+    """
+
+    schema_version: StrictInt = Field(ge=1, le=1)
+    furniture_id: str = Field(min_length=1, pattern=r"\S")
+    furniture_name: str = Field(min_length=1, pattern=r"\S")
+    category: Literal["chair", "storage"]
+    canonical_dimensions: PlanningDimensions
+    envelope: PlanningEnvelope
+    metadata_sha256: SHA256
+
+    @model_validator(mode="after")
+    def preserve_reservation(self) -> Self:
+        record = load_catalog().get_record(self.envelope.asset_id)
+        if (
+            self.canonical_dimensions != self.envelope.planning_dimensions
+            or self.category != record.category
+            or self.metadata_sha256
+            != _digest(self.model_dump(mode="json", exclude={"metadata_sha256"}))
+        ):
+            raise ValueError("Binding geometry, category or digest mismatch.")
+        return self
+
+    def validate_furniture(self, furniture: Furniture) -> None:
+        """Check current metadata/geometry correspondence, not spatial validity."""
+        try:
+            binding = type(self).model_validate(self)
+            furniture = Furniture.model_validate(furniture)
+            if (
+                (furniture.id, furniture.name, furniture.category)
+                != (binding.furniture_id, binding.furniture_name, binding.category)
+                or (furniture.width_m, furniture.depth_m, furniture.height_m)
+                != binding.canonical_dimensions.wdh
+                or furniture.rotation_deg != 0
+            ):
+                raise ValueError
+        except (ValueError, TypeError, RecursionError):
+            raise PlanningEnvelopeError("furniture_binding_mismatch") from None
+
+
+class PlanningFurnitureSpecification(NamedTuple):
+    furniture: Furniture
+    binding: PlanningFurnitureBinding
+
+
+def furniture_from_planning_envelope(
+    asset_id: str,
+    *,
+    furniture_id: str,
+    name: str,
+    x_m: float,
+    y_m: float,
+    rotation_deg: int = 0,
+) -> PlanningFurnitureSpecification:
+    """Explicitly propose a NEW envelope-sized item plus immutable evidence.
+
+    Preserves supplied ID/name/position. Never updates an existing design, calls
+    room validation or generation, reads a GLB, or grants rendering approval.
+    """
+    if type(rotation_deg) is not int or rotation_deg != 0:
+        raise PlanningEnvelopeError("unsupported_yaw")
+    try:
+        envelope = load_planning_envelope(asset_id)
+        record = load_catalog().get_record(asset_id)
+        dimensions = envelope.planning_dimensions
+        furniture = Furniture(
+            id=furniture_id,
+            name=name,
+            category=record.category,
+            x_m=x_m,
+            y_m=y_m,
+            width_m=dimensions.width_m,
+            depth_m=dimensions.depth_m,
+            height_m=dimensions.height_m,
+            rotation_deg=0,
+        )
+        data = dict(
+            schema_version=1,
+            furniture_id=furniture.id,
+            furniture_name=furniture.name,
+            category=furniture.category,
+            canonical_dimensions=dimensions,
+            envelope=envelope,
+        )
+        raw = {
+            k: v.model_dump(mode="json") if isinstance(v, BaseModel) else v
+            for k, v in data.items()
+        }
+        binding = PlanningFurnitureBinding(**data, metadata_sha256=_digest(raw))
+        binding.validate_furniture(furniture)
+        return PlanningFurnitureSpecification(furniture=furniture, binding=binding)
+    except PlanningEnvelopeError:
+        raise
+    except (ValueError, TypeError, OverflowError, RecursionError):
+        raise PlanningEnvelopeError("invalid_planning_specification") from None
