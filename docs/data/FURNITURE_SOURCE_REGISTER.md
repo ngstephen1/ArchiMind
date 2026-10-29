@@ -1,3 +1,21 @@
+# Furniture source register — 08F1 update
+
+**Current research register: 57 records, including 25 new candidates from 30 detailed
+08F1 investigations. Three new acquisition-eligible source records; no bed qualifies.**
+
+The active application still contains **two metadata-qualified products**, with
+**one planning-envelope-qualified and one render-qualified product (Charles)**.
+Nothing below expands that packaged catalog. The 08F1 appendix follows the preserved
+historical report. Historical acquisition decisions are not current render approvals.
+
+The 08A candidate JSON is now preserved byte-for-byte as
+`data/catalogs/furniture_source_candidates_08a.json`, SHA-256
+`cb3d5b7a7382a31ec96ec709f4fdcf6f90d9202275fe41f40c04391dc53ddc5d`.
+The packaged catalog retains its original qualification pins. All 32 historical
+candidate records remain unchanged in the expanded current register.
+
+---
+
 # Furniture source qualification register — Task 08A
 
 **Result: 2 acquisition-eligible candidates; no complete bedroom set and no render-approved new assets.**
@@ -170,3 +188,152 @@ Standard-library validation checks schema version/target/date, sorted unique can
 Only the two intended text/data paths may be staged. `git diff --check`, staged-diff inspection, remote synchronization and resulting CI runs are checkpoint gates. CI executes the unchanged full Python/frontend suite; no production behavior changed and no tests were weakened. Exact commit hashes and final CI outcomes are reported in the delivery response, avoiding self-referential commit hashes in this document.
 
 **Stop after 08A.** No 08B catalog, ingestion, rendering, canonical-model, validator, UI or AI-agent work has been performed.
+
+
+---
+
+# 08F1 — bounded source expansion, 2026-10-29
+
+This section is current research. Earlier sections are the unchanged **08A historical
+report**, including its then-current status and next-task statements. Reassessments
+below supplement rather than replace those findings. No asset acquisition occurred.
+
+## Coverage of this task
+
+| Investigation group | Reviewed this task | Newly added IDs | Eligible | Needs evidence | Excluded |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Bed | 8 | 5 | 0 | 8 | 0 |
+| Desk | 8 | 6 | 1 | 4 | 3 |
+| Wardrobe / dresser leads | 8 | 8 | 1 | 2 | 5 |
+| Additional furniture | 6 | 6 | 1 | 5 | 0 |
+| **Total** | **30** | **25** | **3** | **19** | **8** |
+
+Five historical records were revisited: the original Tisbury Queen/King, metal
+headboard bed and both original desk leads. Their recorded conflicts persist.
+The cumulative stored register has 57 records: **5 historical/current acquisition
+eligibility decisions, 37 needs-evidence, 14 excluded and 1 illustrative fixture**.
+This combines historical source decisions, not 57 acquisition approvals or products
+in the app. The older bookcase decision remains preserved despite its known 4096 px
+texture obstacle. The **new 08F1 shortlist contains only the following three IDs**.
+
+## New acquisition shortlist — source evidence only
+
+| Product / source | Variant label | Published W × D × H, m | Original measurements | HEAD bytes | Reported texture maximum |
+| --- | --- | --- | --- | ---: | ---: |
+| [Movian Belaya desk, B074L4976T](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | Oak; title says Light Brown Oak-Effect | 1.6 × 0.8 × 0.75 | Width 160, length/depth 80, height 75 cm | 3,135,676 | 2048 px |
+| [Movian Morava 4-door / 2-drawer wardrobe, B07H8JN9QF](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | Oak Sonoma; title says Light Brown Oak-Effect | 2.0 × 0.59 × 2.12 | Length/front width 200, width/depth 59, height 212 cm | 2,362,880 | 2048 px |
+| [Rivet two-drawer mirror-panel nightstand, B07B4VXXJC](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz) | Brown | 0.6096 × 0.4318 × 0.6096 | 24W × 17D × 24H inches | 1,298,676 | 2048 px |
+
+These are checked **published claims**, not physical measurements. Exact source
+records join official model-index rows and model URLs; native models have not been
+retrieved. Each passes the existing source-level agreement screen
+`max(0.01 m, 2% of each published dimension)` using **reported** extents. This does
+not establish strict envelope containment, actual units/anchor, embedded resources,
+material appearance, native-scale placement or render qualification.
+
+Morava's reported model height is 2.158716440 m versus the 2.12 m published claim.
+It passes the 2% acquisition screen but cannot be assumed to fit the published box.
+A later inspection/reconciliation task must preserve both quantities and derive any
+planning reservation through the approved process. Do not shrink or silently resize
+it. Belaya's reported height/depth also slightly exceed the published dimensions;
+all three require actual-file containment/placement inspection.
+
+## Candidate decisions and primary locators
+
+Each link identifies an official listing stream. `part:line` is its 1-based complete
+JSONL record location. The candidate JSON retains the exact requested prefix,
+response hash, original record-line hash, model join, item fields, conversions and
+missing evidence. HEAD lengths are not downloaded model bytes; ETags are not SHA-256.
+
+| Product ID / source | Group | New | Part:line | Decision | Finding |
+| --- | --- | --- | --- | --- | --- |
+| [B071FJR46L](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_2.json.gz) | additional | yes | 2:553 | `needs_evidence` | Published 24W x 16D x 23H inches agrees with item fields, but reported model X/Y/Z is about 26/28/33% larger; product-to-model envelope remains unresolved. |
+| [B075X2WN36](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | additional | yes | 6:424 | `needs_evidence` | Published 28.7W x 29.9D x 31.1H inches is explicit, but reported mesh width/height exceed those claims substantially. Do not replace the product size with mesh extents. |
+| [B075X543WR](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_4.json.gz) | additional | yes | 4:382 | `needs_evidence` | Published 32W x 36D x 37H inches is explicit; reported mesh width/depth are smaller by more than 2%. Resolve product/variant/model agreement before acquisition. |
+| [B07B4VXXJC](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz) | additional | yes | 3:110 | `eligible_for_acquisition` | Brown mirror-panel two-drawer bedside nightstand; explicit 24W x 17D x 24H inches and item fields agree. Same-ID model metadata agrees within 2%; original size and texture metadata meet budgets. Localized warranty noise is not used as product evidence. |
+| [B07B7JY9C5](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_9.json.gz) | additional | yes | 9:399 | `needs_evidence` | Whole-item height conflicts: item field 18.25 inches versus explicit bullet 18.75 inches; native X/Z also suggest a different front/axis assignment. No authoritative resolution. |
+| [B07BZQQP5G](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz) | additional | yes | 3:693 | `needs_evidence` | Adjustable 36–39-inch height is a range, not a verified static model pose. Reported full base/depth differs from 21W x 16.5D inches and model height is below the stated range. Caster/pose envelope unresolved. |
+| [B075XZMMG7](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | bed | yes | 6:582 | `needs_evidence` | Item fields 83.5L x 77.1W x 39.6H inches conflict with explicit overall bullet 85L x 80.3W x 44.5H inches. Neither dimension set is silently selected. |
+| [B07B4SCB6T](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_0.json.gz) | bed | revisit | 0:180 | `needs_evidence` | Historical queen/king localized-title conflict persists. Queen and King B07B4VY14V share exactly the same reported extents despite 66-inch versus 84-inch width claims. |
+| [B07B4VSW78](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | bed | yes | 6:1105 | `needs_evidence` | Fresh Dune queen: explicit 66W x 92D x 56H inches and item fields agree, but reported depth 2.386691689 m differs from 2.3368 m by 2.135%, beyond max(0.01 m, 2%). |
+| [B07B4VY14V](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_9.json.gz) | bed | revisit | 9:205 | `needs_evidence` | Historical King has identical model extents to the Queen despite an 84-inch width claim. Preserve the unresolved variant/model conflict. |
+| [B07B4W5V3C](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_0.json.gz) | bed | yes | 0:989 | `needs_evidence` | English Curious Pearl Queen/66-inch title conflicts with multiple localized King/84-inch/Curious Charcoal titles; reported width also exceeds the English claim by more than 2%. |
+| [B07B4ZFD1C](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_0.json.gz) | bed | yes | 0:1831 | `needs_evidence` | King 84W x 92D x 56H inches is explicit, but reported width is about 1.696 m versus 2.1336 m (about 20.5% smaller). Source/model size identity unresolved. |
+| [B07K6M8HKR](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | bed | yes | 6:1849 | `needs_evidence` | Twin item fields are 39W x 75L x 14H inches; reported extents are about 1.393 x 0.680 x 2.635 m. Full product/model envelope and localized size identity are unresolved; no mesh-size correction. |
+| [B086TG9Q4V](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz) | bed | revisit | 3:24 | `needs_evidence` | Historical 14-inch frame/under-bed height does not establish whole headboard height; model metadata is about 0.967 m high. Reported 4096 px textures are an additional blocker. |
+| [B074L4976T](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | desk | yes | 6:1065 | `eligible_for_acquisition` | Belaya curved-top desk: item fields width 160 cm, length/depth 80 cm, height 75 cm; title and same-ID reported X/Y/Z corroborate that axis assignment within 2%. Original size/texture metadata meet budgets. |
+| [B075ZBVZST](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_8.json.gz) | desk | yes | 8:905 | `needs_evidence` | Explicit 48.4W x 22.2D x 31.1H inches agrees with item fields, but reported depth is about 13.7% smaller and width about 2.2% larger. Source/model match unresolved. |
+| [B07K6N5FVX](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | desk | yes | 6:489 | `excluded` | Ohrid source identity and explicit 120W x 55D x 76H cm agree with reported extents. Original model reports 4096 px textures, above 2048; no optimization authorized. |
+| [B07QC8772Q](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_4.json.gz) | desk | revisit | 4:66 | `needs_evidence` | Historical English desk versus localized child-chair category conflict persists. Reported 4096 px textures add a separate resource blocker. |
+| [B07QHKQLBH](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_3.json.gz) | desk | yes | 3:526 | `excluded` | Explicit 44W x 20D x 30H inches and same-ID dimensions agree; original GLB HEAD size 25,711,348 bytes exceeds 15 MiB and reported textures are 4096 px. |
+| [B07R1JT4JL](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_5.json.gz) | desk | yes | 5:532 | `excluded` | Source item 39W x 19.63D x 26H inches and reported extents agree; title/use bullets identify computer/writing desk. Reported 4096 px textures exceed 2048. |
+| [B07TJV6Q5W](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz) | desk | yes | 7:673 | `needs_evidence` | Title lists 90 x 117 x 76 cm without W/D labels; item length/width assignment reverses native X/Z. Do not infer axes from shape alone. HEAD exceeds 15 MiB and textures are 4096 px as additional blockers. |
+| [B084S6TSK7](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_8.json.gz) | desk | revisit | 8:17 | `needs_evidence` | Historical item height 60 cm versus title/explicit W/H/D bullet 80 cm persists. Model metadata about 79 cm does not settle the published conflict; textures are 4096 px. |
+| [B075YZ16V7](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_0.json.gz) | wardrobe_dresser | yes | 0:1445 | `needs_evidence` | English DRESSER title and six-drawer bullets conflict with multiple localized Queen-bed titles. Published 61W x 18D x 32H inches is retained as a claim, not a resolved product/category contract. |
+| [B07B3XXD3P](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_0.json.gz) | wardrobe_dresser | yes | 0:576 | `needs_evidence` | Explicit approximate H178 x W150 x D50 cm conflicts with reported height 187 cm/depth 57 cm. Original size exceeds 15 MiB and textures are 4096 px; no source/model reconciliation. |
+| [B07GFFPKFV](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | wardrobe_dresser | yes | 6:912 | `excluded` | Inari enclosed two-door/two-drawer wardrobe, 100W x 57D x 180H cm; item/title/model dimensions agree within 2%. Original texture metadata is 4096 px; blocked under current unmodified-asset budget. |
+| [B07H8JN9QF](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | wardrobe_dresser | yes | 6:1852 | `eligible_for_acquisition` | Morava four-door/two-drawer mirrored wardrobe: published 200W x 59D x 212H cm, model-number/variant join, reported dimensions within 2%, and original resource metadata meet acquisition gates. Reported mesh height is larger; future native inspection/reservation is mandatory. |
+| [B07H8T8ZS7](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_8.json.gz) | wardrobe_dresser | yes | 8:688 | `excluded` | Localized titles identify a Vitrine/display cabinet, not a clothing wardrobe. Item fields 111 x 40 x 185 cm conflict with localized bullets 92 x 99 x 214 cm; no dimension or wardrobe qualification. |
+| [B07H8V7P3H](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_2.json.gz) | wardrobe_dresser | yes | 2:460 | `excluded` | Moselle two-door wardrobe source dimensions 100W x 60D x 196H cm agree with reported extents, but original HEAD size 39,484,288 bytes and 4096 px textures exceed budgets. |
+| [B07JGPKZYT](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz) | wardrobe_dresser | yes | 7:455 | `excluded` | Mira four-door mirrored wardrobe 181W x 58D x 207H cm; reported dimensions agree. Original HEAD size 43,865,700 bytes and 4096 px textures exceed budgets. |
+| [B07JH147WS](https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz) | wardrobe_dresser | yes | 6:448 | `excluded` | Mira two-door wardrobe, original Italian title and item fields 98W x 58D x 193H cm agree with reported extents. Original HEAD size 30,781,556 bytes and 4096 px textures exceed budgets. |
+
+## Source rights and alternative-source checks
+
+The current official ABO [release](https://amazon-berkeley-objects.s3.amazonaws.com/index.html),
+[CC BY 4.0 license](https://amazon-berkeley-objects.s3.amazonaws.com/LICENSE-CC-BY-4.0.txt),
+[listing schema](https://amazon-berkeley-objects.s3.amazonaws.com/listings/README.md)
+and [model conventions](https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md)
+were rechecked. Rights remain conditional on attribution, license/change notices,
+retained notices and no implied endorsement. Product availability, manufacturer
+certification, chain of title and trademark clearance were not independently proven.
+The published dataset revision remains unknown; response identities are recorded.
+
+[Poly Haven](https://polyhaven.com/license) describes CC0 assets separately from
+website content and prohibits unpermitted scraping. Its [API terms](https://raw.githubusercontent.com/Poly-Haven/Public-API/master/ToS.md)
+make API access subject to separate acceptance. No API endpoint, account, asset-page
+harvest or acceptance action was used; no specific physical product was qualified.
+The [Kenney Furniture Kit](https://kenney.nl/assets/furniture-kit) page still lists
+140 3D files, CC0 and release 1.0 (2018), but does not establish manufacturer item
+measurements or a product-to-model join. Its archive was not retrieved. These are
+two **source-level investigations**, outside the 30 individual product reviews;
+no invented candidate/product ID is assigned to a collection. FRONT/FUTURE remains
+unavailable for public model delivery absent authoritative additional permission.
+
+## Acquisition, catalog and retrieval boundary
+
+Only the three new IDs above are defensible future individual-acquisition leads.
+No new record is metadata-qualified in the packaged catalog, planning-qualified or
+render-qualified. Charles remains the only current approved product mesh. Existing
+Sheen Chair remains an illustrative fixture, not a manufacturer product.
+
+A future task should inspect **Belaya first**, then **Morava**, then the nightstand,
+subject to separately authorized acquisition. Belaya adds the missing desk
+function with a small reported mesh; Morava adds genuine enclosed clothing storage
+but needs particular envelope-height review. No bed is recommended for acquisition.
+
+The packaged catalog currently restricts source categories to CHAIR/SHELF and
+subtypes to armchair/bookcase. Admitting DESK, CABINET/wardrobe or TABLE/nightstand
+requires a separate reviewed metadata-contract/category-mapping task. Source
+qualification cannot bypass that contract, update the live index or modify existing
+specifications. Preserve original marketing titles as provenance; future reviewed
+names/categories/variants may be indexed only after catalog admission. Materials,
+styles, physical colors, room suitability and clearances remain unqualified.
+
+## Transfer budget and review limits
+
+Exactly **9,948,621 metadata response-body bytes** were received in 52 recorded
+implementation requests: five ABO documents/index files, ten 512 KiB listing
+prefixes, four 1 MiB prefixes, 30 model HEAD requests and three alternative-source
+documents. Maximum response body was **1,048,576 bytes**; total stayed below the
+**10,485,760-byte** cap. Model HEAD bodies were zero bytes. Compressed metadata
+transfer bytes are counted before bounded local decompression. HTML was read
+without following image, font or script resources. Git/CI control traffic is outside
+this source-metadata budget. No hidden browser/search downloads occurred.
+
+Only complete JSONL lines were parsed; trailing incomplete lines were discarded.
+The fixed small model index contains 7,953 rows. Prefix scanning identified leads;
+**30** selected product/domain records received detailed qualification, not every
+record decoded in the sample. The sample is not exhaustive. Resource data is
+published metadata, not actual GLB validation. Review was by the implementing agent,
+without an independent human judgment or new retrieval-effectiveness claim.

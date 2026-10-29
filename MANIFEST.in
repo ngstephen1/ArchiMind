@@ -45,3 +45,7 @@ include docs/data/ENCODER_ACQUISITION_08R1.json
 include docs/data/ENCODER_ENVIRONMENT_08R1.json
 include docs/data/RETRIEVAL_EMBEDDING_08R1.md
 include docs/data/RETRIEVAL_EMBEDDING_08R1.json
+
+include data/catalogs/furniture_source_candidates.json
+include data/catalogs/furniture_source_candidates_08a.json
+include docs/data/FURNITURE_SOURCE_REGISTER.md

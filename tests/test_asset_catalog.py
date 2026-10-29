@@ -73,7 +73,7 @@ def test_load_identity_order_and_json_round_trip():
 
 
 def test_records_match_frozen_08a_evidence():
-    path = ROOT / "data/catalogs/furniture_source_candidates.json"
+    path = ROOT / "data/catalogs/furniture_source_candidates_08a.json"
     source = json.loads(path.read_text())
     eligible = {
         c["candidate_id"]: c

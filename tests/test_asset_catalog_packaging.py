@@ -78,6 +78,7 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         }
         assert sum(n.endswith("/CharlesArmchair.glb") for n in archive.namelist()) == 1
         assert not any(n.endswith("/.env") for n in archive.namelist())
+        assert not any("furniture_source_candidates" in n for n in archive.namelist())
         assert not any("furniture_retrieval_synthetic" in n for n in archive.namelist())
         assert not any("B075X2X4XS" in n for n in archive.namelist())
         assert not any(
@@ -109,6 +110,9 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             for n in names
         )
         for required in (
+            "/data/catalogs/furniture_source_candidates.json",
+            "/data/catalogs/furniture_source_candidates_08a.json",
+            "/docs/data/FURNITURE_SOURCE_REGISTER.md",
             "/data/benchmarks/furniture_retrieval_queries.json",
             "/data/benchmarks/furniture_retrieval_synthetic.json",
             "/scripts/evaluate_furniture_retrieval.py",
