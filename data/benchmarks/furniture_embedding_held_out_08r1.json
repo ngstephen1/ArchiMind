@@ -1,0 +1,661 @@
+{
+  "schema_version": 1,
+  "partition": "held_out",
+  "version": "1.0.0",
+  "authorship": "implementation_agent_no_independent_human_review",
+  "freeze_policy": "Gold identities and hard-eligible sets fixed before any real encoder execution. Original 08R0 cases are reference tests, never threshold-development data. Development thresholds are sealed before held-out scoring.",
+  "original_benchmark_sha256": "fa6ebe2e1d57d5deaedab9cdd6e7b6254e723afaa6da86e8a577ed68db567d24",
+  "real_index_identity": {
+    "scope": "real",
+    "catalog_id": "archimind-furniture",
+    "catalog_version": "1.0.0",
+    "catalog_digest": "b93a7511e4085a247f9fee468629657118210ceacaa18762a55630595f224bb0",
+    "evidence_digest": "bcbc3c171945e9329bbebeb6eec272a6cce204078a804e4d433789eb90046411",
+    "search_document_version": 1,
+    "index_format_version": 1,
+    "snapshot_id": "75868dd7f81ac7b3300959e866cec0393338e93f5450886106a2d8eb2da440f8"
+  },
+  "synthetic_catalog_digest": "bd1883030cc4f2631abe4bd8edc2d6ad301e94cd63e0daae098a15ff2efa32a5",
+  "cases": [
+    {
+      "case_id": "real:held_out01",
+      "scope": "real",
+      "request": {
+        "query": "where could I sit to read quietly",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out02",
+      "scope": "real",
+      "request": {
+        "query": "one person place to sit",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out03",
+      "scope": "real",
+      "request": {
+        "query": "find the Charles in the Sod variant",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "variant": "Sod"
+        }
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out04",
+      "scope": "real",
+      "request": {
+        "query": "storage with shelves for my novels",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b07pqs58xn-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out05",
+      "scope": "real",
+      "request": {
+        "query": "a place to organize a book collection",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b07pqs58xn-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out06",
+      "scope": "real",
+      "request": {
+        "query": "the Espresso five level shelving piece",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "variant": "Espresso"
+        }
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b07pqs58xn-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out07",
+      "scope": "real",
+      "request": {
+        "query": "a source qualified seat under 1.01 meters wide",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "chair",
+          "max_width_m": 1.01
+        }
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out08",
+      "scope": "real",
+      "request": {
+        "query": "a bookcase shallower than forty centimetres",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "storage",
+          "max_depth_m": 0.4
+        }
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b07pqs58xn-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out09",
+      "scope": "real",
+      "request": {
+        "query": "a king size bed",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "bed"
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out10",
+      "scope": "real",
+      "request": {
+        "query": "an office computer desk",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "desk"
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out11",
+      "scope": "real",
+      "request": {
+        "query": "closed storage for hanging suits",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "storage",
+          "required_use": "wardrobe"
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out12",
+      "scope": "real",
+      "request": {
+        "query": "Charles in Crimson",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out13",
+      "scope": "real",
+      "request": {
+        "query": "a white Scandinavian shelf",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out14",
+      "scope": "real",
+      "request": {
+        "query": "the Espresso bookcase in solid maple",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out15",
+      "scope": "real",
+      "request": {
+        "query": "an armchair no deeper than 95cm",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "chair",
+          "max_depth_m": 0.95
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:held_out16",
+      "scope": "real",
+      "request": {
+        "query": "a product from https://random.invalid/model.glb",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out01",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a petite desk for handwriting",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "desk",
+          "max_width_m": 1.0
+        }
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:desk-oak-small",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:desk-oak-small"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out02",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a place to sleep on a queen platform",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:bed-queen",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out03",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "furniture for storing shirts and jackets",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:storage-wardrobe",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out04",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a tiny table to put coffee on",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:table-low",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out05",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a place to sit with a novel",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:chair-reading",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out06",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "bookshelves finished in natural oak",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "storage",
+          "materials": [
+            "oak"
+          ]
+        }
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:storage-bookcase",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:storage-bookcase"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out07",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a freezer for frozen food",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out08",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a couch for three people",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out09",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "an ivory reading chair",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out10",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a mahogany four post bed",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out11",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a desk less than 20cm wide",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "desk",
+          "max_width_m": 0.2
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:held_out12",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a real render approved model",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "render"
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    }
+  ]
+}

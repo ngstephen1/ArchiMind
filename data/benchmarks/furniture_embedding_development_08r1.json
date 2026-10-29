@@ -1,0 +1,580 @@
+{
+  "schema_version": 1,
+  "partition": "development",
+  "version": "1.0.0",
+  "authorship": "implementation_agent_no_independent_human_review",
+  "freeze_policy": "Gold identities and hard-eligible sets fixed before any real encoder execution. Original 08R0 cases are reference tests, never threshold-development data. Development thresholds are sealed before held-out scoring.",
+  "original_benchmark_sha256": "fa6ebe2e1d57d5deaedab9cdd6e7b6254e723afaa6da86e8a577ed68db567d24",
+  "real_index_identity": {
+    "scope": "real",
+    "catalog_id": "archimind-furniture",
+    "catalog_version": "1.0.0",
+    "catalog_digest": "b93a7511e4085a247f9fee468629657118210ceacaa18762a55630595f224bb0",
+    "evidence_digest": "bcbc3c171945e9329bbebeb6eec272a6cce204078a804e4d433789eb90046411",
+    "search_document_version": 1,
+    "index_format_version": 1,
+    "snapshot_id": "75868dd7f81ac7b3300959e866cec0393338e93f5450886106a2d8eb2da440f8"
+  },
+  "synthetic_catalog_digest": "bd1883030cc4f2631abe4bd8edc2d6ad301e94cd63e0daae098a15ff2efa32a5",
+  "cases": [
+    {
+      "case_id": "real:development01",
+      "scope": "real",
+      "request": {
+        "query": "an armchair for sitting",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development02",
+      "scope": "real",
+      "request": {
+        "query": "a chair to settle into",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development03",
+      "scope": "real",
+      "request": {
+        "query": "a shelf unit for books",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b07pqs58xn-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development04",
+      "scope": "real",
+      "request": {
+        "query": "freestanding book shelving",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b07pqs58xn-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development05",
+      "scope": "real",
+      "request": {
+        "query": "Stone Beam Sod seat",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b075x2x4xs-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development06",
+      "scope": "real",
+      "request": {
+        "query": "AmazonBasics Espresso shelves",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "abo-b07pqs58xn-amazon-com",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development07",
+      "scope": "real",
+      "request": {
+        "query": "Charles Rose accent chair",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development08",
+      "scope": "real",
+      "request": {
+        "query": "a dresser for socks",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development09",
+      "scope": "real",
+      "request": {
+        "query": "a walnut dining table",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development10",
+      "scope": "real",
+      "request": {
+        "query": "a task desk for studying",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "abo-b075x2x4xs-amazon-com",
+        "abo-b07pqs58xn-amazon-com"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development11",
+      "scope": "real",
+      "request": {
+        "query": "an armchair with certified linen upholstery",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "materials": [
+            "linen"
+          ]
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "real:development12",
+      "scope": "real",
+      "request": {
+        "query": "Scandinavian queen bed",
+        "catalog_id": "archimind-furniture",
+        "top_k": 2,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "bed"
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development01",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a small oak worktable",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata",
+        "filters": {
+          "category": "desk",
+          "max_width_m": 1.0
+        }
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:desk-oak-small",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:desk-oak-small"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development02",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a sleeping surface for two adults",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:bed-queen",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development03",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a place to keep coats",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:storage-wardrobe",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development04",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a low table for mugs",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:table-low",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development05",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a blue seat for reading",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:chair-reading",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development06",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "metal work desk",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [
+        {
+          "asset_id": "synthetic:desk-steel",
+          "grade": 3
+        }
+      ],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "matches",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development07",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a refrigerator",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development08",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a walnut cabinet",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development09",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a leather executive seat",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development10",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "an electric adjustable bed",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development11",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a yellow lounge seat",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata",
+        "filters": {
+          "colors": [
+            "yellow"
+          ]
+        }
+      },
+      "judgments": [],
+      "eligible_ids": [],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    },
+    {
+      "case_id": "synthetic_fixture:development12",
+      "scope": "synthetic_fixture",
+      "request": {
+        "query": "a round marble dining table",
+        "catalog_id": "synthetic:08r0",
+        "top_k": 3,
+        "required_qualification": "metadata"
+      },
+      "judgments": [],
+      "eligible_ids": [
+        "synthetic:bed-queen",
+        "synthetic:chair-reading",
+        "synthetic:desk-oak-large",
+        "synthetic:desk-oak-small",
+        "synthetic:desk-steel",
+        "synthetic:storage-bookcase",
+        "synthetic:storage-wardrobe",
+        "synthetic:table-low"
+      ],
+      "relevant_set_complete": true,
+      "expected_status": "empty",
+      "judgment_note": "Agent-authored source/function-based positive or conservative missing/unsupported-intent negative. Not independent human adjudication; no added real products."
+    }
+  ]
+}
