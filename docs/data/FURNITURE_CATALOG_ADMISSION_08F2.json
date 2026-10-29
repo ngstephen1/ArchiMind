@@ -83,6 +83,54 @@
       "frontend_passed": 75,
       "health": "HTTP 200; local browser app",
       "packaging": "offline builds and isolated install passed within full suite"
+    },
+    "checkpoint3_focused": {
+      "passed": 34,
+      "seconds": 9.89
+    },
+    "development_failure": {
+      "check": "first checkpoint3 packaging subprocess",
+      "outcome": "exit 1; captured build output was not preserved by the test failure",
+      "cause": "not established; available filesystem space was approximately 203 MiB on subsequent inspection",
+      "recovery": "direct offline source/wheel build passed; unchanged packaging test rerun passed; no dependency or test weakening"
+    },
+    "disk_exhaustion_attempt": {
+      "pytest_summary": "1048 passed, 1528 errors in 107.87s",
+      "cause": "OSError [Errno 28] No space left on device during fixture setup/teardown; error count includes repeated fixture failures",
+      "ruff_format_attempt": "ENOSPC creating cache temporary file",
+      "recovery": "Removed only completed 08F2 pytest/build temporary outputs; retained failure logs, evidence and screenshots; no test/dependency changes; fresh full rerun required"
+    },
+    "final_release": {
+      "python": {
+        "passed": 1817,
+        "failed": 0,
+        "skipped": 0,
+        "seconds": 136.62,
+        "baseline_cases_retained": 1781,
+        "added_cases": 36
+      },
+      "frontend": {
+        "passed": 75,
+        "failed": 0,
+        "skipped": 0,
+        "syntax": "passed",
+        "build": "passed",
+        "bundle": "byte_identical"
+      },
+      "ruff_lint": "passed",
+      "ruff_format": {
+        "status": "passed",
+        "files": 177
+      },
+      "pip_check": "no broken requirements",
+      "health": "HTTP 200 ok; temporary server stopped",
+      "registry": "passed",
+      "asset_integrity": "passed including native Charles and packaged hashes",
+      "packaging": "offline sdist and wheel build, no-index/no-deps install, outside-repository new factories, historical replay and approved old asset verification passed",
+      "frozen_files_verified": 90,
+      "implementation_migration_pairs_verified": 13,
+      "real_encoder_runs": 0,
+      "local_log_sha256": "97ac5c7d43ed06b403d861aef2ec82ab676568f2ff4edf77eafa52c65eb95bc0"
     }
   },
   "catalog": {
@@ -398,58 +446,220 @@
     "geometry_or_scoring_changes": false
   },
   "frozen_files": {
-    "docs/data/ASSET_QUALIFICATION_08CR2.md": "5bd7d68ce663df52eeded9fe2dc831579406b9cd99bb2221ca781f3ed894732e",
-    "docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md": "d576f1d3d3d809a9ae9249b075282f5ea5f983395f9bfbfc27a79d575cbe1dbe",
-    "docs/data/RETRIEVAL_BASELINE_08R0.json": "1c7ef9cd163512852482875a78d907499c15f189a37c95c188f724b3dd6de459",
-    "docs/data/CATALOG_GENERATION_08E_VERIFICATION.json": "fdfd25e7552dcd636d1ae8400de44923e00e0833c35cab819b4d6efa7cff081b",
-    "docs/data/RETRIEVAL_EMBEDDING_08R1.json": "0a0f727199b40b5fc0365e6be2dfb67b22d9806fba1e23d71a251ae8fca93811",
-    "docs/data/SELECTED_LAYOUT_08D_VERIFICATION.json": "ced3a98a45fb22e0c82e27e1a59dd2e821ac221823977ca0d803883ab7a60077",
-    "docs/data/RETRIEVAL_EMBEDDING_08R1.md": "0cb3146882f57156966e372acc40bae2bcafc1db4683ba60528a450b0e07d44f",
-    "docs/data/ASSET_DIMENSION_POLICY_REVIEW.json": "e9d851c8cdc215813c0f1e85f8c8a3e16b4b28851118f14dd7c3f9013ce2bffb",
-    "docs/data/FURNITURE_EXPANSION_08F1.json": "d362f6deccc186aaff5a5dec752d739ae3c6f986580fae08af08f885136e4e37",
-    "docs/data/RETRIEVAL_BASELINE_08R0.md": "3ea13a4e29ba3a773f007ec27b3eb9ce66246aac13fc0dd5d351e783ff808b53",
-    "docs/data/ASSET_QUALIFICATION_08C.json": "76572768405747a5a29b62a762ef69c5d991e8375fba24e415197471b2d727ac",
-    "docs/data/FURNITURE_EXPANSION_08F1.md": "76ef81dd2cb2935f91404a878e6bbd57173d727140d6bec2720a447f77edca5b",
-    "docs/data/ENCODER_ACQUISITION_08R1.json": "9722f376af832811bed264a03c9b7dfc593c27d8c3463d0331cbc2fe0614217d",
-    "docs/data/ASSET_DIMENSION_POLICY_REVIEW.md": "54d62184ee39099561757426c51d8e7127ee22ced0d65ead89fa871ba640d4d5",
-    "docs/data/ASSET_QUALIFICATION_08C.md": "6e478483c7c6f20fcf1d7688a1fd471e657541f6594561b8f6431ba254224220",
-    "docs/data/FURNITURE_SOURCE_REGISTER.md": "2e614f988fc604fcbfb2c1d448416039a03dd5d123941bdf669ad1dbc9eb90bb",
-    "docs/data/ASSET_QUALIFICATION_08CR2.json": "a394df0110f6f6c943a1b8b98223405320279afbc320ea7ac0579670407dff76",
-    "docs/data/ENCODER_ENVIRONMENT_08R1.json": "8ecf6a7b17364867f505667e7dab3b4e76ac022a421b6d020ad75c3a36a0f0c2",
-    "data/benchmarks/furniture_embedding_held_out_08r1.json": "e219d29f10de791627acfc573bb2108d8074f937d105b72b2a9e534f85ecd088",
-    "data/benchmarks/furniture_retrieval_synthetic.json": "823d841070031322a86f3f6acb35c87b1bca0d91e9db8f50d24d5c37d1dac23a",
-    "data/benchmarks/furniture_retrieval_queries.json": "fa6ebe2e1d57d5deaedab9cdd6e7b6254e723afaa6da86e8a577ed68db567d24",
     "data/benchmarks/furniture_embedding_development_08r1.json": "1800c1932ba13373de8e62a189a53393e71c97699a19fef288047180528fac29",
-    "src/archimind/_viewer_assets/room.html": "41dc46588cc8155920a44971d02c7d08b863fa1f50bdf5362ee6deeb08215801",
-    "src/archimind/_viewer_assets/index.html": "cfb91c42044c4ea8d07ee57f6616b0eef998a9edd6ed4d4922ccef704bf56c2e",
-    "src/archimind/_viewer_assets/sample-design.json": "02825dc40a9a1b43ed6d5a5c6c513bfafa02a869a1504e1f551babec0e371a56",
-    "src/archimind/_viewer_assets/standalone.js": "f103b9a77fd910a082e42e386f261de3147d99bd9a4b1530b4ffee32c129d579",
-    "src/archimind/_viewer_assets/viewer.js": "c4422cdde95e76081fafe57206f74641d9d6dc1247f9d58ea4a03bfe2786607f",
-    "src/archimind/_viewer_assets/room-design.json": "0324c3b6e8341b2ead814c3195aa0b4e0ab560ac838c2c12980af44683f5f90c",
+    "data/benchmarks/furniture_embedding_held_out_08r1.json": "e219d29f10de791627acfc573bb2108d8074f937d105b72b2a9e534f85ecd088",
+    "data/benchmarks/furniture_retrieval_queries.json": "fa6ebe2e1d57d5deaedab9cdd6e7b6254e723afaa6da86e8a577ed68db567d24",
+    "data/benchmarks/furniture_retrieval_synthetic.json": "823d841070031322a86f3f6acb35c87b1bca0d91e9db8f50d24d5c37d1dac23a",
+    "data/catalogs/furniture_source_candidates.json": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
+    "data/catalogs/furniture_source_candidates_08a.json": "cb3d5b7a7382a31ec96ec709f4fdcf6f90d9202275fe41f40c04391dc53ddc5d",
+    "docs/data/ASSET_DIMENSION_POLICY_REVIEW.json": "e9d851c8cdc215813c0f1e85f8c8a3e16b4b28851118f14dd7c3f9013ce2bffb",
+    "docs/data/ASSET_DIMENSION_POLICY_REVIEW.md": "54d62184ee39099561757426c51d8e7127ee22ced0d65ead89fa871ba640d4d5",
+    "docs/data/ASSET_QUALIFICATION_08C.json": "76572768405747a5a29b62a762ef69c5d991e8375fba24e415197471b2d727ac",
+    "docs/data/ASSET_QUALIFICATION_08C.md": "6e478483c7c6f20fcf1d7688a1fd471e657541f6594561b8f6431ba254224220",
+    "docs/data/ASSET_QUALIFICATION_08CR2.json": "a394df0110f6f6c943a1b8b98223405320279afbc320ea7ac0579670407dff76",
+    "docs/data/ASSET_QUALIFICATION_08CR2.md": "5bd7d68ce663df52eeded9fe2dc831579406b9cd99bb2221ca781f3ed894732e",
+    "docs/data/CATALOG_GENERATION_08E_VERIFICATION.json": "fdfd25e7552dcd636d1ae8400de44923e00e0833c35cab819b4d6efa7cff081b",
+    "docs/data/ENCODER_ACQUISITION_08R1.json": "9722f376af832811bed264a03c9b7dfc593c27d8c3463d0331cbc2fe0614217d",
+    "docs/data/ENCODER_ENVIRONMENT_08R1.json": "8ecf6a7b17364867f505667e7dab3b4e76ac022a421b6d020ad75c3a36a0f0c2",
+    "docs/data/FURNITURE_EXPANSION_08F1.json": "d362f6deccc186aaff5a5dec752d739ae3c6f986580fae08af08f885136e4e37",
+    "docs/data/FURNITURE_EXPANSION_08F1.md": "76ef81dd2cb2935f91404a878e6bbd57173d727140d6bec2720a447f77edca5b",
+    "docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md": "d576f1d3d3d809a9ae9249b075282f5ea5f983395f9bfbfc27a79d575cbe1dbe",
+    "docs/data/FURNITURE_SOURCE_REGISTER.md": "2e614f988fc604fcbfb2c1d448416039a03dd5d123941bdf669ad1dbc9eb90bb",
+    "docs/data/RETRIEVAL_BASELINE_08R0.json": "1c7ef9cd163512852482875a78d907499c15f189a37c95c188f724b3dd6de459",
+    "docs/data/RETRIEVAL_BASELINE_08R0.md": "3ea13a4e29ba3a773f007ec27b3eb9ce66246aac13fc0dd5d351e783ff808b53",
+    "docs/data/RETRIEVAL_EMBEDDING_08R1.json": "0a0f727199b40b5fc0365e6be2dfb67b22d9806fba1e23d71a251ae8fca93811",
+    "docs/data/RETRIEVAL_EMBEDDING_08R1.md": "0cb3146882f57156966e372acc40bae2bcafc1db4683ba60528a450b0e07d44f",
+    "docs/data/SELECTED_LAYOUT_08D_VERIFICATION.json": "ced3a98a45fb22e0c82e27e1a59dd2e821ac221823977ca0d803883ab7a60077",
+    "frontend/realistic_viewer/build.mjs": "5a4e87adb0a8814553167f049e74be7f0f68f281a2f991838558a0a90dc73455",
+    "frontend/realistic_viewer/package-lock.json": "00ddb3aaf64fe5359fc697964912bf888f8c49192e5ce11550aa196b79a6650c",
+    "frontend/realistic_viewer/package.json": "b7c522d4da88bb53c3ca64a42bf735e362a6af89b51d53d8e47bc15b34f9fe29",
+    "frontend/realistic_viewer/src/asset_pool.js": "aabeb8d0f809089e1197d96a7807663b2796b5608694e4f3fb2cd42d0507f8a7",
+    "frontend/realistic_viewer/src/geometry.js": "dd674f1fcd6d99e9582451041cd854f6ce97d47f4a7482db9ee34b87c547452e",
+    "frontend/realistic_viewer/src/index.html": "cfb91c42044c4ea8d07ee57f6616b0eef998a9edd6ed4d4922ccef704bf56c2e",
+    "frontend/realistic_viewer/src/main.js": "7969851e6cab6909e3c5f9e0472ff0a3a3679d501b90a2f7e56366ca6f83a281",
+    "frontend/realistic_viewer/src/product_assets.js": "18e963b367024c71ce37920db4f3e669d14ba72c3940156b23a72211a2359139",
+    "frontend/realistic_viewer/src/product_registry.js": "dbce178dde780949d6b7fe90e5c40473e4789f8325fb93ac03d503c46d027a8a",
+    "frontend/realistic_viewer/src/room.html": "41dc46588cc8155920a44971d02c7d08b863fa1f50bdf5362ee6deeb08215801",
+    "frontend/realistic_viewer/src/room_geometry.js": "f1d7a82c8c1759f6a30abf380ddbe161eb1871e07b0be6e2a49efd13ff718a9e",
+    "frontend/realistic_viewer/src/room_objects.js": "13701603aa1c3b08c7a8409aa9fd0bf057c4a1123d9e6161f54341823ca87153",
+    "frontend/realistic_viewer/src/room_viewer.js": "3d53e8525263228d4347181d2ff97820cdde5d9614ae858edcc6e308836e9b97",
+    "frontend/realistic_viewer/src/scene_lifecycle.js": "296b079800053f295ba0953803a5bef3c8ad6fd23b06b8851b40028d60d03690",
+    "frontend/realistic_viewer/src/standalone-room.js": "bfb0b71794447ef563faa8147d3c9f7929e3900ef001ae7eb6ddbb754ac7ffda",
+    "frontend/realistic_viewer/src/standalone.js": "f103b9a77fd910a082e42e386f261de3147d99bd9a4b1530b4ffee32c129d579",
+    "frontend/realistic_viewer/src/viewer.css": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
+    "frontend/realistic_viewer/src/viewer.js": "6777cb2aba1d1fc2a49f89ec21430182ed86cb2b1bdda406c53cc0f17b64464c",
+    "frontend/realistic_viewer/tests/geometry.test.js": "7d096d7cbeb3cecd49c5b10041696825bb9ac409ca611a2974a8d9b8a57bd7ff",
+    "frontend/realistic_viewer/tests/lifecycle.test.js": "b569db341f165e5f72a8a0e9ffa4cd62fa60e1589a2f1bc070d2032077036193",
+    "frontend/realistic_viewer/tests/product.test.js": "010cdd9988989de62deb3b79c0980255a98075f109a859ec15e6ec7685ed2e9d",
+    "frontend/realistic_viewer/tests/room.test.js": "6f24b3de023ec69f79b6d7cb580b1cfb5a10fa307a81d3ed613a58db0f591b01",
+    "pyproject.toml": "d6ab2dfb6bae0fd26a6c2efc7fdc08224ed0f94da52ac657c92f2d0b8c36864e",
     "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": "274b12859cec8f4023ef0fffb742a2cf7c169137c81aa1c050ced36a071d4a1f",
-    "src/archimind/_viewer_assets/viewer.css": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
-    "src/archimind/_viewer_assets/standalone-room.js": "bfb0b71794447ef563faa8147d3c9f7929e3900ef001ae7eb6ddbb754ac7ffda",
-    "src/archimind/_viewer_assets/viewer.js.LEGAL.txt": "cc7cc7e2f53d5db0235ab2226e85fc6e91655161573b39813b41bb00e5919674",
-    "src/archimind/_viewer_assets/furniture/CHARLES_PROVENANCE.json": "960fcdcef3e3966185b7a50a2d16fd393be97a98f784a89ff02bd955f2cacb63",
-    "src/archimind/_viewer_assets/furniture/CC-BY-4.0.txt": "c8041334a99cb48852b2139253cbde5f8ac87e27f124aed51223e0d5bf0080eb",
-    "src/archimind/_viewer_assets/furniture/PROVENANCE.json": "d2b40549cd7806edf1a048662ae2e6db3521a48703c89b7f3a30fc4e95d0d56a",
-    "src/archimind/_viewer_assets/furniture/UPSTREAM_LICENSE.md": "52912ef39b0f19a2bf816de4fc5a161d058c334a912633f5470cf2c83e9c10c5",
-    "src/archimind/_viewer_assets/furniture/SheenChair.glb": "f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399",
-    "src/archimind/_viewer_assets/furniture/CC0-1.0.txt": "a43fc2004d1e073f1107a1f6146664d08dae6cea93cb828742a4bec6da828e91",
     "src/archimind/_viewer_assets/furniture/ABO_ATTRIBUTION.txt": "97c84b22c835b42eb323942d4ec89d592b9e7072b990a70125dbd0bb2ab17bed",
-    "src/archimind/_viewer_assets/furniture/README.md": "e6a53141d769e5c3c7148f26245816ed7d842c646946b48b994e7d0adc7594ba",
     "src/archimind/_viewer_assets/furniture/ABO_LICENSE_CC_BY_4.0.txt": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
     "src/archimind/_viewer_assets/furniture/ABO_SOURCE_README.md": "6c52f9fdcc807a34fd92961cc09454aecaaabbb26327145953f203b9f2cebb71",
+    "src/archimind/_viewer_assets/furniture/CC-BY-4.0.txt": "c8041334a99cb48852b2139253cbde5f8ac87e27f124aed51223e0d5bf0080eb",
+    "src/archimind/_viewer_assets/furniture/CC0-1.0.txt": "a43fc2004d1e073f1107a1f6146664d08dae6cea93cb828742a4bec6da828e91",
+    "src/archimind/_viewer_assets/furniture/CHARLES_PROVENANCE.json": "960fcdcef3e3966185b7a50a2d16fd393be97a98f784a89ff02bd955f2cacb63",
     "src/archimind/_viewer_assets/furniture/CharlesArmchair.glb": "62c03e59b674cfb3163d2d35fbc50874a46f9d8ebd7c4be73a60e82eb6d1f645",
+    "src/archimind/_viewer_assets/furniture/PROVENANCE.json": "d2b40549cd7806edf1a048662ae2e6db3521a48703c89b7f3a30fc4e95d0d56a",
+    "src/archimind/_viewer_assets/furniture/README.md": "e6a53141d769e5c3c7148f26245816ed7d842c646946b48b994e7d0adc7594ba",
+    "src/archimind/_viewer_assets/furniture/SheenChair.glb": "f0af2a2b102d28d540236306ae19f8fb36842df76bd38cf76f063f9bd2853399",
+    "src/archimind/_viewer_assets/furniture/UPSTREAM_LICENSE.md": "52912ef39b0f19a2bf816de4fc5a161d058c334a912633f5470cf2c83e9c10c5",
+    "src/archimind/_viewer_assets/index.html": "cfb91c42044c4ea8d07ee57f6616b0eef998a9edd6ed4d4922ccef704bf56c2e",
+    "src/archimind/_viewer_assets/room-design.json": "0324c3b6e8341b2ead814c3195aa0b4e0ab560ac838c2c12980af44683f5f90c",
+    "src/archimind/_viewer_assets/room.html": "41dc46588cc8155920a44971d02c7d08b863fa1f50bdf5362ee6deeb08215801",
+    "src/archimind/_viewer_assets/sample-design.json": "02825dc40a9a1b43ed6d5a5c6c513bfafa02a869a1504e1f551babec0e371a56",
+    "src/archimind/_viewer_assets/standalone-room.js": "bfb0b71794447ef563faa8147d3c9f7929e3900ef001ae7eb6ddbb754ac7ffda",
+    "src/archimind/_viewer_assets/standalone.js": "f103b9a77fd910a082e42e386f261de3147d99bd9a4b1530b4ffee32c129d579",
+    "src/archimind/_viewer_assets/viewer.css": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
+    "src/archimind/_viewer_assets/viewer.js": "c4422cdde95e76081fafe57206f74641d9d6dc1247f9d58ea4a03bfe2786607f",
+    "src/archimind/_viewer_assets/viewer.js.LEGAL.txt": "cc7cc7e2f53d5db0235ab2226e85fc6e91655161573b39813b41bb00e5919674",
+    "src/archimind/assets/charles_visual_review.json": "0c7be9904cdd03d7fe3aed6d7be21ebc0d43d47b9692c73fae5105405288d55d",
+    "src/archimind/assets/furniture_catalog_1_0_0.json": "c1116a65558b2781f1ac979920dbd0b0b683dfdcc314681a70d8639ed87880dd",
     "src/archimind/assets/planning_envelopes.json": "116e0e526f4f86941add2eae03530f5d6b7e0ec97aafe682188b44a2b2dd1f5c",
-    "data/catalogs/furniture_source_candidates.json": "6480518590b4325368ee18281a81870b9311e44f99a920e881005729ff9b76d2",
-    "data/catalogs/furniture_source_candidates_08a.json": "cb3d5b7a7382a31ec96ec709f4fdcf6f90d9202275fe41f40c04391dc53ddc5d"
+    "src/archimind/assets/product_render_release.json": "70a680b2dd894ae0cde00251d060081b1117b847ddba3fd496feef095947082b",
+    "src/archimind/geometry/__init__.py": "9f52963b2cbf11bbcb51c5835e355cd5cd0f90ca0c1d230e909a9fb5885d000c",
+    "src/archimind/geometry/accessibility.py": "23908f4879dff33abaca2da6600b53055a1968f9396d9210147b32337a99e09d",
+    "src/archimind/geometry/footprints.py": "2caa084f6c6009430634254e84c1aadb1e47acbb0d6abd492e1f6bbc77520fdb",
+    "src/archimind/geometry/layout_generator.py": "d689fe2beabf06f597e65be8b7d0b5a8db5d57a6daedfd50f62761a4954edb80",
+    "src/archimind/geometry/validator.py": "b2719c9ebd20a23b13071f962a28b6f93590bd7c3ff77a237aba7feb5c648e41",
+    "src/archimind/models/__init__.py": "7b94461568c34fef96cdd8824766be7821c109a43d2b60acc1546c8cae1ad2bd",
+    "src/archimind/models/furniture.py": "e69002dd3e225f95cc4d021a2d18d7df9f9e5b5a7d547577f614fc4a06ed5d1c",
+    "src/archimind/models/room.py": "a5907badd844772d08c406b3913cbc8f5560a39af250baeecacd064365b64608",
+    "src/archimind/render/__init__.py": "75a0d9ff2f06459224e69f83c0f8c20cf87601d23ca94f3bc07acd0acfe62b5d",
+    "src/archimind/render/design_3d.py": "db8dd4f39a0e6b3c3b2f3fcc9447fee862590432b19ba4296bbe7c04479e408f",
+    "src/archimind/render/floorplan_2d.py": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",
+    "src/archimind/render/furniture_3d.py": "91b5e218c050e9a6d25b23a138651a82b6ce76fa3c0c9d984f2136e4fe4f35f0",
+    "src/archimind/render/product_scene.py": "3e87b943ba3bf429f58c53ff3587738336c89d8a9272fb601ec9e226b9a4c6d8",
+    "src/archimind/render/realistic_scene.py": "9fc6b28a61e7d65e96bcc57f599b82122ad2faf0e2575089bd5c83894c5e2b5c",
+    "src/archimind/render/realistic_viewer.py": "c5d21706fafc4135e9abdfce6ec914e29d7207f8f79668ed386d84940a273cf7",
+    "src/archimind/render/room_3d.py": "f6977f7ab2a52b959a1bf5424ae1929ce1b05cfb5f15ec0420a7db7616de1c95",
+    "src/archimind/render/selected_realistic.py": "8bd21ec824d0e85a0652fbf21176cef5056f6eafd6f9a850216d085a431983ae",
+    "src/archimind/render/style_colors.py": "b36a837d860fe906b42ec52ad5f05e4d487e16a53873385e4803633edafed9f0"
   },
   "delivery": {
     "checkpoint1": {
       "commit": "0a2fd8c54331489a3720caeca24cbf774aa757fb",
       "ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/40954559708",
       "status": "passed"
+    },
+    "checkpoint2": {
+      "commit": "ffee12eebcf862675be9f813a229419403e0acea",
+      "ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/40956207603",
+      "status": "passed",
+      "python_tests_ci": 1816,
+      "python_seconds_ci": 183.5
+    },
+    "checkpoint3": {
+      "status": "final commit and actual CI outcome reported in delivery response; no self-referential future commit hash"
     }
-  }
+  },
+  "preservation_summary": {
+    "frozen_files": 90,
+    "comparison_baseline": "4052e1a4bf8d8919a34da249b356d9e4dec5296f",
+    "all_hashes_match": true,
+    "original_catalog_preserved_as": "src/archimind/assets/furniture_catalog_1_0_0.json",
+    "original_record_bodies_and_search_documents": "identical",
+    "separately_declared_implementation_migrations": 13
+  },
+  "browser": {
+    "browser": "Chromium, local app http://127.0.0.1:18512",
+    "viewports": [
+      [
+        1440,
+        1000
+      ],
+      [
+        390,
+        844
+      ]
+    ],
+    "physical_phone_test": false,
+    "scenarios": [
+      "dynamic five-product labels and exact dimensions",
+      "new three-product prepare/review/generate",
+      "A/B selected Three.js placeholders",
+      "pending selection changes preserve current generation and disable stale generation",
+      "mixed Charles + new three + procedural bed",
+      "separate browser page starts an independent Streamlit session"
+    ],
+    "placeholder_only_glb_requests": 0,
+    "mixed_scene_product_assets": [
+      "existing CharlesArmchair.glb only"
+    ],
+    "console_errors": 0,
+    "console_warnings": [
+      "Plotly Canvas2D readback performance advisory"
+    ],
+    "limitations": [
+      "No new model to inspect; placeholder labels are small inside narrow 3D viewport but legend remains readable",
+      "No new forced-corruption browser test; existing automated asset corruption and lifecycle regressions retained",
+      "No sustained performance or physical-device claim"
+    ],
+    "screenshots": [
+      {
+        "path": "/Users/macbook/Hack/.archimind-08f2/catalog-desktop.png",
+        "sha256": "4e42ddec8402edc30c1e6d1171fc2aedd93f95b421aabd789fdd998ffc9d6269"
+      },
+      {
+        "path": "/Users/macbook/Hack/.archimind-08f2/placeholders-desktop.png",
+        "sha256": "463805b2dffc2b840a2d8cdf95c4fb3a6911165ddcb632ea500e02136aa639a1"
+      },
+      {
+        "path": "/Users/macbook/Hack/.archimind-08f2/catalog-narrow.png",
+        "sha256": "ddceb4a9100d1171e3e562951f245147dc99788db5574090c85c3be32feff24e"
+      },
+      {
+        "path": "/Users/macbook/Hack/.archimind-08f2/placeholders-narrow.png",
+        "sha256": "bf587e7f7477196e62f0d16f284543a99b21d2bb5e4fabb7a83332307b636b42"
+      },
+      {
+        "path": "/Users/macbook/Hack/.archimind-08f2/mixed-desktop.png",
+        "sha256": "2b19abad1c71fc4466f5779cffd0e65dc06de3e54451429f7fdb070617301d68"
+      }
+    ],
+    "task_owned_servers_stopped": true
+  },
+  "changed_files": [
+    "MANIFEST.in",
+    "README.md",
+    "docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json",
+    "docs/data/FURNITURE_CATALOG_ADMISSION_08F2.md",
+    "docs/developer/FURNITURE_CATALOG_UI.md",
+    "docs/developer/FURNITURE_RETRIEVAL_ARCHITECTURE.md",
+    "docs/developer/PLANNING_ENVELOPES.md",
+    "docs/developer/STATUS.md",
+    "scripts/evaluate_furniture_embeddings.py",
+    "scripts/evaluate_furniture_retrieval.py",
+    "src/archimind/assets/catalog.py",
+    "src/archimind/assets/furniture_catalog.json",
+    "src/archimind/assets/furniture_catalog_1_0_0.json",
+    "src/archimind/assets/planning_envelopes.py",
+    "src/archimind/assets/specifications.py",
+    "src/archimind/retrieval/eligibility.py",
+    "src/archimind/retrieval/embedding_experiment.py",
+    "src/archimind/retrieval/embedding_index.py",
+    "src/archimind/retrieval/evaluation.py",
+    "src/archimind/retrieval/historical.py",
+    "src/archimind/retrieval/hybrid.py",
+    "src/archimind/retrieval/lexical.py",
+    "src/archimind/retrieval/semantic.py",
+    "src/archimind/ui/furniture_assets.py",
+    "src/archimind/ui/realistic_view.py",
+    "tests/test_asset_catalog.py",
+    "tests/test_asset_catalog_packaging.py",
+    "tests/test_asset_inspection.py",
+    "tests/test_catalog_admission.py",
+    "tests/test_catalog_generation_ui.py",
+    "tests/test_catalog_specifications.py",
+    "tests/test_furniture_source_expansion.py",
+    "tests/test_planning_envelopes.py",
+    "tests/test_retrieval_contracts.py",
+    "tests/test_retrieval_embedding_experiment.py",
+    "tests/test_retrieval_embedding_index.py",
+    "tests/test_retrieval_evaluation.py",
+    "tests/test_retrieval_hybrid.py",
+    "tests/test_retrieval_lexical.py",
+    "tests/test_retrieval_semantic.py"
+  ]
 }

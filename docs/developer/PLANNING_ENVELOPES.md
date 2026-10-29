@@ -11,7 +11,7 @@ The original inspector still rejects Charles against the published product box.
 
 | Value | Meaning | Source of authority |
 | --- | --- | --- |
-| Published product dimensions | Reviewed published whole-item claims, not independent metrology | Unchanged schema-1 furniture catalog and original unit/axis evidence |
+| Published product dimensions | Reviewed published whole-item claims, not independent metrology | Versioned furniture catalog and original unit/axis evidence |
 | Measured mesh dimensions | Extents of all inspected static geometry, after authored transforms | Pinned 08C inspection and received-source SHA-256 |
 | Planning dimensions | Conservative geometric reservation for this native-scale mesh and published box | Explicit versioned Policy B envelope |
 | Canonical Furniture dimensions | The values actually given to existing geometry/generation | Original factory uses published values; new explicit factory uses planning values |
@@ -228,3 +228,18 @@ render approval comes only from the separate digest-bound release, not this
 planning record. See [native-scale product rendering](CHARLES_PRODUCT_RENDERING.md)
 for the trusted binding, actual browser evidence, limits and packaging. No A/B
 selected-layout integration follows automatically; that remains 08D.
+
+
+## 08F2 catalog-release compatibility
+
+The approved Charles envelope and render release keep their original schema-1 /
+catalog-1.0.0 identities. Validation loads that fixed historical resource and
+also requires its product record to equal the current active record. Thus the
+new schema-2 / catalog-1.1.0 release preserves Charles without rewriting its
+proof. An altered active Charles record makes the old proof stale.
+
+The existing qualification function remains scoped to its original approved
+release. Belaya, Morava and the nightstand have published-dimension metadata only;
+model-index extents do not establish inspected geometry or a Policy B envelope.
+Fresh specifications for them use `furniture_from_catalog()` and procedural
+placeholders. No new planning reservation or rendering approval is created.

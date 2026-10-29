@@ -82,6 +82,7 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         assert not any(n.endswith("/.env") for n in archive.namelist())
         assert not any("furniture_source_candidates" in n for n in archive.namelist())
         assert not any("08F1" in n for n in archive.namelist())
+        assert not any("08F2" in n for n in archive.namelist())
         assert not any("furniture_retrieval_synthetic" in n for n in archive.namelist())
         assert not any("B075X2X4XS" in n for n in archive.namelist())
         assert not any(
@@ -119,6 +120,8 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             "/docs/data/FURNITURE_EXPANSION_08F1.md",
             "/docs/data/FURNITURE_EXPANSION_08F1.json",
             "/docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md",
+            "/docs/data/FURNITURE_CATALOG_ADMISSION_08F2.md",
+            "/docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json",
             "/data/benchmarks/furniture_retrieval_queries.json",
             "/data/benchmarks/furniture_retrieval_synthetic.json",
             "/scripts/evaluate_furniture_retrieval.py",
@@ -264,6 +267,25 @@ request = FurnitureSearchRequest(query='Charles armchair')
 assert len(resolve_result(semantic.search(request))) == 5
 hybrid = HybridRetrievalProvider(provider, semantic, corpus=corpus)
 assert len(resolve_result(hybrid.search(request))) == 5
+from archimind.retrieval.historical import (
+    historical_index, HistoricalLexicalProvider, HistoricalSemanticProvider,
+    HistoricalHybridProvider, resolve_historical_result)
+old_corpus = historical_index()
+old_lexical = HistoricalLexicalProvider()
+old_semantic = HistoricalSemanticProvider(
+    index=build_embedding_index(old_corpus, encoder, historical=True), encoder=encoder,
+    policy=AbstentionPolicy(mode='threshold', minimum_cosine=-1.0, method='test_double'))
+old_result = HistoricalHybridProvider(old_lexical, old_semantic, corpus=old_corpus).search(request)
+assert len(resolve_historical_result(old_result)) == 2
+assert LexicalRetrievalProvider(index=old_corpus).search(request).status == 'stale_index'
+for resolution in (resolve_result, lambda r: resolve_historical_result(r, for_preparation=True)):
+    try:
+        resolution(old_result)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Historical research result authorized current preparation')
+assert Path(sys.modules['archimind.retrieval.historical'].__file__).resolve().is_relative_to(target)
 assert not any(n.startswith(('fastembed', 'onnxruntime', 'tokenizers')) for n in sys.modules)
 from archimind.assets.render_assets import (
     product_release, product_asset_path, verify_product_asset, product_projection)
@@ -317,6 +339,16 @@ assert specification_is_current(submission, base,
 assert submission.design().furniture[3].id == 'catalog:abo-b075x2x4xs-amazon-com:1'
 assert submission.assignments[1].product_id == 'B07PQS58XN'
 assert Path(sys.modules['archimind.assets.specifications'].__file__).resolve().is_relative_to(target)
+new_ids = ('abo-b074l4976t-amazon-co-uk', 'abo-b07h8jn9qf-amazon-co-uk', 'abo-b07b4vxxjc-amazon-com')
+new_dimensions = ((1.6, .8, .75), (2.0, .59, 2.12), (.6096, .4318, .6096))
+for asset_id, dimensions in zip(new_ids, new_dimensions):
+    item = furniture_from_catalog(asset_id, furniture_id=asset_id, name='Product', x_m=-1.0, y_m=0.0)
+    assert (item.width_m, item.depth_m, item.height_m) == dimensions and item.rotation_deg == 0
+new_submission = prepare_catalog_specification(base, retained_manual_ids=(), product_ids=new_ids)
+assert len(new_submission.assignments) == 3 and not new_submission.planning_bindings
+assert all(a.catalog_version == '1.1.0' and a.dimension_basis == 'published_item_dimensions'
+    for a in new_submission.assignments)
+assert all(b.asset_id is None for b in build_render_bindings(new_submission.design()).bindings)
 print('INSTALLED_CATALOG_AND_PRODUCT_OK')
 """
     result = subprocess.run(

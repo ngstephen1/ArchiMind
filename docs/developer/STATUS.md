@@ -2,7 +2,7 @@
 
 Last reviewed: **October 29, 2026**.
 
-**Current milestone: Task 08F1 source expansion and owner-review preparation complete; source-only leads are not active products. The application remains at its unchanged 08E UI, and production semantic admission remains deferred.**
+**Current milestone: Task 08F2 metadata admission complete: five catalog products, one approved real mesh (Charles). The existing 08E selection workflow exposes the three new metadata-only products as procedural placeholders. Production semantic admission and human relevance review remain deferred.**
 Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -1512,3 +1512,41 @@ Syntax/build, bundle equivalence, Ruff lint/format (174 files), dependency check
 registry/asset integrity, Streamlit HTTP 200, source/wheel builds and isolated
 installed-wheel checks passed. Checkpoints 1 and 2 passed CI; final delivery
 identities and CI are reported in the response.
+
+
+## Task 08F2 — versioned metadata-only catalog admission
+
+Schema 2 / catalog 1.1.0 admits exactly Belaya B074L4976T, Morava B07H8JN9QF and
+Rivet nightstand B07B4VXXJC, using the unchanged 08F1 identity/license/dimension
+receipts. Published W/D/H are 1.6/0.8/0.75 m, 2.0/0.59/2.12 m and
+0.6096/0.4318/0.6096 m. These are checked published claims. Variant labels do not
+qualify physical colors/materials. None has an approved mesh or planning envelope.
+
+The original two-product 1.0.0 release is retained byte-for-byte. Charles/bookcase
+record bodies and search text, approved Charles assets/releases, canonical geometry,
+scoring and frontend bundles are unchanged. Existing 08E controls discover five
+products; explicit preparation/generation uses current evidence and preserves
+active candidates under pending edits. Three new products generate two passing
+alternatives in 8 attempts; adding Charles and the procedural bed takes 102,
+under the unchanged 500-attempt budget. These checks are not design certification.
+
+Historical retrieval providers/CLI scope preserve frozen two-product results;
+current resolution rejects stale historical hits/vectors. No encoder ran, no new
+benchmark was evaluated, and the 24-prompt owner packet remains blank. The active
+five-product catalog has no measured retrieval effectiveness. See the
+[admission report](../data/FURNITURE_CATALOG_ADMISSION_08F2.md) for exact release
+checks, screenshots outside Git, preservation pins and delivery evidence.
+
+Belaya can proceed to a separately authorized individual acquisition/qualification
+review. Morava's reported height mismatch and the three assets' combined reported
+192 MiB texture estimate need later inspection; the 128 MiB scene limit stays.
+No bed qualifies. No acquisition, new planning proof, render approval, embeddings,
+dependency, database or AI agent is included in 08F2.
+
+Final local release: **1,817 Python tests passed in 136.62s** (36 new; all 1,781
+baseline cases retained), **75 frontend tests passed**, zero failures/skips.
+Syntax/build/bundle equality, Ruff lint/format (177 files), dependency checks,
+registry/asset integrity, Streamlit HTTP 200 and offline source/wheel/isolated-install
+verification passed. A disk-exhaustion attempt is retained in the report; these
+numbers are from the fresh successful rerun. Checkpoints 1 and 2 have green CI;
+final commit/CI identities are in the delivery response. Stop after 08F2.

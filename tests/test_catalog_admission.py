@@ -304,6 +304,7 @@ def test_frozen_benchmark_and_stale_indexes_remain_separate(tmp_path):
         run_benchmark,
     )
     from archimind.retrieval.historical import (
+        HistoricalHybridProvider,
         HistoricalLexicalProvider,
         HistoricalSemanticProvider,
         historical_index,
@@ -357,6 +358,20 @@ def test_frozen_benchmark_and_stale_indexes_remain_separate(tmp_path):
     assert len(replay.hits) == 2
     with pytest.raises(ValueError):
         resolve_result(replay)
+    hybrid = HistoricalHybridProvider(
+        HistoricalLexicalProvider(),
+        HistoricalSemanticProvider(index=vectors, encoder=encoder, policy=policy),
+        corpus=old,
+    )
+    combined = hybrid.search(request)
+    assert len(resolve_historical_result(combined)) == 2
+    assert hybrid.search(request) == combined
+    with pytest.raises(ValueError):
+        resolve_result(combined)
+    empty = HistoricalLexicalProvider().search(FurnitureSearchRequest(query="bed"))
+    assert empty.status == "empty"
+    with pytest.raises(ValueError):
+        resolve_result(empty)
     root = ROOT / "data/benchmarks"
     benchmark = RetrievalBenchmark.model_validate_json(
         (root / "furniture_retrieval_queries.json").read_bytes()
@@ -409,3 +424,19 @@ def test_active_loader_rejects_coherent_but_unapproved_product_change(monkeypatc
     monkeypatch.setattr(module.resources, "files", lambda _: resource)
     with pytest.raises(CatalogError, match="unavailable or invalid"):
         load_catalog()
+
+
+def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
+    receipt = json.loads(
+        (ROOT / "docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json").read_bytes()
+    )
+    for name, expected in receipt["frozen_files"].items():
+        assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
+    catalog_bytes = (ROOT / "src/archimind/assets/furniture_catalog.json").read_bytes()
+    assert hashlib.sha256(catalog_bytes).hexdigest() == receipt["catalog"]["sha256"]
+    assert receipt["catalog"]["metadata_count"] == len(load_catalog().records) == 5
+    assert (
+        receipt["catalog"]["planning_count"] == receipt["catalog"]["render_count"] == 1
+    )
+    assert receipt["human_review"]["completed_judgments"] == 0
+    assert receipt["human_review"]["status"] == "pending_unevaluated"

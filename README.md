@@ -1097,7 +1097,9 @@ ArchiMind/
 
 ## Product facts and conservative planning envelopes
 
-The independent furniture catalog retains two source-qualified ABO product records.
+The independent furniture catalog now contains five metadata-qualified ABO products
+(schema 2, release 1.1.0). Its original two-product release 1.0.0 remains packaged
+for explicit historical research replay.
 Task 08C-R1 adds an explicit backend-only Policy B API for the Charles armchair:
 `furniture_from_planning_envelope()` returns a fresh canonical item plus immutable
 source/inspection/version evidence. Published dimensions, measured mesh bounds,
@@ -1135,29 +1137,32 @@ for API/state contracts, verification and known limits.
 ## Catalog-sized specifications
 
 Choose **Specification for next generation → Catalog selection** to retain or
-remove the procedural items and optionally add one Charles armchair and one
-Espresso bookcase. Use **Prepare new specification → Review → Generate Layouts**.
+remove the procedural items and optionally add one of each catalog product:
+Charles armchair, Espresso bookcase, Belaya writing desk, Morava wardrobe and
+Rivet nightstand. Use **Prepare new specification → Review → Generate Layouts**.
 Pending edits leave displayed results and styling unchanged; generation uses the
 reviewed dimensions and freezes its submitted specification/provenance.
 
 Charles reserves its approved Policy B envelope and can use its native-scale
-mesh. The bookcase uses its published dimensions and remains a named storage
-placeholder. Published measurements are checked claims, not independent physical
-measurements. Compatible Charles instances offer a mesh/placeholder display
+mesh. The other four use published item dimensions and named procedural
+placeholders; they have no approved planning envelope or real-mesh binding.
+Published measurements are checked claims, not independent physical measurements. Compatible Charles instances offer a mesh/placeholder display
 choice; no rendering choice resizes or revalidates the layout. Plotly stays the
 default. See the [catalog workflow guide](docs/developer/FURNITURE_CATALOG_UI.md)
 for exact dimensions, provenance, failure policy, state and verification.
 
 ## Furniture source expansion and owner review
 
-Task **08F1** adds 25 source-research candidates while preserving all 32 historical
+Task **08F1** added 25 source-research candidates while preserving all 32 historical
 records. Three new source-qualified leads cover a desk, a wardrobe and a nightstand;
-no reviewed bed qualifies. The active application still has **two products** and
-Charles remains its only render-qualified product. No model was acquired or index
-updated. Source qualification does not prove native envelope containment or scene
-resource compatibility. The [expansion findings](docs/data/FURNITURE_EXPANSION_08F1.md)
+no reviewed bed qualifies. That historical checkpoint retained two active products.
+Task **08F2** admits those three exact leads as metadata, bringing the active catalog
+to **five products**. Charles remains the only render-qualified product. No model
+was acquired and no embedding was rebuilt. Source qualification does not prove
+native envelope containment or scene resource compatibility. The [expansion findings](docs/data/FURNITURE_EXPANSION_08F1.md)
 include exact evidence and a [blank 24-prompt owner-review packet](docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md).
-Independent relevance review remains pending.
+Independent relevance review remains pending. See the [08F2 admission report](docs/data/FURNITURE_CATALOG_ADMISSION_08F2.md)
+for exact IDs, dimensions, version boundaries and verification.
 
 ## Offline semantic retrieval experiment
 
@@ -1187,10 +1192,13 @@ was tested and no embedding dependency was added. See the
 [architecture guide](docs/developer/FURNITURE_RETRIEVAL_ARCHITECTURE.md) and
 [actual benchmark findings](docs/data/RETRIEVAL_BASELINE_08R0.md).
 
-Run `python scripts/evaluate_furniture_retrieval.py --output /tmp/08r0-results.json`
+Run `python scripts/evaluate_furniture_retrieval.py --historical --output /tmp/08r0-results.json`
 with the project virtual environment. The output must be a new filename; the tool
-never creates an index or downloads a model. 08R1 embedding evaluation, 08R2 UI
-integration and 08F catalog expansion remain separately scoped future tasks.
+constructs only an in-memory historical index and downloads no model. Omitting
+`--historical` rejects these frozen two-product judgments against the active
+five-product corpus. Old lexical/vector snapshots remain stale for application
+resolution. A new five-product effectiveness study needs explicit snapshot
+construction and human-reviewed judgments; no such study or 08R2 UI is implemented.
 
 ## Roadmap
 

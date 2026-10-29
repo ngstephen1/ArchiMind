@@ -281,7 +281,7 @@ to the held-out misses or claim that a database can solve the relevance problem.
 The application remains the explicit 08E catalog-selection workflow.
 
 
-## 08F1 source research and review boundary
+## Historical 08F1 source research and review boundary
 
 [08F1](../data/FURNITURE_EXPANSION_08F1.md) expands the **research register** to
 57 records, with three new source-qualified leads and no packaged-catalog change.
@@ -292,7 +292,7 @@ their qualification revision/hash. The active corpus, search documents and all
 Belaya desk, Morava wardrobe and the Rivet nightstand have checked published item
 claims and same-ID model metadata; native meshes, placement and approved envelopes
 remain unverified. Reported texture costs also prevent assuming all three can share
-one scene under current limits. The current catalog contract accepts only
+one scene under current limits. At that checkpoint the catalog contract accepted only
 CHAIR/SHELF and armchair/bookcase. New source categories require an explicitly
 reviewed contract/version and new immutable qualification bindings before admission;
 registry membership cannot bypass `load_catalog()` or current eligibility.
@@ -303,3 +303,35 @@ Any later benchmark needs actual independent judgments, scope review and a new
 freeze. Do not rebuild existing vectors, rewrite old judgments or claim the broader
 shortlist solves unsupported-query abstention. 08F1 authorizes no acquisition,
 new embeddings, semantic UI or 08R2 integration.
+
+
+## 08F2 active catalog and explicit historical replay
+
+Schema 2 / catalog **1.1.0** admits Belaya writing desk, Morava wardrobe and Rivet
+nightstand as metadata, for five active products. Only Charles has planning/render
+approval. The original two record bodies/search texts stay identical; search-
+document format remains version 1. Every added row has its own source-bound digest.
+Current lexical construction uses the five-row snapshot. No five-product relevance
+benchmark, model-derived embedding index or threshold policy was built or evaluated.
+
+`load_catalog(version="1.0.0")` reads the byte-identical packaged old release.
+`retrieval.historical` provides explicitly named lexical, semantic and hybrid
+providers tied to the complete original index identity. They reuse the ranking
+algorithms, not rewritten judgments. Research resolution is separate: current
+`resolve_result()` rejects old results, including empty results, and
+`resolve_historical_result(..., for_preparation=True)` always rejects.
+There is no mutable global release switch.
+
+Both benchmark CLIs require `--historical` for frozen 08R0/08R1 replay. Without it,
+old benchmark/corpus identities fail against the active catalog. Vector builders
+and readers likewise require explicit historical scope for the old corpus. Old
+vectors fail against the five-product corpus and never rebuild themselves.
+Fixed-vector tests cover these paths; **08F2 ran no real encoder**. Historical
+lexical replay retains the original semantic signature. The 08R1 report's old
+commands now need `--historical`; that historical evidence file is not rewritten.
+
+The blank 24-prompt review packet remains scoped to the earlier current/prospective
+split. A future owner/expert review should explicitly freeze catalog 1.1.0 and
+reconsider those scopes before authoring new judgments. Metadata admission is not
+human relevance adjudication. Production semantic/hybrid integration remains
+deferred. See [08F2 admission and verification](../data/FURNITURE_CATALOG_ADMISSION_08F2.md).
