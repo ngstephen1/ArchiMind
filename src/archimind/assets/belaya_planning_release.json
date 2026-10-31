@@ -1,0 +1,22 @@
+{
+  "asset_id": "abo-b074l4976t-amazon-co-uk",
+  "asset_version": "1.0.0",
+  "product_id": "B074L4976T",
+  "model_id": "B074L4976T",
+  "variant_id": "B074L4976T",
+  "variant_label": "Oak",
+  "catalog_id": "archimind-furniture",
+  "catalog_version": "1.1.0",
+  "catalog_schema_version": 2,
+  "catalog_record_sha256": "e53ea735e094c49ce9fa432dbf9432cc86a6984e111d7a27a9aa6dfc65eb0387",
+  "schema_version": 1,
+  "status": "planning_release_approved",
+  "envelope_sha256": "f2b706c8111e5f9321d3d90856d914a60ab63aebdb0cf30dd4b8847f493723a5",
+  "inspection_sha256": "fa46d4ab6d1a6f5d41d63d5699d60fa4bada2a63a48e7e6a96209723f5b90de7",
+  "source_glb_sha256": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+  "qualification_receipt_sha256": "49b2676cd1dec04d74c2fc564c259ffce909fce68584275c7e6806e9820b46c7",
+  "policy_id": "archimind-conservative-planning-envelope",
+  "policy_version": "1.0.0",
+  "authorization_sha256": "496e98327427372fe9d18780bbd32b70ee0e92e5170b058d8a12e2f1bfbd3a59",
+  "render_qualified": false
+}

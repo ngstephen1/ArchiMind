@@ -43,7 +43,28 @@ OWNER_DECISION_SHA256 = (
 _RECEIPT_ID = "08C:charles:2026-10-28:inspection-v1"
 _INSPECTION_SHA256 = "3ab3b103e8cbaa4b93cd05b825d0a5d4ab819cd62e12b2e5b253aa07c479fd5d"
 _REPORT_SHA256 = "76572768405747a5a29b62a762ef69c5d991e8375fba24e415197471b2d727ac"
+BELAYA_ID = "abo-b074l4976t-amazon-co-uk"
+# Immutable reviewed receipt identities, separate from mutable release reports.
+_REVIEWED_RECEIPTS = {
+    "abo-b075x2x4xs-amazon-com": (
+        _RECEIPT_ID,
+        _INSPECTION_SHA256,
+        _REPORT_SHA256,
+        "1.0.0",
+        "received_bytes_sha256_in_08C",
+    ),
+    BELAYA_ID: (
+        "08F3A:belaya:2026-10-31:inspection-v1",
+        "fa46d4ab6d1a6f5d41d63d5699d60fa4bada2a63a48e7e6a96209723f5b90de7",
+        "49b2676cd1dec04d74c2fc564c259ffce909fce68584275c7e6806e9820b46c7",
+        "1.1.0",
+        "received_bytes_sha256_in_08F3A",
+    ),
+}
 Vector = tuple[FiniteFloat, FiniteFloat, FiniteFloat]
+_BELAYA_RELEASE_SHA256 = (
+    "0f3549c4a6ac035b1346cd3629aa53baa3fab3374d191270fbcc4e6de47f7c18"
+)
 
 
 class PlanningEnvelopeError(ValueError):
@@ -114,20 +135,33 @@ class PlanningEnvelopeEvidence(_Frozen):
     inspection_receipt_sha256: SHA256
     qualification_report_sha256: SHA256
     source_glb_sha256: SHA256
-    source_hash_basis: Literal["received_bytes_sha256_in_08C"]
+    source_hash_basis: Literal[
+        "received_bytes_sha256_in_08C", "received_bytes_sha256_in_08F3A"
+    ]
     inspection: AssetInspection
 
     @model_validator(mode="after")
     def reviewed_evidence_only(self) -> Self:
         # Explicit release trust anchor, not a user-supplied assertion of approval.
         # Adding a receipt requires a reviewed new qualification/release.
+        trusted = _REVIEWED_RECEIPTS.get(self.inspection.asset_id)
         if (
-            self.inspection_receipt_id != _RECEIPT_ID
-            or self.inspection_receipt_sha256 != _INSPECTION_SHA256
-            or self.qualification_report_sha256 != _REPORT_SHA256
-            or _digest(self.inspection.model_dump(mode="json")) != _INSPECTION_SHA256
+            trusted is None
+            or (
+                self.inspection_receipt_id,
+                self.inspection_receipt_sha256,
+                self.qualification_report_sha256,
+                self.source_hash_basis,
+            )
+            != (trusted[0], trusted[1], trusted[2], trusted[4])
+            or _digest(self.inspection.model_dump(mode="json")) != trusted[1]
             or self.source_glb_sha256 != self.inspection.original_sha256
             or not self.inspection.expected_hash_checked
+            or any(
+                g.status != "passed"
+                for g in self.inspection.gates
+                if g.name != "canonical_envelope"
+            )
         ):
             raise ValueError("Unreviewed or mismatched inspection evidence.")
         return self
@@ -142,7 +176,10 @@ class PlanningEnvelopeQualification(_Frozen):
         "cca6bcd209c2859dd461dcc565d5e8e2886dc96717c825e7ff08f660e8ae0ff7"
     ]
     scope: Literal["fresh_backend_specifications_only"]
-    orientation_evidence: Literal["08C_numeric_axes_and_source_front_convention"]
+    orientation_evidence: Literal[
+        "08C_numeric_axes_and_source_front_convention",
+        "08F3A_numeric_axes_and_source_front_convention",
+    ]
     natural_front_visually_verified: Literal[False]
     functional_clearance_evaluated: Literal[False]
     render_qualified: Literal[False]
@@ -273,7 +310,7 @@ class PlanningEnvelope(_Frozen):
     envelope_id: Text
     envelope_version: Literal["1.0.0"]
     catalog_id: Literal["archimind-furniture"]
-    catalog_schema_version: StrictInt = Field(ge=1, le=1)
+    catalog_schema_version: StrictInt = Field(ge=1, le=2)
     catalog_version: Version
     catalog_record_sha256: SHA256
     asset_id: Text
@@ -298,8 +335,17 @@ class PlanningEnvelope(_Frozen):
         if load_catalog().get_record(self.asset_id) != record:
             raise ValueError("Planning evidence no longer matches active product.")
         inspection = self.evidence.inspection
+        trusted = _REVIEWED_RECEIPTS.get(self.asset_id)
+        expected_orientation = (
+            "08F3A_numeric_axes_and_source_front_convention"
+            if self.asset_id == BELAYA_ID
+            else "08C_numeric_axes_and_source_front_convention"
+        )
         if (
-            (self.catalog_id, self.catalog_schema_version, self.catalog_version)
+            trusted is None
+            or self.catalog_version != trusted[3]
+            or self.qualification.orientation_evidence != expected_orientation
+            or (self.catalog_id, self.catalog_schema_version, self.catalog_version)
             != (catalog.catalog_id, catalog.schema_version, catalog.catalog_version)
             or self.catalog_record_sha256 != _digest(record.model_dump(mode="json"))
             or self.asset_version != record.asset_version
@@ -385,7 +431,7 @@ def qualify_planning_envelope(
         evidence = PlanningEnvelopeEvidence.model_validate(evidence)
         # Existing owner-approved Policy B evidence belongs to release 1.0.0.
         # New metadata cannot manufacture a planning qualification.
-        catalog = load_catalog(version="1.0.0")
+        catalog = load_catalog(version=_REVIEWED_RECEIPTS[asset_id][3])
         record = catalog.get_record(asset_id)
         placement = PlanningEnvelopePlacement(
             units="meters",
@@ -436,7 +482,11 @@ def qualify_planning_envelope(
                 owner_decision_id="08C-R1-policy-B",
                 owner_decision_sha256=OWNER_DECISION_SHA256,
                 scope="fresh_backend_specifications_only",
-                orientation_evidence="08C_numeric_axes_and_source_front_convention",
+                orientation_evidence=(
+                    "08F3A_numeric_axes_and_source_front_convention"
+                    if asset_id == BELAYA_ID
+                    else "08C_numeric_axes_and_source_front_convention"
+                ),
                 natural_front_visually_verified=False,
                 functional_clearance_evaluated=False,
                 render_qualified=False,
@@ -447,7 +497,14 @@ def qualify_planning_envelope(
             for k, v in data.items()
         }
         return PlanningEnvelope(**data, metadata_sha256=_digest(serializable))
-    except (ValueError, TypeError, OverflowError, RecursionError, CatalogError):
+    except (
+        ValueError,
+        TypeError,
+        OverflowError,
+        RecursionError,
+        KeyError,
+        CatalogError,
+    ):
         raise PlanningEnvelopeError("unqualified_envelope") from None
 
 
@@ -463,11 +520,68 @@ class PlanningEnvelopeLibrary(_Frozen):
         return self
 
 
+def _require_planning_release(envelope: PlanningEnvelope) -> None:
+    """Candidate validation cannot grant release authority.
+
+    Charles retains its historical fixed receipt authority. Belaya requires a
+    separately pinned release plus the unchanged acquisition/inspection receipt.
+    Neither resource name nor approval digest is accepted from a caller.
+    """
+    if envelope.asset_id != BELAYA_ID:
+        return
+    try:
+        root = resources.files("archimind.assets")
+        with root.joinpath("belaya_planning_release.json").open("rb") as stream:
+            raw = stream.read(16385)
+        if (
+            len(raw) > 16384
+            or hashlib.sha256(raw).hexdigest() != _BELAYA_RELEASE_SHA256
+        ):
+            raise ValueError
+        release = json.loads(raw, object_pairs_hook=_unique, parse_constant=_nonfinite)
+        expected = {
+            "schema_version": 1,
+            "status": "planning_release_approved",
+            "asset_id": envelope.asset_id,
+            "asset_version": envelope.asset_version,
+            "product_id": envelope.product_id,
+            "model_id": envelope.model_id,
+            "variant_id": envelope.variant_id,
+            "variant_label": envelope.variant_label,
+            "catalog_id": envelope.catalog_id,
+            "catalog_version": envelope.catalog_version,
+            "catalog_schema_version": envelope.catalog_schema_version,
+            "catalog_record_sha256": envelope.catalog_record_sha256,
+            "envelope_sha256": envelope.metadata_sha256,
+            "inspection_sha256": envelope.evidence.inspection_receipt_sha256,
+            "source_glb_sha256": envelope.evidence.source_glb_sha256,
+            "qualification_receipt_sha256": envelope.evidence.qualification_report_sha256,
+            "policy_id": POLICY_ID,
+            "policy_version": POLICY_VERSION,
+            "authorization_sha256": "496e98327427372fe9d18780bbd32b70ee0e92e5170b058d8a12e2f1bfbd3a59",
+            "render_qualified": False,
+        }
+        if release != expected:
+            raise ValueError
+        with root.joinpath("belaya_qualification.json").open("rb") as stream:
+            receipt = stream.read(65537)
+        if (
+            len(receipt) > 65536
+            or hashlib.sha256(receipt).hexdigest()
+            != envelope.evidence.qualification_report_sha256
+        ):
+            raise ValueError
+    except (OSError, ValueError, TypeError, RecursionError):
+        raise PlanningEnvelopeError("planning_release_unavailable") from None
+
+
 def load_planning_envelope(asset_id: str) -> PlanningEnvelope:
     """Resolve a fixed packaged record; no caller path/URL or runtime GLB read."""
     try:
         resource = resources.files("archimind.assets").joinpath(
-            "planning_envelopes.json"
+            "belaya_planning_envelope.json"
+            if asset_id == BELAYA_ID
+            else "planning_envelopes.json"
         )
         with resource.open("rb") as stream:
             data = stream.read(512 * 1024 + 1)
@@ -478,6 +592,7 @@ def load_planning_envelope(asset_id: str) -> PlanningEnvelope:
         raise PlanningEnvelopeError("envelope_metadata_unavailable") from None
     for envelope in library.envelopes:
         if type(asset_id) is str and envelope.asset_id == asset_id:
+            _require_planning_release(envelope)
             return envelope
     raise PlanningEnvelopeError("envelope_not_found")
 
@@ -493,13 +608,14 @@ class PlanningFurnitureBinding(_Frozen):
     schema_version: StrictInt = Field(ge=1, le=1)
     furniture_id: str = Field(min_length=1, pattern=r"\S")
     furniture_name: str = Field(min_length=1, pattern=r"\S")
-    category: Literal["chair", "storage"]
+    category: Literal["chair", "storage", "desk"]
     canonical_dimensions: PlanningDimensions
     envelope: PlanningEnvelope
     metadata_sha256: SHA256
 
     @model_validator(mode="after")
     def preserve_reservation(self) -> Self:
+        _require_planning_release(self.envelope)
         record = load_catalog().get_record(self.envelope.asset_id)
         if (
             self.canonical_dimensions != self.envelope.planning_dimensions

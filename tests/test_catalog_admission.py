@@ -248,8 +248,15 @@ def test_new_factory_preparation_and_placeholder_only(asset_id):
         is option.render_release_digest
         is None
     )
-    with pytest.raises(ValueError):
-        load_planning_envelope(asset_id)
+    if asset_id == "abo-b074l4976t-amazon-co-uk":
+        # 08F3A separately releases planning evidence; historical catalog flags
+        # and this pre-render workflow remain metadata-only at this checkpoint.
+        envelope = load_planning_envelope(asset_id)
+        assert envelope.catalog_version == "1.1.0"
+        assert not envelope.qualification.render_qualified
+    else:
+        with pytest.raises(ValueError):
+            load_planning_envelope(asset_id)
     item = furniture_from_catalog(
         asset_id, furniture_id="fresh", name="Product", x_m=-1.0, y_m=20.0
     )

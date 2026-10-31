@@ -495,10 +495,16 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
         (ROOT / "docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json").read_text()
     )["authorized_migrations"]
     assert set(migrations) <= pins["baseline_files"].keys()
+    continuation = parse(
+        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
+    )["r1"]["authorized_migrations"]
     for path, expected in pins["baseline_files"].items():
         if path in migrations:
             assert migrations[path]["before_sha256"] == expected
             expected = migrations[path]["after_sha256"]
+        if path in continuation:
+            assert continuation[path]["before_sha256"] == expected
+            expected = continuation[path]["after_sha256"]
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")
