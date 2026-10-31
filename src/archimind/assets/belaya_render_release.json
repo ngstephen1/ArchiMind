@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "asset_id": "abo-b074l4976t-amazon-co-uk",
+  "render_version": "1.0.0",
+  "render_qualified": true,
+  "policy": "native_scale_1_planning_envelope_B",
+  "envelope_sha256": "f2b706c8111e5f9321d3d90856d914a60ab63aebdb0cf30dd4b8847f493723a5",
+  "inspection_sha256": "fa46d4ab6d1a6f5d41d63d5699d60fa4bada2a63a48e7e6a96209723f5b90de7",
+  "catalog_record_sha256": "e53ea735e094c49ce9fa432dbf9432cc86a6984e111d7a27a9aa6dfc65eb0387",
+  "source_glb_sha256": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+  "filename": "BelayaDesk.glb",
+  "visual_review_sha256": "c0ba457e88b6f828ea6ac02202cf53de357496739a3ef750a02cc84340f1481c",
+  "license_id": "CC-BY-4.0",
+  "bytes_unchanged": true
+}

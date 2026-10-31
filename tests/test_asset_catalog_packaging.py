@@ -54,6 +54,14 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/ui/product_fixture.py",
         "archimind/assets/product_render_release.json",
         "archimind/assets/charles_visual_review.json",
+        "archimind/assets/belaya_visual_review.json",
+        "archimind/assets/belaya_render_release.json",
+        "archimind/assets/belaya_planning_release.json",
+        "archimind/assets/belaya_planning_envelope.json",
+        "archimind/assets/belaya_qualification.json",
+        "archimind/_viewer_assets/furniture/BelayaDesk.glb",
+        "archimind/_viewer_assets/furniture/BELAYA_PROVENANCE.json",
+        "archimind/_viewer_assets/furniture/BELAYA_ATTRIBUTION.txt",
         "archimind/render/product_scene.py",
         "archimind/examples/sample_product_room.py",
         "archimind/_viewer_assets/furniture/CharlesArmchair.glb",
@@ -77,6 +85,7 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         assert {Path(n).name for n in archive.namelist() if n.endswith(".glb")} == {
             "SheenChair.glb",
             "CharlesArmchair.glb",
+            "BelayaDesk.glb",
         }
         assert sum(n.endswith("/CharlesArmchair.glb") for n in archive.namelist()) == 1
         assert not any(n.endswith("/.env") for n in archive.namelist())
@@ -308,6 +317,14 @@ assert technical['inspection']['original_sha256'] == release.source_glb_sha256
 assert technical['envelope']['metadata_sha256'] == release.envelope_sha256
 projection = product_projection()[release.asset_id]
 assert projection['bytes'] == 4252440 and projection['triangles'] == 42706
+belaya_id = 'abo-b074l4976t-amazon-co-uk'
+belaya_release = product_release(belaya_id)
+assert belaya_release.render_qualified
+assert product_asset_path(belaya_id).resolve().is_relative_to(target)
+assert product_asset_path(belaya_id).stat().st_size == 3135676
+belaya_technical = verify_product_asset(belaya_id)
+assert belaya_technical['inspection']['original_sha256'] == belaya_release.source_glb_sha256
+assert product_projection()[belaya_id]['triangles'] == 812
 room = create_sample_product_room()
 bindings = {f.id: release.asset_id if f.category == 'chair' else None for f in room.furniture}
 assert product_scene_payload(room, asset_bindings=bindings)['schema_version'] == 3

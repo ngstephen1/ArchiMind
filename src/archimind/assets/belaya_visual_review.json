@@ -1,0 +1,92 @@
+{
+  "schema_version": 1,
+  "task": "08F3A-R1",
+  "checked_utc": "2026-10-31T04:58:15.839669+00:00",
+  "status": "passed_with_documented_limits",
+  "asset_id": "abo-b074l4976t-amazon-co-uk",
+  "source_glb_sha256": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+  "envelope_sha256": "f2b706c8111e5f9321d3d90856d914a60ab63aebdb0cf30dd4b8847f493723a5",
+  "review_type": "same_agent_browser_and_numeric_review",
+  "browser": "desktop Chromium and resized narrow Chromium, not physical mobile",
+  "viewports": [
+    [
+      1440,
+      1000
+    ],
+    [
+      390,
+      844
+    ]
+  ],
+  "required_checks": {
+    "embedded_images_decoded": true,
+    "materials_reviewed": true,
+    "front_faces_canonical_south": true,
+    "up_is_vertical": true,
+    "floor_contact": true,
+    "metric_envelope_containment": true,
+    "desktop_framing": true,
+    "narrow_framing": true,
+    "walls_and_openings": true,
+    "orbit_zoom_reset_cutaway": true,
+    "missing_asset_fallback": true,
+    "corrupt_asset_fallback": true,
+    "recovery": true,
+    "shared_resources": true,
+    "idempotent_cleanup": true,
+    "mixed_scene_placeholders": true
+  },
+  "observations": [
+    "Source light wood-grain appearance, rectangular desktop, slab side legs and rear modesty panel. Open working side faces native +Z/canonical south; no orientation correction or fit scaling.",
+    "Both desk instances scale 1, minimum Y=0; 812 triangles each, one shared geometry, one GLB load. World bounds differ from reservation at floating arithmetic precision only; exact-rational local containment remains authoritative.",
+    "Desktop and narrow framing fit room; controls wrap and long provenance scrolls. Private harness title has an encoding artifact; this is outside application output.",
+    "Missing HTTP404 and corrupt bytes yield 0 textured/3 placeholders; recovery yields 2 textured/1 placeholder. The forced404 produces one expected browser network error; ordinary loads and lifecycle test have no page errors.",
+    "Mixed Charles/Belaya numerical budget passes with eight bytes margin, but separate admission returns mixed_scene_not_yet_qualified; all three furniture objects placeholders, no GLB requests.",
+    "Repeated cleanup and immediate replacement completed without page errors; no sustained leak benchmark."
+  ],
+  "metrics": {
+    "initial_setup_ms": 686.9,
+    "missing_setup_ms": 163.0,
+    "corrupt_setup_ms": 149.3,
+    "recovery_setup_ms": 264.5,
+    "rapid_replacement_setup_ms": 170.5,
+    "unique_encoded_bytes": 3135676,
+    "unique_texture_bytes_estimate": 67108860,
+    "instantiated_product_triangles": 1624,
+    "shared_geometry_count": 1
+  },
+  "screenshots": [
+    {
+      "filename": "belaya-desktop.png",
+      "sha256": "9a5ae736f63b3cc7b551029c42582867bf20703b3835fcf2c0afe83f18f03e49",
+      "stored_outside_git": true
+    },
+    {
+      "filename": "belaya-detail.png",
+      "sha256": "bb30e3c9d0333f7abff38c9c91c221fc1187e5bf9c3ccf7e627999b19e3426a7",
+      "stored_outside_git": true
+    },
+    {
+      "filename": "belaya-narrow.png",
+      "sha256": "f25751e84becd4ed0d8e943c5734aa078ad1c636911029ccbebea0d59cac2d3f",
+      "stored_outside_git": true
+    },
+    {
+      "filename": "belaya-orbit.png",
+      "sha256": "769e2e985916b5b50fd2f03e59a1280448e1d23b6b9eee61acc7e86cd10b7a53",
+      "stored_outside_git": true
+    }
+  ],
+  "reviewed_source_sha256": {
+    "frontend/realistic_viewer/src/product_assets.js": "0c8f206cfdb706ceb246cbd1b0617171f70e18f025b51e80fd24d90d93faf2e4",
+    "frontend/realistic_viewer/src/room_viewer.js": "65a28345562616471ffb8f58a73bf3a1ca8266436c33d8975a038e548317ca1a",
+    "frontend/realistic_viewer/src/asset_pool.js": "aabeb8d0f809089e1197d96a7807663b2796b5608694e4f3fb2cd42d0507f8a7",
+    "frontend/realistic_viewer/src/room_geometry.js": "f1d7a82c8c1759f6a30abf380ddbe161eb1871e07b0be6e2a49efd13ff718a9e"
+  },
+  "limitations": [
+    "Same-agent visual review, not independent human review or physical measurement.",
+    "No calibrated color/material fidelity, physical-device performance, sustained GPU-memory or leak measurement.",
+    "Texture estimate excludes structural/environment/shadow/framebuffer allocations; mixed scene is not qualified.",
+    "No new source request or reacquisition; existing exact authorized local bytes used."
+  ]
+}

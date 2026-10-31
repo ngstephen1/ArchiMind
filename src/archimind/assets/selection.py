@@ -7,7 +7,8 @@ from pydantic import BaseModel, ConfigDict
 
 from archimind.assets.inspection import assess_scene_budget
 from archimind.assets.planning_envelopes import PlanningFurnitureBinding
-from archimind.assets.render_assets import product_release
+from archimind.assets.render_assets import BELAYA_ID, product_release
+from archimind.assets.render_qualification import CHARLES_ID
 from archimind.models import RoomDesign
 from archimind.render.product_scene import ProductBinding
 
@@ -20,6 +21,7 @@ Reason = Literal[
     "asset_release_unavailable",
     "scene_budget_exceeded",
     "asset_unavailable",
+    "mixed_scene_not_yet_qualified",
 ]
 
 
@@ -73,7 +75,11 @@ def build_render_bindings(
                 reason = "invalid_planning_binding"
             if reason is None:
                 try:
-                    release = product_release()
+                    release = (
+                        product_release()
+                        if proof.envelope.asset_id == CHARLES_ID
+                        else product_release(proof.envelope.asset_id)
+                    )
                 except (ValueError, OSError, RecursionError):
                     reason = "asset_release_unavailable"
                 if release is not None:
@@ -113,7 +119,8 @@ def build_render_bindings(
     budget = assess_scene_budget(
         tuple((inspections[key], count) for key, count in sorted(counts.items()))
     )
-    if not budget.passed:
+    mixed = {CHARLES_ID, BELAYA_ID} <= counts.keys()
+    if mixed or not budget.passed:
         bindings = [
             ProductBinding(
                 furniture_id=b.furniture_id,
@@ -127,7 +134,9 @@ def build_render_bindings(
             BindingDiagnostic(
                 furniture_id=d.furniture_id,
                 status="placeholder",
-                reason="scene_budget_exceeded",
+                reason="mixed_scene_not_yet_qualified"
+                if mixed
+                else "scene_budget_exceeded",
             )
             if d.status == "approved_product"
             else d

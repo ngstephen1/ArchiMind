@@ -1,0 +1,19 @@
+Amazon Berkeley Objects (c) by Amazon.com
+Belaya desk — Oak — B074L4976T
+Credit for the data, including all images and 3D models: Amazon.com.
+Credit for building the dataset, archives and benchmark sets:
+Matthieu Guillaumin (Amazon.com), Thomas Dideriksen (Amazon.com),
+Kenan Deng (Amazon.com), Himanshu Arora (Amazon.com),
+Jasmine Collins (UC Berkeley) and Jitendra Malik (UC Berkeley).
+Source: https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/original/T/B074L4976T.glb
+Dataset: https://amazon-berkeley-objects.s3.amazonaws.com/index.html
+Model documentation: https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+Full license: adjacent ABO_LICENSE_CC_BY_4.0.txt. Source notice (whitespace normalized): ABO_SOURCE_README.md.
+No additional legal or technological restrictions are imposed on licensed reuse.
+Original GLB bytes unchanged; no geometry, material, texture or scale edits.
+ArchiMind adds only runtime center/floor translation and canonical furniture position.
+Attribution does not imply endorsement. Product names/marks belong to their owners.
+Individual mesh creator is not identified. See BELAYA_PROVENANCE.json and
+packaged render/visual qualification receipts for provenance and limits.

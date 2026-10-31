@@ -437,7 +437,13 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
     receipt = json.loads(
         (ROOT / "docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json").read_bytes()
     )
+    migrations = json.loads(
+        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_bytes()
+    )["r1"]["authorized_migrations"]
     for name, expected in receipt["frozen_files"].items():
+        if name in migrations:
+            assert migrations[name]["before_sha256"] == expected
+            expected = migrations[name]["after_sha256"]
         assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
     catalog_bytes = (ROOT / "src/archimind/assets/furniture_catalog.json").read_bytes()
     assert hashlib.sha256(catalog_bytes).hexdigest() == receipt["catalog"]["sha256"]

@@ -187,3 +187,51 @@ Owner-selected rendering scope is **Belaya-only first**. Mixed Charles/Belaya
 scenes must use truthful placeholders with a distinct not-yet-qualified reason,
 not a false numerical budget failure. Estimated product texture bytes exclude
 room textures, environment targets, shadows and other GPU allocations.
+
+### R1 checkpoint 2 — Belaya-only native rendering
+
+Checkpoint 1 was pushed as `e56333d3a076819f8c32e885afba490755682d3c`;
+[CI passed](https://github.com/ngstephen1/ArchiMind/actions/runs/41170171461):
+1,844 Python tests and 75 frontend tests.
+
+The private pending-qualification harness reused the actual product loader,
+native placement, resource pool and room renderer. Desktop 1440×1000 and resized
+Chromium 390×844 showed the source wood-grain appearance, vertical up, an open
+working side facing canonical south, floor contact and scale exactly 1. Two desks
+shared geometry and one 3,135,676-byte GLB load. Initial setup was 686.9 ms;
+missing/corrupt/recovery setups were 163.0/149.3/264.5 ms. These are local
+observations, not physical-mobile or total GPU-memory measurements.
+
+A forced HTTP 404 and corrupt response each produced three placeholders;
+recovery restored both desks. Repeated cleanup and rapid replacement produced no
+page errors. The deliberate 404 caused one expected browser network error.
+Orbit, zoom, reset, cutaway, walls/openings and narrow framing were inspected.
+Screenshots and the private harness remain outside Git under
+`/Users/macbook/Hack/.archimind-08f3a/harness/`; hashes and detailed limits are in
+`src/archimind/assets/belaya_visual_review.json`. This is same-agent review,
+not independent human certification or manufacturer measurement.
+
+A separate pinned render release approves unchanged Belaya bytes. Charles's
+release, visual receipt, envelope, GLB and default APIs remain preserved.
+Registry generation is a projection of the reviewed releases. Runtime scenes
+still contain only IDs/version/digest bindings; no URL/transform admission was
+added. The V3 shape and original native-scale loader/cleanup paths remain intact.
+
+Mixed Charles/Belaya requests are **not yet qualified**. In the private browser
+test, the numerical 128 MiB estimate passed by eight bytes, while the separate
+admission decision rejected the scene: all detailed product meshes became labeled
+placeholders and zero GLB requests occurred. The backend adapter and direct
+mounting path enforce the same policy. This is distinct from numerical budget
+failure; the 128 MiB ceiling is unchanged. Texture accounting does not include
+environment, structural, shadow or framebuffer allocations.
+
+At this checkpoint the Select/Prepare workflow is intentionally unchanged;
+Belaya planning-sidecar integration remains checkpoint 3.
+
+Local checkpoint 2 verification: 80 frontend tests, syntax/build, registry,
+Ruff (180 files), pip compatibility and health200 passed. The initial full Python
+run had 1,851 passes and one stale exact-GLB-inventory assertion (161.87s).
+The assertion now requires exactly Sheen/Charles/Belaya, preserving old integrity
+checks. Corrected inventory plus Belaya tests: 41 passed; separate offline
+source/wheel/isolated-install, catalog and preservation checks: 61 passed.
+The new Belaya suite totals 12 passing cases. Full CI must pass before checkpoint3.

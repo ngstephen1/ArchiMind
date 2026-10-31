@@ -31,6 +31,12 @@ export function productSceneBudget(bindings,registry=PRODUCT_ASSETS){
   }
   return {passed:bytes<=50*1024*1024&&textures<=128*1024*1024&&triangles<=300000,uniqueEncodedBytes:bytes,uniqueTextureBytes:textures,instantiatedTriangles:triangles};
 }
+export function productSceneAdmission(bindings){
+  const ids=new Set(bindings.map(b=>b.asset_id).filter(Boolean));
+  if(ids.has('abo-b074l4976t-amazon-co-uk')&&ids.has('abo-b075x2x4xs-amazon-com'))
+    return {admitted:false,reason:'mixed_scene_not_yet_qualified'};
+  return {admitted:true,reason:null};
+}
 export async function boundedProductBytes(response,record){
   require(response.ok);const declared=response.headers.get('content-length');
   require(declared===null||Number(declared)<=15*1024*1024);

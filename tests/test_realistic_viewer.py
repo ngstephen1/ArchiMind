@@ -30,6 +30,7 @@ def test_asset_provenance_file_and_model_license():
     assert {p.name for p in viewer.ASSET_DIR.rglob("*.glb")} == {
         "SheenChair.glb",
         "CharlesArmchair.glb",
+        "BelayaDesk.glb",
     }
 
 

@@ -439,7 +439,7 @@
     "texture_optimization": "Not required by measured individual/two-asset arithmetic; browser qualification is still pending."
   },
   "r1": {
-    "status": "checkpoint_1_locally_verified",
+    "status": "checkpoint_2_verified_pending_ci",
     "initial_available_bytes": 8666808320,
     "local_replay": {
       "time": "2026-10-31T00:49:40.163864-04:00",
@@ -452,9 +452,41 @@
       "render_qualified": false
     },
     "authorized_migrations": {
+      "MANIFEST.in": {
+        "before_sha256": "0e38c7278d1999165384ded29278aedd6933acc99e7e38058210afb57e1ca0f7",
+        "after_sha256": "499361581d79475d4405ba111130dc8516f1a878cbbe67e64e8c7bc4653b1e0e"
+      },
+      "frontend/realistic_viewer/src/product_assets.js": {
+        "before_sha256": "18e963b367024c71ce37920db4f3e669d14ba72c3940156b23a72211a2359139",
+        "after_sha256": "0c8f206cfdb706ceb246cbd1b0617171f70e18f025b51e80fd24d90d93faf2e4"
+      },
+      "frontend/realistic_viewer/src/product_registry.js": {
+        "before_sha256": "dbce178dde780949d6b7fe90e5c40473e4789f8325fb93ac03d503c46d027a8a",
+        "after_sha256": "95bd8e1750fb5ae98a10c028e9bc8e77d7920067c213383bd4da6025dc1945bc"
+      },
+      "frontend/realistic_viewer/src/room_viewer.js": {
+        "before_sha256": "3d53e8525263228d4347181d2ff97820cdde5d9614ae858edcc6e308836e9b97",
+        "after_sha256": "65a28345562616471ffb8f58a73bf3a1ca8266436c33d8975a038e548317ca1a"
+      },
+      "src/archimind/_viewer_assets/viewer.js": {
+        "before_sha256": "c4422cdde95e76081fafe57206f74641d9d6dc1247f9d58ea4a03bfe2786607f",
+        "after_sha256": "5505b498f0bae6fd437ce5a7de0c64ab2dc343d2a797f07cdd01468c75e84fc3"
+      },
       "src/archimind/assets/planning_envelopes.py": {
         "before_sha256": "7d4ad4dbe251558616c0e0301bdb4c87c1989001b96b7c974318d3099913a907",
         "after_sha256": "3d66f0379b70bd84c090605f6c481349d787c7a89eb2ad4d3f6b8ef0cc267f81"
+      },
+      "src/archimind/assets/render_assets.py": {
+        "before_sha256": "28617456490b9a3f204b19ce3519f2b9e0b5bb73e140f860a85515062abeb319",
+        "after_sha256": "491210e4f486442a58a6905ed9b3b3458f377176a7a26f36bb41e2ab0348e149"
+      },
+      "src/archimind/assets/selection.py": {
+        "before_sha256": "c332d0d32f57668d567e33c832bc497c7f1ff0dbdf7191746a69b9e543fa00d2",
+        "after_sha256": "90dc231cb7c6b0cce88a599106489c16417abe9cce8d2d32c029bf949f0b3c59"
+      },
+      "src/archimind/render/product_scene.py": {
+        "before_sha256": "3e87b943ba3bf429f58c53ff3587738336c89d8a9272fb601ec9e226b9a4c6d8",
+        "after_sha256": "1ffd81cd0dcfe77e37dbb1523fee066081051207d336ac6276c1f5c18ff3750b"
       }
     },
     "original_run_preserved": true,
@@ -475,7 +507,16 @@
         "One obsolete 08F2 no-envelope expectation updated for separately released Belaya planning; published factory and placeholder assertions retained."
       ]
     },
-    "commits": [],
+    "commits": [
+      {
+        "checkpoint": 1,
+        "sha": "e56333d3a076819f8c32e885afba490755682d3c",
+        "ci": "https://github.com/ngstephen1/ArchiMind/actions/runs/41170171461",
+        "conclusion": "success",
+        "python_tests": 1844,
+        "frontend_tests": 75
+      }
+    ],
     "planning_release_sha256": "0f3549c4a6ac035b1346cd3629aa53baa3fab3374d191270fbcc4e6de47f7c18",
     "disk_samples": [
       {
@@ -495,6 +536,30 @@
         "available_bytes": 11028598784
       }
     ],
-    "precommit_available_bytes": 11043704832
+    "precommit_available_bytes": 11043704832,
+    "checkpoint_2": {
+      "status": "verified_pending_ci",
+      "visual_receipt": "src/archimind/assets/belaya_visual_review.json",
+      "render_release": "src/archimind/assets/belaya_render_release.json",
+      "mixed_scene": "not_yet_qualified_all_product_placeholders",
+      "new_source_requests": 0,
+      "new_model_downloads": 0,
+      "legacy_focused_tests_passed": 79,
+      "new_belaya_tests_passed": 12,
+      "frontend_tests_passed": 80,
+      "corrected_inventory_and_belaya_tests_passed": 41,
+      "packaging_catalog_preservation_tests_passed": 61,
+      "full_suite_initial": {
+        "passed": 1851,
+        "failed": 1,
+        "seconds": 161.87,
+        "failure": "Old exact GLB inventory omitted newly approved Belaya; corrected to exact three-file set and focused tests passed."
+      },
+      "ruff": "passed",
+      "pip_check": "passed",
+      "health": "200 ok",
+      "registry": "passed",
+      "packaging": "offline source/wheel and isolated installed Belaya loading passed"
+    }
   }
 }
