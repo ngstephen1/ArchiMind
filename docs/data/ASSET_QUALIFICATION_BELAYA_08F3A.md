@@ -1198,3 +1198,16 @@ links, both checks passed: 95 distinct focused cases passed across runs. Fronten
 91/91, syntax, byte-identical rebuild of 24 viewer files, Ruff (180 formatted files),
 dependency compatibility, registry, HTTP 200 health and diff checks passed. No
 full local Python suite is claimed; the new pushed CI run checks the full snapshot.
+
+
+### CI compatibility follow-up
+
+[Initial delivery CI](https://github.com/ngstephen1/ArchiMind/actions/runs/41278491937)
+passed Python lint/format/dependency checks, then reported 90/91 frontend tests.
+Node 20.13.1's timer double threw on `clearTimeout(null)` in the pool reuse test;
+the local Node 24.1.0 run had passed. Python tests were not reached in that run.
+A test-only wrapper now treats null as the native timer API's no-op and delegates
+all actual timer IDs to the existing mock. Reuse, cancellation and eviction
+assertions are retained; production code and bundled assets are unchanged. A
+separate migration entry preserves the first delivery's exact test-file hash.
+The follow-up commit and actual CI result are supplied in the delivery response.

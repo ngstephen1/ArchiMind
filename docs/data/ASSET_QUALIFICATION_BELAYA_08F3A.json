@@ -11808,5 +11808,16 @@
       "diff_check": "passed",
       "full_python_suite": "Deferred to the pushed CI run; not represented as locally run."
     }
+  },
+  "ci_compatibility_20261101": {
+    "failed_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/41278491937",
+    "failure": "Node 20.13.1 mock timers throw for clearTimeout(null) in the pool reuse regression; 90 frontend tests passed and one failed. Python suite was not reached. Local Node 24.1.0 had passed all 91.",
+    "change": "Test-only wrapper ignores null as native clearTimeout does; non-null timer IDs still use the same mock, preserving cancellation and 250ms eviction assertions. No production or bundle change.",
+    "authorized_migrations": {
+      "frontend/realistic_viewer/tests/lifecycle.test.js": {
+        "before_sha256": "caab0c3148b4462f82f50cd7ab68dbf5189e9b2e62b1396c53b448b47e16ce60",
+        "after_sha256": "b1bb3736f5fc2127078a6a5e849a6e4b2f8df697c3861b611b8009244df89f98"
+      }
+    }
   }
 }

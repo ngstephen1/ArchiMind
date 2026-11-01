@@ -76,6 +76,9 @@ test('late asynchronous completion across replaced hosts cannot attach obsolete 
 });
 test('owner handoff preserves pool reuse; after eviction a new request is legitimate',async t=>{
  t.mock.timers.enable({apis:['setTimeout']});let disposed=0;
+ // Node 20's timer double rejects null; native clearTimeout treats it as a no-op.
+ // Keep real timer IDs delegated to the mock so cancellation remains exercised.
+ const clear=globalThis.clearTimeout;t.mock.method(globalThis,'clearTimeout',id=>{if(id!==null)clear(id);});
  const pool=createAssetPool(async()=>({}),()=>{disposed++;}),owner={},handles=[];
  const update=createSceneManager(()=>{const h=pool.acquire('sheen-chair');handles.push(h);return ()=>h.release();});
  update({},scene(),{owner})();update({},scene('b'),{owner})();await Promise.all(handles.map(h=>h.promise));

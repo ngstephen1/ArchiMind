@@ -506,6 +506,9 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     delivery = parse(
         (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
     )["delivery_20261101"]["authorized_migrations"]
+    ci_compatibility = parse(
+        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
+    )["ci_compatibility_20261101"]["authorized_migrations"]
     for path, expected in pins["baseline_files"].items():
         if path in migrations:
             assert migrations[path]["before_sha256"] == expected
@@ -519,6 +522,9 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
         if path in delivery:
             assert delivery[path]["before_sha256"] == expected
             expected = delivery[path]["after_sha256"]
+        if path in ci_compatibility:
+            assert ci_compatibility[path]["before_sha256"] == expected
+            expected = ci_compatibility[path]["after_sha256"]
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")
