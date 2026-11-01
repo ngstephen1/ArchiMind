@@ -20,6 +20,8 @@ from archimind.assets.planning_envelopes import (
 from archimind.models import Furniture, RoomDesign
 
 CHARLES_ID = "abo-b075x2x4xs-amazon-com"
+BELAYA_ID = "abo-b074l4976t-amazon-co-uk"
+_REQUIRED_PLANNING = frozenset((CHARLES_ID, BELAYA_ID))
 BOOKCASE_ID = "abo-b07pqs58xn-amazon-com"
 
 
@@ -115,7 +117,7 @@ def catalog_product_options(
     options = []
     for record in catalog.records:
         dimensions, planning_digest, release_digest = None, None, None
-        if record.asset_id == CHARLES_ID:
+        if record.asset_id in _REQUIRED_PLANNING:
             try:
                 envelope = load_planning_envelope(record.asset_id)
                 dimensions = envelope.planning_dimensions
@@ -123,7 +125,11 @@ def catalog_product_options(
             except (ValueError, OSError):
                 pass
             try:
-                release = product_release()
+                release = (
+                    product_release()
+                    if record.asset_id == CHARLES_ID
+                    else product_release(record.asset_id)
+                )
                 if (
                     release.asset_id == record.asset_id
                     and release.envelope_sha256 == planning_digest
@@ -143,7 +149,7 @@ def catalog_product_options(
                 render_release_digest=release_digest,
                 preparation_available=(
                     dimensions is not None
-                    if record.asset_id == CHARLES_ID
+                    if record.asset_id in _REQUIRED_PLANNING
                     else record.qualification == "metadata_qualified"
                 ),
             )
@@ -192,7 +198,7 @@ def prepare_catalog_specification(
                 )
             name = f"{record.subtype.capitalize()} ({record.variant_label})"
             args = dict(furniture_id=fid, name=name, x_m=0.0, y_m=0.0)
-            if asset_id == CHARLES_ID:
+            if asset_id in _REQUIRED_PLANNING:
                 item, proof = furniture_from_planning_envelope(asset_id, **args)
                 proofs.append(proof)
                 basis = "planning_envelope_B"

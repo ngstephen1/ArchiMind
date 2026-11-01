@@ -208,9 +208,22 @@ def render_selected_layout_view(
             width="stretch",
         )
     if approved:
-        st.caption(
-            "Charles, Sod — ABO B075X2X4XS · Amazon.com · CC BY 4.0 · Original GLB unchanged; native scale 1.0. Dataset builders: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, Himanshu Arora, Jasmine Collins and Jitendra Malik. No endorsement implied."
-        )
+        products = {
+            d.provenance.envelope.asset_id: d.provenance.envelope
+            for d in prepared.resolution.diagnostics
+            if d.status == "approved_product" and d.provenance is not None
+        }
+        for product in products.values():
+            st.caption(
+                f"ABO {product.product_id}, {product.variant_label} · CC BY 4.0 · Original GLB unchanged; native scale 1.0. Dataset builders: Matthieu Guillaumin, Thomas Dideriksen, Kenan Deng, Himanshu Arora, Jasmine Collins and Jitendra Malik. No endorsement implied."
+            )
         st.markdown(
             "[ABO source](https://amazon-berkeley-objects.s3.amazonaws.com/3dmodels/README.md) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)"
+        )
+    if any(
+        d.reason == "mixed_scene_not_yet_qualified"
+        for d in prepared.resolution.diagnostics
+    ):
+        st.info(
+            "Mixed scene not yet qualified: Charles and Belaya both use procedural placeholders. The numerical texture estimate does not approve this combination."
         )

@@ -362,9 +362,13 @@ for asset_id, dimensions in zip(new_ids, new_dimensions):
     item = furniture_from_catalog(asset_id, furniture_id=asset_id, name='Product', x_m=-1.0, y_m=0.0)
     assert (item.width_m, item.depth_m, item.height_m) == dimensions and item.rotation_deg == 0
 new_submission = prepare_catalog_specification(base, retained_manual_ids=(), product_ids=new_ids)
-assert len(new_submission.assignments) == 3 and not new_submission.planning_bindings
-assert all(a.catalog_version == '1.1.0' and a.dimension_basis == 'published_item_dimensions'
-    for a in new_submission.assignments)
+assert len(new_submission.assignments) == 3 and len(new_submission.planning_bindings) == 1
+assert all(a.catalog_version == '1.1.0' for a in new_submission.assignments)
+assert all(a.dimension_basis == ('planning_envelope_B' if a.asset_id == belaya_id else 'published_item_dimensions') for a in new_submission.assignments)
+assert new_submission.planning_bindings[0].envelope.asset_id == belaya_id
+assert new_submission.planning_bindings[0].canonical_dimensions.wdh == (1.6, .8018731772899628, .7516312003135682)
+resolved = build_render_bindings(new_submission.design(), planning_bindings={p.furniture_id:p for p in new_submission.planning_bindings})
+assert {b.asset_id for b in resolved.bindings} == {None,belaya_id}
 assert all(b.asset_id is None for b in build_render_bindings(new_submission.design()).bindings)
 print('INSTALLED_CATALOG_AND_PRODUCT_OK')
 """

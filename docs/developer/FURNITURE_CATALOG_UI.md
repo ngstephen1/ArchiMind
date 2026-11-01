@@ -1,5 +1,7 @@
 # Catalog selection and explicit generation (08E / 08F2)
 
+> Current through 08F3A-R3B5 (November 1, 2026): Belaya preparation, same-session regeneration and synchronized native rendering passed browser acceptance. Historical storage stops remain in the qualification report; final R3C release acceptance remains separate.
+
 The existing generation workflow supports one instance of each of five qualified
 ABO metadata records. Catalog release 1.1.0 adds Belaya, Morava and the nightstand;
 Charles and the bookcase retain their original record bodies and measurements.
@@ -33,7 +35,7 @@ provenance have separate labels.
 | --- | --- | --- | --- |
 | Charles armchair, Sod / B075X2X4XS | 0.9906 × 0.9906 × 0.9652 | Policy B: 0.996104896068573 × 1.0019413232803345 × 0.9760930538177491 | Approved native-scale mesh, with current explicit sidecar/release |
 | Five-shelf bookcase, Espresso / B07PQS58XN | 0.659892 × 0.381762 × 1.891792 | Published item dimensions, unchanged | Named storage placeholder; no bookcase model acquired |
-| Belaya writing desk, Oak / B074L4976T | 1.6 × 0.8 × 0.75 | Published item dimensions; no approved envelope | Named desk placeholder |
+| Belaya writing desk, Oak / B074L4976T | 1.6 × 0.8 × 0.75 | Policy B: 1.6 × 0.8018731772899628 × 0.7516312003135682 | Native-scale Belaya mesh with current sidecar/release; mixed Charles/Belaya scenes use placeholders |
 | Morava wardrobe, Oak Sonoma / B07H8JN9QF | 2.0 × 0.59 × 2.12 | Published item dimensions; no approved envelope | Named wardrobe placeholder |
 | Rivet nightstand, Brown / B07B4VXXJC | 0.6096 × 0.4318 × 0.6096 | Published item dimensions; no approved envelope | Named bedside-table placeholder |
 
@@ -41,7 +43,7 @@ provenance have separate labels.
 physical measurements. Full precision, original inch/centimeter values, axis
 evidence and source/license links are in the technical details. Planning dimensions are
 reservations, not revised manufacturer claims or extra circulation allowances.
-If Charles's Policy B evidence is unavailable, preparation is disabled for that
+If Charles's or Belaya's Policy B evidence is unavailable, preparation is disabled for that
 product; the smaller published box is never substituted. Render approval comes
 from the existing current release, separately from historical catalog flags.
 
@@ -77,7 +79,7 @@ Unknown/duplicate selections, ID collisions and nonzero rotations are rejected.
 `ProductAssignment` binds each generated furniture identity/category/dimensions
 to catalog/record versions and digest, product/variant, reviewed name, source,
 license and dimension basis. It is provenance, not an alternative catalog or mesh
-approval. Charles uses `furniture_from_planning_envelope()`; the other four use
+approval. Charles and Belaya use `furniture_from_planning_envelope()`; the other three use
 `furniture_from_catalog()`. Future retrieval must return these qualified asset IDs
 and resolve them through the authoritative catalog/preparation checks. No embedding
 or vector index is created here.
@@ -100,7 +102,7 @@ reports. Rendering uses the exact original stored selected `candidate.design`.
 
 Plotly remains the default. Three.js uses the unchanged V3 contract, native-scale
 placement, resource limits, integrity checks and pool/lifecycle. Only items with
-current compatible Charles evidence offer **Approved product mesh** or
+current compatible Charles or Belaya evidence offer **Approved product mesh** or
 **Procedural placeholder**. Other items have read-only placeholder diagnostics.
 Choices persist through A/B/view changes and reset on generation replacement;
 they cannot promote a generic chair or any metadata-only product. They do not change
@@ -139,3 +141,37 @@ are fixed historical reads. Fresh preparation always validates against the activ
 Charles envelope still binds its original release and must also match the unchanged
 active product. No reported mesh extent can qualify a new envelope or resize an
 existing candidate. Stop after 08F2 for review.
+
+## 08F3A-R2 application boundary
+
+New Belaya selections use the pinned Policy B reservation and sidecar through the
+existing explicit Prepare/Review/Generate boundary. Pending edits never migrate
+stored candidates. Source measurements and catalog flags remain historical; the
+separate planning/render releases govern new reservations and meshes. Mixed
+Charles/Belaya bindings yield `mixed_scene_not_yet_qualified` for both products,
+even though the texture estimate is eight bytes below 128 MiB. No generator,
+validator, scoring, retrieval algorithm, asset, or resource-budget change is made
+by R2. Final acceptance is recorded in the Belaya qualification report.
+
+
+## R3B5 acceptance and viewer-state boundaries
+
+The actual app completed two explicit Generate clicks in the same session: revision
+1 → 2, generator calls 1 → 2, and UI acceptance checks 2 → 4. Seed 42 reproduced
+the same two passing Belaya layouts in five attempts; a fresh result object was
+stored. Plotly and Three.js received the exact selected candidate, and native
+Belaya scale remained 1.0. Pending edits invalidated preparation without replacing
+results; visible reprepare restored readiness with no third generation.
+
+Three.js camera/target and front-wall/footprint toggles persist within the same
+room and DOM owner across A/B changes. The generation-keyed parent supports host
+replacement through owner-scoped WeakMap snapshots; obsolete cleanup cannot
+overwrite a replacement. A new generation, closed/reopened view, or different DOM
+owner resets framing. Restoring a pending selection can replace that owner and
+reset view controls while leaving all stored results intact. Actual A/B continuity
+passed; same-owner host replacement retains its deterministic regression evidence.
+
+See [R3B5 evidence](../data/ASSET_QUALIFICATION_BELAYA_08F3A.md#r3b5--final-same-session-browser-regeneration-acceptance).
+No physical-mobile, universal leak-freedom or total GPU-memory claim follows. Mixed
+Charles/Belaya native scenes remain unqualified and use placeholders. Production
+semantic retrieval, new assets and further qualification are outside this checkpoint.

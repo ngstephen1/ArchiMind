@@ -1,9 +1,9 @@
 # Project status
 
-Last reviewed: **October 29, 2026**.
+Last reviewed: **November 1, 2026**.
 
-**Current milestone: Task 08F2 metadata admission complete: five catalog products, one approved real mesh (Charles). The existing 08E selection workflow exposes the three new metadata-only products as procedural placeholders. Production semantic admission and human relevance review remain deferred.**
-Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles now uses its original embedded source materials.
+**Current milestone: 08F3A through R3B5 browser acceptance complete. Five metadata-qualified catalog products; Charles and Belaya have separate approved planning/native-render releases. Belaya now participates in explicit preparation, generation and selected A/B views. Mixed Charles/Belaya scenes remain placeholders. R3C final release acceptance is separate.**
+Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles and Belaya use their original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
@@ -47,17 +47,17 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Furniture data | IDs, names, categories, positions, dimensions, and right-angle rotations | Data can represent overlaps and out-of-room objects |
 | Schema validation | Strict types, finite numbers, positive dimensions, opening extents, and design-wide unique IDs | Does not establish spatial validity |
 | 2D rendering | Walls with opening gaps, blue windows, gold door spans, furniture footprints, and labels | Only zero-rotation furniture; unsupported rotations raise `ValueError` |
-| Interaction | Hover, pan/zoom, equal metric scale, Generate Layouts button, seed control, and A/B selector | Fixed sample specification; no furniture-editing controls |
+| Interaction | Generate button, seed, A/B selector and explicit catalog Select → Prepare → Review → Generate | One instance per catalog product; no arbitrary furniture editor |
 | Sample data | Fresh 5 × 4 × 2.7 m bedroom with a south door, north window, bed, desk, and wardrobe | Manually specified demonstration, not an optimized or spatially validated layout |
 | JSON | Model serialization and reconstruction | No project-save UI or revision database |
 | Spatial checks | Backend containment, furniture overlaps, door approaches, and circulation for rotation 0 | Separate from renderer; rectangular/square approximations, no swing or vertical checks |
 | Validation reports | Unchanged Task 04A API plus combined Task 04B report; typed JSON, errors/warnings, per-check results, and overall passed/failed/unverified | Unsupported/unevaluated required checks cannot pass; supported violations remain visible |
-| Layout generation | Backend and Streamlit expose up to two distinct validator-approved alternatives with deterministic seeds/scores and validation summaries | Rotation zero; fixed sample dimensions in UI; no LLMs or global-optimality claims |
+| Layout generation | Backend and Streamlit expose up to two distinct validator-approved alternatives with deterministic seeds/scores and validation summaries | Rotation zero; manual or reviewed catalog reservations; no global-optimality claim |
 | Session state | Results and selection survive normal reruns; generation and acceptance checks run only on button click | Refresh/disconnect may clear results; no database persistence |
 | 3D structure | Floor, four zero-thickness walls, real door/window gaps, optional blue glazing, and orbit/zoom/pan | No 3D furniture, ceiling slab, reveals, or synchronization with selected layouts |
 | 3D furniture | Bed frame/mattress/pillows, desk tabletop/legs, wardrobe/plinth/panels/handles, and generic solids | Rotation 0 only; at most 100 items; generated selection and separate fixed sample; no rendering-based validity claim |
-| Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; no furniture editing or camera-pose persistence across A/B switches |
-| Experimental realistic room | Local Three.js room, four walls with real holes, glazing, procedural floor, two textured chairs and a labeled desk placeholder | Independent fixed sample; rotation 0; no generator connection or detailed-mesh validity claim; legacy single-chair mode retained |
+| Selected 2D/3D views | Both renderers receive the same stored candidate design | Selection does not generate or spatially revalidate; Three.js camera/controls persist within one room/DOM owner across A/B |
+| Experimental realistic room | Selected candidates plus separate samples; native Charles or Belaya with explicit current evidence | Rotation zero; mixed real-product scenes unqualified; other products use placeholders; legacy viewers retained |
 | Export | Not implemented | No GLB, CAD, or BIM integration |
 | Workflow orchestration | Default requirements → generation → deterministic critique → fixture; independent optional advisor, critic and E1 styling; selected-styling UI entry point | Full graph stays separate; UI never regenerates or invokes other roles; no persistence/revisions |
 | Requirements interpretation | Optional OpenAI Responses API with structured extraction and canonical conversion | Disabled by default; explicit per-call authorization/key required; only rectangular bedrooms/studios and a three-item furniture catalog; verified with mocks only |
@@ -1550,3 +1550,36 @@ registry/asset integrity, Streamlit HTTP 200 and offline source/wheel/isolated-i
 verification passed. A disk-exhaustion attempt is retained in the report; these
 numbers are from the fresh successful rerun. Checkpoints 1 and 2 have green CI;
 final commit/CI identities are in the delivery response. Stop after 08F2.
+
+
+## Current checkpoint — 08F3A workflow through R3B5
+
+Belaya uses its approved Policy B reservation, exactly **1.6 × 0.8018731772899628
+× 0.7516312003135682 m**, instead of silently falling back to published dimensions.
+Current sidecars/releases govern admission. Charles remains supported; bookcase,
+Morava and nightstand remain metadata-only. No catalog, asset bytes, geometry,
+scoring, validation rule, scene budget or frozen retrieval judgment changed here.
+
+R3B5 verified two actual Generate clicks in one Streamlit session, revision 1 → 2,
+generator count 1 → 2 and UI validation count 2 → 4. Both results contain two
+passing seed-42 alternatives in five attempts; deterministic content matches while
+the stored result object is new. Plotly/native Three.js synchronize with the exact
+selected objects. Pending edits preserve results and require fresh preparation.
+
+The R3B3 lifecycle correction retains camera/control snapshots under a stable DOM
+owner. Actual A/B navigation passes; new generations and new owners reset defaults.
+Restoring pending controls can replace an owner, so view persistence across every
+possible rerun is not claimed. The generated Belaya GLB hash matches its approved
+release, at native scale 1.0. Mixed Charles/Belaya scenes remain explicitly unqualified.
+
+Evidence: [qualification report](../data/ASSET_QUALIFICATION_BELAYA_08F3A.md).
+R3B4 passed 57 focused Python and 18 lifecycle tests; R3B3 previously passed 82
+focused frontend tests and reproducible bundle checks. R3B5 required no code/test
+rerun and recorded zero browser errors, one Plotly advisory and no storage warning.
+These are bounded acceptance results, not production or architectural certification.
+
+The owner authorized committing/pushing accumulated work after R3B5. Current
+delivery checks and GitHub CI are reported with the commit; older green CI does
+not certify this new snapshot. Full separately scoped R3C release reconciliation
+remains pending. No new asset, dependency, encoder, retrieval integration or AI
+agent is included. Historical milestone sections above describe their own checkpoints.

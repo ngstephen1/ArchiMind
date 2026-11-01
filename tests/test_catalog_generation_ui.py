@@ -9,7 +9,7 @@ from unittest.mock import Mock
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from archimind.assets.specifications import BOOKCASE_ID, CHARLES_ID
+from archimind.assets.specifications import BELAYA_ID, BOOKCASE_ID, CHARLES_ID
 from archimind.geometry import LayoutGenerationResult
 from archimind.render import product_scene
 from archimind.ui import furniture_assets as controls
@@ -79,6 +79,118 @@ def prepare(a):
 
 def generate(a):
     return a.button(key="generate_layouts").click().run()
+
+
+@pytest.mark.parametrize("with_bed", [False, True])
+def test_belaya_explicit_generation_and_exact_ab_handoff(spies, with_bed):
+    a = catalog(app(), products=(BELAYA_ID,), manual=False)
+    if with_bed:
+        a.checkbox(key="keep_manual:queen-bed").check().run()
+    assert a.button(key="generate_layouts").disabled
+    prepare(a)
+    p = a.session_state[controls.PREPARED_KEY]
+    # AppTest.run() settles the full rerun. In the browser the review may
+    # arrive before the downstream Generate button's enabled-state update.
+    assert not a.button(key="generate_layouts").disabled
+    assert any("Review next specification" in item.value for item in a.markdown)
+    reviews = [
+        item.value for item in a.dataframe if "Dimension basis" in item.value.columns
+    ]
+    assert len(reviews) == 1
+    review = reviews[0]
+    belaya_row = review[review["Identity"] == "B074L4976T"].iloc[0]
+    assert belaya_row["Dimension basis"] == "Policy B planning reservation"
+    assert p.product_ids == (BELAYA_ID,)
+    a.run()
+    assert a.session_state[controls.PREPARED_KEY] is p
+    assert not a.button(key="generate_layouts").disabled
+    assert not spies.generator.called and not spies.validator.called
+    assert p.assignments[0].dimensions.wdh == (
+        1.6,
+        0.8018731772899628,
+        0.7516312003135682,
+    )
+    generate(a)
+    assert not a.exception
+    assert spies.generator.call_count == 1
+    result = a.session_state[ui.RESULT_KEY]
+    assert result.status == "complete" and len(result.candidates) == 2
+    snapshot = a.session_state[view.SNAPSHOT_KEY]
+    assert snapshot.bindings == p.planning_bindings
+    assert snapshot.source_specification_json == p.source_specification_json
+    assert type(snapshot).model_validate_json(snapshot.model_dump_json()) == snapshot
+    before = result.model_dump_json()
+    counts = spies.generator.call_count, spies.validator.call_count
+    for index, label in [(1, "Layout B"), (0, "Layout A")]:
+        a.radio(key=ui.SELECTION_KEY).set_value(label).run()
+        assert (
+            spies.plan.call_args.args[0]
+            is spies.plot.call_args.args[0]
+            is result.candidates[index].design
+        )
+        assert result.candidates[index].validation.status == "passed"
+        a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+        assert spies.three.call_args.args[0] is result.candidates[index].design
+        data = spies.component.call_args.kwargs["data"]
+        assert data["design"] == result.candidates[index].design.model_dump(mode="json")
+        assert sum(b["asset_id"] == BELAYA_ID for b in data["asset_bindings"]) == 1
+        assert all(b["asset_id"] in (BELAYA_ID, None) for b in data["asset_bindings"])
+        assert any("ABO B074L4976T, Oak" in c.value for c in a.caption)
+        assert not any(
+            "ABO B074L4976T" in c.value and "Amazon.com" in c.value for c in a.caption
+        )
+        assert not any("Charles, Sod" in c.value for c in a.caption)
+        a.radio(key=view.VIEW_KEY).set_value(view.PLOTLY_VIEW).run()
+    a.run()
+    a.run()
+    assert (spies.generator.call_count, spies.validator.call_count) == counts
+    assert a.session_state[ui.RESULT_KEY].model_dump_json() == before
+    a.checkbox(key=f"catalog_product:{BELAYA_ID}").uncheck().run()
+    assert a.button(key="generate_layouts").disabled
+    assert a.session_state[view.SNAPSHOT_KEY] is snapshot
+    assert a.session_state[ui.RESULT_KEY].model_dump_json() == before
+
+
+def test_generated_belaya_charles_mixed_scene_is_explicitly_unqualified(spies):
+    a = generate(
+        prepare(catalog(app(), products=(BELAYA_ID, CHARLES_ID), manual=False))
+    )
+    result = a.session_state[ui.RESULT_KEY]
+    before = result.model_dump_json()
+    assert result.status == "complete"
+    assert len(a.session_state[view.SNAPSHOT_KEY].bindings) == 2
+    a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+    assert all(
+        b["asset_id"] is None
+        for b in spies.component.call_args.kwargs["data"]["asset_bindings"]
+    )
+    assert any("Mixed scene not yet qualified" in i.value for i in a.info)
+    assert a.session_state[ui.RESULT_KEY].model_dump_json() == before
+
+
+def test_belaya_missing_planning_blocks_pending_but_preserves_existing(
+    spies, monkeypatch
+):
+    from archimind.assets import specifications
+
+    a = generate(prepare(catalog(app(), products=(BELAYA_ID,), manual=False)))
+    result = a.session_state[ui.RESULT_KEY]
+    snapshot = a.session_state[view.SNAPSHOT_KEY]
+    original = specifications.load_planning_envelope
+
+    def missing(asset_id):
+        if asset_id == BELAYA_ID:
+            raise ValueError("secret-token")
+        return original(asset_id)
+
+    monkeypatch.setattr(specifications, "load_planning_envelope", missing)
+    a.run()
+    assert a.checkbox(key=f"catalog_product:{BELAYA_ID}").disabled
+    assert a.button(key="generate_layouts").disabled
+    assert a.session_state[ui.RESULT_KEY] is result
+    assert a.session_state[view.SNAPSHOT_KEY] is snapshot
+    assert not a.exception
+    assert any("Published measurements cannot replace it" in c.value for c in a.caption)
 
 
 def test_catalog_requires_current_explicit_review_seed_does_not_invalidate(spies):
@@ -294,27 +406,28 @@ def test_new_metadata_products_review_generate_and_pending_edits(spies):
     assert not spies.generator.called and not spies.validator.called
     assert (
         sum("Approved planning envelope: unavailable" in c.value for c in a.caption)
-        == 4
+        == 3
     )
     prepare(a)
     prepared = a.session_state[controls.PREPARED_KEY]
-    assert len(prepared.assignments) == 3 and not prepared.planning_bindings
+    assert len(prepared.assignments) == 3 and len(prepared.planning_bindings) == 1
+    assert prepared.planning_bindings[0].envelope.asset_id == BELAYA_ID
     generate(a)
     assert not a.exception
     result = a.session_state[ui.RESULT_KEY]
     before = result.model_dump_json()
     assert result.status == "complete" and len(result.candidates) == 2
     snapshot = a.session_state[view.SNAPSHOT_KEY]
-    assert len(snapshot.assignments) == 3 and not snapshot.bindings
+    assert len(snapshot.assignments) == 3 and len(snapshot.bindings) == 1
     assert {p.category for p in snapshot.assignments} == {"desk", "table", "wardrobe"}
     assert all(p.catalog_version == "1.1.0" for p in snapshot.assignments)
     assert not any("Metadata-only bookcase" in c.value for c in a.caption)
     calls = spies.generator.call_count, spies.validator.call_count
     a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
-    assert all(
-        b["asset_id"] is None
+    assert {
+        b["asset_id"]
         for b in spies.component.call_args.kwargs["data"]["asset_bindings"]
-    )
+    } == {None, BELAYA_ID}
     a.radio(key=ui.SELECTION_KEY).set_value("Layout B").run()
     assert spies.three.call_args.args[0] is result.candidates[1].design
     a.checkbox(key=f"catalog_product:{products[0]}").uncheck().run()
@@ -326,3 +439,91 @@ def test_new_metadata_products_review_generate_and_pending_edits(spies):
         spies.styling.call_args.args[0].model_dump_json()
         == snapshot.source_specification_json
     )
+
+
+def test_selected_view_parent_is_generation_scoped_and_removed_on_close(spies):
+    a = app()
+    generate(a)
+
+    def owners():
+        return [
+            block.proto.id
+            for block in a.get("flex_container")
+            if "selected-realistic-owner-" in block.proto.id
+        ]
+
+    assert not owners()
+    a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+    assert not a.exception
+    first = owners()
+    assert len(first) == 1 and first[0].endswith("selected-realistic-owner-1")
+    result = a.session_state[ui.RESULT_KEY]
+    for label, index in [("Layout B", 1), ("Layout A", 0), ("Layout B", 1)]:
+        a.radio(key=ui.SELECTION_KEY).set_value(label).run()
+        assert not a.exception
+        assert owners() == first
+        assert spies.three.call_args.args[0] is result.candidates[index].design
+    assert spies.generator.call_count == 1
+    assert spies.validator.call_count == 2
+    a.radio(key=view.VIEW_KEY).set_value(view.PLOTLY_VIEW).run()
+    assert not owners()
+    a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+    assert owners() == first  # Reinserted DOM owner, not a persistent browser cache.
+    generate(a)
+    assert len(owners()) == 1 and owners()[0].endswith("selected-realistic-owner-2")
+    assert owners() != first
+    empty = a.session_state[ui.RESULT_KEY].model_dump()
+    empty.update(status="search_exhausted", candidates=[], attempts_used=500)
+    spies.generator.return_value = LayoutGenerationResult.model_validate(empty)
+    generate(a)
+    assert not a.exception
+    assert not owners()
+
+
+def test_belaya_same_session_regeneration_and_pending_recovery(spies):
+    a = prepare(catalog(app(), products=(BELAYA_ID,), manual=False))
+    prepared = a.session_state[controls.PREPARED_KEY]
+    generate(a)
+    first = a.session_state[ui.RESULT_KEY]
+    first_json = first.model_dump_json()
+    assert a.session_state[view.REVISION_KEY] == 1
+    assert (spies.generator.call_count, spies.validator.call_count) == (1, 2)
+    for label in ("Layout B", "Layout A"):
+        a.radio(key=ui.SELECTION_KEY).set_value(label).run()
+    a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+    assert spies.three.call_args.args[0] is first.candidates[0].design
+    assert (spies.generator.call_count, spies.validator.call_count) == (1, 2)
+    generate(a)
+    second = a.session_state[ui.RESULT_KEY]
+    assert second is not first
+    assert second.model_dump_json() == first_json
+    assert a.session_state[view.REVISION_KEY] == 2
+    assert (spies.generator.call_count, spies.validator.call_count) == (2, 4)
+    assert a.session_state[controls.PREPARED_KEY] is prepared
+    snapshot = a.session_state[view.SNAPSHOT_KEY]
+    assert snapshot.bindings == prepared.planning_bindings
+    assert snapshot.source_specification_json == prepared.source_specification_json
+    for index, label in enumerate(("Layout A", "Layout B")):
+        a.radio(key=ui.SELECTION_KEY).set_value(label).run()
+        assert spies.three.call_args.args[0] is second.candidates[index].design
+        furniture = second.candidates[index].design.furniture[0]
+        assert furniture.id == f"catalog:{BELAYA_ID}:1"
+        assert furniture.rotation_deg == 0
+        assert (furniture.width_m, furniture.depth_m, furniture.height_m) == (
+            1.6,
+            0.8018731772899628,
+            0.7516312003135682,
+        )
+    a.checkbox(key="keep_manual:queen-bed").check().run()
+    assert a.button(key="generate_layouts").disabled
+    assert a.session_state[ui.RESULT_KEY] is second
+    assert a.session_state[view.SNAPSHOT_KEY] is snapshot
+    a.checkbox(key="keep_manual:queen-bed").uncheck().run()
+    prepare(a)
+    assert not a.button(key="generate_layouts").disabled
+    assert a.session_state[ui.RESULT_KEY] is second
+    assert a.session_state[view.SNAPSHOT_KEY] is snapshot
+    assert second.model_dump_json() == first.model_dump_json() == first_json
+    assert a.session_state[view.REVISION_KEY] == 2
+    assert (spies.generator.call_count, spies.validator.call_count) == (2, 4)
+    assert not a.exception

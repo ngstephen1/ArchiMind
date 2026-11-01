@@ -498,6 +498,14 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     continuation = parse(
         (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
     )["r1"]["authorized_migrations"]
+    r2 = (
+        parse((ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text())
+        .get("r2", {})
+        .get("authorized_migrations", {})
+    )
+    delivery = parse(
+        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
+    )["delivery_20261101"]["authorized_migrations"]
     for path, expected in pins["baseline_files"].items():
         if path in migrations:
             assert migrations[path]["before_sha256"] == expected
@@ -505,6 +513,12 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
         if path in continuation:
             assert continuation[path]["before_sha256"] == expected
             expected = continuation[path]["after_sha256"]
+        if path in r2:
+            assert r2[path]["before_sha256"] == expected
+            expected = r2[path]["after_sha256"]
+        if path in delivery:
+            assert delivery[path]["before_sha256"] == expected
+            expected = delivery[path]["after_sha256"]
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")

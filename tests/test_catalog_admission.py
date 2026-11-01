@@ -241,20 +241,23 @@ def test_new_factory_preparation_and_placeholder_only(asset_id):
 
     record = load_catalog().get_record(asset_id)
     option = next(o for o in catalog_product_options() if o.record.asset_id == asset_id)
-    assert option.preparation_available and not option.render_qualified
-    assert (
-        option.planning_dimensions
-        is option.planning_digest
-        is option.render_release_digest
-        is None
-    )
+    assert option.preparation_available
     if asset_id == "abo-b074l4976t-amazon-co-uk":
-        # 08F3A separately releases planning evidence; historical catalog flags
-        # and this pre-render workflow remain metadata-only at this checkpoint.
+        # 08F3A's separate release now governs new prepared desk reservations.
+        # The historical catalog's published dimensions/render flags stay intact.
         envelope = load_planning_envelope(asset_id)
         assert envelope.catalog_version == "1.1.0"
         assert not envelope.qualification.render_qualified
+        assert option.planning_dimensions == envelope.planning_dimensions
+        assert option.render_qualified and option.render_release_digest
     else:
+        assert not option.render_qualified
+        assert (
+            option.planning_dimensions
+            is option.planning_digest
+            is option.render_release_digest
+            is None
+        )
         with pytest.raises(ValueError):
             load_planning_envelope(asset_id)
     item = furniture_from_catalog(
@@ -271,10 +274,12 @@ def test_new_factory_preparation_and_placeholder_only(asset_id):
     p = prepare_catalog_specification(
         base, retained_manual_ids=(), product_ids=(asset_id,)
     )
-    assert (
-        not p.planning_bindings
-        and p.assignments[0].dimension_basis == "published_item_dimensions"
-    )
+    if asset_id == "abo-b074l4976t-amazon-co-uk":
+        assert len(p.planning_bindings) == 1
+        assert p.assignments[0].dimension_basis == "planning_envelope_B"
+    else:
+        assert not p.planning_bindings
+        assert p.assignments[0].dimension_basis == "published_item_dimensions"
     assert p.assignments[0].catalog_version == "1.1.0"
     p.assignments[0].validate_furniture(p.design().furniture[0])
     assert base.model_dump_json() == before
@@ -440,10 +445,26 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
     migrations = json.loads(
         (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_bytes()
     )["r1"]["authorized_migrations"]
+    r2 = (
+        json.loads(
+            (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_bytes()
+        )
+        .get("r2", {})
+        .get("authorized_migrations", {})
+    )
+    delivery = json.loads(
+        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_bytes()
+    )["delivery_20261101"]["authorized_migrations"]
     for name, expected in receipt["frozen_files"].items():
         if name in migrations:
             assert migrations[name]["before_sha256"] == expected
             expected = migrations[name]["after_sha256"]
+        if name in r2:
+            assert r2[name]["before_sha256"] == expected
+            expected = r2[name]["after_sha256"]
+        if name in delivery:
+            assert delivery[name]["before_sha256"] == expected
+            expected = delivery[name]["after_sha256"]
         assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
     catalog_bytes = (ROOT / "src/archimind/assets/furniture_catalog.json").read_bytes()
     assert hashlib.sha256(catalog_bytes).hexdigest() == receipt["catalog"]["sha256"]

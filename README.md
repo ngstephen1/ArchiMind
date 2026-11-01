@@ -1127,7 +1127,7 @@ validation or rescoring on a view change. A/B switches preserve the Three.js
 camera and cutaway controls; Reset fits the current layout.
 
 The default procedural bedroom shows labeled bed, desk and wardrobe placeholders.
-Charles is used only with an explicit, current planning sidecar; matching a
+Charles or Belaya is used only with an explicit, current planning sidecar; matching a
 category or size is insufficient. The separate **Charles product (08C-R2)**
 demonstration now passes deterministic fixture validation and exercises the same
 adapter. Styling colors remain a Plotly preview; Three.js retains source materials.
@@ -1136,6 +1136,8 @@ for API/state contracts, verification and known limits.
 
 ## Catalog-sized specifications
 
+> Belaya end-to-end browser acceptance passed on November 1, 2026 (R3B5). The accumulated workflow and viewer-lifecycle changes are now recorded in this checkpoint. See the [qualification report](docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.md#r3b5--final-same-session-browser-regeneration-acceptance) for evidence and the remaining separate R3C release work.
+
 Choose **Specification for next generation → Catalog selection** to retain or
 remove the procedural items and optionally add one of each catalog product:
 Charles armchair, Espresso bookcase, Belaya writing desk, Morava wardrobe and
@@ -1143,10 +1145,14 @@ Rivet nightstand. Use **Prepare new specification → Review → Generate Layout
 Pending edits leave displayed results and styling unchanged; generation uses the
 reviewed dimensions and freezes its submitted specification/provenance.
 
-Charles reserves its approved Policy B envelope and can use its native-scale
-mesh. The other four use published item dimensions and named procedural
-placeholders; they have no approved planning envelope or real-mesh binding.
-Published measurements are checked claims, not independent physical measurements. Compatible Charles instances offer a mesh/placeholder display
+Charles and Belaya reserve their separately approved Policy B envelopes and can
+use their native-scale meshes in single-product scenes. Belaya reserves exactly
+1.6 × 0.8018731772899628 × 0.7516312003135682 m; its published 1.6 × 0.8 × 0.75 m
+measurements remain separate. Missing planning evidence disables preparation.
+The bookcase, Morava and nightstand remain published-sized placeholders.
+A combined Charles/Belaya scene reports **mixed scene not yet qualified** and
+uses placeholders for both products; the resource budget is unchanged.
+Published measurements are checked claims, not independent physical measurements. Compatible Charles or Belaya instances offer a mesh/placeholder display
 choice; no rendering choice resizes or revalidates the layout. Plotly stays the
 default. See the [catalog workflow guide](docs/developer/FURNITURE_CATALOG_UI.md)
 for exact dimensions, provenance, failure policy, state and verification.
@@ -1157,7 +1163,7 @@ Task **08F1** added 25 source-research candidates while preserving all 32 histor
 records. Three new source-qualified leads cover a desk, a wardrobe and a nightstand;
 no reviewed bed qualifies. That historical checkpoint retained two active products.
 Task **08F2** admits those three exact leads as metadata, bringing the active catalog
-to **five products**. Charles remains the only render-qualified product. No model
+to **five products**. At that historical checkpoint Charles was the only render-qualified product. No model
 was acquired and no embedding was rebuilt. Source qualification does not prove
 native envelope containment or scene resource compatibility. The [expansion findings](docs/data/FURNITURE_EXPANSION_08F1.md)
 include exact evidence and a [blank 24-prompt owner-review packet](docs/data/FURNITURE_RETRIEVAL_HUMAN_REVIEW_08F1.md).
@@ -1234,6 +1240,9 @@ and verification record.
 - [x] **Task 08D · Selected-layout Three.js** — exact selected A/B geometry, a Plotly/Three.js selector, explicit product evidence and honest placeholders.
 - [x] **Task 08E · Catalog-sized specifications and selection** — explicit preparation/review, catalog-sized generation, frozen provenance and compatible display choices; no implicit resizing.
 - [x] **Task 08F1 · Source shortlist and human-review preparation** — three new source-qualified leads, preserved historical evidence and blank review forms; active catalog unchanged.
+- [x] **Task 08F2 · Metadata admission** — five qualified catalog records with separate published, planning and rendering evidence.
+- [x] **Task 08F3A through R3B5 · Belaya workflow and browser acceptance** — approved Policy B generation, native-scale selected A/B views, same-session regeneration and owner-scoped camera persistence.
+- [ ] **Task 08F3A-R3C · Final release acceptance** — separately scoped full verification and release reconciliation.
 - [x] **Task 08R1 · Offline embedding/hybrid benchmark** — one isolated CPU encoder, frozen development/held-out judgments and measured abstention trade-offs; production integration deferred.
 - [x] **Task 08R0 · Offline retrieval contract and baselines** — current hard filters, keyword/FTS5 comparison, isolated synthetic fixtures and auditable metrics; no vector database or UI wiring.
 - [ ] Export.

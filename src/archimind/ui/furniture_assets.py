@@ -79,9 +79,13 @@ def render_furniture_assets(base: RoomDesign) -> PendingSpecification:
                 st.caption(
                     f"Policy B planning reservation: {metric(option.planning_dimensions.wdh)} · Approved product mesh: {'yes' if option.render_qualified else 'unavailable'}"
                 )
-            else:
+            elif option.preparation_available:
                 st.caption(
                     "Published item dimensions used for generation · Approved planning envelope: unavailable · Product mesh: unavailable; procedural placeholder only."
+                )
+            else:
+                st.caption(
+                    "Required planning reservation unavailable. Published measurements cannot replace it; generation is disabled for this product."
                 )
             if not option.preparation_available:
                 st.warning(

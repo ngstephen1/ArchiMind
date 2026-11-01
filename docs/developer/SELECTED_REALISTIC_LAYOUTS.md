@@ -1,8 +1,10 @@
 # Selected A/B layouts in Three.js — Task 08D
 
-The selected candidate now drives the 2D floor plan and the chosen 3D backend. Under **Selected 3D Furnished Room**, choose **Plotly schematic** (default) or **Realistic Three.js**. The 2D plan stays visible. The current generated bedroom uses three labeled procedural placeholders: no bed, desk or wardrobe product is qualified, and matching a category or size never identifies a product.
+> Current through 08F3A-R3B5 (November 1, 2026): Belaya preparation, same-session regeneration and synchronized native rendering passed browser acceptance. Historical storage stops remain in the qualification report; final R3C release acceptance remains separate.
 
-Charles/Sod remains the only approved real-product mesh. Its separate, explicitly loaded demonstration uses fresh Policy B factory specifications, retained planning sidecars and a real passing deterministic spatial report. It does not replace the generated alternatives or imply architectural certification. The original Sheen architectural room and single-chair demonstration remain available.
+The selected candidate now drives the 2D floor plan and the chosen 3D backend. Under **Selected 3D Furnished Room**, choose **Plotly schematic** (default) or **Realistic Three.js**. The 2D plan stays visible. The default procedural bedroom uses three labeled placeholders. Catalog selection can instead supply explicit approved Charles or Belaya identities; matching a category or size alone never identifies a product. No bed is qualified, and Morava remains metadata-only.
+
+Charles/Sod and Belaya/Oak have separate approved native-scale releases. Mixed Charles/Belaya real-mesh scenes remain unqualified and use labeled placeholders. Charles's separate, explicitly loaded demonstration uses fresh Policy B factory specifications, retained planning sidecars and a real passing deterministic spatial report. It does not replace the generated alternatives or imply architectural certification. The original Sheen architectural room and single-chair demonstration remain available.
 
 ## Adapter and authority
 
@@ -10,7 +12,7 @@ Charles/Sod remains the only approved real-product mesh. Its separate, explicitl
 
 `render/selected_realistic.py` exports `build_selected_realistic_scene(...)` and `render_selected_realistic_scene(...)`, using the same optional evidence/override arguments. The former returns `PreparedRealisticScene(scene, resolution)`; the latter mounts through the existing product component and reports backend asset-integrity failures in its diagnostics. The render function also accepts a component key. The common `mount_product_payload()` validates the existing V3 contract and performs the existing local integrity check. Legacy wrappers reuse it without changing their public return behavior.
 
-No product is inferred from a chair category, approximate dimensions or even an exact dimension match. Charles requires an explicit `PlanningFurnitureBinding`, revalidated against the actual furniture ID/name/category, exact B dimensions, zero yaw, current catalog/record and envelope, source-model hash and digest-bound render release. Overrides are backend-only: `None` explicitly requests a placeholder; a product override requires its matching sidecar. An invalid override for a known furniture item produces a placeholder, never a substitute. Unknown furniture references reject the request.
+No product is inferred from a chair category, approximate dimensions or even an exact dimension match. Charles and Belaya require an explicit `PlanningFurnitureBinding`, revalidated against the actual furniture ID/name/category, exact B dimensions, zero yaw, current catalog/record and envelope, source-model hash and digest-bound render release. Overrides are backend-only: `None` explicitly requests a placeholder; a product override requires its matching sidecar. An invalid override for a known furniture item produces a placeholder, never a substitute. Unknown furniture references reject the request.
 
 Missing/stale/malformed planning evidence, unavailable render approval and resource-budget failure produce fixed diagnostic reasons. Placeholder-only and empty scenes require no Charles metadata lookup or model file. Unsupported rotation and renderer size/count limits are explicit errors, never geometry coercion or truncated scenes. Actual binary corruption/missing files trigger the existing unavailable-asset fallback; browser failures show their own truthful loading status.
 
@@ -174,3 +176,36 @@ session/generation-bound and available only for compatible current Charles
 bindings. Bookcase metadata is separate and cannot grant product rendering.
 The original 08D verification section remains historical; new checks are recorded
 in the [08E receipt](../data/CATALOG_GENERATION_08E_VERIFICATION.json).
+
+## 08F3A-R2 selected Belaya layouts
+
+Catalog preparation now supplies Belaya's immutable planning sidecar. Generated
+A/B candidates keep their exact dimensions and identities; existing generation
+snapshots carry the sidecar without a second mutable design. Plotly and Three.js
+receive the same selected candidate. The default procedural desk has no product
+identity and remains a placeholder. Belaya-specific source attribution replaces
+the previous Charles-only caption. See the qualification report for actual
+application browser acceptance; earlier 08D fixture observations remain historical.
+
+
+## R3B5 acceptance and viewer-state boundaries
+
+The actual app completed two explicit Generate clicks in the same session: revision
+1 → 2, generator calls 1 → 2, and UI acceptance checks 2 → 4. Seed 42 reproduced
+the same two passing Belaya layouts in five attempts; a fresh result object was
+stored. Plotly and Three.js received the exact selected candidate, and native
+Belaya scale remained 1.0. Pending edits invalidated preparation without replacing
+results; visible reprepare restored readiness with no third generation.
+
+Three.js camera/target and front-wall/footprint toggles persist within the same
+room and DOM owner across A/B changes. The generation-keyed parent supports host
+replacement through owner-scoped WeakMap snapshots; obsolete cleanup cannot
+overwrite a replacement. A new generation, closed/reopened view, or different DOM
+owner resets framing. Restoring a pending selection can replace that owner and
+reset view controls while leaving all stored results intact. Actual A/B continuity
+passed; same-owner host replacement retains its deterministic regression evidence.
+
+See [R3B5 evidence](../data/ASSET_QUALIFICATION_BELAYA_08F3A.md#r3b5--final-same-session-browser-regeneration-acceptance).
+No physical-mobile, universal leak-freedom or total GPU-memory claim follows. Mixed
+Charles/Belaya native scenes remain unqualified and use placeholders. Production
+semantic retrieval, new assets and further qualification are outside this checkpoint.

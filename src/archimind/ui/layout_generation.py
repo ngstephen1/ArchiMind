@@ -286,7 +286,15 @@ def render_layout_generator(
         view = st.radio(
             "3D view", [PLOTLY_VIEW, THREE_VIEW], horizontal=True, key=VIEW_KEY
         )
-        selected_scene = st.empty()
+        # A stable parent owns view state across disposable component hosts.
+        # Plotly/empty outcomes remove it; a new generation gets a fresh owner.
+        selected_scene = (
+            st.container(
+                key=f"selected-realistic-owner-{st.session_state.get(REVISION_KEY, 0)}"
+            )
+            if view == THREE_VIEW
+            else st.empty()
+        )
 
     st.markdown("### Spatial Validation Summary")
     report = candidate.validation
