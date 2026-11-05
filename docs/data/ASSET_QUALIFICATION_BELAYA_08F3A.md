@@ -1211,3 +1211,146 @@ all actual timer IDs to the existing mock. Reuse, cancellation and eviction
 assertions are retained; production code and bundled assets are unchanged. A
 separate migration entry preserves the first delivery's exact test-file hash.
 The follow-up commit and actual CI result are supplied in the delivery response.
+
+
+## R3C final reconciliation — November 5, 2026
+
+**R3C_RELEASE_PENDING_DELIVERY_CI** at commit time. Existing mandatory product
+checks are supported; focused report preservation and the delivered commit’s CI
+complete the release gate. The delivery response reports the actual CI result.
+The original top-level JSON `BLOCKED_STORAGE_VOLATILITY` and `completed=false`
+remain the October 30 history. `current_release` points to this latest section.
+
+### Release matrix
+
+| Gate | Result | Evidence and limits |
+| --- | --- | --- |
+| Source/provenance | passed | Existing exact product/model/variant/catalog/release identities. No new retrieval or independent legal/physical certification. |
+| Policy B geometry | passed | Installed Belaya exact WDH 1.6 × 0.8018731772899628 × 0.7516312003135682 m, yaw 0 and native scale 1.0; pinned qualification/CI covers exact-rational containment. |
+| Product registry and integrity | passed | Five metadata records, individual Charles and Belaya releases; exact three packaged GLBs including illustrative Sheen; installed asset loading and approved hashes passed. |
+| Mixed-scene admission | passed | Installed mixed preparation yielded two placeholders and mixed_scene_not_yet_qualified. This is an admission restriction, not arithmetic budget failure. |
+| Generated layouts | passed_historical | R3A ordinary generation, R3B generated A/B and R3B5 two explicit same-session generations. R3B5 exact-object/call-count observations use read-only wrappers. |
+| Browser acceptance | passed_historical | R3B desktop/narrow, companions, native Charles and metadata-only products; R3B5 same-session regeneration and pending edits. No browser replay in R3C. |
+| Lifecycle | passed | R3B3 deterministic real host-replacement contract tests; ordinary-app A/B corroboration. Same owner preserves state; new owner/generation/reopen resets. Pending edits can replace the owner. |
+| Fallbacks | passed | R3B local missing/corrupt response interception; R3B2 copied-binding fault harness. Installed R3C missing/stale bindings fail closed; recovery evidence remains separately labeled. |
+| Desktop/narrow | passed_historical | 1440×1000 and 390×844 Chromium, not a physical phone or universal GPU-memory guarantee. |
+| Python/frontend baseline CI | passed | 41278648171 on 75a14349d4828f959236a69d0ff940731560c788: 1867 Python and 91 frontend tests, lint/format, pip compatibility, viewer syntax/build/bundle equality, HTTP 200. Full suite includes packaging test. |
+| Packaging/installation | passed_reused | Previous R3C packaging test passed in 6.79s; wheel/source membership and isolated no-index/no-deps installation passed. Additional outside-checkout installed smoke passed; retained artifact hashes match. |
+| Application health | passed_reused | Previous R3C scripts/check_health.py returned HTTP 200; temporary server stopped. No new server launched. |
+| Reporting/preservation | passed | Historical JSON values and exact Markdown prefix preserved; additive current-release metadata validated; both frozen-evidence tests pass through appended R3C hashes. |
+| Delivery CI | pending | New reconciliation commit requires its own successful workflow; baseline success does not certify another SHA. |
+| Storage | observed_window_only | FINAL2-only >=3.5 GiB writing gate, stop below 3 GiB or first >=200 MiB/~30s loss; 1 GiB reserve. Finite periodic sampling, no future stability guarantee. |
+| Prototype scope | bounded | No verified full live-AI journey, production semantic retrieval, arbitrary yaw/polygons/multi-room planning, CAD/BIM export, building-code or production/device certification. |
+
+### Preserved progression and evidence boundaries
+
+Initial inspection rejected the smaller published envelope and stopped on storage.
+R1 separately approved the Policy B planning reservation and trusted native mesh.
+R2 added catalog preparation; R3A resolved the incremental Generate-button timing
+without a bypass. R3B exercised real generated scenes but stopped before all gates.
+R3B2 supplied instrumented identity and copied-binding rejection evidence and
+exposed host-remount state loss. R3B3 corrected owner-scoped lifecycle behavior.
+R3B4 regeneration was interrupted; R3B5 completed two explicit same-session
+generations with revisions 1 → 2, generator calls 1 → 2, UI acceptance-validator
+calls 2 → 4, and new stored results. Counts exclude generator-internal checks.
+Pending edits and reprepare preserved revision-2 results with no third generation.
+
+Ordinary application observations, observation-only wrappers, controlled network/
+binding faults, deterministic frontend tests, AppTest and CI are separate evidence
+types. R3B5 call counts are not independent production telemetry. All 30 saved
+R3B5 manifest entries reverified; its required camera/native placement/pending
+workflow passed with zero captured errors and one Plotly advisory. Host replacement
+itself is deterministic test coverage, not a forced ordinary-browser event.
+
+November 1 accumulated delivery updated attribution and documentation. The failed
+Node 20 run remains failed; the timer-mock-only correction is included in
+[successful baseline CI](https://github.com/ngstephen1/ArchiMind/actions/runs/41278648171).
+Its 1,867 Python and 91 frontend tests cover that exact starting SHA. The only
+runtime source change since the accepted R3B5 snapshot is the attribution caption;
+UK Belaya is no longer mislabeled with an Amazon.com marketplace. Asset bytes,
+geometry, render contracts and qualification releases remain unchanged.
+
+### Reused R3C packaging and installed contracts
+
+The prior R3C test command was `.venv/bin/python -m pytest -q
+tests/test_asset_catalog_packaging.py --basetemp=<fresh external R3C directory>`.
+It passed in **6.79 seconds**, building source/wheel offline with existing tooling
+and installing with `--no-index --no-deps --no-compile` into an isolated target.
+Installed APIs ran outside the checkout under `python -I`; resource paths and
+approved assets/notices/viewer bytes were verified. The source archive includes
+research/docs/tests; the wheel excludes research corpora, encoder weights, vectors,
+secrets and protected directories. It contains exactly Belaya, Charles and the
+illustrative Sheen GLBs. The full baseline CI already includes this packaging test.
+
+An additional external installed smoke checked Belaya/Charles individually, exact
+Policy B sizes, yaw zero, native scale 1.0, missing-sidecar placeholders, stale V3
+rejection, and two mixed-scene placeholders without source mutation. This is scene
+preparation evidence, not a fresh generation or browser test. Retained HTTP 200
+health belongs to the prior R3C command; its temporary server stopped.
+No build, installation, browser replay or encoder inference was repeated here.
+
+- `archimind-0.1.0-py3-none-any.whl`: 11275376 bytes, 124 members; SHA-256 `64ea7aee4d3e8b78683213b5267acd9f245f8999d6e168a412206868dea3acbf`.
+- `archimind-0.1.0.tar.gz`: 11921300 bytes, 296 members; SHA-256 `45262f3a91d2ca109f9c496938bfa0379bf06954d31092ec2c5f926f72d3f4a1`.
+
+Belaya remains 3,135,676 bytes, SHA-256
+`2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e`,
+at native scale 1.0, yaw zero and reservation
+**1.6 × 0.8018731772899628 × 0.7516312003135682 m**. Source claims remain
+separate from measured mesh bounds and approved planning dimensions.
+
+### Interrupted R3C and continuation
+
+The first November 5 R3C attempt completed packaging, installed-contract checks
+and health, then stopped after losing **1,101,963,264 bytes in 30.03 seconds**,
+leaving 2.20 GiB. The write guard prevented repository edits. Two read-only Ruff
+checks inadvertently ran after the alert and are excluded from acceptance.
+A later R3C-FINAL preflight observed 3.78–3.82 GiB and performed only read-only
+reconciliation under its 4 GiB gate; FINAL2 then stopped at 0.505 GiB.
+
+The owner separately requested storage recovery. Nine verified NVM download
+archives were cleared; seven installed Node executable hashes stayed unchanged.
+Observed free capacity rose above 6 GiB, partly through unrelated background
+activity. This continuation uses the explicitly authorized FINAL2-only 3.5 GiB
+writing threshold, 3 GiB stop floor and first 200 MiB/~30s sharp-loss stop.
+No cleanup is part of this release reconciliation. Periodic samples do not prove
+continuous or future stability. Fresh measurements are recorded before delivery.
+
+### Current prototype and remaining work
+
+Select → Prepare → Review → Generate, deterministic containment/collision/door
+approach/circulation checks, A/B scores and synchronized selected 2D/Plotly/Three.js
+views are supported. Pending edits preserve stored results; camera/controls persist
+within the supported owner and reset across new owners/generations/reopening.
+Charles and Belaya individually have approved native meshes and fail-closed
+bindings. The mixed detailed scene remains unqualified; both use labeled
+placeholders. Morava, Rivet nightstand and Espresso bookcase remain metadata-only.
+
+No complete verified live-AI design journey, production semantic recommendations,
+arbitrary rotation, nonrectangular/multi-room planning, CAD/BIM export, building-code
+certification or universal device/GPU-memory guarantee is established. These are
+prototype boundaries, not failures of this bounded release. Independent physical
+measurements and independent human relevance review remain absent.
+The recommended next milestone is owner-first review of the existing 24-prompt
+relevance packet before choosing further product/retrieval work.
+
+Final focused preservation results, storage observations and commit-time delivery
+state are recorded below. Artifacts above identify the verified starting snapshot;
+report-only changes do not retroactively alter those archives. The new delivery
+commit requires its own CI, reported in the final response without a commit loop.
+
+
+### Final focused checks and precommit storage
+
+The two existing frozen-evidence tests passed: **2 passed in 0.64s**. README and
+STATUS now describe this reconciliation; two mechanical test extensions verify
+the appended R3C before/after doc hashes while retaining every older hash and
+assertion. Changed-test Ruff lint/format passed. Additive report fields, duplicate
+keys, historical JSON values, exact Markdown prefix and unchanged non-delivery
+files are checked by the external reconciliation script. No runtime behavior,
+asset, catalog, release, validator, geometry or scoring change is included.
+
+Observed precommit capacity: initial **6276415488 bytes**, minimum **6260445184 bytes**, latest **6260445184 bytes**. 6 samples; maximum interval 30.060s; zero alerts. Full samples are in `r3c.final2.storage_observations_before_commit`. This is a bounded window, not a future-stability claim.
+
+The delivered commit remains pending CI at commit time; only its actual successful
+workflow can establish the final `R3C_RELEASE_VERIFIED` verdict. The final response
+records that outcome and the final storage reading without another report commit.

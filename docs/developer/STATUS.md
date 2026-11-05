@@ -1,8 +1,8 @@
 # Project status
 
-Last reviewed: **November 1, 2026**.
+Last reviewed: **November 5, 2026**.
 
-**Current milestone: 08F3A through R3B5 browser acceptance complete. Five metadata-qualified catalog products; Charles and Belaya have separate approved planning/native-render releases. Belaya now participates in explicit preparation, generation and selected A/B views. Mixed Charles/Belaya scenes remain placeholders. R3C final release acceptance is separate.**
+**Current milestone: 08F3A through R3B5 browser acceptance complete. Five metadata-qualified catalog products; Charles and Belaya have separate approved planning/native-render releases. Belaya now participates in explicit preparation, generation and selected A/B views. Mixed Charles/Belaya scenes remain placeholders. R3C reconciliation and focused preservation checks are complete; delivery CI is pending at commit time.**
 Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles and Belaya use their original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -1580,6 +1580,32 @@ These are bounded acceptance results, not production or architectural certificat
 
 The owner authorized committing/pushing accumulated work after R3B5. Current
 delivery checks and GitHub CI are reported with the commit; older green CI does
-not certify this new snapshot. Full separately scoped R3C release reconciliation
-remains pending. No new asset, dependency, encoder, retrieval integration or AI
+not certify this new snapshot. R3C reconciliation is recorded below. No new asset, dependency, encoder, retrieval integration or AI
 agent is included. Historical milestone sections above describe their own checkpoints.
+
+
+## R3C — Current release reconciliation (November 5, 2026)
+
+**R3C_RELEASE_PENDING_DELIVERY_CI** at commit time. The existing narrow prototype
+is supported by exact baseline CI (1,867 Python / 91 frontend tests), retained
+offline source/wheel and isolated-install checks, installed fail-closed binding
+checks and HTTP 200 health. All 30 R3B5 evidence-manifest entries reverified.
+The final delivery response reports the new commit’s actual CI result; successful
+baseline CI is never attributed to another SHA. No browser matrix was repeated.
+
+The [current release evidence](../data/ASSET_QUALIFICATION_BELAYA_08F3A.md#r3c-final-reconciliation--november-5-2026)
+preserves the initial and interrupted storage stops. Its JSON `current_release`
+points to the current verdict; original top-level blocked fields describe October
+30 only. Same-owner A/B camera continuity and explicit same-session regeneration
+are verified within their recorded evidence boundaries. New owners reset the view.
+
+Five ABO products remain in the catalog, with individual native approval for
+Charles and Belaya only. Their mixed detailed scene remains unqualified and uses
+placeholders; Morava, nightstand and bookcase remain metadata-only. No full verified
+live-AI design journey, production semantic retrieval, arbitrary rotation,
+nonrectangular/multi-room design, CAD/BIM export or production/device certification
+is claimed. Published product dimensions remain source claims.
+
+This continuation changes only release docs and mechanical preservation-chain
+tests. Owner-first review of the existing 24-prompt relevance packet is the next
+recommended product task; no new asset or feature work started.

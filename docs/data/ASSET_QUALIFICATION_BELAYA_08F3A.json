@@ -11819,5 +11819,359 @@
         "after_sha256": "b1bb3736f5fc2127078a6a5e849a6e4b2f8df697c3861b611b8009244df89f98"
       }
     }
+  },
+  "r3c": {
+    "task": "08F3A-R3C",
+    "initial_attempt": {
+      "status": "R3C_RELEASE_BLOCKED",
+      "observed_on": "2026-11-05",
+      "baseline_commit": "75a14349d4828f959236a69d0ff940731560c788",
+      "workspace": "/Users/macbook/Hack/.archimind-08f3a/r3c-20261105",
+      "completed": [
+        "Offline source/wheel and isolated installed APIs",
+        "Additional installed stale/missing/mixed binding smoke",
+        "Fresh HTTP 200 health",
+        "30 R3B5 manifest members verified",
+        "Unchanged baseline and artifact hashes"
+      ],
+      "stop": {
+        "time": "2026-11-05T21:37:17.629781+00:00",
+        "monotonic": 300009.981377041,
+        "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 206534428   2302152    99% 4114755 23021520   15%   /System/Volumes/Data\n",
+        "available_bytes": 2357403648,
+        "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 206534428   2302152    99% 4114755 23021520   15%   /System/Volumes/Data\n",
+        "swap_pressure": "vm.swapusage: total = 8192.00M  used = 7186.69M  free = 1005.31M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+        "interval_seconds": 30.029700083017815,
+        "loss_bytes": 1101963264,
+        "alert": true
+      },
+      "documentation_writes": false,
+      "commits": 0,
+      "post_alert_note": "Two read-only Ruff checks ran inadvertently after stop; excluded from acceptance."
+    },
+    "final_attempt_preflight": {
+      "status": "R3C_RELEASE_BLOCKED",
+      "capacity_gib_approximately": [
+        3.78,
+        3.82
+      ],
+      "action": "Read-only retained evidence reconciliation; no repository writes or delivery under prior 4 GiB gate."
+    },
+    "final2": {
+      "task": "08F3A-R3C-FINAL2",
+      "status": "R3C_RELEASE_PENDING_DELIVERY_CI",
+      "checked_on": "2026-11-05",
+      "baseline_commit": "75a14349d4828f959236a69d0ff940731560c788",
+      "scope": "Existing bounded single-rectangular-room prototype; broader ArchiMind vision unfinished",
+      "baseline_ci": {
+        "conclusion": "success",
+        "headSha": "75a14349d4828f959236a69d0ff940731560c788",
+        "url": "https://github.com/ngstephen1/ArchiMind/actions/runs/41278648171"
+      },
+      "matrix": [
+        {
+          "gate": "Source/provenance",
+          "status": "passed",
+          "evidence_and_limits": "Existing exact product/model/variant/catalog/release identities. No new retrieval or independent legal/physical certification."
+        },
+        {
+          "gate": "Policy B geometry",
+          "status": "passed",
+          "evidence_and_limits": "Installed Belaya exact WDH 1.6 \u00d7 0.8018731772899628 \u00d7 0.7516312003135682 m, yaw 0 and native scale 1.0; pinned qualification/CI covers exact-rational containment."
+        },
+        {
+          "gate": "Product registry and integrity",
+          "status": "passed",
+          "evidence_and_limits": "Five metadata records, individual Charles and Belaya releases; exact three packaged GLBs including illustrative Sheen; installed asset loading and approved hashes passed."
+        },
+        {
+          "gate": "Mixed-scene admission",
+          "status": "passed",
+          "evidence_and_limits": "Installed mixed preparation yielded two placeholders and mixed_scene_not_yet_qualified. This is an admission restriction, not arithmetic budget failure."
+        },
+        {
+          "gate": "Generated layouts",
+          "status": "passed_historical",
+          "evidence_and_limits": "R3A ordinary generation, R3B generated A/B and R3B5 two explicit same-session generations. R3B5 exact-object/call-count observations use read-only wrappers."
+        },
+        {
+          "gate": "Browser acceptance",
+          "status": "passed_historical",
+          "evidence_and_limits": "R3B desktop/narrow, companions, native Charles and metadata-only products; R3B5 same-session regeneration and pending edits. No browser replay in R3C."
+        },
+        {
+          "gate": "Lifecycle",
+          "status": "passed",
+          "evidence_and_limits": "R3B3 deterministic real host-replacement contract tests; ordinary-app A/B corroboration. Same owner preserves state; new owner/generation/reopen resets. Pending edits can replace the owner."
+        },
+        {
+          "gate": "Fallbacks",
+          "status": "passed",
+          "evidence_and_limits": "R3B local missing/corrupt response interception; R3B2 copied-binding fault harness. Installed R3C missing/stale bindings fail closed; recovery evidence remains separately labeled."
+        },
+        {
+          "gate": "Desktop/narrow",
+          "status": "passed_historical",
+          "evidence_and_limits": "1440\u00d71000 and 390\u00d7844 Chromium, not a physical phone or universal GPU-memory guarantee."
+        },
+        {
+          "gate": "Python/frontend baseline CI",
+          "status": "passed",
+          "evidence_and_limits": "41278648171 on 75a14349d4828f959236a69d0ff940731560c788: 1867 Python and 91 frontend tests, lint/format, pip compatibility, viewer syntax/build/bundle equality, HTTP 200. Full suite includes packaging test."
+        },
+        {
+          "gate": "Packaging/installation",
+          "status": "passed_reused",
+          "evidence_and_limits": "Previous R3C packaging test passed in 6.79s; wheel/source membership and isolated no-index/no-deps installation passed. Additional outside-checkout installed smoke passed; retained artifact hashes match."
+        },
+        {
+          "gate": "Application health",
+          "status": "passed_reused",
+          "evidence_and_limits": "Previous R3C scripts/check_health.py returned HTTP 200; temporary server stopped. No new server launched."
+        },
+        {
+          "gate": "Reporting/preservation",
+          "status": "passed",
+          "evidence_and_limits": "Historical JSON values and exact Markdown prefix preserved; additive current-release metadata validated; two existing frozen-file tests pass through appended R3C hashes."
+        },
+        {
+          "gate": "Delivery CI",
+          "status": "pending",
+          "evidence_and_limits": "New reconciliation commit requires its own successful workflow; baseline success does not certify another SHA."
+        },
+        {
+          "gate": "Storage",
+          "status": "observed_window_only",
+          "evidence_and_limits": "FINAL2-only >=3.5 GiB writing gate, stop below 3 GiB or first >=200 MiB/~30s loss; 1 GiB reserve. Finite periodic sampling, no future stability guarantee."
+        },
+        {
+          "gate": "Prototype scope",
+          "status": "bounded",
+          "evidence_and_limits": "No verified full live-AI journey, production semantic retrieval, arbitrary yaw/polygons/multi-room planning, CAD/BIM export, building-code or production/device certification."
+        }
+      ],
+      "packaging_artifacts": [
+        {
+          "name": "archimind-0.1.0-py3-none-any.whl",
+          "bytes": 11275376,
+          "sha256": "64ea7aee4d3e8b78683213b5267acd9f245f8999d6e168a412206868dea3acbf",
+          "member_count": 124
+        },
+        {
+          "name": "archimind-0.1.0.tar.gz",
+          "bytes": 11921300,
+          "sha256": "45262f3a91d2ca109f9c496938bfa0379bf06954d31092ec2c5f926f72d3f4a1",
+          "member_count": 296
+        }
+      ],
+      "reused_receipt_hashes": {
+        "packaging.log": "10da3c13e095e762721c2777e1668e12e22937a52afdca119d1657f6a3f93adc",
+        "installed-smoke.log": "f1ff395994f8fceded4e67854f0df075cac31b358c5e9a8e08e0a2873187eb59",
+        "installed_smoke.py": "b80ffcf97fb22407a8b456436572c29022a1d0f8fa93dbfbe3eff395ce193ce8",
+        "health.log": "08d6c9a2c47257d8301e09e5e1e858268f97d0a6120dacafa69b15f0b7fe83d2",
+        "ci.json": "7f2a423017c7438b9eeb33df715ecb030dac42bf5c7d41c68c4187555abec6d6",
+        "ci.log": "571e656bf74e3b77430fcc3369e8981a05c1856a563617fadc295e43b93e0775",
+        "reconciliation.json": "89cfcb55d943e287ef243ee0bcfad252eb8cab53ccd531a31adc95ac86ae5c49",
+        "starting_hashes.json": "208b555583a76c26685907f116ae66be393f0fec2fa1696dae7496cdc2d92afe",
+        "capacity.jsonl": "66f4e3aa963a53c9a5c356173592a1f9a1c27e87dacf6255c2dd23ceacbde45c",
+        "STOP.json": "42911bdc8f2a6dac61ace3017bdb91bb08f36b182176bf0fa23143a0e1deb307"
+      },
+      "r3b5_manifest": {
+        "verified_entries": 30,
+        "manifest_sha256": "e2a616c4cc283198e90bbfdf358daf2e72b08d500dc1a748f42878cb33035570",
+        "evidence_type": "Same-agent saved-evidence reconciliation, not independent human review"
+      },
+      "source_comparison": {
+        "starting_tracked_files_unchanged": 266,
+        "browser_snapshot_differences": {
+          "README.md": {
+            "before": "19a6b379ef589b42c1220e665bd18a2bbca4c8f05b0c34ad7e59c291c4e986f2",
+            "after": "3bf6f0be74248b3ca3c7eb11986f8f30d5309d4ae88db1dab3b041436486755d"
+          },
+          "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json": {
+            "before": "036badefdc401aa7d8e8c4167673842beed2fb123e6369e4d826f7defab60ed8",
+            "after": "8d9933cf339b631d79dc4c3a9d6d75dcca3ccb31ef8a6357afc5620248be437a"
+          },
+          "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.md": {
+            "before": "8297ede821f0b62f4593224212eea5a34fd524e5aef5a0a5df6b08a2531f6548",
+            "after": "789379230be1ded8bbcbbda411cbb87ee973e076f789234192ce00b1df48d487"
+          },
+          "docs/developer/FURNITURE_CATALOG_UI.md": {
+            "before": "e97d9bbb98e250b6b93a915c760438cb02477c9170427631577afd6ead3b452f",
+            "after": "a5f39ab1538448b333d1a0726c7e6c0fd034697575b000652cb7add205562313"
+          },
+          "docs/developer/SELECTED_REALISTIC_LAYOUTS.md": {
+            "before": "f201a6848c39f2c03fc428f195c8a2be9ec5fea80701fd433adf6ec4ffb0f2af",
+            "after": "c8338cc8c4a996be4f1264b92e6959a17620e69ae75dd0cbb86c417b763de585"
+          },
+          "docs/developer/STATUS.md": {
+            "before": "2dd3b3d626530e242fbcc9e4bc6db4ea864b9bb4ea3be1307caecdbfd6c9e839",
+            "after": "c481a07e8c6987a2d6b60b077bfe8a5c3ef685347bb38a0d9927f8b726ded457"
+          },
+          "frontend/realistic_viewer/tests/lifecycle.test.js": {
+            "before": "caab0c3148b4462f82f50cd7ab68dbf5189e9b2e62b1396c53b448b47e16ce60",
+            "after": "b1bb3736f5fc2127078a6a5e849a6e4b2f8df697c3861b611b8009244df89f98"
+          },
+          "src/archimind/ui/realistic_view.py": {
+            "before": "c9a9878d23051a09e06288f896a3581e0411bca5b6d0ec728624bed226541584",
+            "after": "9565826d3faab442c58f52a275d268c66ed2c9dafb7e5517ba0871fcdd12d79d"
+          },
+          "tests/test_catalog_admission.py": {
+            "before": "ca0675a62ec45adfc99038271f3f7769f75d46b48ec6de4fd892d65bab91e70f",
+            "after": "357ae8a5650ea22e4b27ae85ce2fcedec1a1ce5d12ef957a28ab4f33e421d073"
+          },
+          "tests/test_catalog_generation_ui.py": {
+            "before": "e6cec9dda2accbf4f92399293b6703a4ae844525cd58ac33536682a227d4b30c",
+            "after": "811d9e85d63d5bd423f85e06d27fe4797bc0d936f7baede89eddad0b425e6bf9"
+          },
+          "tests/test_catalog_specifications.py": {
+            "before": "e97c7d89edff798268d363efc69fcc26fb99d01f1f6664befaf3a9bdc1ffa946",
+            "after": "654cf11c7c76accdfcd72018f108d61b645c3ceb6346af68af3504538867a329"
+          },
+          "tests/test_furniture_source_expansion.py": {
+            "before": "c22b6f8fd55a1af36df8144ce1df2cc04ebf3a07a601e13c5129c8a4601c0d99",
+            "after": "cf7598f020e7e3d90dbc8c120892f2ef6148c6daec5edb2ff88e92b30c8aec8b"
+          }
+        },
+        "runtime_difference": "Only generic ABO attribution caption changed since accepted browser snapshot; no geometry/viewer/asset/release change. Other differences are docs/tests/formatting."
+      },
+      "belaya": {
+        "bytes": 3135676,
+        "sha256": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+        "wdh_m": [
+          1.6,
+          0.8018731772899628,
+          0.7516312003135682
+        ],
+        "native_scale": 1.0,
+        "yaw_deg": 0
+      },
+      "metadata_only": [
+        "Morava wardrobe",
+        "Rivet nightstand",
+        "Espresso bookcase"
+      ],
+      "approved_individual_native": [
+        "Charles armchair",
+        "Belaya writing desk"
+      ],
+      "storage_policy": {
+        "one_task_only": true,
+        "minimum_before_writes_gib": 3.5,
+        "stop_below_gib": 3.0,
+        "sharp_loss_bytes_per_approximately_30_seconds": 209715200,
+        "absolute_reserve_gib": 1
+      },
+      "external_workspace": "/Users/macbook/Hack/.archimind-08f3a/r3c-final2-20261105",
+      "authorized_migrations": {
+        "README.md": {
+          "before_sha256": "3bf6f0be74248b3ca3c7eb11986f8f30d5309d4ae88db1dab3b041436486755d",
+          "after_sha256": "3cebdc33cac25a960adc65d4f1e181378c41d2756da30f3b071e6fdce06a5008"
+        },
+        "docs/developer/STATUS.md": {
+          "before_sha256": "c481a07e8c6987a2d6b60b077bfe8a5c3ef685347bb38a0d9927f8b726ded457",
+          "after_sha256": "85249c1166f4fe10f2bf0b4958bf472715e3442b967ec65f0ca8bef409aa6011"
+        }
+      },
+      "delivery": {
+        "status": "Pending at commit time; final response reports actual commit and new CI outcome without self-referential commits."
+      },
+      "next_milestone": "Owner-first relevance review using the existing 24-prompt packet to guide product/retrieval priorities; no new acquisition or feature starts.",
+      "storage_observations_before_commit": {
+        "samples": [
+          {
+            "time": "2026-11-05T23:08:59.089493+00:00",
+            "monotonic": 305246.7978225,
+            "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203759052   6129312    98% 4068709 61293120    6%   /System/Volumes/Data\n",
+            "available_bytes": 6276415488,
+            "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203759052   6129312    98% 4068709 61293120    6%   /System/Volumes/Data\n",
+            "swap_pressure": "vm.swapusage: total = 7168.00M  used = 6280.19M  free = 887.81M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+            "alert": false
+          },
+          {
+            "time": "2026-11-05T23:09:29.098765+00:00",
+            "monotonic": 305276.807906916,
+            "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203760156   6128208    98% 4068716 61282080    6%   /System/Volumes/Data\n",
+            "available_bytes": 6275284992,
+            "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203760156   6128208    98% 4068716 61282080    6%   /System/Volumes/Data\n",
+            "swap_pressure": "vm.swapusage: total = 7168.00M  used = 6469.88M  free = 698.12M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+            "interval_seconds": 30.0100844160188,
+            "loss_bytes": 1130496,
+            "alert": false
+          },
+          {
+            "time": "2026-11-05T23:09:59.126152+00:00",
+            "monotonic": 305306.8363535,
+            "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203761664   6126700    98% 4068745 61267000    6%   /System/Volumes/Data\n",
+            "available_bytes": 6273740800,
+            "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203761664   6126700    98% 4068745 61267000    6%   /System/Volumes/Data\n",
+            "swap_pressure": "vm.swapusage: total = 7168.00M  used = 6333.44M  free = 834.56M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+            "interval_seconds": 30.028446584008634,
+            "loss_bytes": 1544192,
+            "alert": false
+          },
+          {
+            "time": "2026-11-05T23:10:29.168137+00:00",
+            "monotonic": 305336.895914708,
+            "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203767748   6120616    98% 4068748 61206160    6%   /System/Volumes/Data\n",
+            "available_bytes": 6267510784,
+            "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203767748   6120616    98% 4068748 61206160    6%   /System/Volumes/Data\n",
+            "swap_pressure": "vm.swapusage: total = 7168.00M  used = 6189.44M  free = 978.56M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+            "interval_seconds": 30.059561207948718,
+            "loss_bytes": 6230016,
+            "alert": false
+          },
+          {
+            "time": "2026-11-05T23:10:59.188882+00:00",
+            "monotonic": 305366.9263735,
+            "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203771844   6116520    98% 4068777 61165200    6%   /System/Volumes/Data\n",
+            "available_bytes": 6263316480,
+            "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203771844   6116520    98% 4068777 61165200    6%   /System/Volumes/Data\n",
+            "swap_pressure": "vm.swapusage: total = 7168.00M  used = 6050.50M  free = 1117.50M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+            "interval_seconds": 30.03045879205456,
+            "loss_bytes": 4194304,
+            "alert": false
+          },
+          {
+            "time": "2026-11-05T23:11:29.209740+00:00",
+            "monotonic": 305396.95010875,
+            "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203774648   6113716    98% 4068782 61137160    6%   /System/Volumes/Data\n",
+            "available_bytes": 6260445184,
+            "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 203774648   6113716    98% 4068782 61137160    6%   /System/Volumes/Data\n",
+            "swap_pressure": "vm.swapusage: total = 7168.00M  used = 6148.38M  free = 1019.62M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+            "interval_seconds": 30.023735249997117,
+            "loss_bytes": 2871296,
+            "alert": false
+          }
+        ],
+        "initial_available_bytes": 6276415488,
+        "minimum_observed_bytes": 6260445184,
+        "latest_available_bytes": 6260445184,
+        "max_interval_seconds": 30.059561207948718,
+        "max_loss_bytes": 6230016,
+        "alerts": 0,
+        "limits": "Periodic observations through precommit only; final CI-wait readings are reported in the delivery response."
+      },
+      "focused_verification": {
+        "preservation_tests": {
+          "passed": 2,
+          "failed": 0,
+          "seconds": 0.64,
+          "command": ".venv/bin/python -m pytest -q -p no:cacheprovider tests/test_catalog_admission.py::test_admission_receipt_pins_frozen_research_and_original_asset_bytes tests/test_furniture_source_expansion.py::test_production_and_frozen_artifacts_and_historical_report_are_preserved"
+        },
+        "changed_test_ruff": "lint/format passed; two files already formatted",
+        "historical_prefix_and_objects": "passed",
+        "reused_evidence": "baseline 266-file ledger, both distribution hashes and 30 R3B5 manifest entries matched",
+        "local_full_suite_build_browser_install": "Not repeated; existing accepted receipts reused."
+      },
+      "documentation_migration": "README/STATUS current text plus two mechanical test extensions; previous hash steps and exact assertions retained. No production/runtime resource changes."
+    }
+  },
+  "current_release": {
+    "status": "R3C_RELEASE_PENDING_DELIVERY_CI",
+    "checked_on": "2026-11-05",
+    "evidence_section": "r3c.final2",
+    "historical_top_level_status": "Original October 30 acquisition stop, retained verbatim",
+    "scope": "Bounded prototype; final verified verdict requires successful delivered-commit CI reported in delivery response"
   }
 }

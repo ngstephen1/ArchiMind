@@ -1136,7 +1136,7 @@ for API/state contracts, verification and known limits.
 
 ## Catalog-sized specifications
 
-> Belaya end-to-end browser acceptance passed on November 1, 2026 (R3B5). The accumulated workflow and viewer-lifecycle changes are now recorded in this checkpoint. See the [qualification report](docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.md#r3b5--final-same-session-browser-regeneration-acceptance) for evidence and the remaining separate R3C release work.
+> Belaya end-to-end browser acceptance passed on November 1, 2026 (R3B5). The accumulated workflow and viewer-lifecycle changes are now recorded in this checkpoint. See the [qualification report](docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.md#r3b5--final-same-session-browser-regeneration-acceptance) for historical browser evidence and the appended R3C reconciliation.
 
 Choose **Specification for next generation → Catalog selection** to retain or
 remove the procedural items and optionally add one of each catalog product:
@@ -1242,7 +1242,7 @@ and verification record.
 - [x] **Task 08F1 · Source shortlist and human-review preparation** — three new source-qualified leads, preserved historical evidence and blank review forms; active catalog unchanged.
 - [x] **Task 08F2 · Metadata admission** — five qualified catalog records with separate published, planning and rendering evidence.
 - [x] **Task 08F3A through R3B5 · Belaya workflow and browser acceptance** — approved Policy B generation, native-scale selected A/B views, same-session regeneration and owner-scoped camera persistence.
-- [ ] **Task 08F3A-R3C · Final release acceptance** — separately scoped full verification and release reconciliation.
+- [ ] **Task 08F3A-R3C · Release reconciliation complete; delivery CI pending at commit time** — retained packaging, installed-contract and browser evidence reconciled; the delivery response confirms the new commit’s CI outcome.
 - [x] **Task 08R1 · Offline embedding/hybrid benchmark** — one isolated CPU encoder, frozen development/held-out judgments and measured abstention trade-offs; production integration deferred.
 - [x] **Task 08R0 · Offline retrieval contract and baselines** — current hard filters, keyword/FTS5 comparison, isolated synthetic fixtures and auditable metrics; no vector database or UI wiring.
 - [ ] Export.
