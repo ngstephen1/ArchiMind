@@ -64,6 +64,17 @@ def retrieve_chat_candidates(draft) -> tuple[ChatRetrieval, ...]:
         fields = dict(category=category)
         for name in ("variant", "product_id", "required_use"):
             fields[name] = text_value(getattr(intent, name), draft.turns)
+        # A reviewed function qualifier can be extracted into variant by the
+        # provider. Retain its meaning as an exact intended-use constraint.
+        # Actual finish variants (Oak, Espresso, etc.) remain exact filters.
+        if intent.function == "desk" and (fields["variant"] or "").casefold() in {
+            "writing",
+            "writing desk",
+        }:
+            query = "writing desk"
+            fields["variant"] = None
+            if fields["required_use"] is None:
+                fields["required_use"] = "writing"
         for name in ("materials", "styles", "colors"):
             fields[name] = tuple(
                 text_value(v, draft.turns) for v in getattr(intent, name)
@@ -101,9 +112,12 @@ def procedural_options(intent, turns):
         return ()
     if intent.function == "bed" and "queen" not in intent.source.text.casefold():
         return ()
+    variant = text_value(intent.variant, turns)
+    if intent.function == "bed" and (variant or "").casefold() == "queen":
+        variant = None  # Exact size label of this explicitly offered template.
     if any(
         (
-            intent.variant,
+            variant,
             intent.product_id,
             intent.materials,
             intent.styles,

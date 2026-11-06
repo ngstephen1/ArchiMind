@@ -47,7 +47,7 @@ def test_streamlit_app_runs() -> None:
         "Multi-Agent Interior Design & 3D Spatial Planning"
     )
     assert {metric.label: metric.value for metric in app.metric} == {
-        "Current development phase": "Task 08E",
+        "Current development phase": "Task 09A",
         "Application status": "Running",
     }
     assert app.subheader[1].value == "Planned capabilities"
@@ -58,4 +58,5 @@ def test_streamlit_app_runs() -> None:
         "Versioned projects and export",
     ):
         assert capability in app.markdown[1].value
-    assert "These capabilities are planned." in app.caption[0].value
+    assert "The capabilities above remain future work." in app.caption[0].value
+    assert "Opt-in Chat bedroom" in app.caption[0].value

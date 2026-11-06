@@ -28,6 +28,27 @@
 
 ## Overview
 
+**Task 09A — Chat bedroom: live conversation-to-layout acceptance passed.**
+Describe one measured rectangular bedroom, clarify missing measurements, explicitly
+select qualified catalog products or compatible procedural templates, then
+Prepare → Review → Generate synchronized A/B layouts. A fresh three-request
+smoke completed a desktop request and a two-turn narrow-screen clarification;
+both generated two passing seed-42 alternatives with native Belaya and an
+explicitly accepted procedural queen bed. Local verification passed: 1,927 Python tests, offline installed-wheel contracts, lint, formatting, dependencies and health. Final checkpoint CI/delivery is recorded in the 09A report.
+Five products are metadata qualified; Charles and Belaya are individually approved
+native meshes. Mixed Charles/Belaya scenes remain placeholders. Generated 3D
+assets and other live AI agents remain outside this verified milestone.
+See the [chat guide](docs/developer/CHAT_BEDROOM.md) and
+[current 09A evidence](docs/data/CHAT_BEDROOM_09A.md#current-09a-continuation).
+The earlier November 5 storage stop remains historical evidence in that report.
+
+To enable local opt-in chat with credentials in the ignored `.env` file:
+
+```sh
+.venv/bin/python scripts/run_chat.py --port 8502
+```
+
+
 **ArchiMind AI** is an ADS 5984 software project exploring how natural-language
 room requirements can become validated floor plans and interactive 3D interiors.
 
@@ -38,7 +59,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 | **Define the space** | **Trust the data** | **See the plan** |
 | :--- | :--- | :--- |
 | Describe one rectangular room, its doors, windows, and furniture. | Validate dimensions, IDs, containment, collisions, doors, and circulation. | Generate two seeded alternatives and inspect the selected layout in synchronized 2D and 3D. |
-| Available now | Available now | Interactive sample available |
+| Available now | Available now | Synchronized selected views available |
 
 > **Current stage · Styling panel and catalog-color preview POC**
 >
@@ -73,7 +94,7 @@ validation, an interactive 2D sample floor plan, and a reproducible developer wo
 Tasks **01–06E1, 07A, 07B, 07C1, 07C2, 07D1, 07D2, 07E1, 07E2 and 07F are complete**, including the isolated architectural
 room experiment and optional requirements backend. The
 [project status record](docs/developer/STATUS.md) lists milestone progress,
-capability boundaries, and the verified baseline. The current local suite contains
+capability boundaries, and the verified baseline. The historical Task 07F suite contained
 **1,219 passing Python tests**: all 1,191 previous cases plus 28 color-preview cases,
 and **27 frontend tests** covering mapping, genuine wall gaps, uniform fit,
 independent instances, shared asset lifecycle, camera framing, and trusted inputs.

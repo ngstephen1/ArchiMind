@@ -1,0 +1,685 @@
+{
+  "schema_version": 1,
+  "task": "09A",
+  "status": "BLOCKED_STORAGE_BELOW_4_GIB",
+  "completed": false,
+  "baseline": "a38a2e121d66c5a755cf9fe5fed8a4e3dfc4db6c",
+  "current_HEAD": "4dc5c026cafdfec23cc0924b6bcca62ece0f29f7",
+  "workspace": "/Users/macbook/Hack/.archimind-09a-policyB-20261105",
+  "checkpoints": [
+    {
+      "commit": "cec39878f1bfa3751839def2cda244055c5dd845",
+      "CI": "https://github.com/ngstephen1/ArchiMind/actions/runs/42137017804",
+      "result": "success",
+      "scope": "Outstanding documentation/status housekeeping"
+    },
+    {
+      "commit": "4dc5c026cafdfec23cc0924b6bcca62ece0f29f7",
+      "CI": "https://github.com/ngstephen1/ArchiMind/actions/runs/42139576080",
+      "result": "success",
+      "scope": "Conversation contracts, evidence conversion, lexical retrieval, preparation; later qualifier correction remains uncommitted"
+    }
+  ],
+  "authorized_migrations": {
+    "MANIFEST.in": {
+      "before_sha256": "499361581d79475d4405ba111130dc8516f1a878cbbe67e64e8c7bc4653b1e0e",
+      "after_sha256": "b43b5ecd6d303f13a6a14b4f52e148b68b1944518aeaafdca045e203e05c10ec"
+    },
+    "README.md": {
+      "before_sha256": "511872653e4202df5d922357526e84b104c66785fa7b99dbab945fb80fc27cf4",
+      "after_sha256": "8a19a45d6ab1beb5ed7f325d4b69138f3404c7a7255cba7a397a35a9dbd3875c"
+    },
+    "app.py": {
+      "before_sha256": "1072853f36f26622e7b11c18a817694dc57fa072b68095866cefbd7893d8651f",
+      "after_sha256": "bc5a10dd38f6864d58b47fc4baec9887f641b4e33aaaeaf91d3d5b4e3719528b"
+    },
+    "docs/developer/CHAT_BEDROOM.md": {
+      "before_sha256": "0494c198fbf5a3693d69ad626cc07196069602bec6f1074148225a6f8446fdcd",
+      "after_sha256": "673a84dd9796708ed2a663362513ecf7dde27d86fce6923bdad2f65a0d24aaf5"
+    },
+    "docs/developer/STATUS.md": {
+      "before_sha256": "95f8a8111de449b47db7e3dbedb5baed610d88257ca7948f55c2f3a8f4aa119e",
+      "after_sha256": "6fb06eeb2a1b9005f204b32794a2dfa3444763fa60cc5cb0ee8705ee799079eb"
+    },
+    "src/archimind/agents/catalog_conversation.py": {
+      "before_sha256": "361fe310c97eb297afc5ae789051baa325d4b6cb111bee0db11fafc3dbd814d1",
+      "after_sha256": "e2fdae096d49f6c2a630ed09886a4144a3eb125daa5dd72f2fd8280b45013462"
+    },
+    "src/archimind/assets/chat_specifications.py": {
+      "before_sha256": "6f0abd052b07d234c2074143c28f0dae3b5c6996347344d0562118c1de5b8769",
+      "after_sha256": "2ee256c49b5deabb7395801029fcf0c835a77a0f4570e1a564bdb73a7fd1684d"
+    },
+    "src/archimind/ui/furniture_assets.py": {
+      "before_sha256": "b953f906b853ae4976b553412d95ac4f3efa2c37b9e53477e56d4cdd6a8ca080",
+      "after_sha256": "6e0f69b624b68aa33be2f444bc24a880788aea516204b321a40f145a2dc81cda"
+    },
+    "src/archimind/ui/layout_generation.py": {
+      "before_sha256": "ca82433962d6c31a2d9268467101a9601164c89532748073285e7cef9f124af9",
+      "after_sha256": "e18b9ffc79005fec55778fb55cf05d0cb324cce504a74fd688ca817d355d8833"
+    },
+    "tests/test_asset_catalog_packaging.py": {
+      "before_sha256": "89254b5a2c0bb80da76956edcb9f626b33ef7a228b5cc291e0c95c005ad69414",
+      "after_sha256": "0dda9bc4ad176f0b158ded9b8ff81158b19852f857a4c8c82073d05ba01fab70"
+    },
+    "tests/test_catalog_admission.py": {
+      "before_sha256": "b009bb9ddab4352229bb12d2f986634c699082fa95eec4151196f3fb293aab9f",
+      "after_sha256": "27850e8c3f4c1cda9ff1d52ab284f7123503b03ef3bdcd8ae51ee2d2305bcab1"
+    },
+    "tests/test_catalog_conversation.py": {
+      "before_sha256": "32575351844b74fa4d1ee14be01f73fb5df5d6e4fbca12964f67330e9282ad92",
+      "after_sha256": "5a401b7f9ec490a5d67586c2a142b90808fb4b3e6a926993efb9aaf82a3dbe7e"
+    },
+    "tests/test_furniture_source_expansion.py": {
+      "before_sha256": "10c6f35a149333a196a1f299a7bee5bb31974af41e9021df999426fcf3a4d60f",
+      "after_sha256": "1ab3e1b820b62e1ea4a09f4eae29e2b204150bc7dd2b67fd9c6dd442db5fbb58"
+    },
+    "tests/test_smoke.py": {
+      "before_sha256": "af03bb2389c119e1087fae45be0ea4d36f8b86fdf07c31b3c692a5d9cb4df695",
+      "after_sha256": "1bf11aa77e20c3d07a35598f3142673bd46db71dc940293a9d932aa92b2b21b5"
+    }
+  },
+  "verification": {
+    "backend_and_legacy": {
+      "passed": 102,
+      "scope": "checkpoint 2",
+      "log": "backend-sdk-final.log"
+    },
+    "qualifier_regression": {
+      "passed": 40,
+      "scope": "current catalog conversation tests",
+      "log": "qualifier-regression.log"
+    },
+    "prior_UI_catalog_regression": {
+      "passed": 27,
+      "scope": "initial UI integration plus existing furniture/catalog generation tests",
+      "log": "chat-ui-final.log"
+    },
+    "latest_UI_launcher_smoke": {
+      "passed": 13,
+      "scope": "current UI, launcher and app smoke tests",
+      "log": "launcher-ui-final.log"
+    },
+    "lint": "ruff check . passed",
+    "format": "ruff format --check . passed; 190 files",
+    "dependencies": "pip check passed",
+    "full_python": "NOT_RUN_STORAGE_STOP",
+    "installed_wheel": "NOT_RUN_STORAGE_STOP; coverage edits unexecuted",
+    "health": "Task servers served browser pages; dedicated fresh check NOT_RUN_STORAGE_STOP",
+    "frontend_build": "Unchanged JS; final checkpoint CI NOT_RUN",
+    "preservation_tests": "Migration chain mechanically extended, NOT_RUN_STORAGE_STOP",
+    "diff_check": "NOT_RUN after final evidence edits"
+  },
+  "live": {
+    "result": "PENDING_NOT_PASSED",
+    "receipt": {
+      "limit": 3,
+      "requests": [
+        {
+          "number": 1,
+          "started_monotonic": 310723.860461,
+          "status": "completed",
+          "seconds": 4.4959467080188915,
+          "model": "gpt-5.4-mini-2026-03-17",
+          "usage": {
+            "input_tokens": 1504,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0
+            },
+            "output_tokens": 820,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 2324
+          }
+        },
+        {
+          "number": 2,
+          "started_monotonic": 310926.086890416,
+          "status": "error",
+          "exception_type": "InternalServerError",
+          "seconds": 0.399644042016007
+        },
+        {
+          "number": 3,
+          "started_monotonic": 310939.906325208,
+          "status": "error",
+          "exception_type": "InternalServerError",
+          "seconds": 0.30756975000258535
+        }
+      ]
+    },
+    "ordinary_UI": "app.py via local launcher with unchanged request/result pass-through and external 3-call budget observer",
+    "outcome": "First complete extraction returned ready but queen/writing classified as variants excluded choices. Correction covered offline. Requests 2 and 3 returned InternalServerError; sanitized failures displayed, Generate disabled. No additional calls or retries.",
+    "limits": "No completed live conversation-to-layout workflow; no successful live clarification. Other AI agents remain live-unverified."
+  },
+  "browser": {
+    "fixture_scope": "Only interpreter output substituted by external launcher; real preparation, generator, validators, Plotly and Three.js. Synthetic evidence; not live acceptance.",
+    "desktop": {
+      "viewport": [
+        1440,
+        1000
+      ],
+      "room_m": [
+        6,
+        4,
+        2.7
+      ],
+      "doors": [
+        {
+          "wall": "south",
+          "offset_m": 0.6,
+          "width_m": 0.85,
+          "height_m": 2.1
+        }
+      ],
+      "windows": [],
+      "flow": "Missing door height clarified; explicit queen template and Belaya chosen; Prepare/Review then seed42 produced two passing alternatives",
+      "native": 1,
+      "procedural": 1,
+      "scale": 1,
+      "A_positions": {
+        "desk": [
+          0,
+          3.1981268227100372
+        ],
+        "bed": [
+          4.4,
+          2
+        ]
+      },
+      "B_positions": {
+        "desk": [
+          4.4,
+          0.33
+        ],
+        "bed": [
+          1.5,
+          2
+        ]
+      },
+      "synchronization": "B Plotly footprint coordinates equal Three.js canonical metrics; A schematic and native observations agree",
+      "camera": "Nondefault camera and target retained across A/B with small OrbitControls damping differences; front and footprint toggles remained off",
+      "canvas_count": 1,
+      "A_asset_loads": 1,
+      "B_asset_loads": 0,
+      "raw": [
+        "browserA.json",
+        "browserB.json",
+        "browser-fixture-network.txt",
+        "browser-fixture-console.txt"
+      ]
+    },
+    "narrow": {
+      "viewport": [
+        390,
+        844
+      ],
+      "result": "INCOMPLETE_STORAGE_STOP",
+      "observed": "New conversation/pending message retained displayed two-layout result; later clarification action timed out on disabled input. No completed narrow regenerated-layout acceptance. In-flight action overlap with alert cannot be ruled out; exclude that action from acceptance."
+    },
+    "no_match": "Bed no eligible product message and explicit template selection observed",
+    "missing_evidence": "AppTest passed; browser NOT_RUN",
+    "provider_failure": "Real narrow UI showed sanitized errors with Generate disabled",
+    "console": "Initial Plotly Canvas2D advisory; raw fixture file external. No universal clean-console or GPU-memory claim.",
+    "screenshots": [
+      "desktop-fixture-A-three.png",
+      "desktop-fixture-generated.png",
+      "desktop-fixture-clarification.png",
+      "desktop-live-initial-diagnostic.png",
+      "desktop-fixture-B-three.png",
+      "narrow-live-budget-complete.png",
+      "narrow-live-provider-error.png"
+    ]
+  },
+  "storage": {
+    "policy_scope": "Explicit owner-approved 09A exception only; earlier policies unchanged",
+    "warning_loss_bytes": 209715200,
+    "stop_below_bytes": 4294967296,
+    "absolute_reserve_bytes": 1073741824,
+    "target_bytes": 6442450944,
+    "initial_bytes": 8079659008,
+    "minimum_observed_bytes": 3567538176,
+    "last_observer_bytes": 3567538176,
+    "sample_count": 46,
+    "warning_count": 5,
+    "max_monotonic_interval_seconds": 30.66072979202727,
+    "max_wall_interval_seconds": 30.573488,
+    "alert": {
+      "time": "2026-11-06T01:06:19.743431+00:00",
+      "monotonic": 311205.87825975,
+      "temporary_df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 199049528   3483924    99% 4060100 34839240   10%   /System/Volumes/Data\n",
+      "available_bytes": 3567538176,
+      "df": "Filesystem   1024-blocks      Used Available Capacity iused    ifree %iused  Mounted on\n/dev/disk3s5   239362496 199049528   3483924    99% 4060100 34839240   10%   /System/Volumes/Data\n",
+      "swap_pressure": "vm.swapusage: total = 14336.00M  used = 12840.06M  free = 1495.94M  (encrypted)\nkern.memorystatus_vm_pressure_level: 4\n",
+      "interval_seconds": 30.66072979202727,
+      "loss_bytes": 1072320512,
+      "sharp_loss_warning": true,
+      "alert": true
+    },
+    "observer_exited": true,
+    "response": "Stopped on first below-4-GiB observation; no resumption, builds, tests, commits or pushes afterward. Task-owned 8502 server had stopped; 8503 server terminated. Existing owner server8501 untouched.",
+    "limits": "Finite periodic observation; cannot cancel remote browser call in-flight. The pending narrow call is excluded. Swap allocation coincided with declines; cause unproven."
+  },
+  "preservation": {
+    "checkpoint2_hash_ledger": "/Users/macbook/Hack/.archimind-09a-policyB-20261105/checkpoint2_hashes.json",
+    "starting_diff": "/Users/macbook/Hack/.archimind-09a-policyB-20261105/checkpoint3_inprogress.diff",
+    "unchanged_tracked_count": 258,
+    "historical_Belaya_report_byte_identical": true,
+    "protected_directories": "Untouched and untracked",
+    "secrets": "Runtime .env ignored; no key contents in receipts or commits",
+    "final_diff_saved_externally": true
+  },
+  "development_failures": [
+    "Initial UI test used unsupported AppTest filtered_state access; corrected to membership",
+    "SDK test missing json import fixed before checkpoint 2",
+    "First live response classified queen/writing as variants; narrow mapping, prompt clarification and regression added without weakening finish/use/size constraints",
+    "Hot reload invalidated stored typed objects; clean server restarted, diagnostic data excluded",
+    "API requests2/3 InternalServerError; authorized budget exhausted",
+    "Browser dropdown/render synchronization and ambiguous Layout B locator corrected; cross-call tool globals unavailable, raw results saved explicitly"
+  ],
+  "product_restrictions": [
+    "Five metadata-qualified products",
+    "Charles and Belaya individually approved native meshes; mixed scenes remain placeholders",
+    "One instance per product/template; zero yaw; one rectangular room",
+    "No new assets, dependencies, encoders, agents or geometry/scoring changes",
+    "Missing Policy B evidence never uses smaller published dimensions"
+  ],
+  "delivery": {
+    "checkpoint3_committed": false,
+    "checkpoint3_pushed": false,
+    "reason": "Storage stop and incomplete live acceptance",
+    "remaining": [
+      "Re-establish owner-approved storage gate in a new authorized run",
+      "Finish narrow/missing-evidence browser coverage",
+      "Run full Python suite including one offline installed-wheel check and migration tests",
+      "Obtain new explicit API smoke budget for live clarification-to-layout acceptance",
+      "Review current changes then commit/push final scoped checkpoint and require green CI"
+    ]
+  },
+  "resume3": {
+    "status": "09A_VERIFIED",
+    "baseline_commit": "3f16158653485ba891f1a43cb5e78463c768fc31",
+    "workspace": "/Users/macbook/Hack/.archimind-09a-resume3-20261105",
+    "resource_policy": {
+      "time": "2026-11-06T03:50:22.348000+00:00",
+      "owner_instruction": "resuming 09A no matter what, clean space with commands along the way",
+      "current_run": "4 GiB is an advisory recovery warning, not an end-of-attempt condition; original 2 GiB before heavy work, 1 GiB reserve retained; cleanup/reassessment continues on dips",
+      "historical_runs_unchanged": true,
+      "observer": "Finite 181 samples; approximately30 seconds; PAUSE.json records advisory <4GiB, STOP.json latches reserve breach; workers independently supervise <2GiB"
+    },
+    "authorized_migrations": {
+      "README.md": {
+        "before_sha256": "8a19a45d6ab1beb5ed7f325d4b69138f3404c7a7255cba7a397a35a9dbd3875c",
+        "after_sha256": "cefa7b238f6990575c6129b11b348557b4af964655a1a4ab75647de7ede33079"
+      },
+      "docs/developer/CHAT_BEDROOM.md": {
+        "before_sha256": "673a84dd9796708ed2a663362513ecf7dde27d86fce6923bdad2f65a0d24aaf5",
+        "after_sha256": "be545a724a113b4d24db71de884d140e8f992602c59d339dc46a40c68eb05796"
+      },
+      "docs/developer/STATUS.md": {
+        "before_sha256": "6fb06eeb2a1b9005f204b32794a2dfa3444763fa60cc5cb0ee8705ee799079eb",
+        "after_sha256": "8d7c97a82ea2f595f1cf71c7303e6daf94e2696a9f0382888ab0a837f6cf0d95"
+      },
+      "src/archimind/agents/catalog_conversation.py": {
+        "before_sha256": "e2fdae096d49f6c2a630ed09886a4144a3eb125daa5dd72f2fd8280b45013462",
+        "after_sha256": "59e62b7205ce07b3af574d556e1cfa74a2218a32dc609a3c464b64190b7221a9"
+      },
+      "src/archimind/agents/catalog_requirements.py": {
+        "before_sha256": "fac330f3cee0df387e12a760ac15c1d962423aa961ce64fffcefa956ca4f9177",
+        "after_sha256": "6f31e19094715a0815f44650994170a350e35b4214e93e1846c0db13933de70c"
+      },
+      "src/archimind/ui/furniture_assets.py": {
+        "before_sha256": "6e0f69b624b68aa33be2f444bc24a880788aea516204b321a40f145a2dc81cda",
+        "after_sha256": "e109a391a50d67e013d79ab93baef8abad4d067bf5f16dcb89e4e89ee18c5125"
+      },
+      "tests/test_asset_catalog_packaging.py": {
+        "before_sha256": "0dda9bc4ad176f0b158ded9b8ff81158b19852f857a4c8c82073d05ba01fab70",
+        "after_sha256": "2519c87e152e7e860a99d9e2635b8156be42ad7a59b78ab1a63a2a0eee0d2403"
+      },
+      "tests/test_catalog_admission.py": {
+        "before_sha256": "27850e8c3f4c1cda9ff1d52ab284f7123503b03ef3bdcd8ae51ee2d2305bcab1",
+        "after_sha256": "fe2c57aec99e737c6951f78c1203cd5dd003c33359fdc4dda3b5420ee9abe832"
+      },
+      "tests/test_catalog_conversation.py": {
+        "before_sha256": "5a401b7f9ec490a5d67586c2a142b90808fb4b3e6a926993efb9aaf82a3dbe7e",
+        "after_sha256": "83321d24ec9b25f67b7b4dee6d7224829ab774f61169563b2c8d5fc8ce3493e0"
+      },
+      "tests/test_furniture_assets_ui.py": {
+        "before_sha256": "bc3468991e2a56be6db32734b7b857c710c3f5b492a2878289594f9097d7e33f",
+        "after_sha256": "65a0880356891a20e90d280640e88681aa038bf8e55c94bbde369335fc0d06bb"
+      },
+      "tests/test_furniture_source_expansion.py": {
+        "before_sha256": "1ab3e1b820b62e1ea4a09f4eae29e2b204150bc7dd2b67fd9c6dd442db5fbb58",
+        "after_sha256": "9c10d047818b0d80e170ea4cc57112d7e6fe379e09d6be9a5fb698b9f79ae9cc"
+      },
+      "src/archimind/ui/bedroom_chat.py": {
+        "before_sha256": "ca37cebb6f73bc6ec93df33cbbe90497a23038d61594cb2c2a0e6fe5a39bb55c",
+        "after_sha256": "8c3eca17d1fe0a1ae27b47d43c6f21ca42c4a35ffa1093be588957a5b49a1ddf"
+      },
+      "tests/test_bedroom_chat_ui.py": {
+        "before_sha256": "7f17f4a0456a173c040bc9cd87b65c01ffa038ef3eb4c5288984f2b216f4227f",
+        "after_sha256": "877880925e7825e68045af03c423a7244e3fdf059e28ea797aa6e1ff4a6f1242"
+      }
+    },
+    "verification": {
+      "full_python": {
+        "command": ".venv/bin/python -B -m pytest -q --basetemp=/Users/macbook/Hack/.archimind-09a-resume3-20261105/full-test-final",
+        "result_log": "full-python-final.log",
+        "summary": "1927 passed in 185.30s (0:03:05)"
+      },
+      "development_failures": [
+        "Three new focused tests failed before blank-turn/king-omit/mode-retention fixes; passed after correction.",
+        "Initial full run1925 passed/1 failed: strict JSON packaging fixture boundary; corrected without weakening assertions; same installed wheel smoke passed.",
+        "Live reset issue reproduced in new red AppTest; corrected and14 UI/catalog tests passed."
+      ],
+      "focused_prior": "126 conversation/legacy/UI/launcher passed; reset14 and planning-warning8 overlap final suite.",
+      "lint": "ruff check . passed",
+      "format": "ruff format --check . passed;194 files",
+      "dependencies": "pip check passed",
+      "health": "Streamlit health check passed: http://127.0.0.1:60942/_stcore/health -> 200 ok",
+      "frontend": "No JS or bundled-asset change; final CI runs syntax/frontend tests/build/bundle comparison.",
+      "installed": "Existing coordinated packaging test builds offline/no isolation, installs --no-deps --no-index and runs isolated Python outside checkout; chat interfaces, product contracts, resources and missing-live gate verified.",
+      "artifacts": [
+        {
+          "path": "/Users/macbook/Hack/.archimind-09a-resume3-20261105/full-test-final/test_catalog_in_source_wheel_a0/dist/archimind-0.1.0-py3-none-any.whl",
+          "bytes": 11290035,
+          "sha256": "d10c802af2f0b10254a4a7bd950d8a778730d00563c8a37040e881f7be06d024",
+          "members": 128,
+          "chat_members": [
+            "archimind/agents/catalog_conversation.py",
+            "archimind/agents/catalog_requirements.py",
+            "archimind/assets/chat_specifications.py",
+            "archimind/ui/bedroom_chat.py"
+          ],
+          "secret_members": []
+        },
+        {
+          "path": "/Users/macbook/Hack/.archimind-09a-resume3-20261105/full-test-final/test_catalog_in_source_wheel_a0/dist/archimind-0.1.0.tar.gz",
+          "bytes": 11964290,
+          "sha256": "67e4037f9d17d8dcb9070628236a299d167adc9f38d29bd28e15ae275186e323",
+          "members": 309,
+          "chat_members": [
+            "archimind-0.1.0/docs/data/CHAT_BEDROOM_09A.json",
+            "archimind-0.1.0/docs/data/CHAT_BEDROOM_09A.md",
+            "archimind-0.1.0/docs/developer/CHAT_BEDROOM.md",
+            "archimind-0.1.0/scripts/run_chat.py",
+            "archimind-0.1.0/src/archimind/agents/catalog_conversation.py",
+            "archimind-0.1.0/src/archimind/agents/catalog_requirements.py",
+            "archimind-0.1.0/src/archimind/assets/chat_specifications.py",
+            "archimind-0.1.0/src/archimind/ui/bedroom_chat.py",
+            "archimind-0.1.0/tests/catalog_chat_helpers.py",
+            "archimind-0.1.0/tests/test_bedroom_chat_ui.py",
+            "archimind-0.1.0/tests/test_catalog_chat_failures.py",
+            "archimind-0.1.0/tests/test_catalog_conversation.py",
+            "archimind-0.1.0/tests/test_chat_launcher.py"
+          ],
+          "secret_members": []
+        }
+      ],
+      "artifact_limit": "Built before final evidence-only documentation reconciliation; executable wheel members are compared byte-for-byte to final source. No redundant local rebuild.",
+      "preservation_final": {
+        "passed": 60,
+        "seconds": 4.06,
+        "command": "pytest -q tests/test_catalog_admission.py tests/test_furniture_source_expansion.py",
+        "historical_objects_prefix_JSON_diff_check": "passed"
+      }
+    },
+    "completed": true,
+    "observed_utc": "2026-11-06T04:17:35.894746+00:00",
+    "implementation": "Chat bedroom input mode shares the authoritative Prepare/Review/_generate/snapshot/selected-renderer path. Legacy procedural/catalog modes remain available.",
+    "corrections": [
+      "Blank-turn rejection and bounded clarification text prevent malformed-output UI failures.",
+      "Reviewed queen-size and writing-use qualifiers preserve meaning without broadening true finish/use constraints.",
+      "Known unsupported bed sizes can be explicitly omitted; never substituted with queen.",
+      "Catalog choices survive mode switches; planning-evidence warnings identify the unavailable product.",
+      "New conversation clears pending state via a pre-widget callback, retaining consent/control identity and displayed results.",
+      "Stable chat input container isolates variable transcript/review content from the selected-viewer owner.",
+      "Installed smoke reads strict typed extraction from JSON through model_validate_json."
+    ],
+    "live": {
+      "authorization": "Three additional requests explicitly approved by owner; budget exhausted.",
+      "receipt": {
+        "limit": 3,
+        "requests": [
+          {
+            "number": 1,
+            "time": "2026-11-06T04:00:04.182430+00:00",
+            "started_monotonic": 321630.243422416,
+            "status": "completed",
+            "model": "gpt-5.4-mini-2026-03-17",
+            "usage": {
+              "input_tokens": 1559,
+              "input_tokens_details": {
+                "cache_write_tokens": 0,
+                "cached_tokens": 0
+              },
+              "output_tokens": 1219,
+              "output_tokens_details": {
+                "reasoning_tokens": 0
+              },
+              "total_tokens": 2778
+            },
+            "seconds": 5.838759709033184
+          },
+          {
+            "number": 2,
+            "time": "2026-11-06T04:07:16.989851+00:00",
+            "started_monotonic": 322063.054308041,
+            "status": "completed",
+            "model": "gpt-5.4-mini-2026-03-17",
+            "usage": {
+              "input_tokens": 1552,
+              "input_tokens_details": {
+                "cache_write_tokens": 0,
+                "cached_tokens": 0
+              },
+              "output_tokens": 2468,
+              "output_tokens_details": {
+                "reasoning_tokens": 0
+              },
+              "total_tokens": 4020
+            },
+            "seconds": 6.6632878339733
+          },
+          {
+            "number": 3,
+            "time": "2026-11-06T04:07:35.372387+00:00",
+            "started_monotonic": 322081.4369935,
+            "status": "completed",
+            "model": "gpt-5.4-mini-2026-03-17",
+            "usage": {
+              "input_tokens": 1599,
+              "input_tokens_details": {
+                "cache_write_tokens": 0,
+                "cached_tokens": 1408
+              },
+              "output_tokens": 843,
+              "output_tokens_details": {
+                "reasoning_tokens": 0
+              },
+              "total_tokens": 2442
+            },
+            "seconds": 3.349979416001588
+          }
+        ]
+      },
+      "scope": "Ordinary app.py UI via scripts/run_chat.py; external pass-through request counter enforces budget and records metadata. Provider results were not substituted. No session-state injection.",
+      "desktop": {
+        "viewport": [
+          1440,
+          1000
+        ],
+        "room_m": [
+          6,
+          4,
+          2.7
+        ],
+        "turns": 1,
+        "outcome": "two passing alternatives, seed42, five attempts",
+        "desk_xy": {
+          "A": [
+            0,
+            3.1981268227100372
+          ],
+          "B": [
+            4.4,
+            0.33
+          ]
+        },
+        "bed_xy": {
+          "A": [
+            4.4,
+            2
+          ],
+          "B": [
+            1.5,
+            2
+          ]
+        },
+        "plotly_three_agree": true,
+        "native_belaya": 1,
+        "procedural_queen": 1,
+        "scale": 1,
+        "triangles": 812,
+        "settled_AB_camera_equal": true
+      },
+      "narrow": {
+        "viewport": [
+          390,
+          844
+        ],
+        "room_m": [
+          7,
+          4,
+          2.7
+        ],
+        "turns": 2,
+        "clarification": "door height absent -> asks for height -> explicit 2.1m reply accepted",
+        "outcome": "two passing alternatives, seed42, five attempts",
+        "desk_xy": {
+          "A": [
+            0,
+            3.1981268227100372
+          ],
+          "B": [
+            5.4,
+            0.33
+          ]
+        },
+        "bed_xy": {
+          "A": [
+            5.4,
+            2
+          ],
+          "B": [
+            1.84,
+            2
+          ]
+        },
+        "plotly_three_agree": true,
+        "native_belaya": 1,
+        "procedural_queen": 1,
+        "controls": "orbit/reset/front walls/footprints accessible within390px"
+      },
+      "openings_both": {
+        "door": {
+          "wall": "south",
+          "offset_m": 0.6,
+          "width_m": 0.85,
+          "height_m": 2.1
+        },
+        "window": {
+          "wall": "north",
+          "offset_m": 2,
+          "width_m": 1.2,
+          "height_m": 1,
+          "sill_height_m": 1
+        }
+      },
+      "pending_reset": "Omitting pending desk disables Generate; stored revision1 and both displayed objects unchanged. New conversation clears transcript, retains consent, input enabled; no submission/API request.",
+      "extra_requests_on_controls": 0,
+      "limits": "Bounded model samples, desktop/narrow emulation; no universal semantic accuracy, physical-device, GPU-memory or leak proof. Prior provider errors remain historical. Restart connection errors/one intercepted hidden-input click were harness diagnostics, not clean-console acceptance."
+    },
+    "fault_browser": {
+      "scope": "Separate external interpreter/read-fault fixture; real preparation/generator/validators/renderers; zero API calls. Both1440x1000 and390x844.",
+      "no_match": "King bed has only choose/explicit omit, no queen offer. Generation disabled until resolved; displayed results retained.",
+      "planning": "Copied external read fault rejects Belaya Policy B evidence; explicit named warning and no published fallback; Generate disabled. Flag removed; original evidence recovered. No approved files changed.",
+      "provider_failure": "Synthetic api_error rendered sanitized server-error/no-retry text; no exception; displayed revision1 retained; Generate disabled.",
+      "fault_removed": true
+    },
+    "restrictions": [
+      "Five metadata-qualified ABO products; only Charles and Belaya have individual approved native meshes.",
+      "Mixed Charles/Belaya detailed scenes remain placeholders; no generated3D assets/acquisitions/dependencies/encoders added.",
+      "One instance/product or compatible template; zero yaw; rectangular room; mandatory unsupported constraints block; soft preferences unenforced.",
+      "Other live agents remain unverified. Dataset handoff remains a separate teammate track."
+    ],
+    "cleanup": {
+      "conda_unused_package_bytes": 1419712375,
+      "command": "CONDA_NO_PLUGINS=true CONDA_SOLVER=classic conda clean --packages --yes --json",
+      "environments_deleted": false,
+      "browser_cache": "Partial selective inactive-cache cleanup; concurrent recreation stopped further removal; exact bytes unknown. Cookies/history/session/localstorage preserved.",
+      "active_uv_and_updater_caches": "Left untouched",
+      "owner_processes_terminated": 0
+    },
+    "delivery": {
+      "baseline": "3f16158653485ba891f1a43cb5e78463c768fc31",
+      "feature_commit": "da18ee87e9c48f75bb2cacf910b56dd3b699ef70",
+      "CI": "https://github.com/ngstephen1/ArchiMind/actions/runs/42161686538",
+      "CI_conclusion": "success",
+      "python_tests": 1927,
+      "frontend_tests": 91,
+      "pull_request": "https://github.com/ngstephen1/ArchiMind/pull/6",
+      "state": "Executable checkpoint verified. This evidence-only follow-up is delivered through the same PR; its head/merge CI remains visible there.",
+      "no_credentials_in_artifacts": true
+    },
+    "evidence_location": "/Users/macbook/Hack/.archimind-09a-resume3-20261105",
+    "storage": {
+      "policy": {
+        "time": "2026-11-06T03:50:22.348000+00:00",
+        "owner_instruction": "resuming 09A no matter what, clean space with commands along the way",
+        "current_run": "4 GiB is an advisory recovery warning, not an end-of-attempt condition; original 2 GiB before heavy work, 1 GiB reserve retained; cleanup/reassessment continues on dips",
+        "historical_runs_unchanged": true,
+        "observer": "Finite 181 samples; approximately30 seconds; PAUSE.json records advisory <4GiB, STOP.json latches reserve breach; workers independently supervise <2GiB"
+      },
+      "samples": 66,
+      "first": {
+        "time": "2026-11-06T03:45:01.762230+00:00",
+        "monotonic": 320727.80353,
+        "available_bytes": 5076324352,
+        "swap_pressure": "vm.swapusage: total = 6144.00M  used = 5707.88M  free = 436.12M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+        "sharp_loss_warning": false,
+        "recovery_required": false,
+        "reserve_stop": false
+      },
+      "minimum_bytes": 3659194368,
+      "latest": {
+        "time": "2026-11-06T04:17:33.248622+00:00",
+        "monotonic": 322679.318027041,
+        "available_bytes": 3659194368,
+        "swap_pressure": "vm.swapusage: total = 7168.00M  used = 6303.81M  free = 864.19M  (encrypted)\nkern.memorystatus_vm_pressure_level: 2\n",
+        "loss_bytes": 1896448,
+        "interval_seconds": 30.021285499969963,
+        "sharp_loss_warning": false,
+        "recovery_required": true,
+        "reserve_stop": false
+      },
+      "sharp_warning_count": 6,
+      "reserve_stop": false,
+      "sampling_limit": "Finite periodic readings, not continuous or future stability. Task-owned heavy workers additionally stop below2GiB."
+    },
+    "preservation": {
+      "tracked_unchanged_since_resume": 265,
+      "prior_JSON_values_preserved": true,
+      "prior_Markdown_prefix_preserved": true,
+      "approved_assets_catalogs_Belaya_reports_handoff_unchanged": true,
+      "protected_directories": "untouched"
+    }
+  },
+  "current_release": {
+    "reference": "resume3",
+    "status": "09A_VERIFIED",
+    "historical_top_level_status": "Preserved November5 storage-stop receipt; not current release verdict.",
+    "delivery": "Feature commit da18ee87e9c48f75bb2cacf910b56dd3b699ef70 passed exact-commit CI; PR6 carries the evidence-only follow-up and merge status."
+  }
+}

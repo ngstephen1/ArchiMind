@@ -2,8 +2,27 @@
 
 Last reviewed: **November 5, 2026**.
 
-**Current milestone: 08F3A through R3B5 browser acceptance complete. Five metadata-qualified catalog products; Charles and Belaya have separate approved planning/native-render releases. Belaya now participates in explicit preparation, generation and selected A/B views. Mixed Charles/Belaya scenes remain placeholders. R3C_RELEASE_VERIFIED: release commit `a38a2e1` passed delivery CI with 1,867 Python and 91 frontend tests.**
-Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles and Belaya use their original embedded source materials.
+**Current milestone: Task 09A live conversation-to-layout acceptance passed;
+1,927 Python tests and installed-wheel/lint/dependency/health checks pass.
+Final checkpoint CI/delivery is recorded in the 09A report.** Three newly authorized
+requests all completed: a desktop complete request and a two-turn narrow-screen
+clarification. Each produced two passing seed-42 alternatives for its custom room,
+with native Belaya and an explicitly accepted queen-bed placeholder. Pending
+choices and New conversation retain displayed results; reset keeps input usable.
+No further API requests are authorized by this smoke budget. Offline, live,
+AppTest and fault-harness evidence remain distinct in
+[the 09A report](../data/CHAT_BEDROOM_09A.md#current-09a-continuation).
+Use `scripts/run_chat.py` for local opt-in chat. No asset generation was added.
+The earlier 3.32 GiB storage stop is preserved as historical evidence. In the
+resumed run, the owner's continuation instruction makes 4 GiB advisory, with
+supervised verification requiring 2 GiB and a retained 1 GiB absolute reserve.
+
+**Prior release: R3C_RELEASE_VERIFIED.** Release `a38a2e1` passed CI with
+1,867 Python and 91 frontend tests. Five metadata-qualified catalog products;
+Charles and Belaya have individual approved Policy B/native-render releases.
+Mixed Charles/Belaya scenes remain placeholders.
+
+Other live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles and Belaya use their original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
 Optional C01 is complete separately: a disabled-by-default, backend-only Codex
@@ -36,6 +55,7 @@ advisor with offline tests. C02 remains a separate proposed integration.
 | Task 07E1 — Standalone AI Interior Stylist | Complete backend; live behavior unverified | Five-theme immutable catalog, verified selected candidate, controlled finish/accent metadata, conflicts/clarification and 89 new offline tests |
 | Task 07E2 — Interior Stylist workflow integration | Complete backend; live behavior unverified | Optional final E1 node, fresh approval, separate checked plan/provenance and safe explicit fixture fallback; 61 new integration/demo tests |
 | Task 07F — Streamlit styling panel | Complete UI/backend; live behavior unverified | Stored selected-layout E2 handoff, catalog theme/preferences, per-attempt consent, explicit fixture/AI provenance and 55 new tests |
+| Task 09A — Chat bedroom | Live and local acceptance verified; see delivery receipt | Evidence-grounded room clarification, five-product lexical retrieval, explicit selection/Prepare/Review and synchronized validated A/B generation |
 | Later phases | Planned | Agents, targeted revisions, persistence, and export |
 
 ## Capability status

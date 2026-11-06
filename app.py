@@ -20,19 +20,19 @@ def main() -> None:
     )
 
     phase, status = st.columns(2)
-    phase.metric("Current development phase", "Task 08E")
+    phase.metric("Current development phase", "Task 09A")
     status.metric("Application status", "Running")
 
     st.divider()
     st.subheader("Planned capabilities")
     st.markdown(
-        "- AI-assisted room planning\n"
+        "- Richer AI-assisted room planning and targeted revisions\n"
         "- Full 3D furniture asset catalog\n"
         "- Multi-agent collaboration\n"
         "- Versioned projects and export"
     )
     st.caption(
-        "These capabilities are planned. Deterministic layout generation, "
+        "The capabilities above remain future work. Opt-in Chat bedroom, qualified catalog retrieval, deterministic layout generation, "
         "spatial validation, synchronized selected 2D/3D layouts, optional interior styling, and standalone sample previews are available below."
     )
 
