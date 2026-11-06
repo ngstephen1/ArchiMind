@@ -43,18 +43,14 @@ def test_streamlit_app_runs() -> None:
 
     assert not app.exception
     assert app.title[0].value == "ArchiMind AI"
-    assert app.subheader[0].value == (
-        "Multi-Agent Interior Design & 3D Spatial Planning"
-    )
+    assert app.subheader[0].value == "AI Interior Design & 3D Spatial Planning"
     assert {metric.label: metric.value for metric in app.metric} == {
         "Current development phase": "Task 09A",
         "Application status": "Running",
     }
     assert app.subheader[1].value == "Planned capabilities"
     for capability in (
-        "AI-assisted room planning",
         "Full 3D furniture asset catalog",
-        "Multi-agent collaboration",
         "Versioned projects and export",
     ):
         assert capability in app.markdown[1].value

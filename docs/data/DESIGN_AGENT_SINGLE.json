@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0.0",
+  "task": "Single design agent",
+  "base_commit": "22f0227",
+  "note": "Appends one authorized hash migration; historical receipts are unchanged.",
+  "authorized_migrations": {
+    "app.py": {
+      "before_sha256": "bc5a10dd38f6864d58b47fc4baec9887f641b4e33aaaeaf91d3d5b4e3719528b",
+      "after_sha256": "f7de9c7a9a11c97cf6f0ed9aecf00d2b6fbfadb3f62a1db7bdfc85caf0a90371",
+      "reason": "Mount the optional design-agent panel and update the planned-capabilities copy."
+    }
+  }
+}

@@ -5,6 +5,7 @@ import streamlit as st
 from archimind.examples import create_sample_bedroom
 from archimind.render import render_design_3d, render_floorplan, render_room_3d
 from archimind.ui import render_layout_generator
+from archimind.ui.design_agent_chat import render_design_agent
 
 
 def main() -> None:
@@ -12,7 +13,7 @@ def main() -> None:
     st.set_page_config(page_title="ArchiMind AI", layout="centered")
 
     st.title("ArchiMind AI")
-    st.subheader("Multi-Agent Interior Design & 3D Spatial Planning")
+    st.subheader("AI Interior Design & 3D Spatial Planning")
     st.write(
         "ArchiMind AI is an interior design prototype being developed to turn "
         "natural-language room requirements into validated floor plans and "
@@ -28,13 +29,16 @@ def main() -> None:
     st.markdown(
         "- Richer AI-assisted room planning and targeted revisions\n"
         "- Full 3D furniture asset catalog\n"
-        "- Multi-agent collaboration\n"
         "- Versioned projects and export"
     )
     st.caption(
-        "The capabilities above remain future work. Opt-in Chat bedroom, qualified catalog retrieval, deterministic layout generation, "
+        "The capabilities above remain future work. Opt-in Chat bedroom, the optional design agent, qualified catalog retrieval, deterministic layout generation, "
         "spatial validation, synchronized selected 2D/3D layouts, optional interior styling, and standalone sample previews are available below."
     )
+
+    st.divider()
+    with st.container(key="design_agent"):
+        render_design_agent()
 
     st.divider()
     st.subheader("2D Floor Plan Preview")
