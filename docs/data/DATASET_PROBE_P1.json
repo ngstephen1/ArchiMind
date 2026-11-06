@@ -1,0 +1,264 @@
+{
+  "branch": "data/dataset-reference-pilot",
+  "commands": [
+    "python -m archimind.datasets probe-hf gradient-spaces/SSR-3DFRONT --revision b606183e56d972f85850125f9191932cbea654c3",
+    "python -m archimind.datasets fetch <pinned shard url> <dest> --max-bytes N --sha256 <lfs oid>",
+    "python -m archimind.datasets probe-ssr train.parquet val.parquet test.parquet",
+    "python -m archimind.datasets probe-hf huanngzh/3D-Front --revision 156fc5312ea613d4e92cbf5da1fddfa61bbad3b2",
+    "python -m archimind.datasets probe-tar-prefix <3D-FRONT-TEST-SCENE.tar.gz url> --max-bytes 67108864",
+    "python -m archimind.datasets probe-join train.parquet val.parquet test.parquet --midi-dir <dir>"
+  ],
+  "conventions": {
+    "midi_3dfront": {
+      "archive_layout": "<split>-SCENE/<house>/<room>.glb, <room>_full.glb, <room>/<furniture id>.glb, ceil.glb",
+      "association": "i-th room owns i-th furniture list; verified lengths equal",
+      "furniture_id": "<3D-FUTURE super-category>_<jid>_<instance>",
+      "room_id": "<house uuid>/<room id> (5 rooms are bare 'OtherRoom')",
+      "test_split": "last 1,000 rooms; equals midi_test_room_ids.json exactly"
+    },
+    "ssr_3dfront": {
+      "basis": "canonical (x,y,z) = (X-minX, maxZ-Z, Y-floorY)",
+      "evidence": "GradientSpaces/respace b1a4b32b5fe0a547342dd37063002010c06224dd src/eval.py get_xz_bbox_from_obj, get_y_angle_from_xyzw_quaternion; dataset card at b606183e",
+      "note": "ReSpace rotates 2D corners with the opposite sense to the quaternion yaw; identical for quarter-turn footprints, so facing must come from the quaternion",
+      "pos": "bottom-center pivot",
+      "room_bounds": "centered on origin, floor y=0",
+      "rot": "quaternion [x,y,z,w]",
+      "size": "full extent [x,y,z]",
+      "split": "room-type split (bedroom_*) only; parquet file name is not the split",
+      "units": "meters",
+      "up_axis": "Y"
+    }
+  },
+  "future_3d": {
+    "file_listing": "NOT_RUN (requires Kaggle credentials)",
+    "license_field": "Unknown",
+    "mirror": "kaggle tobetheonly/3d-future-model",
+    "total_bytes": 65938974044,
+    "version": 1
+  },
+  "midi_3dfront": {
+    "file_count": 52,
+    "gated": false,
+    "license_field": "cc-by-nc-4.0",
+    "metadata_files": [
+      {
+        "path": ".gitattributes",
+        "sha256": null,
+        "size_bytes": 4910
+      },
+      {
+        "path": "README.md",
+        "sha256": null,
+        "size_bytes": 3723
+      },
+      {
+        "path": "midi_furniture_ids.json",
+        "sha256": null,
+        "size_bytes": 2262587
+      },
+      {
+        "path": "midi_room_ids.json",
+        "sha256": null,
+        "size_bytes": 486542
+      },
+      {
+        "path": "midi_test_furniture_ids.json",
+        "sha256": null,
+        "size_bytes": 290888
+      },
+      {
+        "path": "midi_test_room_ids.json",
+        "sha256": null,
+        "size_bytes": 60957
+      },
+      {
+        "path": "valid_furniture_ids.json",
+        "sha256": null,
+        "size_bytes": 4125096
+      },
+      {
+        "path": "valid_room_ids.json",
+        "sha256": null,
+        "size_bytes": 647944
+      }
+    ],
+    "prefix_rooms_note": "64 MiB prefix held 6 rooms (4 bedrooms), all in the MIDI test split; all 4 bedrooms exist in SSR (1 reference_only, 3 irregular)",
+    "revision": "156fc5312ea613d4e92cbf5da1fddfa61bbad3b2",
+    "test_scene_prefix": {
+      "bytes_read": 67108864,
+      "complete": false,
+      "file_bytes": 81063312,
+      "files": 43,
+      "members": 52,
+      "suffixes": {
+        ".glb": 43
+      },
+      "url": "https://huggingface.co/datasets/huanngzh/3D-Front/resolve/156fc5312ea613d4e92cbf5da1fddfa61bbad3b2/3D-FRONT-TEST-SCENE.tar.gz"
+    },
+    "total_bytes": 1685107393138
+  },
+  "observed_utc": "2026-11-06T18:00:00Z",
+  "schema_version": "1.0.0",
+  "ssr_3dfront": {
+    "files": [
+      {
+        "path": ".gitattributes",
+        "sha256": null,
+        "size_bytes": 2461
+      },
+      {
+        "path": "README.md",
+        "sha256": null,
+        "size_bytes": 4930
+      },
+      {
+        "path": "data/test-00000-of-00001.parquet",
+        "sha256": "8970830a27fb3dafb5e89d324f5f3666b3defd489e79345d314d455d00a1331b",
+        "size_bytes": 858995
+      },
+      {
+        "path": "data/train-00000-of-00001.parquet",
+        "sha256": "aedbb1f9448614299ecc6c40e6ccf4f9b7441feee42275d7fcfb06690de038e1",
+        "size_bytes": 5698138
+      },
+      {
+        "path": "data/val-00000-of-00001.parquet",
+        "sha256": "38e99958698c2633199e041f68cba51b91f2db1255718ea894a6db8ee323fe40",
+        "size_bytes": 848612
+      },
+      {
+        "path": "raw_scenes.zip",
+        "sha256": "8a38f6309d447a4abd03455762aaf8c8cc1c0f4abc973ffa1f0f740d55fcf238",
+        "size_bytes": 21881708
+      }
+    ],
+    "gated": false,
+    "license_field": "mit",
+    "probe": {
+      "bedroom_rows": 7328,
+      "convention": "ssr-3dfront-respace-b1a4b32b",
+      "convention_digest": "9365a8b0fc7fdc64bdfb561188f57e56641bc7c85e179d946aa4f3c3ef6189bc",
+      "eligible_room_area_m2": {
+        "<12": 1946,
+        "<16": 1648,
+        "<20": 426,
+        "<30": 155,
+        "<8": 216,
+        ">=30": 33
+      },
+      "identity": {
+        "duplicate_file_ids": 0,
+        "duplicate_geometry": 372,
+        "duplicate_geometry_across_splits": 84,
+        "room_ids_seen_more_than_once": 609,
+        "split_conflicts": 0
+      },
+      "inputs": [
+        {
+          "file": "test.parquet",
+          "sha256": "8970830a27fb3dafb5e89d324f5f3666b3defd489e79345d314d455d00a1331b"
+        },
+        {
+          "file": "train.parquet",
+          "sha256": "aedbb1f9448614299ecc6c40e6ccf4f9b7441feee42275d7fcfb06690de038e1"
+        },
+        {
+          "file": "val.parquet",
+          "sha256": "38e99958698c2633199e041f68cba51b91f2db1255718ea894a6db8ee323fe40"
+        }
+      ],
+      "jids_per_eligible_room": {
+        "<12": 172,
+        "<3": 448,
+        "<5": 2381,
+        "<8": 1420,
+        ">=12": 3
+      },
+      "object_rejections": {
+        "invalid_dimensions": 12,
+        "non_quarter_turn_rotation": 1107,
+        "tilted_object": 1
+      },
+      "objects_floating_rows": 3508,
+      "objects_outside_room_rows": 3428,
+      "probe_version": "1.1.0",
+      "room_type": "bedroom",
+      "rotation_profile_of_rectangular_rooms": {
+        "all_quarter": 3371,
+        "all_zero": 214,
+        "has_rejected": 840
+      },
+      "rows_with_footprint_overlap": 3722,
+      "rows_with_solid_overlap": 2484,
+      "tiers": {
+        "canonical": 55,
+        "excluded:irregular_room": 2903,
+        "excluded:no_admitted_object": 1,
+        "reference_only": 4369
+      },
+      "tiers_by_split": {
+        "test|canonical": 1,
+        "test|excluded:irregular_room": 199,
+        "test|reference_only": 300,
+        "train|canonical": 51,
+        "train|excluded:irregular_room": 2509,
+        "train|excluded:no_admitted_object": 1,
+        "train|reference_only": 3767,
+        "val|canonical": 3,
+        "val|excluded:irregular_room": 195,
+        "val|reference_only": 302
+      },
+      "unique_jids": 7722,
+      "wall_protrusion_m_rectangular_rows": {
+        "<0.02": 621,
+        "<0.05": 1204,
+        "<0.1": 867,
+        "<0.2": 277,
+        "<1e-06": 1437,
+        ">=0.2": 19
+      }
+    },
+    "revision": "b606183e56d972f85850125f9191932cbea654c3",
+    "total_bytes": 29294844
+  },
+  "ssr_midi_join": {
+    "joined_rows": 4080,
+    "joined_tiers": {
+      "canonical": 52,
+      "excluded:irregular_room": 1544,
+      "excluded:no_admitted_object": 1,
+      "reference_only": 2483
+    },
+    "midi_categories_of_ssr_jids": {
+      "Bed": 331,
+      "Cabinet_Shelf_Desk": 1224,
+      "Chair": 294,
+      "Lighting": 607,
+      "Others": 206,
+      "Pier_Stool": 87,
+      "Sofa": 109,
+      "Table": 189
+    },
+    "midi_jids": 6486,
+    "midi_rooms": 7979,
+    "split_disagreements": 1020,
+    "split_pairs": {
+      "ssr_test|midi_test": 25,
+      "ssr_test|midi_train": 252,
+      "ssr_train|midi_test": 483,
+      "ssr_train|midi_train": 3035,
+      "ssr_val|midi_test": 27,
+      "ssr_val|midi_train": 258
+    },
+    "ssr_jids_with_midi_category": 3047,
+    "ssr_rows": 7328,
+    "ssr_unique_jids": 7722
+  },
+  "status": {
+    "future_3d": "NOT_RUN_NEEDS_KAGGLE_CREDENTIALS",
+    "midi_3dfront": "PASS_BOUNDED_PREFIX_ONLY",
+    "ssr_3dfront": "PASS"
+  },
+  "task": "P1 dataset probe",
+  "where_run": "Local Windows machine for SSR (29 MB) and MIDI metadata; the MIDI archive prefix was streamed and discarded. FUTURE requires the Colab notebook."
+}

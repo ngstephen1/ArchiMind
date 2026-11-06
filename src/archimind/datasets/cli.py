@@ -98,7 +98,15 @@ def _cmd_fixture_pack(args) -> int:
 
 def _cmd_fetch(args) -> int:
     headers = {}
-    if args.auth_env:
+    if args.kaggle_auth:
+        from archimind.datasets.remote import kaggle_headers
+
+        try:
+            headers = kaggle_headers()
+        except PermissionError as error:
+            _emit({"status": "blocked", "reason": str(error)})
+            return EXIT_BLOCKED
+    elif args.auth_env:
         token = os.environ.get(args.auth_env)
         if not token:
             _emit({"status": "blocked", "reason": f"{args.auth_env} is not set"})
@@ -120,8 +128,154 @@ def _cmd_fetch(args) -> int:
             "size_bytes": receipt.size_bytes,
             "sha256": receipt.sha256,
             "resumed": receipt.resumed,
+            "cached": receipt.cached,
         }
     )
+    return EXIT_OK
+
+
+def _write_out(args, payload: dict) -> None:
+    if getattr(args, "out", None):
+        text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+        atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+
+
+def _files(files) -> list[dict]:
+    return [
+        {"path": f.path, "size_bytes": f.size_bytes, "sha256": f.sha256} for f in files
+    ]
+
+
+def _cmd_probe_hf(args) -> int:
+    from archimind.datasets.remote import hf_dataset_revision, hf_tree
+
+    info = hf_dataset_revision(args.repo)
+    revision = args.revision or info["revision"]
+    files = hf_tree(args.repo, revision)
+    payload = info | {
+        "revision": revision,
+        "current_revision": info["revision"],
+        "file_count": len(files),
+        "total_bytes": sum(f.size_bytes for f in files),
+        "files": _files(files),
+    }
+    _write_out(args, payload)
+    _emit(payload)
+    return EXIT_OK
+
+
+def _cmd_probe_kaggle(args) -> int:
+    from archimind.datasets.remote import (
+        kaggle_dataset_view,
+        kaggle_download_url,
+        kaggle_files,
+    )
+
+    payload = kaggle_dataset_view(args.ref)
+    try:
+        files = kaggle_files(args.ref)
+    except PermissionError as error:
+        payload |= {"files": None, "blocked": str(error)}
+        _write_out(args, payload)
+        _emit(payload)
+        return EXIT_BLOCKED
+    payload |= {"file_count": len(files), "files": _files(files)}
+    wanted = [f for f in files if f.path.rsplit("/", 1)[-1] == "model_info.json"]
+    payload["model_info"] = [
+        {
+            "path": f.path,
+            "size_bytes": f.size_bytes,
+            "url": kaggle_download_url(args.ref, f.path),
+        }
+        for f in wanted
+    ]
+    _write_out(args, payload)
+    _emit({k: v for k, v in payload.items() if k != "files"})
+    return EXIT_OK
+
+
+def _cmd_probe_tar_prefix(args) -> int:
+    from archimind.datasets.remote import gzip_tar_prefix
+
+    headers = {}
+    if args.auth_env and os.environ.get(args.auth_env):
+        headers["Authorization"] = f"Bearer {os.environ[args.auth_env]}"
+    listing = gzip_tar_prefix(args.url, max_bytes=args.max_bytes, headers=headers)
+    files = [m for m in listing.members if m[2] == "file"]
+    top = sorted({m[0].split("/")[0] for m in listing.members})
+    payload = {
+        "url": listing.url,
+        "bytes_read": listing.bytes_read,
+        "complete": listing.complete,
+        "members": len(listing.members),
+        "files": len(files),
+        "file_bytes": sum(m[1] for m in files),
+        "top_level": top[:50],
+        "suffixes": dict(
+            sorted(
+                {
+                    s: sum(1 for m in files if m[0].endswith(s))
+                    for s in {
+                        "." + m[0].rsplit(".", 1)[-1] for m in files if "." in m[0]
+                    }
+                }.items()
+            )
+        ),
+        "first_members": [list(m) for m in listing.members[:40]],
+    }
+    _write_out(args, payload | {"all_members": [list(m) for m in listing.members]})
+    _emit(payload)
+    return EXIT_OK
+
+
+def _cmd_probe_ssr(args) -> int:
+    from archimind.datasets.canonical import file_sha256
+    from archimind.datasets.ssr import iter_parquet_rows, probe, profile_row
+
+    profiles, inputs = [], []
+    for path in sorted(Path(p) for p in args.parquet):
+        inputs.append({"file": path.name, "sha256": file_sha256(path)})
+        for row in iter_parquet_rows(path):
+            profile = profile_row(row, args.room_type)
+            if profile is not None:
+                profiles.append(profile)
+    payload = {"room_type": args.room_type, "inputs": inputs} | probe(profiles)
+    _write_out(args, payload)
+    _emit(payload)
+    return EXIT_OK
+
+
+def _cmd_probe_join(args) -> int:
+    from archimind.datasets.canonical import strict_loads
+    from archimind.datasets.midi import build_index, join_report
+    from archimind.datasets.ssr import iter_parquet_rows, profile_row, room_key
+
+    midi = Path(args.midi_dir)
+
+    def load(name):
+        return strict_loads((midi / name).read_bytes())
+
+    index = build_index(
+        load("midi_room_ids.json"),
+        load("midi_furniture_ids.json"),
+        test_room_ids=load("midi_test_room_ids.json"),
+    )
+
+    def ssr_rooms():
+        for path in sorted(Path(p) for p in args.parquet):
+            for row in iter_parquet_rows(path):
+                profile = profile_row(row, "bedroom")
+                if profile is None:
+                    continue
+                key = room_key(profile.file_id, profile.room_id)
+                yield key, profile.split, profile.tier, profile.jids
+
+    payload = {
+        "midi_rooms": len(index.rooms),
+        "midi_jids": len(index.jid_categories),
+    } | join_report(ssr_rooms(), index)
+    _write_out(args, payload)
+    _emit(payload)
     return EXIT_OK
 
 
@@ -155,9 +309,44 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--max-bytes", type=int, required=True)
     p.add_argument("--sha256")
     p.add_argument("--auth-env", help="Name of the env var holding a bearer token")
+    p.add_argument(
+        "--kaggle-auth",
+        action="store_true",
+        help="Use KAGGLE_USERNAME/KAGGLE_KEY (Basic auth)",
+    )
     p.add_argument("--floor-gib", type=int, default=4)
     p.add_argument("--timeout", type=float, default=60.0)
     p.set_defaults(func=_cmd_fetch)
+
+    p = sub.add_parser("probe-hf", help="Pin a Hugging Face dataset and list files")
+    p.add_argument("repo")
+    p.add_argument("--revision", help="Exact 40-character revision (default: current)")
+    p.add_argument("--out")
+    p.set_defaults(func=_cmd_probe_hf)
+
+    p = sub.add_parser("probe-kaggle", help="Kaggle dataset version and file list")
+    p.add_argument("ref")
+    p.add_argument("--out")
+    p.set_defaults(func=_cmd_probe_kaggle)
+
+    p = sub.add_parser("probe-tar-prefix", help="List a capped .tar.gz prefix")
+    p.add_argument("url")
+    p.add_argument("--max-bytes", type=int, required=True)
+    p.add_argument("--auth-env")
+    p.add_argument("--out")
+    p.set_defaults(func=_cmd_probe_tar_prefix)
+
+    p = sub.add_parser("probe-ssr", help="Yield/identity profile of SSR parquet files")
+    p.add_argument("parquet", nargs="+")
+    p.add_argument("--room-type", default="bedroom")
+    p.add_argument("--out")
+    p.set_defaults(func=_cmd_probe_ssr)
+
+    p = sub.add_parser("probe-join", help="SSR bedrooms joined to MIDI identities")
+    p.add_argument("parquet", nargs="+")
+    p.add_argument("--midi-dir", required=True)
+    p.add_argument("--out")
+    p.set_defaults(func=_cmd_probe_join)
     return parser
 
 

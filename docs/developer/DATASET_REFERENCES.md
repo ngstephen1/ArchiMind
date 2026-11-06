@@ -12,7 +12,7 @@ reference pack, and works unchanged when no pack is configured.
 | Phase | State | Evidence |
 | --- | --- | --- |
 | P0 contracts, safe I/O, stages, pack, CLI | IMPLEMENTED (synthetic only) | `tests/datasets` (offline) |
-| P1 probe (inventory and yield) | NOT RUN | next milestone, in Colab |
+| P1 probe (inventory and yield) | SSR PASS, MIDI PASS (bounded prefix), FUTURE NOT RUN | [DATASET_PROBE_P1.md](../data/DATASET_PROBE_P1.md) |
 | P2 SSR / FUTURE / MIDI adapters | NOT STARTED | |
 | P3 search facade over a real pack | NOT STARTED | |
 | P4 app wiring | NOT STARTED | |
@@ -30,7 +30,10 @@ schemas, conventions or yield.
 | `safe_io.py` | `https`-only bounded and resumable downloads, capacity floor, archive extraction safe on Windows (traversal, reserved names, case-insensitive duplicates, links, expansion bombs), numeric-only NPY loading and embedded-only GLB headers. |
 | `stages.py` | Content-addressed, resumable stages (`_COMPLETE` with per-file SHA-256) and the atomic `sync_tree` used for Drive checkpoints. |
 | `pack.py` | `build_pack`, `verify_pack` and `load_pack`. `load_pack` never raises: it returns `ready`, or `unavailable` with a reason code and no paths. |
-| `cli.py` | `python -m archimind.datasets env | sync | verify-pack | fixture-pack | fetch`. |
+| `ssr.py` | Proven SSR conventions, room/object classification, `room_key`, bedroom split parsing and the yield probe. |
+| `midi.py` | MIDI id parsing, positional room/furniture index, test-tail check, jid categories and the SSR join report. |
+| `remote.py` | Pinned Hugging Face trees (with LFS SHA-256), Kaggle listings and capped streaming listings of `.tar.gz` prefixes. |
+| `cli.py` | `env`, `sync`, `verify-pack`, `fixture-pack`, `fetch`, `probe-hf`, `probe-kaggle`, `probe-tar-prefix`, `probe-ssr`, `probe-join`. Credentials are never forwarded on redirects. |
 
 ## Tiers
 

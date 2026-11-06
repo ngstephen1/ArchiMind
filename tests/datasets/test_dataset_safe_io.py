@@ -309,3 +309,39 @@ def test_glb_container_errors(tmp_path):
         (tmp_path / f"{name}.glb").write_bytes(data)
         with pytest.raises(UnsafeContentError):
             read_glb_json(tmp_path / f"{name}.glb")
+
+
+def test_credentials_are_not_forwarded_on_redirect():
+    from archimind.datasets.safe_io import make_request
+
+    request = make_request(URL, {"Authorization": "Bearer x", "Range": "bytes=1-"})
+    assert request.get_header("Authorization") == "Bearer x"
+    assert "Authorization" not in request.headers  # ordinary headers are redirected
+    assert request.headers["Range"] == "bytes=1-"
+    assert "Authorization" in request.unredirected_hdrs
+
+
+def test_existing_file_with_expected_hash_is_not_refetched(tmp_path):
+    body = b"cached-bytes"
+    (tmp_path / "f").write_bytes(body)
+
+    def never(request, timeout):
+        raise AssertionError("network must not be used")
+
+    receipt = bounded_download(
+        URL,
+        tmp_path / "f",
+        max_bytes=100,
+        expected_sha256=hashlib.sha256(body).hexdigest(),
+        opener=never,
+    )
+    assert receipt.cached and receipt.size_bytes == len(body)
+    (tmp_path / "f").write_bytes(b"stale")
+    receipt = bounded_download(
+        URL,
+        tmp_path / "f",
+        max_bytes=100,
+        expected_sha256=hashlib.sha256(body).hexdigest(),
+        opener=opener_for(body),
+    )
+    assert not receipt.cached and (tmp_path / "f").read_bytes() == body

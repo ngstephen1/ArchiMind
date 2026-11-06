@@ -166,7 +166,7 @@ def object_box(
     """
     check_rigid(convention.basis)
     if not all(math.isfinite(s) and s > 0 for s in size):
-        raise GeometryError("Object size must be finite and positive")
+        raise GeometryError("invalid_dimensions")
     full = tuple(
         s * 2 if convention.size_semantics == "half_extent" else s for s in size
     )

@@ -58,9 +58,27 @@ class DownloadReceipt:
     size_bytes: int
     sha256: str
     resumed: bool
+    cached: bool = False  # already present with the expected SHA-256; not fetched
 
 
 Opener = Callable[[urllib.request.Request, float], object]
+SENSITIVE_HEADERS = frozenset({"authorization", "cookie"})
+
+
+def make_request(url: str, headers: Mapping[str, str] | None = None):
+    """Build a request whose credentials are never forwarded on redirects.
+
+    Hugging Face and Kaggle answer downloads with redirects to storage hosts.
+    ``urllib`` copies ordinary headers to the redirected request, so credentials
+    are added as *unredirected* headers and stay with the original host only.
+    """
+    request = urllib.request.Request(url)
+    for name, value in (headers or {}).items():
+        if name.lower() in SENSITIVE_HEADERS:
+            request.add_unredirected_header(name, value)
+        else:
+            request.add_header(name, value)
+    return request
 
 
 def _default_opener(request: urllib.request.Request, timeout: float):
@@ -89,13 +107,17 @@ def bounded_download(
     if not url.startswith("https://"):
         raise UnsafeContentError("Only https:// downloads are allowed")
     dest = Path(dest)
+    if expected_sha256 is not None and dest.is_file():
+        if file_sha256(dest) == expected_sha256:
+            size = dest.stat().st_size
+            return DownloadReceipt(url, dest.name, size, expected_sha256, False, True)
     dest.parent.mkdir(parents=True, exist_ok=True)
     partial = dest.with_name(dest.name + ".partial")
     offset = partial.stat().st_size if partial.exists() else 0
     if offset > max_bytes:
         partial.unlink()
         offset = 0
-    request = urllib.request.Request(url, headers=dict(headers or {}))
+    request = make_request(url, headers)
     if offset:
         request.add_header("Range", f"bytes={offset}-")
     with opener(request, timeout_s) as response:
