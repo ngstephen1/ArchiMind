@@ -1,3 +1,7 @@
 # Preserve upstream license text and generated Three.js GLSL string whitespace.
 src/archimind/_viewer_assets/viewer.js -whitespace
 src/archimind/_viewer_assets/furniture/CC0-1.0.txt -whitespace
+
+# Hash-pinned data must keep identical bytes on every OS (Windows autocrlf broke the catalog).
+* text=auto eol=lf
+*.glb binary

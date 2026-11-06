@@ -160,6 +160,30 @@ python -m streamlit run app.py --server.headless true --server.address 127.0.0.1
 
 </details>
 
+## Design agent (optional)
+
+One model chooses from four deterministic tools in a bounded loop. It can record
+requirements, generate layouts, set measurable placement goals and ask for a release.
+It cannot set coordinates, and only a code-only gate in
+`src/archimind/design_agent/gate.py` can release a design. The gate re-runs spatial
+validation, compares the design with the specification, checks requested furniture
+against the user's own words, refuses tall furniture in front of a window, and
+enforces required goals.
+
+```bash
+python scripts/run_with_agent.py            # reads OPENAI_API_KEY from .env, then opens the app
+python scripts/eval_design_agent.py --repeat 3   # scores 8 live briefs; spends tokens
+```
+
+The panel also needs its consent checkbox ticked before any message is sent. Each
+message is limited to 12 model calls, 60,000 tokens and 180 seconds. Agent traces go to
+the server console under the `archimind.design_agent` logger, without message text or
+keys. The existing generator and all other features work with no model and no key.
+
+Known limits: placement wishes are enforced only when the model records them as goals,
+furniture checks cover only beds, desks and wardrobes, and the model's written summary
+is not verified, so trust the drawing and the approval banner over its wording.
+
 ## 2D floor plan preview
 
 Launch the app and scroll to **2D Floor Plan Preview**. The sample contains a
