@@ -298,7 +298,7 @@
     ]
   },
   "resume3": {
-    "status": "09A_LOCAL_ACCEPTANCE_VERIFIED",
+    "status": "09A_VERIFIED",
     "baseline_commit": "3f16158653485ba891f1a43cb5e78463c768fc31",
     "workspace": "/Users/macbook/Hack/.archimind-09a-resume3-20261105",
     "resource_policy": {
@@ -624,7 +624,13 @@
     },
     "delivery": {
       "baseline": "3f16158653485ba891f1a43cb5e78463c768fc31",
-      "state": "Scoped checkpoint pending commit/PR CI",
+      "feature_commit": "da18ee87e9c48f75bb2cacf910b56dd3b699ef70",
+      "CI": "https://github.com/ngstephen1/ArchiMind/actions/runs/42161686538",
+      "CI_conclusion": "success",
+      "python_tests": 1927,
+      "frontend_tests": 91,
+      "pull_request": "https://github.com/ngstephen1/ArchiMind/pull/6",
+      "state": "Executable checkpoint verified. This evidence-only follow-up is delivered through the same PR; its head/merge CI remains visible there.",
       "no_credentials_in_artifacts": true
     },
     "evidence_location": "/Users/macbook/Hack/.archimind-09a-resume3-20261105",
@@ -672,8 +678,8 @@
   },
   "current_release": {
     "reference": "resume3",
-    "status": "09A_LOCAL_ACCEPTANCE_VERIFIED",
+    "status": "09A_VERIFIED",
     "historical_top_level_status": "Preserved November5 storage-stop receipt; not current release verdict.",
-    "delivery": "Final commit and CI recorded separately after successful local checks."
+    "delivery": "Feature commit da18ee87e9c48f75bb2cacf910b56dd3b699ef70 passed exact-commit CI; PR6 carries the evidence-only follow-up and merge status."
   }
 }

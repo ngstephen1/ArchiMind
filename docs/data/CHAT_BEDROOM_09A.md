@@ -141,3 +141,18 @@ boundaries. Other agents' live behavior, generated meshes and dataset integratio
 remain separate work. Next milestone after delivery: teammate's isolated M0/M1
 source/permission/normalization work from the dataset handoff; no automatic
 acquisition or app integration is authorized by this checkpoint.
+
+
+### Verified executable checkpoint and delivery
+
+**09A_VERIFIED.** Executable checkpoint
+`da18ee87e9c48f75bb2cacf910b56dd3b699ef70` passed
+[exact-commit CI](https://github.com/ngstephen1/ArchiMind/actions/runs/42161686538):
+1,927 Python tests,91 frontend tests, lint, formatting, dependency compatibility,
+viewer syntax/build/bundle equality, packaging/installed contracts and HTTP200 health.
+[PR6](https://github.com/ngstephen1/ArchiMind/pull/6) carries the evidence-only
+follow-up and final delivery status. That follow-up changes these receipts only;
+executable source and the tested wheel members remain unchanged. The top-level
+blocked status and initial LOCAL_ACCEPTANCE verdict remain chronological history;
+`current_release` points to this verified continuation. No additional live calls,
+model changes, datasets or assets are part of delivery.
