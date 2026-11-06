@@ -2,7 +2,7 @@
 
 Last reviewed: **November 5, 2026**.
 
-**Current milestone: 08F3A through R3B5 browser acceptance complete. Five metadata-qualified catalog products; Charles and Belaya have separate approved planning/native-render releases. Belaya now participates in explicit preparation, generation and selected A/B views. Mixed Charles/Belaya scenes remain placeholders. R3C reconciliation and focused preservation checks are complete; delivery CI is pending at commit time.**
+**Current milestone: 08F3A through R3B5 browser acceptance complete. Five metadata-qualified catalog products; Charles and Belaya have separate approved planning/native-render releases. Belaya now participates in explicit preparation, generation and selected A/B views. Mixed Charles/Belaya scenes remain placeholders. R3C_RELEASE_VERIFIED: release commit `a38a2e1` passed delivery CI with 1,867 Python and 91 frontend tests.**
 Live OpenAI behavior is unverified; the separate local CPU encoder experiment is measured below. Full material editing and Task 06E2 remain separate future renderer work; Charles and Belaya use their original embedded source materials.
 The Task 03 preview, Task 05B comparison, and
 Task 06A structural-only preview are preserved.
@@ -1609,3 +1609,15 @@ is claimed. Published product dimensions remain source claims.
 This continuation changes only release docs and mechanical preservation-chain
 tests. Owner-first review of the existing 24-prompt relevance packet is the next
 recommended product task; no new asset or feature work started.
+
+
+## Confirmed R3C delivery
+
+**R3C_RELEASE_VERIFIED** for release commit
+`a38a2e121d66c5a755cf9fe5fed8a4e3dfc4db6c`.
+[Delivery CI passed](https://github.com/ngstephen1/ArchiMind/actions/runs/42127832828):
+**1,867 Python tests, 91 frontend tests**, lint/format, dependency compatibility,
+viewer build/bundle equality and HTTP 200 health. The preceding pending-CI text
+records the state when that commit was created; this addendum records the result.
+The current JSON verdict is at `r3c.delivery_followup`, leaving historical events
+intact. Prototype limitations above continue to apply.

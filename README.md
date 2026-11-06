@@ -1242,7 +1242,7 @@ and verification record.
 - [x] **Task 08F1 · Source shortlist and human-review preparation** — three new source-qualified leads, preserved historical evidence and blank review forms; active catalog unchanged.
 - [x] **Task 08F2 · Metadata admission** — five qualified catalog records with separate published, planning and rendering evidence.
 - [x] **Task 08F3A through R3B5 · Belaya workflow and browser acceptance** — approved Policy B generation, native-scale selected A/B views, same-session regeneration and owner-scoped camera persistence.
-- [ ] **Task 08F3A-R3C · Release reconciliation complete; delivery CI pending at commit time** — retained packaging, installed-contract and browser evidence reconciled; the delivery response confirms the new commit’s CI outcome.
+- [x] **Task 08F3A-R3C · Release verified** — [delivery CI passed](https://github.com/ngstephen1/ArchiMind/actions/runs/42127832828) for `a38a2e1`: 1,867 Python and 91 frontend tests. Packaging, installed contracts and browser evidence are reconciled for the bounded prototype.
 - [x] **Task 08R1 · Offline embedding/hybrid benchmark** — one isolated CPU encoder, frozen development/held-out judgments and measured abstention trade-offs; production integration deferred.
 - [x] **Task 08R0 · Offline retrieval contract and baselines** — current hard filters, keyword/FTS5 comparison, isolated synthetic fixtures and auditable metrics; no vector database or UI wiring.
 - [ ] Export.

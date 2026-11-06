@@ -461,6 +461,9 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
     r3c = json.loads(
         (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
     )["r3c"]["final2"]["authorized_migrations"]
+    delivery_followup = json.loads(
+        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
+    )["r3c"]["delivery_followup"]["authorized_migrations"]
     for name, expected in receipt["frozen_files"].items():
         if name in migrations:
             assert migrations[name]["before_sha256"] == expected
@@ -477,6 +480,9 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
         if name in r3c:
             assert r3c[name]["before_sha256"] == expected
             expected = r3c[name]["after_sha256"]
+        if name in delivery_followup:
+            assert delivery_followup[name]["before_sha256"] == expected
+            expected = delivery_followup[name]["after_sha256"]
         assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
     catalog_bytes = (ROOT / "src/archimind/assets/furniture_catalog.json").read_bytes()
     assert hashlib.sha256(catalog_bytes).hexdigest() == receipt["catalog"]["sha256"]

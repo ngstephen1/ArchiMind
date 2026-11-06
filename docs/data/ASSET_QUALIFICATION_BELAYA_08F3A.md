@@ -1354,3 +1354,19 @@ Observed precommit capacity: initial **6276415488 bytes**, minimum **6260445184 
 The delivered commit remains pending CI at commit time; only its actual successful
 workflow can establish the final `R3C_RELEASE_VERIFIED` verdict. The final response
 records that outcome and the final storage reading without another report commit.
+
+
+## Confirmed delivery and current status
+
+**R3C_RELEASE_VERIFIED** for
+`a38a2e121d66c5a755cf9fe5fed8a4e3dfc4db6c`.
+[Delivery CI 42127832828 passed](https://github.com/ngstephen1/ArchiMind/actions/runs/42127832828):
+**1,867 Python tests in 278.53s and 91 frontend tests**, lint, formatting, dependency
+compatibility, viewer build/bundle equality and HTTP 200 health. Earlier pending-CI
+statements remain accurate commit-time history. JSON `current_release` now points
+to `r3c.delivery_followup`; the original acquisition status remains untouched.
+
+This owner-requested documentation follow-up updates current status and appends
+a documentation migration step. It introduces no runtime, catalog, asset, release,
+geometry, scoring or validation changes. Localhost launch uses the existing app
+and environment. No new CI is claimed for uncommitted documentation edits.
