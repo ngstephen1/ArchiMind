@@ -57,3 +57,7 @@ include docs/data/FURNITURE_CATALOG_ADMISSION_08F2.md
 include docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json
 include docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.md
 include docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json
+
+include docs/developer/CHAT_BEDROOM.md
+include docs/data/CHAT_BEDROOM_09A.json
+include docs/data/CHAT_BEDROOM_09A.md

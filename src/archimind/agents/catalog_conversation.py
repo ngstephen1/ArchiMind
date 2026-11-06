@@ -14,6 +14,7 @@ from openai import (
     APIError,
     APITimeoutError,
     AuthenticationError,
+    InternalServerError,
     RateLimitError,
 )
 
@@ -61,6 +62,8 @@ required uses (e.g. desk chair is not an armchair), variants, product IDs, size
 limits and mandatory material/style/color constraints in their fields, with exact
 source quotes. Values of text facts must occur verbatim in their user quotes.
 A product variant such as Oak/Espresso is not a verified material/color.
+Queen is a bed-size variant. Writing in 'writing desk' is the required_use
+'writing', not a finish variant. Preserve all other requested variants exactly.
 Unspecified filters are null/[]; never drop constraints to obtain matches.
 Only maximum furniture dimensions can filter products; exact/minimum sizes and
 other mandatory placement constraints belong in hard_constraints (unsupported).
@@ -79,6 +82,7 @@ def validate_turns(turns) -> tuple[CatalogChatTurn, ...]:
     if (
         ids != sorted(set(ids))
         or sum(t.role == "user" for t in result) > MAX_USER_TURNS
+        or any(not t.content.strip() for t in result)
     ):
         raise ValueError("Conversation IDs or turn limit invalid")
     raw = json.dumps([t.model_dump(mode="json") for t in result], ensure_ascii=False)
@@ -260,9 +264,27 @@ def reconcile_catalog_extraction(
             FUNCTION_TERMS[intent.function], intent.source.text, re.I
         ):
             questions.append(f"Confirm the function of furniture request {i}.")
-        if intent.function == "bed" and "queen" not in intent.source.text.casefold():
+        known_bed_size = re.search(
+            r"\b(?:queen|king|twin(?: xl)?|single|double|full)(?:[- ]sized?)?\s+beds?\b",
+            intent.source.text,
+            re.I,
+        ) or (
+            intent.variant is not None
+            and intent.variant.value.casefold()
+            in {
+                "queen",
+                "king",
+                "twin",
+                "twin xl",
+                "single",
+                "double",
+                "full",
+                "california king",
+            }
+        )
+        if intent.function == "bed" and not known_bed_size:
             questions.append(
-                "The current procedural bed is queen-sized; confirm queen or revise/omit the bed request."
+                "Specify the bed size. Only the disclosed queen template is available procedurally; other sizes can be revised or explicitly omitted after review."
             )
         if intent.quantity is None:
             questions.append(f"Specify quantity for furniture request {i}.")
@@ -399,6 +421,10 @@ def interpret_catalog_conversation(turns, *, allow_live=False, client_factory=No
         )
     except APIConnectionError:
         return failure("connection", "Provider connection unavailable.", "unavailable")
+    except InternalServerError:
+        return failure(
+            "api_error", "Provider server error; no retry was made. Submit again later."
+        )
     except APIError:
         return failure("api_error", "Provider request failed.")
     except (ValueError, TypeError, AttributeError):

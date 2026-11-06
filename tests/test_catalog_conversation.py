@@ -72,6 +72,56 @@ def test_grounded_custom_room_and_explicit_catalog_template_submission():
         draft.room_json = "forged"
 
 
+def test_live_function_qualifiers_preserve_use_and_template_size():
+    e = extraction()
+    bed, desk = e.furniture
+    e = e.model_copy(
+        update={
+            "furniture": (
+                bed.model_copy(
+                    update={
+                        "variant": ChatTextFact(
+                            value="queen", source=quote("queen bed")
+                        )
+                    }
+                ),
+                desk.model_copy(
+                    update={
+                        "variant": ChatTextFact(
+                            value="writing", source=quote("writing desk")
+                        )
+                    }
+                ),
+            )
+        }
+    )
+    draft = ready(e)
+    found = retrieve_chat_candidates(draft)
+    assert found[0].result.status == "empty"
+    assert [h.reference.asset_id for h in found[1].result.hits] == [BELAYA_ID]
+    assert (
+        procedural_options(draft.extraction.furniture[0], draft.turns)[0].id
+        == "queen-bed"
+    )
+    prepared = prepare_chat_specification(
+        draft,
+        selections={"request-2": BELAYA_ID},
+        procedural_ids={"request-1": "queen-bed"},
+    )
+    assert len(prepared.design().furniture) == 2
+    constrained = desk.model_copy(
+        update={
+            "variant": ChatTextFact(value="writing", source=quote("writing desk")),
+            "required_use": ChatTextFact(value="standing", source=quote("standing")),
+        }
+    )
+    draft = ready(
+        e.model_copy(update={"furniture": (bed, constrained)}),
+        turns(TEXT + " standing"),
+    )
+    assert retrieve_chat_candidates(draft)[1].result.status == "empty"
+
+
 @pytest.mark.parametrize(
     "field,value",
     [
@@ -247,6 +297,35 @@ def test_conversation_limits_and_ids():
                 for i in range(4)
             )
         )
+
+
+def test_blank_context_rejected_and_clarification_text_is_bounded():
+    with pytest.raises(ValueError):
+        agent.validate_turns(turns("   \n"))
+    with pytest.raises(ValidationError):
+        type(extraction()).model_validate(
+            extraction().model_copy(update={"missing_or_ambiguous": ("x" * 301,)})
+        )
+
+
+def test_known_unsupported_bed_size_can_be_explicitly_omitted():
+    e = extraction()
+    bed = e.furniture[0].model_copy(
+        update={
+            "source": quote("king bed"),
+            "variant": ChatTextFact(value="king", source=quote("king bed")),
+        }
+    )
+    draft = ready(
+        e.model_copy(update={"furniture": (bed, e.furniture[1])}),
+        turns(TEXT.replace("queen bed", "king bed")),
+    )
+    assert not retrieve_chat_candidates(draft)[0].result.hits
+    assert not procedural_options(bed, draft.turns)
+    prepared = prepare_chat_specification(
+        draft, selections={"request-1": None, "request-2": BELAYA_ID}, procedural_ids={}
+    )
+    assert len(prepared.design().furniture) == 1
 
 
 @pytest.mark.parametrize("case", ["disabled", "consent", "key", "model", "limit"])

@@ -25,7 +25,13 @@ from archimind.render import (
     render_floorplan,
     render_styled_design_3d,
 )
-from archimind.ui.furniture_assets import CATALOG, PROCEDURAL, render_furniture_assets
+from archimind.ui.furniture_assets import (
+    CATALOG,
+    CHAT,
+    MODE_KEY,
+    PROCEDURAL,
+    render_furniture_assets,
+)
 from archimind.ui.interior_styling import render_interior_styling, reset_styling
 from archimind.ui.realistic_view import (
     OVERRIDES_KEY,
@@ -106,23 +112,27 @@ def render_layout_generator(
         "for the selected layout below."
     )
     st.markdown("### Room Information")
-    room = specification.room
-    st.write(
-        f"**{room.name}** · {room.width_m:g} m wide × {room.depth_m:g} m deep "
-        f"× {room.ceiling_height_m:g} m high"
-    )
-    st.write(
-        "Procedural base furniture: "
-        + ", ".join(item.name for item in specification.furniture)
-    )
-    st.write(
-        "Openings: "
-        + "; ".join(
-            [f"{door.wall.capitalize()}-wall door" for door in room.doors]
-            + [f"{window.wall.capitalize()}-wall window" for window in room.windows]
+    if st.session_state.get(MODE_KEY) == CHAT:
+        st.caption(
+            "Describe your next room in Chat bedroom below. The fixed sample is not your chat room; currently displayed results retain their own stored room."
         )
-    )
-
+    else:
+        room = specification.room
+        st.write(
+            f"**{room.name}** · {room.width_m:g} m wide × {room.depth_m:g} m deep "
+            f"× {room.ceiling_height_m:g} m high"
+        )
+        st.write(
+            "Procedural base furniture: "
+            + ", ".join(item.name for item in specification.furniture)
+        )
+        st.write(
+            "Openings: "
+            + "; ".join(
+                [f"{door.wall.capitalize()}-wall door" for door in room.doors]
+                + [f"{window.wall.capitalize()}-wall window" for window in room.windows]
+            )
+        )
     st.markdown("### Layout Generation Controls")
     pending = render_furniture_assets(specification)
     seed = int(
@@ -167,7 +177,8 @@ def render_layout_generator(
                     assignments=pending.prepared.assignments
                     if pending.prepared is not None
                     else (),
-                    source_mode=CATALOG if pending.catalog_mode else PROCEDURAL,
+                    source_mode=pending.source_mode
+                    or (CATALOG if pending.catalog_mode else PROCEDURAL),
                 )
         except Exception:
             logging.getLogger(__name__).exception("Layout generation failed")

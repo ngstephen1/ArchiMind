@@ -91,3 +91,15 @@ def test_unavailable_catalog_is_sanitized(monkeypatch):
     a = catalog(app())
     assert not a.exception and a.session_state["pending"].prepared is None
     assert "secret-token" not in str([i.value for i in a.error])
+
+
+def test_catalog_choices_survive_visiting_chat(monkeypatch):
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_REQUIREMENTS", "0")
+    a = catalog(app())
+    a.checkbox(key="keep_manual:queen-bed").uncheck().run()
+    a.checkbox(key=f"catalog_product:{CHARLES_ID}").check().run()
+    a.selectbox(key=panel.MODE_KEY).set_value(panel.CHAT).run()
+    a.selectbox(key=panel.MODE_KEY).set_value(panel.CATALOG).run()
+    assert not a.exception
+    assert not a.checkbox(key="keep_manual:queen-bed").value
+    assert a.checkbox(key=f"catalog_product:{CHARLES_ID}").value

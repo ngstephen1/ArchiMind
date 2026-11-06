@@ -1,11 +1,13 @@
 """Immutable evidence contracts for the catalog-aware Requirements Interpreter."""
 
-from typing import Literal
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, FiniteFloat, model_validator
 
 from archimind.agents.requirements_schemas import RequirementsError
 from archimind.models import Room
+
+ClarificationText = Annotated[str, Field(min_length=1, max_length=300)]
 
 
 class Frozen(BaseModel):
@@ -89,8 +91,8 @@ class CatalogConversationExtraction(Frozen):
     furniture: tuple[CatalogFurnitureIntent, ...] = Field(max_length=8)
     hard_constraints: tuple[ChatTextFact, ...] = Field(max_length=16)
     soft_preferences: tuple[ChatTextFact, ...] = Field(max_length=16)
-    missing_or_ambiguous: tuple[str, ...] = Field(max_length=16)
-    unsupported_features: tuple[str, ...] = Field(max_length=16)
+    missing_or_ambiguous: tuple[ClarificationText, ...] = Field(max_length=16)
+    unsupported_features: tuple[ClarificationText, ...] = Field(max_length=16)
 
 
 class CatalogChatDraft(Frozen):

@@ -49,6 +49,10 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/retrieval/embedding_experiment.py",
         "archimind/retrieval/hybrid.py",
         "archimind/ui/furniture_assets.py",
+        "archimind/ui/bedroom_chat.py",
+        "archimind/agents/catalog_conversation.py",
+        "archimind/agents/catalog_requirements.py",
+        "archimind/assets/chat_specifications.py",
         "archimind/render/selected_realistic.py",
         "archimind/ui/realistic_view.py",
         "archimind/ui/product_fixture.py",
@@ -123,6 +127,10 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             for n in names
         )
         for required in (
+            "/scripts/run_chat.py",
+            "/docs/developer/CHAT_BEDROOM.md",
+            "/docs/data/CHAT_BEDROOM_09A.json",
+            "/docs/data/CHAT_BEDROOM_09A.md",
             "/data/catalogs/furniture_source_candidates.json",
             "/data/catalogs/furniture_source_candidates_08a.json",
             "/docs/data/FURNITURE_SOURCE_REGISTER.md",
@@ -372,8 +380,45 @@ assert {b.asset_id for b in resolved.bindings} == {None,belaya_id}
 assert all(b.asset_id is None for b in build_render_bindings(new_submission.design()).bindings)
 print('INSTALLED_CATALOG_AND_PRODUCT_OK')
 """
+    from catalog_chat_helpers import TEXT, extraction
+
+    code = (
+        code.replace("print('INSTALLED_CATALOG_AND_PRODUCT_OK')", "")
+        + """
+import json
+from archimind.agents.catalog_conversation import (
+    reconcile_catalog_extraction, interpret_catalog_conversation)
+from archimind.agents.catalog_requirements import CatalogChatTurn, CatalogConversationExtraction
+from archimind.assets.chat_specifications import prepare_chat_specification
+for name in ('archimind.agents.catalog_conversation',
+             'archimind.agents.catalog_requirements',
+             'archimind.assets.chat_specifications'):
+    assert Path(sys.modules[name].__file__).resolve().is_relative_to(target)
+data = CatalogConversationExtraction.model_validate_json(sys.argv[2])
+conversation = (CatalogChatTurn(id=1,role='user',content=sys.argv[3]),)
+assert interpret_catalog_conversation(conversation).status == 'unavailable'
+draft = reconcile_catalog_extraction(data,conversation).draft
+chat = prepare_chat_specification(draft,
+    selections={'request-2':belaya_id}, procedural_ids={'request-1':'queen-bed'})
+assert len(chat.design().furniture) == 2
+assert not chat.design().room.windows
+assert chat.planning_bindings[0].canonical_dimensions.wdh == (
+    1.6,.8018731772899628,.7516312003135682)
+assert all(f.rotation_deg == 0 for f in chat.design().furniture)
+assert not any(n.startswith(('fastembed','onnxruntime','tokenizers')) for n in sys.modules)
+print('INSTALLED_CATALOG_AND_PRODUCT_AND_CHAT_OK')
+"""
+    )
     result = subprocess.run(
-        [sys.executable, "-I", "-c", code, str(target)],
+        [
+            sys.executable,
+            "-I",
+            "-c",
+            code,
+            str(target),
+            extraction().model_dump_json(),
+            TEXT,
+        ],
         cwd=outside,
         env=env,
         check=True,
@@ -381,4 +426,4 @@ print('INSTALLED_CATALOG_AND_PRODUCT_OK')
         text=True,
         timeout=30,
     )
-    assert result.stdout.strip() == "INSTALLED_CATALOG_AND_PRODUCT_OK"
+    assert result.stdout.strip() == "INSTALLED_CATALOG_AND_PRODUCT_AND_CHAT_OK"

@@ -16,11 +16,13 @@ MODE_KEY = "next_specification_mode"
 PREPARED_KEY = "prepared_catalog_specification"
 PROCEDURAL = "Procedural bedroom"
 CATALOG = "Catalog selection"
+CHAT = "Chat bedroom"
 
 
 class PendingSpecification(NamedTuple):
     catalog_mode: bool
     prepared: PreparedCatalogSpecification | None
+    source_mode: str | None = None
 
 
 def metric(values) -> str:
@@ -33,17 +35,25 @@ def metric(values) -> str:
 def _retain_hidden_choices() -> None:
     # Streamlit discards widget-owned keys when their panel cannot be rendered.
     for key in list(st.session_state):
-        if key.startswith(("keep_manual:", "catalog_product:")):
+        if key.startswith(("keep_manual:", "catalog_product:", "chat_choice:")):
             st.session_state[key] = st.session_state[key]
 
 
 def render_furniture_assets(base: RoomDesign) -> PendingSpecification:
     """Preparing changes only pending state. Generate remains the confirmation."""
     mode = st.selectbox(
-        "Specification for next generation", [PROCEDURAL, CATALOG], key=MODE_KEY
+        "Specification for next generation", [PROCEDURAL, CATALOG, CHAT], key=MODE_KEY
     )
+    _retain_hidden_choices()
+    if mode == CHAT:
+        from archimind.ui.bedroom_chat import render_bedroom_chat
+
+        # Variable transcript/review content stays within one stable sibling
+        # block so pending chat edits do not move the selected viewer's owner.
+        with st.container(key="chat_bedroom_inputs"):
+            prepared = render_bedroom_chat()
+        return PendingSpecification(True, prepared, CHAT)
     if mode == PROCEDURAL:
-        _retain_hidden_choices()
         return PendingSpecification(False, None)
     st.caption(
         "Next specification only. Current alternatives stay unchanged until Generate Layouts returns a new outcome."
