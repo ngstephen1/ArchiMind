@@ -279,6 +279,126 @@ def _cmd_probe_join(args) -> int:
     return EXIT_OK
 
 
+def _cmd_ssr_build(args) -> int:
+    """P2a: real SSR parquet -> scenes/exclusions/report (and optionally a pack)."""
+    from archimind.datasets.canonical import file_sha256, strict_loads, write_jsonl
+    from archimind.datasets.contracts import (
+        PermissionRecord,
+        SourceFile,
+        SourceManifest,
+    )
+    from archimind.datasets.midi import build_index
+    from archimind.datasets.pack import PackError, build_pack, verify_pack
+    from archimind.datasets.ssr import iter_parquet_rows
+    from archimind.datasets.ssr_adapter import (
+        CATEGORY_MAP_VERSION,
+        TRANSFORM_VERSION,
+        build_report,
+        convert_row,
+        deduplicate,
+    )
+
+    out = Path(args.out)
+    if out.exists() and any(out.iterdir()):
+        _emit({"status": "failed", "reason": "output directory is not empty"})
+        return EXIT_FAIL
+    inventory = strict_loads(Path(args.inventory).read_bytes())
+    revision = inventory["revision"]
+    pinned = {f["sha256"]: f for f in inventory["files"] if f.get("sha256")}
+    midi = Path(args.midi_dir)
+
+    def load(name):
+        return strict_loads((midi / name).read_bytes())
+
+    index = build_index(
+        load("midi_room_ids.json"),
+        load("midi_furniture_ids.json"),
+        test_room_ids=load("midi_test_room_ids.json"),
+    )
+    results, source_files = [], []
+    for path in sorted(Path(p) for p in args.parquet):
+        sha = file_sha256(path)
+        entry = pinned.get(sha)
+        if entry is None or entry["size_bytes"] != path.stat().st_size:
+            _emit(
+                {
+                    "status": "failed",
+                    "reason": f"{path.name} is not in the pinned inventory",
+                }
+            )
+            return EXIT_FAIL
+        source_files.append(
+            SourceFile(path=entry["path"], size_bytes=entry["size_bytes"], sha256=sha)
+        )
+        for row in iter_parquet_rows(path):
+            result = convert_row(
+                row,
+                revision=revision,
+                source_sha256=sha,
+                jid_categories=index.jid_categories,
+                midi_splits=index.splits,
+            )
+            if result is not None:
+                results.append(result)
+    scenes, exclusions = deduplicate(results)
+    report = {
+        "source": "ssr_3dfront",
+        "revision": revision,
+        "inputs": [f.model_dump() for f in sorted(source_files, key=lambda f: f.path)],
+        "bedroom_rows": len(results),
+    } | build_report(scenes, exclusions)
+    out.mkdir(parents=True, exist_ok=True)
+    report["outputs"] = {}
+    for name, records in (("scenes.jsonl", scenes), ("exclusions.jsonl", exclusions)):
+        sha, count = write_jsonl(out / name, records)
+        report["outputs"][name] = {"sha256": sha, "records": count}
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    atomic_write_bytes(out / "report.json", text.encode("utf-8"))
+
+    if args.pack_dir:
+        if not (args.permission and args.retrieved_utc):
+            _emit(
+                {
+                    "status": "failed",
+                    "reason": "--pack-dir needs --permission and --retrieved-utc",
+                }
+            )
+            return EXIT_FAIL
+        permission = PermissionRecord.model_validate_json(
+            Path(args.permission).read_bytes()
+        )
+        manifest = SourceManifest(
+            source="ssr_3dfront",
+            origin_url=f"https://huggingface.co/datasets/{inventory['repo']}",
+            revision=revision,
+            retrieved_utc=args.retrieved_utc,
+            files=tuple(sorted(source_files, key=lambda f: f.path)),
+            permission=permission,
+        )
+        try:
+            pack = build_pack(
+                Path(args.pack_dir),
+                pack_id=args.pack_id,
+                audience=args.audience,
+                sources=[manifest],
+                scenes=scenes,
+                exclusions=exclusions,
+                assets=[],
+                glb_files={},
+                transform_version=TRANSFORM_VERSION,
+                category_map_version=CATEGORY_MAP_VERSION,
+                builder=f"archimind.datasets ssr-build {report['adapter_version']}",
+                created_utc=args.retrieved_utc,
+            )
+            verify_pack(Path(args.pack_dir))
+        except PackError as error:
+            _emit({"status": "failed", "reason": str(error)} | {"report": report})
+            return EXIT_FAIL
+        report["pack"] = {"pack_id": pack.pack_id, "snapshot_id": pack.snapshot_id}
+    _emit({"status": "built"} | report)
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m archimind.datasets")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -347,6 +467,20 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--midi-dir", required=True)
     p.add_argument("--out")
     p.set_defaults(func=_cmd_probe_join)
+
+    p = sub.add_parser("ssr-build", help="P2a: SSR bedrooms -> scene references")
+    p.add_argument("parquet", nargs="+")
+    p.add_argument(
+        "--inventory", required=True, help="probe-hf output that pins the shards"
+    )
+    p.add_argument("--midi-dir", required=True)
+    p.add_argument("--out", required=True, help="new or empty stage directory")
+    p.add_argument("--pack-dir", help="also build and verify a pack here")
+    p.add_argument("--pack-id", default="ssr-bedrooms")
+    p.add_argument("--audience", choices=("local", "public"), default="local")
+    p.add_argument("--permission", help="PermissionRecord JSON decided by the owner")
+    p.add_argument("--retrieved-utc", help="when the pinned shards were fetched")
+    p.set_defaults(func=_cmd_ssr_build)
     return parser
 
 

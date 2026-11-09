@@ -13,7 +13,8 @@ reference pack, and works unchanged when no pack is configured.
 | --- | --- | --- |
 | P0 contracts, safe I/O, stages, pack, CLI | IMPLEMENTED (synthetic only) | `tests/datasets` (offline) |
 | P1 probe (inventory and yield) | SSR PASS, MIDI PASS (bounded prefix), FUTURE NOT RUN | [DATASET_PROBE_P1.md](../data/DATASET_PROBE_P1.md) |
-| P2 SSR / FUTURE / MIDI adapters | NOT STARTED | |
+| P2a SSR adapter | IMPLEMENTED; real local pack verified (4,168 scenes, 53 canonical); permission provisional | [DATASET_SSR_P2A.md](../data/DATASET_SSR_P2A.md) |
+| P2b FUTURE / P2c MIDI adapters | NOT STARTED (P2b blocked on Kaggle credentials) | |
 | P3 search facade over a real pack | NOT STARTED | |
 | P4 app wiring | NOT STARTED | |
 
@@ -33,7 +34,8 @@ schemas, conventions or yield.
 | `ssr.py` | Proven SSR conventions, room/object classification, `room_key`, bedroom split parsing and the yield probe. |
 | `midi.py` | MIDI id parsing, positional room/furniture index, test-tail check, jid categories and the SSR join report. |
 | `remote.py` | Pinned Hugging Face trees (with LFS SHA-256), Kaggle listings and capped streaming listings of `.tar.gz` prefixes. |
-| `cli.py` | `env`, `sync`, `verify-pack`, `fixture-pack`, `fetch`, `probe-hf`, `probe-kaggle`, `probe-tar-prefix`, `probe-ssr`, `probe-join`. Credentials are never forwarded on redirects. |
+| `ssr_adapter.py` | P2a: SSR rows to `SceneReference`/`ExclusionRecord`. Categories from MIDI ids only (scale-variant jids map through their model id), tiers, per-scene checks, geometry deduplication with recorded aliases. |
+| `cli.py` | `env`, `sync`, `verify-pack`, `fixture-pack`, `fetch`, `probe-hf`, `probe-kaggle`, `probe-tar-prefix`, `probe-ssr`, `probe-join`, `ssr-build`. Credentials are never forwarded on redirects. |
 
 ## Tiers
 
