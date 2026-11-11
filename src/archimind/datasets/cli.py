@@ -171,11 +171,11 @@ def _cmd_probe_kaggle(args) -> int:
         kaggle_files,
     )
 
-    payload = kaggle_dataset_view(args.ref)
     try:
+        payload = kaggle_dataset_view(args.ref)
         files = kaggle_files(args.ref)
     except PermissionError as error:
-        payload |= {"files": None, "blocked": str(error)}
+        payload = {"ref": args.ref, "files": None, "blocked": str(error)}
         _write_out(args, payload)
         _emit(payload)
         return EXIT_BLOCKED

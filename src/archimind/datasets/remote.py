@@ -103,7 +103,16 @@ def kaggle_download_url(ref: str, path: str) -> str:
 
 
 def kaggle_headers() -> dict:
-    user, key = os.environ.get("KAGGLE_USERNAME"), os.environ.get("KAGGLE_KEY")
+    """Kaggle auth headers, read from the environment by name.
+
+    Newer ``KGAT_`` API tokens use Bearer auth; legacy 32-hex keys use Basic
+    ``username:key``. Either way the value is never printed.
+    """
+    key = os.environ.get("KAGGLE_KEY") or os.environ.get("KAGGLE_API_TOKEN") or ""
+    key = key.strip()
+    user = (os.environ.get("KAGGLE_USERNAME") or "").strip()
+    if key.startswith("KGAT_"):
+        return {"Authorization": f"Bearer {key}"}
     if not user or not key:
         raise PermissionError("KAGGLE_USERNAME and KAGGLE_KEY are required")
     token = base64.b64encode(f"{user}:{key}".encode()).decode()
@@ -111,7 +120,9 @@ def kaggle_headers() -> dict:
 
 
 def kaggle_dataset_view(ref: str, *, opener: Opener = _default_opener) -> dict:
-    info = _get_json(f"{KAGGLE_API}/datasets/view/{ref}", opener=opener)
+    info = _get_json(
+        f"{KAGGLE_API}/datasets/view/{ref}", headers=kaggle_headers(), opener=opener
+    )
     return {
         "ref": info.get("ref"),
         "version": info.get("currentVersionNumber"),

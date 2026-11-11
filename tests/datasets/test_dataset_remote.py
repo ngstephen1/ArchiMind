@@ -8,7 +8,9 @@ from archimind.datasets.remote import (
     gzip_tar_prefix,
     hf_resolve_url,
     hf_tree,
+    kaggle_dataset_view,
     kaggle_files,
+    kaggle_headers,
 )
 from archimind.datasets.safe_io import UnsafeContentError
 
@@ -68,6 +70,25 @@ def test_kaggle_files_paginates_and_needs_credentials(monkeypatch):
     files = kaggle_files("o/d", opener=json_opener(pages, log))
     assert [f.path for f in files] == ["a.json", "b.zip"]
     assert "pageToken=t" in log[1][0] and log[0][1].startswith("Basic ")
+
+
+def test_kaggle_headers_bearer_for_new_tokens_basic_for_legacy(monkeypatch):
+    monkeypatch.delenv("KAGGLE_API_TOKEN", raising=False)
+    monkeypatch.setenv("KAGGLE_USERNAME", "u")
+    monkeypatch.setenv("KAGGLE_KEY", "KGAT_" + "a" * 32)
+    assert kaggle_headers()["Authorization"] == "Bearer KGAT_" + "a" * 32
+    monkeypatch.setenv("KAGGLE_KEY", "k" * 32)
+    assert kaggle_headers()["Authorization"].startswith("Basic ")
+
+
+def test_kaggle_dataset_view_sends_credentials(monkeypatch):
+    monkeypatch.setenv("KAGGLE_USERNAME", "u")
+    monkeypatch.setenv("KAGGLE_KEY", "k")
+    log = []
+    info = kaggle_dataset_view(
+        "o/d", opener=json_opener([{"ref": "o/d", "totalBytes": 5}], log)
+    )
+    assert info["ref"] == "o/d" and log[0][1].startswith("Basic ")
 
 
 def test_listing_size_limit(monkeypatch):
