@@ -66,7 +66,7 @@ def _reset_pending_chat():
     ):
         st.session_state.pop(key, None)
     for key in list(st.session_state):
-        if key.startswith("chat_choice:"):
+        if key.startswith(("chat_choice:", "dataset_ref")):
             del st.session_state[key]
 
 
@@ -162,6 +162,10 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
         )
     for text in result.limitations:
         st.caption(text)
+    # Optional, default-off dataset references; separate state, no model calls.
+    from archimind.ui.dataset_references import render_dataset_references
+
+    render_dataset_references(draft)
     try:
         unavailable = [
             o.record.search.reviewed_name

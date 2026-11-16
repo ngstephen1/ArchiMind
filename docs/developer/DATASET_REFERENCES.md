@@ -17,7 +17,7 @@ reference pack, and works unchanged when no pack is configured.
 | P2b FUTURE categories | IMPLEMENTED; real local pack verified (4,172 scenes, 53 canonical, 0 unmapped objects); FUTURE permission provisional | [DATASET_FUTURE_P2B.md](../data/DATASET_FUTURE_P2B.md) |
 | P2c MIDI adapter | IMPLEMENTED; 5 bedrooms audited locally (alignment, camera, association PASS 5/5); depth units and surfaces not verified | [DATASET_MIDI_P2C.md](../data/DATASET_MIDI_P2C.md) |
 | P3 search facade over a real pack | IMPLEMENTED; local pack evaluated (category precision 1.0, deterministic, p50 17 ms); public audience blocked by permissions; no assets yet | [DATASET_SEARCH_P3.md](../data/DATASET_SEARCH_P3.md) |
-| P4 app wiring | NOT STARTED | |
+| P4 app wiring | IMPLEMENTED default-off in Chat bedroom (local packs only; public blocked; no mesh viewer) | [DATASET_APP_P4.md](../data/DATASET_APP_P4.md) |
 
 Synthetic fixtures prove the engineering only. They say nothing about real source
 schemas, conventions or yield.
@@ -42,6 +42,7 @@ schemas, conventions or yield.
 | `search.py` | P3: `load_reference_pack`, `reference_query_from_chat`, `search_references`, `prepare_reference_preview`; deterministic in-memory lexical index with exact-duplicate folding. |
 | `search_eval.py` | P3: expected-category, self-retrieval, empty-query, determinism and latency evaluation (`ref-eval`). |
 | `cli.py` | `env`, `sync`, `verify-pack`, `fixture-pack`, `fetch`, `probe-hf`, `probe-kaggle`, `probe-tar-prefix`, `probe-ssr`, `probe-join`, `ssr-build`, `midi-audit`, `ref-search`, `ref-eval`. Credentials are never forwarded on redirects. |
+| `ui/dataset_references.py` | P4: default-off *References for next specification* panel in Chat bedroom; explicit search and preview; separate `dataset_ref*` session state. |
 
 ## Tiers
 
