@@ -315,6 +315,61 @@ def _cmd_ssr_build(args) -> int:
         load("midi_furniture_ids.json"),
         test_room_ids=load("midi_test_room_ids.json"),
     )
+    jid_categories, jid_fine, future_report = index.jid_categories, {}, None
+    future_given = [
+        args.future_model_info,
+        args.future_sha256,
+        args.future_inventory,
+    ]
+    if any(future_given) and not all(future_given):
+        _emit(
+            {
+                "status": "failed",
+                "reason": "--future-model-info, --future-sha256 and "
+                "--future-inventory go together",
+            }
+        )
+        return EXIT_FAIL
+    if args.future_model_info:
+        from archimind.datasets.future import (
+            FutureInfoError,
+            merge_categories,
+            parse_model_info,
+        )
+
+        info_path = Path(args.future_model_info)
+        info_sha = file_sha256(info_path)
+        future_inventory = strict_loads(Path(args.future_inventory).read_bytes())
+        listed = [
+            m
+            for m in future_inventory.get("model_info") or []
+            if m.get("size_bytes") == info_path.stat().st_size
+        ]
+        if info_sha != args.future_sha256 or len(listed) != 1:
+            _emit(
+                {
+                    "status": "failed",
+                    "reason": "model_info.json does not match --future-sha256 "
+                    "and the Kaggle inventory",
+                }
+            )
+            return EXIT_FAIL
+        try:
+            future = parse_model_info(strict_loads(info_path.read_bytes()))
+            jid_categories, future_report = merge_categories(
+                future.super_categories, index.jid_categories
+            )
+        except FutureInfoError as error:
+            _emit({"status": "failed", "reason": str(error)})
+            return EXIT_FAIL
+        jid_fine = future.fine_categories
+        future_report |= {
+            "ref": future_inventory["ref"],
+            "version": future_inventory["version"],
+            "path": listed[0]["path"],
+            "size_bytes": listed[0]["size_bytes"],
+            "sha256": info_sha,
+        }
     results, source_files = [], []
     for path in sorted(Path(p) for p in args.parquet):
         sha = file_sha256(path)
@@ -335,8 +390,9 @@ def _cmd_ssr_build(args) -> int:
                 row,
                 revision=revision,
                 source_sha256=sha,
-                jid_categories=index.jid_categories,
+                jid_categories=jid_categories,
                 midi_splits=index.splits,
+                jid_fine_categories=jid_fine,
             )
             if result is not None:
                 results.append(result)
@@ -346,6 +402,7 @@ def _cmd_ssr_build(args) -> int:
         "revision": revision,
         "inputs": [f.model_dump() for f in sorted(source_files, key=lambda f: f.path)],
         "bedroom_rows": len(results),
+        "category_sources": {"midi": "furniture ids", "future_3d": future_report},
     } | build_report(scenes, exclusions)
     out.mkdir(parents=True, exist_ok=True)
     report["outputs"] = {}
@@ -367,20 +424,50 @@ def _cmd_ssr_build(args) -> int:
         permission = PermissionRecord.model_validate_json(
             Path(args.permission).read_bytes()
         )
-        manifest = SourceManifest(
-            source="ssr_3dfront",
-            origin_url=f"https://huggingface.co/datasets/{inventory['repo']}",
-            revision=revision,
-            retrieved_utc=args.retrieved_utc,
-            files=tuple(sorted(source_files, key=lambda f: f.path)),
-            permission=permission,
-        )
+        manifests = [
+            SourceManifest(
+                source="ssr_3dfront",
+                origin_url=f"https://huggingface.co/datasets/{inventory['repo']}",
+                revision=revision,
+                retrieved_utc=args.retrieved_utc,
+                files=tuple(sorted(source_files, key=lambda f: f.path)),
+                permission=permission,
+            )
+        ]
+        if future_report:
+            if not (args.future_permission and args.future_retrieved_utc):
+                _emit(
+                    {
+                        "status": "failed",
+                        "reason": "a pack with 3D-FUTURE categories needs "
+                        "--future-permission and --future-retrieved-utc",
+                    }
+                )
+                return EXIT_FAIL
+            manifests.append(
+                SourceManifest(
+                    source="future_3d",
+                    origin_url=f"https://www.kaggle.com/datasets/{future_report['ref']}",
+                    revision=f"kaggle-v{future_report['version']}",
+                    retrieved_utc=args.future_retrieved_utc,
+                    files=(
+                        SourceFile(
+                            path=future_report["path"],
+                            size_bytes=future_report["size_bytes"],
+                            sha256=future_report["sha256"],
+                        ),
+                    ),
+                    permission=PermissionRecord.model_validate_json(
+                        Path(args.future_permission).read_bytes()
+                    ),
+                )
+            )
         try:
             pack = build_pack(
                 Path(args.pack_dir),
                 pack_id=args.pack_id,
                 audience=args.audience,
-                sources=[manifest],
+                sources=manifests,
                 scenes=scenes,
                 exclusions=exclusions,
                 assets=[],
@@ -480,6 +567,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--audience", choices=("local", "public"), default="local")
     p.add_argument("--permission", help="PermissionRecord JSON decided by the owner")
     p.add_argument("--retrieved-utc", help="when the pinned shards were fetched")
+    p.add_argument(
+        "--future-model-info",
+        help="P2b: 3D-FUTURE model_info.json (primary categories)",
+    )
+    p.add_argument("--future-sha256", help="expected SHA-256 of model_info.json")
+    p.add_argument("--future-inventory", help="probe-kaggle output listing it")
+    p.add_argument("--future-permission", help="PermissionRecord JSON for 3D-FUTURE")
+    p.add_argument("--future-retrieved-utc", help="when model_info.json was fetched")
     p.set_defaults(func=_cmd_ssr_build)
     return parser
 

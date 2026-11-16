@@ -14,7 +14,8 @@ reference pack, and works unchanged when no pack is configured.
 | P0 contracts, safe I/O, stages, pack, CLI | IMPLEMENTED (synthetic only) | `tests/datasets` (offline) |
 | P1 probe (inventory and yield) | SSR PASS, MIDI PASS (bounded prefix), FUTURE PASS (Colab `pilot-001`) | [DATASET_PROBE_P1.md](../data/DATASET_PROBE_P1.md) |
 | P2a SSR adapter | IMPLEMENTED; real local pack verified (4,168 scenes, 53 canonical); permission provisional | [DATASET_SSR_P2A.md](../data/DATASET_SSR_P2A.md) |
-| P2b FUTURE / P2c MIDI adapters | NOT STARTED (P2b unblocked: `model_info.json` covers 7,699 of 7,722 SSR jids) | |
+| P2b FUTURE categories | IMPLEMENTED; real local pack verified (4,172 scenes, 53 canonical, 0 unmapped objects); FUTURE permission provisional | [DATASET_FUTURE_P2B.md](../data/DATASET_FUTURE_P2B.md) |
+| P2c MIDI adapter | NOT STARTED | |
 | P3 search facade over a real pack | NOT STARTED | |
 | P4 app wiring | NOT STARTED | |
 
@@ -34,7 +35,8 @@ schemas, conventions or yield.
 | `ssr.py` | Proven SSR conventions, room/object classification, `room_key`, bedroom split parsing and the yield probe. |
 | `midi.py` | MIDI id parsing, positional room/furniture index, test-tail check, jid categories and the SSR join report. |
 | `remote.py` | Pinned Hugging Face trees (with LFS SHA-256), Kaggle listings and capped streaming listings of `.tar.gz` prefixes. |
-| `ssr_adapter.py` | P2a: SSR rows to `SceneReference`/`ExclusionRecord`. Categories from MIDI ids only (scale-variant jids map through their model id), tiers, per-scene checks, geometry deduplication with recorded aliases. |
+| `ssr_adapter.py` | P2a: SSR rows to `SceneReference`/`ExclusionRecord`. Categories from 3D-FUTURE `model_info.json`, cross-checked against MIDI ids. Scale-variant and mirrored jids map through their model id. `raw_category` holds the finer 3D-FUTURE category., tiers, per-scene checks, geometry deduplication with recorded aliases. |
+| `future.py` | P2b: validated 3D-FUTURE `model_info.json` (super-categories in MIDI spelling, finer categories) and the strict MIDI cross-check. |
 | `cli.py` | `env`, `sync`, `verify-pack`, `fixture-pack`, `fetch`, `probe-hf`, `probe-kaggle`, `probe-tar-prefix`, `probe-ssr`, `probe-join`, `ssr-build`. Credentials are never forwarded on redirects. |
 
 ## Tiers

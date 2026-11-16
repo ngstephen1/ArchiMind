@@ -80,6 +80,8 @@ def check(scene, name):
 def test_base_jid_strips_scale_variant_suffix():
     assert base_jid(BED) == BED
     assert base_jid(f"{BED}-(0.74)-(1.0)-(0.68)") == BED
+    assert base_jid(f"{BED}-(-1.0)-(1)-(1)") == BED  # mirrored (negative x scale)
+    assert base_jid(f"{BED}-(--1.0)") is None
     assert base_jid("not-a-jid") is None
     assert base_jid(None) is None
 
@@ -149,6 +151,49 @@ def test_hanging_light_does_not_fail_floor_contact():
     floating_bed = obj((-1.0, 0.5, -1.0), size=(0.5, 0.5, 0.5))
     scene = convert(row([obj(), floating_bed])).scene
     assert check(scene, "floor_contact").status == "FAIL"
+
+
+def test_floor_lamp_must_stand_on_the_floor():
+    floating_lamp = obj((1.0, 0.5, 1.0), size=(0.4, 1.5, 0.4), jid=LAMP)
+    fine = {LAMP: "Floor Lamp"}
+    scene = convert_row(
+        row([obj(), floating_lamp]),
+        revision=REVISION,
+        source_sha256=SHA,
+        jid_categories=CATEGORIES,
+        midi_splits={},
+        jid_fine_categories=fine,
+    ).scene
+    assert check(scene, "floor_contact").status == "FAIL"
+    hanging = obj((1.0, 2.2, 1.0), size=(0.4, 0.3, 0.4), jid=LAMP)
+    scene = convert_row(
+        row([obj(), hanging]),
+        revision=REVISION,
+        source_sha256=SHA,
+        jid_categories=CATEGORIES,
+        midi_splits={},
+        jid_fine_categories={LAMP: "Pendant Lamp"},
+    ).scene
+    assert check(scene, "floor_contact").status == "PASS"
+
+
+def test_fine_category_is_raw_category_and_mirrored_jid_is_admitted():
+    mirrored = obj((1.0, 0.0, 1.0), size=(0.5, 0.5, 0.5), jid=f"{BED}-(-1.0)-(1)-(1)")
+    scene = convert_row(
+        row([obj(), mirrored]),
+        revision=REVISION,
+        source_sha256=SHA,
+        jid_categories=CATEGORIES,
+        midi_splits={},
+        jid_fine_categories={BED: "King-size Bed"},
+    ).scene
+    assert [(o.jid, o.raw_category, o.category) for o in scene.objects] == [
+        (BED, "King-size Bed", "bed"),
+        (BED, "King-size Bed", "bed"),
+    ]
+    assert scene.category_map_version == "1.1.0"
+    report = build_report([scene], [])
+    assert report["admitted_raw_categories"] == {"King-size Bed": 2}
 
 
 def test_bad_quaternion_becomes_malformed_object():
@@ -322,3 +367,140 @@ def test_ssr_build_rejects_unpinned_shard(tmp_path, capsys):
     assert (
         "not in the pinned inventory" in json.loads(capsys.readouterr().out)["reason"]
     )
+
+
+def _future_build_inputs(tmp_path, model_info):
+    """Shard, inventories, MIDI lists, permission and a model_info.json on disk."""
+    shard = tmp_path / "train.parquet"
+    lamp = obj((1.0, 0.0, 1.0), size=(0.4, 1.5, 0.4), jid=f"{UNKNOWN}-(-1.0)-(1)-(1)")
+    _write_parquet(shard, [row([obj(), lamp])])
+    inventory = tmp_path / "inventory.json"
+    inventory.write_text(
+        json.dumps(
+            {
+                "repo": "gradient-spaces/SSR-3DFRONT",
+                "revision": REVISION,
+                "files": [
+                    {
+                        "path": "data/train-00000-of-00001.parquet",
+                        "size_bytes": shard.stat().st_size,
+                        "sha256": file_sha256(shard),
+                    }
+                ],
+            }
+        )
+    )
+    midi = tmp_path / "midi"
+    midi.mkdir()
+    rooms = [f"{OTHER_HOUSE}/Bedroom-{i}" for i in range(1000)]
+    furniture = [[f"Bed_{BED}_0"]] + [[] for _ in range(999)]
+    (midi / "midi_room_ids.json").write_text(json.dumps(rooms))
+    (midi / "midi_furniture_ids.json").write_text(json.dumps(furniture))
+    (midi / "midi_test_room_ids.json").write_text(json.dumps(rooms))
+    info = tmp_path / "model_info.json"
+    info.write_text(json.dumps(model_info))
+    future_inventory = tmp_path / "future_inventory.json"
+    future_inventory.write_text(
+        json.dumps(
+            {
+                "ref": "owner/3d-future",
+                "version": 1,
+                "model_info": [
+                    {
+                        "path": "3D-FUTURE-model/model_info.json",
+                        "size_bytes": info.stat().st_size,
+                        "url": "https://www.kaggle.com/x",
+                    }
+                ],
+            }
+        )
+    )
+    permission = tmp_path / "permission.json"
+    permission.write_text(
+        json.dumps(
+            {
+                "local_research": "allowed",
+                "derived_metadata": "unknown",
+                "public_geometry": "unknown",
+                "public_images": "unknown",
+                "provider_disclosure": "unknown",
+                "evidence": "synthetic test",
+                "decided_by": "test",
+                "decided_utc": "2026-01-01T00:00:00Z",
+            }
+        )
+    )
+    base = [
+        "ssr-build",
+        str(shard),
+        "--inventory",
+        str(inventory),
+        "--midi-dir",
+        str(midi),
+        "--future-model-info",
+        str(info),
+        "--future-sha256",
+        file_sha256(info),
+        "--future-inventory",
+        str(future_inventory),
+    ]
+    return base, permission
+
+
+def test_ssr_build_with_future_categories_and_pack(tmp_path, capsys):
+    model_info = [
+        {"model_id": BED, "super-category": "Bed", "category": "Double Bed"},
+        {"model_id": UNKNOWN, "super-category": "Lighting", "category": "Floor Lamp"},
+    ]
+    base, permission = _future_build_inputs(tmp_path, model_info)
+    pack_args = [
+        "--pack-dir",
+        str(tmp_path / "pack"),
+        "--permission",
+        str(permission),
+        "--retrieved-utc",
+        "2026-11-06T18:00:00Z",
+    ]
+    # The pack needs a 3D-FUTURE permission record of its own.
+    code = main([*base, "--out", str(tmp_path / "s0"), *pack_args])
+    assert code == 1
+    assert "--future-permission" in json.loads(capsys.readouterr().out)["reason"]
+
+    code = main(
+        [
+            *base,
+            "--out",
+            str(tmp_path / "stage"),
+            *pack_args,
+            "--future-permission",
+            str(permission),
+            "--future-retrieved-utc",
+            "2026-11-16T03:12:56Z",
+        ]
+    )
+    payload = json.loads(capsys.readouterr().out)
+    assert code == 0, payload
+    assert payload["category_sources"]["future_3d"]["midi_agrees_with_future"] == 1
+    assert payload["admitted_raw_categories"] == {"Double Bed": 1, "Floor Lamp": 1}
+    assert payload["object_exclusions"] == {}
+    pack = verify_pack(tmp_path / "pack")
+    assert sorted(s.source for s in pack.sources) == ["future_3d", "ssr_3dfront"]
+    future = next(s for s in pack.sources if s.source == "future_3d")
+    assert future.revision == "kaggle-v1"
+    assert future.files[0].path == "3D-FUTURE-model/model_info.json"
+
+
+def test_ssr_build_rejects_unpinned_or_contradicting_future(tmp_path, capsys):
+    model_info = [{"model_id": BED, "super-category": "Sofa", "category": None}]
+    base, _ = _future_build_inputs(tmp_path, model_info)
+    wrong_sha = [*base]
+    wrong_sha[wrong_sha.index("--future-sha256") + 1] = "0" * 64
+    assert main([*wrong_sha, "--out", str(tmp_path / "a")]) == 1
+    assert "does not match" in json.loads(capsys.readouterr().out)["reason"]
+    # MIDI says Bed, 3D-FUTURE says Sofa: the build stops.
+    assert main([*base, "--out", str(tmp_path / "b")]) == 1
+    assert "MIDI says Bed" in json.loads(capsys.readouterr().out)["reason"]
+    # The three --future-* inputs go together.
+    partial = base[: base.index("--future-sha256")]
+    assert main([*partial, "--out", str(tmp_path / "c")]) == 1
+    assert "go together" in json.loads(capsys.readouterr().out)["reason"]
