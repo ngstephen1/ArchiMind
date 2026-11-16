@@ -875,6 +875,64 @@ def _cmd_habit_bench(args) -> int:
     return EXIT_OK
 
 
+def _cmd_prompt_suite(args) -> int:
+    """Prompt-variation cases from one split of a verified pack."""
+    from archimind.datasets.canonical import canonical_bytes
+    from archimind.datasets.habits import select_split
+    from archimind.datasets.pack import load_pack
+    from archimind.datasets.prompt_suite import build_prompt_suite, case_to_json
+
+    status = load_pack(Path(args.pack), audience="local")
+    if status.status != "ready":
+        _emit({"status": "unavailable", "reason": status.reason})
+        return EXIT_BLOCKED
+    scenes = select_split(status.pack.scenes, args.split)
+    cases = build_prompt_suite(scenes, per_style=args.per_style, seed=args.seed)
+    data = b"".join(canonical_bytes(case_to_json(c)) + b"\n" for c in cases)
+    atomic_write_bytes(Path(args.out), data)
+    _emit({"status": "built", "cases": len(cases), "split": args.split})
+    return EXIT_OK
+
+
+def _cmd_prompt_eval(args) -> int:
+    """Record live interpreter answers (--live) and score every recorded case."""
+    from archimind.datasets.canonical import iter_jsonl
+    from archimind.datasets.prompt_eval import evaluate_recordings, record_case
+    from archimind.datasets.prompt_suite import case_from_json
+
+    cases = [case_from_json(r) for r in iter_jsonl(Path(args.cases))]
+    rec_path = Path(args.recordings)
+    recordings = (
+        {r["case_id"]: r for r in iter_jsonl(rec_path)} if rec_path.is_file() else {}
+    )
+    if args.live:
+        from archimind.agents.catalog_conversation import interpret_catalog_conversation
+
+        def interpret(turns):
+            return interpret_catalog_conversation(turns, allow_live=True)
+
+        with rec_path.open("a", encoding="utf-8", newline="\n") as stream:
+            for case in cases:
+                if case.case_id in recordings:
+                    continue
+                record = record_case(case, interpret)
+                recordings[case.case_id] = record
+                stream.write(json.dumps(record, sort_keys=True) + "\n")
+                stream.flush()
+    report = evaluate_recordings(cases, recordings)
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit(
+        {
+            "status": "evaluated",
+            "total_cases": len(cases),
+            "unrecorded": len(report["unrecorded"]),
+            **{k: report["summary"][k] for k in ("cases", "passed", "pass_rate")},
+        }
+    )
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m archimind.datasets")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -1004,6 +1062,25 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", required=True, help="write the report JSON here")
     p.add_argument("--seeds", type=int, default=50, help="seeds 0..N-1 per room")
     p.set_defaults(func=_cmd_habit_bench)
+
+    p = sub.add_parser("prompt-suite", help="Prompt-variation cases from pack rooms")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--out", required=True, help="write cases JSONL here")
+    p.add_argument("--split", choices=("train", "val", "test"), default="val")
+    p.add_argument("--per-style", type=int, default=3)
+    p.add_argument("--seed", type=int, default=0)
+    p.set_defaults(func=_cmd_prompt_suite)
+
+    p = sub.add_parser("prompt-eval", help="Record (--live) and score chat answers")
+    p.add_argument("--cases", required=True, help="cases JSONL from prompt-suite")
+    p.add_argument("--recordings", required=True, help="recordings JSONL (appended)")
+    p.add_argument("--out", required=True, help="write the report JSON here")
+    p.add_argument(
+        "--live",
+        action="store_true",
+        help="call the configured model once per unrecorded case (costs API usage)",
+    )
+    p.set_defaults(func=_cmd_prompt_eval)
     return parser
 
 

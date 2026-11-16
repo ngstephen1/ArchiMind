@@ -154,3 +154,21 @@ def test_habit_bench_runs(tmp_path, capsys):
     )
     assert code == 0 and summary["calls"] == 24
     assert json.loads((tmp_path / "b.json").read_bytes())["rooms"] == 24
+
+
+def test_prompt_suite_and_offline_eval(tmp_path, capsys):
+    run(capsys, "fixture-pack", str(tmp_path / "p"))
+    cases = tmp_path / "cases.jsonl"
+    code, summary = run(
+        capsys, "prompt-suite", "--pack", str(tmp_path / "p"), "--out", str(cases),
+        "--split", "train", "--per-style", "2",
+    )
+    assert code == 0 and summary["status"] == "built"
+    first = cases.read_bytes()
+    run(capsys, "prompt-suite", "--pack", str(tmp_path / "p"), "--out", str(cases), "--split", "train", "--per-style", "2")
+    assert cases.read_bytes() == first
+    code, summary = run(
+        capsys, "prompt-eval", "--cases", str(cases), "--recordings", str(tmp_path / "rec.jsonl"),
+        "--out", str(tmp_path / "report.json"),
+    )
+    assert code == 0 and summary["unrecorded"] == summary["total_cases"]
