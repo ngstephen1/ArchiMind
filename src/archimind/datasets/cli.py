@@ -810,6 +810,35 @@ def _cmd_ref_eval(args) -> int:
     return EXIT_OK if report["status"] == "evaluated" else EXIT_BLOCKED
 
 
+def _cmd_habit_stats(args) -> int:
+    """P5: layout-habit statistics from the train split of a verified pack."""
+    from archimind.datasets.habits import compute_habits, habits_bytes, leak_free_train
+    from archimind.datasets.pack import load_pack
+
+    status = load_pack(Path(args.pack), audience="local")
+    if status.status != "ready":
+        _emit({"status": "unavailable", "reason": status.reason})
+        return EXIT_BLOCKED
+    manifest = status.pack.manifest
+    train, cross = leak_free_train(status.pack.scenes)
+    habits = compute_habits(
+        train, pack_id=manifest.pack_id, snapshot_id=manifest.snapshot_id
+    )
+    habits["counts"]["cross_split_alias_groups_dropped"] = cross
+    data = habits_bytes(habits)
+    atomic_write_bytes(Path(args.out), data)
+    _emit(
+        {
+            "status": "computed",
+            "rooms": habits["counts"]["rooms"],
+            "tolerance_m": habits["tolerance_m"],
+            "bytes": len(data),
+            "habits": {k: v["status"] for k, v in habits["habits"].items()},
+        }
+    )
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m archimind.datasets")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -927,6 +956,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--out", help="write the report JSON here")
     p.set_defaults(func=_cmd_ref_eval)
+
+    p = sub.add_parser("habit-stats", help="P5: layout habits from a pack's train split")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--out", required=True, help="write habits.json here")
+    p.set_defaults(func=_cmd_habit_stats)
     return parser
 
 

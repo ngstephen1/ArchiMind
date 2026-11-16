@@ -108,3 +108,23 @@ def test_import_has_no_side_effects_or_heavy_dependencies():
         timeout=60,
     ).stdout
     assert out.strip() == "[]"
+
+
+def test_habit_stats_on_fixture_pack(tmp_path, capsys):
+    run(capsys, "fixture-pack", str(tmp_path / "p"))
+    out = tmp_path / "habits.json"
+    code, summary = run(
+        capsys, "habit-stats", "--pack", str(tmp_path / "p"), "--out", str(out)
+    )
+    assert code == 0 and summary["status"] == "computed"
+    first = out.read_bytes()
+    assert json.loads(first)["split"] == "train"
+    run(capsys, "habit-stats", "--pack", str(tmp_path / "p"), "--out", str(out))
+    assert out.read_bytes() == first
+
+
+def test_habit_stats_unavailable_pack(tmp_path, capsys):
+    code, summary = run(
+        capsys, "habit-stats", "--pack", str(tmp_path / "none"), "--out", str(tmp_path / "h.json")
+    )
+    assert code == 3 and summary["status"] == "unavailable"
