@@ -221,7 +221,8 @@ def test_search_and_both_previews_without_model_or_generation(
     assert len(a.get("plotly_chart")) == charts + 1
     assert "not a spatially approved layout" in texts(a)
     a.button(key="dataset_ref_preview:2").click().run()
-    assert "quarter turns" in texts(a) and len(a.get("plotly_chart")) == charts
+    # P7: quarter-turn references are drawn too, by our own figure, not render_floorplan.
+    assert "turned 90" in texts(a) and len(a.get("plotly_chart")) == charts + 1
     assert any(len(d.value) == 1 for d in a.dataframe)
     assert (agent.call_count, gen.call_count) == (1, 0)
 
@@ -264,3 +265,38 @@ def test_changed_measurements_invalidate_only_references(spies, monkeypatch, tmp
     assert refs.RESULT not in a.session_state
     assert "Nothing searched yet" in texts(a)
     assert gen.call_count == 0
+
+
+def _preview(objects, dims=(4.0, 5.0, 2.7)):
+    from archimind.datasets.search import PreviewObject, ReferencePreview
+
+    return ReferencePreview(
+        status="ready",
+        reference_id="ssr:turned:Bedroom-1",
+        snapshot_id="0" * 64,
+        tier="reference_only",
+        display="oriented_footprints",
+        room=RoomExtent(width_m=dims[0], depth_m=dims[1], height_m=dims[2]),
+        objects=tuple(PreviewObject(**o) for o in objects),
+        openings="unknown",
+    )
+
+
+def test_reference_figure_traces_and_bounds():
+    bed = dict(category="bed", x_m=1.0, y_m=0.5, width_m=1.6, depth_m=2.0, height_m=0.5, yaw_quarter_turns=1)
+    desk = dict(category="table", x_m=2.5, y_m=4.0, width_m=1.2, depth_m=0.6, height_m=0.7, yaw_quarter_turns=0)
+    stand = dict(category="cabinet_shelf_desk", x_m=-0.1, y_m=0.0, width_m=0.4, depth_m=0.4, height_m=0.5, yaw_quarter_turns=2)
+    fig = refs.reference_figure(_preview([bed, desk, stand]))
+    assert len(fig.data) == 1 + 3  # room outline + one rectangle per object
+    outline = fig.data[0]
+    assert (min(outline.x), max(outline.x), min(outline.y), max(outline.y)) == (0.0, 4.0, 0.0, 5.0)
+    rect = fig.data[1]
+    assert (min(rect.x), max(rect.x)) == pytest.approx((1.0, 2.6))
+    assert (min(rect.y), max(rect.y)) == pytest.approx((0.5, 2.5))
+    assert rect.fill == "toself"
+    names = [t.name for t in fig.data[1:]]
+    assert names == ["bed · turned 90°", "table", "cabinet/shelf/desk · turned 180°"]
+    x0, x1 = fig.layout.xaxis.range
+    assert x0 < -0.1 and x1 > 4.0  # objects slightly outside stay visible
+    assert fig.layout.yaxis.scaleanchor == "x"
+    assert "not validated" in fig.layout.title.text

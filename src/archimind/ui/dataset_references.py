@@ -93,6 +93,69 @@ def _hit_text(hit) -> str:
     )
 
 
+TURN_LABELS = {1: "turned 90°", 2: "turned 180°", 3: "turned 270°"}
+
+
+def reference_figure(preview):
+    """Top-down footprints for any reference, including quarter-turn furniture.
+
+    Footprints are already axis-aligned extents, so each is a plain rectangle,
+    labelled with its category and turn. Only the room outline is drawn: the
+    source records no doors or windows. This is our own figure on purpose;
+    ``render_floorplan`` rightly rejects rotated app furniture.
+    """
+    import plotly.graph_objects as go
+
+    room = preview.room
+    fig = go.Figure()
+    fig.add_trace(
+        go.Scatter(
+            x=[0.0, room.width_m, room.width_m, 0.0, 0.0],
+            y=[0.0, 0.0, room.depth_m, room.depth_m, 0.0],
+            mode="lines",
+            line={"color": "#444", "width": 3},
+            name="Room outline (doors and windows unknown)",
+            hoverinfo="skip",
+        )
+    )
+    xs, ys = [0.0, room.width_m], [0.0, room.depth_m]
+    for o in preview.objects:
+        x0, y0, x1, y1 = o.x_m, o.y_m, o.x_m + o.width_m, o.y_m + o.depth_m
+        xs += [x0, x1]
+        ys += [y0, y1]
+        label = o.category.replace("_", "/")
+        if o.yaw_quarter_turns in TURN_LABELS:
+            label += " · " + TURN_LABELS[o.yaw_quarter_turns]
+        fig.add_trace(
+            go.Scatter(
+                x=[x0, x1, x1, x0, x0],
+                y=[y0, y0, y1, y1, y0],
+                mode="lines",
+                fill="toself",
+                opacity=0.6,
+                name=label,
+                text=label,
+                hovertemplate=(
+                    f"{label}<br>{o.width_m:.2f} × {o.depth_m:.2f} m<extra></extra>"
+                ),
+            )
+        )
+    margin = 0.3
+    fig.update_layout(
+        title={"text": "Reference footprints (not validated)"},
+        xaxis={"range": [min(xs) - margin, max(xs) + margin], "title": "x (m)"},
+        yaxis={
+            "range": [min(ys) - margin, max(ys) + margin],
+            "title": "y (m)",
+            "scaleanchor": "x",
+            "scaleratio": 1,
+        },
+        legend={"orientation": "h"},
+        margin={"l": 40, "r": 10, "t": 50, "b": 40},
+    )
+    return fig
+
+
 def _render_preview(hit, pack) -> None:
     from archimind.datasets.search import prepare_reference_preview
 
@@ -149,9 +212,18 @@ def _render_preview(hit, pack) -> None:
             "does not record them; this is not a spatially approved layout."
         )
     else:
-        st.info(
-            "Not drawn as a floor plan: this reference has furniture at quarter turns, "
-            "which the canonical preview does not support. Footprints are listed instead."
+        st.plotly_chart(
+            reference_figure(preview),
+            width="stretch",
+            theme=None,
+            key=f"dataset-ref-oriented-{hit.rank}",
+            config={"scrollZoom": True, "displaylogo": False},
+            alt="Top-down reference footprints, some turned; doors and windows unknown; not a validated layout.",
+        )
+        st.caption(
+            "Reference footprints only, some turned 90° or more. Doors and windows are not "
+            "drawn because the source does not record them; this is not a spatially "
+            "approved layout."
         )
         st.dataframe(
             [
