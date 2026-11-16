@@ -29,8 +29,10 @@ STYLES = (
     "missing_ceiling",
     "no_bed_size",
     "l_shaped",
+    "twin_beds",
 )
 EXPECTED = {
+    "twin_beds": ("needs_clarification", "quantity"),
     "full_metric": ("ready", None),
     "feet": ("ready", None),
     "typos": ("ready", None),
@@ -105,14 +107,18 @@ def _eligible(scene) -> bool:
     )
 
 
-def _items(counts: Counter, bed_size: str, *, real_counts: bool, sized: bool) -> str:
+def _items(
+    counts: Counter, bed_size: str, *, real_counts: bool, sized: bool, twin: bool = False
+) -> str:
     parts = []
     for name in ORDER:
         n = counts[name] if real_counts else min(counts[name], 1)
         if not n:
             continue
         if name == "bed":
-            parts.append(f"one {bed_size} bed" if sized else "a bed")
+            parts.append(
+                "two twin beds" if twin else f"one {bed_size} bed" if sized else "a bed"
+            )
         else:
             parts.append(f"{NUMBER.get(n, str(n))} {name if n == 1 else PLURAL[name]}")
     return parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
@@ -127,7 +133,8 @@ def _prompt(style: str, dims, counts: Counter, bed_size: str) -> str:
         offset, door_w, door_h = (round(v / FT, 1) for v in DOOR)
         unit = "ft"
     items = _items(
-        counts, bed_size, real_counts=style == "multiples", sized=style != "no_bed_size"
+        counts, bed_size, real_counts=style == "multiples", sized=style != "no_bed_size",
+        twin=style == "twin_beds",
     )
     if style == "casual":
         return (
@@ -175,6 +182,8 @@ def build_prompt_suite(scenes, *, per_style: int = 3, seed: int = 0) -> list[Pro
             functions = {
                 k: (counts[k] if style == "multiples" else 1) for k in ORDER if counts[k]
             }
+            if style == "twin_beds":
+                functions["bed"] = 2
             cases.append(
                 PromptCase(
                     case_id=f"{style}:{scene.reference_id}",

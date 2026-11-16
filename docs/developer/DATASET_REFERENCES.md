@@ -21,7 +21,7 @@ reference pack, and works unchanged when no pack is configured.
 | P5 layout-habit statistics | IMPLEMENTED; `habits.json` reproducible byte for byte from the P2b train split; every habit n ≥ 100 | [DATASET_HABITS_P5.md](../data/DATASET_HABITS_P5.md) |
 | P6 habit scorer and generator benchmark | IMPLEMENTED; baseline bed only-long-edge 30.6% generated vs 12.9% real (val); held-out check PASS (median penalty 0.048 val / 0.055 test vs 0.198 generated) | [DATASET_HABITS_P6.md](../data/DATASET_HABITS_P6.md) |
 | P7 preview every reference | IMPLEMENTED; quarter-turn references drawn by an own Plotly figure; all 4,170 real references previewable (0 failures) | [DATASET_PREVIEW_P7.md](../data/DATASET_PREVIEW_P7.md) |
-| Chat prompt-variation suite | IMPLEMENTED; 30 val-room prompts in 10 styles, live run 26/30 correct; failures: typos 0/3 (evidence checks), 1 feet case (duplicated hard constraint) | [CHAT_PROMPT_SUITE.md](../data/CHAT_PROMPT_SUITE.md) |
+| Chat prompt-variation suite | IMPLEMENTED; 33 val-room prompts in 11 styles; 26/30 before the interpreter fixes, 32/33 after (typo-tolerant evidence words, restated requests ignored as constraints, named unsupported reasons) | [CHAT_PROMPT_SUITE.md](../data/CHAT_PROMPT_SUITE.md) |
 
 Synthetic fixtures prove the engineering only. They say nothing about real source
 schemas, conventions or yield.

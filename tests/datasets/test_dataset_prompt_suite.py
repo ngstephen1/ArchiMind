@@ -123,3 +123,17 @@ def test_entrance_question_counts_as_naming_the_door():
     row = score_case(case, _result("needs_clarification", tuple(case.expected_functions.items()),
                                    clarifications=("Provide at least one entrance: wall, offset, width and height.",)))
     assert row["reason_ok"] is True
+
+
+def test_twin_beds_style_asks_about_quantity():
+    case = by_style(build_prompt_suite(rooms(), per_style=1, seed=0))["twin_beds"][0]
+    assert "two twin beds" in case.prompt
+    assert case.expected_functions["bed"] == 2
+    assert (case.expected_status, case.expected_reason) == ("needs_clarification", "quantity")
+
+
+def test_new_styles_leave_existing_cases_unchanged():
+    cases = build_prompt_suite(rooms(), per_style=2, seed=0)
+    assert [c.case_id for c in cases if c.style == "feet"] == [
+        c.case_id for c in build_prompt_suite(rooms(), per_style=2, seed=0) if c.style == "feet"
+    ]

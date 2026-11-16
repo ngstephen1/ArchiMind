@@ -1,6 +1,7 @@
 """Conversation is pending input; existing generation/results remain authoritative."""
 
 import os
+import re
 
 import streamlit as st
 
@@ -29,10 +30,49 @@ PREPARED = "chat_bedroom_prepared"
 SIGNATURE = "chat_bedroom_signature"
 
 
+def _plain(text: str) -> str:
+    """One short line with markdown control characters escaped."""
+    text = " ".join(text.split())[:120]
+    return re.sub(r"([\\`*_{}\[\]<>#|~])", r"\\\1", text)
+
+
+def _unsupported_reasons(extraction) -> list[str]:
+    """What made a request unsupported, in the user's own words where possible."""
+    if extraction is None:
+        return []
+    from archimind.agents.catalog_conversation import _restates_request
+
+    reasons = []
+    if extraction.room_type == "unsupported":
+        reasons.append("only bedrooms are supported")
+    if extraction.shape == "unsupported":
+        reasons.append("only single rectangular rooms are supported")
+    reasons += [_plain(f) for f in extraction.unsupported_features]
+    functions = {i.function for i in extraction.furniture}
+    reasons += [
+        f"mandatory constraint: {_plain(c.value)}"
+        for c in extraction.hard_constraints
+        if not _restates_request(c, functions)
+    ]
+    reasons += [
+        f"unsupported furniture: {_plain(i.source.text)}"
+        for i in extraction.furniture
+        if i.function == "unsupported"
+    ]
+    return list(dict.fromkeys(reasons))[:4]
+
+
 def _assistant_text(result):
     if result.error:
         return result.error.message
     if result.status == "unsupported":
+        reasons = _unsupported_reasons(getattr(result, "extraction", None))
+        if reasons:
+            return (
+                "This request includes something the app cannot do yet:\n"
+                + "\n".join(f"- {r}" for r in reasons)
+                + "\n\nPlease revise it; no layout has changed."
+            )
         return "This request includes unsupported room geometry or mandatory constraints. Please revise it; no layout has changed."
     if result.status == "needs_clarification":
         return "Please clarify:\n" + "\n".join(

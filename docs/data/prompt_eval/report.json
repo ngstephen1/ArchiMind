@@ -45,11 +45,11 @@
       "error": null,
       "expected_status": "ready",
       "functions_ok": true,
-      "got_status": "unsupported",
-      "passed": false,
+      "got_status": "ready",
+      "passed": true,
       "reason_ok": null,
-      "room_ok": null,
-      "status_ok": false,
+      "room_ok": true,
+      "status_ok": true,
       "style": "feet"
     },
     {
@@ -80,27 +80,21 @@
     },
     {
       "case_id": "typos:ssr:6e3dbf3d-cf2f-41ea-adad-c6a40129c200:SecondBedroom-6938",
-      "clarifications": [
-        "Confirm that this is a bedroom.",
-        "Confirm the function of furniture request 2.",
-        "Confirm the function of furniture request 3."
-      ],
+      "clarifications": [],
       "error": null,
       "expected_status": "ready",
       "functions_ok": true,
-      "got_status": "needs_clarification",
-      "passed": false,
+      "got_status": "ready",
+      "passed": true,
       "reason_ok": null,
-      "room_ok": null,
-      "status_ok": false,
+      "room_ok": true,
+      "status_ok": true,
       "style": "typos"
     },
     {
       "case_id": "typos:ssr:fe3731be-633d-487d-a502-63a3c0ebfbc7:MasterBedroom-2363",
       "clarifications": [
-        "Confirm that this is a bedroom.",
-        "Provide/confirm room depth, including original number and units.",
-        "Confirm the function of furniture request 2."
+        "Provide/confirm room depth, including original number and units."
       ],
       "error": null,
       "expected_status": "ready",
@@ -114,18 +108,15 @@
     },
     {
       "case_id": "typos:ssr:6e7a0c41-15f3-4909-a20c-dab460b45ada:Bedroom-258",
-      "clarifications": [
-        "Confirm that this is a bedroom.",
-        "Confirm the function of furniture request 2."
-      ],
+      "clarifications": [],
       "error": null,
       "expected_status": "ready",
       "functions_ok": true,
-      "got_status": "needs_clarification",
-      "passed": false,
+      "got_status": "ready",
+      "passed": true,
       "reason_ok": null,
-      "room_ok": null,
-      "status_ok": false,
+      "room_ok": true,
+      "status_ok": true,
       "style": "typos"
     },
     {
@@ -441,6 +432,51 @@
       "room_ok": null,
       "status_ok": true,
       "style": "l_shaped"
+    },
+    {
+      "case_id": "twin_beds:ssr:ab4068f7-ec54-420f-a856-59a54a807d91:Bedroom-52838",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "twin_beds"
+    },
+    {
+      "case_id": "twin_beds:ssr:40c54a07-55c4-4c83-9624-957261e07ab8:MasterBedroom-65728",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "twin_beds"
+    },
+    {
+      "case_id": "twin_beds:ssr:797dd495-26a0-4bf6-b0c8-c71690e1addf:SecondBedroom-5810",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "twin_beds"
     }
   ],
   "summary": {
@@ -456,10 +492,9 @@
       "feet": {
         "cases": 3,
         "got_status": {
-          "ready": 2,
-          "unsupported": 1
+          "ready": 3
         },
-        "passed": 2,
+        "passed": 3,
         "reason_named": null
       },
       "full_metric": {
@@ -518,18 +553,27 @@
         "passed": 3,
         "reason_named": "3/3"
       },
-      "typos": {
+      "twin_beds": {
         "cases": 3,
         "got_status": {
           "needs_clarification": 3
         },
-        "passed": 0,
+        "passed": 3,
+        "reason_named": "3/3"
+      },
+      "typos": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 1,
+          "ready": 2
+        },
+        "passed": 2,
         "reason_named": null
       }
     },
-    "cases": 30,
-    "pass_rate": 0.8667,
-    "passed": 26
+    "cases": 33,
+    "pass_rate": 0.9697,
+    "passed": 32
   },
   "unrecorded": []
 }
