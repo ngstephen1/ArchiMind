@@ -9,13 +9,15 @@ members that happen to be stored first, not members chosen by identity.
 
 import base64
 import os
+import shutil
 import tarfile
 import time
 import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from pathlib import Path
 
 from archimind.datasets.canonical import strict_loads
 from archimind.datasets.safe_io import UnsafeContentError, make_request
@@ -261,4 +263,104 @@ def gzip_tar_prefix(
             complete = False  # the cap cut the stream mid-member: expected
     return PrefixListing(
         url=url, bytes_read=capped.read_bytes, complete=complete, members=tuple(members)
+    )
+
+
+@dataclass(frozen=True)
+class SelectedMembers:
+    url: str
+    bytes_read: int
+    files: tuple  # SourceFile records, sorted by path
+    missing: tuple[str, ...]  # wanted names not found before the cap
+
+
+def gzip_tar_select(
+    url: str,
+    dest: Path,
+    wanted: Mapping[str, int],
+    *,
+    max_bytes: int,
+    max_member_bytes: int = 64 * 1024 * 1024,
+    headers=None,
+    opener: Opener = _default_opener,
+    timeout: float = 120.0,
+) -> SelectedMembers:
+    """Stream a ``.tar.gz`` prefix and keep only the exactly named members.
+
+    ``wanted`` maps member names (from an earlier prefix listing) to their expected
+    sizes. Streaming stops as soon as every wanted member is written, or at
+    ``max_bytes`` of compressed input. Every name is checked as a portable relative
+    path, every member must be a regular file of the listed size, and nothing is
+    written outside ``dest``. Files land in a staging directory that replaces
+    ``dest`` only when the stream ends without error.
+    """
+    from archimind.datasets.canonical import file_sha256
+    from archimind.datasets.contracts import SourceFile, check_relative_path
+
+    if not url.startswith("https://"):
+        raise UnsafeContentError("Only https:// requests are allowed")
+    for name, size in wanted.items():
+        try:
+            check_relative_path(name)
+        except ValueError as error:
+            raise UnsafeContentError(f"Unsafe wanted member: {error}") from None
+        if not isinstance(size, int) or not 0 <= size <= max_member_bytes:
+            raise UnsafeContentError(f"Wanted member {name} exceeds its size limit")
+    if len({n.casefold() for n in wanted}) != len(wanted):
+        raise UnsafeContentError("Wanted members collide case-insensitively")
+    dest = Path(dest)
+    staging = dest.with_name(dest.name + ".selecting")
+    if staging.exists():
+        shutil.rmtree(staging)
+    staging.mkdir(parents=True)
+    remaining = dict(wanted)
+    records = []
+    request = make_request(url, headers)
+    try:
+        with opener(request, timeout) as response:
+            capped = _CappedReader(response, max_bytes)
+            try:
+                with tarfile.open(fileobj=capped, mode="r|gz") as archive:
+                    for info in archive:
+                        if info.name not in remaining:
+                            continue
+                        if not info.isreg() or info.size != remaining[info.name]:
+                            raise UnsafeContentError(
+                                f"{info.name} is not a regular file of the listed size"
+                            )
+                        target = staging / info.name
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        source = archive.extractfile(info)
+                        with source, open(target, "wb") as out:
+                            written = 0
+                            while block := source.read(1024 * 1024):
+                                written += len(block)
+                                if written > info.size:
+                                    raise UnsafeContentError("Member overran its size")
+                                out.write(block)
+                        if written != info.size:
+                            raise UnsafeContentError(f"{info.name} was truncated")
+                        records.append(
+                            SourceFile(
+                                path=info.name,
+                                size_bytes=written,
+                                sha256=file_sha256(target),
+                            )
+                        )
+                        del remaining[info.name]
+                        if not remaining:
+                            break
+            except (tarfile.ReadError, EOFError, OSError):
+                pass  # the cap cut the stream: whatever is still wanted is reported
+        if dest.exists():
+            shutil.rmtree(dest)
+        os.replace(staging, dest)
+    except BaseException:
+        shutil.rmtree(staging, ignore_errors=True)
+        raise
+    return SelectedMembers(
+        url=url,
+        bytes_read=capped.read_bytes,
+        files=tuple(sorted(records, key=lambda r: r.path)),
+        missing=tuple(sorted(remaining)),
     )

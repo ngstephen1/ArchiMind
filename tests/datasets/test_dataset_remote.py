@@ -6,6 +6,7 @@ import pytest
 
 from archimind.datasets.remote import (
     gzip_tar_prefix,
+    gzip_tar_select,
     hf_resolve_url,
     hf_tree,
     kaggle_dataset_view,
@@ -177,3 +178,88 @@ def test_kaggle_download_url_encodes_subdirectory_slashes():
     assert kaggle_download_url("o/d", "dir/sub file.json") == (
         "https://www.kaggle.com/api/v1/datasets/download/o/d/dir%2Fsub%20file.json"
     )
+
+
+def test_select_keeps_only_named_members_and_stops_early(tmp_path):
+    import hashlib
+
+    body = targz(
+        {
+            "S/h/r/Bed_x_1.glb": b"b" * 50,
+            "S/h/other/Sofa_y_1.glb": b"s" * 70,
+            "S/h/r/meta.json": b"{}",
+            "S/z/never/read.bin": b"z" * 10,
+        }
+    )
+    reads = []
+
+    class Counting(Response):
+        def read(self, size=-1):
+            data = super().read(size)
+            reads.append(len(data))
+            return data
+
+    result = gzip_tar_select(
+        "https://x/a.tar.gz",
+        tmp_path / "out",
+        {"S/h/r/Bed_x_1.glb": 50, "S/h/r/meta.json": 2},
+        max_bytes=10**6,
+        opener=lambda request, timeout: Counting(body),
+    )
+    assert result.missing == ()
+    assert [f.path for f in result.files] == ["S/h/r/Bed_x_1.glb", "S/h/r/meta.json"]
+    assert result.files[0].sha256 == hashlib.sha256(b"b" * 50).hexdigest()
+    assert sorted(p.name for p in (tmp_path / "out").rglob("*") if p.is_file()) == [
+        "Bed_x_1.glb",
+        "meta.json",
+    ]
+    assert not (tmp_path / "out.selecting").exists()
+
+
+def test_select_reports_members_beyond_the_cap(tmp_path):
+    import os
+
+    body = targz({f"S/f{i}.bin": os.urandom(20_000) for i in range(20)})
+    result = gzip_tar_select(
+        "https://x/a.tar.gz",
+        tmp_path / "out",
+        {"S/f0.bin": 20_000, "S/f19.bin": 20_000},
+        max_bytes=60_000,
+        opener=bytes_opener(body),
+    )
+    assert [f.path for f in result.files] == ["S/f0.bin"]
+    assert result.missing == ("S/f19.bin",)
+
+
+@pytest.mark.parametrize(
+    "wanted",
+    [
+        {"../evil.bin": 1},
+        {"C:/evil.bin": 1},
+        {"S/a.bin": 1, "s/A.BIN": 1},
+        {"S/a.bin": 10**12},
+    ],
+)
+def test_select_rejects_unsafe_wanted_names(tmp_path, wanted):
+    with pytest.raises(UnsafeContentError):
+        gzip_tar_select(
+            "https://x/a.tar.gz",
+            tmp_path / "out",
+            wanted,
+            max_bytes=10**6,
+            opener=bytes_opener(targz({})),
+        )
+
+
+def test_select_rejects_size_mismatch_and_leaves_nothing(tmp_path):
+    body = targz({"S/a.bin": b"a" * 10})
+    with pytest.raises(UnsafeContentError, match="listed size"):
+        gzip_tar_select(
+            "https://x/a.tar.gz",
+            tmp_path / "out",
+            {"S/a.bin": 11},
+            max_bytes=10**6,
+            opener=bytes_opener(body),
+        )
+    assert not (tmp_path / "out").exists()
+    assert not (tmp_path / "out.selecting").exists()

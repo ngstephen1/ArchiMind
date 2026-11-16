@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import sys
+from collections import Counter
 from pathlib import Path
 
 from archimind.datasets.canonical import atomic_write_bytes
@@ -486,6 +487,265 @@ def _cmd_ssr_build(args) -> int:
     return EXIT_OK
 
 
+def _semantic_label_boxes(path: Path) -> tuple[dict, tuple[int, int]]:
+    """Pixel box of each non-zero label in a palette PNG (offline audit only)."""
+    import numpy as np  # lazy: numpy and Pillow are only needed for this audit
+    from PIL import Image
+
+    with Image.open(path) as image:
+        if image.mode not in ("P", "L"):
+            raise UnsafeContentError(f"{path.name}: semantic image is not single-band")
+        labels = np.asarray(image)
+        size = image.size
+    boxes = {}
+    for label in np.unique(labels):
+        if label == 0:
+            continue
+        rows, cols = np.nonzero(labels == label)
+        boxes[int(label)] = (
+            float(cols.min()),
+            float(rows.min()),
+            float(cols.max() + 1),
+            float(rows.max() + 1),
+        )
+    return boxes, size
+
+
+def _cmd_midi_audit(args) -> int:
+    """P2c: audit acquired MIDI rooms against their manifest, SSR and cameras."""
+    from archimind.datasets.canonical import file_sha256, strict_loads
+    from archimind.datasets.glb import inspect_glb
+    from archimind.datasets.midi import build_index
+    from archimind.datasets.midi_adapter import (
+        ADAPTER_VERSION,
+        alignment_report,
+        associate,
+        camera_report,
+        classify_room_files,
+        fit_similarity,
+        furniture_name,
+        match_objects,
+        ssr_world_box,
+        topdown_svg,
+        view_inventory,
+    )
+    from archimind.datasets.pack import PackError, verify_pack
+
+    out = Path(args.out)
+    if out.exists() and any(out.iterdir()):
+        _emit({"status": "failed", "reason": "output directory is not empty"})
+        return EXIT_FAIL
+    try:
+        pack = verify_pack(Path(args.ssr_pack))
+    except PackError as error:
+        _emit({"status": "failed", "reason": f"ssr pack: {error}"})
+        return EXIT_FAIL
+    scenes = {f"{s.source_scene_id}/{s.source_room_id}": s for s in pack.scenes}
+    midi_dir = Path(args.midi_dir)
+
+    def load(name):
+        return strict_loads((midi_dir / name).read_bytes())
+
+    index = build_index(
+        load("midi_room_ids.json"),
+        load("midi_furniture_ids.json"),
+        test_room_ids=load("midi_test_room_ids.json"),
+    )
+    scene_root, render_root = Path(args.scene_root), Path(args.render_root)
+
+    def record(path: Path, root: Path) -> dict:
+        return {
+            "path": path.relative_to(root).as_posix(),
+            "size_bytes": path.stat().st_size,
+            "sha256": file_sha256(path),
+        }
+
+    rooms = []
+    (out / "overlays").mkdir(parents=True, exist_ok=True)
+    for room_dir in sorted(p for p in scene_root.glob("*/*") if p.is_dir()):
+        house_dir, room = room_dir.parent, room_dir.name
+        key = f"{house_dir.name}/{room}"
+        names = [
+            p.relative_to(house_dir).as_posix()
+            for p in house_dir.rglob("*")
+            if p.is_file()
+            and (p.parent == room_dir or p.name in (f"{room}.glb", f"{room}_full.glb"))
+        ]
+        files = classify_room_files(room, names)
+        geometry, boxes = {"objects": [], "structure": []}, {}
+        for label, member in (
+            ("room_glb", files.room_glb),
+            ("full_glb", files.full_glb),
+        ):
+            if member:
+                summary = inspect_glb(house_dir / member)
+                geometry[label] = record(house_dir / member, scene_root) | {
+                    "triangles": summary.triangles,
+                    "images": summary.images,
+                    "max_texture_px": summary.max_texture_px,
+                }
+            else:
+                geometry[label] = None
+        for fid, member in sorted(files.objects.items()):
+            summary = inspect_glb(house_dir / member, max_bytes=32 * 1024 * 1024)
+            boxes[fid] = (summary.world_min, summary.world_max)
+            geometry["objects"].append(
+                record(house_dir / member, scene_root)
+                | {
+                    "furniture_id": fid,
+                    "triangles": summary.triangles,
+                    "max_texture_px": summary.max_texture_px,
+                    "world_min": [round(v, 6) for v in summary.world_min],
+                    "world_max": [round(v, 6) for v in summary.world_max],
+                }
+            )
+        for member in files.structure:
+            geometry["structure"].append(record(house_dir / member, scene_root))
+        geometry["unrecognized"] = list(files.unrecognized)
+
+        listed = [furniture_name(f) for f in index.rooms.get(key, ())]
+        assoc = associate(listed, files.objects)
+        view_dir = render_root / key
+        view_names = (
+            sorted(p.name for p in view_dir.iterdir() if p.is_file())
+            if view_dir.is_dir()
+            else []
+        )
+        meta = (
+            strict_loads((view_dir / "meta.json").read_bytes())
+            if "meta.json" in view_names
+            else None
+        )
+        locations = len(meta["locations"]) if meta else 0
+        inventory = view_inventory(view_names, locations)
+        if meta:
+            listed_frames = {
+                f.get("name")
+                for loc in meta["locations"]
+                for f in loc.get("frames", [])
+            }
+            inventory["meta_frame_names_present"] = sum(
+                1 for n in listed_frames if n in view_names
+            )
+            inventory["meta_frame_names"] = len(listed_frames)
+        inventory["files"] = [record(view_dir / n, render_root) for n in view_names]
+
+        midi_centres = {
+            fid: (
+                tuple((a + b) / 2 for a, b in zip(lo, hi, strict=True)),
+                tuple(b - a for a, b in zip(lo, hi, strict=True)),
+            )
+            for fid, (lo, hi) in boxes.items()
+        }
+        scene = scenes.get(key)
+        if scene is None:
+            alignment = {"status": "NOT_VERIFIABLE", "detail": "room not in SSR pack"}
+        else:
+            ssr_objects = [o.model_dump() for o in scene.objects]
+            alignment = alignment_report(midi_centres, ssr_objects)
+            if alignment["status"] != "NOT_VERIFIABLE":
+                ssr_boxes = {
+                    o["source_object_id"]: ssr_world_box(
+                        o["size_raw"], o["position_raw"], o["rotation_raw_xyzw"]
+                    )
+                    for o in ssr_objects
+                }
+                ssr_boxes = {k: v for k, v in ssr_boxes.items() if v is not None}
+                pairs, _, _ = match_objects(
+                    midi_centres,
+                    {
+                        o["source_object_id"]: (
+                            o["jid"],
+                            ssr_boxes.get(o["source_object_id"]),
+                        )
+                        for o in ssr_objects
+                    },
+                )
+                fit = fit_similarity(pairs)
+                midi_in_ssr = {
+                    fid: (fit.to_ssr(c), tuple(v / fit.scale for v in e))
+                    for fid, (c, e) in midi_centres.items()
+                }
+                svg = topdown_svg(scene.room.model_dump(), ssr_boxes, midi_in_ssr)
+                (out / "overlays" / f"{house_dir.name}_{room}.svg").write_text(
+                    svg, encoding="utf-8"
+                )
+        camera = {"status": "NOT_VERIFIABLE", "detail": "no meta.json"}
+        if meta and boxes:
+            labels, width, height = [], None, None
+            for k in range(locations):
+                path = view_dir / f"semantic_{k:04d}.png"
+                if not path.is_file():
+                    labels = None
+                    break
+                found, (width, height) = _semantic_label_boxes(path)
+                labels.append(found)
+            if labels:
+                camera = camera_report(meta, boxes, labels, width=width, height=height)
+            else:
+                camera = {
+                    "status": "NOT_VERIFIABLE",
+                    "detail": "semantic views missing",
+                }
+        rooms.append(
+            {
+                "room_key": key,
+                "midi_split": index.splits.get(key),
+                "ssr": None
+                if scene is None
+                else {
+                    "reference_id": scene.reference_id,
+                    "tier": scene.tier,
+                    "split": scene.split,
+                },
+                "geometry": geometry,
+                "association": {
+                    "listed": len(listed),
+                    "matched": list(assoc.matched),
+                    "missing": list(assoc.missing),
+                    "orphans": list(assoc.orphans),
+                    "duplicates": list(assoc.duplicates),
+                },
+                "views": inventory,
+                "modalities": {
+                    "room_glb": "present" if files.room_glb else "absent",
+                    "full_glb": "present" if files.full_glb else "absent",
+                    "object_glbs": len(files.objects),
+                    "views": "present" if meta else "absent",
+                    "depth": "present, EXR not decoded: units unverified"
+                    if inventory["kinds"]["depth"]["present"]
+                    else "absent",
+                    "surfaces_npy": "not acquired (separate SURFACE archives)",
+                },
+                "alignment": alignment,
+                "camera": camera,
+            }
+        )
+    report = {
+        "adapter_version": ADAPTER_VERSION,
+        "ssr_pack_snapshot": pack.manifest.snapshot_id,
+        "rooms": rooms,
+        "summary": {
+            "rooms": len(rooms),
+            "alignment": dict(Counter(r["alignment"]["status"] for r in rooms)),
+            "camera": dict(Counter(r["camera"]["status"] for r in rooms)),
+            "association_clean": sum(
+                1
+                for r in rooms
+                if not (
+                    r["association"]["missing"]
+                    or r["association"]["orphans"]
+                    or r["association"]["duplicates"]
+                )
+            ),
+        },
+    }
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    atomic_write_bytes(out / "report.json", text.encode("utf-8"))
+    _emit({"status": "audited"} | report["summary"])
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m archimind.datasets")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -576,6 +836,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--future-permission", help="PermissionRecord JSON for 3D-FUTURE")
     p.add_argument("--future-retrieved-utc", help="when model_info.json was fetched")
     p.set_defaults(func=_cmd_ssr_build)
+
+    p = sub.add_parser("midi-audit", help="P2c: audit acquired MIDI rooms")
+    p.add_argument("--scene-root", required=True, help="<...>/3D-FRONT-TEST-SCENE")
+    p.add_argument("--render-root", required=True, help="<...>/3D-FRONT-TEST-RENDER")
+    p.add_argument("--midi-dir", required=True, help="MIDI id lists")
+    p.add_argument("--ssr-pack", required=True, help="verified SSR reference pack")
+    p.add_argument("--out", required=True, help="new or empty output directory")
+    p.set_defaults(func=_cmd_midi_audit)
     return parser
 
 
