@@ -12,9 +12,9 @@ reference pack, and works unchanged when no pack is configured.
 | Phase | State | Evidence |
 | --- | --- | --- |
 | P0 contracts, safe I/O, stages, pack, CLI | IMPLEMENTED (synthetic only) | `tests/datasets` (offline) |
-| P1 probe (inventory and yield) | SSR PASS, MIDI PASS (bounded prefix), FUTURE NOT RUN | [DATASET_PROBE_P1.md](../data/DATASET_PROBE_P1.md) |
+| P1 probe (inventory and yield) | SSR PASS, MIDI PASS (bounded prefix), FUTURE PASS (Colab `pilot-001`) | [DATASET_PROBE_P1.md](../data/DATASET_PROBE_P1.md) |
 | P2a SSR adapter | IMPLEMENTED; real local pack verified (4,168 scenes, 53 canonical); permission provisional | [DATASET_SSR_P2A.md](../data/DATASET_SSR_P2A.md) |
-| P2b FUTURE / P2c MIDI adapters | NOT STARTED (P2b blocked on Kaggle credentials) | |
+| P2b FUTURE / P2c MIDI adapters | NOT STARTED (P2b unblocked: `model_info.json` covers 7,699 of 7,722 SSR jids) | |
 | P3 search facade over a real pack | NOT STARTED | |
 | P4 app wiring | NOT STARTED | |
 

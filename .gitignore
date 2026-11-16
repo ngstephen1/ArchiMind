@@ -55,3 +55,6 @@ htmlcov/
 
 # Notebook checkpoints
 .ipynb_checkpoints/
+
+# Real dataset downloads (third-party licenses; never commit)
+/data/p1/
