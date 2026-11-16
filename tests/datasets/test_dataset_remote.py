@@ -9,6 +9,7 @@ from archimind.datasets.remote import (
     hf_resolve_url,
     hf_tree,
     kaggle_dataset_view,
+    kaggle_download_url,
     kaggle_files,
     kaggle_headers,
 )
@@ -67,9 +68,10 @@ def test_kaggle_files_paginates_and_needs_credentials(monkeypatch):
         {"datasetFiles": [{"name": "a.json", "totalBytes": 1}]},
     ]
     log = []
-    files = kaggle_files("o/d", opener=json_opener(pages, log))
+    files = kaggle_files("o/d", opener=json_opener(pages, log), sleep=lambda _: None)
     assert [f.path for f in files] == ["a.json", "b.zip"]
     assert "pageToken=t" in log[1][0] and log[0][1].startswith("Basic ")
+    assert log[0][0].startswith("https://www.kaggle.com/api/v1/datasets/list/o/d?")
 
 
 def test_kaggle_headers_bearer_for_new_tokens_basic_for_legacy(monkeypatch):
@@ -135,3 +137,43 @@ def test_prefix_stops_at_the_cap_without_error():
 def test_prefix_requires_https():
     with pytest.raises(UnsafeContentError):
         gzip_tar_prefix("http://x/a.tar.gz", max_bytes=10)
+
+
+def test_kaggle_files_retries_rate_limits_then_gives_up(monkeypatch):
+    import email.message
+    import urllib.error
+
+    monkeypatch.setenv("KAGGLE_USERNAME", "u")
+    monkeypatch.setenv("KAGGLE_KEY", "k")
+
+    def http_error(code, retry_after=None):
+        headers = email.message.Message()
+        if retry_after is not None:
+            headers["Retry-After"] = retry_after
+        return urllib.error.HTTPError("https://x", code, "err", headers, None)
+
+    page = {"datasetFiles": [{"name": "a.json", "totalBytes": 1}]}
+    responses = [http_error(429, "7"), http_error(503), page]
+
+    def opener(request, timeout):
+        item = responses.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return Response(json.dumps(item).encode())
+
+    slept = []
+    files = kaggle_files("o/d", opener=opener, sleep=slept.append)
+    assert [f.path for f in files] == ["a.json"]
+    assert slept == [7.0, 4.0]  # Retry-After honoured, then exponential backoff
+
+    def always_404(request, timeout):
+        raise http_error(404)
+
+    with pytest.raises(urllib.error.HTTPError):
+        kaggle_files("o/d", opener=always_404, sleep=slept.append)
+
+
+def test_kaggle_download_url_encodes_subdirectory_slashes():
+    assert kaggle_download_url("o/d", "dir/sub file.json") == (
+        "https://www.kaggle.com/api/v1/datasets/download/o/d/dir%2Fsub%20file.json"
+    )

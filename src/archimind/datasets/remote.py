@@ -10,6 +10,8 @@ members that happen to be stored first, not members chosen by identity.
 import base64
 import os
 import tarfile
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Callable
@@ -98,8 +100,12 @@ def hf_resolve_url(repo: str, revision: str, path: str) -> str:
 
 
 def kaggle_download_url(ref: str, path: str) -> str:
-    """Single-file download endpoint; Kaggle may serve large files zipped."""
-    return f"{KAGGLE_API}/datasets/download/{ref}/{urllib.parse.quote(path)}"
+    """Single-file download endpoint; Kaggle may serve large files zipped.
+
+    The file path is one URL segment, so ``/`` inside it must be ``%2F``: the
+    unencoded form 404s for files in subdirectories.
+    """
+    return f"{KAGGLE_API}/datasets/download/{ref}/{urllib.parse.quote(path, safe='')}"
 
 
 def kaggle_headers() -> dict:
@@ -132,16 +138,60 @@ def kaggle_dataset_view(ref: str, *, opener: Opener = _default_opener) -> dict:
     }
 
 
+RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
+
+
+def _retry_delay(error: urllib.error.HTTPError, attempt: int, cap: float) -> float:
+    retry_after = (error.headers.get("Retry-After") or "") if error.headers else ""
+    if retry_after.strip().isdigit():
+        return min(cap, float(retry_after.strip()))
+    return min(cap, 2.0 * 2**attempt)
+
+
+def _get_json_retrying(
+    url: str,
+    *,
+    headers,
+    opener: Opener,
+    sleep: Callable[[float], None],
+    retries: int = 8,
+    max_delay: float = 120.0,
+):
+    """``_get_json`` that backs off on rate limits and transient server errors,
+    honouring ``Retry-After`` when the server sends one."""
+    for attempt in range(retries + 1):
+        try:
+            return _get_json(url, headers=headers, opener=opener)
+        except urllib.error.HTTPError as error:
+            if error.code not in RETRY_STATUS or attempt == retries:
+                raise
+            sleep(_retry_delay(error, attempt, max_delay))
+    raise AssertionError("unreachable")
+
+
 def kaggle_files(
-    ref: str, *, opener: Opener = _default_opener, max_pages: int = 200
+    ref: str,
+    *,
+    opener: Opener = _default_opener,
+    max_pages: int = 2000,
+    page_delay: float = 0.5,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> list[RemoteFile]:
-    """Paginated file listing (requires Kaggle credentials in the environment)."""
+    """Paginated file listing (requires Kaggle credentials in the environment).
+
+    Endpoint is ``/datasets/list/{owner}/{slug}`` (``/datasets/list/files/...``
+    404s). The server caps ``pageSize`` at 200, so large datasets such as
+    3D-FUTURE need hundreds of pages: requests are paced by ``page_delay`` and
+    429/5xx responses are retried with backoff.
+    """
     headers = kaggle_headers()
     files, token = [], None
-    for _ in range(max_pages):
+    for page_number in range(max_pages):
+        if page_number:
+            sleep(page_delay)
         query = {"pageSize": "200"} | ({"pageToken": token} if token else {})
-        url = f"{KAGGLE_API}/datasets/list/files/{ref}?{urllib.parse.urlencode(query)}"
-        page = _get_json(url, headers=headers, opener=opener)
+        url = f"{KAGGLE_API}/datasets/list/{ref}?{urllib.parse.urlencode(query)}"
+        page = _get_json_retrying(url, headers=headers, opener=opener, sleep=sleep)
         for f in page.get("datasetFiles") or []:
             files.append(
                 RemoteFile(
