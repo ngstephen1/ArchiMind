@@ -1,0 +1,248 @@
+{
+  "call_pass_rate": 1.0,
+  "calls": 1200,
+  "generated": {
+    "candidates": 2400,
+    "habit_outcomes": {
+      "bed_edge": {
+        "free_standing": 0.12,
+        "long_edge_only": 0.30625,
+        "short_edge": 0.57375
+      },
+      "chair_desk_gap": {
+        "0.15_0.40": 0.074545,
+        "0.40_0.80": 0.109091,
+        "ge_0.80": 0.76,
+        "lt_0.15": 0.056364
+      },
+      "desk_wall": {
+        "free": 0.135833,
+        "wall": 0.864167
+      },
+      "storage_wall": {
+        "free": 0.1125,
+        "wall": 0.8875
+      }
+    },
+    "habit_penalty": {
+      "mean": 0.252162,
+      "n": 2400,
+      "p10": 0.045391,
+      "p50": 0.197511,
+      "p90": 0.471248
+    },
+    "layout_score": {
+      "mean": 55.901451,
+      "n": 2400,
+      "p10": 40.982431,
+      "p50": 57.435792,
+      "p90": 68.780542
+    },
+    "n": {
+      "bed_edge": 2400,
+      "chair_desk_gap": 1100,
+      "desk_wall": 2400,
+      "storage_wall": 1200
+    }
+  },
+  "habits_snapshot_id": "8cfb31258aa7c4b7f29ce114661d59c1709d95e4d4ca16f5929e78e5089e9422",
+  "held_out": {
+    "passed": true,
+    "test": {
+      "penalty": {
+        "mean": 0.158952,
+        "n": 259,
+        "p10": 0.008029,
+        "p50": 0.055012,
+        "p90": 0.465618
+      },
+      "rooms_scored": 259,
+      "share_below_generated_median": 0.710425
+    },
+    "val": {
+      "penalty": {
+        "mean": 0.114935,
+        "n": 255,
+        "p10": 0.008029,
+        "p50": 0.0483,
+        "p90": 0.417756
+      },
+      "rooms_scored": 255,
+      "share_below_generated_median": 0.823529
+    }
+  },
+  "per_room": {
+    "chat-09a": {
+      "bed_long_edge_only": 0.25,
+      "bed_observations": 100
+    },
+    "grid-3.5x3.5-a": {
+      "bed_long_edge_only": 0.29,
+      "bed_observations": 100
+    },
+    "grid-3.5x3.5-b": {
+      "bed_long_edge_only": 0.35,
+      "bed_observations": 100
+    },
+    "grid-3.5x4.0-a": {
+      "bed_long_edge_only": 0.29,
+      "bed_observations": 100
+    },
+    "grid-3.5x4.0-b": {
+      "bed_long_edge_only": 0.32,
+      "bed_observations": 100
+    },
+    "grid-3.5x4.5-a": {
+      "bed_long_edge_only": 0.34,
+      "bed_observations": 100
+    },
+    "grid-3.5x4.5-b": {
+      "bed_long_edge_only": 0.37,
+      "bed_observations": 100
+    },
+    "grid-4.0x3.5-a": {
+      "bed_long_edge_only": 0.39,
+      "bed_observations": 100
+    },
+    "grid-4.0x3.5-b": {
+      "bed_long_edge_only": 0.22,
+      "bed_observations": 100
+    },
+    "grid-4.0x4.0-a": {
+      "bed_long_edge_only": 0.39,
+      "bed_observations": 100
+    },
+    "grid-4.0x4.0-b": {
+      "bed_long_edge_only": 0.25,
+      "bed_observations": 100
+    },
+    "grid-4.0x4.5-a": {
+      "bed_long_edge_only": 0.36,
+      "bed_observations": 100
+    },
+    "grid-4.0x4.5-b": {
+      "bed_long_edge_only": 0.27,
+      "bed_observations": 100
+    },
+    "grid-5.0x3.5-a": {
+      "bed_long_edge_only": 0.26,
+      "bed_observations": 100
+    },
+    "grid-5.0x3.5-b": {
+      "bed_long_edge_only": 0.22,
+      "bed_observations": 100
+    },
+    "grid-5.0x4.0-a": {
+      "bed_long_edge_only": 0.36,
+      "bed_observations": 100
+    },
+    "grid-5.0x4.0-b": {
+      "bed_long_edge_only": 0.25,
+      "bed_observations": 100
+    },
+    "grid-5.0x4.5-a": {
+      "bed_long_edge_only": 0.24,
+      "bed_observations": 100
+    },
+    "grid-5.0x4.5-b": {
+      "bed_long_edge_only": 0.26,
+      "bed_observations": 100
+    },
+    "product-4.0x4.0-belaya-charles": {
+      "bed_long_edge_only": 0.39,
+      "bed_observations": 100
+    },
+    "product-4.0x4.0-belaya-storage": {
+      "bed_long_edge_only": 0.34,
+      "bed_observations": 100
+    },
+    "product-5.0x4.0-belaya-charles": {
+      "bed_long_edge_only": 0.28,
+      "bed_observations": 100
+    },
+    "product-5.0x4.0-belaya-storage": {
+      "bed_long_edge_only": 0.3,
+      "bed_observations": 100
+    },
+    "sample": {
+      "bed_long_edge_only": 0.36,
+      "bed_observations": 100
+    }
+  },
+  "reference": {
+    "test": {
+      "habit_outcomes": {
+        "bed_edge": {
+          "free_standing": 0.150943,
+          "long_edge_only": 0.179245,
+          "short_edge": 0.669811
+        },
+        "chair_desk_gap": {
+          "0.15_0.40": 0.090909,
+          "0.40_0.80": 0.0,
+          "ge_0.80": 0.090909,
+          "lt_0.15": 0.818182
+        },
+        "desk_wall": {
+          "free": 0.090909,
+          "wall": 0.909091
+        },
+        "storage_wall": {
+          "free": 0.042945,
+          "wall": 0.957055
+        }
+      },
+      "n": {
+        "bed_edge": 212,
+        "chair_desk_gap": 22,
+        "desk_wall": 33,
+        "storage_wall": 163
+      },
+      "rooms": 286
+    },
+    "val": {
+      "habit_outcomes": {
+        "bed_edge": {
+          "free_standing": 0.061905,
+          "long_edge_only": 0.128571,
+          "short_edge": 0.809524
+        },
+        "chair_desk_gap": {
+          "0.15_0.40": 0.066667,
+          "0.40_0.80": 0.033333,
+          "ge_0.80": 0.0,
+          "lt_0.15": 0.9
+        },
+        "desk_wall": {
+          "free": 0.096774,
+          "wall": 0.903226
+        },
+        "storage_wall": {
+          "free": 0.047059,
+          "wall": 0.952941
+        }
+      },
+      "n": {
+        "bed_edge": 210,
+        "chair_desk_gap": 30,
+        "desk_wall": 31,
+        "storage_wall": 170
+      },
+      "rooms": 282
+    }
+  },
+  "rooms": 24,
+  "schema_version": "1.0.0",
+  "seeds": [
+    0,
+    49
+  ],
+  "status_counts": {
+    "complete": 1200
+  },
+  "timing_ms": {
+    "max": 297.231,
+    "p50": 16.325,
+    "p95": 73.671
+  }
+}

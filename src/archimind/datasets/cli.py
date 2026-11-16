@@ -839,6 +839,42 @@ def _cmd_habit_stats(args) -> int:
     return EXIT_OK
 
 
+def _cmd_habit_bench(args) -> int:
+    """P6: score the unchanged generator and held-out reference rooms."""
+    from archimind.datasets.canonical import strict_loads
+    from archimind.datasets.habit_bench import run_bench
+    from archimind.datasets.habits import select_split
+    from archimind.datasets.pack import load_pack
+
+    status = load_pack(Path(args.pack), audience="local")
+    if status.status != "ready":
+        _emit({"status": "unavailable", "reason": status.reason})
+        return EXIT_BLOCKED
+    try:
+        habits = strict_loads(Path(args.habits).read_bytes())
+    except (OSError, ValueError):
+        _emit({"status": "failed", "reason": "invalid_habits"})
+        return EXIT_USAGE
+    if habits.get("snapshot_id") != status.pack.manifest.snapshot_id:
+        _emit({"status": "unavailable", "reason": "habits_snapshot_mismatch"})
+        return EXIT_BLOCKED
+    scenes = status.pack.scenes
+    held = {k: select_split(scenes, k) for k in ("val", "test")}
+    report = run_bench(habits, seeds=range(args.seeds), held_out=held)
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit(
+        {
+            "status": "benchmarked",
+            "calls": report["calls"],
+            "bed_edge": report["generated"]["habit_outcomes"]["bed_edge"],
+            "held_out_passed": report["held_out"]["passed"],
+            "timing_ms": report["timing_ms"],
+        }
+    )
+    return EXIT_OK
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m archimind.datasets")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -961,6 +997,13 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--pack", required=True, help="verified reference pack")
     p.add_argument("--out", required=True, help="write habits.json here")
     p.set_defaults(func=_cmd_habit_stats)
+
+    p = sub.add_parser("habit-bench", help="P6: habit benchmark of the generator")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--habits", required=True, help="habits.json from habit-stats")
+    p.add_argument("--out", required=True, help="write the report JSON here")
+    p.add_argument("--seeds", type=int, default=50, help="seeds 0..N-1 per room")
+    p.set_defaults(func=_cmd_habit_bench)
     return parser
 
 

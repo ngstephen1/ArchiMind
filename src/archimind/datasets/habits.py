@@ -100,6 +100,7 @@ class Rect:
     w: float
     d: float
     table: bool = False  # any table, for the chair habit
+    key: str = ""  # item identity for reports only
 
     @property
     def area(self) -> float:
@@ -162,25 +163,25 @@ def observe_room(rects: list[Rect], width: float, depth: float, tol: float) -> R
     inside = [r for r in rects if not is_outside(r, width, depth)]
     outcomes: dict[str, list] = defaultdict(list)
     square = 0
-    for i, r in enumerate(inside):
+    for r in inside:
         if r.group == "bed":
             edge = bed_edge(r, width, depth, tol)
             if edge == "square":
                 square += 1
             else:
-                outcomes["bed_edge"].append((edge, None, i))
+                outcomes["bed_edge"].append((edge, None, r.key))
         elif r.group in ("desk", "storage"):
             label = "wall" if on_wall(r, width, depth, tol) else "free"
-            outcomes[f"{r.group}_wall"].append((label, None, i))
+            outcomes[f"{r.group}_wall"].append((label, None, r.key))
     tables = [r for r in inside if r.table]
     beds = [r for r in inside if r.group == "bed"]
-    for i, r in enumerate(inside):
+    for r in inside:
         if r.group == "chair" and tables:
             gap = min(rect_gap(r, t) for t in tables)
-            outcomes["chair_desk_gap"].append((_bin(gap, GAP_BINS), gap, i))
+            outcomes["chair_desk_gap"].append((_bin(gap, GAP_BINS), gap, r.key))
         if r.group == "nightstand" and beds:
             gap = min(rect_gap(r, b) for b in beds)
-            outcomes["nightstand_bed_gap"].append((_bin(gap, GAP_BINS), gap, i))
+            outcomes["nightstand_bed_gap"].append((_bin(gap, GAP_BINS), gap, r.key))
     area = width * depth
     coverage = sum(r.area for r in inside) / area
     return RoomObs(dict(outcomes), area, coverage, len(rects) - len(inside), square)
@@ -201,6 +202,7 @@ def scene_rects(scene) -> list[Rect]:
                 f.width_m,
                 f.depth_m,
                 table=o.category == "table",
+                key=o.source_object_id,
             )
         )
     return out
@@ -410,3 +412,88 @@ def leak_free_train(all_scenes) -> tuple[list, int]:
             dropped.update(m.reference_id for m in members)
     train = [s for s in select_split(all_scenes) if s.reference_id not in dropped]
     return train, groups
+
+
+# ------------------------------------------------------------- P6 scorer
+
+RARITY_FLOOR = 0.01  # outcomes rarer than 1% all get the maximum rarity of 1
+
+
+def rarity(rate: float) -> float:
+    """Log-rarity scaled to [0, 1]: 0 for an outcome every room shows."""
+    return min(1.0, -math.log(max(rate, RARITY_FLOOR)) / -math.log(RARITY_FLOOR))
+
+
+@dataclass(frozen=True)
+class HabitFact:
+    item: str
+    habit: str
+    outcome: str
+    typical_rate: float  # share of reference observations with this outcome
+    rarity: float
+    scored: bool  # counted in the penalty
+
+
+@dataclass(frozen=True)
+class HabitReport:
+    status: str  # "scored", "refused" or "no_habits"
+    reason: str | None = None
+    penalty: float | None = None
+    facts: tuple[HabitFact, ...] = ()
+
+
+def _score(rects: list[Rect], width: float, depth: float, habits: dict) -> HabitReport:
+    obs = observe_room(rects, width, depth, habits["tolerance_m"])
+    weights = habits["weights"]
+    facts, total, weight_sum = [], 0.0, 0.0
+    for name, entries in sorted(obs.outcomes.items()):
+        entry = habits["habits"].get(name)
+        if entry is None:
+            continue
+        usable = entry["usable"] and entry["status"] == "ok" and weights.get(name, 0) > 0
+        if not entry["usable"]:
+            continue  # recorded-only habits are never reported as app facts
+        values = []
+        for label, _, key in entries:
+            rate = entry["outcomes"][label]["rate"]
+            facts.append(HabitFact(key, name, label, rate, round(rarity(rate), 6), usable))
+            values.append(rarity(rate))
+        if usable and values:
+            total += weights[name] * sum(values) / len(values)
+            weight_sum += weights[name]
+    cov = habits["habits"]["floor_coverage"]
+    t = tercile(obs.area, cov["tercile_edges_m2"])
+    label = _bin(obs.coverage, COVERAGE_BINS)
+    rate = cov["by_tercile"][t]["outcomes"][label]["rate"]
+    scored = cov["status"] == "ok" and weights.get("floor_coverage", 0) > 0
+    facts.append(HabitFact("room", "floor_coverage", f"{t}:{label}", rate, round(rarity(rate), 6), scored))
+    if scored:
+        total += weights["floor_coverage"] * rarity(rate)
+        weight_sum += weights["floor_coverage"]
+    if not weight_sum:
+        return HabitReport("no_habits", "no_scored_habit", None, tuple(facts))
+    return HabitReport("scored", None, round(total / weight_sum, 6), tuple(facts))
+
+
+def score_layout_habits(design, habits: dict) -> HabitReport:
+    """Habit facts and a penalty in [0, 1] for an app ``RoomDesign``. Read-only.
+
+    Orientation-free: a design with any rotated item is refused, never guessed.
+    """
+    if any(item.rotation_deg != 0 for item in design.furniture):
+        return HabitReport("refused", "rotated_furniture")
+    rects = []
+    for item in design.furniture:
+        if item.category.casefold() in IGNORED:
+            continue
+        group = app_group(item.category)
+        rects.append(
+            Rect(group, item.x_m, item.y_m, item.width_m, item.depth_m,
+                 table=group == "desk", key=item.id)
+        )
+    return _score(rects, design.room.width_m, design.room.depth_m, habits)
+
+
+def score_scene_habits(scene, habits: dict) -> HabitReport:
+    """The same score for a reference room (canonical or quarter-turn footprints)."""
+    return _score(scene_rects(scene), *_scene_dims(scene), habits)

@@ -128,3 +128,29 @@ def test_habit_stats_unavailable_pack(tmp_path, capsys):
         capsys, "habit-stats", "--pack", str(tmp_path / "none"), "--out", str(tmp_path / "h.json")
     )
     assert code == 3 and summary["status"] == "unavailable"
+
+
+def test_habit_bench_rejects_foreign_habits(tmp_path, capsys):
+    run(capsys, "fixture-pack", str(tmp_path / "p"))
+    habits = tmp_path / "h.json"
+    run(capsys, "habit-stats", "--pack", str(tmp_path / "p"), "--out", str(habits))
+    data = json.loads(habits.read_bytes())
+    data["snapshot_id"] = "f" * 64
+    habits.write_text(json.dumps(data), encoding="utf-8")
+    code, summary = run(
+        capsys, "habit-bench", "--pack", str(tmp_path / "p"), "--habits", str(habits),
+        "--out", str(tmp_path / "b.json"), "--seeds", "1",
+    )
+    assert code == 3 and summary["reason"] == "habits_snapshot_mismatch"
+
+
+def test_habit_bench_runs(tmp_path, capsys):
+    run(capsys, "fixture-pack", str(tmp_path / "p"))
+    habits = tmp_path / "h.json"
+    run(capsys, "habit-stats", "--pack", str(tmp_path / "p"), "--out", str(habits))
+    code, summary = run(
+        capsys, "habit-bench", "--pack", str(tmp_path / "p"), "--habits", str(habits),
+        "--out", str(tmp_path / "b.json"), "--seeds", "1",
+    )
+    assert code == 0 and summary["calls"] == 24
+    assert json.loads((tmp_path / "b.json").read_bytes())["rooms"] == 24

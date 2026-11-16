@@ -247,3 +247,84 @@ def test_leak_free_train_drops_cross_split_aliases():
     )
     train, groups = leak_free_train([*rooms, held])
     assert groups == 1 and train == rooms[1:]
+
+
+# ------------------------------------------------------------- P6 scorer
+
+
+def _habits():
+    return compute_habits(typical_rooms(200), pack_id="p", snapshot_id=SNAP)
+
+
+def _design(bed_xy, *, rotation=0, extra=()):
+    from archimind.models import Door, Furniture, Room, RoomDesign
+
+    def f(fid, cat, x, y, w, d, rot=0):
+        return Furniture(
+            id=fid, name=fid, category=cat, x_m=x, y_m=y, width_m=w, depth_m=d,
+            height_m=0.7, rotation_deg=rot,
+        )
+
+    return RoomDesign(
+        room=Room(
+            id="r", name="r", width_m=4.0, depth_m=4.0, ceiling_height_m=2.7,
+            doors=[Door(id="d", wall="south", offset_m=3.0, width_m=0.8, height_m=2.0)],
+        ),
+        furniture=[
+            f("bed", "bed", *bed_xy, 2.0, 1.6, rotation),
+            f("desk", "desk", 2.8, 3.4, 1.0, 0.6),
+            f("lamp", "lighting", 1.0, 1.0, 0.3, 0.3),
+            *extra,
+        ],
+    )
+
+
+def test_scorer_ranks_long_edge_bed_worse_and_reports_facts():
+    from archimind.datasets.habits import score_layout_habits
+
+    habits = _habits()
+    typical = score_layout_habits(_design((0.0, 1.0)), habits)
+    odd = score_layout_habits(_design((1.0, 0.0)), habits)
+    assert typical.status == odd.status == "scored"
+    assert 0.0 <= typical.penalty < odd.penalty <= 1.0
+    fact = next(f for f in odd.facts if f.habit == "bed_edge")
+    assert (fact.item, fact.outcome) == ("bed", "long_edge_only")
+    assert fact.typical_rate == pytest.approx(0.25)
+    assert "lamp" not in {f.item for f in odd.facts}
+    assert not any(f.habit == "nightstand_bed_gap" for f in odd.facts)
+
+
+def test_scorer_does_not_change_the_design():
+    from archimind.datasets.habits import score_layout_habits
+
+    design = _design((0.0, 1.0))
+    before = design.model_dump()
+    score_layout_habits(design, _habits())
+    assert design.model_dump() == before
+
+
+def test_scorer_refuses_rotation():
+    from archimind.datasets.habits import score_layout_habits
+
+    report = score_layout_habits(_design((0.0, 1.0), rotation=90), _habits())
+    assert report.status == "refused" and report.reason == "rotated_furniture"
+    assert report.penalty is None and report.facts == ()
+
+
+def test_scorer_skips_insufficient_habits():
+    from archimind.datasets.habits import score_layout_habits
+
+    habits = _habits()
+    habits["habits"]["bed_edge"]["status"] = "insufficient"
+    report = score_layout_habits(_design((1.0, 0.0)), habits)
+    assert not any(f.habit == "bed_edge" and f.scored for f in report.facts)
+
+
+def test_scene_scorer_matches_design_scorer():
+    from archimind.datasets.habits import score_layout_habits, score_scene_habits
+
+    habits = _habits()
+    room = scene("s", [obj("b", *BED, 1.0, 0.0, 2.0, 1.6), obj("d", *DESK, 2.8, 3.4, 1.0, 0.6)])
+    a = score_scene_habits(room, habits)
+    b = score_layout_habits(_design((1.0, 0.0)), habits)
+    assert a.penalty == pytest.approx(b.penalty)
