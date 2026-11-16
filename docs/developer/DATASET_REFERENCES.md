@@ -16,7 +16,7 @@ reference pack, and works unchanged when no pack is configured.
 | P2a SSR adapter | IMPLEMENTED; real local pack verified (4,168 scenes, 53 canonical); permission provisional | [DATASET_SSR_P2A.md](../data/DATASET_SSR_P2A.md) |
 | P2b FUTURE categories | IMPLEMENTED; real local pack verified (4,172 scenes, 53 canonical, 0 unmapped objects); FUTURE permission provisional | [DATASET_FUTURE_P2B.md](../data/DATASET_FUTURE_P2B.md) |
 | P2c MIDI adapter | IMPLEMENTED; 5 bedrooms audited locally (alignment, camera, association PASS 5/5); depth units and surfaces not verified | [DATASET_MIDI_P2C.md](../data/DATASET_MIDI_P2C.md) |
-| P3 search facade over a real pack | NOT STARTED | |
+| P3 search facade over a real pack | IMPLEMENTED; local pack evaluated (category precision 1.0, deterministic, p50 17 ms); public audience blocked by permissions; no assets yet | [DATASET_SEARCH_P3.md](../data/DATASET_SEARCH_P3.md) |
 | P4 app wiring | NOT STARTED | |
 
 Synthetic fixtures prove the engineering only. They say nothing about real source
@@ -39,7 +39,9 @@ schemas, conventions or yield.
 | `future.py` | P2b: validated 3D-FUTURE `model_info.json` (super-categories in MIDI spelling, finer categories) and the strict MIDI cross-check. |
 | `glb.py` | P2c: bounded GLB reader (node hierarchy, world bounds, triangles, texture sizes). |
 | `midi_adapter.py` | P2c: MIDI room files, object association, view inventory, SSR-to-MIDI similarity fit and camera-convention test; used by `midi-audit`. |
-| `cli.py` | `env`, `sync`, `verify-pack`, `fixture-pack`, `fetch`, `probe-hf`, `probe-kaggle`, `probe-tar-prefix`, `probe-ssr`, `probe-join`, `ssr-build`. Credentials are never forwarded on redirects. |
+| `search.py` | P3: `load_reference_pack`, `reference_query_from_chat`, `search_references`, `prepare_reference_preview`; deterministic in-memory lexical index with exact-duplicate folding. |
+| `search_eval.py` | P3: expected-category, self-retrieval, empty-query, determinism and latency evaluation (`ref-eval`). |
+| `cli.py` | `env`, `sync`, `verify-pack`, `fixture-pack`, `fetch`, `probe-hf`, `probe-kaggle`, `probe-tar-prefix`, `probe-ssr`, `probe-join`, `ssr-build`, `midi-audit`, `ref-search`, `ref-eval`. Credentials are never forwarded on redirects. |
 
 ## Tiers
 

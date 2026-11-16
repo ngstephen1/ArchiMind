@@ -746,6 +746,70 @@ def _cmd_midi_audit(args) -> int:
     return EXIT_OK
 
 
+def _cmd_ref_search(args) -> int:
+    """P3: run one ReferenceQuery (JSON file) and optionally preview one hit."""
+    from pydantic import ValidationError
+
+    from archimind.datasets.canonical import strict_loads
+    from archimind.datasets.search import (
+        ReferenceQuery,
+        load_reference_pack,
+        prepare_reference_preview,
+        search_references,
+    )
+
+    try:
+        query = ReferenceQuery.model_validate_json(
+            json.dumps(strict_loads(Path(args.query).read_bytes()))
+        )
+    except (OSError, ValueError, ValidationError):
+        _emit({"status": "failed", "reason": "invalid_query"})
+        return EXIT_USAGE
+    pack = load_reference_pack(Path(args.pack), audience=args.audience)
+    result = search_references(query, pack=pack)
+    payload = {"result": result.model_dump(mode="json")}
+    if args.preview_rank is not None:
+        hits = {h.rank: h for h in result.scene_hits}
+        hit = hits.get(args.preview_rank)
+        payload["preview"] = (
+            prepare_reference_preview(hit, pack=pack).model_dump(mode="json")
+            if hit
+            else {"status": "unavailable", "reason": "no_hit_at_rank"}
+        )
+    text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if args.out:
+        atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit(
+        {
+            "status": result.status,
+            "reason": result.reason,
+            "scene_hits": [h.reference_id for h in result.scene_hits],
+            "asset_hits": [h.asset_id for h in result.asset_hits],
+        }
+    )
+    return EXIT_OK if result.status != "unavailable" else EXIT_BLOCKED
+
+
+def _cmd_ref_eval(args) -> int:
+    """P3: retrieval, empty-query, determinism and latency evaluation of a pack."""
+    import time
+
+    from archimind.datasets.search import load_reference_pack
+    from archimind.datasets.search_eval import evaluate
+
+    start = time.perf_counter()
+    pack = load_reference_pack(Path(args.pack), audience=args.audience)
+    load_s = round(time.perf_counter() - start, 2)
+    report = evaluate(pack, reference_only_sample=args.sample)
+    report["load_and_index_s"] = load_s
+    report["public_audience"] = load_reference_pack(Path(args.pack)).reason or "ready"
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    if args.out:
+        atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit({k: report[k] for k in report if k not in ("expected_category",)})
+    return EXIT_OK if report["status"] == "evaluated" else EXIT_BLOCKED
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="python -m archimind.datasets")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -844,6 +908,25 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ssr-pack", required=True, help="verified SSR reference pack")
     p.add_argument("--out", required=True, help="new or empty output directory")
     p.set_defaults(func=_cmd_midi_audit)
+
+    p = sub.add_parser("ref-search", help="P3: search a verified reference pack")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--audience", choices=["public", "local"], default="public")
+    p.add_argument("--query", required=True, help="ReferenceQuery JSON file")
+    p.add_argument(
+        "--preview-rank", type=int, help="also preview the scene hit at this rank"
+    )
+    p.add_argument("--out", help="write the full result JSON here")
+    p.set_defaults(func=_cmd_ref_search)
+
+    p = sub.add_parser("ref-eval", help="P3: evaluate search over a reference pack")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--audience", choices=["public", "local"], default="public")
+    p.add_argument(
+        "--sample", type=int, default=200, help="reference_only scenes to self-query"
+    )
+    p.add_argument("--out", help="write the report JSON here")
+    p.set_defaults(func=_cmd_ref_eval)
     return parser
 
 

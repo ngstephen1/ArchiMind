@@ -110,7 +110,27 @@ def atomic_write_bytes(path: Path, data: bytes) -> None:
         handle.write(data)
         handle.flush()
         os.fsync(handle.fileno())
-    os.replace(tmp, path)
+    replace_with_retry(tmp, path)
+
+
+def replace_with_retry(src: Path, dest: Path, *, attempts: int = 8, sleep=None) -> None:
+    """``os.replace`` that tolerates brief Windows sharing violations.
+
+    On Windows a scanner or indexer can hold a just-written file for a few
+    milliseconds, and the rename then fails with ``PermissionError``. The retry is
+    bounded (about 1.3 s in total). The last error is raised unchanged.
+    """
+    import time
+
+    sleep = time.sleep if sleep is None else sleep
+    for attempt in range(attempts):
+        try:
+            os.replace(src, dest)
+            return
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            sleep(0.01 * 2**attempt)
 
 
 def write_jsonl(path: Path, records: Iterable) -> tuple[str, int]:

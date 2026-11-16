@@ -1,0 +1,189 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "P3",
+  "branch": "data/dataset-reference-pilot",
+  "observed_utc": "2026-11-16T00:00:00Z",
+  "where_run": "Local Windows machine, CPU only, no network",
+  "pack": {
+    "pack_id": "ssr-bedrooms-p2b",
+    "snapshot_id": "8cfb31258aa7c4b7f29ce114661d59c1709d95e4d4ca16f5929e78e5089e9422",
+    "audience": "local",
+    "public_audience_result": "pack_not_public"
+  },
+  "index": {
+    "index_version": "1.0.0",
+    "indexed_scenes": 4170,
+    "folded_exact_duplicates": 2,
+    "load_and_index_s": 1.94
+  },
+  "evaluation": {
+    "self_retrieval": {
+      "canonical": {
+        "not_in_top_10": 4,
+        "queries": 53,
+        "recall_at_1": 0.566,
+        "recall_at_10": 0.9245,
+        "recall_at_3": 0.7358
+      },
+      "reference_only": {
+        "not_in_top_10": 6,
+        "queries": 200,
+        "recall_at_1": 0.58,
+        "recall_at_10": 0.97,
+        "recall_at_3": 0.77
+      }
+    },
+    "self_retrieval_note": "Query = the scene's own room size plus admitted category counts. Every canonical miss at rank 1 (23 of 23) is an exact tie (coverage 1.0, size distance 0.0) broken by reference id, as the ranking specifies.",
+    "expected_category": {
+      "bed": {
+        "candidates": 3544,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "cabinet_shelf_desk": {
+        "candidates": 3834,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "cabinet_shelf_desk/bookcase": {
+        "candidates": 3834,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "cabinet_shelf_desk/nightstand": {
+        "candidates": 3834,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "cabinet_shelf_desk/wardrobe": {
+        "candidates": 3834,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "chair": {
+        "candidates": 439,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "lighting": {
+        "candidates": 3317,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "other": {
+        "candidates": 808,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "sofa": {
+        "candidates": 98,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "sofa/armchair": {
+        "candidates": 98,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "stool": {
+        "candidates": 193,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "table": {
+        "candidates": 834,
+        "hits": 10,
+        "precision": 1.0
+      },
+      "table/desk": {
+        "candidates": 834,
+        "hits": 10,
+        "precision": 1.0
+      }
+    },
+    "empty_query": {
+      "reason": "empty_query",
+      "status": "empty"
+    },
+    "deterministic_under_reordering": true,
+    "latency_ms": {
+      "max": 187.63,
+      "p50": 17.48,
+      "p95": 90.36,
+      "queries": 266
+    }
+  },
+  "sample_search": {
+    "query": {
+      "room": {
+        "width_m": 4.0,
+        "depth_m": 3.5,
+        "height_m": 2.7
+      },
+      "categories": [
+        {
+          "category": "bed",
+          "count": 1
+        },
+        {
+          "category": "cabinet_shelf_desk",
+          "term": "nightstand",
+          "count": 2
+        },
+        {
+          "category": "table",
+          "term": "desk",
+          "count": 1
+        }
+      ],
+      "keywords": [
+        "bed",
+        "desk",
+        "nightstand",
+        "queen",
+        "writing"
+      ]
+    },
+    "status": "matches",
+    "top_hit": {
+      "reference_id": "ssr:6417999f-abfd-4c11-8ca1-0100d8738214:MasterBedroom-6822",
+      "tier": "reference_only",
+      "split": "train",
+      "coverage": 1.0,
+      "size_distance": 0.021561,
+      "matched_keywords": [
+        "bed",
+        "desk",
+        "nightstand"
+      ],
+      "unmatched_keywords": [
+        "queen",
+        "writing"
+      ],
+      "reasons": [
+        "Has 1 of 1 requested bed.",
+        "Has 2 of 2 requested nightstand.",
+        "Has 1 of 1 requested desk.",
+        "Room 3.90 x 3.40 x 2.73 m; relative size difference 2.2%.",
+        "Matching terms: bed, desk, nightstand.",
+        "Reference only: oriented footprints, not a validated layout.",
+        "Doors and windows are not recorded by the source."
+      ]
+    },
+    "preview_status": "ready",
+    "preview_display": "oriented_footprints",
+    "output_contains_paths_or_urls": false
+  },
+  "category_mapping_evidence": {
+    "desk": "3D-FUTURE 'Desk' objects in the P2b pack: 416 under table, 0 under cabinet_shelf_desk",
+    "armchair": "3D-FUTURE 'armchair' objects in the P2b pack: 34 admitted, all under sofa"
+  },
+  "local_evidence_sha256": {
+    "eval.json": "41bad639c2415000fd189ccfb389ac56ea754c937d2ee9411af569354b17bc35",
+    "search_bedroom.json": "55622d381ae023f147a5096ff6f72f80c01c2207c2d66e7551c6b64dbdf22d05"
+  },
+  "commands": [
+    "python -m archimind.datasets ref-eval --pack <ssr-bedrooms-p2b> --audience local --out <eval.json>",
+    "python -m archimind.datasets ref-search --pack <ssr-bedrooms-p2b> --audience local --query <query.json> --preview-rank 1 --out <result.json>"
+  ]
+}
