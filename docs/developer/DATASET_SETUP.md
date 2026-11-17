@@ -76,8 +76,9 @@ Edit `.env` in the repo root. The dataset block is at the bottom.
 | `ARCHIMIND_COMMIT` | Output of `git rev-parse HEAD` | Pinned Colab run |
 | `ARCHIMIND_DATA_ROOT` | e.g. `E:\archimind-data` (outside Git) | Local runs |
 | `ARCHIMIND_FLOOR_GIB` | `4` | Free-disk stop floor |
-| `ARCHIMIND_ENABLE_DATASET_REFERENCES` | `0` | Leave off until app wiring (M5) |
-| `ARCHIMIND_DATASET_REFERENCE_ROOT` | Path of a finished pack | M5 only |
+| `ARCHIMIND_ENABLE_DATASET_REFERENCES` | `0` (default) or `1` | `1` shows *References for next specification* in Chat bedroom |
+| `ARCHIMIND_DATASET_REFERENCE_ROOT` | Path of a verified pack, e.g. `E:\archimind-data\p2b\pack` | Server-side only; users never supply paths |
+| `ARCHIMIND_DATASET_REFERENCE_AUDIENCE` | `public` (default) or `local` | `local` only on a research machine; a local pack is blocked for `public` |
 
 ### B3. Kaggle alternatives (optional)
 

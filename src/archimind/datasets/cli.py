@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 import sys
+from collections import Counter
 from pathlib import Path
 
 from archimind.datasets.canonical import atomic_write_bytes
@@ -315,6 +316,61 @@ def _cmd_ssr_build(args) -> int:
         load("midi_furniture_ids.json"),
         test_room_ids=load("midi_test_room_ids.json"),
     )
+    jid_categories, jid_fine, future_report = index.jid_categories, {}, None
+    future_given = [
+        args.future_model_info,
+        args.future_sha256,
+        args.future_inventory,
+    ]
+    if any(future_given) and not all(future_given):
+        _emit(
+            {
+                "status": "failed",
+                "reason": "--future-model-info, --future-sha256 and "
+                "--future-inventory go together",
+            }
+        )
+        return EXIT_FAIL
+    if args.future_model_info:
+        from archimind.datasets.future import (
+            FutureInfoError,
+            merge_categories,
+            parse_model_info,
+        )
+
+        info_path = Path(args.future_model_info)
+        info_sha = file_sha256(info_path)
+        future_inventory = strict_loads(Path(args.future_inventory).read_bytes())
+        listed = [
+            m
+            for m in future_inventory.get("model_info") or []
+            if m.get("size_bytes") == info_path.stat().st_size
+        ]
+        if info_sha != args.future_sha256 or len(listed) != 1:
+            _emit(
+                {
+                    "status": "failed",
+                    "reason": "model_info.json does not match --future-sha256 "
+                    "and the Kaggle inventory",
+                }
+            )
+            return EXIT_FAIL
+        try:
+            future = parse_model_info(strict_loads(info_path.read_bytes()))
+            jid_categories, future_report = merge_categories(
+                future.super_categories, index.jid_categories
+            )
+        except FutureInfoError as error:
+            _emit({"status": "failed", "reason": str(error)})
+            return EXIT_FAIL
+        jid_fine = future.fine_categories
+        future_report |= {
+            "ref": future_inventory["ref"],
+            "version": future_inventory["version"],
+            "path": listed[0]["path"],
+            "size_bytes": listed[0]["size_bytes"],
+            "sha256": info_sha,
+        }
     results, source_files = [], []
     for path in sorted(Path(p) for p in args.parquet):
         sha = file_sha256(path)
@@ -335,8 +391,9 @@ def _cmd_ssr_build(args) -> int:
                 row,
                 revision=revision,
                 source_sha256=sha,
-                jid_categories=index.jid_categories,
+                jid_categories=jid_categories,
                 midi_splits=index.splits,
+                jid_fine_categories=jid_fine,
             )
             if result is not None:
                 results.append(result)
@@ -346,6 +403,7 @@ def _cmd_ssr_build(args) -> int:
         "revision": revision,
         "inputs": [f.model_dump() for f in sorted(source_files, key=lambda f: f.path)],
         "bedroom_rows": len(results),
+        "category_sources": {"midi": "furniture ids", "future_3d": future_report},
         "midi_inputs": [
             {"file": name, "sha256": file_sha256(midi / name)}
             for name in (
@@ -380,20 +438,50 @@ def _cmd_ssr_build(args) -> int:
             # not yet bind a pinned MIDI source AND its separate permission record.
             _emit({"status": "blocked", "reason": "midi_provenance_unverified"})
             return EXIT_BLOCKED
-        manifest = SourceManifest(
-            source="ssr_3dfront",
-            origin_url=f"https://huggingface.co/datasets/{inventory['repo']}",
-            revision=revision,
-            retrieved_utc=args.retrieved_utc,
-            files=tuple(sorted(source_files, key=lambda f: f.path)),
-            permission=permission,
-        )
+        manifests = [
+            SourceManifest(
+                source="ssr_3dfront",
+                origin_url=f"https://huggingface.co/datasets/{inventory['repo']}",
+                revision=revision,
+                retrieved_utc=args.retrieved_utc,
+                files=tuple(sorted(source_files, key=lambda f: f.path)),
+                permission=permission,
+            )
+        ]
+        if future_report:
+            if not (args.future_permission and args.future_retrieved_utc):
+                _emit(
+                    {
+                        "status": "failed",
+                        "reason": "a pack with 3D-FUTURE categories needs "
+                        "--future-permission and --future-retrieved-utc",
+                    }
+                )
+                return EXIT_FAIL
+            manifests.append(
+                SourceManifest(
+                    source="future_3d",
+                    origin_url=f"https://www.kaggle.com/datasets/{future_report['ref']}",
+                    revision=f"kaggle-v{future_report['version']}",
+                    retrieved_utc=args.future_retrieved_utc,
+                    files=(
+                        SourceFile(
+                            path=future_report["path"],
+                            size_bytes=future_report["size_bytes"],
+                            sha256=future_report["sha256"],
+                        ),
+                    ),
+                    permission=PermissionRecord.model_validate_json(
+                        Path(args.future_permission).read_bytes()
+                    ),
+                )
+            )
         try:
             pack = build_pack(
                 Path(args.pack_dir),
                 pack_id=args.pack_id,
                 audience=args.audience,
-                sources=[manifest],
+                sources=manifests,
                 scenes=scenes,
                 exclusions=exclusions,
                 assets=[],
@@ -409,6 +497,478 @@ def _cmd_ssr_build(args) -> int:
             return EXIT_FAIL
         report["pack"] = {"pack_id": pack.pack_id, "snapshot_id": pack.snapshot_id}
     _emit({"status": "built"} | report)
+    return EXIT_OK
+
+
+def _semantic_label_boxes(path: Path) -> tuple[dict, tuple[int, int]]:
+    """Pixel box of each non-zero label in a palette PNG (offline audit only)."""
+    import numpy as np  # lazy: numpy and Pillow are only needed for this audit
+    from PIL import Image
+
+    with Image.open(path) as image:
+        if image.mode not in ("P", "L"):
+            raise UnsafeContentError(f"{path.name}: semantic image is not single-band")
+        labels = np.asarray(image)
+        size = image.size
+    boxes = {}
+    for label in np.unique(labels):
+        if label == 0:
+            continue
+        rows, cols = np.nonzero(labels == label)
+        boxes[int(label)] = (
+            float(cols.min()),
+            float(rows.min()),
+            float(cols.max() + 1),
+            float(rows.max() + 1),
+        )
+    return boxes, size
+
+
+def _cmd_midi_audit(args) -> int:
+    """P2c: audit acquired MIDI rooms against their manifest, SSR and cameras."""
+    from archimind.datasets.canonical import file_sha256, strict_loads
+    from archimind.datasets.glb import inspect_glb
+    from archimind.datasets.midi import build_index
+    from archimind.datasets.midi_adapter import (
+        ADAPTER_VERSION,
+        alignment_report,
+        associate,
+        camera_report,
+        classify_room_files,
+        fit_similarity,
+        furniture_name,
+        match_objects,
+        ssr_world_box,
+        topdown_svg,
+        view_inventory,
+    )
+    from archimind.datasets.pack import PackError, verify_pack
+
+    out = Path(args.out)
+    if out.exists() and any(out.iterdir()):
+        _emit({"status": "failed", "reason": "output directory is not empty"})
+        return EXIT_FAIL
+    try:
+        pack = verify_pack(Path(args.ssr_pack))
+    except PackError as error:
+        _emit({"status": "failed", "reason": f"ssr pack: {error}"})
+        return EXIT_FAIL
+    scenes = {f"{s.source_scene_id}/{s.source_room_id}": s for s in pack.scenes}
+    midi_dir = Path(args.midi_dir)
+
+    def load(name):
+        return strict_loads((midi_dir / name).read_bytes())
+
+    index = build_index(
+        load("midi_room_ids.json"),
+        load("midi_furniture_ids.json"),
+        test_room_ids=load("midi_test_room_ids.json"),
+    )
+    scene_root, render_root = Path(args.scene_root), Path(args.render_root)
+
+    def record(path: Path, root: Path) -> dict:
+        return {
+            "path": path.relative_to(root).as_posix(),
+            "size_bytes": path.stat().st_size,
+            "sha256": file_sha256(path),
+        }
+
+    rooms = []
+    (out / "overlays").mkdir(parents=True, exist_ok=True)
+    for room_dir in sorted(p for p in scene_root.glob("*/*") if p.is_dir()):
+        house_dir, room = room_dir.parent, room_dir.name
+        key = f"{house_dir.name}/{room}"
+        names = [
+            p.relative_to(house_dir).as_posix()
+            for p in house_dir.rglob("*")
+            if p.is_file()
+            and (p.parent == room_dir or p.name in (f"{room}.glb", f"{room}_full.glb"))
+        ]
+        files = classify_room_files(room, names)
+        geometry, boxes = {"objects": [], "structure": []}, {}
+        for label, member in (
+            ("room_glb", files.room_glb),
+            ("full_glb", files.full_glb),
+        ):
+            if member:
+                summary = inspect_glb(house_dir / member)
+                geometry[label] = record(house_dir / member, scene_root) | {
+                    "triangles": summary.triangles,
+                    "images": summary.images,
+                    "max_texture_px": summary.max_texture_px,
+                }
+            else:
+                geometry[label] = None
+        for fid, member in sorted(files.objects.items()):
+            summary = inspect_glb(house_dir / member, max_bytes=32 * 1024 * 1024)
+            boxes[fid] = (summary.world_min, summary.world_max)
+            geometry["objects"].append(
+                record(house_dir / member, scene_root)
+                | {
+                    "furniture_id": fid,
+                    "triangles": summary.triangles,
+                    "max_texture_px": summary.max_texture_px,
+                    "world_min": [round(v, 6) for v in summary.world_min],
+                    "world_max": [round(v, 6) for v in summary.world_max],
+                }
+            )
+        for member in files.structure:
+            geometry["structure"].append(record(house_dir / member, scene_root))
+        geometry["unrecognized"] = list(files.unrecognized)
+
+        listed = [furniture_name(f) for f in index.rooms.get(key, ())]
+        assoc = associate(listed, files.objects)
+        view_dir = render_root / key
+        view_names = (
+            sorted(p.name for p in view_dir.iterdir() if p.is_file())
+            if view_dir.is_dir()
+            else []
+        )
+        meta = (
+            strict_loads((view_dir / "meta.json").read_bytes())
+            if "meta.json" in view_names
+            else None
+        )
+        locations = len(meta["locations"]) if meta else 0
+        inventory = view_inventory(view_names, locations)
+        if meta:
+            listed_frames = {
+                f.get("name")
+                for loc in meta["locations"]
+                for f in loc.get("frames", [])
+            }
+            inventory["meta_frame_names_present"] = sum(
+                1 for n in listed_frames if n in view_names
+            )
+            inventory["meta_frame_names"] = len(listed_frames)
+        inventory["files"] = [record(view_dir / n, render_root) for n in view_names]
+
+        midi_centres = {
+            fid: (
+                tuple((a + b) / 2 for a, b in zip(lo, hi, strict=True)),
+                tuple(b - a for a, b in zip(lo, hi, strict=True)),
+            )
+            for fid, (lo, hi) in boxes.items()
+        }
+        scene = scenes.get(key)
+        if scene is None:
+            alignment = {"status": "NOT_VERIFIABLE", "detail": "room not in SSR pack"}
+        else:
+            ssr_objects = [o.model_dump() for o in scene.objects]
+            alignment = alignment_report(midi_centres, ssr_objects)
+            if alignment["status"] != "NOT_VERIFIABLE":
+                ssr_boxes = {
+                    o["source_object_id"]: ssr_world_box(
+                        o["size_raw"], o["position_raw"], o["rotation_raw_xyzw"]
+                    )
+                    for o in ssr_objects
+                }
+                ssr_boxes = {k: v for k, v in ssr_boxes.items() if v is not None}
+                pairs, _, _ = match_objects(
+                    midi_centres,
+                    {
+                        o["source_object_id"]: (
+                            o["jid"],
+                            ssr_boxes.get(o["source_object_id"]),
+                        )
+                        for o in ssr_objects
+                    },
+                )
+                fit = fit_similarity(pairs)
+                midi_in_ssr = {
+                    fid: (fit.to_ssr(c), tuple(v / fit.scale for v in e))
+                    for fid, (c, e) in midi_centres.items()
+                }
+                svg = topdown_svg(scene.room.model_dump(), ssr_boxes, midi_in_ssr)
+                (out / "overlays" / f"{house_dir.name}_{room}.svg").write_text(
+                    svg, encoding="utf-8"
+                )
+        camera = {"status": "NOT_VERIFIABLE", "detail": "no meta.json"}
+        if meta and boxes:
+            labels, width, height = [], None, None
+            for k in range(locations):
+                path = view_dir / f"semantic_{k:04d}.png"
+                if not path.is_file():
+                    labels = None
+                    break
+                found, (width, height) = _semantic_label_boxes(path)
+                labels.append(found)
+            if labels:
+                camera = camera_report(meta, boxes, labels, width=width, height=height)
+            else:
+                camera = {
+                    "status": "NOT_VERIFIABLE",
+                    "detail": "semantic views missing",
+                }
+        rooms.append(
+            {
+                "room_key": key,
+                "midi_split": index.splits.get(key),
+                "ssr": None
+                if scene is None
+                else {
+                    "reference_id": scene.reference_id,
+                    "tier": scene.tier,
+                    "split": scene.split,
+                },
+                "geometry": geometry,
+                "association": {
+                    "listed": len(listed),
+                    "matched": list(assoc.matched),
+                    "missing": list(assoc.missing),
+                    "orphans": list(assoc.orphans),
+                    "duplicates": list(assoc.duplicates),
+                },
+                "views": inventory,
+                "modalities": {
+                    "room_glb": "present" if files.room_glb else "absent",
+                    "full_glb": "present" if files.full_glb else "absent",
+                    "object_glbs": len(files.objects),
+                    "views": "present" if meta else "absent",
+                    "depth": "present, EXR not decoded: units unverified"
+                    if inventory["kinds"]["depth"]["present"]
+                    else "absent",
+                    "surfaces_npy": "not acquired (separate SURFACE archives)",
+                },
+                "alignment": alignment,
+                "camera": camera,
+            }
+        )
+    report = {
+        "adapter_version": ADAPTER_VERSION,
+        "ssr_pack_snapshot": pack.manifest.snapshot_id,
+        "rooms": rooms,
+        "summary": {
+            "rooms": len(rooms),
+            "alignment": dict(Counter(r["alignment"]["status"] for r in rooms)),
+            "camera": dict(Counter(r["camera"]["status"] for r in rooms)),
+            "association_clean": sum(
+                1
+                for r in rooms
+                if not (
+                    r["association"]["missing"]
+                    or r["association"]["orphans"]
+                    or r["association"]["duplicates"]
+                )
+            ),
+        },
+    }
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    atomic_write_bytes(out / "report.json", text.encode("utf-8"))
+    _emit({"status": "audited"} | report["summary"])
+    return EXIT_OK
+
+
+def _cmd_ref_search(args) -> int:
+    """P3: run one ReferenceQuery (JSON file) and optionally preview one hit."""
+    from pydantic import ValidationError
+
+    from archimind.datasets.canonical import strict_loads
+    from archimind.datasets.search import (
+        ReferenceQuery,
+        load_reference_pack,
+        prepare_reference_preview,
+        search_references,
+    )
+
+    try:
+        query = ReferenceQuery.model_validate_json(
+            json.dumps(strict_loads(Path(args.query).read_bytes()))
+        )
+    except (OSError, ValueError, ValidationError):
+        _emit({"status": "failed", "reason": "invalid_query"})
+        return EXIT_USAGE
+    pack = load_reference_pack(Path(args.pack), audience=args.audience)
+    result = search_references(query, pack=pack)
+    payload = {"result": result.model_dump(mode="json")}
+    if args.preview_rank is not None:
+        hits = {h.rank: h for h in result.scene_hits}
+        hit = hits.get(args.preview_rank)
+        payload["preview"] = (
+            prepare_reference_preview(hit, pack=pack).model_dump(mode="json")
+            if hit
+            else {"status": "unavailable", "reason": "no_hit_at_rank"}
+        )
+    text = json.dumps(payload, indent=2, sort_keys=True) + "\n"
+    if args.out:
+        atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit(
+        {
+            "status": result.status,
+            "reason": result.reason,
+            "scene_hits": [h.reference_id for h in result.scene_hits],
+            "asset_hits": [h.asset_id for h in result.asset_hits],
+        }
+    )
+    return EXIT_OK if result.status != "unavailable" else EXIT_BLOCKED
+
+
+def _cmd_ref_eval(args) -> int:
+    """P3: retrieval, empty-query, determinism and latency evaluation of a pack."""
+    import time
+
+    from archimind.datasets.search import load_reference_pack
+    from archimind.datasets.search_eval import evaluate
+
+    start = time.perf_counter()
+    pack = load_reference_pack(Path(args.pack), audience=args.audience)
+    load_s = round(time.perf_counter() - start, 2)
+    report = evaluate(pack, reference_only_sample=args.sample)
+    report["load_and_index_s"] = load_s
+    report["public_audience"] = load_reference_pack(Path(args.pack)).reason or "ready"
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    if args.out:
+        atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit({k: report[k] for k in report if k not in ("expected_category",)})
+    return EXIT_OK if report["status"] == "evaluated" else EXIT_BLOCKED
+
+
+def _cmd_habit_stats(args) -> int:
+    """P5: layout-habit statistics from the train split of a verified pack."""
+    from archimind.datasets.habits import compute_habits, habits_bytes, leak_free_train
+    from archimind.datasets.pack import load_pack
+
+    status = load_pack(Path(args.pack), audience="local")
+    if status.status != "ready":
+        _emit({"status": "unavailable", "reason": status.reason})
+        return EXIT_BLOCKED
+    manifest = status.pack.manifest
+    train, cross = leak_free_train(status.pack.scenes)
+    habits = compute_habits(
+        train, pack_id=manifest.pack_id, snapshot_id=manifest.snapshot_id
+    )
+    habits["counts"]["cross_split_alias_groups_dropped"] = cross
+    data = habits_bytes(habits)
+    atomic_write_bytes(Path(args.out), data)
+    _emit(
+        {
+            "status": "computed",
+            "rooms": habits["counts"]["rooms"],
+            "tolerance_m": habits["tolerance_m"],
+            "bytes": len(data),
+            "habits": {k: v["status"] for k, v in habits["habits"].items()},
+        }
+    )
+    return EXIT_OK
+
+
+def _cmd_habit_bench(args) -> int:
+    """P6: score the unchanged generator and held-out reference rooms."""
+    from archimind.datasets.canonical import strict_loads
+    from archimind.datasets.habit_bench import run_bench
+    from archimind.datasets.habits import select_split
+    from archimind.datasets.pack import load_pack
+
+    status = load_pack(Path(args.pack), audience="local")
+    if status.status != "ready":
+        _emit({"status": "unavailable", "reason": status.reason})
+        return EXIT_BLOCKED
+    try:
+        habits = strict_loads(Path(args.habits).read_bytes())
+    except (OSError, ValueError):
+        _emit({"status": "failed", "reason": "invalid_habits"})
+        return EXIT_USAGE
+    if habits.get("snapshot_id") != status.pack.manifest.snapshot_id:
+        _emit({"status": "unavailable", "reason": "habits_snapshot_mismatch"})
+        return EXIT_BLOCKED
+    scenes = status.pack.scenes
+    held = {k: select_split(scenes, k) for k in ("val", "test")}
+    report = run_bench(habits, seeds=range(args.seeds), held_out=held)
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit(
+        {
+            "status": "benchmarked",
+            "calls": report["calls"],
+            "bed_edge": report["generated"]["habit_outcomes"]["bed_edge"],
+            "held_out_passed": report["held_out"]["passed"],
+            "timing_ms": report["timing_ms"],
+        }
+    )
+    return EXIT_OK
+
+
+def _cmd_prompt_suite(args) -> int:
+    """Prompt-variation cases from one split of a verified pack."""
+    from archimind.datasets.canonical import canonical_bytes
+    from archimind.datasets.habits import select_split
+    from archimind.datasets.pack import load_pack
+    from archimind.datasets.prompt_suite import (
+        bind_case,
+        build_prompt_suite,
+        case_to_json,
+    )
+
+    status = load_pack(Path(args.pack), audience="local")
+    if status.status != "ready":
+        _emit({"status": "unavailable", "reason": status.reason})
+        return EXIT_BLOCKED
+    scenes = select_split(status.pack.scenes, args.split)
+    cases = build_prompt_suite(scenes, per_style=args.per_style, seed=args.seed)
+    data = b"".join(
+        canonical_bytes(case_to_json(bind_case(c, status.pack))) + b"\n" for c in cases
+    )
+    atomic_write_bytes(Path(args.out), data)
+    _emit({"status": "built", "cases": len(cases), "split": args.split})
+    return EXIT_OK
+
+
+def _cmd_prompt_eval(args) -> int:
+    """Record live interpreter answers (--live) and score every recorded case."""
+    from archimind.datasets.canonical import iter_jsonl
+    from archimind.datasets.prompt_eval import evaluate_recordings, record_case
+    from archimind.datasets.prompt_suite import case_from_json
+
+    cases = [case_from_json(r) for r in iter_jsonl(Path(args.cases))]
+    rec_path = Path(args.recordings)
+    recordings = (
+        {r["case_id"]: r for r in iter_jsonl(rec_path)} if rec_path.is_file() else {}
+    )
+    if args.live:
+        from archimind.agents.catalog_conversation import interpret_catalog_conversation
+        from archimind.datasets.pack import load_pack
+        from archimind.datasets.prompt_suite import live_cases_allowed
+
+        root = Path(args.pack) if args.pack else None
+
+        def disclosure_allowed(batch):
+            pack = load_pack(root, audience="local")
+            return pack.status == "ready" and live_cases_allowed(batch, pack.pack)
+
+        if not disclosure_allowed(cases):
+            _emit({"status": "blocked", "reason": "unverified_provider_disclosure"})
+            return EXIT_BLOCKED
+
+        def interpret(turns):
+            return interpret_catalog_conversation(turns, allow_live=True)
+
+        with rec_path.open("a", encoding="utf-8", newline="\n") as stream:
+            for case in cases:
+                if case.case_id in recordings:
+                    continue
+                if not disclosure_allowed([case]):
+                    _emit(
+                        {
+                            "status": "blocked",
+                            "reason": "unverified_provider_disclosure",
+                        }
+                    )
+                    return EXIT_BLOCKED
+                record = record_case(case, interpret)
+                recordings[case.case_id] = record
+                stream.write(json.dumps(record, sort_keys=True) + "\n")
+                stream.flush()
+    report = evaluate_recordings(cases, recordings)
+    text = json.dumps(report, indent=2, sort_keys=True) + "\n"
+    atomic_write_bytes(Path(args.out), text.encode("utf-8"))
+    _emit(
+        {
+            "status": "evaluated",
+            "total_cases": len(cases),
+            "unrecorded": len(report["unrecorded"]),
+            **{k: report["summary"][k] for k in ("cases", "passed", "pass_rate")},
+        }
+    )
     return EXIT_OK
 
 
@@ -493,7 +1053,79 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--audience", choices=("local", "public"), default="local")
     p.add_argument("--permission", help="PermissionRecord JSON decided by the owner")
     p.add_argument("--retrieved-utc", help="when the pinned shards were fetched")
+    p.add_argument(
+        "--future-model-info",
+        help="P2b: 3D-FUTURE model_info.json (primary categories)",
+    )
+    p.add_argument("--future-sha256", help="expected SHA-256 of model_info.json")
+    p.add_argument("--future-inventory", help="probe-kaggle output listing it")
+    p.add_argument("--future-permission", help="PermissionRecord JSON for 3D-FUTURE")
+    p.add_argument("--future-retrieved-utc", help="when model_info.json was fetched")
     p.set_defaults(func=_cmd_ssr_build)
+
+    p = sub.add_parser("midi-audit", help="P2c: audit acquired MIDI rooms")
+    p.add_argument("--scene-root", required=True, help="<...>/3D-FRONT-TEST-SCENE")
+    p.add_argument("--render-root", required=True, help="<...>/3D-FRONT-TEST-RENDER")
+    p.add_argument("--midi-dir", required=True, help="MIDI id lists")
+    p.add_argument("--ssr-pack", required=True, help="verified SSR reference pack")
+    p.add_argument("--out", required=True, help="new or empty output directory")
+    p.set_defaults(func=_cmd_midi_audit)
+
+    p = sub.add_parser("ref-search", help="P3: search a verified reference pack")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--audience", choices=["public", "local"], default="public")
+    p.add_argument("--query", required=True, help="ReferenceQuery JSON file")
+    p.add_argument(
+        "--preview-rank", type=int, help="also preview the scene hit at this rank"
+    )
+    p.add_argument("--out", help="write the full result JSON here")
+    p.set_defaults(func=_cmd_ref_search)
+
+    p = sub.add_parser("ref-eval", help="P3: evaluate search over a reference pack")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--audience", choices=["public", "local"], default="public")
+    p.add_argument(
+        "--sample", type=int, default=200, help="reference_only scenes to self-query"
+    )
+    p.add_argument("--out", help="write the report JSON here")
+    p.set_defaults(func=_cmd_ref_eval)
+
+    p = sub.add_parser(
+        "habit-stats", help="P5: layout habits from a pack's train split"
+    )
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--out", required=True, help="write habits.json here")
+    p.set_defaults(func=_cmd_habit_stats)
+
+    p = sub.add_parser("habit-bench", help="P6: habit benchmark of the generator")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--habits", required=True, help="habits.json from habit-stats")
+    p.add_argument("--out", required=True, help="write the report JSON here")
+    p.add_argument("--seeds", type=int, default=50, help="seeds 0..N-1 per room")
+    p.set_defaults(func=_cmd_habit_bench)
+
+    p = sub.add_parser("prompt-suite", help="Prompt-variation cases from pack rooms")
+    p.add_argument("--pack", required=True, help="verified reference pack")
+    p.add_argument("--out", required=True, help="write cases JSONL here")
+    p.add_argument("--split", choices=("train", "val", "test"), default="val")
+    p.add_argument("--per-style", type=int, default=3)
+    p.add_argument("--seed", type=int, default=0)
+    p.set_defaults(func=_cmd_prompt_suite)
+
+    p = sub.add_parser("prompt-eval", help="Record (--live) and score chat answers")
+    p.add_argument(
+        "--pack",
+        help="Current verified source pack, required for live disclosure checks",
+    )
+    p.add_argument("--cases", required=True, help="cases JSONL from prompt-suite")
+    p.add_argument("--recordings", required=True, help="recordings JSONL (appended)")
+    p.add_argument("--out", required=True, help="write the report JSON here")
+    p.add_argument(
+        "--live",
+        action="store_true",
+        help="call the configured model once per unrecorded case (costs API usage)",
+    )
+    p.set_defaults(func=_cmd_prompt_eval)
     return parser
 
 

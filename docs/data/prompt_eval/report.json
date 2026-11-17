@@ -1,0 +1,579 @@
+{
+  "rows": [
+    {
+      "case_id": "full_metric:ssr:81066537-15f3-471c-a325-807d292d693a:Bedroom-790",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "full_metric"
+    },
+    {
+      "case_id": "full_metric:ssr:cbbaa3ef-e12d-42bf-a8c6-35719d6e86c8:SecondBedroom-74434",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "full_metric"
+    },
+    {
+      "case_id": "full_metric:ssr:6e7a0c41-15f3-4909-a20c-dab460b45ada:Bedroom-258",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "full_metric"
+    },
+    {
+      "case_id": "feet:ssr:629cf963-2c15-47a5-9af4-8742592a70e7:Bedroom-3521",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "feet"
+    },
+    {
+      "case_id": "feet:ssr:1f54e60e-c8c2-437d-af36-75ca36438019:SecondBedroom-24295",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "feet"
+    },
+    {
+      "case_id": "feet:ssr:10e11961-a7ca-48d0-becd-eebdd9c598e4:MasterBedroom-22066",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "feet"
+    },
+    {
+      "case_id": "typos:ssr:6e3dbf3d-cf2f-41ea-adad-c6a40129c200:SecondBedroom-6938",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "typos"
+    },
+    {
+      "case_id": "typos:ssr:fe3731be-633d-487d-a502-63a3c0ebfbc7:MasterBedroom-2363",
+      "clarifications": [
+        "Provide/confirm room depth, including original number and units."
+      ],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": false,
+      "reason_ok": null,
+      "room_ok": null,
+      "status_ok": false,
+      "style": "typos"
+    },
+    {
+      "case_id": "typos:ssr:6e7a0c41-15f3-4909-a20c-dab460b45ada:Bedroom-258",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "typos"
+    },
+    {
+      "case_id": "casual:ssr:a931e811-6950-46f6-b733-6c13e079f448:MasterBedroom-72447",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "casual"
+    },
+    {
+      "case_id": "casual:ssr:cbbaa3ef-e12d-42bf-a8c6-35719d6e86c8:SecondBedroom-74434",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "casual"
+    },
+    {
+      "case_id": "casual:ssr:d90e4b61-1b9c-4065-b973-2f6f22120acc:Bedroom-16311",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "ready",
+      "functions_ok": true,
+      "got_status": "ready",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": true,
+      "status_ok": true,
+      "style": "casual"
+    },
+    {
+      "case_id": "multiples:ssr:0857b91d-e04a-497a-ac00-7d912e032e99:SecondBedroom-4383",
+      "clarifications": [
+        "None",
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "multiples"
+    },
+    {
+      "case_id": "multiples:ssr:87d50727-70e7-4346-8f30-f00979a98a24:MasterBedroom-27222",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "multiples"
+    },
+    {
+      "case_id": "multiples:ssr:206d8aff-ccfc-4120-b5d8-d63c5578796e:MasterBedroom-994",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "multiples"
+    },
+    {
+      "case_id": "missing_door:ssr:e2232752-01e2-4276-8abe-4314243d9b13:SecondBedroom-8154",
+      "clarifications": [
+        "Provide at least one entrance: wall, offset, width and height."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_door"
+    },
+    {
+      "case_id": "missing_door:ssr:5aae238d-48bb-4ffc-a14f-d93215e68162:MasterBedroom-1757",
+      "clarifications": [
+        "Provide at least one entrance: wall, offset, width and height."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_door"
+    },
+    {
+      "case_id": "missing_door:ssr:a97fb93b-c83c-4a4c-8c80-cc218ad7d015:MasterBedroom-1747",
+      "clarifications": [
+        "Provide at least one entrance: wall, offset, width and height."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_door"
+    },
+    {
+      "case_id": "missing_windows:ssr:31bc6da9-67c9-4b81-b046-bc5752296b30:Bedroom-294",
+      "clarifications": [
+        "windows presence",
+        "bed size beyond 'single'",
+        "Specify measured windows or explicitly confirm no windows."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_windows"
+    },
+    {
+      "case_id": "missing_windows:ssr:b9e0dff9-03dd-4c4a-a00f-0b04b45d8df4:SecondBedroom-59226",
+      "clarifications": [
+        "windows present or none explicitly stated",
+        "Specify measured windows or explicitly confirm no windows."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_windows"
+    },
+    {
+      "case_id": "missing_windows:ssr:55f4adda-f24e-4f47-ad62-d504a722aad4:MasterBedroom-2972",
+      "clarifications": [
+        "Whether there are any windows, or explicitly none",
+        "Specify measured windows or explicitly confirm no windows."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_windows"
+    },
+    {
+      "case_id": "missing_ceiling:ssr:e6534ac2-3e67-4cb1-8776-f1b5ae914105:SecondBedroom-5427",
+      "clarifications": [
+        "Provide/confirm room ceiling height, including original number and units."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_ceiling"
+    },
+    {
+      "case_id": "missing_ceiling:ssr:9a0486c5-58e8-4a77-99de-9c4ea78d39d3:SecondBedroom-6212",
+      "clarifications": [
+        "Provide/confirm room ceiling height, including original number and units."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_ceiling"
+    },
+    {
+      "case_id": "missing_ceiling:ssr:e2232752-01e2-4276-8abe-4314243d9b13:SecondBedroom-8154",
+      "clarifications": [
+        "bed product size/width-depth constraints are unspecified",
+        "chair type is unspecified",
+        "Provide/confirm room ceiling height, including original number and units."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "missing_ceiling"
+    },
+    {
+      "case_id": "no_bed_size:ssr:410346c8-1f2d-47cc-b8ae-d1a0d73ccf03:Bedroom-9251",
+      "clarifications": [
+        "Specify the bed size. Only the disclosed queen template is available procedurally; other sizes can be revised or explicitly omitted after review."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "no_bed_size"
+    },
+    {
+      "case_id": "no_bed_size:ssr:12cc5ada-f116-4e16-bcc1-f1ac7bc6ef50:MasterBedroom-57483",
+      "clarifications": [
+        "bed size",
+        "Specify the bed size. Only the disclosed queen template is available procedurally; other sizes can be revised or explicitly omitted after review."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "no_bed_size"
+    },
+    {
+      "case_id": "no_bed_size:ssr:6df8f830-ba50-46b4-9f9a-b35535f22535:MasterBedroom-97178",
+      "clarifications": [
+        "Specify the bed size. Only the disclosed queen template is available procedurally; other sizes can be revised or explicitly omitted after review."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "no_bed_size"
+    },
+    {
+      "case_id": "l_shaped:ssr:b1b34315-3981-48b3-bfc0-e82878ea6e34:SecondBedroom-49489",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "unsupported",
+      "functions_ok": null,
+      "got_status": "unsupported",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "l_shaped"
+    },
+    {
+      "case_id": "l_shaped:ssr:e6534ac2-3e67-4cb1-8776-f1b5ae914105:SecondBedroom-5427",
+      "clarifications": [],
+      "error": null,
+      "expected_status": "unsupported",
+      "functions_ok": null,
+      "got_status": "unsupported",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "l_shaped"
+    },
+    {
+      "case_id": "l_shaped:ssr:5ab31a7e-13f2-4b31-9f0d-4a01afb0091d:MasterBedroom-73892",
+      "clarifications": [
+        "Bedroom is marked unsupported because the user requested an L-shaped room, which is nonrectangular.",
+        "No clarification for bed size beyond 'king'; if product matching needs a specific king variant, this may be ambiguous."
+      ],
+      "error": null,
+      "expected_status": "unsupported",
+      "functions_ok": null,
+      "got_status": "unsupported",
+      "passed": true,
+      "reason_ok": null,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "l_shaped"
+    },
+    {
+      "case_id": "twin_beds:ssr:ab4068f7-ec54-420f-a856-59a54a807d91:Bedroom-52838",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "twin_beds"
+    },
+    {
+      "case_id": "twin_beds:ssr:40c54a07-55c4-4c83-9624-957261e07ab8:MasterBedroom-65728",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "twin_beds"
+    },
+    {
+      "case_id": "twin_beds:ssr:797dd495-26a0-4bf6-b0c8-c71690e1addf:SecondBedroom-5810",
+      "clarifications": [
+        "This first catalog workflow supports one instance per product/template; revise quantities."
+      ],
+      "error": null,
+      "expected_status": "needs_clarification",
+      "functions_ok": true,
+      "got_status": "needs_clarification",
+      "passed": true,
+      "reason_ok": true,
+      "room_ok": null,
+      "status_ok": true,
+      "style": "twin_beds"
+    }
+  ],
+  "summary": {
+    "by_style": {
+      "casual": {
+        "cases": 3,
+        "got_status": {
+          "ready": 3
+        },
+        "passed": 3,
+        "reason_named": null
+      },
+      "feet": {
+        "cases": 3,
+        "got_status": {
+          "ready": 3
+        },
+        "passed": 3,
+        "reason_named": null
+      },
+      "full_metric": {
+        "cases": 3,
+        "got_status": {
+          "ready": 3
+        },
+        "passed": 3,
+        "reason_named": null
+      },
+      "l_shaped": {
+        "cases": 3,
+        "got_status": {
+          "unsupported": 3
+        },
+        "passed": 3,
+        "reason_named": null
+      },
+      "missing_ceiling": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 3
+        },
+        "passed": 3,
+        "reason_named": "3/3"
+      },
+      "missing_door": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 3
+        },
+        "passed": 3,
+        "reason_named": "3/3"
+      },
+      "missing_windows": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 3
+        },
+        "passed": 3,
+        "reason_named": "3/3"
+      },
+      "multiples": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 3
+        },
+        "passed": 3,
+        "reason_named": "3/3"
+      },
+      "no_bed_size": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 3
+        },
+        "passed": 3,
+        "reason_named": "3/3"
+      },
+      "twin_beds": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 3
+        },
+        "passed": 3,
+        "reason_named": "3/3"
+      },
+      "typos": {
+        "cases": 3,
+        "got_status": {
+          "needs_clarification": 1,
+          "ready": 2
+        },
+        "passed": 2,
+        "reason_named": null
+      }
+    },
+    "cases": 33,
+    "pass_rate": 0.9697,
+    "passed": 32
+  },
+  "unrecorded": []
+}

@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "P4",
+  "branch": "data/dataset-reference-pilot",
+  "observed_utc": "2026-11-16T00:00:00Z",
+  "base": {
+    "origin_main": "fc19b0ba5899a0b2968789bb8ff6aefbef6c3ed3",
+    "contains": ["PR #6 feat/09a-chat-bedroom (verified 09A checkpoint)", "PR #7 feature/single-agent"],
+    "rebase_needed": false,
+    "conflicts": []
+  },
+  "changed_shared_files": {
+    "src/archimind/ui/bedroom_chat.py": "Mount the default-off reference panel for a ready draft; New conversation also clears dataset_ref* keys. Not hash-pinned."
+  },
+  "pinned_files_touched": [],
+  "new_files": [
+    "src/archimind/ui/dataset_references.py",
+    "tests/test_dataset_references_ui.py"
+  ],
+  "server_settings": {
+    "ARCHIMIND_ENABLE_DATASET_REFERENCES": "default 0 (panel absent, no pack load)",
+    "ARCHIMIND_DATASET_REFERENCE_ROOT": "server-side pack path",
+    "ARCHIMIND_DATASET_REFERENCE_AUDIENCE": "default public; local for research checkouts"
+  },
+  "tests": {
+    "new_ui_tests": "5 passed (tests/test_dataset_references_ui.py)",
+    "existing_chat_ui_tests": "14 passed (test_bedroom_chat_ui.py, test_furniture_assets_ui.py)",
+    "full_suite_windows": {
+      "conditions": "PYTHONUTF8=1 and a scratchpad-only pytest plugin that builds asyncio's loopback self-pipe; same machine, run in parallel",
+      "baseline_P3_commit_clean_worktree": "17 failed, 2164 passed, 55 errors",
+      "with_P4": "18 failed, 2168 passed, 55 errors",
+      "only_with_P4": [
+        "test_furniture_source_expansion.py::test_production_and_frozen_artifacts_and_historical_report_are_preserved"
+      ],
+      "only_with_P4_cause": "Line endings of the main Windows checkout (core.autocrlf=true): src/archimind/ui/furniture_assets.py is unchanged versus HEAD, and its CR-stripped bytes hash to the pinned e109a391…; the LF worktree passes. Not caused by P4.",
+      "shared_failures_cause": "Pre-existing on Windows in both trees (codex advisor, requirements/stylist/critic agents, retrieval encoders, packaging); none import the dataset package or the reference panel."
+    }
+  },
+  "real_pack_apptest": {
+    "pack_id": "ssr-bedrooms-p2b",
+    "snapshot_id": "8cfb31258aa7c4b7f29ce114661d59c1709d95e4d4ca16f5929e78e5089e9422",
+    "audience": "local",
+    "draft": "09A fixture: 5 x 4 x 2.7 m, queen bed and writing desk",
+    "status": "matches",
+    "hits": [
+      "ssr:06bb7494-bd68-45f7-b38c-af949dff8449:Bedroom-797",
+      "ssr:186273e2-5d0a-4057-a1d9-4e43bdf705c5:MasterBedroom-38350",
+      "ssr:16c0e506-c41b-4532-8293-1b15110c3919:MasterBedroom-13813"
+    ],
+    "coverage": [1.0, 1.0, 1.0],
+    "size_distance": [0.019012, 0.020679, 0.027346],
+    "preview_rank_1": "reference_only: footprint table, no floor plan drawn",
+    "exception": false,
+    "find_click_s_including_first_pack_load": 4.35,
+    "preview_click_s_cached_pack": 0.84,
+    "interpretation_calls": 1,
+    "generator_calls": 0
+  },
+  "not_done": [
+    "Reference-mesh viewer: no qualified meshes (M3 not run); viewer sources and build.mjs are hash-pinned owner files",
+    "Browser screenshots at 1440x1000 and 390x844",
+    "Public demo: blocked by source permissions"
+  ]
+}

@@ -1,6 +1,7 @@
 """Conversation is pending input; existing generation/results remain authoritative."""
 
 import os
+import re
 
 import streamlit as st
 
@@ -29,10 +30,48 @@ PREPARED = "chat_bedroom_prepared"
 SIGNATURE = "chat_bedroom_signature"
 
 
-def _assistant_text(result):
+def _plain(text: str) -> str:
+    """One short line with markdown control characters escaped."""
+    text = " ".join(text.split())[:120]
+    return re.sub(r"([\\`*_{}\[\]<>#|~])", r"\\\1", text)
+
+
+def _unsupported_reasons(extraction, turns) -> list[str]:
+    """What made a request unsupported, in the user's own words where possible."""
+    if extraction is None:
+        return []
+    from archimind.agents.catalog_conversation import _request_constraint
+
+    reasons = []
+    if extraction.room_type == "unsupported":
+        reasons.append("only bedrooms are supported")
+    if extraction.shape == "unsupported":
+        reasons.append("only single rectangular rooms are supported")
+    reasons += [_plain(f) for f in extraction.unsupported_features]
+    reasons += [
+        f"mandatory constraint: {_plain(c.value)}"
+        for c in extraction.hard_constraints
+        if _request_constraint(c, extraction.furniture, turns) == "unsupported"
+    ]
+    reasons += [
+        f"unsupported furniture: {_plain(i.source.text)}"
+        for i in extraction.furniture
+        if i.function == "unsupported"
+    ]
+    return list(dict.fromkeys(reasons))[:4]
+
+
+def _assistant_text(result, turns=()):
     if result.error:
         return result.error.message
     if result.status == "unsupported":
+        reasons = _unsupported_reasons(getattr(result, "extraction", None), turns)
+        if reasons:
+            return (
+                "This request includes something the app cannot do yet:\n"
+                + "\n".join(f"- {r}" for r in reasons)
+                + "\n\nPlease revise it; no layout has changed."
+            )
         return "This request includes unsupported room geometry or mandatory constraints. Please revise it; no layout has changed."
     if result.status == "needs_clarification":
         return "Please clarify:\n" + "\n".join(
@@ -66,7 +105,7 @@ def _reset_pending_chat():
     ):
         st.session_state.pop(key, None)
     for key in list(st.session_state):
-        if key.startswith("chat_choice:"):
+        if key.startswith(("chat_choice:", "dataset_ref")):
             del st.session_state[key]
 
 
@@ -124,7 +163,9 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
         with st.spinner("Interpreting requirements…"):
             result = interpret_catalog_conversation(proposed, allow_live=allow)
         answer = CatalogChatTurn(
-            id=proposed[-1].id + 1, role="assistant", content=_assistant_text(result)
+            id=proposed[-1].id + 1,
+            role="assistant",
+            content=_assistant_text(result, proposed),
         )
         st.session_state[TURNS] = (*proposed, answer)
         st.session_state[RESULT] = result
@@ -162,6 +203,10 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
         )
     for text in result.limitations:
         st.caption(text)
+    # Optional, default-off dataset references; separate state, no model calls.
+    from archimind.ui.dataset_references import render_dataset_references
+
+    render_dataset_references(draft)
     try:
         unavailable = [
             o.record.search.reviewed_name

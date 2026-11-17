@@ -3,13 +3,18 @@
 Rules (each from the P1 probe, docs/data/DATASET_PROBE_P1.md):
 
 * Geometry uses :mod:`archimind.datasets.ssr` unchanged (proven conventions).
-* Categories come ONLY from MIDI-3D furniture ids (3D-FUTURE super-categories),
-  joined by jid. SSR ``desc`` text is untrusted and never read. An object whose jid
-  has no MIDI category is kept with ``exclusion="unmapped_category"``; it has no
-  footprint, so it cannot reach a layout.
-* SSR jids may carry a scale-variant suffix (``<uuid>-(0.74)-(0.74)-(0.74)``).
-  The stored ``jid`` is the 36-character 3D-FUTURE model id; the real extent stays
-  in ``size_raw``.
+* Categories come ONLY from 3D-FUTURE ``model_info.json`` (P2b) and MIDI-3D
+  furniture ids, joined by jid (see :mod:`archimind.datasets.future`). SSR ``desc``
+  text is untrusted and never read. An object whose jid has no category is kept with
+  ``exclusion="unmapped_category"``; it has no footprint, so it cannot reach a
+  layout. ``raw_category`` is the finer 3D-FUTURE category when known (for example
+  ``Nightstand``), otherwise the super-category.
+* SSR jids may carry a scale-variant suffix (``<uuid>-(0.74)-(0.74)-(0.74)``),
+  including mirrored ones with a negative x scale (``<uuid>-(-1.0)-(1.0)-(1.0)``).
+  The stored ``jid`` is the 36-character 3D-FUTURE model id; the real, positive
+  extent stays in ``size_raw``, so footprints are unaffected by mirroring.
+* Lighting is exempt from ``floor_contact`` (ceiling and wall lights), except a
+  3D-FUTURE ``Floor Lamp``, which must stand on the floor.
 * ``canonical``: every object admitted at zero yaw, inside the walls, no solid
   overlap. ``reference_only``: at least one admitted object. Otherwise excluded.
 * Rows with identical geometry are deduplicated: the smallest ``reference_id`` is
@@ -48,8 +53,8 @@ from archimind.datasets.ssr import (
 )
 
 TRANSFORM_VERSION = "1.0.0"
-CATEGORY_MAP_VERSION = "1.0.0"
-ADAPTER_VERSION = "1.0.0"
+CATEGORY_MAP_VERSION = "1.1.0"  # 1.1: 3D-FUTURE categories, mirrored jids, floor lamps
+ADAPTER_VERSION = "1.1.0"
 SOURCE = "ssr_3dfront"
 
 # MIDI-3D / 3D-FUTURE super-category -> ArchiMind reference category.
@@ -65,13 +70,15 @@ CATEGORY_MAP: Mapping[str, str] = {
 }
 # Categories that legitimately hang above the floor (ceiling and wall lights).
 NOT_FLOOR_STANDING = frozenset({"lighting"})
+# Finer 3D-FUTURE categories inside NOT_FLOOR_STANDING that do stand on the floor.
+FLOOR_STANDING_FINE = frozenset({"Floor Lamp"})
 _GEOMETRY_CODES = frozenset(
     {"tilted_object", "non_quarter_turn_rotation", "invalid_dimensions"}
 )
 
 _BASE_JID = re.compile(
     r"^(?P<base>[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})"
-    r"(?P<variant>(?:-\([0-9.]{1,16}\))*)$"
+    r"(?P<variant>(?:-\(-?[0-9.]{1,16}\))*)$"
 )
 
 
@@ -82,7 +89,7 @@ def base_jid(jid) -> str | None:
 
 
 def lookup_category(jid, jid_categories: Mapping[str, str]) -> str | None:
-    """MIDI super-category by exact jid, then by the base model id."""
+    """Category by exact jid, then by the base model id."""
     if not isinstance(jid, str):
         return None
     if jid in jid_categories:
@@ -125,8 +132,14 @@ def convert_row(
     jid_categories: Mapping[str, str],
     midi_splits: Mapping[str, str],
     room_type: str = "bedroom",
+    jid_fine_categories: Mapping[str, str] | None = None,
 ) -> RowResult | None:
-    """Convert one parquet row; ``None`` when the row is not of ``room_type``."""
+    """Convert one parquet row; ``None`` when the row is not of ``room_type``.
+
+    ``jid_categories`` maps jids to super-categories (MIDI spelling);
+    ``jid_fine_categories`` optionally maps them to finer 3D-FUTURE categories.
+    """
+    jid_fine_categories = jid_fine_categories or {}
     split = room_type_split(row.get("splits"), room_type)
     if split is None:
         return None
@@ -168,12 +181,13 @@ def convert_row(
             f"{len(objects)} objects (allowed 1-{MAX_OBJECTS})",
         )
 
-    records, boxes = [], []
+    records, boxes, floor_standing = [], [], []
     for index, obj in enumerate(objects):
         raw_jid = obj.get("jid")
         jid = base_jid(raw_jid)
         super_category = lookup_category(raw_jid, jid_categories)
         category = CATEGORY_MAP.get(super_category) if super_category else None
+        fine_category = lookup_category(raw_jid, jid_fine_categories)
         try:
             size = tuple(float(c) for c in obj["size"])
             pos = tuple(float(c) for c in obj["pos"])
@@ -206,11 +220,15 @@ def convert_row(
                 yaw_quarter_turns=box.quarter_turns,
             )
             boxes.append((category, box))
+            floor_standing.append(
+                category not in NOT_FLOOR_STANDING
+                or fine_category in FLOOR_STANDING_FINE
+            )
         records.append(
             SceneObject(
                 source_object_id=f"o{index:02d}",
                 jid=jid,
-                raw_category=super_category or "unmapped",
+                raw_category=fine_category or super_category or "unmapped",
                 category=category if exclusion is None else None,
                 size_raw=size,
                 position_raw=pos,
@@ -261,9 +279,8 @@ def convert_row(
     )
     floating = sum(
         1
-        for category, b in boxes
-        if category not in NOT_FLOOR_STANDING
-        and abs(b.bottom_z_m) > FLOOR_CONTACT_TOLERANCE_M
+        for standing, (_, b) in zip(floor_standing, boxes, strict=True)
+        if standing and abs(b.bottom_z_m) > FLOOR_CONTACT_TOLERANCE_M
     )
     midi_split = midi_splits.get(key)
     checks = [
@@ -385,6 +402,9 @@ def build_report(
         ),
         "admitted_categories": dict(
             sorted(Counter(o.category for o in objects if o.category).items())
+        ),
+        "admitted_raw_categories": dict(
+            sorted(Counter(o.raw_category for o in objects if o.category).items())
         ),
         "checks": dict(sorted(checks.items())),
     }

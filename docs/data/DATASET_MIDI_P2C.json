@@ -1,0 +1,423 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "P2c",
+  "branch": "data/dataset-reference-pilot",
+  "observed_utc": "2026-11-16T00:00:00Z",
+  "midi_revision": "156fc5312ea613d4e92cbf5da1fddfa61bbad3b2",
+  "where_run": "Local Windows machine; both archives streamed over HTTPS and discarded except the selected members",
+  "acquisition": {
+    "scene": {
+      "url": "https://huggingface.co/datasets/huanngzh/3D-Front/resolve/156fc5312ea613d4e92cbf5da1fddfa61bbad3b2/3D-FRONT-TEST-SCENE.tar.gz",
+      "cap_bytes": 536870912,
+      "bytes_streamed": 382310400,
+      "members_kept": 40,
+      "bytes_kept": 56944956,
+      "missing": []
+    },
+    "render": {
+      "url": "https://huggingface.co/datasets/huanngzh/3D-Front/resolve/156fc5312ea613d4e92cbf5da1fddfa61bbad3b2/3D-FRONT-TEST-RENDER.tar.gz",
+      "cap_bytes": 167772160,
+      "bytes_streamed": 108492800,
+      "members_kept": 280,
+      "bytes_kept": 22162930,
+      "missing": []
+    }
+  },
+  "local_evidence_sha256": {
+    "acquisition.json": "8920b4c0680e5d0ca7f9e4ac5f068d7ea5bde5067a6dae6933d1b76b1449e26b",
+    "audit/report.json": "92e6aaee42db7e0ecacc1be853baf3de24adad16c27559c41fd1f23348c1f43b"
+  },
+  "ssr_pack_snapshot": "8cfb31258aa7c4b7f29ce114661d59c1709d95e4d4ca16f5929e78e5089e9422",
+  "summary": {
+    "alignment": {
+      "PASS": 5
+    },
+    "association_clean": 5,
+    "camera": {
+      "PASS": 5
+    },
+    "rooms": 5
+  },
+  "rooms": [
+    {
+      "room_key": "e8924da7-9ca0-4eaa-b936-6636786c97cb/Bedroom-338",
+      "midi_split": "test",
+      "ssr": {
+        "reference_id": "ssr:e8924da7-9ca0-4eaa-b936-6636786c97cb:Bedroom-338",
+        "split": "train",
+        "tier": "reference_only"
+      },
+      "objects": 4,
+      "structure_parts": [
+        "others.glb"
+      ],
+      "room_glb": {
+        "sha256": "6081ca4d0def4dd6f0b7523fa5ce28ba63c885e0e2fde1338b87dafa5a6790a2",
+        "size_bytes": 5643252,
+        "triangles": 47629,
+        "max_texture_px": 1024
+      },
+      "full_glb": {
+        "sha256": "29202561413439715c4975cdca6b8da0551a4d2aa9686e814286ff079dfbd661",
+        "size_bytes": 5648968,
+        "triangles": 47899,
+        "max_texture_px": 1024
+      },
+      "association": {
+        "duplicates": [],
+        "listed": 4,
+        "matched": [
+          "Bed_f43310eb-270b-49ec-aef9-11103921b224_1",
+          "Cabinet_Shelf_Desk_841a57e7-68a6-42bb-b414-77c32424874f_2",
+          "Cabinet_Shelf_Desk_c5d2b55c-30c1-4da3-928d-abc49b9936d4_4",
+          "Lighting_5004e8f6-326e-4e46-8581-ad88f55c25b4_3"
+        ],
+        "missing": [],
+        "orphans": []
+      },
+      "views": {
+        "depth": 11,
+        "normal": 11,
+        "render": 11,
+        "rerender": 11,
+        "semantic": 11
+      },
+      "meta_frame_names_present": [
+        21,
+        44
+      ],
+      "alignment": {
+        "status": "PASS",
+        "scale_midi_per_m": 0.55834,
+        "translation_m": [
+          -0.4592,
+          1.3748,
+          0.1194
+        ],
+        "predicted_from_ssr_agrees": true,
+        "max_centre_error_m": 0.0054,
+        "max_extent_error_m": 0.0042,
+        "extent_not_comparable": [],
+        "unmatched_midi": [],
+        "unmatched_ssr": []
+      },
+      "camera": {
+        "status": "PASS",
+        "median_iou": {
+          "documented": 0.5911,
+          "sorted_frame_names": 0.4098,
+          "y_up_and_sorted": 0.0497,
+          "y_up_world": 0.0766
+        }
+      }
+    },
+    {
+      "room_key": "fd987ee8-eeac-4d95-a947-306db2feada5/Bedroom-18956",
+      "midi_split": "test",
+      "ssr": {
+        "reference_id": "ssr:fd987ee8-eeac-4d95-a947-306db2feada5:Bedroom-18956",
+        "split": "train",
+        "tier": "reference_only"
+      },
+      "objects": 3,
+      "structure_parts": [
+        "ceil.glb",
+        "floor.glb",
+        "others.glb",
+        "wall.glb"
+      ],
+      "room_glb": {
+        "sha256": "d9cc1bc8fd93806d36f577a37a9f5251f3074f2ae8bc85637f58f1bc2b944c9f",
+        "size_bytes": 757904,
+        "triangles": 3288,
+        "max_texture_px": 1024
+      },
+      "full_glb": {
+        "sha256": "78216f3f9af12e1ed0f09eb24207001e41a21ef8f78599804719f1418af261ce",
+        "size_bytes": 787556,
+        "triangles": 4548,
+        "max_texture_px": 1024
+      },
+      "association": {
+        "duplicates": [],
+        "listed": 3,
+        "matched": [
+          "Cabinet_Shelf_Desk_06d5595f-679e-423c-b011-9619edaaac60_1",
+          "Lighting_7e6da177-e9cc-4631-a07b-40aef2265b16_3",
+          "Table_0c64b5e0-2f99-4c17-bd22-345131e20f72_2"
+        ],
+        "missing": [],
+        "orphans": []
+      },
+      "views": {
+        "depth": 11,
+        "normal": 11,
+        "render": 11,
+        "rerender": 11,
+        "semantic": 11
+      },
+      "meta_frame_names_present": [
+        21,
+        44
+      ],
+      "alignment": {
+        "status": "PASS",
+        "scale_midi_per_m": 0.731336,
+        "translation_m": [
+          0.0169,
+          1.3007,
+          0.559
+        ],
+        "predicted_from_ssr_agrees": true,
+        "max_centre_error_m": 0.0043,
+        "max_extent_error_m": 0.0048,
+        "extent_not_comparable": [],
+        "unmatched_midi": [],
+        "unmatched_ssr": []
+      },
+      "camera": {
+        "status": "PASS",
+        "median_iou": {
+          "documented": 0.6544,
+          "sorted_frame_names": 0.1941,
+          "y_up_and_sorted": 0.1477,
+          "y_up_world": 0.2549
+        }
+      }
+    },
+    {
+      "room_key": "fd987ee8-eeac-4d95-a947-306db2feada5/MasterBedroom-11997",
+      "midi_split": "test",
+      "ssr": {
+        "reference_id": "ssr:fd987ee8-eeac-4d95-a947-306db2feada5:MasterBedroom-11997",
+        "split": "train",
+        "tier": "reference_only"
+      },
+      "objects": 5,
+      "structure_parts": [
+        "ceil.glb",
+        "others.glb",
+        "wall.glb"
+      ],
+      "room_glb": {
+        "sha256": "efbbc23874492e747b09d0a41f6304cfaba49c7fa6a7365a9c9a4a1bf4d5e4a2",
+        "size_bytes": 3999420,
+        "triangles": 26535,
+        "max_texture_px": 1024
+      },
+      "full_glb": {
+        "sha256": "cf2eba5a830cb2e78d6adc23963862e6a6f9070fe708b7d0bff08c36ee23d39a",
+        "size_bytes": 4007268,
+        "triangles": 26761,
+        "max_texture_px": 1024
+      },
+      "association": {
+        "duplicates": [],
+        "listed": 5,
+        "matched": [
+          "Bed_00acb313-c507-4372-addf-508755c6e98b_1",
+          "Cabinet_Shelf_Desk_27afe8b6-b7a6-4b44-a916-788b9aa27ed1_2",
+          "Cabinet_Shelf_Desk_27afe8b6-b7a6-4b44-a916-788b9aa27ed1_3",
+          "Cabinet_Shelf_Desk_311ff139-b90e-42cb-9ef6-bb95f6567ca7_4",
+          "Cabinet_Shelf_Desk_5921e731-07e7-42be-9b2b-b7e7025de569_5"
+        ],
+        "missing": [],
+        "orphans": []
+      },
+      "views": {
+        "depth": 11,
+        "normal": 11,
+        "render": 11,
+        "rerender": 11,
+        "semantic": 11
+      },
+      "meta_frame_names_present": [
+        21,
+        44
+      ],
+      "alignment": {
+        "status": "PASS",
+        "scale_midi_per_m": 0.445616,
+        "translation_m": [
+          0.3151,
+          1.351,
+          0.0376
+        ],
+        "predicted_from_ssr_agrees": false,
+        "max_centre_error_m": 0.0055,
+        "max_extent_error_m": 0.0031,
+        "extent_not_comparable": [
+          "Cabinet_Shelf_Desk_27afe8b6-b7a6-4b44-a916-788b9aa27ed1_2",
+          "Cabinet_Shelf_Desk_27afe8b6-b7a6-4b44-a916-788b9aa27ed1_3"
+        ],
+        "unmatched_midi": [
+          "Cabinet_Shelf_Desk_311ff139-b90e-42cb-9ef6-bb95f6567ca7_4"
+        ],
+        "unmatched_ssr": []
+      },
+      "camera": {
+        "status": "PASS",
+        "median_iou": {
+          "documented": 0.9487,
+          "sorted_frame_names": 0.1945,
+          "y_up_and_sorted": 0.0837,
+          "y_up_world": 0.0376
+        }
+      }
+    },
+    {
+      "room_key": "fd9984b0-5f43-40b7-861b-f2cbee90326a/Bedroom-9575",
+      "midi_split": "test",
+      "ssr": {
+        "reference_id": "ssr:fd9984b0-5f43-40b7-861b-f2cbee90326a:Bedroom-9575",
+        "split": "train",
+        "tier": "canonical"
+      },
+      "objects": 2,
+      "structure_parts": [
+        "others.glb"
+      ],
+      "room_glb": {
+        "sha256": "a7d0c5567a5ef32d9cd543fb6e9ca4adfc6ce87ee3f3600025bd523abcde3cea",
+        "size_bytes": 3454612,
+        "triangles": 41358,
+        "max_texture_px": 1024
+      },
+      "full_glb": {
+        "sha256": "71422b58f917b9807cdd4b082a46f16f168715942494c3dbf542f7fe33932b84",
+        "size_bytes": 3463292,
+        "triangles": 41786,
+        "max_texture_px": 1024
+      },
+      "association": {
+        "duplicates": [],
+        "listed": 2,
+        "matched": [
+          "Bed_83db09d8-0c4c-4b13-8909-404bdf4ea3ec_1",
+          "Lighting_880ac819-66b6-4b09-addb-c3239a16ec5c_2"
+        ],
+        "missing": [],
+        "orphans": []
+      },
+      "views": {
+        "depth": 11,
+        "normal": 11,
+        "render": 11,
+        "rerender": 11,
+        "semantic": 11
+      },
+      "meta_frame_names_present": [
+        21,
+        44
+      ],
+      "alignment": {
+        "status": "PASS",
+        "scale_midi_per_m": 0.697894,
+        "translation_m": [
+          0.3822,
+          1.3009,
+          -0.0973
+        ],
+        "predicted_from_ssr_agrees": true,
+        "max_centre_error_m": 0.0027,
+        "max_extent_error_m": 0.0036,
+        "extent_not_comparable": [],
+        "unmatched_midi": [],
+        "unmatched_ssr": []
+      },
+      "camera": {
+        "status": "PASS",
+        "median_iou": {
+          "documented": 0.9644,
+          "sorted_frame_names": 0.694,
+          "y_up_and_sorted": 0.2043,
+          "y_up_world": 0.236
+        }
+      }
+    },
+    {
+      "room_key": "fe6717d3-31e0-41a2-83e6-98c29c3461df/MasterBedroom-2820",
+      "midi_split": "test",
+      "ssr": {
+        "reference_id": "ssr:fe6717d3-31e0-41a2-83e6-98c29c3461df:MasterBedroom-2820",
+        "split": "train",
+        "tier": "reference_only"
+      },
+      "objects": 6,
+      "structure_parts": [
+        "ceil.glb"
+      ],
+      "room_glb": {
+        "sha256": "bcbb222550c25dfd8b0088918e67a8cd4ee28f3a64cfb354d34be9e896472ca6",
+        "size_bytes": 4744748,
+        "triangles": 59391,
+        "max_texture_px": 1024
+      },
+      "full_glb": {
+        "sha256": "1b9fae6b27c1198992e37b5807531092201acadb49f7fdf94034a3a30f6978b9",
+        "size_bytes": 4753916,
+        "triangles": 59853,
+        "max_texture_px": 1024
+      },
+      "association": {
+        "duplicates": [],
+        "listed": 6,
+        "matched": [
+          "Bed_71eb55bb-b50f-436e-aba5-a25504574d49_2",
+          "Cabinet_Shelf_Desk_e314cd3c-e309-4614-98d2-13f99208ced8_3",
+          "Cabinet_Shelf_Desk_ee520469-b2d9-4552-b207-e674cd30a402_4",
+          "Lighting_41dce00c-6a26-4480-a569-4ab8e6e74d67_5",
+          "Lighting_41dce00c-6a26-4480-a569-4ab8e6e74d67_6",
+          "Lighting_ec122679-f54a-4344-84da-7de8bb4cd4ff_1"
+        ],
+        "missing": [],
+        "orphans": []
+      },
+      "views": {
+        "depth": 11,
+        "normal": 11,
+        "render": 11,
+        "rerender": 11,
+        "semantic": 11
+      },
+      "meta_frame_names_present": [
+        21,
+        44
+      ],
+      "alignment": {
+        "status": "PASS",
+        "scale_midi_per_m": 0.526327,
+        "translation_m": [
+          -0.304,
+          1.249,
+          -0.2838
+        ],
+        "predicted_from_ssr_agrees": true,
+        "max_centre_error_m": 0.0043,
+        "max_extent_error_m": 0.0042,
+        "extent_not_comparable": [],
+        "unmatched_midi": [],
+        "unmatched_ssr": []
+      },
+      "camera": {
+        "status": "PASS",
+        "median_iou": {
+          "documented": 0.9253,
+          "sorted_frame_names": 0.3799,
+          "y_up_and_sorted": 0.1205,
+          "y_up_world": 0.0988
+        }
+      }
+    }
+  ],
+  "not_acquired": {
+    "surfaces_npy": "3D-FRONT-TEST-SURFACE is 70.1 GB in 3 gzip parts; not needed to prove alignment",
+    "depth_units": "depth EXR files are present but not decoded (no EXR reader in the environment); units unverified"
+  },
+  "commands": [
+    "python -m archimind.datasets probe-tar-prefix <3D-FRONT-TEST-RENDER.tar.gz url> --max-bytes 67108864",
+    "gzip_tar_select(<TEST-SCENE url>, <dest>, <exact member names from the P1 listing>, max_bytes=512 MiB)",
+    "gzip_tar_select(<TEST-RENDER url>, <dest>, <exact member names from a render listing>, max_bytes=160 MiB)",
+    "python -m archimind.datasets midi-audit --scene-root <...>/3D-FRONT-TEST-SCENE --render-root <...>/3D-FRONT-TEST-RENDER --midi-dir <midi id lists> --ssr-pack <ssr-bedrooms-p2b> --out <audit>"
+  ]
+}

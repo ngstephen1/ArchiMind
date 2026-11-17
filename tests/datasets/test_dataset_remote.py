@@ -6,9 +6,11 @@ import pytest
 
 from archimind.datasets.remote import (
     gzip_tar_prefix,
+    gzip_tar_select,
     hf_resolve_url,
     hf_tree,
     kaggle_dataset_view,
+    kaggle_download_url,
     kaggle_files,
     kaggle_headers,
 )
@@ -67,9 +69,10 @@ def test_kaggle_files_paginates_and_needs_credentials(monkeypatch):
         {"datasetFiles": [{"name": "a.json", "totalBytes": 1}]},
     ]
     log = []
-    files = kaggle_files("o/d", opener=json_opener(pages, log))
+    files = kaggle_files("o/d", opener=json_opener(pages, log), sleep=lambda _: None)
     assert [f.path for f in files] == ["a.json", "b.zip"]
     assert "pageToken=t" in log[1][0] and log[0][1].startswith("Basic ")
+    assert log[0][0].startswith("https://www.kaggle.com/api/v1/datasets/list/o/d?")
 
 
 def test_kaggle_headers_bearer_for_new_tokens_basic_for_legacy(monkeypatch):
@@ -135,3 +138,174 @@ def test_prefix_stops_at_the_cap_without_error():
 def test_prefix_requires_https():
     with pytest.raises(UnsafeContentError):
         gzip_tar_prefix("http://x/a.tar.gz", max_bytes=10)
+
+
+def test_kaggle_files_retries_rate_limits_then_gives_up(monkeypatch):
+    import email.message
+    import urllib.error
+
+    monkeypatch.setenv("KAGGLE_USERNAME", "u")
+    monkeypatch.setenv("KAGGLE_KEY", "k")
+
+    def http_error(code, retry_after=None):
+        headers = email.message.Message()
+        if retry_after is not None:
+            headers["Retry-After"] = retry_after
+        return urllib.error.HTTPError("https://x", code, "err", headers, None)
+
+    page = {"datasetFiles": [{"name": "a.json", "totalBytes": 1}]}
+    responses = [http_error(429, "7"), http_error(503), page]
+
+    def opener(request, timeout):
+        item = responses.pop(0)
+        if isinstance(item, Exception):
+            raise item
+        return Response(json.dumps(item).encode())
+
+    slept = []
+    files = kaggle_files("o/d", opener=opener, sleep=slept.append)
+    assert [f.path for f in files] == ["a.json"]
+    assert slept == [7.0, 4.0]  # Retry-After honoured, then exponential backoff
+
+    def always_404(request, timeout):
+        raise http_error(404)
+
+    with pytest.raises(urllib.error.HTTPError):
+        kaggle_files("o/d", opener=always_404, sleep=slept.append)
+
+
+def test_kaggle_download_url_encodes_subdirectory_slashes():
+    assert kaggle_download_url("o/d", "dir/sub file.json") == (
+        "https://www.kaggle.com/api/v1/datasets/download/o/d/dir%2Fsub%20file.json"
+    )
+
+
+def test_select_keeps_only_named_members_and_stops_early(tmp_path):
+    import hashlib
+
+    body = targz(
+        {
+            "S/h/r/Bed_x_1.glb": b"b" * 50,
+            "S/h/other/Sofa_y_1.glb": b"s" * 70,
+            "S/h/r/meta.json": b"{}",
+            "S/z/never/read.bin": b"z" * 10,
+        }
+    )
+    reads = []
+
+    class Counting(Response):
+        def read(self, size=-1):
+            data = super().read(size)
+            reads.append(len(data))
+            return data
+
+    result = gzip_tar_select(
+        "https://x/a.tar.gz",
+        tmp_path / "out",
+        {"S/h/r/Bed_x_1.glb": 50, "S/h/r/meta.json": 2},
+        max_bytes=10**6,
+        opener=lambda request, timeout: Counting(body),
+    )
+    assert result.missing == ()
+    assert [f.path for f in result.files] == ["S/h/r/Bed_x_1.glb", "S/h/r/meta.json"]
+    assert result.files[0].sha256 == hashlib.sha256(b"b" * 50).hexdigest()
+    assert sorted(p.name for p in (tmp_path / "out").rglob("*") if p.is_file()) == [
+        "Bed_x_1.glb",
+        "meta.json",
+    ]
+    assert not (tmp_path / "out.selecting").exists()
+
+
+def test_select_reports_members_beyond_the_cap(tmp_path):
+    import os
+
+    body = targz({f"S/f{i}.bin": os.urandom(20_000) for i in range(20)})
+    result = gzip_tar_select(
+        "https://x/a.tar.gz",
+        tmp_path / "out",
+        {"S/f0.bin": 20_000, "S/f19.bin": 20_000},
+        max_bytes=60_000,
+        opener=bytes_opener(body),
+    )
+    assert [f.path for f in result.files] == ["S/f0.bin"]
+    assert result.missing == ("S/f19.bin",)
+
+
+@pytest.mark.parametrize(
+    "wanted",
+    [
+        {"../evil.bin": 1},
+        {"C:/evil.bin": 1},
+        {"S/a.bin": 1, "s/A.BIN": 1},
+        {"S/a.bin": 10**12},
+    ],
+)
+def test_select_rejects_unsafe_wanted_names(tmp_path, wanted):
+    with pytest.raises(UnsafeContentError):
+        gzip_tar_select(
+            "https://x/a.tar.gz",
+            tmp_path / "out",
+            wanted,
+            max_bytes=10**6,
+            opener=bytes_opener(targz({})),
+        )
+
+
+def test_select_rejects_size_mismatch_and_leaves_nothing(tmp_path):
+    body = targz({"S/a.bin": b"a" * 10})
+    with pytest.raises(UnsafeContentError, match="listed size"):
+        gzip_tar_select(
+            "https://x/a.tar.gz",
+            tmp_path / "out",
+            {"S/a.bin": 11},
+            max_bytes=10**6,
+            opener=bytes_opener(body),
+        )
+    assert not (tmp_path / "out").exists()
+    assert not (tmp_path / "out.selecting").exists()
+
+
+@pytest.mark.parametrize("failure", ["missing", "write", "publish"])
+def test_incomplete_replacement_preserves_destination(tmp_path, monkeypatch, failure):
+    import os
+
+    from archimind.datasets import canonical
+
+    dest = tmp_path / "out"
+    dest.mkdir()
+    (dest / "good").write_bytes(b"previous")
+    wanted = {"a": 1}
+    if failure == "missing":
+        wanted["b"] = 1
+    if failure == "write":
+
+        def fail_hash(path):
+            raise OSError("staging read failed")
+
+        monkeypatch.setattr(canonical, "file_sha256", fail_hash)
+    if failure == "publish":
+        replace = os.replace
+
+        def fail_publish(src, dst):
+            if src.name == "staged":
+                raise OSError("publish failed")
+            replace(src, dst)
+
+        monkeypatch.setattr(os, "replace", fail_publish)
+
+    def select():
+        return gzip_tar_select(
+            "https://example.invalid/a",
+            dest,
+            wanted,
+            max_bytes=4096,
+            opener=bytes_opener(targz({"a": b"x"})),
+        )
+
+    if failure == "missing":
+        assert select().missing == ("b",)
+    else:
+        with pytest.raises(OSError):
+            select()
+    assert list(dest.iterdir()) == [dest / "good"]
+    assert (dest / "good").read_bytes() == b"previous"

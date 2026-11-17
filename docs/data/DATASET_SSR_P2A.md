@@ -25,8 +25,10 @@ not in Git. Rebuild it with the command in the JSON receipt.
   same model (`<uuid>-(0.74)-(1.0)-(0.68)`). Looking up the 36-character model id
   maps all but 729 objects. The stored `jid` is that model id, and the real extent
   stays in `size_raw`.
-- **Canonical drops from 55 to 53.** A canonical room needs every object categorized,
-  and two rooms contain an object that has no MIDI category.
+- **Canonical drops from 55 to 53.** ~~A canonical room needs every object
+  categorized, and two rooms contain an object that has no MIDI category.~~
+  Corrected in P2b: the two rooms are exact geometry duplicates of canonical rooms
+  that are kept. See [DATASET_FUTURE_P2B.md](DATASET_FUTURE_P2B.md).
 - **252 duplicates, not 372.** P1 counted duplicates among all rows. Here the 120 other
   duplicates are in rooms that were already excluded for other reasons.
 
@@ -50,5 +52,5 @@ footprints with these check results attached.
   `local_research` allowed and every public use `unknown`. `build_pack` therefore
   refuses a public pack (`source_not_public`). The owner must decide the permission
   record before any public use.
-- **729 unmapped objects** wait for 3D-FUTURE `model_info.json` (P2b, blocked on
-  Kaggle credentials). Mapping them requires a `category_map_version` bump.
+- **729 unmapped objects** wait for 3D-FUTURE `model_info.json`. Resolved in P2b:
+  0 unmapped, with `category_map_version` 1.1.0.

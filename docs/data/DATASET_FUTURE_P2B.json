@@ -1,0 +1,244 @@
+{
+  "schema_version": "1.0.0",
+  "phase": "P2b",
+  "branch": "data/dataset-reference-pilot",
+  "observed_utc": "2026-11-16T00:00:00Z",
+  "midi_revision": "156fc5312ea613d4e92cbf5da1fddfa61bbad3b2",
+  "future": {
+    "ref": "tobetheonly/3d-future-model",
+    "version": 1,
+    "model_info_sha256": "7b73e8cbf23110d15776a433258f4a8736267984f8f5a06c76b4c83201b8d661",
+    "fetched_by": "Colab run pilot-001 (see DATASET_PROBE_P1.json colab_run_future)"
+  },
+  "decisions": {
+    "category_source": "3D-FUTURE model_info.json is primary; MIDI furniture ids are a strict cross-check (any disagreement stops the build) and supply MIDI-only jids (none in practice)",
+    "raw_category": "finer 3D-FUTURE category when known (e.g. Nightstand), else the super-category; ArchiMind categories still map from super-categories",
+    "mirrored_jids": "accepted: <uuid>-(-x)-(y)-(z) maps to the base model id; SSR size is positive, so footprints are unaffected; the mirror sign stays recoverable from the source row via source_object_id",
+    "floor_lamps": "lighting stays exempt from floor_contact except 3D-FUTURE Floor Lamp",
+    "permission": "future_3d manifest carries a provisional record: local_research allowed, every public use unknown, pending owner review"
+  },
+  "comparison_with_p2a": {
+    "unmapped_objects": [
+      729,
+      0
+    ],
+    "objects_admitted": [
+      18631,
+      19374
+    ],
+    "scenes": [
+      4168,
+      4172
+    ],
+    "canonical": [
+      53,
+      53
+    ],
+    "floor_contact_fail": {
+      "p2a": 117,
+      "p2b_without_floor_lamp_rule": 144,
+      "p2b": 147
+    },
+    "mirrored_objects_admitted": 8,
+    "floor_lamps_admitted": 166,
+    "canonical_note": "P1's 55 canonical rows include 2 exact geometry duplicates of kept canonical rooms (7fd782e5…/SecondBedroom-17563, b9301a72…/Bedroom-15959). P2a attributed the drop to unmapped objects; that was wrong."
+  },
+  "ssr": {
+    "adapter_version": "1.1.0",
+    "admitted_categories": {
+      "bed": 3551,
+      "cabinet_shelf_desk": 9191,
+      "chair": 479,
+      "lighting": 3991,
+      "other": 964,
+      "sofa": 106,
+      "stool": 217,
+      "table": 875
+    },
+    "admitted_raw_categories": {
+      "Bar": 22,
+      "Barstool": 8,
+      "Bed": 4,
+      "Bed Frame": 11,
+      "Bookcase / jewelry Armoire": 172,
+      "Bunk Bed": 22,
+      "Ceiling Lamp": 1212,
+      "Chaise Longue Sofa": 2,
+      "Children Cabinet": 124,
+      "Classic Chinese Chair": 10,
+      "Coffee Table": 42,
+      "Corner/Side Table": 343,
+      "Desk": 416,
+      "Dining Chair": 193,
+      "Dining Table": 27,
+      "Double Bed": 24,
+      "Drawer Chest / Corner cabinet": 368,
+      "Dressing Chair": 118,
+      "Dressing Table": 406,
+      "Floor Lamp": 166,
+      "Folding chair": 2,
+      "Footstool / Sofastool / Bed End Stool / Stool": 234,
+      "Kids Bed": 141,
+      "King-size Bed": 2978,
+      "L-shaped Sofa": 3,
+      "Lazy Sofa": 7,
+      "Lounge Chair / Book-chair / Computer Chair": 22,
+      "Lounge Chair / Cafe Chair / Office Chair": 126,
+      "Loveseat Sofa": 19,
+      "Nightstand": 4843,
+      "Others": 964,
+      "Pendant Lamp": 2611,
+      "Round End Table": 39,
+      "Shelf": 190,
+      "Shoe Cabinet": 1,
+      "Sideboard / Side Cabinet / Console": 3,
+      "Sideboard / Side Cabinet / Console Table": 94,
+      "Single bed": 371,
+      "TV Stand": 666,
+      "Tea Table": 1,
+      "Three-Seat / Multi-person sofa": 1,
+      "Three-Seat / Multi-seat Sofa": 22,
+      "Two-seat Sofa": 1,
+      "Wall Lamp": 2,
+      "Wardrobe": 2290,
+      "Wine Cabinet": 18,
+      "Wine Cooler": 1,
+      "armchair": 34
+    },
+    "bedroom_rows": 7328,
+    "category_map_version": "1.1.0",
+    "category_sources": {
+      "future_3d": {
+        "future_models": 16563,
+        "merged_jids": 16563,
+        "midi_agrees_with_future": 6486,
+        "midi_jids": 6486,
+        "midi_only_jids": 0,
+        "path": "3D-FUTURE-model/model_info.json",
+        "ref": "tobetheonly/3d-future-model",
+        "sha256": "7b73e8cbf23110d15776a433258f4a8736267984f8f5a06c76b4c83201b8d661",
+        "size_bytes": 4016486,
+        "version": 1
+      },
+      "midi": "furniture ids"
+    },
+    "checks": {
+      "door_clearance|NOT_VERIFIABLE": 4172,
+      "floor_contact|FAIL": 147,
+      "floor_contact|PASS": 4025,
+      "solid_overlap|FAIL": 2336,
+      "solid_overlap|PASS": 1836,
+      "split_agreement|FAIL": 604,
+      "split_agreement|NOT_VERIFIABLE": 1779,
+      "split_agreement|PASS": 1789,
+      "wall_containment|FAIL": 3226,
+      "wall_containment|PASS": 946
+    },
+    "convention": "ssr-3dfront-respace-b1a4b32b",
+    "convention_digest": "9365a8b0fc7fdc64bdfb561188f57e56641bc7c85e179d946aa4f3c3ef6189bc",
+    "exclusion_reasons": {
+      "duplicate_identity": 252,
+      "irregular_room": 2903,
+      "non_quarter_turn_rotation": 1
+    },
+    "exclusions": 3156,
+    "inputs": [
+      {
+        "path": "data/test-00000-of-00001.parquet",
+        "sha256": "8970830a27fb3dafb5e89d324f5f3666b3defd489e79345d314d455d00a1331b",
+        "size_bytes": 858995
+      },
+      {
+        "path": "data/train-00000-of-00001.parquet",
+        "sha256": "aedbb1f9448614299ecc6c40e6ccf4f9b7441feee42275d7fcfb06690de038e1",
+        "size_bytes": 5698138
+      },
+      {
+        "path": "data/val-00000-of-00001.parquet",
+        "sha256": "38e99958698c2633199e041f68cba51b91f2db1255718ea894a6db8ee323fe40",
+        "size_bytes": 848612
+      }
+    ],
+    "object_exclusions": {
+      "invalid_dimensions": 12,
+      "non_quarter_turn_rotation": 1066,
+      "tilted_object": 1
+    },
+    "objects": 20453,
+    "objects_admitted": 19374,
+    "outputs": {
+      "exclusions.jsonl": {
+        "records": 3156,
+        "sha256": "1cae709dd238f4e512ebe9f079dc9b80dd57030481f08265884c1850f2d619fe"
+      },
+      "scenes.jsonl": {
+        "records": 4172,
+        "sha256": "1f7db8ac078fe1814e8c2123e44d9afa1476b41ea01b767be4ceaf4441bbe766"
+      }
+    },
+    "pack": {
+      "pack_id": "ssr-bedrooms-p2b",
+      "snapshot_id": "8cfb31258aa7c4b7f29ce114661d59c1709d95e4d4ca16f5929e78e5089e9422"
+    },
+    "revision": "b606183e56d972f85850125f9191932cbea654c3",
+    "scenes": 4172,
+    "source": "ssr_3dfront",
+    "tiers": {
+      "canonical": 53,
+      "reference_only": 4119
+    },
+    "tiers_by_split": {
+      "test|canonical": 1,
+      "test|reference_only": 285,
+      "train|canonical": 49,
+      "train|reference_only": 3555,
+      "val|canonical": 3,
+      "val|reference_only": 279
+    },
+    "transform_version": "1.0.0"
+  },
+  "pack": {
+    "pack_id": "ssr-bedrooms-p2b",
+    "audience": "local",
+    "snapshot_id": "8cfb31258aa7c4b7f29ce114661d59c1709d95e4d4ca16f5929e78e5089e9422",
+    "files": [
+      {
+        "kind": "assets",
+        "path": "assets.jsonl",
+        "records": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_bytes": 0
+      },
+      {
+        "kind": "exclusions",
+        "path": "exclusions.jsonl",
+        "records": 3156,
+        "sha256": "1cae709dd238f4e512ebe9f079dc9b80dd57030481f08265884c1850f2d619fe",
+        "size_bytes": 625087
+      },
+      {
+        "kind": "scenes",
+        "path": "scenes.jsonl",
+        "records": 4172,
+        "sha256": "1f7db8ac078fe1814e8c2123e44d9afa1476b41ea01b767be4ceaf4441bbe766",
+        "size_bytes": 11402298
+      },
+      {
+        "kind": "sources",
+        "path": "sources.jsonl",
+        "records": 2,
+        "sha256": "929a3842052b8d11aeceaaff305a09896c32f9ff6e1849e735063f5b7743d90b",
+        "size_bytes": 1789
+      }
+    ],
+    "sources": [
+      "future_3d",
+      "ssr_3dfront"
+    ],
+    "rebuild_snapshot_identical": true
+  },
+  "commands": [
+    "python -m archimind.datasets ssr-build train.parquet val.parquet test.parquet --inventory ssr_inventory.json --midi-dir <midi id lists> --future-model-info model_info.json --future-sha256 7b73e8cbf23110d15776a433258f4a8736267984f8f5a06c76b4c83201b8d661 --future-inventory future_inventory.json --out <stage> --pack-dir <pack> --pack-id ssr-bedrooms-p2b --permission <ssr_permission.json> --retrieved-utc 2026-11-06T18:00:00Z --future-permission <future_permission.json> --future-retrieved-utc 2026-11-16T03:12:56Z",
+    "python -m archimind.datasets verify-pack <pack>"
+  ]
+}
