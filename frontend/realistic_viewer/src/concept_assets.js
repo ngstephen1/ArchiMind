@@ -47,7 +47,7 @@ export function conceptInstance(recipe,f){
       else geometry=new THREE.SphereGeometry(p.a[0],16,8);
       const matrix=new THREE.Matrix4().compose(new THREE.Vector3(...p.t),new THREE.Quaternion(),new THREE.Vector3(p.o?.sx??1,p.o?.sy??1,p.o?.sz??1));
       geometry.applyMatrix4(matrix);
-      const key=p.c+'|'+p.o.rough;
+      const key=p.c.toLowerCase()+'|'+p.o.rough;
       if(!buckets.has(key))buckets.set(key,{color:p.c,roughness:p.o.rough,geometries:[]});
       buckets.get(key).geometries.push(geometry);
     }

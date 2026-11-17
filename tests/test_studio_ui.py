@@ -85,3 +85,33 @@ def test_unexpected_proposal_failure_is_sanitized_and_keeps_results(monkeypatch)
     assert studio.DRAFT not in app.session_state
     assert app.session_state[studio.BUILD] == previous
     assert "private request detail" not in str(app.error)
+
+
+def test_failed_offline_example_clears_pending_ai_plan(monkeypatch):
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    monkeypatch.setattr(studio, "_component", lambda: lambda **kw: None)
+    app = AppTest.from_string(APP, default_timeout=30).run()
+    app.button(key="studio_example").click().run()
+    example = app.session_state[studio.DRAFT]
+    app.button(key="studio_build_button").click().run()
+    displayed = app.session_state[studio.BUILD]
+    calls = []
+
+    def propose(*args, offline=False, **kwargs):
+        calls.append(offline)
+        if offline:
+            raise ValueError("Example does not fit")
+        return example.model_copy(
+            update={"source": "ai_concept", "model": "test-model"}
+        )
+
+    monkeypatch.setattr(studio, "propose_room", propose)
+    app.checkbox(key="studio_consent").check().run()
+    app.button(key="studio_propose").click().run()
+    assert app.session_state[studio.DRAFT].source == "ai_concept"
+    app.button(key="studio_example").click().run()
+    assert not app.exception and app.error
+    assert studio.DRAFT not in app.session_state
+    assert all(button.key != "studio_build_button" for button in app.button)
+    assert app.session_state[studio.BUILD] == displayed
+    assert calls == [False, True]

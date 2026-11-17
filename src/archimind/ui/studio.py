@@ -145,6 +145,7 @@ def render_studio():
         key="studio_example",
         disabled=problem is not None,
     ):
+        st.session_state.pop(DRAFT, None)
         try:
             st.session_state[DRAFT] = propose_room(room, kind, brief, offline=True)
         except (StudioError, ValueError):

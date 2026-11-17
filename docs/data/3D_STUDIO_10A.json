@@ -801,5 +801,14 @@
     "maximum_post_clean_bytes": 7178584064,
     "sample_count": 42,
     "limit": "Observed finite samples only; no causal attribution or guarantee of future free capacity"
+  },
+  "merge_review": {
+    "base_commit": "ea50d19f03bc50e5fd637c67205908cdd411895d",
+    "authorized_migrations": {
+      "src/archimind/_viewer_assets/viewer.js": {
+        "before_sha256": "935492e49615ec430999e0989e8a1583ba08b5fcbe737e749d691b1f07964325",
+        "after_sha256": "7b801114599ae58e45034d445de0f6c7333ea7b4091f4993312429da861b123b"
+      }
+    }
   }
 }

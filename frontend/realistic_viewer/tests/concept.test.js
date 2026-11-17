@@ -52,3 +52,13 @@ for(const fixture of fixtures)test(`whole ${fixture.kind} ${fixture.label} prese
   }
   assert.ok(triangles<=300000);assert.ok(meshes<=8*data.design.furniture.length);
 });
+test('equivalent hex colors share a material and a draw call',()=>{
+  const parts=['#abcdef','#ABCDEF'].map(color=>({...part,color}));
+  const object=conceptInstance({...recipe,parts},furniture);
+  try {
+    assert.equal(object.children.length,1);
+    assert.equal(object.children[0].material.color.getHexString(),'abcdef');
+  } finally {
+    disposeObject(object);
+  }
+});
