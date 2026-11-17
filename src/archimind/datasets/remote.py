@@ -9,11 +9,16 @@ members that happen to be stored first, not members chosen by identity.
 
 import base64
 import os
+import shutil
 import tarfile
+import tempfile
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from pathlib import Path
 
 from archimind.datasets.canonical import strict_loads
 from archimind.datasets.safe_io import UnsafeContentError, make_request
@@ -109,8 +114,12 @@ def hf_resolve_url(repo: str, revision: str, path: str) -> str:
 
 
 def kaggle_download_url(ref: str, path: str) -> str:
-    """Single-file download endpoint; Kaggle may serve large files zipped."""
-    return f"{KAGGLE_API}/datasets/download/{ref}/{urllib.parse.quote(path)}"
+    """Single-file download endpoint; Kaggle may serve large files zipped.
+
+    The file path is one URL segment, so ``/`` inside it must be ``%2F``: the
+    unencoded form 404s for files in subdirectories.
+    """
+    return f"{KAGGLE_API}/datasets/download/{ref}/{urllib.parse.quote(path, safe='')}"
 
 
 def kaggle_headers() -> dict:
@@ -143,16 +152,60 @@ def kaggle_dataset_view(ref: str, *, opener: Opener = _default_opener) -> dict:
     }
 
 
+RETRY_STATUS = frozenset({429, 500, 502, 503, 504})
+
+
+def _retry_delay(error: urllib.error.HTTPError, attempt: int, cap: float) -> float:
+    retry_after = (error.headers.get("Retry-After") or "") if error.headers else ""
+    if retry_after.strip().isdigit():
+        return min(cap, float(retry_after.strip()))
+    return min(cap, 2.0 * 2**attempt)
+
+
+def _get_json_retrying(
+    url: str,
+    *,
+    headers,
+    opener: Opener,
+    sleep: Callable[[float], None],
+    retries: int = 8,
+    max_delay: float = 120.0,
+):
+    """``_get_json`` that backs off on rate limits and transient server errors,
+    honouring ``Retry-After`` when the server sends one."""
+    for attempt in range(retries + 1):
+        try:
+            return _get_json(url, headers=headers, opener=opener)
+        except urllib.error.HTTPError as error:
+            if error.code not in RETRY_STATUS or attempt == retries:
+                raise
+            sleep(_retry_delay(error, attempt, max_delay))
+    raise AssertionError("unreachable")
+
+
 def kaggle_files(
-    ref: str, *, opener: Opener = _default_opener, max_pages: int = 200
+    ref: str,
+    *,
+    opener: Opener = _default_opener,
+    max_pages: int = 2000,
+    page_delay: float = 0.5,
+    sleep: Callable[[float], None] = time.sleep,
 ) -> list[RemoteFile]:
-    """Paginated file listing (requires Kaggle credentials in the environment)."""
+    """Paginated file listing (requires Kaggle credentials in the environment).
+
+    Endpoint is ``/datasets/list/{owner}/{slug}`` (``/datasets/list/files/...``
+    404s). The server caps ``pageSize`` at 200, so large datasets such as
+    3D-FUTURE need hundreds of pages: requests are paced by ``page_delay`` and
+    429/5xx responses are retried with backoff.
+    """
     headers = kaggle_headers()
     files, token = [], None
-    for _ in range(max_pages):
+    for page_number in range(max_pages):
+        if page_number:
+            sleep(page_delay)
         query = {"pageSize": "200"} | ({"pageToken": token} if token else {})
-        url = f"{KAGGLE_API}/datasets/list/files/{ref}?{urllib.parse.urlencode(query)}"
-        page = _get_json(url, headers=headers, opener=opener)
+        url = f"{KAGGLE_API}/datasets/list/{ref}?{urllib.parse.urlencode(query)}"
+        page = _get_json_retrying(url, headers=headers, opener=opener, sleep=sleep)
         for f in page.get("datasetFiles") or []:
             files.append(
                 RemoteFile(
@@ -222,4 +275,123 @@ def gzip_tar_prefix(
             complete = False  # the cap cut the stream mid-member: expected
     return PrefixListing(
         url=url, bytes_read=capped.read_bytes, complete=complete, members=tuple(members)
+    )
+
+
+@dataclass(frozen=True)
+class SelectedMembers:
+    url: str
+    bytes_read: int
+    files: tuple  # SourceFile records, sorted by path
+    missing: tuple[str, ...]  # wanted names not found before the cap
+
+
+def gzip_tar_select(
+    url: str,
+    dest: Path,
+    wanted: Mapping[str, int],
+    *,
+    max_bytes: int,
+    max_member_bytes: int = 64 * 1024 * 1024,
+    headers=None,
+    opener: Opener = _default_opener,
+    timeout: float = 120.0,
+) -> SelectedMembers:
+    """Stream a ``.tar.gz`` prefix and keep only the exactly named members.
+
+    ``wanted`` maps member names (from an earlier prefix listing) to their expected
+    sizes. Streaming stops as soon as every wanted member is written, or at
+    ``max_bytes`` of compressed input. Every name is checked as a portable relative
+    path, every member must be a regular file of the listed size, and nothing is
+    written outside ``dest``. Files land in a staging directory that replaces
+    ``dest`` only when every requested member has been read and checked. On an
+    incomplete read, the receipt lists observed members without publishing files.
+    """
+    from archimind.datasets.canonical import file_sha256
+    from archimind.datasets.contracts import SourceFile, check_relative_path
+
+    if not url.startswith("https://"):
+        raise UnsafeContentError("Only https:// requests are allowed")
+    for name, size in wanted.items():
+        try:
+            check_relative_path(name)
+        except ValueError as error:
+            raise UnsafeContentError(f"Unsafe wanted member: {error}") from None
+        if not isinstance(size, int) or not 0 <= size <= max_member_bytes:
+            raise UnsafeContentError(f"Wanted member {name} exceeds its size limit")
+    if len({n.casefold() for n in wanted}) != len(wanted):
+        raise UnsafeContentError("Wanted members collide case-insensitively")
+    dest = Path(dest)
+    if not wanted:
+        raise ValueError("Select at least one archive member")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    work = Path(tempfile.mkdtemp(prefix=f".{dest.name}-", dir=dest.parent))
+    staging = work / "staged"
+    staging.mkdir()
+    previous = work / "previous"
+    remaining = dict(wanted)
+    records = []
+    request = make_request(url, headers)
+    try:
+        with opener(request, timeout) as response:
+            capped = _CappedReader(response, max_bytes)
+            try:
+                with tarfile.open(fileobj=capped, mode="r|gz") as archive:
+                    for info in archive:
+                        if info.name not in remaining:
+                            continue
+                        if not info.isreg() or info.size != remaining[info.name]:
+                            raise UnsafeContentError(
+                                f"{info.name} is not a regular file of the listed size"
+                            )
+                        target = staging / info.name
+                        target.parent.mkdir(parents=True, exist_ok=True)
+                        source = archive.extractfile(info)
+                        with source, open(target, "wb") as out:
+                            written = 0
+                            while block := source.read(1024 * 1024):
+                                written += len(block)
+                                if written > info.size:
+                                    raise UnsafeContentError("Member overran its size")
+                                out.write(block)
+                        if written != info.size:
+                            raise UnsafeContentError(f"{info.name} was truncated")
+                        records.append(
+                            SourceFile(
+                                path=info.name,
+                                size_bytes=written,
+                                sha256=file_sha256(target),
+                            )
+                        )
+                        del remaining[info.name]
+                        if not remaining:
+                            break
+            except (tarfile.ReadError, EOFError):
+                if not remaining:
+                    raise
+        if not remaining:
+            lock = dest.with_name(dest.name + ".publishing")
+            lock.mkdir()
+            try:
+                if dest.exists():
+                    os.replace(dest, previous)
+                try:
+                    os.replace(staging, dest)
+                except BaseException:
+                    if previous.exists():
+                        os.replace(previous, dest)
+                    raise
+                if previous.exists():
+                    shutil.rmtree(previous, ignore_errors=True)
+            finally:
+                lock.rmdir()
+    finally:
+        # If rollback itself failed, preserve the backup for recovery.
+        if not previous.exists():
+            shutil.rmtree(work, ignore_errors=True)
+    return SelectedMembers(
+        url=url,
+        bytes_read=capped.read_bytes,
+        files=tuple(sorted(records, key=lambda r: r.path)),
+        missing=tuple(sorted(remaining)),
     )

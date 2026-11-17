@@ -6,7 +6,9 @@
     "python -m archimind.datasets probe-ssr train.parquet val.parquet test.parquet",
     "python -m archimind.datasets probe-hf huanngzh/3D-Front --revision 156fc5312ea613d4e92cbf5da1fddfa61bbad3b2",
     "python -m archimind.datasets probe-tar-prefix <3D-FRONT-TEST-SCENE.tar.gz url> --max-bytes 67108864",
-    "python -m archimind.datasets probe-join train.parquet val.parquet test.parquet --midi-dir <dir>"
+    "python -m archimind.datasets probe-join train.parquet val.parquet test.parquet --midi-dir <dir>",
+    "python -m archimind.datasets probe-kaggle tobetheonly/3d-future-model --out future_inventory.json",
+    "python -m archimind.datasets fetch <kaggle_download_url(ref, model_info path)> <dest> --max-bytes 67108864 --kaggle-auth"
   ],
   "conventions": {
     "midi_3dfront": {
@@ -30,11 +32,86 @@
     }
   },
   "future_3d": {
-    "file_listing": "NOT_RUN (requires Kaggle credentials)",
-    "license_field": "Unknown",
     "mirror": "kaggle tobetheonly/3d-future-model",
+    "version": 1,
+    "last_updated": "2024-12-05T11:00:58.527Z",
+    "license_field": "Unknown",
     "total_bytes": 65938974044,
-    "version": 1
+    "file_count": 87908,
+    "model_dirs": 16563,
+    "per_model_files": {
+      "image.jpg": 16563,
+      "model.mtl": 16563,
+      "raw_model.obj": 16563,
+      "texture.png": 16562,
+      "normalized_model.obj": 16560,
+      "bbox_vertices.npy": 5095
+    },
+    "top_level_files": [
+      "3D-FUTURE-model/categories.py",
+      "3D-FUTURE-model/model_info.json"
+    ],
+    "model_info": {
+      "path": "3D-FUTURE-model/model_info.json",
+      "size_bytes": 4016486,
+      "sha256": "7b73e8cbf23110d15776a433258f4a8736267984f8f5a06c76b4c83201b8d661",
+      "rows": 16563,
+      "unique_model_ids": 16563,
+      "fields": [
+        "category",
+        "material",
+        "model_id",
+        "style",
+        "super-category",
+        "theme"
+      ],
+      "categories": 50,
+      "super_categories": {
+        "Cabinet/Shelf/Desk": 5725,
+        "Sofa": 2701,
+        "Lighting": 1921,
+        "Chair": 1775,
+        "Others": 1740,
+        "Bed": 1124,
+        "Table": 1090,
+        "Pier/Stool": 487
+      },
+      "model_ids_with_model_dir": 16563,
+      "model_dirs_without_row": 0
+    },
+    "inventory_sha256": "efe9d0eb1693bbe38a99bf26f8f50fa2a1e9cdf6cc80c8aaee74e4058e9322f9",
+    "midi_join": {
+      "midi_unique_jids": 6486,
+      "in_model_info": 6486,
+      "super_category_agrees_after_separator_normalization": 6486,
+      "separator_note": "MIDI writes Cabinet_Shelf_Desk and Pier_Stool; model_info writes Cabinet/Shelf/Desk and Pier/Stool"
+    },
+    "ssr_bedroom_jid_coverage": {
+      "ssr_unique_jids": 7722,
+      "by_midi_exact_or_base": 6440,
+      "by_model_info_exact_or_base": 7699,
+      "unresolved": 23,
+      "unresolved_reason": "mirror variants <uuid>-(-1.0)-(1.0)-(1.0): base_jid rejects the negative scale; all 23 base uuids are in model_info",
+      "by_tier": {
+        "canonical": {
+          "jids": 108,
+          "model_info": 108
+        },
+        "reference_only": {
+          "jids": 5051,
+          "model_info": 5043
+        },
+        "excluded:irregular_room": {
+          "jids": 4529,
+          "model_info": 4512
+        }
+      }
+    },
+    "access_notes": [
+      "list files: GET /api/v1/datasets/list/{owner}/{slug}; /datasets/list/files/... 404s",
+      "pageSize is capped at 200 (about 440 pages); Kaggle answers 429 under load, cleared by one retry",
+      "single file: /api/v1/datasets/download/{owner}/{slug}/{path with / as %2F}; it redirects to the file alone on storage.googleapis.com"
+    ]
   },
   "midi_3dfront": {
     "file_count": 52,
@@ -255,10 +332,29 @@
     "ssr_unique_jids": 7722
   },
   "status": {
-    "future_3d": "NOT_RUN_NEEDS_KAGGLE_CREDENTIALS",
+    "future_3d": "PASS",
     "midi_3dfront": "PASS_BOUNDED_PREFIX_ONLY",
     "ssr_3dfront": "PASS"
   },
   "task": "P1 dataset probe",
-  "where_run": "Local Windows machine for SSR (29 MB) and MIDI metadata; the MIDI archive prefix was streamed and discarded. FUTURE requires the Colab notebook."
+  "where_run": "Local Windows machine for SSR (29 MB) and MIDI metadata; the MIDI archive prefix was streamed and discarded. FUTURE ran in Colab (run pilot-001, 2026-11-16).",
+  "colab_run_future": {
+    "run_id": "pilot-001",
+    "observed_utc": "2026-11-16T03:12:56Z",
+    "code": "ce22f9242264d9eff333af83b7b4a6115ec47450 plus notebook hotfix cells equivalent to 3d9971be2478b6d203ea48fab514189345d9be26",
+    "ssr_reproduced": "ssr_probe identical to the local run except shard file names; same shard SHA-256",
+    "midi_metadata_reproduced": "same id-list sizes; 1 GiB test-scene prefix held 762 GLBs (897 members)",
+    "outputs_sha256": {
+      "future/model_info_0.download": "7b73e8cbf23110d15776a433258f4a8736267984f8f5a06c76b4c83201b8d661",
+      "future_inventory.json": "efe9d0eb1693bbe38a99bf26f8f50fa2a1e9cdf6cc80c8aaee74e4058e9322f9",
+      "midi/midi_furniture_ids.json": "5d5bdab074e260dcd4df0687af96fbde8572ad8e429066dade77c3d8da1bc609",
+      "midi/midi_room_ids.json": "5a8e350ed0313ee11389c8830e0032a94cc6b22c444dd9e0cf94bc9e3116f594",
+      "midi/midi_test_furniture_ids.json": "e0043e93b0d0ef912eacaabf69de5e440970d28978890235e51489756b047f13",
+      "midi/midi_test_room_ids.json": "3c37a29076ce9478723e4195b15be4459898e4eed179c850a814257c841c4e60",
+      "midi_inventory.json": "f02e1cb36b96514fd30d1760880982fb4deea38434d6e8cf2cd153230920d51f",
+      "midi_test_scene_prefix.json": "16cc707b4e1572200ed83790a401ad1bb880f3605c3934d350f22e47781d20a4",
+      "ssr_inventory.json": "29a128deff632aba6843a27bcceeeeaeeea0e257289a8478bf4c596e422f5012",
+      "ssr_probe.json": "570034f274204058493d0dcc3526c9971fd96f4575b5fb47f5579bc25d259b91"
+    }
+  }
 }

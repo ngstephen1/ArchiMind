@@ -85,7 +85,9 @@ def _object(
         source_object_id=oid,
         jid=f"jid-{oid}",
         raw_category=category,
-        category=category,
+        category={"desk": "table", "nightstand": "cabinet_shelf_desk"}.get(
+            category, category
+        ),
         size_raw=(w, h, d),
         position_raw=(x + w / 2, h / 2, y + d / 2),
         rotation_raw_xyzw=(0.0, 0.0, 0.0, 1.0),

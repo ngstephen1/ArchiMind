@@ -7,7 +7,7 @@ Every number below is from real pinned data, not fixtures.
 | --- | --- | --- | --- |
 | SSR-3DFRONT | **PASS** | HF `b606183e56d972f85850125f9191932cbea654c3` | 29.3 MB (3 parquet shards, 7.4 MB) |
 | MIDI-3D / 3D-Front | **PASS, bounded prefix only** | HF `156fc5312ea613d4e92cbf5da1fddfa61bbad3b2` | 1.685 TB, all gzip |
-| 3D-FUTURE (Kaggle mirror) | **NOT RUN**: needs Kaggle credentials (Colab cell) | `tobetheonly/3d-future-model` v1 | 65.9 GB |
+| 3D-FUTURE (Kaggle mirror) | **PASS** (Colab run `pilot-001`, 2026-11-16) | `tobetheonly/3d-future-model` v1 | 65.9 GB, 87,908 files |
 
 ## Conventions (proven, not assumed)
 
@@ -76,6 +76,37 @@ prefix is bounded and works:
 This means MIDI rooms are "whatever comes first in the archive", not chosen rooms.
 P2c streams at most 1 GiB and keeps only bedrooms that join SSR.
 
+## 3D-FUTURE (Colab run `pilot-001`, 2026-11-16)
+
+The run used `ce22f92` plus notebook hotfix cells. Those fixes are now commit
+`3d9971be`, so later runs no longer need the hotfix cells. The same run also repeated
+the SSR and MIDI probes. Every SSR number matched the local run, the shard SHA-256
+values were identical, and the MIDI id lists were the same sizes.
+
+- **Layout:** 16,563 model directories under `3D-FUTURE-model/`. Each has `image.jpg`,
+  `model.mtl`, `raw_model.obj` and (almost always) `texture.png` and
+  `normalized_model.obj`. Only 5,095 have `bbox_vertices.npy`. There are two
+  top-level files: `categories.py` and `model_info.json`.
+- **`model_info.json`** (4.0 MB, SHA-256 `7b73e8cb…`): 16,563 rows with unique
+  `model_id`s, one for each model directory, with no directories missing a row. The
+  fields are `super-category`, `category` (50 values), `style`, `theme` and
+  `material`.
+- **MIDI join:** all 6,486 MIDI furniture jids are in `model_info.json`. Their
+  super-categories agree once separators are normalized: MIDI writes
+  `Cabinet_Shelf_Desk` and `Pier_Stool`, while 3D-FUTURE writes `Cabinet/Shelf/Desk`
+  and `Pier/Stool`.
+- **SSR bedroom coverage:** `model_info.json` categorizes **7,699 of 7,722** SSR jids,
+  matched directly or through their base model id. MIDI alone covers 6,440. Coverage
+  by tier is 108/108 canonical and 5,043/5,051 reference_only. All 23 unresolved jids
+  are mirror variants, `<uuid>-(-1.0)-(1.0)-(1.0)`. `base_jid` rejects the negative
+  scale, but every base uuid is in `model_info.json`.
+- **Access:** the file list comes from `GET /datasets/list/{owner}/{slug}`, at most
+  200 files per page. Kaggle rate-limits (429) partway through, and one retry clears
+  it. A single file comes from `/datasets/download/{owner}/{slug}/{path}` with `/`
+  encoded as `%2F`. That redirects to the file on its own, not to the 66 GB bundle.
+- The license field is still `Unknown` on the mirror. It stays local research only,
+  like the other sources, until the owner records a permission decision.
+
 ## Decisions for P2
 
 1. **SSR (P2a)** runs locally, because the whole source is 29 MB. It produces
@@ -85,5 +116,6 @@ P2c streams at most 1 GiB and keeps only bedrooms that join SSR.
    objects are excluded from footprints and keep their `jid`.
 3. **MIDI (P2c)** streams at most 1 GiB in Colab and keeps up to 5 bedrooms that
    join SSR.
-4. **FUTURE (P2b)** is blocked until the Colab cell produces the file list and
-   `model_info.json`.
+4. **FUTURE (P2b)** is unblocked. It maps jids to categories from
+   `model_info.json`, with MIDI as a cross-check. It must decide how mirror variants
+   (negative scale) are handled before admitting them.

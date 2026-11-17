@@ -63,3 +63,30 @@ def test_jsonl_rejects_crlf_long_lines_and_too_many_records(tmp_path):
     many.write_bytes(b"{}\n" * 5)
     with pytest.raises(CanonicalError):
         list(iter_jsonl(many, max_records=4))
+
+
+def test_replace_with_retry_tolerates_brief_sharing_violations(tmp_path, monkeypatch):
+    import os
+
+    from archimind.datasets.canonical import replace_with_retry
+
+    src, dest = tmp_path / "a", tmp_path / "b"
+    src.write_bytes(b"x")
+    real, calls, waits = os.replace, [], []
+
+    def flaky(a, b):
+        calls.append(1)
+        if len(calls) < 3:
+            raise PermissionError("in use")
+        real(a, b)
+
+    monkeypatch.setattr(os, "replace", flaky)
+    replace_with_retry(src, dest, sleep=waits.append)
+    assert dest.read_bytes() == b"x" and len(calls) == 3 and waits == [0.01, 0.02]
+
+    src.write_bytes(b"y")
+    monkeypatch.setattr(
+        os, "replace", lambda a, b: (_ for _ in ()).throw(PermissionError("held"))
+    )
+    with pytest.raises(PermissionError):
+        replace_with_retry(src, dest, attempts=2, sleep=waits.append)
