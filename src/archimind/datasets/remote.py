@@ -11,6 +11,7 @@ import base64
 import os
 import shutil
 import tarfile
+import tempfile
 import time
 import urllib.error
 import urllib.parse
@@ -303,7 +304,8 @@ def gzip_tar_select(
     ``max_bytes`` of compressed input. Every name is checked as a portable relative
     path, every member must be a regular file of the listed size, and nothing is
     written outside ``dest``. Files land in a staging directory that replaces
-    ``dest`` only when the stream ends without error.
+    ``dest`` only when every requested member has been read and checked. On an
+    incomplete read, the receipt lists observed members without publishing files.
     """
     from archimind.datasets.canonical import file_sha256
     from archimind.datasets.contracts import SourceFile, check_relative_path
@@ -320,10 +322,13 @@ def gzip_tar_select(
     if len({n.casefold() for n in wanted}) != len(wanted):
         raise UnsafeContentError("Wanted members collide case-insensitively")
     dest = Path(dest)
-    staging = dest.with_name(dest.name + ".selecting")
-    if staging.exists():
-        shutil.rmtree(staging)
-    staging.mkdir(parents=True)
+    if not wanted:
+        raise ValueError("Select at least one archive member")
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    work = Path(tempfile.mkdtemp(prefix=f".{dest.name}-", dir=dest.parent))
+    staging = work / "staged"
+    staging.mkdir()
+    previous = work / "previous"
     remaining = dict(wanted)
     records = []
     request = make_request(url, headers)
@@ -361,14 +366,29 @@ def gzip_tar_select(
                         del remaining[info.name]
                         if not remaining:
                             break
-            except (tarfile.ReadError, EOFError, OSError):
-                pass  # the cap cut the stream: whatever is still wanted is reported
-        if dest.exists():
-            shutil.rmtree(dest)
-        os.replace(staging, dest)
-    except BaseException:
-        shutil.rmtree(staging, ignore_errors=True)
-        raise
+            except (tarfile.ReadError, EOFError):
+                if not remaining:
+                    raise
+        if not remaining:
+            lock = dest.with_name(dest.name + ".publishing")
+            lock.mkdir()
+            try:
+                if dest.exists():
+                    os.replace(dest, previous)
+                try:
+                    os.replace(staging, dest)
+                except BaseException:
+                    if previous.exists():
+                        os.replace(previous, dest)
+                    raise
+                if previous.exists():
+                    shutil.rmtree(previous, ignore_errors=True)
+            finally:
+                lock.rmdir()
+    finally:
+        # If rollback itself failed, preserve the backup for recovery.
+        if not previous.exists():
+            shutil.rmtree(work, ignore_errors=True)
     return SelectedMembers(
         url=url,
         bytes_read=capped.read_bytes,

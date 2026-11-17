@@ -125,7 +125,12 @@ def test_habit_stats_on_fixture_pack(tmp_path, capsys):
 
 def test_habit_stats_unavailable_pack(tmp_path, capsys):
     code, summary = run(
-        capsys, "habit-stats", "--pack", str(tmp_path / "none"), "--out", str(tmp_path / "h.json")
+        capsys,
+        "habit-stats",
+        "--pack",
+        str(tmp_path / "none"),
+        "--out",
+        str(tmp_path / "h.json"),
     )
     assert code == 3 and summary["status"] == "unavailable"
 
@@ -138,8 +143,16 @@ def test_habit_bench_rejects_foreign_habits(tmp_path, capsys):
     data["snapshot_id"] = "f" * 64
     habits.write_text(json.dumps(data), encoding="utf-8")
     code, summary = run(
-        capsys, "habit-bench", "--pack", str(tmp_path / "p"), "--habits", str(habits),
-        "--out", str(tmp_path / "b.json"), "--seeds", "1",
+        capsys,
+        "habit-bench",
+        "--pack",
+        str(tmp_path / "p"),
+        "--habits",
+        str(habits),
+        "--out",
+        str(tmp_path / "b.json"),
+        "--seeds",
+        "1",
     )
     assert code == 3 and summary["reason"] == "habits_snapshot_mismatch"
 
@@ -149,8 +162,16 @@ def test_habit_bench_runs(tmp_path, capsys):
     habits = tmp_path / "h.json"
     run(capsys, "habit-stats", "--pack", str(tmp_path / "p"), "--out", str(habits))
     code, summary = run(
-        capsys, "habit-bench", "--pack", str(tmp_path / "p"), "--habits", str(habits),
-        "--out", str(tmp_path / "b.json"), "--seeds", "1",
+        capsys,
+        "habit-bench",
+        "--pack",
+        str(tmp_path / "p"),
+        "--habits",
+        str(habits),
+        "--out",
+        str(tmp_path / "b.json"),
+        "--seeds",
+        "1",
     )
     assert code == 0 and summary["calls"] == 24
     assert json.loads((tmp_path / "b.json").read_bytes())["rooms"] == 24
@@ -160,15 +181,40 @@ def test_prompt_suite_and_offline_eval(tmp_path, capsys):
     run(capsys, "fixture-pack", str(tmp_path / "p"))
     cases = tmp_path / "cases.jsonl"
     code, summary = run(
-        capsys, "prompt-suite", "--pack", str(tmp_path / "p"), "--out", str(cases),
-        "--split", "train", "--per-style", "2",
+        capsys,
+        "prompt-suite",
+        "--pack",
+        str(tmp_path / "p"),
+        "--out",
+        str(cases),
+        "--split",
+        "train",
+        "--per-style",
+        "2",
     )
     assert code == 0 and summary["status"] == "built"
     first = cases.read_bytes()
-    run(capsys, "prompt-suite", "--pack", str(tmp_path / "p"), "--out", str(cases), "--split", "train", "--per-style", "2")
+    run(
+        capsys,
+        "prompt-suite",
+        "--pack",
+        str(tmp_path / "p"),
+        "--out",
+        str(cases),
+        "--split",
+        "train",
+        "--per-style",
+        "2",
+    )
     assert cases.read_bytes() == first
     code, summary = run(
-        capsys, "prompt-eval", "--cases", str(cases), "--recordings", str(tmp_path / "rec.jsonl"),
-        "--out", str(tmp_path / "report.json"),
+        capsys,
+        "prompt-eval",
+        "--cases",
+        str(cases),
+        "--recordings",
+        str(tmp_path / "rec.jsonl"),
+        "--out",
+        str(tmp_path / "report.json"),
     )
     assert code == 0 and summary["unrecorded"] == summary["total_cases"]

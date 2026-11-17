@@ -55,12 +55,21 @@ def _select_preview(rank: int) -> None:
 def _pack_key():
     root = os.environ.get(ROOT_ENV, "").strip()
     audience = os.environ.get(AUDIENCE_ENV, "public")
-    try:
-        stat = (Path(root) / "manifest.json").stat() if root else None
-        version = (stat.st_mtime_ns, stat.st_size) if stat else None
-    except OSError:
-        version = None
-    return root, audience, version
+    entries = []
+    if root:
+        for path in sorted(Path(root).rglob("*")):
+            stat = path.lstat()
+            entries.append(
+                (
+                    str(path.relative_to(root)),
+                    stat.st_dev,
+                    stat.st_ino,
+                    stat.st_ctime_ns,
+                    stat.st_mtime_ns,
+                    stat.st_size,
+                )
+            )
+    return root, audience, tuple(entries)
 
 
 @st.cache_resource(max_entries=2, show_spinner=False)
@@ -73,7 +82,12 @@ def _load(root: str, audience: str, version):
 
 
 def current_pack():
-    root, audience, version = _pack_key()
+    try:
+        root, audience, version = _pack_key()
+    except OSError:
+        from archimind.datasets.search import ReferencePack
+
+        return ReferencePack("unavailable", "pack_unreadable")
     return _load(root, audience, version)
 
 
@@ -243,6 +257,7 @@ def _render_preview(hit, pack) -> None:
 def render_dataset_references(draft) -> None:
     """Explicit, local reference retrieval for a ready chat draft."""
     if not enabled():
+        clear_reference_state()
         return
     from archimind.datasets.canonical import digest
     from archimind.datasets.search import (
@@ -290,6 +305,15 @@ def render_dataset_references(draft) -> None:
             )
             return
         pack = current_pack()
+        if pack.status != "ready" or (pack.pack_id, pack.snapshot_id) != (
+            stored.pack_id,
+            stored.snapshot_id,
+        ):
+            clear_reference_state()
+            st.warning(
+                "The reference pack is unavailable or has changed. Find references again."
+            )
+            return
         st.caption(
             f"Pack {stored.pack_id} · snapshot {stored.snapshot_id[:12]} · "
             f"{len(stored.scene_hits)} of {stored.eligible_scenes} eligible references"

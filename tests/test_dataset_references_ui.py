@@ -17,7 +17,6 @@ from streamlit.testing.v1 import AppTest
 
 from archimind.agents.catalog_conversation import reconcile_catalog_extraction
 from archimind.assets.specifications import BELAYA_ID
-from archimind.datasets.canonical import sha256_hex
 from archimind.datasets.contracts import (
     CheckResult,
     Footprint,
@@ -92,7 +91,7 @@ def scene(house, tier, dims, objects):
         reference_id=f"ssr:{house}:Bedroom-1",
         source="ssr_3dfront",
         source_revision=SYNTHETIC_REVISION,
-        source_sha256=sha256_hex(b"ssr"),
+        source_sha256=source_manifest("ssr_3dfront").files[0].sha256,
         split="train",
         source_scene_id=house,
         source_room_id="Bedroom-1",
@@ -230,7 +229,13 @@ def test_search_and_both_previews_without_model_or_generation(
 def test_references_never_touch_preparation_or_displayed_results(
     spies, monkeypatch, tmp_path
 ):
+    from archimind.ui import realistic_view as view
+
     agent, gen = spies
+    validator = Mock(wraps=ui.validate_accessibility)
+    renderer = Mock(wraps=view.render_selected_realistic_scene)
+    monkeypatch.setattr(ui, "validate_accessibility", validator)
+    monkeypatch.setattr(view, "render_selected_realistic_scene", renderer)
     enable(monkeypatch, make_pack(tmp_path / "pack"), "local")
     a = app()
     submit(a)
@@ -244,6 +249,26 @@ def test_references_never_touch_preparation_or_displayed_results(
     assert a.session_state[ui.RESULT_KEY] is layouts
     assert a.session_state[chat.PREPARED] is prepared
     assert (agent.call_count, gen.call_count) == (1, 1)
+
+    assert len(layouts.candidates) == 2
+    a.radio(key=view.VIEW_KEY).set_value(view.THREE_VIEW).run()
+    for index, label in enumerate(("Layout A", "Layout B")):
+        a.radio(key=ui.SELECTION_KEY).set_value(label).run()
+        assert not a.exception
+        assert a.session_state[ui.RESULT_KEY] is layouts
+        assert layouts.candidates[index].validation.status == "passed"
+        assert f"{label} · Approved product bindings: 1 · Placeholders: 1" in texts(a)
+        assert renderer.call_args.args[0] is layouts.candidates[index].design
+        (bindings,) = [
+            frame.value
+            for frame in a.dataframe
+            if "Representation" in frame.value.columns
+        ]
+        assert bindings.set_index("Furniture ID")["Representation"].to_dict() == {
+            f"catalog:{BELAYA_ID}:1": "approved product",
+            "queen-bed": "placeholder",
+        }
+    assert (agent.call_count, gen.call_count, validator.call_count) == (1, 1, 2)
 
     a.button(key="chat_bedroom_reset").click().run()
     assert refs.RESULT not in a.session_state and refs.PREVIEW not in a.session_state
@@ -283,13 +308,42 @@ def _preview(objects, dims=(4.0, 5.0, 2.7)):
 
 
 def test_reference_figure_traces_and_bounds():
-    bed = dict(category="bed", x_m=1.0, y_m=0.5, width_m=1.6, depth_m=2.0, height_m=0.5, yaw_quarter_turns=1)
-    desk = dict(category="table", x_m=2.5, y_m=4.0, width_m=1.2, depth_m=0.6, height_m=0.7, yaw_quarter_turns=0)
-    stand = dict(category="cabinet_shelf_desk", x_m=-0.1, y_m=0.0, width_m=0.4, depth_m=0.4, height_m=0.5, yaw_quarter_turns=2)
+    bed = dict(
+        category="bed",
+        x_m=1.0,
+        y_m=0.5,
+        width_m=1.6,
+        depth_m=2.0,
+        height_m=0.5,
+        yaw_quarter_turns=1,
+    )
+    desk = dict(
+        category="table",
+        x_m=2.5,
+        y_m=4.0,
+        width_m=1.2,
+        depth_m=0.6,
+        height_m=0.7,
+        yaw_quarter_turns=0,
+    )
+    stand = dict(
+        category="cabinet_shelf_desk",
+        x_m=-0.1,
+        y_m=0.0,
+        width_m=0.4,
+        depth_m=0.4,
+        height_m=0.5,
+        yaw_quarter_turns=2,
+    )
     fig = refs.reference_figure(_preview([bed, desk, stand]))
     assert len(fig.data) == 1 + 3  # room outline + one rectangle per object
     outline = fig.data[0]
-    assert (min(outline.x), max(outline.x), min(outline.y), max(outline.y)) == (0.0, 4.0, 0.0, 5.0)
+    assert (min(outline.x), max(outline.x), min(outline.y), max(outline.y)) == (
+        0.0,
+        4.0,
+        0.0,
+        5.0,
+    )
     rect = fig.data[1]
     assert (min(rect.x), max(rect.x)) == pytest.approx((1.0, 2.6))
     assert (min(rect.y), max(rect.y)) == pytest.approx((0.5, 2.5))
@@ -300,3 +354,57 @@ def test_reference_figure_traces_and_bounds():
     assert x0 < -0.1 and x1 > 4.0  # objects slightly outside stay visible
     assert fig.layout.yaxis.scaleanchor == "x"
     assert "not validated" in fig.layout.title.text
+
+
+@pytest.mark.parametrize("withdrawal", ["audience", "remove", "replace", "corrupt"])
+def test_cached_hits_disappear_on_withdrawal(tmp_path, monkeypatch, spies, withdrawal):
+    root = make_pack(tmp_path / "pack")
+    enable(monkeypatch, root, "local")
+    a = app()
+    submit(a)
+    a.button(key="dataset_ref_find").click().run()
+    a.button(key="dataset_ref_preview:1").click().run()
+    assert "ssr:canon:Bedroom-1" in texts(a)
+    if withdrawal == "audience":
+        monkeypatch.setenv(refs.AUDIENCE_ENV, "public")
+    elif withdrawal == "remove":
+        root.rename(tmp_path / "withdrawn")
+    elif withdrawal == "replace":
+        from archimind.datasets.fixtures import build_synthetic_pack
+
+        root.rename(tmp_path / "previous")
+        build_synthetic_pack(root)
+    else:
+        (root / "sources.jsonl").write_bytes(b"{}\n")
+    a.run()
+    assert not a.exception
+    assert "ssr:canon:Bedroom-1" not in texts(a)
+    assert refs.PREVIEW not in a.session_state and refs.RESULT not in a.session_state
+    assert not any(b.label == "Preview reference" for b in a.button)
+
+
+@pytest.mark.parametrize("function", ["desk", "nightstand"])
+def test_shipped_fixture_matches_single_chat_request(tmp_path, function):
+    from catalog_chat_helpers import intent
+
+    from archimind.datasets.fixtures import build_synthetic_pack
+    from archimind.datasets.search import (
+        load_reference_pack,
+        reference_query_from_chat,
+        search_references,
+    )
+
+    root = tmp_path / "pack"
+    build_synthetic_pack(root)
+    text = TEXT.replace("A queen bed and a writing desk.", f"One {function}.")
+    data = extraction().model_copy(
+        update={"furniture": (intent(function, f"One {function}"),)}
+    )
+    draft = reconcile_catalog_extraction(data, turns(text)).draft
+    result = search_references(
+        reference_query_from_chat(draft),
+        pack=load_reference_pack(root, audience="local"),
+    )
+    assert len(result.scene_hits) == 1
+    (match,) = result.scene_hits[0].category_matches
+    assert (match.term, match.found) == (function, 1)

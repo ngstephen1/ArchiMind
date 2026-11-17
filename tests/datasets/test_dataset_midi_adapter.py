@@ -425,7 +425,7 @@ def test_midi_audit_cli_on_a_synthetic_room(tmp_path, capsys):
             {
                 "index": f"{k:04d}",
                 "transform_matrix": look_at(e),
-                "frames": [{"name": "render_0017.webp"}],
+                "frames": [{"name": f"render_{17 - k:04d}.webp"}],
             }
             for k, e in enumerate(eyes)
         ],
@@ -496,3 +496,20 @@ def test_midi_audit_cli_on_a_synthetic_room(tmp_path, capsys):
         )
         == 1
     )
+
+
+def test_camera_report_requires_distinguishing_observations():
+    meta, labels = synthetic_views(OBJECTS, to_world=gltf_to_camera_world)
+    for objects, observed in [({}, labels), (OBJECTS, [{} for _ in labels])]:
+        report = camera_report(meta, objects, observed, width=200, height=200)
+        assert report["status"] == "NOT_VERIFIABLE"
+        assert report["best"] is None
+    # A single frame cannot distinguish the two index rules, even with perfect overlap.
+    report = camera_report(
+        {**meta, "locations": meta["locations"][:1]},
+        OBJECTS,
+        labels[:1],
+        width=200,
+        height=200,
+    )
+    assert report["status"] == "NOT_VERIFIABLE"

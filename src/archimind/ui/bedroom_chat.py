@@ -36,11 +36,11 @@ def _plain(text: str) -> str:
     return re.sub(r"([\\`*_{}\[\]<>#|~])", r"\\\1", text)
 
 
-def _unsupported_reasons(extraction) -> list[str]:
+def _unsupported_reasons(extraction, turns) -> list[str]:
     """What made a request unsupported, in the user's own words where possible."""
     if extraction is None:
         return []
-    from archimind.agents.catalog_conversation import _restates_request
+    from archimind.agents.catalog_conversation import _request_constraint
 
     reasons = []
     if extraction.room_type == "unsupported":
@@ -48,11 +48,10 @@ def _unsupported_reasons(extraction) -> list[str]:
     if extraction.shape == "unsupported":
         reasons.append("only single rectangular rooms are supported")
     reasons += [_plain(f) for f in extraction.unsupported_features]
-    functions = {i.function for i in extraction.furniture}
     reasons += [
         f"mandatory constraint: {_plain(c.value)}"
         for c in extraction.hard_constraints
-        if not _restates_request(c, functions)
+        if _request_constraint(c, extraction.furniture, turns) == "unsupported"
     ]
     reasons += [
         f"unsupported furniture: {_plain(i.source.text)}"
@@ -62,11 +61,11 @@ def _unsupported_reasons(extraction) -> list[str]:
     return list(dict.fromkeys(reasons))[:4]
 
 
-def _assistant_text(result):
+def _assistant_text(result, turns=()):
     if result.error:
         return result.error.message
     if result.status == "unsupported":
-        reasons = _unsupported_reasons(getattr(result, "extraction", None))
+        reasons = _unsupported_reasons(getattr(result, "extraction", None), turns)
         if reasons:
             return (
                 "This request includes something the app cannot do yet:\n"
@@ -164,7 +163,9 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
         with st.spinner("Interpreting requirements…"):
             result = interpret_catalog_conversation(proposed, allow_live=allow)
         answer = CatalogChatTurn(
-            id=proposed[-1].id + 1, role="assistant", content=_assistant_text(result)
+            id=proposed[-1].id + 1,
+            role="assistant",
+            content=_assistant_text(result, proposed),
         )
         st.session_state[TURNS] = (*proposed, answer)
         st.session_state[RESULT] = result

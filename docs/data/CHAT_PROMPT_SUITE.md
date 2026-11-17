@@ -3,7 +3,7 @@
 Measures how the chat interpreter handles different ways of asking. Cases come from real bedrooms (room size and furniture) in the P2b pack's `val` split, each written in one of 10 styles with a known correct outcome.
 
     python -m archimind.datasets prompt-suite --pack E:/archimind-data/p2b/pack --out cases.jsonl --per-style 3
-    python -m archimind.datasets prompt-eval --cases cases.jsonl --recordings recordings.jsonl --out report.json --live   # 1 model call per new case
+    python -m archimind.datasets prompt-eval --cases cases.jsonl --recordings recordings.jsonl --out report.json --pack E:/archimind-data/p2b/pack --live   # 1 model call per new case
     python -m archimind.datasets prompt-eval --cases cases.jsonl --recordings recordings.jsonl --out report.json          # offline re-score, free
 
 - `--live` needs `ARCHIMIND_ENABLE_OPENAI_REQUIREMENTS=1` and `OPENAI_API_KEY` in the environment. Without it, nothing is sent.
@@ -50,3 +50,5 @@ The remaining typo failure is a genuine model error: the model's depth quote ("â
 The 3 twin-bed answers contained no restated constraints, so a complete twin-bed prompt would also have reached a clarification under the old rules. The "two twin beds â€¦" rejection seen in manual testing is consistent with the restated-constraint pattern from the feet case, but it cannot be confirmed without that response.
 
 Chat regression tests (`test_catalog_conversation`, `test_catalog_chat_failures`, `test_bedroom_chat_ui`, `test_catalog_specifications`, `test_asset_catalog_packaging`): 76 passed with the same single failure as before the change (`test_catalog_in_source_wheel_and_isolated_install`, pre-existing). The new tests are in `tests/test_catalog_conversation_tolerance.py` (8).
+
+Live evaluation requires cases exported with their source and snapshot plus the current verified pack. Each prompt is reconstructed and checked against current provider-disclosure permission before any request. Historical cases remain available for offline replay.

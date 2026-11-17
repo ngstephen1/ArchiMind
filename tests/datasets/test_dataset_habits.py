@@ -243,7 +243,11 @@ def test_leak_free_train_drops_cross_split_aliases():
 
     rooms = typical_rooms(3)
     held = rooms[0].model_copy(
-        update={"reference_id": "ssr:v:Bedroom-1", "source_scene_id": "v", "split": "val"}
+        update={
+            "reference_id": "ssr:v:Bedroom-1",
+            "source_scene_id": "v",
+            "split": "val",
+        }
     )
     train, groups = leak_free_train([*rooms, held])
     assert groups == 1 and train == rooms[1:]
@@ -261,13 +265,24 @@ def _design(bed_xy, *, rotation=0, extra=()):
 
     def f(fid, cat, x, y, w, d, rot=0):
         return Furniture(
-            id=fid, name=fid, category=cat, x_m=x, y_m=y, width_m=w, depth_m=d,
-            height_m=0.7, rotation_deg=rot,
+            id=fid,
+            name=fid,
+            category=cat,
+            x_m=x,
+            y_m=y,
+            width_m=w,
+            depth_m=d,
+            height_m=0.7,
+            rotation_deg=rot,
         )
 
     return RoomDesign(
         room=Room(
-            id="r", name="r", width_m=4.0, depth_m=4.0, ceiling_height_m=2.7,
+            id="r",
+            name="r",
+            width_m=4.0,
+            depth_m=4.0,
+            ceiling_height_m=2.7,
             doors=[Door(id="d", wall="south", offset_m=3.0, width_m=0.8, height_m=2.0)],
         ),
         furniture=[
@@ -324,7 +339,9 @@ def test_scene_scorer_matches_design_scorer():
     from archimind.datasets.habits import score_layout_habits, score_scene_habits
 
     habits = _habits()
-    room = scene("s", [obj("b", *BED, 1.0, 0.0, 2.0, 1.6), obj("d", *DESK, 2.8, 3.4, 1.0, 0.6)])
+    room = scene(
+        "s", [obj("b", *BED, 1.0, 0.0, 2.0, 1.6), obj("d", *DESK, 2.8, 3.4, 1.0, 0.6)]
+    )
     a = score_scene_habits(room, habits)
     b = score_layout_habits(_design((1.0, 0.0)), habits)
     assert a.penalty == pytest.approx(b.penalty)

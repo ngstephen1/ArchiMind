@@ -481,9 +481,13 @@ def camera_report(
             "objects_in_view": len(values),
             "median_iou": round(_median(values), 4) if values else 0.0,
         }
-    best = max(scores, key=lambda n: (scores[n]["median_iou"], n == "documented"))
+    highest = max(row["median_iou"] for row in scores.values())
+    winners = [name for name, row in scores.items() if row["median_iou"] == highest]
+    best = winners[0] if highest > 0 and len(winners) == 1 else None
     return {
-        "status": "PASS" if best == "documented" else "FAIL",
+        "status": "NOT_VERIFIABLE"
+        if best is None
+        else ("PASS" if best == "documented" else "FAIL"),
         "best": best,
         "hypotheses": scores,
         "camera_angle_x": angle,

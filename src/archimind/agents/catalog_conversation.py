@@ -54,8 +54,16 @@ TERM_WORDS = {
     "bookcase": ("bookcase", "bookcases", "bookshelves", "bookshelf"),
     "nightstand": ("nightstand", "nightstands", "bedside"),
 }
-_QUANTITY = r"(?:a|an|one|two|three|four|five|six|seven|eight|\d+)\s+"
-_QUALIFIER = r"(?:queen|king|twin|xl|single|double|full|california|writing|study)(?:[- ]sized?)?[- ]+"
+_COUNTS = {
+    "a": 1,
+    "an": 1,
+    **dict(zip("one two three four five six seven eight".split(), range(1, 9))),
+}
+_SIZE = r"(?:california king|twin xl|queen|king|twin|single|double|full)"
+_ITEM = re.compile(
+    rf"(?:(?P<count>{'|'.join(_COUNTS)}|[0-9]+) )?"
+    rf"(?:(?P<qualifier>{_SIZE}|writing|study)(?:[- ]sized?)?[- ])?(?P<noun>[a-z ]+)"
+)
 
 
 def _slips(a: str, b: str) -> int:
@@ -82,16 +90,68 @@ def near_term(term: str, text: str) -> bool:
     return False
 
 
-def _restates_request(fact: ChatTextFact, functions) -> bool:
-    """A 'constraint' that is only a quantity, a size and a requested function."""
-    rest = fact.value.casefold().strip(" .")
-    rest = re.sub(rf"^{_QUANTITY}", "", rest)
-    rest = re.sub(rf"^(?:{_QUALIFIER})*", "", rest).strip()
-    return any(
-        re.fullmatch(FUNCTION_TERMS[f], rest, re.I)
-        for f in functions
-        if f in FUNCTION_TERMS
-    )
+def _match_item_phrase(value, furniture):
+    """Return the matching function or explain why the phrase cannot be applied."""
+    parsed = _ITEM.fullmatch(value)
+    if not parsed:
+        return "unsupported"
+    matches = [
+        item
+        for item in furniture
+        if item.function in FUNCTION_TERMS
+        and re.fullmatch(FUNCTION_TERMS[item.function], parsed["noun"])
+    ]
+    if not matches:
+        return "unsupported"
+    if len(matches) != 1:
+        return "conflict"
+    item = matches[0]
+    if parsed["count"] is None and parsed["noun"].endswith("s"):
+        return "conflict"
+    count = parsed["count"] or "a"
+    if item.quantity != (_COUNTS[count] if count in _COUNTS else int(count)):
+        return "conflict"
+    qualifier = parsed["qualifier"]
+    if qualifier:
+        if item.function == "bed":
+            size = re.search(rf"\b({_SIZE})\b", item.source.text, re.I)
+            variant = item.variant.value.casefold() if item.variant else None
+            if (
+                (variant and variant != qualifier)
+                or (size and size[1].casefold() != qualifier)
+                or not (variant or size)
+            ):
+                return "conflict"
+        elif qualifier not in ("writing", "study") or not re.search(
+            rf"\b{qualifier}\b", item.source.text, re.I
+        ):
+            return "conflict"
+    return item.function
+
+
+def _request_constraint(fact: ChatTextFact, furniture, turns):
+    """Only discard a duplicate if each item in its quoted list also agrees."""
+
+    def strip_lead(text):
+        return re.sub(r"^i (?:need|require|want) ", "", text.casefold().strip(" ."))
+
+    value = strip_lead(fact.value)
+    match = _match_item_phrase(value, furniture)
+    if match in ("unsupported", "conflict"):
+        return match
+    try:
+        text_value(fact, turns)
+    except ValueError:
+        return "conflict"
+    phrases = re.split(r",\s*(?:and\s+)?|\s+and\s+", strip_lead(fact.source.text))
+    if value not in phrases:
+        return "conflict"
+    functions = [_match_item_phrase(phrase, furniture) for phrase in phrases]
+    if any(f in ("unsupported", "conflict") for f in functions) or len(
+        set(functions)
+    ) != len(functions):
+        return "conflict"
+    return "restated"
 
 
 INSTRUCTIONS = """Extract a full CURRENT bedroom specification from this conversation,
@@ -226,13 +286,14 @@ def reconcile_catalog_extraction(
         data.room_type == "unsupported"
         or data.shape == "unsupported"
         or data.unsupported_features
-        or [
-            c
-            for c in data.hard_constraints
-            if not _restates_request(c, {i.function for i in data.furniture})
-        ]
     ):
         return result("unsupported")
+    for constraint in data.hard_constraints:
+        status = _request_constraint(constraint, data.furniture, turns)
+        if status == "unsupported":
+            return result("unsupported")
+        if status == "conflict":
+            questions.append("Confirm the required furniture, quantity and size.")
     if (
         data.room_type != "bedroom"
         or not quote_present(data.room_source, turns)

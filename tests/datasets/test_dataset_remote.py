@@ -263,3 +263,49 @@ def test_select_rejects_size_mismatch_and_leaves_nothing(tmp_path):
         )
     assert not (tmp_path / "out").exists()
     assert not (tmp_path / "out.selecting").exists()
+
+
+@pytest.mark.parametrize("failure", ["missing", "write", "publish"])
+def test_incomplete_replacement_preserves_destination(tmp_path, monkeypatch, failure):
+    import os
+
+    from archimind.datasets import canonical
+
+    dest = tmp_path / "out"
+    dest.mkdir()
+    (dest / "good").write_bytes(b"previous")
+    wanted = {"a": 1}
+    if failure == "missing":
+        wanted["b"] = 1
+    if failure == "write":
+
+        def fail_hash(path):
+            raise OSError("staging read failed")
+
+        monkeypatch.setattr(canonical, "file_sha256", fail_hash)
+    if failure == "publish":
+        replace = os.replace
+
+        def fail_publish(src, dst):
+            if src.name == "staged":
+                raise OSError("publish failed")
+            replace(src, dst)
+
+        monkeypatch.setattr(os, "replace", fail_publish)
+
+    def select():
+        return gzip_tar_select(
+            "https://example.invalid/a",
+            dest,
+            wanted,
+            max_bytes=4096,
+            opener=bytes_opener(targz({"a": b"x"})),
+        )
+
+    if failure == "missing":
+        assert select().missing == ("b",)
+    else:
+        with pytest.raises(OSError):
+            select()
+    assert list(dest.iterdir()) == [dest / "good"]
+    assert (dest / "good").read_bytes() == b"previous"

@@ -56,13 +56,29 @@ ROOM_TOLERANCE_M = 0.05
 FT = 0.3048
 DOOR = (0.5, 0.85, 2.1)  # offset, width, height on the south wall
 NUMBER = {1: "one", 2: "two", 3: "three"}
-PLURAL = {"nightstand": "nightstands", "wardrobe": "wardrobes", "bookcase": "bookcases",
-          "desk": "desks", "chair": "chairs", "bed": "beds"}
-TYPOS = {"bedroom": "bedrom", "wardrobe": "wadrobe", "nightstand": "nighstand",
-         "chair": "chiar", "desk": "deks"}
+PLURAL = {
+    "nightstand": "nightstands",
+    "wardrobe": "wardrobes",
+    "bookcase": "bookcases",
+    "desk": "desks",
+    "chair": "chairs",
+    "bed": "beds",
+}
+TYPOS = {
+    "bedroom": "bedrom",
+    "wardrobe": "wadrobe",
+    "nightstand": "nighstand",
+    "chair": "chiar",
+    "desk": "deks",
+}
 ORDER = ("bed", "nightstand", "wardrobe", "bookcase", "desk", "chair")
-BED_SIZE = {"king": "king", "single": "single", "kid": "single", "bunk": "single",
-            "double": "double"}
+BED_SIZE = {
+    "king": "king",
+    "single": "single",
+    "kid": "single",
+    "bunk": "single",
+    "double": "double",
+}
 
 
 @dataclass(frozen=True)
@@ -74,6 +90,9 @@ class PromptCase:
     expected_reason: str | None
     expected_functions: dict = field(hash=False)
     expected_room: tuple[float, float, float]
+    snapshot_id: str | None = None
+    source: str | None = None
+    provider_disclosure: str | None = None
 
 
 def _furniture(scene) -> tuple[Counter, str]:
@@ -108,7 +127,12 @@ def _eligible(scene) -> bool:
 
 
 def _items(
-    counts: Counter, bed_size: str, *, real_counts: bool, sized: bool, twin: bool = False
+    counts: Counter,
+    bed_size: str,
+    *,
+    real_counts: bool,
+    sized: bool,
+    twin: bool = False,
 ) -> str:
     parts = []
     for name in ORDER:
@@ -133,7 +157,10 @@ def _prompt(style: str, dims, counts: Counter, bed_size: str) -> str:
         offset, door_w, door_h = (round(v / FT, 1) for v in DOOR)
         unit = "ft"
     items = _items(
-        counts, bed_size, real_counts=style == "multiples", sized=style != "no_bed_size",
+        counts,
+        bed_size,
+        real_counts=style == "multiples",
+        sized=style != "no_bed_size",
         twin=style == "twin_beds",
     )
     if style == "casual":
@@ -162,7 +189,9 @@ def _prompt(style: str, dims, counts: Counter, bed_size: str) -> str:
     return text
 
 
-def build_prompt_suite(scenes, *, per_style: int = 3, seed: int = 0) -> list[PromptCase]:
+def build_prompt_suite(
+    scenes, *, per_style: int = 3, seed: int = 0
+) -> list[PromptCase]:
     """``per_style`` rooms per style, drawn deterministically from eligible scenes."""
     scenes, _ = fold_aliases(list(scenes))
     eligible = [s for s in scenes if _eligible(s)]
@@ -180,7 +209,9 @@ def build_prompt_suite(scenes, *, per_style: int = 3, seed: int = 0) -> list[Pro
             )
             status, reason = EXPECTED[style]
             functions = {
-                k: (counts[k] if style == "multiples" else 1) for k in ORDER if counts[k]
+                k: (counts[k] if style == "multiples" else 1)
+                for k in ORDER
+                if counts[k]
             }
             if style == "twin_beds":
                 functions["bed"] = 2
@@ -256,9 +287,43 @@ def summarize(rows: list[dict]) -> dict:
     return {
         "cases": len(rows),
         "passed": sum(r["passed"] for r in rows),
-        "pass_rate": round(sum(r["passed"] for r in rows) / len(rows), 4) if rows else 0.0,
+        "pass_rate": round(sum(r["passed"] for r in rows) / len(rows), 4)
+        if rows
+        else 0.0,
         "by_style": by_style,
     }
+
+
+def bind_case(case, pack):
+    """Attach disclosure evidence from the verified source of this scene."""
+    from dataclasses import replace
+
+    scene_id = case.case_id.split(":", 1)[1]
+    scene = next(s for s in pack.scenes if s.reference_id == scene_id)
+    source = next(s for s in pack.sources if s.source == scene.source)
+    return replace(
+        case,
+        snapshot_id=pack.manifest.snapshot_id,
+        source=scene.source,
+        provider_disclosure=source.permission.provider_disclosure,
+    )
+
+
+def live_cases_allowed(cases, pack):
+    """Reconstruct each prompt using current pack evidence before any live call."""
+    by_id = {s.reference_id: s for s in pack.scenes}
+    for case in cases:
+        scene = by_id.get(case.case_id.partition(":")[2])
+        if scene is None or case.provider_disclosure != "allowed":
+            return False
+        originals = build_prompt_suite([scene], per_style=1)
+        if not any(
+            bind_case(original, pack) == case
+            for original in originals
+            if original.style == case.style
+        ):
+            return False
+    return True
 
 
 def case_to_json(case: PromptCase) -> dict:

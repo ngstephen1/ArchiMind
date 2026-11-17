@@ -47,7 +47,10 @@ def test_typos_in_room_and_function_words_still_ready():
 
 def test_wrong_function_word_still_asks():
     text = TEXT.replace("a writing desk", "a nightmare")
-    result = run(text, furniture=(intent("bed", "queen bed"), intent("nightstand", "a nightmare")))
+    result = run(
+        text,
+        furniture=(intent("bed", "queen bed"), intent("nightstand", "a nightmare")),
+    )
     assert result.status == "needs_clarification"
     assert any("function of furniture request 2" in q for q in result.clarifications)
 
@@ -57,13 +60,24 @@ def fact(value, source):
 
 
 def test_constraint_that_only_restates_a_request_is_ignored():
-    result = run(TEXT, hard_constraints=(fact("A queen bed", "A queen bed"), fact("a writing desk", "a writing desk")))
+    result = run(
+        TEXT,
+        hard_constraints=(
+            fact("A queen bed", "A queen bed"),
+            fact("a writing desk", "a writing desk"),
+        ),
+    )
     assert result.status == "ready", result.clarifications
 
 
 def test_real_constraint_is_still_unsupported():
     text = TEXT.replace("A queen bed", "A queen bed against the north wall")
-    result = run(text, hard_constraints=(fact("bed against the north wall", "A queen bed against the north wall"),))
+    result = run(
+        text,
+        hard_constraints=(
+            fact("bed against the north wall", "A queen bed against the north wall"),
+        ),
+    )
     assert result.status == "unsupported"
 
 
@@ -73,7 +87,9 @@ def test_restated_constraint_for_an_unrequested_function_is_still_unsupported():
 
 
 def test_two_twin_beds_asks_about_quantity_instead_of_unsupported():
-    text = TEXT.replace("A queen bed and a writing desk.", "Two twin beds and a writing desk.")
+    text = TEXT.replace(
+        "A queen bed and a writing desk.", "Two twin beds and a writing desk."
+    )
     beds = intent("bed", "Two twin beds").model_copy(update={"quantity": 2})
     result = run(
         text,
@@ -98,5 +114,59 @@ def test_unsupported_message_names_the_reason():
     text = _assistant_text(result)
     assert "L-shaped bedroom" in text and "bed against the north wall" in text
     assert "no layout has changed" in text
-    bare = _assistant_text(SimpleNamespace(status="unsupported", error=None, extraction=None))
+    bare = _assistant_text(
+        SimpleNamespace(status="unsupported", error=None, extraction=None)
+    )
     assert "no layout has changed" in bare
+
+
+def test_correction_conflicts_with_retained_request():
+    for phrase in ("two writing desks", "a king bed"):
+        result = run(
+            TEXT + " I require " + phrase + ".",
+            hard_constraints=(fact(phrase, phrase),),
+        )
+        assert result.status == "needs_clarification"
+        assert result.draft is None
+
+
+def test_shortened_constraint_cannot_drop_qualifiers_from_quoted_evidence():
+    result = run(
+        TEXT + " I require two writing desks.",
+        hard_constraints=(fact("desk", "two writing desks"),),
+    )
+    assert result.status == "needs_clarification"
+
+
+def test_quoted_list_only_restates_distinct_agreeing_items():
+    assert (
+        run(
+            TEXT,
+            hard_constraints=(fact("queen bed", "A queen bed and a writing desk."),),
+        ).status
+        == "needs_clarification"
+    )
+    assert (
+        run(
+            TEXT,
+            hard_constraints=(fact("A queen bed", "A queen bed and a writing desk."),),
+        ).status
+        == "ready"
+    )
+    phrase = "A queen bed and two writing desks"
+    assert (
+        run(TEXT + " " + phrase, hard_constraints=(fact("A queen bed", phrase),)).status
+        == "needs_clarification"
+    )
+
+
+def test_later_user_turn_requires_two_desks():
+    from archimind.agents.catalog_requirements import CatalogChatTurn
+
+    correction = "I require two writing desks."
+    constraint = ChatTextFact(value="two writing desks", source=quote(correction, 2))
+    result = reconcile_catalog_extraction(
+        extraction().model_copy(update={"hard_constraints": (constraint,)}),
+        (*turns(), CatalogChatTurn(id=2, role="user", content=correction)),
+    )
+    assert result.status == "needs_clarification" and result.draft is None

@@ -39,8 +39,14 @@ def _item(fid, category, w, d, h):
     from archimind.models import Furniture
 
     return Furniture(
-        id=fid, name=fid, category=category, x_m=0.0, y_m=0.0,
-        width_m=w, depth_m=d, height_m=h,
+        id=fid,
+        name=fid,
+        category=category,
+        x_m=0.0,
+        y_m=0.0,
+        width_m=w,
+        depth_m=d,
+        height_m=h,
     )
 
 
@@ -49,7 +55,11 @@ def _room(rid, width, depth):
 
     door = Door(id="south-door", wall="south", offset_m=0.6, width_m=0.85, height_m=2.1)
     return Room(
-        id=rid, name=rid, width_m=width, depth_m=depth, ceiling_height_m=2.7,
+        id=rid,
+        name=rid,
+        width_m=width,
+        depth_m=depth,
+        ceiling_height_m=2.7,
         doors=[door],
     )
 
@@ -156,7 +166,9 @@ def run_bench(
         room_labels = []
         for seed in seeds:
             start = clock()
-            result = generate_layout_candidates(room.room, list(room.furniture), seed=seed)
+            result = generate_layout_candidates(
+                room.room, list(room.furniture), seed=seed
+            )
             times.append((clock() - start) * 1000)
             calls += 1
             statuses[result.status] += 1
@@ -173,7 +185,9 @@ def run_bench(
                         if f.habit == "bed_edge":
                             room_labels.append(f.outcome)
         per_room[room.id] = {
-            "bed_long_edge_only": _dist(room_labels, LABELS["bed_edge"])["long_edge_only"],
+            "bed_long_edge_only": _dist(room_labels, LABELS["bed_edge"])[
+                "long_edge_only"
+            ],
             "bed_observations": len(room_labels),
         }
     times.sort()
@@ -200,7 +214,9 @@ def run_bench(
         },
     }
     if held_out is not None:
-        report["reference"] = {k: reference_rates(v, habits) for k, v in held_out.items()}
+        report["reference"] = {
+            k: reference_rates(v, habits) for k, v in held_out.items()
+        }
         gen_p50 = report["generated"]["habit_penalty"].get("p50")
         check = {}
         for split, scenes in held_out.items():

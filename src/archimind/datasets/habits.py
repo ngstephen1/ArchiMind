@@ -30,10 +30,17 @@ MIN_N = 100
 TOLERANCES_M = (0.05, 0.10, 0.15)
 STOP_FALLING = 0.02  # the free-standing rate "stops falling" below 2 points
 OUTSIDE_LIMIT_M = 0.15  # deeper than this through a wall: excluded, counted
-SQUARE_RATIO = 0.02  # |w - d| / max(w, d) at or below this: no short edge (~10% of real beds)
+SQUARE_RATIO = (
+    0.02  # |w - d| / max(w, d) at or below this: no short edge (~10% of real beds)
+)
 BOOTSTRAP_RESAMPLES = 500
 BOOTSTRAP_SEED = 0
-GAP_BINS = (("lt_0.15", 0.15), ("0.15_0.40", 0.40), ("0.40_0.80", 0.80), ("ge_0.80", math.inf))
+GAP_BINS = (
+    ("lt_0.15", 0.15),
+    ("0.15_0.40", 0.40),
+    ("0.40_0.80", 0.80),
+    ("ge_0.80", math.inf),
+)
 COVERAGE_BINS = (
     ("lt_0.10", 0.10),
     ("0.10_0.20", 0.20),
@@ -125,9 +132,13 @@ def bed_edge(r: Rect, width: float, depth: float, tol: float) -> str:
         return "square"
     west, east, south, north = (g <= tol for g in wall_gaps(r, width, depth))
     # Long axis along X: the short edges are the west/east sides.
-    short, long_ = ((west or east), (south or north)) if r.w > r.d else (
-        (south or north),
-        (west or east),
+    short, long_ = (
+        ((west or east), (south or north))
+        if r.w > r.d
+        else (
+            (south or north),
+            (west or east),
+        )
     )
     if short:
         return "short_edge"
@@ -233,7 +244,10 @@ def _quantile(values: list[float], p: float) -> float:
 def _quantiles(values: list[float]) -> dict:
     if not values:
         return {}
-    return {f"p{int(p * 100):02d}": round(_quantile(values, p), 6) for p in (0.1, 0.25, 0.5, 0.75, 0.9)}
+    return {
+        f"p{int(p * 100):02d}": round(_quantile(values, p), 6)
+        for p in (0.1, 0.25, 0.5, 0.75, 0.9)
+    }
 
 
 def _rates(per_room: list[list[str]], labels, rng: Random) -> dict:
@@ -245,7 +259,9 @@ def _rates(per_room: list[list[str]], labels, rng: Random) -> dict:
     n = sum(total.values())
     out = {}
     if not n:
-        return {label: {"count": 0, "rate": 0.0, "ci95": [0.0, 0.0]} for label in labels}
+        return {
+            label: {"count": 0, "rate": 0.0, "ci95": [0.0, 0.0]} for label in labels
+        }
     samples = {label: [] for label in labels}
     for _ in range(BOOTSTRAP_RESAMPLES):
         picked = rng.choices(counts, k=len(counts))
@@ -371,7 +387,11 @@ def compute_habits(
         ),
         "outside_limit_m": OUTSIDE_LIMIT_M,
         "square_ratio": SQUARE_RATIO,
-        "bootstrap": {"resamples": BOOTSTRAP_RESAMPLES, "seed": BOOTSTRAP_SEED, "unit": "room"},
+        "bootstrap": {
+            "resamples": BOOTSTRAP_RESAMPLES,
+            "seed": BOOTSTRAP_SEED,
+            "unit": "room",
+        },
         "category_map": {
             "pack": {
                 c: {g: sorted(req) if req else "*" for g, req in groups}
@@ -450,13 +470,17 @@ def _score(rects: list[Rect], width: float, depth: float, habits: dict) -> Habit
         entry = habits["habits"].get(name)
         if entry is None:
             continue
-        usable = entry["usable"] and entry["status"] == "ok" and weights.get(name, 0) > 0
+        usable = (
+            entry["usable"] and entry["status"] == "ok" and weights.get(name, 0) > 0
+        )
         if not entry["usable"]:
             continue  # recorded-only habits are never reported as app facts
         values = []
         for label, _, key in entries:
             rate = entry["outcomes"][label]["rate"]
-            facts.append(HabitFact(key, name, label, rate, round(rarity(rate), 6), usable))
+            facts.append(
+                HabitFact(key, name, label, rate, round(rarity(rate), 6), usable)
+            )
             values.append(rarity(rate))
         if usable and values:
             total += weights[name] * sum(values) / len(values)
@@ -466,7 +490,16 @@ def _score(rects: list[Rect], width: float, depth: float, habits: dict) -> Habit
     label = _bin(obs.coverage, COVERAGE_BINS)
     rate = cov["by_tercile"][t]["outcomes"][label]["rate"]
     scored = cov["status"] == "ok" and weights.get("floor_coverage", 0) > 0
-    facts.append(HabitFact("room", "floor_coverage", f"{t}:{label}", rate, round(rarity(rate), 6), scored))
+    facts.append(
+        HabitFact(
+            "room",
+            "floor_coverage",
+            f"{t}:{label}",
+            rate,
+            round(rarity(rate), 6),
+            scored,
+        )
+    )
     if scored:
         total += weights["floor_coverage"] * rarity(rate)
         weight_sum += weights["floor_coverage"]
@@ -488,8 +521,15 @@ def score_layout_habits(design, habits: dict) -> HabitReport:
             continue
         group = app_group(item.category)
         rects.append(
-            Rect(group, item.x_m, item.y_m, item.width_m, item.depth_m,
-                 table=group == "desk", key=item.id)
+            Rect(
+                group,
+                item.x_m,
+                item.y_m,
+                item.width_m,
+                item.depth_m,
+                table=group == "desk",
+                key=item.id,
+            )
         )
     return _score(rects, design.room.width_m, design.room.depth_m, habits)
 

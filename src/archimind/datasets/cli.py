@@ -893,7 +893,11 @@ def _cmd_prompt_suite(args) -> int:
     from archimind.datasets.canonical import canonical_bytes
     from archimind.datasets.habits import select_split
     from archimind.datasets.pack import load_pack
-    from archimind.datasets.prompt_suite import build_prompt_suite, case_to_json
+    from archimind.datasets.prompt_suite import (
+        bind_case,
+        build_prompt_suite,
+        case_to_json,
+    )
 
     status = load_pack(Path(args.pack), audience="local")
     if status.status != "ready":
@@ -901,7 +905,9 @@ def _cmd_prompt_suite(args) -> int:
         return EXIT_BLOCKED
     scenes = select_split(status.pack.scenes, args.split)
     cases = build_prompt_suite(scenes, per_style=args.per_style, seed=args.seed)
-    data = b"".join(canonical_bytes(case_to_json(c)) + b"\n" for c in cases)
+    data = b"".join(
+        canonical_bytes(case_to_json(bind_case(c, status.pack))) + b"\n" for c in cases
+    )
     atomic_write_bytes(Path(args.out), data)
     _emit({"status": "built", "cases": len(cases), "split": args.split})
     return EXIT_OK
@@ -920,6 +926,18 @@ def _cmd_prompt_eval(args) -> int:
     )
     if args.live:
         from archimind.agents.catalog_conversation import interpret_catalog_conversation
+        from archimind.datasets.pack import load_pack
+        from archimind.datasets.prompt_suite import live_cases_allowed
+
+        root = Path(args.pack) if args.pack else None
+
+        def disclosure_allowed(batch):
+            pack = load_pack(root, audience="local")
+            return pack.status == "ready" and live_cases_allowed(batch, pack.pack)
+
+        if not disclosure_allowed(cases):
+            _emit({"status": "blocked", "reason": "unverified_provider_disclosure"})
+            return EXIT_BLOCKED
 
         def interpret(turns):
             return interpret_catalog_conversation(turns, allow_live=True)
@@ -928,6 +946,14 @@ def _cmd_prompt_eval(args) -> int:
             for case in cases:
                 if case.case_id in recordings:
                     continue
+                if not disclosure_allowed([case]):
+                    _emit(
+                        {
+                            "status": "blocked",
+                            "reason": "unverified_provider_disclosure",
+                        }
+                    )
+                    return EXIT_BLOCKED
                 record = record_case(case, interpret)
                 recordings[case.case_id] = record
                 stream.write(json.dumps(record, sort_keys=True) + "\n")
@@ -1064,7 +1090,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--out", help="write the report JSON here")
     p.set_defaults(func=_cmd_ref_eval)
 
-    p = sub.add_parser("habit-stats", help="P5: layout habits from a pack's train split")
+    p = sub.add_parser(
+        "habit-stats", help="P5: layout habits from a pack's train split"
+    )
     p.add_argument("--pack", required=True, help="verified reference pack")
     p.add_argument("--out", required=True, help="write habits.json here")
     p.set_defaults(func=_cmd_habit_stats)
@@ -1085,6 +1113,10 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=_cmd_prompt_suite)
 
     p = sub.add_parser("prompt-eval", help="Record (--live) and score chat answers")
+    p.add_argument(
+        "--pack",
+        help="Current verified source pack, required for live disclosure checks",
+    )
     p.add_argument("--cases", required=True, help="cases JSONL from prompt-suite")
     p.add_argument("--recordings", required=True, help="recordings JSONL (appended)")
     p.add_argument("--out", required=True, help="write the report JSON here")
