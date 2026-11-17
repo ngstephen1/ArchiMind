@@ -1,0 +1,145 @@
+{
+  "branch": "data/dataset-reference-pilot",
+  "commands": [
+    "python -m archimind.datasets ssr-build train.parquet val.parquet test.parquet --inventory ssr_inventory.json --midi-dir <midi id lists> --out <stage> --pack-dir <pack> --pack-id ssr-bedrooms-p2a --permission <permission.json> --retrieved-utc 2026-11-06T18:00:00Z",
+    "python -m archimind.datasets verify-pack <pack>"
+  ],
+  "midi_revision": "156fc5312ea613d4e92cbf5da1fddfa61bbad3b2",
+  "observed_utc": "2026-11-08T00:00:00Z",
+  "pack": {
+    "audience": "local",
+    "files": [
+      {
+        "kind": "assets",
+        "path": "assets.jsonl",
+        "records": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "size_bytes": 0
+      },
+      {
+        "kind": "exclusions",
+        "path": "exclusions.jsonl",
+        "records": 3160,
+        "sha256": "134d0fdcbe8ef0e5d99b55bfb484fe0562fe51b9dfecc1bba1b1b54fca97b330",
+        "size_bytes": 625999
+      },
+      {
+        "kind": "scenes",
+        "path": "scenes.jsonl",
+        "records": 4168,
+        "sha256": "df7d0d13a8effbaab6fac90d3a66c62498f6f3d96d5aa278202287d2a6b46cb6",
+        "size_bytes": 11317889
+      },
+      {
+        "kind": "sources",
+        "path": "sources.jsonl",
+        "records": 1,
+        "sha256": "22f5d8ca2db3a6ca6191913dcf05b15ee49249bb78b391ef88a16a7ce30e80d1",
+        "size_bytes": 1022
+      }
+    ],
+    "pack_id": "ssr-bedrooms-p2a",
+    "rebuild_snapshot_identical": true,
+    "snapshot_id": "e0f2496e2cbf1e74019366e89afcb90325cb84d7dfc9bee244341033f2c01654"
+  },
+  "permission": {
+    "derived_metadata": "unknown",
+    "local_research": "allowed (provisional, pending owner review)",
+    "provider_disclosure": "unknown",
+    "public_geometry": "unknown",
+    "public_images": "unknown"
+  },
+  "phase": "P2a",
+  "schema_version": "1.0.0",
+  "ssr": {
+    "adapter_version": "1.0.0",
+    "admitted_categories": {
+      "bed": 3511,
+      "cabinet_shelf_desk": 8895,
+      "chair": 441,
+      "lighting": 3917,
+      "other": 765,
+      "sofa": 80,
+      "stool": 174,
+      "table": 848
+    },
+    "bedroom_rows": 7328,
+    "category_map_version": "1.0.0",
+    "checks": {
+      "door_clearance|NOT_VERIFIABLE": 4168,
+      "floor_contact|FAIL": 117,
+      "floor_contact|PASS": 4051,
+      "solid_overlap|FAIL": 2212,
+      "solid_overlap|PASS": 1956,
+      "split_agreement|FAIL": 604,
+      "split_agreement|NOT_VERIFIABLE": 1775,
+      "split_agreement|PASS": 1789,
+      "wall_containment|FAIL": 3178,
+      "wall_containment|PASS": 990
+    },
+    "convention": "ssr-3dfront-respace-b1a4b32b",
+    "convention_digest": "9365a8b0fc7fdc64bdfb561188f57e56641bc7c85e179d946aa4f3c3ef6189bc",
+    "exclusion_reasons": {
+      "duplicate_identity": 252,
+      "irregular_room": 2903,
+      "non_quarter_turn_rotation": 2,
+      "unmapped_category": 3
+    },
+    "exclusions": 3160,
+    "inputs": [
+      {
+        "path": "data/test-00000-of-00001.parquet",
+        "sha256": "8970830a27fb3dafb5e89d324f5f3666b3defd489e79345d314d455d00a1331b",
+        "size_bytes": 858995
+      },
+      {
+        "path": "data/train-00000-of-00001.parquet",
+        "sha256": "aedbb1f9448614299ecc6c40e6ccf4f9b7441feee42275d7fcfb06690de038e1",
+        "size_bytes": 5698138
+      },
+      {
+        "path": "data/val-00000-of-00001.parquet",
+        "sha256": "38e99958698c2633199e041f68cba51b91f2db1255718ea894a6db8ee323fe40",
+        "size_bytes": 848612
+      }
+    ],
+    "object_exclusions": {
+      "invalid_dimensions": 12,
+      "non_quarter_turn_rotation": 1064,
+      "tilted_object": 1,
+      "unmapped_category": 729
+    },
+    "objects": 20437,
+    "objects_admitted": 18631,
+    "outputs": {
+      "exclusions.jsonl": {
+        "records": 3160,
+        "sha256": "134d0fdcbe8ef0e5d99b55bfb484fe0562fe51b9dfecc1bba1b1b54fca97b330"
+      },
+      "scenes.jsonl": {
+        "records": 4168,
+        "sha256": "df7d0d13a8effbaab6fac90d3a66c62498f6f3d96d5aa278202287d2a6b46cb6"
+      }
+    },
+    "pack": {
+      "pack_id": "ssr-bedrooms-p2a",
+      "snapshot_id": "e0f2496e2cbf1e74019366e89afcb90325cb84d7dfc9bee244341033f2c01654"
+    },
+    "revision": "b606183e56d972f85850125f9191932cbea654c3",
+    "scenes": 4168,
+    "source": "ssr_3dfront",
+    "tiers": {
+      "canonical": 53,
+      "reference_only": 4115
+    },
+    "tiers_by_split": {
+      "test|canonical": 1,
+      "test|reference_only": 285,
+      "train|canonical": 49,
+      "train|reference_only": 3552,
+      "val|canonical": 3,
+      "val|reference_only": 278
+    },
+    "transform_version": "1.0.0"
+  }
+}

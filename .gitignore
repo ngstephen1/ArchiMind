@@ -52,3 +52,6 @@ htmlcov/
 *.swp
 *.swo
 *~
+
+# Notebook checkpoints
+.ipynb_checkpoints/
