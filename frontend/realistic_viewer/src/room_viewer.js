@@ -7,6 +7,7 @@ import {disposeObject} from './viewer.js';
 import {validateScene,wallQuads,openingQuad,cameraFrame,canonicalVolume} from './room_geometry.js';
 import {createAssetPool} from './asset_pool.js';
 import {fittedInstance,placeholder,footprint,instanceMetrics,quadGeometry} from './room_objects.js';
+import {conceptInstance} from './concept_assets.js';
 
 import {PRODUCT_ASSETS,boundedProductBytes,verifyDecodedProduct,nativeProductInstance,productSceneBudget,productSceneAdmission} from './product_assets.js';
 
@@ -60,19 +61,21 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
   try{
     const data=validateScene(input),room=data.design.room,fs=[...data.design.furniture].sort((a,b)=>a.id.localeCompare(b.id));
     const bindings=new Map(data.asset_bindings.map(b=>[b.furniture_id,b.asset_id]));root.dataset.state='loading';
+    const concepts=new Map((data.concept_assets??[]).map(r=>[r.recipe_id,r])),conceptBindings=new Map((data.concept_bindings??[]).map(b=>[b.furniture_id,b.recipe_id]));
     root.querySelector('.room-info').textContent=`${room.name} · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · X east, Y north, Z up. ${data.schema_version===3?'Canonical layout. Only explicitly approved product bindings use native-scale meshes; other objects are labeled placeholders.':'Canonical data; illustrative fitted mesh validity is not established.'}`;
+    if(data.schema_version===4){root.dataset.conceptRoom='true';root.querySelector('.room-info').textContent=`${room.name} · Procedural concept room, not catalog products · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · reservation-based spatial checks; no product or building-code certification.`;}
     scene=new THREE.Scene();scene.background=new THREE.Color('#e9edf0');scene.add(owned,instances);owned.add(walls,footprints);
     renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
-    renderer.domElement.setAttribute('aria-label','Experimental room with wall openings, native-scale products and labeled procedural furniture');stage.prepend(renderer.domElement);
+    renderer.domElement.setAttribute('aria-label',data.schema_version===4?'Procedural concept room with measured openings and generated furniture':'Experimental room with wall openings, native-scale products and labeled procedural furniture');stage.prepend(renderer.domElement);
     const env=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer);envTarget=pmrem.fromScene(env,.04);scene.environment=envTarget.texture;scene.environmentIntensity=.6;disposeObject(env);pmrem.dispose();
     owned.add(new THREE.HemisphereLight(0xf2f6ff,0xa79a86,1.1));
     const sun=new THREE.DirectionalLight(0xfff4e5,3.0),span=Math.max(room.width_m,room.depth_m,room.ceiling_height_m);
     sun.position.set(room.width_m+2,room.ceiling_height_m+4,2);sun.target.position.set(room.width_m/2,0,-room.depth_m/2);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-span,right:span,top:span,bottom:-span,near:.1,far:span*5});sun.shadow.normalBias=.005;sun.shadow.bias=-.0002;sun.shadow.radius=3;owned.add(sun,sun.target);
-    const floor=new THREE.Mesh(new THREE.PlaneGeometry(room.width_m,room.depth_m),new THREE.MeshStandardMaterial({map:plankTexture(),roughness:.82,metalness:0}));floor.rotation.x=-Math.PI/2;floor.position.set(room.width_m/2,-.002,-room.depth_m/2);floor.receiveShadow=true;owned.add(floor);
+    const floor=new THREE.Mesh(new THREE.PlaneGeometry(room.width_m,room.depth_m),new THREE.MeshStandardMaterial({map:plankTexture(),color:data.surfaces?.floor_color??'#ffffff',roughness:.82,metalness:0}));floor.rotation.x=-Math.PI/2;floor.position.set(room.width_m/2,-.002,-room.depth_m/2);floor.receiveShadow=true;owned.add(floor);
     const quads=wallQuads(room);
     for(const wall of ['south','east','north','west']){
       const panels=quads.filter(q=>q.wall===wall);if(!panels.length)continue;
-      const front=['south','east'].includes(wall);const mesh=new THREE.Mesh(quadGeometry(panels.map(q=>q.points)),new THREE.MeshStandardMaterial({color:'#e1e2dc',roughness:.9,side:THREE.DoubleSide,transparent:true,opacity:front?.2:.85,depthWrite:false}));
+      const front=['south','east'].includes(wall);const mesh=new THREE.Mesh(quadGeometry(panels.map(q=>q.points)),new THREE.MeshStandardMaterial({color:data.surfaces?.wall_color??'#e1e2dc',roughness:.9,side:THREE.DoubleSide,transparent:true,opacity:front?.2:.85,depthWrite:false}));
       mesh.name=wall;mesh.userData={kind:'wall',wall,panels:panels.length};mesh.castShadow=true;mesh.receiveShadow=true;walls.add(mesh);
     }
     for(const o of [...room.doors,...room.windows]){
@@ -109,19 +112,23 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
       const metrics=[];let failedInstances=0;
       for(const f of fs){
         const id=bindings.get(f.id),source=sourceModels.get(id);let object,kind;
+        if(data.schema_version===4){
+          try{object=conceptInstance(concepts.get(conceptBindings.get(f.id)),f);kind='procedural_concept';owned.add(object);}
+          catch{failedInstances++;}
+        }
         if(source){
           try{object=PRODUCT_ASSETS[id]?nativeProductInstance(source,f,PRODUCT_ASSETS[id]):fittedInstance(source,f);kind='textured';instances.add(object);}
           catch{failed.add(id);}
         }
-        if(!object){object=placeholder(f);kind=id?'asset_unavailable_placeholder':'procedural_placeholder';owned.add(object,placeholderLabel(f));if(id)failedInstances++;}
+        if(!object){object=placeholder(f);kind=data.schema_version===4?'concept_unavailable_placeholder':id?'asset_unavailable_placeholder':'procedural_placeholder';owned.add(object,placeholderLabel(f));if(id)failedInstances++;}
         metrics.push(instanceMetrics(object,f,kind));
         const row=document.createElement('li');row.textContent=`${f.name} · ${f.id} · ${f.category} · X/Y (${f.x_m}, ${f.y_m}) · W/D/H ${f.width_m} × ${f.depth_m} × ${f.height_m} m · ${kind.replaceAll('_',' ')}${id&&failed.has(id)?(admission&&!admission.admitted?' (mixed scene not yet qualified)':budget&&!budget.passed?' (scene resource budget exceeded)':' (local asset unavailable or failed qualification)'):PRODUCT_ASSETS[id]?` · native-scale ABO ${PRODUCT_ASSETS[id].product_id}, ${PRODUCT_ASSETS[id].variant_label}, CC BY 4.0`:''}`;root.querySelector('.objects').appendChild(row);
       }
       renderer.render(scene,camera);
       const geometries=new Set();instances.traverse(o=>{if(o.isMesh)geometries.add(o.geometry);});
-      const result={productBudget:budget,productAdmission:admission,instances:metrics,furnitureCount:fs.length,texturedInstances:metrics.filter(m=>m.kind==='textured').length,placeholderInstances:metrics.filter(m=>m.kind!=='textured').length,assetLoadsThisMount:pool.loads-loadsBefore,uniqueAssetIds:assetIds.length,sharedAssetGeometries:geometries.size,loadMs:performance.now()-start,wallPanels:quads.map(q=>({wall:q.wall,left:q.left,right:q.right,bottom:q.bottom,top:q.top})),doors:room.doors,windows:room.windows,roomDimensions:[room.width_m,room.depth_m,room.ceiling_height_m],structuralTriangles:quads.length*2,triangles:metrics.reduce((s,m)=>s+m.triangles,0)};
-      root.dataset.metrics=JSON.stringify(result);root.querySelector('.metrics').textContent=`${fs.length} objects · ${result.texturedInstances} textured / ${result.placeholderInstances} placeholder · ${result.assetLoadsThisMount} new GLB load(s) · room setup ${(result.loadMs/1000).toFixed(2)} s`;
-      root.dataset.state=failedInstances?'partial':'ready';status.dataset.state=root.dataset.state;status.textContent=failedInstances?'Room loaded; textured asset unavailable. Labeled placeholders shown.':'Experimental room loaded';
+      const result={productBudget:budget,productAdmission:admission,instances:metrics,furnitureCount:fs.length,texturedInstances:metrics.filter(m=>m.kind==='textured').length,conceptInstances:metrics.filter(m=>m.kind==='procedural_concept').length,placeholderInstances:metrics.filter(m=>m.kind.includes('placeholder')).length,assetLoadsThisMount:pool.loads-loadsBefore,uniqueAssetIds:assetIds.length,sharedAssetGeometries:geometries.size,loadMs:performance.now()-start,wallPanels:quads.map(q=>({wall:q.wall,left:q.left,right:q.right,bottom:q.bottom,top:q.top})),doors:room.doors,windows:room.windows,roomDimensions:[room.width_m,room.depth_m,room.ceiling_height_m],structuralTriangles:quads.length*2,triangles:metrics.reduce((s,m)=>s+m.triangles,0)};
+      root.dataset.metrics=JSON.stringify(result);root.querySelector('.metrics').textContent=`${fs.length} objects · ${result.texturedInstances} textured / ${result.placeholderInstances} placeholder${result.conceptInstances?' / '+result.conceptInstances+' concept':''} · ${result.assetLoadsThisMount} new GLB load(s) · room setup ${(result.loadMs/1000).toFixed(2)} s`;
+      root.dataset.state=failedInstances?'partial':'ready';status.dataset.state=root.dataset.state;status.textContent=data.schema_version===4?(failedInstances?'Concept geometry unavailable. Labeled placeholders shown.':'Procedural concept room loaded'):(failedInstances?'Room loaded; textured asset unavailable. Labeled placeholders shown.':'Experimental room loaded');
     })().catch(()=>{if(!disposed)fail();});
   }catch{fail();}
   cleanup.captureView=()=>!disposed&&camera&&controls?{

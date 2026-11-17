@@ -526,6 +526,9 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     design_agent = json.loads(
         (ROOT / "docs/data/DESIGN_AGENT_SINGLE.json").read_text()
     )["authorized_migrations"]
+    studio = json.loads((ROOT / "docs/data/3D_STUDIO_10A.json").read_text())[
+        "authorized_migrations"
+    ]
     for path, expected in pins["baseline_files"].items():
         if path in migrations:
             assert migrations[path]["before_sha256"] == expected
@@ -557,6 +560,9 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
         if path in design_agent:
             assert design_agent[path]["before_sha256"] == expected
             expected = design_agent[path]["after_sha256"]
+        if path in studio:
+            assert studio[path]["before_sha256"] == expected
+            expected = studio[path]["after_sha256"]
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")

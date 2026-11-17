@@ -2,6 +2,17 @@
 
 Last reviewed: **November 5, 2026**.
 
+**November 17 branch addition — 3D Studio.** The separate
+`feat/spoken-world-3d-studio` workspace adds concept-only furnished bedrooms,
+living rooms and home offices using bounded declarative primitive recipes.
+Offline examples and a gated Structured Outputs provider adapter are implemented.
+An authorized four-request backend smoke produced three custom recipes and two
+validated alternatives; actual Three.js geometry checks passed. Full live-UI
+acceptance remains pending. The qualified catalog,
+dataset eligibility gates and 09A workflow keep their existing contracts.
+See [3D Studio](3D_STUDIO.md) and its [verification receipt](../data/3D_STUDIO_10A.json).
+The November 5 milestone below is historical context for the existing chatbot.
+
 **Current milestone: Task 09A live conversation-to-layout acceptance passed;
 1,927 Python tests and installed-wheel/lint/dependency/health checks pass.
 Final checkpoint CI/delivery is recorded in the 09A report.** Three newly authorized

@@ -1,0 +1,5 @@
+Spoken World part recorder
+Copyright 2026 ryannli (https://github.com/ryannli)
+Source: https://github.com/ryannli/spoken-world/tree/2c398a545eca4364ff6029940cecc4719c21b862
+Apache License, Version 2.0. Modified by ArchiMind: pure ES-module extraction.
+Only the part recorder is adapted. Fonts, media, voice, model host and world runtime are not included.
