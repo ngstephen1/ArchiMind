@@ -19,6 +19,7 @@ from archimind.datasets.canonical import (
     file_sha256,
     strict_loads,
 )
+from archimind.datasets.contracts import check_relative_path
 
 COMPLETE = "_COMPLETE"
 
@@ -66,6 +67,9 @@ def run_stage(
     build: Callable[[Path], None],
 ) -> StageResult:
     """Run ``build(out_dir)`` unless an identical verified result already exists."""
+    check_relative_path(name)
+    if "/" in name:
+        raise ValueError("Stage name must be a single portable component")
     key = stage_key(name, version, inputs)
     final = Path(root) / name / key
     if verify_stage(final):

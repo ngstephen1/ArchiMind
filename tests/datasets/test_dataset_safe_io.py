@@ -38,7 +38,11 @@ def opener_for(body: bytes, *, honours_range=True, length=True, log=None):
             log.append(rng)
         if rng and honours_range:
             start = int(rng.split("=")[1].rstrip("-"))
-            return FakeResponse(body[start:], status=206, length=length)
+            response = FakeResponse(body[start:], status=206, length=length)
+            response.headers["Content-Range"] = (
+                f"bytes {start}-{len(body) - 1}/{len(body)}"
+            )
+            return response
         return FakeResponse(body, status=200, length=length)
 
     return opener

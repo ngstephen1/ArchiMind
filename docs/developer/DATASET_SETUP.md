@@ -69,7 +69,7 @@ Edit `.env` in the repo root. The dataset block is at the bottom.
 
 | Variable | Value | Needed when |
 | --- | --- | --- |
-| `HF_TOKEN` | Token from A1 | Always for SSR / MIDI |
+| `HF_TOKEN` | Token from A1 | When the source requires authentication |
 | `KAGGLE_USERNAME` | `username` from `kaggle.json` | 3D-FUTURE |
 | `KAGGLE_KEY` | `key` from `kaggle.json` | 3D-FUTURE |
 | `GH_TOKEN` | Token from A3 | Colab only (leave placeholder locally) |
@@ -82,10 +82,11 @@ Edit `.env` in the repo root. The dataset block is at the bottom.
 
 ### B3. Kaggle alternatives (optional)
 
-- Use the file instead of env vars: save `kaggle.json` to
-  `C:\Users\<you>\.kaggle\kaggle.json`.
-- Token-string accounts: set `KAGGLE_API_TOKEN`, or save the string in
-  `C:\Users\<you>\.kaggle\access_token`.
+- This package reads environment variables only; it does not read Kaggle credential
+  files automatically. Copy legacy file values into `KAGGLE_USERNAME` and
+  `KAGGLE_KEY` locally, without sharing or committing them.
+- Token-string accounts: set `KAGGLE_API_TOKEN` (a `KGAT_` token). The notebook
+  accepts that secret as well as legacy username/key pairs.
 
 ### B4. Load `.env` into your PowerShell session
 
@@ -219,6 +220,7 @@ Full detail lives in `docs/developer/DATASET_COLAB.md`. Short version:
    ```python
    import os
    from kaggle_secrets import UserSecretsClient
+
    s = UserSecretsClient()
    for n in ("HF_TOKEN", "KAGGLE_USERNAME", "KAGGLE_KEY"):
        os.environ[n] = s.get_secret(n)
@@ -298,3 +300,16 @@ All print one JSON document. Exit codes: `0` ok, `1` failure, `2` usage,
 | HF 401/403 | Token missing/incorrect, or the dataset's access conditions are not accepted on your account |
 | Kaggle 401/403 | Regenerate the token; open the dataset page once while logged in |
 | Colab disconnect | Rerun from the top with the same `RUN_ID` |
+
+## Current public integration boundary
+
+The current delivery is offline tooling, probes and the SSR adapter, not a dataset
+feature in the app. `ARCHIMIND_ENABLE_DATASET_REFERENCES` and
+`ARCHIMIND_DATASET_REFERENCE_ROOT` are reserved for future wiring and have no
+runtime effect yet. Public SSR pack creation is blocked pending pinned MIDI
+category/split provenance and separate permissions, even if SSR metadata itself
+has been authorized. See [DATASET_REFERENCES.md](DATASET_REFERENCES.md).
+
+The notebook is committed without execution outputs. Select the exact reviewed
+commit before running it, retain external receipts, and do not interpret a
+successful login/download as permission to publish source data or send it to an LLM.

@@ -57,7 +57,7 @@ def scene(house, room, dims, objects, *, tier="reference_only", split="train"):
         reference_id=f"ssr:{house}:{room}",
         source="ssr_3dfront",
         source_revision=SYNTHETIC_REVISION,
-        source_sha256=sha256_hex(b"ssr"),
+        source_sha256=sha256_hex(b"ssr_3dfront-synthetic"),
         split=split,
         source_scene_id=house,
         source_room_id=room,
