@@ -31,12 +31,21 @@ def _default_opener(request, timeout):
 
 
 def _get_json(
-    url: str, *, headers=None, opener: Opener = _default_opener, timeout: float = 60.0
+    url: str,
+    *,
+    headers=None,
+    opener: Opener = _default_opener,
+    timeout: float = 60.0,
+    reject_pagination: bool = False,
 ):
     if not url.startswith("https://"):
         raise UnsafeContentError("Only https:// requests are allowed")
     request = make_request(url, headers)
     with opener(request, timeout) as response:
+        if reject_pagination and 'rel="next"' in response.headers.get("Link", ""):
+            raise UnsafeContentError(
+                "Paginated tree requires a bounded pagination implementation"
+            )
         data = response.read(MAX_LISTING_BYTES + 1)
     if len(data) > MAX_LISTING_BYTES:
         raise UnsafeContentError("Listing exceeds the size limit")
@@ -77,7 +86,9 @@ def hf_tree(
     if len(revision) != 40:
         raise ValueError("Pin a full 40-character revision")
     url = f"{HF_API}/{repo}/tree/{revision}?recursive=true"
-    entries = _get_json(url, headers=_hf_headers(), opener=opener)
+    entries = _get_json(
+        url, headers=_hf_headers(), opener=opener, reject_pagination=True
+    )
     if not isinstance(entries, list) or len(entries) > max_entries:
         raise UnsafeContentError("Unexpected Hugging Face tree listing")
     files = []

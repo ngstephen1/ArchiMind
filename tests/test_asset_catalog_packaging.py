@@ -84,6 +84,9 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt",
     ]
     with zipfile.ZipFile(wheel) as archive:
+        for path in sorted((ROOT / "src/archimind/datasets").glob("*.py")):
+            name = path.relative_to(ROOT / "src").as_posix()
+            assert archive.read(name) == path.read_bytes()
         for name in preserved:
             assert archive.read(name) == (ROOT / "src" / name).read_bytes()
         assert {Path(n).name for n in archive.namelist() if n.endswith(".glb")} == {
@@ -202,6 +205,15 @@ def offline(event, args):
         raise AssertionError('Catalog attempted external work')
 sys.addaudithook(offline)
 import archimind
+import archimind.datasets as dataset_module
+from archimind.datasets.fixtures import build_synthetic_pack
+assert Path(dataset_module.__file__).resolve().is_relative_to(target)
+assert dataset_module.load_pack(None).reason == 'not_configured'
+fixture_root = Path('installed-synthetic-reference-pack')
+build_synthetic_pack(fixture_root)
+assert dataset_module.verify_pack(fixture_root).manifest.audience == 'local'
+assert dataset_module.load_pack(fixture_root).reason == 'pack_not_public'
+assert dataset_module.load_pack(fixture_root, audience='local').status == 'ready'
 import archimind.assets.catalog as module
 from archimind.assets import load_catalog, furniture_from_catalog
 import archimind.assets.inspection as inspection

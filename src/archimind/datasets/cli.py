@@ -346,6 +346,14 @@ def _cmd_ssr_build(args) -> int:
         "revision": revision,
         "inputs": [f.model_dump() for f in sorted(source_files, key=lambda f: f.path)],
         "bedroom_rows": len(results),
+        "midi_inputs": [
+            {"file": name, "sha256": file_sha256(midi / name)}
+            for name in (
+                "midi_room_ids.json",
+                "midi_furniture_ids.json",
+                "midi_test_room_ids.json",
+            )
+        ],
     } | build_report(scenes, exclusions)
     out.mkdir(parents=True, exist_ok=True)
     report["outputs"] = {}
@@ -367,6 +375,11 @@ def _cmd_ssr_build(args) -> int:
         permission = PermissionRecord.model_validate_json(
             Path(args.permission).read_bytes()
         )
+        if args.audience == "public" and permission.allows("derived_metadata"):
+            # MIDI categories/splits also contribute to the result. This CLI does
+            # not yet bind a pinned MIDI source AND its separate permission record.
+            _emit({"status": "blocked", "reason": "midi_provenance_unverified"})
+            return EXIT_BLOCKED
         manifest = SourceManifest(
             source="ssr_3dfront",
             origin_url=f"https://huggingface.co/datasets/{inventory['repo']}",

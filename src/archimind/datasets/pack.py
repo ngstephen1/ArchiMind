@@ -88,6 +88,8 @@ def check_audience(
     *,
     has_assets: bool,
 ) -> None:
+    if audience not in ("local", "public"):
+        raise PackError("invalid_audience")
     by_source = {s.source: s for s in sources}
     if len(by_source) != len(sources):
         raise PackError("duplicate_source")
@@ -104,6 +106,40 @@ def check_audience(
         for s in sources:
             if not s.permission.allows("local_research"):
                 raise PackError("source_not_permitted")
+
+
+def _check_bindings(sources, scenes, exclusions, assets, transform, category_map):
+    """Validate relationships as well as individual records, on build AND load."""
+    by_source = {s.source: s for s in sources}
+    for records, key in (
+        (sources, lambda s: s.source),
+        (scenes, lambda s: s.reference_id),
+        (exclusions, lambda e: (e.source, e.source_id, e.reason)),
+        (assets, lambda a: a.asset_id),
+    ):
+        if len({key(r) for r in records}) != len(records):
+            raise PackError("duplicate_record")
+    for record in (*scenes, *exclusions):
+        if record.source not in by_source:
+            raise PackError("missing_source_binding")
+    for scene in scenes:
+        source = by_source[scene.source]
+        if scene.source_revision != source.revision or scene.source_sha256 not in {
+            f.sha256 for f in source.files
+        }:
+            raise PackError("scene_source_mismatch")
+        if (
+            scene.transform_version != transform
+            or scene.category_map_version != category_map
+        ):
+            raise PackError("scene_version_mismatch")
+    if assets and "future_3d" not in by_source:
+        raise PackError("missing_asset_source")
+    if assets:
+        source_files = {f.path: f for f in by_source["future_3d"].files}
+        for asset in assets:
+            if any(source_files.get(f.path) != f for f in asset.source_files):
+                raise PackError("asset_source_mismatch")
 
 
 def build_pack(
@@ -142,6 +178,9 @@ def build_pack(
     scenes = _dedupe(scenes, lambda s: s.reference_id)
     exclusions = _dedupe(exclusions, lambda e: f"{e.source}|{e.source_id}|{e.reason}")
     assets = _dedupe(assets, lambda a: a.asset_id)
+    _check_bindings(
+        sources, scenes, exclusions, assets, transform_version, category_map_version
+    )
     referenced = {a.glb.path for a in assets}
     if referenced != set(glb_files):
         raise PackError("GLB files must match the assets exactly")
@@ -216,6 +255,8 @@ class LoadedPack:
 def verify_pack(root: Path) -> LoadedPack:
     """Re-hash every file, re-validate every record and recompute the snapshot."""
     root = Path(root)
+    if any(p.is_symlink() for p in root.rglob("*")):
+        raise PackError("symlink_in_pack")
     manifest_path = root / MANIFEST
     if not manifest_path.is_file():
         raise PackError("missing_manifest")
@@ -272,8 +313,19 @@ def verify_pack(root: Path) -> LoadedPack:
         raise PackError("asset_glb_mismatch")
     for asset in loaded["assets"]:
         listed_glb = next(f for f in manifest.files if f.path == asset.glb.path)
-        if listed_glb.sha256 != asset.glb.sha256:
+        if (
+            listed_glb.sha256 != asset.glb.sha256
+            or listed_glb.size_bytes != asset.glb.size_bytes
+        ):
             raise PackError("asset_digest_mismatch")
+    _check_bindings(
+        loaded["sources"],
+        loaded["scenes"],
+        loaded["exclusions"],
+        loaded["assets"],
+        manifest.transform_version,
+        manifest.category_map_version,
+    )
     check_audience(
         manifest.audience, loaded["sources"], has_assets=bool(loaded["assets"])
     )
@@ -299,6 +351,8 @@ def load_pack(root: Path | None, *, audience: str = "public") -> PackStatus:
     """Load a verified pack for ``audience``; every failure becomes ``unavailable``."""
     if root is None or not str(root).strip():
         return PackStatus("unavailable", "not_configured")
+    if audience not in ("local", "public"):
+        return PackStatus("unavailable", "invalid_audience")
     root = Path(root)
     if not root.is_dir():
         return PackStatus("unavailable", "pack_not_found")
@@ -309,6 +363,8 @@ def load_pack(root: Path | None, *, audience: str = "public") -> PackStatus:
         return PackStatus("unavailable", code if _CODE.match(code) else "invalid_pack")
     except OSError:
         return PackStatus("unavailable", "pack_unreadable")
+    except (ValueError, TypeError, RecursionError):
+        return PackStatus("unavailable", "invalid_pack")
     if audience == "public" and pack.manifest.audience != "public":
         return PackStatus("unavailable", "pack_not_public")
     return PackStatus("ready", None, pack)

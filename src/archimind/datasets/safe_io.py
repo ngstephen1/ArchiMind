@@ -6,6 +6,7 @@ member and shape limits instead of trusting sizes declared by the file or server
 
 import json
 import os
+import re
 import shutil
 import stat
 import struct
@@ -16,7 +17,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from pathlib import Path
 
-from archimind.datasets.canonical import file_sha256, strict_loads
+from archimind.datasets.canonical import CanonicalError, file_sha256, strict_loads
 from archimind.datasets.contracts import SourceFile, check_relative_path
 
 GIB = 1024**3
@@ -106,10 +107,14 @@ def bounded_download(
     """
     if not url.startswith("https://"):
         raise UnsafeContentError("Only https:// downloads are allowed")
+    if max_bytes <= 0 or chunk <= 0 or floor_bytes < 0:
+        raise UnsafeContentError("Invalid download budget")
     dest = Path(dest)
     if expected_sha256 is not None and dest.is_file():
         if file_sha256(dest) == expected_sha256:
             size = dest.stat().st_size
+            if size > max_bytes:
+                raise UnsafeContentError("Cached file exceeds the byte budget")
             return DownloadReceipt(url, dest.name, size, expected_sha256, False, True)
     dest.parent.mkdir(parents=True, exist_ok=True)
     partial = dest.with_name(dest.name + ".partial")
@@ -125,6 +130,16 @@ def bounded_download(
         if status not in (200, 206):
             raise UnsafeContentError(f"Unexpected HTTP status {status}")
         resumed = bool(offset) and status == 206
+        total = None
+        if status == 206:
+            match = re.fullmatch(
+                r"bytes (\d+)-(\d+)/(\d+)", response.headers.get("Content-Range", "")
+            )
+            if not match:
+                raise UnsafeContentError("Missing or invalid Content-Range")
+            start, end, total = map(int, match.groups())
+            if start != offset or end < start or end + 1 != total or total > max_bytes:
+                raise UnsafeContentError("Inconsistent Content-Range")
         if not resumed:
             offset = 0
         declared = response.headers.get("Content-Length")
@@ -144,7 +159,18 @@ def bounded_download(
                     handle.close()
                     partial.unlink()
                     raise UnsafeContentError("Download exceeded the byte budget")
+                require_capacity(
+                    dest.parent, floor_bytes=floor_bytes, needed_bytes=len(block)
+                )
                 handle.write(block)
+    if (
+        declared is not None
+        and declared.isdigit()
+        and received - offset != int(declared)
+    ):
+        raise UnsafeContentError("Incomplete response body")
+    if total is not None and received != total:
+        raise UnsafeContentError("Incomplete ranged response")
     digest_hex = file_sha256(partial)
     if expected_sha256 is not None and digest_hex != expected_sha256:
         partial.unlink()
@@ -368,12 +394,28 @@ def read_glb_json(
         chunk_len, chunk_type = struct.unpack("<II", chunk_header)
         if chunk_type != JSON_CHUNK or chunk_len > max_json_bytes or chunk_len % 4:
             raise UnsafeContentError("Invalid GLB JSON chunk")
-        document = strict_loads(handle.read(chunk_len).rstrip(b" \x00"))
+        if 20 + chunk_len > size:
+            raise UnsafeContentError("Truncated GLB JSON chunk")
+        try:
+            document = strict_loads(handle.read(chunk_len).rstrip(b" "))
+        except CanonicalError as error:
+            raise UnsafeContentError("Invalid GLB JSON") from error
+        while handle.tell() < size:
+            header = handle.read(8)
+            if len(header) != 8:
+                raise UnsafeContentError("Truncated GLB chunk")
+            length, _ = struct.unpack("<II", header)
+            if length % 4 or handle.tell() + length > size:
+                raise UnsafeContentError("Invalid GLB chunk length")
+            handle.seek(length, 1)
     if not isinstance(document, dict):
         raise UnsafeContentError("GLB JSON must be an object")
     for kind in ("buffers", "images"):
-        for item in document.get(kind, []):
-            uri = item.get("uri") if isinstance(item, dict) else None
+        items = document.get(kind, [])
+        if not isinstance(items, list) or any(not isinstance(i, dict) for i in items):
+            raise UnsafeContentError(f"GLB {kind} must be an array of objects")
+        for item in items:
+            uri = item.get("uri")
             if uri is not None:
                 raise UnsafeContentError(f"GLB {kind} must be embedded, not URIs")
     if document.get("extensionsRequired"):

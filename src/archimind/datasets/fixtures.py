@@ -60,7 +60,9 @@ def source_manifest(source: str, value: str = "allowed") -> SourceManifest:
         origin_url="https://example.invalid/synthetic",
         revision=SYNTHETIC_REVISION,
         retrieved_utc=SYNTHETIC_TIME,
-        files=(
+        files=(SourceFile(path="raw_model.obj", size_bytes=1, sha256=sha256_hex(b"o")),)
+        if source == "future_3d"
+        else (
             SourceFile(
                 path="synthetic.json", size_bytes=len(data), sha256=sha256_hex(data)
             ),

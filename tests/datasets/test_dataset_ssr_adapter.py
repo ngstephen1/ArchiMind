@@ -294,6 +294,34 @@ def test_ssr_build_cli_writes_stage_and_verified_local_pack(tmp_path, capsys):
     assert json.loads(capsys.readouterr().out)["reason"] == "source_not_public"
     assert not (tmp_path / "pack2").exists()
 
+    # SSR permission alone cannot authorize the MIDI-derived categories/splits.
+    record = json.loads(permission.read_text())
+    record["derived_metadata"] = "allowed"
+    permission.write_text(json.dumps(record))
+    code = main(
+        [
+            "ssr-build",
+            str(shard),
+            "--inventory",
+            str(inventory),
+            "--midi-dir",
+            str(midi),
+            "--out",
+            str(tmp_path / "stage3"),
+            "--pack-dir",
+            str(tmp_path / "pack3"),
+            "--audience",
+            "public",
+            "--permission",
+            str(permission),
+            "--retrieved-utc",
+            "2026-11-06T18:00:00Z",
+        ]
+    )
+    assert code == 3
+    assert json.loads(capsys.readouterr().out)["reason"] == "midi_provenance_unverified"
+    assert not (tmp_path / "pack3").exists()
+
 
 def test_ssr_build_rejects_unpinned_shard(tmp_path, capsys):
     shard = tmp_path / "train.parquet"
