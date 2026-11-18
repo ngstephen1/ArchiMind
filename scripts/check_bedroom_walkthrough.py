@@ -21,6 +21,9 @@ def check(url: str, output: Path):
         errors: list[str] = []
         page.on("pageerror", lambda error: errors.append(str(error)))
         page.goto(url)
+        first_load = page.evaluate(
+            "performance.getEntriesByType('navigation')[0].loadEventEnd"
+        )
         page.locator("#design").click()
         page.locator("#generate").click()
         page.locator("#apply").click()
@@ -56,6 +59,7 @@ def check(url: str, output: Path):
             assert canvas.get_attribute("data-camera") == view
             assert page.locator("#photoReason").text_content() == ""
         page.locator("#photoView").select_option("")
+        assert canvas.evaluate("element => element === document.activeElement")
         assert initial == canvas.screenshot(), "Walking view was not restored"
 
         page.locator("#design").click()
@@ -121,9 +125,7 @@ def check(url: str, output: Path):
                     "applied_revision": 4,
                     "seed": 42,
                     "raf_ms_median": statistics.median(frames),
-                    "navigation_load_ms": page.evaluate(
-                        "performance.getEntriesByType('navigation')[0].loadEventEnd"
-                    ),
+                    "initial_navigation_load_ms": first_load,
                     "page_errors": errors,
                 },
                 indent=2,

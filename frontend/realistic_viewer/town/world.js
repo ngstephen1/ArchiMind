@@ -411,7 +411,10 @@ export function createTown(canvas, status, action) {
     look = false;
     keys.clear();
   }
-  photoView.onchange = selectPhoto;
+  photoView.onchange = () => {
+    selectPhoto();
+    if (!preset) canvas.focus();
+  };
   function walkView() {
     if (!preset) return;
     photoView.value = "";
@@ -599,7 +602,10 @@ export function createTown(canvas, status, action) {
         Promise.all([loadBedroomConcept(binding, new URL("./assets/", document.baseURI)), surfaces.ready])
           .then(([model]) => finishBedroomConcept(model, surfaces)),
         fallback, item, -1, () => generation === epoch, clear,
-      ));
+      ).then(status => {
+        if (status === "verified") clear(fallback);
+        return status;
+      }));
     }
     home = h;
     canvas.dataset.chair = "procedural";
