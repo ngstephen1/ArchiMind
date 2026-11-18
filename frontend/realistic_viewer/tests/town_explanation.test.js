@@ -48,3 +48,13 @@ for (const [question, modify, expected] of [
     assert.equal(JSON.stringify({home, manifest}), snapshot);
   });
 }
+
+test("synthetic chair edit changes the measured gap independently of window and finish", () => {
+  const {home, bedroom, manifest} = selected();
+  const answer = q => explanation(home, q, manifest);
+  const previous = ["chair", "window", "oak"].map(answer);
+  bedroom.furniture.find(f => f.id === "desk-chair").y_m -= 0.2;
+  assert.notEqual(answer("chair"), previous[0]);
+  assert.equal(answer("window"), previous[1]);
+  assert.equal(answer("oak"), previous[2]);
+});
