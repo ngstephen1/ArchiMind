@@ -12,7 +12,7 @@
     "check": "node --check src/main.js && node --check src/viewer.js && node --check src/geometry.js && node --check src/room_viewer.js && node --check src/room_geometry.js && node --check src/room_objects.js && node --check src/asset_pool.js && node --check src/product_assets.js && node --check src/product_registry.js && node --check src/scene_lifecycle.js && node --check src/concept_assets.js && node --check src/spoken_world/parts.js"
   },
   "dependencies": {
-    "three": "0.186.1"
+    "three": "0.187.0"
   },
   "devDependencies": {
     "esbuild": "0.28.2"
