@@ -55,6 +55,8 @@ living rooms and home offices. Set room measurements and openings, propose a
 furnishing plan, review its proposed dimensions, then explicitly build A/B layouts.
 Python places and validates the furniture; bounded primitive recipes supply the
 3D details. These are concept objects, separate from qualified catalog products.
+Five [style packs](docs/developer/STYLE_PACKS.md) dress Studio rooms and Town homes
+with CC0 surfaces, lighting, furniture models and decor.
 
 Run the normal app and follow **Open 3D Studio**, or open
 `http://localhost:8501/?workspace=studio`. **Load example furnishing plan → Build

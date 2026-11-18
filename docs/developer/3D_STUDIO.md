@@ -18,6 +18,8 @@ Open `http://127.0.0.1:8503/?workspace=studio`, or follow **Open 3D Studio** fro
 the main app. Select a room type, edit its measurements/openings, then click
 **Load example furnishing plan → review → Build 3D room**. The examples use fixed
 furniture and colors; they do not interpret the design brief and make no API calls.
+Choose a **Style** before building to dress the room with a [style pack](STYLE_PACKS.md);
+the 2D plan uses the pack's plan colours.
 
 For custom AI concepts, the local launcher reads only `OPENAI_API_KEY` and
 `ARCHIMIND_OPENAI_MODEL` from the ignored `.env` file; existing process values win:

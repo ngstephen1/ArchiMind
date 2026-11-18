@@ -13,6 +13,14 @@ dataset eligibility gates and 09A workflow keep their existing contracts.
 See [3D Studio](3D_STUDIO.md) and its [verification receipt](../data/3D_STUDIO_10A.json).
 The November 5 milestone below is historical context for the existing chatbot.
 
+**November 18 branch addition — photoreal style packs (11A).** Five styles
+(modern classic, industrial loft, Scandinavian, Japandi, mid-century) with released
+CC0 surfaces, HDR lighting, measured CC0 furniture models, decor, plan themes, a
+Quality toggle and a Plan ↔ Room sweep in Studio and Town. Homes saved before the
+feature render as before (0.51% pixel difference against `main`, all in the new
+footer control). Blender signature pieces and frame-rate acceptance are pending.
+See [Style packs](STYLE_PACKS.md) and the [receipt](../data/STYLE_PACKS_11A.json).
+
 **Current milestone: Task 09A live conversation-to-layout acceptance passed;
 1,927 Python tests and installed-wheel/lint/dependency/health checks pass.
 Final checkpoint CI/delivery is recorded in the 09A report.** Three newly authorized

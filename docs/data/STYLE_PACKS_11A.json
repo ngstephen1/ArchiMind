@@ -43,5 +43,85 @@
       "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",
       "after_sha256": "5373acf686af9834f6f8b6b289b512330f39df9653dcc92904aca183f839f960"
     }
+  },
+  "acceptance": {
+    "date": "2026-11-18",
+    "environment": "Windows 11, Chrome, maximised window; 1440x1000 and 390x844 via same-origin iframes (the window could not be resized)",
+    "town_per_pack": {
+      "styles": [
+        "modern_classic",
+        "industrial_loft",
+        "scandinavian",
+        "japandi",
+        "mid_century"
+      ],
+      "captures": "docs/images/style-packs/<style>/{plan,walkthrough}-{desktop,narrow}.png",
+      "style_kept_through": [
+        "layout A/B preview",
+        "apply",
+        "replay recorded work",
+        "reload"
+      ],
+      "offline_briefs": [
+        "bright study in industrial loft",
+        "quiet bedroom in japandi",
+        "bright study in mid-century",
+        "quiet bedroom in modern classic",
+        "bright study in scandinavian"
+      ]
+    },
+    "studio_per_pack": {
+      "captures": "docs/images/style-packs/<style>/studio-desktop.png and surfaces/<style>-{high,low}.png",
+      "narrow": "not captured"
+    },
+    "legacy": {
+      "method": "main and branch Town builds rendering the same pre-11A showcase in identical 1440x1000 iframes (legacy-before/ was captured at a different viewport)",
+      "pixel_difference_percent": {
+        "room_views": 0.02,
+        "with_footer": 0.51
+      },
+      "difference_source": "new Plan/Room footer control and mouse cursor",
+      "packs_requests": 0,
+      "captures": "docs/images/style-packs/legacy-after/"
+    },
+    "faults": {
+      "texture_404": "floor falls back, named in status",
+      "texture_hash_mismatch": "wall falls back, named in status",
+      "model_missing": "procedural sofa kept, status names 'Fallback furniture: Sofa'",
+      "layout_preserved": true,
+      "unknown_style_brief": "offline clarification, saved home unchanged"
+    },
+    "performance": {
+      "measured": false,
+      "reason": "Chrome window throttled by the OS during automation: requestAnimationFrame ran at about 3.5 Hz on the top-level document and 1 Hz in the iframe, so no meaningful FPS could be recorded",
+      "owner_action": "measure a 20 s walk at high (desktop) and low (390x844) tier with the window in front"
+    },
+    "suites": {
+      "npm_test": "172 passed",
+      "npm_run_check": "passed",
+      "town_build": "passed",
+      "pytest": "2405 passed, 3 skipped, 16 failed, 55 errors; every failure is Windows-environment only (os.killpg, WinError 1314 symlink privilege, 32767-character environment limit, subprocess _overlapped import) in files this branch does not change",
+      "deselected_windows_baseline": [
+        "tests/test_realistic_viewer.py::test_symlink_escape_is_rejected",
+        "tests/test_asset_catalog_packaging.py::test_catalog_in_source_wheel_and_isolated_install"
+      ]
+    },
+    "budgets_mb": {
+      "modern_classic": 12.6,
+      "industrial_loft": 22.5,
+      "scandinavian": 13.0,
+      "japandi": 16.4,
+      "mid_century": 17.9,
+      "all_assets_on_disk": 60.3,
+      "caps": {
+        "per_pack": 25,
+        "total": 120
+      }
+    },
+    "pending": [
+      "Blender 5.1 + MCP operator setup (Task 11) and Blender signature pieces (Task 12 steps 2-3)",
+      "frame-rate measurement",
+      "push and pull request (owner approval)"
+    ]
   }
 }
