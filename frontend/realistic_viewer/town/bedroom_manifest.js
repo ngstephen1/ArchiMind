@@ -1,5 +1,5 @@
 import { bedroomCameras } from "./bedroom_cameras.js";
-import { PRODUCT_ASSETS } from "../src/product_registry.js";
+import { PRODUCT_ASSETS, productSceneAdmission, productSceneBudget, validateProductBindings } from "../src/product_assets.js";
 import publications from "./bedroom_publications.json" with { type: "json" };
 
 const bedDesk = PRODUCT_ASSETS["abo-b074l4976t-amazon-co-uk"];
@@ -17,13 +17,19 @@ export function bedroomManifest({project, revision, home}) {
   const bedroom = home.rooms.find(({design}) => design.room.id === "bedroom");
   if (!bedroom) throw Error("Saved bedroom unavailable.");
   const {room, furniture} = bedroom.design;
+  const bindings = home.rooms.flatMap(part => part.asset_bindings || []);
+  let nativeProducts;
+  try {
+    validateProductBindings({design:bedroom.design,asset_bindings:bedroom.asset_bindings,unavailable_assets:[]});
+    nativeProducts = productSceneAdmission(bindings).admitted && productSceneBudget(bindings).passed;
+  } catch { nativeProducts = false; }
   const desk = furniture.find((f) => f.id === "belaya");
   const items = furniture.map(f => {
     let source = null, turn = 0;
     const binding = bedroom.asset_bindings.find(b => b.furniture_id === f.id);
     const concept = f.id === "desk-chair" ? bedroom.designer_chair : bedroom.designer_collection?.[f.id];
     if (f.rotation_deg !== 0) throw Error("Unsupported reservation rotation.");
-    if (f.id === "belaya" && binding?.asset_id === bedDesk.asset_id &&
+    if (nativeProducts && f.id === "belaya" && binding?.asset_id === bedDesk.asset_id &&
         binding.render_version === bedDesk.render_version && binding.envelope_sha256 === bedDesk.envelope_sha256 &&
         dim(f).every((v,i) => v === bedDesk.dimensions[i])) {
       source = {kind:"catalog", id:bedDesk.asset_id, version:bedDesk.render_version,
@@ -43,7 +49,7 @@ export function bedroomManifest({project, revision, home}) {
     ({id,label,eye_xyz_m:fromThree(eye),target_xyz_m:fromThree(target),vertical_fov_degrees:fov,reason}));
   return {schema_version:1, project, revision, home_id:home.id, palette:home.palette,
     coordinates:"Bedroom-local metres: +X east, +Y north, +Z up", origin_xy_m:bedroom.origin,
-    room, furniture:items, cameras};
+    room:structuredClone(room), furniture:items, cameras};
 }
 
 export async function manifestDigest(record) {
