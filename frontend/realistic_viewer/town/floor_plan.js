@@ -1,0 +1,61 @@
+// Return endpoints in room-local metres, with north along positive Y.
+export function openingEndpoints(room, opening) {
+  const start = opening.offset_m;
+  const end = start + opening.width_m;
+  switch (opening.wall) {
+    case "north": return [[start, room.depth_m], [end, room.depth_m]];
+    case "south": return [[start, 0], [end, 0]];
+    case "east": return [[room.width_m, start], [room.width_m, end]];
+    case "west": return [[0, start], [0, end]];
+    default: throw new Error("Unknown opening wall");
+  }
+}
+
+export function floorPlan(h, c) {
+  const ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, c.width, c.height);
+  const s = Math.min(510 / h.width, 350 / h.depth),
+    ox = (c.width - h.width * s) / 2,
+    oy = c.height - 20;
+  ctx.fillStyle = "#e2d3af";
+  ctx.fillRect(ox, oy - s * h.depth, s * h.width, s * h.depth);
+  for (const p of h.rooms) {
+    const r = p.design.room,
+      x = ox + s * p.origin[0],
+      y = oy - s * p.origin[1],
+      w = s * r.width_m,
+      d = s * r.depth_m;
+    ctx.fillStyle = "#f9f6ec";
+    ctx.fillRect(x + 1, y - d + 1, w - 2, d - 2);
+    ctx.strokeStyle = "#46584a";
+    ctx.strokeRect(x, y - d, w, d);
+    for (const f of p.design.furniture) {
+      ctx.fillStyle = "#b5bfac";
+      ctx.fillRect(
+        x + s * f.x_m,
+        y - s * (f.y_m + f.depth_m),
+        s * f.width_m,
+        s * f.depth_m,
+      );
+    }
+    for (const opening of [...r.windows, ...r.doors]) {
+      const [[x1, y1], [x2, y2]] = openingEndpoints(r, opening);
+      ctx.strokeStyle =
+        opening.sill_height_m === undefined ? "#dfb855" : "#609aab";
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(x + s * x1, y - s * y1);
+      ctx.lineTo(x + s * x2, y - s * y2);
+      ctx.stroke();
+      ctx.lineWidth = 1;
+    }
+    ctx.fillStyle = "#233e35";
+    ctx.font = "14px sans-serif";
+    ctx.fillText(r.name, x + 6, y - d + 18, w - 12);
+    ctx.font = "12px sans-serif";
+    ctx.fillText(r.width_m.toFixed(2) + " × " + r.depth_m.toFixed(2) + " m", x + 6, y - d + 34, w - 12);
+  }
+  ctx.font = "14px sans-serif";
+  ctx.fillText(h.width + " m", ox, oy + 16);
+  ctx.fillText(h.depth + " m", 2, oy - (h.depth * s) / 2);
+}
