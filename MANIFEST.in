@@ -70,3 +70,6 @@ include docs/data/3D_STUDIO_10A.json
 recursive-include design/oak-sage-writing-chair *.blend *.3dm *.json
 include docs/developer/DESIGNER_CHAIR_AUTHORING.md
 include docs/developer/RHINO_CHAIR.md
+
+recursive-include design/oak-bedside-lamp *.blend *.json
+recursive-include design/upholstered-linen-bed *.blend *.json

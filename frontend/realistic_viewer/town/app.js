@@ -21,8 +21,9 @@ const world = createTown(el("world"), el("place"), el("door"));
 world.load(showcase);
 new MutationObserver(() => {
   el("assetStatus").hidden = el("world").dataset.desk !== "placeholder";
+  el("collectionStatus").hidden = el("world").dataset.collection !== "placeholder";
   el("chairStatus").hidden = el("world").dataset.chair !== "placeholder";
-}).observe(el("world"), { attributes: true, attributeFilter: ["data-desk", "data-chair"] });
+}).observe(el("world"), { attributes: true, attributeFilter: ["data-desk", "data-chair", "data-collection"] });
 const notify = (text) => (el("notice").textContent = text);
 async function api(path, body) {
   const r = await fetch(cfg.api + path, {
@@ -465,18 +466,18 @@ el("chairStudio").ontoggle = async () => {
   if (!el("chairStudio").open || chairPreview || releasedChairs.length) return;
   const epoch = ++chairEpoch;
   el("chairPicker").hidden = el("chairPreview").hidden = true;
-  el("chairNotice").textContent = "Checking released chairs…";
+  el("chairNotice").textContent = "Checking released furniture…";
   try {
-    const { chairs } = await api("/designer-chairs");
+    const [{ chairs }, { concepts }] = await Promise.all([api("/designer-chairs"),api("/bedroom-collection")]);
     if (epoch !== chairEpoch) return;
-    releasedChairs = chairs;
+    releasedChairs = [...chairs, ...concepts];
     el("chairChoice").replaceChildren(
-      ...chairs.map((c, i) => new Option(c.name + " · " + c.variant_label + " · " + c.version, String(i))),
+      ...releasedChairs.map((c, i) => new Option([c.name,c.variant_label,c.version].filter(Boolean).join(" · "), String(i))),
     );
-    el("chairPicker").hidden = el("chairPreview").hidden = !chairs.length;
-    el("chairNotice").textContent = chairs.length
-      ? "Preview the chair at its native size in this revision."
-      : "No designer chair has been released. The bedroom uses its procedural chair.";
+    el("chairPicker").hidden = el("chairPreview").hidden = !releasedChairs.length;
+    el("chairNotice").textContent = releasedChairs.length
+      ? "Preview a piece at its native size in this revision."
+      : "No released furniture is available.";
   } catch (e) {
     if (epoch === chairEpoch) el("chairNotice").textContent = e.message;
   }
@@ -494,20 +495,21 @@ bind("chairPreview", async () => {
   const epoch = chairEpoch;
   const { concept_id, version, sha256 } = releasedChairs[Number(el("chairChoice").value)];
   const request = { base: revision, binding: { concept_id, version, sha256 } };
-  const { home } = await api("/projects/" + project + "/designer-chair/preview", request);
+  const endpoint = concept_id === "oak-sage-writing-chair" ? "designer-chair" : "bedroom-collection";
+  const { home } = await api("/projects/" + project + "/" + endpoint + "/preview", request);
   if (epoch !== chairEpoch) return;
   if ((await world.load(home)) !== "verified") {
     if (epoch === chairEpoch) {
       discardChair();
-      el("chairNotice").textContent = "Chair preview unavailable. Your saved bedroom is still displayed.";
+      el("chairNotice").textContent = "Furniture preview unavailable. Your saved bedroom is still displayed.";
     }
     return;
   }
   if (epoch !== chairEpoch) return;
-  chairPreview = { ...request, preview_id: home.id };
+  chairPreview = {endpoint, request: { ...request, preview_id: home.id }};
   el("chairApply").hidden = el("chairDiscard").hidden = false;
   el("chairNotice").textContent = "Bedroom preview ready. Apply to save a new revision.";
-  el("revision").textContent = "Bedroom chair preview · Unsaved";
+  el("revision").textContent = "Bedroom furniture preview · Unsaved";
   world.visit();
   el("door").click();
   el("roomJump").value = "bedroom";
@@ -516,9 +518,9 @@ bind("chairPreview", async () => {
 });
 bind("chairApply", async () => {
   if (!chairPreview) return;
-  sync(await api("/projects/" + project + "/designer-chair/apply", chairPreview));
+  sync(await api("/projects/" + project + "/"+chairPreview.endpoint+"/apply", chairPreview.request));
   el("alternatives").hidden = true;
-  notify("Designer chair saved in revision " + revision + ".");
+  notify("Designer furniture saved in revision " + revision + ".");
 });
 
 let boardHome;
@@ -574,7 +576,7 @@ el("present").onclick = async () => {
           (f.id === "desk-chair" && p.designer_chair
             ? p.designer_chair.name + (p.designer_chair.variant_label ? " · " + p.designer_chair.variant_label : "") + " · Designer concept v" + p.designer_chair.binding.version +
               " · Native " + p.designer_chair.dimensions_wdh_m.join(" × ") + " m · Reservation"
-            : f.name) +
+            : p.designer_collection?.[f.id]?.name || f.name) +
             " · " +
             [f.width_m, f.depth_m, f.height_m]
               .map((v) => v.toFixed(2))
@@ -586,8 +588,9 @@ el("present").onclick = async () => {
   el("whyAnswer").textContent = "";
   el("photos").textContent = "Rendering bedroom views…";
   try {
-    const { images, chair } = await world.bedroomViews(h);
+    const { images, chair, collection } = await world.bedroomViews(h);
     el("photos").replaceChildren();
+    if (collection === "placeholder") el("photos").append(node("p","Bedroom collection mesh unavailable. A procedural piece marks its reservation."));
     if (chair === "placeholder")
       el("photos").append(node("p", "Designer chair unavailable in these views. The procedural chair marks its reservation."));
     images.forEach((src, i) => {

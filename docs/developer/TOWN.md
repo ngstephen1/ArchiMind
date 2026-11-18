@@ -81,3 +81,9 @@ The project service checks the chair's release and the saved bedroom reservation
 Open **Design a home** and submit “Design a five-room home with a quiet bedroom and a bright study.” The Design team panel follows five concurrent worker tasks. A interprets the brief, B searches catalog evidence and the optional configured reference pack, C reads the lot and plans rooms, D checks geometry, and E resolves the finish. Expand a card for the recorded inputs or findings. Only A can call a model, through the existing explicit opt-in. The other specialists run local Python. Reference matches are evidence for review and cannot authorize a mesh or change a furniture binding.
 
 The working plan shows proposed partitions and furnished candidates. Final alternatives appear after validation. **Apply to my home** saves the selected alternative. The Streamlit Town editor reads the same private run. Reloading either client at the same base revision restores the event history. Short tasks can finish between polls. **Replay recorded work** in Town steps through those events at a slower pace.
+
+### Furnish a saved bedroom
+
+Generate a home and apply a layout. Open **Design a home → Bedroom designer furniture**, choose a piece and select **Preview in bedroom**. Reopen the design panel and choose **Apply furniture to my home** to save the next revision. Repeat to combine either writing chair with the linen platform bed and oak nightstand. **Design presentation** shows the saved pieces. **Restore previous revision** restores the prior choices. Each mesh fits the corresponding generated reservation at its original scale. Missing or corrupt mesh data leaves procedural furniture in place and adds an availability label.
+
+![Saved Town bedroom with the upholstered bed and reading lamp](../images/town-bedroom-collection.jpg)

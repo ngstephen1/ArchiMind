@@ -18,6 +18,31 @@ export function validateRecipe(recipe){
 }
 export const DESIGNER_CHAIR_SLOT='studio:designer-chair';
 export function validateConceptScene(data){
+  if(data.schema_version===6){
+    const {designer_collection: releases, ...base}=data;
+    if(!Array.isArray(releases) || releases.length<1 || releases.length>2 ||
+       data.design.furniture.length>12 || data.concept_assets?.length+releases.length+Number(!!base.designer_chair)>8)
+      throw Error('Invalid bedroom collection size');
+    const slots=new Set();
+    for(const binding of releases){
+      if(!exact(binding,['concept_id','version','sha256']) ||
+         !['upholstered-linen-bed','oak-bedside-lamp'].includes(binding.concept_id) ||
+         typeof binding.version!=='string' || !/^\d+\.\d+\.\d+$/.test(binding.version) ||
+         typeof binding.sha256!=='string' || !/^[a-f0-9]{64}$/.test(binding.sha256))
+        throw Error('Invalid bedroom collection release');
+      const slot='studio:'+binding.concept_id;
+      const item=data.design.furniture.find(f=>f.id===slot);
+      if(slots.has(slot) || !item || item.category!==(binding.concept_id==='upholstered-linen-bed'?'bed':'table') || item.rotation_deg!==0)
+        throw Error('Invalid bedroom collection slot');
+      slots.add(slot);
+    }
+    validateRecipesAndChair({...base,schema_version:base.designer_chair?5:4,
+      design:{...data.design,furniture:data.design.furniture.filter(f=>!slots.has(f.id))}},true);
+    return data;
+  }
+  return validateRecipesAndChair(data,false);
+}
+function validateRecipesAndChair(data, allowNativeOnly) {
   if(data.schema_version===5){
     const {designer_chair:binding,...rest}=data;
     const chair=data.design.furniture.find(f=>f.id===DESIGNER_CHAIR_SLOT);
@@ -27,10 +52,10 @@ export function validateConceptScene(data){
        !/^[0-9a-f]{64}$/.test(binding.sha256) || data.design.furniture.length>12 || data.concept_assets?.length>=8 ||
        data.asset_bindings.some(b=>b.asset_id!==null))throw Error('Invalid designer chair scene');
     // The structural validator checked the complete design. Each other object needs its own recipe.
-    validateConceptScene({...rest,schema_version:4,design:{...data.design,furniture:data.design.furniture.filter(f=>f!==chair)}});
+    validateRecipesAndChair({...rest,schema_version:4,design:{...data.design,furniture:data.design.furniture.filter(f=>f!==chair)}},allowNativeOnly);
     return data;
   }
-  if(!exact(data,['schema_version','design','asset_bindings','unavailable_assets','concept_assets','concept_bindings','surfaces'])||data.schema_version!==4||!Array.isArray(data.concept_assets)||!data.concept_assets.length||data.concept_assets.length>8||!Array.isArray(data.concept_bindings)||data.concept_bindings.length>12||data.unavailable_assets.length||data.asset_bindings.some(b=>b.asset_id!==null))throw Error('Invalid concept scene');
+  if(!exact(data,['schema_version','design','asset_bindings','unavailable_assets','concept_assets','concept_bindings','surfaces'])||data.schema_version!==4||!Array.isArray(data.concept_assets)||(!allowNativeOnly && !data.concept_assets.length)||data.concept_assets.length>8||!Array.isArray(data.concept_bindings)||data.concept_bindings.length>12||data.unavailable_assets.length||data.asset_bindings.some(b=>b.asset_id!==null))throw Error('Invalid concept scene');
   if(!exact(data.surfaces,['wall_color','floor_color'])||!Object.values(data.surfaces).every(color))throw Error('Invalid concept surfaces');
   const assets=new Map();
   for(const r of data.concept_assets){validateRecipe(r);if(assets.has(r.recipe_id))throw Error('Duplicate concept');assets.set(r.recipe_id,r);}

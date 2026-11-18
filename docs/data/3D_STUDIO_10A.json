@@ -901,5 +901,31 @@
         "after_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5"
       }
     }
+  },
+  "bedroom_collection": {
+    "authoring_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44233437901",
+    "town_check": "Seed 42 generated a home. Revision 2 applied the gentle chair, 3 the nightstand and 4 the bed. Desktop presentation displayed both native releases. A 390-by-844 reload with corrupt bed bytes retained the fallbacks and availability message, followed by successful native recovery and undo.",
+    "authorized_migrations": {
+      "frontend/realistic_viewer/src/main.js": {
+        "before_sha256": "bed9873c239099e1692f71be45b2187fec1dc1fbdbe077e26a73939210e36f32",
+        "after_sha256": "04592c52ed6b30522613c9a79097234157ab844e7df9cf109d1b56e034261653"
+      },
+      "frontend/realistic_viewer/src/room_geometry.js": {
+        "before_sha256": "ed9f32e2b92dd1350f15d108abfddf2cc213f946314ad765b5bfdede6a31d781",
+        "after_sha256": "33ee6aaaa86cd2c375f15bd23f6a23e98628b7ca6f20ed09cf942fd724ad30f5"
+      },
+      "frontend/realistic_viewer/src/room_viewer.js": {
+        "before_sha256": "f02138b362bc9c2807ed28837a430bca47db12130af4e4ced9139b26c7ec943d",
+        "after_sha256": "8021955b69f68ca31411cbc574f40854c0ae20585b5ec3322ec1c612b3e3b789"
+      },
+      "frontend/realistic_viewer/src/scene_lifecycle.js": {
+        "before_sha256": "060af0397ba927a4c85e215ee89a193fd719b38b0c14acd564fde0b3b0e40b2c",
+        "after_sha256": "01080157022b75303dbc4fddb8696daad1f6c20734a4e006c3964a52a9e441a3"
+      },
+      "src/archimind/_viewer_assets/viewer.js": {
+        "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
+        "after_sha256": "fec484212bbd30e20481f6776c578adde4f27dc5af915950b82cbb6d1b301a5d"
+      }
+    }
   }
 }
