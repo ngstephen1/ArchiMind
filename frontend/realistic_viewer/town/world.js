@@ -280,7 +280,8 @@ export function createTown(canvas, status, action) {
     }
   }
   for (let i = 0; i < 12; i++) tree(-36 + i * 6.5, 13 + (i % 2), i);
-  for (let i = 0; i < 8; i++) tree(-31 + i * 9, -12.5, i + 3);
+  // The north row sits beyond both the 16 m maximum house and the rear shops.
+  for (let i = 0; i < 8; i++) tree(-31 + i * 9, -28, i + 3);
   for (const x of [-7, 9]) {
     solid(street, x, 0.5, 4, 2, 0.14, 0.53, "#855f40", obstacles);
     for (const dx of [-0.76, 0.76])
