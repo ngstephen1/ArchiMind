@@ -113,6 +113,7 @@ with st.form("town_edit"):
     d = st.number_input(
         "Lot depth (m)", 9.0, 16.0, float(home["depth"]) if home else 13.0
     )
+    salon = st.checkbox("Include a formal salon and dining group")
     priority = st.selectbox("Priority", ["balanced", "quiet bedroom", "bright study"])
     finishes = ["oak", "sage", "terracotta"]
     palette = st.selectbox(
@@ -140,6 +141,7 @@ with st.form("town_edit"):
                     "width": w,
                     "depth": d,
                     "priority": priority,
+                    "formal_salon": salon,
                     "palette": palette,
                     "locks": locks,
                     "seed": 42 + rev,

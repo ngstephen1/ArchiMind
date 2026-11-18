@@ -10,7 +10,7 @@ from starlette.testclient import TestClient
 
 from archimind.town import service
 from archimind.town.api import app
-from archimind.town.design import Brief, generate, validate_home
+from archimind.town.design import Brief, generate, interpret_offline, validate_home
 
 SHOWCASE = (
     Path(__file__).resolve().parents[1] / "frontend/realistic_viewer/town/showcase.json"
@@ -500,3 +500,52 @@ def test_concept_image_uses_validated_saved_plan(monkeypatch):
     assert calls[0]["image"] == ("measured-plan.png", expected, "image/png")
     assert calls[0]["n"] == 1
     assert home == json.loads(SHOWCASE.read_text())
+
+
+def test_entertaining_home_has_distinct_salon_and_clearance_reservations():
+    brief = interpret_offline(Brief(width=15, depth=16), "entertaining guests")
+    home = generate(brief)[0]
+    validate_home(home)
+    assert home["evidence"]["reachable_rooms"] == 6
+    assert {"salon", "living", "kitchen-dining"} <= {
+        p["design"]["room"]["id"] for p in home["rooms"]
+    }
+    salon = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "salon")
+    dining = next(f for f in salon["design"]["furniture"] if f["id"] == "salon-dining")
+    assert dining["depth_m"] / 2 - 0.72 - 0.46 / 2 >= 0.5
+    assert (
+        interpret_offline(Brief(), "quiet work").priority
+        == "quiet bedroom and bright study"
+    )
+    compact = interpret_offline(Brief(), "compact everyday living")
+    assert (compact.width, compact.depth) == (10.5, 11.5)
+
+
+def test_rotated_salon_uses_checked_group_footprint():
+    home = generate(Brief(formal_salon=True, width=15, depth=16, seed=43))[0]
+    salon = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "salon")
+    suite = next(f for f in salon["design"]["furniture"] if f["id"] == "salon-suite")
+    assert salon["suite_yaw_deg"] == 90
+    assert (suite["width_m"], suite["depth_m"]) == (2.35, 2.8)
+    validate_home(home)
+    suite["depth_m"] = 2
+    with pytest.raises(ValueError, match="group footprint"):
+        validate_home(home)
+
+
+def test_chair_edit_keeps_the_original_and_revalidates():
+    brief = Brief(width=15, depth=16, formal_salon=True, palette="sage")
+    before = generate(brief)[0]
+    frozen = copy.deepcopy(before)
+    edit = interpret_offline(
+        brief, "move the bedroom desk chair and terracotta finishes"
+    )
+    after = generate(edit, previous=before)[0]
+    assert before == frozen
+    assert after["id"] != before["id"]
+    assert after["palette"] == "terracotta"
+    move = after["evidence"]["chair_move_m"]
+    assert abs(move["from_x"] - move["to_x"]) >= 0.10
+    validate_home(after)
+    with pytest.raises(ValueError, match="unlock"):
+        generate(edit.model_copy(update={"locks": ["bedroom"]}), previous=before)

@@ -18,9 +18,18 @@ from archimind.assets.selection import build_render_bindings
 from archimind.geometry import generate_layout_candidates, validate_accessibility
 from archimind.models import Door, Furniture, Room, RoomDesign, Window
 
-Kind = Literal["bedroom", "study", "living", "kitchen-dining", "bathroom"]
+Kind = Literal["salon", "bedroom", "study", "living", "kitchen-dining", "bathroom"]
 PROGRAM = ["bedroom", "study", "living", "kitchen-dining", "bathroom"]
+STUDIO_ITEMS = {
+    "salon": [
+        ("salon-suite", "seating", 2.8, 2.35, 0.94),
+        ("salon-dining", "dining", 2.2, 2.92, 1.0),
+    ],
+    "living": [("media-console", "storage", 1.6, 0.38, 0.64)],
+    "study": [("bookcase", "storage", 0.85, 0.34, 1.75)],
+}
 ITEMS = {
+    "salon": [],
     "bedroom": [("queen-bed", "bed", 1.6, 2, 0.6)],
     "living": [
         ("sofa", "sofa", 2, 0.85, 0.86),
@@ -38,6 +47,17 @@ ITEMS = {
 }
 
 
+# Each ensemble reserves the complete arrangement, including the chairs.
+STUDIO_ENSEMBLES = {
+    "living": [("reading-suite", "seating", 2.85, 2.35, 1.4)],
+    "study": [("writing-suite", "desk", 1.75, 1.85, 1.13)],
+    "kitchen-dining": [
+        ("counter", "counter", 2, 0.64, 0.92),
+        ("breakfast-suite", "table", 1.75, 2.4, 0.87),
+    ],
+}
+
+
 class Brief(BaseModel):
     model_config = ConfigDict(extra="forbid")
     width: float = Field(default=13, ge=9, le=15)
@@ -45,10 +65,12 @@ class Brief(BaseModel):
     priority: Literal[
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ] = "balanced"
+    formal_salon: bool = False
     palette: Literal["oak", "sage", "terracotta"] = "oak"
     seed: int = Field(default=42, ge=0, le=1000000)
+    shift_bedroom_chair: bool = False
     closer_study_desk: bool = False
-    locks: list[Kind] = Field(default_factory=list, max_length=5)
+    locks: list[Kind] = Field(default_factory=list, max_length=6)
 
 
 def interpret_offline(brief, text):
@@ -71,8 +93,20 @@ def interpret_offline(brief, text):
     for clause in re.split(r"\s+(?:and|with)\s+|[;,]", message):
         clause = " ".join(clause.split())
         clause = re.sub(r"^(?:a|an) ", "", clause)
+        if clause == "move the bedroom desk chair":
+            values["shift_bedroom_chair"] = True
+            continue
         if clause == "move the study desk closer to its window":
             values["closer_study_desk"] = True
+            continue
+        if clause in {"formal salon", "entertaining guests", "salon for entertaining"}:
+            values["formal_salon"] = True
+            continue
+        if clause == "quiet work":
+            clause = "quiet bedroom and bright study"
+            priorities[clause] = clause
+        if clause == "compact everyday living":
+            values.update(width=10.5, depth=11.5)
             continue
         if clause == "writing desk":
             # Every generated bedroom includes the qualified Belaya.
@@ -133,6 +167,23 @@ def validate_home(home):
         d = RoomDesign.model_validate(part["design"])
         r = d.room
         kinds.append(r.id)
+        orientation = part.get("suite_yaw_deg", 0)
+        if orientation not in (0, 90) or (orientation and r.id != "salon"):
+            raise ValueError("Unsupported salon grouping orientation.")
+        if r.id == "salon":
+            by_id = {f.id: f for f in d.furniture}
+            for ident, _, group_width, group_depth, height in STUDIO_ITEMS["salon"]:
+                if ident == "salon-suite" and orientation:
+                    group_width, group_depth = group_depth, group_width
+                item = by_id.get(ident)
+                if item is None or (item.width_m, item.depth_m, item.height_m) != (
+                    group_width,
+                    group_depth,
+                    height,
+                ):
+                    raise ValueError(
+                        "Salon furniture must retain the checked group footprint."
+                    )
         x, y = part["origin"]
         areas.append(box(x, y, x + r.width_m, y + r.depth_m))
         if len(r.doors) != 1:
@@ -174,7 +225,7 @@ def validate_home(home):
     shell = box(0, 0, width, depth)
     coverage = unary_union(areas)
     if (
-        sorted(kinds) != sorted(PROGRAM)
+        sorted(kinds) != sorted(PROGRAM + (["salon"] if "salon" in kinds else []))
         or shell.symmetric_difference(coverage).area > 1e-5
         or sum(a.area for a in areas) - coverage.area > 1e-5
     ):
@@ -222,6 +273,48 @@ def dress_bedroom(design):
     return None
 
 
+def revise_bedroom_chair(brief, previous):
+    if not previous or "bedroom" in brief.locks:
+        raise ValueError("Apply a home and unlock its bedroom before moving the chair.")
+    if (
+        brief.closer_study_desk
+        or brief.priority != "balanced"
+        or (brief.width, brief.depth) != (previous["width"], previous["depth"])
+    ):
+        raise ValueError(
+            "Submit the chair move separately from desk, shell or priority changes."
+        )
+    home = copy.deepcopy(previous)
+    part = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "bedroom")
+    furniture = {f["id"]: f for f in part["design"]["furniture"]}
+    desk, chair = furniture.get("belaya"), furniture.get("desk-chair")
+    if not desk or not chair:
+        raise ValueError("The saved bedroom needs a desk and chair.")
+    before = chair["x_m"]
+    left = desk["x_m"] + 0.10
+    right = desk["x_m"] + desk["width_m"] - chair["width_m"] - 0.10
+    for x in sorted((left, right), key=lambda x: abs(x - before), reverse=True):
+        if abs(x - before) < 0.10:
+            continue
+        chair["x_m"] = x
+        try:
+            validate_home(home)
+        except ValueError:
+            continue
+        home["palette"] = brief.palette
+        home["evidence"]["chair_move_m"] = {
+            "from_x": before,
+            "to_x": x,
+            "y": chair["y_m"],
+        }
+        home.pop("id")
+        home["id"] = digest(home)
+        return home
+    raise ValueError(
+        "No alternate chair position at this desk passed spatial validation."
+    )
+
+
 def revise_study_desk(brief, previous):
     if not previous or "study" in brief.locks:
         raise ValueError("Apply a home and unlock its study before moving the desk.")
@@ -237,7 +330,10 @@ def revise_study_desk(brief, previous):
         r["design"] for r in home["rooms"] if r["design"]["room"]["id"] == "study"
     )
     room = design["room"]
-    desk = next((f for f in design["furniture"] if f["id"] == "work-table"), None)
+    desk = next(
+        (f for f in design["furniture"] if f["id"] in {"work-table", "writing-suite"}),
+        None,
+    )
     if not desk or len(room["windows"]) != 1:
         raise ValueError("A unique study desk and window are required.")
     window = room["windows"][0]
@@ -278,8 +374,18 @@ def revise_study_desk(brief, previous):
 
 
 def generate(brief, previous=None, *, on_progress=None):
-    if brief.closer_study_desk:
-        home = revise_study_desk(brief, previous)
+    if brief.shift_bedroom_chair or brief.closer_study_desk:
+        if (
+            brief.formal_salon
+            and previous
+            and not any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+        ):
+            raise ValueError(
+                "Add the salon in a separate layout revision before moving furniture."
+            )
+        home = (
+            revise_bedroom_chair if brief.shift_bedroom_chair else revise_study_desk
+        )(brief, previous)
         if on_progress:
             on_progress("Furnished candidate", home)
         return [home]
@@ -290,6 +396,16 @@ def generate(brief, previous=None, *, on_progress=None):
         previous["depth"],
     ):
         raise ValueError("Keep the shell dimensions to preserve locked rooms.")
+    salon = brief.formal_salon or bool(
+        previous
+        and any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+    )
+    if (
+        salon
+        and brief.locks
+        and not any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+    ):
+        raise ValueError("Adding a salon requires repartitioning. Unlock rooms first.")
     candidates = []
     for attempt in range(8):
         rng = random.Random(brief.seed + 7919 * attempt)
@@ -299,6 +415,8 @@ def generate(brief, previous=None, *, on_progress=None):
             rng.shuffle(row)
         if "quiet bedroom" in brief.priority:
             rows[0] = ["living", "bedroom"]
+        if salon:
+            rows[0].insert(0, "salon")
         partitions = []
         for side, row in enumerate(rows):
             x = 0 if side == 0 else hall + 1.6
@@ -345,7 +463,11 @@ def generate(brief, previous=None, *, on_progress=None):
                 continue
             window_width = min(
                 h - 0.6,
-                2.5 if k == "study" and "bright study" in brief.priority else 1.4,
+                2.85
+                if k == "salon"
+                else 2.5
+                if k == "study" and "bright study" in brief.priority
+                else 1.4,
             )
             r = Room(
                 id=k,
@@ -362,24 +484,28 @@ def generate(brief, previous=None, *, on_progress=None):
                         wall="west" if x == 0 else "east",
                         offset_m=(h - window_width) / 2,
                         width_m=window_width,
-                        height_m=1.15,
-                        sill_height_m=1,
+                        height_m=1.75 if k == "salon" else 1.15,
+                        sill_height_m=0.55 if k == "salon" else 1,
                     )
                 ],
             )
+            rotate_suite = k == "salon" and brief.seed % 2 == 1
             items = [
                 Furniture(
                     id=i,
                     name=i.replace("-", " ").title(),
                     category=c,
-                    width_m=a,
-                    depth_m=b,
+                    width_m=b if rotate_suite and i == "salon-suite" else a,
+                    depth_m=a if rotate_suite and i == "salon-suite" else b,
                     height_m=z,
                     x_m=0,
                     y_m=0,
                     rotation_deg=0,
                 )
-                for i, c, a, b, z in ITEMS[k]
+                for i, c, a, b, z in (
+                    STUDIO_ENSEMBLES.get(k, ITEMS[k]) if salon else ITEMS[k]
+                )
+                + (STUDIO_ITEMS.get(k, []) if salon else [])
             ]
             proofs = {}
             if k == "bedroom":
@@ -406,6 +532,7 @@ def generate(brief, previous=None, *, on_progress=None):
             rooms.append(
                 dict(
                     origin=[x, y],
+                    **({"suite_yaw_deg": 90} if rotate_suite else {}),
                     asset_bindings=[
                         b.model_dump(mode="json") for b in resolved.bindings
                     ],
@@ -420,7 +547,7 @@ def generate(brief, previous=None, *, on_progress=None):
             rooms=rooms,
             palette=brief.palette,
         )
-        if len(rooms) != 5:
+        if len(rooms) != len(PROGRAM) + int(salon):
             continue
         try:
             validate_home(home)
@@ -429,12 +556,19 @@ def generate(brief, previous=None, *, on_progress=None):
         bedroom = next(p for p in rooms if p["design"]["room"]["id"] == "bedroom")
         rear = bedroom["origin"][1] + bedroom["design"]["room"]["depth_m"] / 2
         home["evidence"] = {
-            "reachable_rooms": 5,
+            "reachable_rooms": len(rooms),
             "bedroom_center_from_front_m": round(rear, 2),
             "study_window_width_m": next(
                 p for p in rooms if p["design"]["room"]["id"] == "study"
             )["design"]["room"]["windows"][0]["width_m"],
         }
+        if salon:
+            home["evidence"]["salon"] = {
+                "dining_places": 4,
+                "chair_pullout_m": 0.5,
+                "basis": "A reserved dining group includes a 0.50 m withdrawal strip behind each chair row.",
+                "seating": "A three-piece conversation group faces the central coffee table.",
+            }
         home["id"] = digest(home)
         if home not in candidates:
             candidates.append(home)
@@ -443,6 +577,10 @@ def generate(brief, previous=None, *, on_progress=None):
         if len(candidates) == 2:
             break
     if not candidates:
+        if salon:
+            raise ValueError(
+                f"Search exhausted for a connected home with a formal salon on the {brief.width:g} × {brief.depth:g} m lot. Try more space or revise the room program."
+            )
         raise ValueError("Search exhausted without a connected furnished home.")
     if "quiet bedroom" in brief.priority:
         candidates.sort(key=lambda c: -c["evidence"]["bedroom_center_from_front_m"])

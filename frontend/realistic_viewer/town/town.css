@@ -424,3 +424,7 @@ button[aria-pressed="true"] {
 @media (prefers-reduced-motion: reduce) {
   #agentCards details[data-state="running"] { animation: none; }
 }
+
+
+#elevations img { width: 50%; height: auto; vertical-align: top }
+@media(max-width:600px){#elevations img{width:100%}}

@@ -1,3 +1,6 @@
+import { turnedCoverlet } from "./studio_textiles.js";
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { studioFurniture, studioFinishes, salonDetails } from "./studio_furniture.js";
 import * as T from "three";
 import { bedroomSurfaces, finishBedroomConcept, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
@@ -595,7 +598,7 @@ export function createTown(canvas, status, action) {
     const epoch = generation;
     const selectedLoads = [];
     canvas.dataset.collection = "procedural";
-    function replaceCollection(binding, fallback, item) {
+    function replaceCollection(binding, fallback, item, onVerified) {
       if (!binding) return;
       canvas.dataset.collection = "loading";
       selectedLoads.push(fitBedroomChair(
@@ -603,7 +606,7 @@ export function createTown(canvas, status, action) {
           .then(([model]) => finishBedroomConcept(model, surfaces)),
         fallback, item, -1, () => generation === epoch, clear,
       ).then(status => {
-        if (status === "verified") clear(fallback);
+        if (status === "verified") { clear(fallback); onVerified?.(); }
         return status;
       }));
     }
@@ -810,6 +813,14 @@ export function createTown(canvas, status, action) {
         0.012,
         "#ba7e5c",
       );
+      function studioPiece(p) {
+        const [w,d,h]=p.wdh,[x,y,z]=p.xyz;
+        const rounded=p.shape==="sphere" || p.shape==="cylinder";
+        const geom=p.shape==="sphere"?new T.SphereGeometry(.5,20,12):p.shape==="cylinder"?new T.CylinderGeometry(.5,.5,1,24):new RoundedBoxGeometry(w,h,d,2,p.radius);
+        const obj=mesh(group,geom,studioFinishes[p.finish],x,z,-y);
+        if(rounded)obj.scale.set(w,h,d);
+      }
+      salonDetails(part).forEach(studioPiece);
       for (const f of part.design.furniture) {
         const x = f.x_m + f.width_m / 2,
           z = -f.y_m - f.depth_m / 2,
@@ -817,6 +828,11 @@ export function createTown(canvas, status, action) {
           d = f.depth_m,
           t = f.height_m;
         indoor.push([ox + f.x_m, -oy - f.y_m - d, ox + f.x_m + w, -oy - f.y_m]);
+        const pieces = r.id !== "bedroom" && h.rooms.some((p) => p.design.room.id === "salon") ? studioFurniture(f,part.suite_yaw_deg) : [];
+        if (pieces.length) {
+          pieces.forEach(studioPiece);
+          continue;
+        }
         if (f.id === "queen-bed") {
           const left = Math.max(0.06, f.x_m - 0.58),
             right = Math.min(r.width_m - 0.06, f.x_m + w + 0.58);
@@ -846,7 +862,16 @@ export function createTown(canvas, status, action) {
             );
           const fallback = queenBed(f);
           group.add(fallback);
-          replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f);
+          replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f, () => {
+            if (!h.rooms.some(p => p.design.room.id === "salon")) return;
+            const textile = turnedCoverlet(f);
+            const geometry = new T.BufferGeometry();
+            const coords = textile.vertices.flatMap(([a,b,c]) => [a,c,-b]);
+            geometry.setAttribute("position", new T.Float32BufferAttribute(coords, 3));
+            geometry.setIndex(textile.faces.flat());
+            geometry.computeVertexNormals();
+            mesh(group, geometry, "#d5c4a9", 0, 0, 0);
+          });
         } else if (f.id === "desk-chair") {
           const desk = part.design.furniture.find(
             (item) => item.id === "belaya",
@@ -1222,7 +1247,7 @@ export function createTown(canvas, status, action) {
   });
   return {
     load,
-    async bedroomViews(snapshot) {
+    async bedroomViews(snapshot, roomId = "bedroom") {
       const original = home, originalPreset = photoView.value;
       const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
       if (home !== snapshot) load(snapshot);
@@ -1232,7 +1257,7 @@ export function createTown(canvas, status, action) {
         const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
         await surfaces.ready;
         if (epoch !== generation) throw Error("Presentation source changed.");
-        const part = snapshot.rooms.find((p) => p.design.room.id === "bedroom");
+        const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
         const views = bedroomCameras(part);
         const visible = [hero, street, interior, avatar].map((o) => o.visible);
         const size = renderer.getSize(new T.Vector2());

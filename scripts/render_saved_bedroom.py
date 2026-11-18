@@ -419,7 +419,7 @@ def load_furniture(item, registry, materials):
     return digest
 
 
-def render(manifest_path, output, originals, inspect_only=False):
+def render(manifest_path, output, originals, inspect_only=False, *, include_hall=True):
     manifest_bytes = manifest_path.read_bytes()
     manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
     manifest = json.loads(manifest_bytes)
@@ -483,7 +483,8 @@ def render(manifest_path, output, originals, inspect_only=False):
     bg.inputs["Strength"].default_value = 0.8
     room = manifest["room"]
     architecture(room, m)
-    hall_context(manifest["hall_context"], room, m)
+    if include_hall:
+        hall_context(manifest["hall_context"], room, m)
     registry_data = json.loads((ASSETS / "designer_registry.json").read_text())
     registry = {
         (a["concept_id"], a["version"], a["sha256"])

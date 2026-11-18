@@ -105,7 +105,7 @@ def coordinate(req, previous, interpret, emit):
                 lambda: {
                     "width_m": req.brief.width,
                     "depth_m": req.brief.depth,
-                    "program": PROGRAM,
+                    "program": PROGRAM + (["salon"] if req.brief.formal_salon else []),
                     "existing_rooms": len(previous["rooms"]) if previous else 0,
                 },
             ),
@@ -159,6 +159,10 @@ def coordinate(req, previous, interpret, emit):
             )
             and (brief.width, brief.depth) == (previous["width"], previous["depth"])
             and brief.priority == "balanced"
+            and (
+                not brief.formal_salon
+                or any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+            )
         )
         if finish_only:
             home = copy.deepcopy(previous)
@@ -170,6 +174,25 @@ def coordinate(req, previous, interpret, emit):
         else:
             homes = generate(brief, previous, on_progress=progress)
             emit("C", "completed", "Furnishing complete", {"candidates": len(homes)})
+        for h in homes:
+            rooms = {p["design"]["room"]["id"]: p["design"]["room"] for p in h["rooms"]}
+            if "salon" not in rooms:
+                continue
+            window = rooms["salon"]["windows"][0]
+            emit(
+                "E",
+                "completed",
+                "Compose client views",
+                {
+                    "home_id": h["id"],
+                    "palette": h["palette"],
+                    "salon_subjects": ["salon-suite", "salon-dining"],
+                    "daylight_opening": window["id"],
+                    "daylight_wall": window["wall"],
+                    "lighting_studies": ["daylight", "pendant evening"],
+                    "camera_proofs": "Available after the applied revision is rendered in Cycles.",
+                },
+            )
         for check in checks:
             check.result()
         if req.agent_team and homes:
