@@ -166,6 +166,7 @@ def coordinate(req, previous, interpret, emit):
                 req.message.strip().lower(),
             )
             and (brief.width, brief.depth) == (previous["width"], previous["depth"])
+            and not brief.room_goals
             and brief.priority == "balanced"
             and (
                 not brief.formal_salon

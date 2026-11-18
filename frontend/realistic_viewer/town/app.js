@@ -220,6 +220,12 @@ function evidence(h) {
   const e = h.evidence;
   el("evidence").textContent =
     `${e.reachable_rooms} rooms reachable after furnishing · Bedroom center ${e.bedroom_center_from_front_m} m from front · Study window ${e.study_window_width_m} m wide. Distance and window size are proxies for privacy and daylight.`;
+  if (e.room_preferences?.length) {
+    const measures = e.room_preferences.map(g =>
+      `${g.room} ${g.relation === "near" ? "near" : "away from"} ${g.target}: ${g.center_distance_m.toFixed(2)} m`);
+    el("evidence").textContent += " Room-center distances in plan · " + measures.join(" · ") +
+      ". These preferences rank validated layouts. They do not measure walking routes or sound levels.";
+  }
   if (e.study_desk_window_center_distance_m) {
     const gap = e.study_desk_window_center_distance_m;
     el("evidence").textContent +=
