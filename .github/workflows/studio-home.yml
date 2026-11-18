@@ -56,3 +56,27 @@ jobs:
           name: studio-home-proof
           path: ${{ runner.temp }}/proof
           if-no-files-found: error
+
+      - name: Replay a chair and palette edit and render the next revision independently
+        run: |
+          python scripts/run_studio_home.py --edited --export "$RUNNER_TEMP/edited.json"
+          node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/edited.json" "$RUNNER_TEMP/edited-board.json"
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/edited-board.json" "$RUNNER_TEMP/edited-proof" --proof
+          python scripts/publish_studio_board.py "$RUNNER_TEMP/edited-proof"
+          google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/edited-proof/Studio-House.pdf" "file://$RUNNER_TEMP/edited-proof/index.html"
+          python - "$RUNNER_TEMP" <<'PYTHON'
+          import json, sys
+          from pathlib import Path
+          original, edited = [
+              json.loads((Path(sys.argv[1]) / name / "receipt.json").read_bytes())
+              for name in ("proof", "edited-proof")
+          ]
+          assert (original["revision"], edited["revision"]) == (5, 6)
+          assert original["home_id"] != edited["home_id"]
+          assert original["files"]["bedroom-desk.png"] != edited["files"]["bedroom-desk.png"]
+          PYTHON
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: studio-home-edited-proof
+          path: ${{ runner.temp }}/edited-proof
+          if-no-files-found: error

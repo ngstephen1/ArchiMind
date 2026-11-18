@@ -153,7 +153,7 @@ def book(directory):
         r = part["room"]
         views = part["cameras"]
         rows = "".join(
-            f"<tr><td>{esc(f['name'])}</td><td>{f['width_m']:.2f} × {f['depth_m']:.2f} × {f['height_m']:.2f}</td></tr>"
+            f"<tr><td>{esc(f['name'])}</td><td>{f['width_m']:.2f} × {f['depth_m']:.2f} × {f['height_m']:.2f}</td><td>{f['x_m']:.2f}, {f['y_m']:.2f}</td></tr>"
             for f in part["furniture"]
         )
         pages.append(
@@ -168,7 +168,7 @@ def book(directory):
             )
             + '</div><div class="grid">'
             + elevations(part)
-            + "</div><table><tr><th>Furniture</th><th>Reserved W × D × H (m)</th></tr>"
+            + "</div><table><tr><th>Furniture</th><th>Reserved W × D × H (m)</th><th>Room X, Y (m)</th></tr>"
             + rows
             + "</table>"
         )

@@ -413,3 +413,21 @@ def test_rotated_salon_uses_checked_group_footprint():
     suite["depth_m"] = 2
     with pytest.raises(ValueError, match="group footprint"):
         validate_home(home)
+
+
+def test_chair_edit_keeps_the_original_and_revalidates():
+    brief = Brief(width=15, depth=16, formal_salon=True, palette="sage")
+    before = generate(brief)[0]
+    frozen = copy.deepcopy(before)
+    edit = interpret_offline(
+        brief, "move the bedroom desk chair and terracotta finishes"
+    )
+    after = generate(edit, previous=before)[0]
+    assert before == frozen
+    assert after["id"] != before["id"]
+    assert after["palette"] == "terracotta"
+    move = after["evidence"]["chair_move_m"]
+    assert abs(move["from_x"] - move["to_x"]) >= 0.10
+    validate_home(after)
+    with pytest.raises(ValueError, match="unlock"):
+        generate(edit.model_copy(update={"locks": ["bedroom"]}), previous=before)

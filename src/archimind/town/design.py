@@ -68,6 +68,7 @@ class Brief(BaseModel):
     formal_salon: bool = False
     palette: Literal["oak", "sage", "terracotta"] = "oak"
     seed: int = Field(default=42, ge=0, le=1000000)
+    shift_bedroom_chair: bool = False
     closer_study_desk: bool = False
     locks: list[Kind] = Field(default_factory=list, max_length=6)
 
@@ -92,6 +93,9 @@ def interpret_offline(brief, text):
     for clause in re.split(r"\s+(?:and|with)\s+|[;,]", message):
         clause = " ".join(clause.split())
         clause = re.sub(r"^(?:a|an) ", "", clause)
+        if clause == "move the bedroom desk chair":
+            values["shift_bedroom_chair"] = True
+            continue
         if clause == "move the study desk closer to its window":
             values["closer_study_desk"] = True
             continue
@@ -269,6 +273,48 @@ def dress_bedroom(design):
     return None
 
 
+def revise_bedroom_chair(brief, previous):
+    if not previous or "bedroom" in brief.locks:
+        raise ValueError("Apply a home and unlock its bedroom before moving the chair.")
+    if (
+        brief.closer_study_desk
+        or brief.priority != "balanced"
+        or (brief.width, brief.depth) != (previous["width"], previous["depth"])
+    ):
+        raise ValueError(
+            "Submit the chair move separately from desk, shell or priority changes."
+        )
+    home = copy.deepcopy(previous)
+    part = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "bedroom")
+    furniture = {f["id"]: f for f in part["design"]["furniture"]}
+    desk, chair = furniture.get("belaya"), furniture.get("desk-chair")
+    if not desk or not chair:
+        raise ValueError("The saved bedroom needs a desk and chair.")
+    before = chair["x_m"]
+    left = desk["x_m"] + 0.10
+    right = desk["x_m"] + desk["width_m"] - chair["width_m"] - 0.10
+    for x in sorted((left, right), key=lambda x: abs(x - before), reverse=True):
+        if abs(x - before) < 0.10:
+            continue
+        chair["x_m"] = x
+        try:
+            validate_home(home)
+        except ValueError:
+            continue
+        home["palette"] = brief.palette
+        home["evidence"]["chair_move_m"] = {
+            "from_x": before,
+            "to_x": x,
+            "y": chair["y_m"],
+        }
+        home.pop("id")
+        home["id"] = digest(home)
+        return home
+    raise ValueError(
+        "No alternate chair position at this desk passed spatial validation."
+    )
+
+
 def revise_study_desk(brief, previous):
     if not previous or "study" in brief.locks:
         raise ValueError("Apply a home and unlock its study before moving the desk.")
@@ -328,8 +374,10 @@ def revise_study_desk(brief, previous):
 
 
 def generate(brief, previous=None, *, on_progress=None):
-    if brief.closer_study_desk:
-        home = revise_study_desk(brief, previous)
+    if brief.shift_bedroom_chair or brief.closer_study_desk:
+        home = (
+            revise_bedroom_chair if brief.shift_bedroom_chair else revise_study_desk
+        )(brief, previous)
         if on_progress:
             on_progress("Furnished candidate", home)
         return [home]

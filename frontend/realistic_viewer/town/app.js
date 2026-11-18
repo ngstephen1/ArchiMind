@@ -575,7 +575,7 @@ el("present").onclick = async () => {
             [f.width_m, f.depth_m, f.height_m]
               .map((v) => v.toFixed(2))
               .join(" × ") +
-            " m (W × D × H)",
+            ` m (W × D × H) · Room position (${f.x_m.toFixed(2)}, ${f.y_m.toFixed(2)}) m`,
         ),
       );
   }

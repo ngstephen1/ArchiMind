@@ -14,7 +14,7 @@ from archimind.town.designer_chair import chair_change
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def create(directory):
+def create(directory, *, edited=False):
     os.environ.pop("DATABASE_URL", None)
     os.environ.update(TOWN_DB=str(directory / "studio.sqlite3"), TOWN_MODE="local")
     service.initialize()
@@ -39,15 +39,32 @@ def create(directory):
                 apply=True,
                 collection=change["collection"],
             )
+        if edited:
+            edited_home = generate(
+                Brief(
+                    formal_salon=True,
+                    width=15,
+                    depth=16,
+                    palette="terracotta",
+                    shift_bedroom_chair=True,
+                ),
+                previous=saved["home"],
+            )[0]
+            saved = service.apply(q, owner, project, saved["revision"], edited_home)
     return saved
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--export", type=Path)
+    parser.add_argument(
+        "--edited",
+        action="store_true",
+        help="Apply a reviewed chair and palette edit as revision 6.",
+    )
     args = parser.parse_args()
     with tempfile.TemporaryDirectory(prefix="archimind-studio-") as directory:
-        saved = create(Path(directory))
+        saved = create(Path(directory), edited=args.edited)
         if args.export:
             args.export.write_text(json.dumps(saved, indent=2))
         else:
