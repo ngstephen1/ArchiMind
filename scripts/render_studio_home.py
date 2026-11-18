@@ -359,11 +359,15 @@ def render(args):
     )
     outline.select_silhouette = outline.select_border = True
     outline.select_crease = False
+    if not outline.linestyle:
+        outline.linestyle = bpy.data.linestyles.new("Silhouette ink")
     outline.linestyle.color = (0.025, 0.033, 0.031)
     outline.linestyle.thickness = scene.render.resolution_x / 960
     crease = settings.linesets.new("Furniture and joinery")
     crease.select_silhouette = crease.select_border = False
     crease.select_crease = True
+    if not crease.linestyle:
+        crease.linestyle = bpy.data.linestyles.new("Joinery ink")
     crease.linestyle.color = (0.19, 0.18, 0.15)
     crease.linestyle.thickness = 0.48 * scene.render.resolution_x / 960
     photo(hero + "-drawing")
