@@ -4,7 +4,9 @@ on:
   push:
     branches: [feat/whole-home-client-studio]
     paths:
-      - scripts/render_studio_home.py
+      - scripts/*studio_home.py
+      - scripts/publish_studio_board.py
+      - scripts/render_saved_bedroom.py
       - .github/workflows/studio-home.yml
       - src/archimind/town/design.py
       - frontend/realistic_viewer/town/bedroom_cameras.js

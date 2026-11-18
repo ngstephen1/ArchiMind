@@ -401,3 +401,15 @@ def test_entertaining_home_has_distinct_salon_and_clearance_reservations():
     )
     compact = interpret_offline(Brief(), "compact everyday living")
     assert (compact.width, compact.depth) == (10.5, 11.5)
+
+
+def test_rotated_salon_uses_checked_group_footprint():
+    home = generate(Brief(formal_salon=True, width=15, depth=16, seed=43))[0]
+    salon = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "salon")
+    suite = next(f for f in salon["design"]["furniture"] if f["id"] == "salon-suite")
+    assert salon["suite_yaw_deg"] == 90
+    assert (suite["width_m"], suite["depth_m"]) == (2.35, 2.8)
+    validate_home(home)
+    suite["depth_m"] = 2
+    with pytest.raises(ValueError, match="group footprint"):
+        validate_home(home)

@@ -47,6 +47,17 @@ ITEMS = {
 }
 
 
+# Each ensemble reserves the complete arrangement, including the chairs.
+STUDIO_ENSEMBLES = {
+    "living": [("reading-suite", "seating", 2.85, 2.35, 1.4)],
+    "study": [("writing-suite", "desk", 1.75, 1.85, 1.13)],
+    "kitchen-dining": [
+        ("counter", "counter", 2, 0.64, 0.92),
+        ("breakfast-suite", "table", 1.75, 2.4, 0.87),
+    ],
+}
+
+
 class Brief(BaseModel):
     model_config = ConfigDict(extra="forbid")
     width: float = Field(default=13, ge=9, le=15)
@@ -152,6 +163,23 @@ def validate_home(home):
         d = RoomDesign.model_validate(part["design"])
         r = d.room
         kinds.append(r.id)
+        orientation = part.get("suite_yaw_deg", 0)
+        if orientation not in (0, 90) or (orientation and r.id != "salon"):
+            raise ValueError("Unsupported salon grouping orientation.")
+        if r.id == "salon":
+            by_id = {f.id: f for f in d.furniture}
+            for ident, _, group_width, group_depth, height in STUDIO_ITEMS["salon"]:
+                if ident == "salon-suite" and orientation:
+                    group_width, group_depth = group_depth, group_width
+                item = by_id.get(ident)
+                if item is None or (item.width_m, item.depth_m, item.height_m) != (
+                    group_width,
+                    group_depth,
+                    height,
+                ):
+                    raise ValueError(
+                        "Salon furniture must retain the checked group footprint."
+                    )
         x, y = part["origin"]
         areas.append(box(x, y, x + r.width_m, y + r.depth_m))
         if len(r.doors) != 1:
@@ -256,7 +284,10 @@ def revise_study_desk(brief, previous):
         r["design"] for r in home["rooms"] if r["design"]["room"]["id"] == "study"
     )
     room = design["room"]
-    desk = next((f for f in design["furniture"] if f["id"] == "work-table"), None)
+    desk = next(
+        (f for f in design["furniture"] if f["id"] in {"work-table", "writing-suite"}),
+        None,
+    )
     if not desk or len(room["windows"]) != 1:
         raise ValueError("A unique study desk and window are required.")
     window = room["windows"][0]
@@ -376,7 +407,11 @@ def generate(brief, previous=None, *, on_progress=None):
                 continue
             window_width = min(
                 h - 0.6,
-                2.5 if k == "study" and "bright study" in brief.priority else 1.4,
+                2.85
+                if k == "salon"
+                else 2.5
+                if k == "study" and "bright study" in brief.priority
+                else 1.4,
             )
             r = Room(
                 id=k,
@@ -393,24 +428,27 @@ def generate(brief, previous=None, *, on_progress=None):
                         wall="west" if x == 0 else "east",
                         offset_m=(h - window_width) / 2,
                         width_m=window_width,
-                        height_m=1.15,
-                        sill_height_m=1,
+                        height_m=1.75 if k == "salon" else 1.15,
+                        sill_height_m=0.55 if k == "salon" else 1,
                     )
                 ],
             )
+            rotate_suite = k == "salon" and brief.seed % 2 == 1
             items = [
                 Furniture(
                     id=i,
                     name=i.replace("-", " ").title(),
                     category=c,
-                    width_m=a,
-                    depth_m=b,
+                    width_m=b if rotate_suite and i == "salon-suite" else a,
+                    depth_m=a if rotate_suite and i == "salon-suite" else b,
                     height_m=z,
                     x_m=0,
                     y_m=0,
                     rotation_deg=0,
                 )
-                for i, c, a, b, z in ITEMS[k]
+                for i, c, a, b, z in (
+                    STUDIO_ENSEMBLES.get(k, ITEMS[k]) if salon else ITEMS[k]
+                )
                 + (STUDIO_ITEMS.get(k, []) if salon else [])
             ]
             proofs = {}
@@ -438,6 +476,7 @@ def generate(brief, previous=None, *, on_progress=None):
             rooms.append(
                 dict(
                     origin=[x, y],
+                    **({"suite_yaw_deg": 90} if rotate_suite else {}),
                     asset_bindings=[
                         b.model_dump(mode="json") for b in resolved.bindings
                     ],

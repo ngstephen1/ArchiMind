@@ -16,3 +16,13 @@ test("salon families stay within their reserved footprint at nonzero origins", (
     }
   }
 });
+
+test("a quarter turn swaps the design envelope and preserves every part",()=>{
+  const f={id:"salon-suite",x_m:2,y_m:1,width_m:2.35,depth_m:2.8,height_m:.94};
+  const parts=studioFurniture(f,90);
+  for(const p of parts){
+    assert.ok(p.xyz[0]-p.wdh[0]/2>=2-1e-8 && p.xyz[0]+p.wdh[0]/2<=4.35+1e-8);
+    assert.ok(p.xyz[1]-p.wdh[1]/2>=1-1e-8 && p.xyz[1]+p.wdh[1]/2<=3.8+1e-8);
+  }
+  assert.throws(()=>studioFurniture(f,33));
+});

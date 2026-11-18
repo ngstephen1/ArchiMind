@@ -5,8 +5,8 @@ import hashlib
 import json
 import math
 import sys
-import time
 import tempfile
+import time
 from pathlib import Path
 
 import bpy
@@ -186,6 +186,36 @@ def render(args):
     finishes["wool"].node_tree.nodes.get("Principled BSDF").inputs[
         "Sheen Weight"
     ].default_value = 0.55
+    # A side-lit finish study uses one soft sun shared by all rooms.
+    sun_data = bpy.data.lights.new("Late afternoon sun", "SUN")
+    sun_data.energy = 1.6
+    sun_data.angle = math.radians(7)
+    sun_data.color = (1.0, 0.91, 0.79)
+    sun = bpy.data.objects.new("Late afternoon sun", sun_data)
+    bpy.context.collection.objects.link(sun)
+    sun.rotation_euler = Vector((1.0, 0.27, -0.39)).to_track_quat("-Z", "Y").to_euler()
+    for key, roughness, metal in (
+        ("brass", 0.23, 0.82),
+        ("marble", 0.30, 0),
+        ("glass", 0.12, 0.05),
+    ):
+        shader = finishes[key].node_tree.nodes.get("Principled BSDF")
+        shader.inputs["Roughness"].default_value = roughness
+        shader.inputs["Metallic"].default_value = metal
+    glass = finishes["glass"].node_tree.nodes.get("Principled BSDF")
+    glass.inputs["Transmission Weight"].default_value = 0.72
+    glass.inputs["IOR"].default_value = 1.48
+    for key in ("wool", "moss", "paper"):
+        shader = finishes[key].node_tree.nodes.get("Principled BSDF")
+        shader.inputs["Sheen Weight"].default_value = 0.43
+        tree = finishes[key].node_tree
+        tex = tree.nodes.new("ShaderNodeTexNoise")
+        tex.inputs["Scale"].default_value = 360
+        bump = tree.nodes.new("ShaderNodeBump")
+        bump.inputs["Strength"].default_value = 0.18
+        bump.inputs["Distance"].default_value = 0.0016
+        tree.links.new(tex.outputs["Fac"], bump.inputs["Height"])
+        tree.links.new(bump.outputs["Normal"], shader.inputs["Normal"])
     views = []
     for part in board["rooms"]:
         room = part["room"]
@@ -280,6 +310,21 @@ def render(args):
     scene.camera = bpy.data.objects[hero]
     scene.render.use_freestyle = True
     scene.view_layers[0].material_override = bedroom.surface("Drawing paper", "EEEDE8")
+    settings = scene.view_layers[0].freestyle_settings
+    outline = (
+        settings.linesets[0]
+        if len(settings.linesets)
+        else settings.linesets.new("Silhouettes")
+    )
+    outline.select_silhouette = outline.select_border = True
+    outline.select_crease = False
+    outline.linestyle.color = (0.025, 0.033, 0.031)
+    outline.linestyle.thickness = scene.render.resolution_x / 960
+    crease = settings.linesets.new("Furniture and joinery")
+    crease.select_silhouette = crease.select_border = False
+    crease.select_crease = True
+    crease.linestyle.color = (0.19, 0.18, 0.15)
+    crease.linestyle.thickness = 0.48 * scene.render.resolution_x / 960
     photo(hero + "-drawing")
     scene.render.use_freestyle = False
     scene.view_layers[0].material_override = None
@@ -287,7 +332,9 @@ def render(args):
         "Strength"
     ].default_value = 0.035
     for lamp in bpy.data.lights:
-        if "aylight" in lamp.name:
+        if lamp.type == "SUN":
+            lamp.energy = 0
+        elif "aylight" in lamp.name:
             lamp.energy *= 0.045
     photo(hero + "-evening")
     (out / "receipt.json").write_text(

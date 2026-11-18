@@ -13,7 +13,7 @@ export function homeBoard(snapshot) {
     rooms:snapshot.home.rooms.map(part => {
       const {room,furniture}=part.design;
       return {room, origin:part.origin, details:salonDetails(part), furniture:furniture.map(f=>({...f,
-        parts:studio && room.id!=="bedroom" ? studioFurniture(f):[]})),
+        parts:studio && room.id!=="bedroom" ? studioFurniture(f,part.suite_yaw_deg):[]})),
         cameras:bedroomCameras(part)};
     })
   };

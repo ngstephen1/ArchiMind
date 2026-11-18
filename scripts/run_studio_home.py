@@ -52,7 +52,7 @@ if __name__ == "__main__":
             args.export.write_text(json.dumps(saved, indent=2))
         else:
             print(
-                f"Studio home: http://127.0.0.1:8790/?project={saved['project']}&revision={saved['revision']}",
+                f"Studio home: http://127.0.0.1:{os.getenv('TOWN_PORT', '8790')}/?project={saved['project']}&revision={saved['revision']}",
                 flush=True,
             )
             runpy.run_path(str(ROOT / "scripts/run_town.py"), run_name="__main__")

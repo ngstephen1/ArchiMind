@@ -5,7 +5,12 @@ export const studioFinishes = {
   clay: "#9e5f4b", glass: "#637873",
 };
 
-export function studioFurniture(f) {
+export function studioFurniture(f, suiteYaw=0) {
+  if(f.id==="salon-suite" && suiteYaw){
+    if(suiteYaw!==90)throw Error("Unsupported salon grouping orientation.");
+    const parts=studioFurniture({...f,width_m:f.depth_m,depth_m:f.width_m,x_m:0,y_m:0});
+    return parts.map(p=>({...p,xyz:[f.x_m+f.width_m-p.xyz[1],f.y_m+p.xyz[0],p.xyz[2]],wdh:[p.wdh[1],p.wdh[0],p.wdh[2]]}));
+  }
   const parts = [];
   function piece(name, finish, x, y, z, w, d, h, radius = 0.012, shape="box") {
     parts.push({name, finish, xyz: [f.x_m+x, f.y_m+y, z], wdh: [w,d,h], radius, shape});
@@ -58,6 +63,29 @@ export function studioFurniture(f) {
       piece("Brass cutlery","brass",cx-.15,cy,.758,.012,.15,.012,.005);
     }
     piece("Stoneware tray","marble",x,y,.78,.40,.21,.06,.029);
+  } else if(f.id==="writing-suite"){
+    table(x,d-.38,1.6,.74,.75,"oak");
+    seat(x,d-1.12,.49,.5,.84,-1,"moss");
+    piece("Leather blotter","clay",x,d-.40,.754,.72,.38,.008,.004);
+    piece("Lamp base","ink",.25,d-.25,.78,.18,.18,.06,.008,"cylinder");
+    piece("Lamp stem","brass",.25,d-.25,.94,.016,.016,.27,0,"cylinder");
+    piece("Lamp shade","paper",.25,d-.25,1.075,.22,.22,.11,.006,"sphere");
+    piece("Notebook","paper",x+.29,d-.36,.767,.16,.22,.017);
+  } else if(f.id==="breakfast-suite"){
+    table(x,y,1.32,.72,.74,"oak");
+    for(const sign of [-1,1]) for(const dx of [-.34,.34])
+      seat(x+dx,y+sign*.61,.42,.4,.81,sign,"moss");
+    piece("Breakfast bowl","clay",x,y,.80,.22,.22,.12,0,"sphere");
+    for(const dx of [-.34,.34])piece("Stoneware side plate","paper",x+dx,y,.752,.19,.19,.024,0,"cylinder");
+  } else if(f.id==="reading-suite"){
+    piece("Loop pile rug","paper",x,y,.012,w-.03,d-.03,.024);
+    seat(x,d-.43,1.94,.82,.89,1,"wool");
+    seat(.43,.40,.78,.68,.81,-1,"clay");
+    table(x,.91,.9,.46,.37,"walnut");
+    piece("Open book","paper",x-.1,.91,.382,.25,.17,.024);
+    piece("Reading lamp base","ink",w-.27,.4,.035,.29,.29,.07,0,"cylinder");
+    piece("Reading lamp stem","brass",w-.27,.4,.65,.026,.026,1.2,0,"cylinder");
+    piece("Linen drum shade","paper",w-.27,.4,1.235,.37,.37,.33,0,"cylinder");
   } else if(f.id==="media-console" || f.id==="bookcase"){
     for(const i of [-1,1])piece("Carcass side","walnut",x+i*(w-.035)/2,y,h/2,.035,d,h);
     const shelves=f.id==="bookcase"?5:2;
@@ -84,10 +112,19 @@ export function studioFurniture(f) {
 // Elevated fixtures belong to the architectural layer, outside furniture reservations.
 export function salonDetails(part) {
   const {room,furniture}=part.design;
-  if(room.id!=="salon")return [];
+
   const out=[];
   const add=(name,finish,xyz,wdh,shape="box",radius=.008)=>out.push({name,finish,xyz,wdh,shape,radius});
   const {width_m:w,depth_m:d,ceiling_height_m:h}=room;
+  if(room.id!=="salon")return out;
+  // The south wall has no openings. Hang an original relief triptych as one ensemble.
+  for (let n=0; n<3; n++) {
+    const cx=w*.50+(n-1)*.58;
+    add("Shadow-box frame","walnut",[cx,.035,1.60],[.52,.065,.85]);
+    add("Cotton paper","paper",[cx,.071,1.60],[.485,.012,.815]);
+    add("Cut paper arc",["moss","clay","ink"][n],[cx-.045,.081,1.64-n*.07],[.30,.015,.38],"sphere");
+    add("Cut paper horizon","wool",[cx+.05,.095,1.46],[.32,.014,.08]);
+  }
   for(const z of [.13,h-.11]){
     add("North plaster moulding","paper",[w/2,d-.024,z],[w,.048,.048]);
     add("South plaster moulding","paper",[w/2,.024,z],[w,.048,.048]);

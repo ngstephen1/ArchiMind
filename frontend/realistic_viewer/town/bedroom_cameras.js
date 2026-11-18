@@ -221,6 +221,12 @@ export function bedroomCameras(part, aspect = 16 / 9) {
       }
     }
   }
+  const ensemble = furniture.find(f => ["reading-suite", "breakfast-suite", "writing-suite"].includes(f.id));
+  if (ensemble) {
+    const companion = furniture.find(f => f.id !== ensemble.id);
+    return [detail("overview", room.name, [ensemble.id], 3.4), detail("ensemble", ensemble.name, [ensemble.id], 2.15),
+      ...(companion ? [detail(companion.id, companion.name, [companion.id], 1.9)] : [])];
+  }
   if (room.id !== "bedroom") {
     const primary = furniture[0], secondary = furniture[1] || primary;
     return [overview, ...[primary, secondary].filter((f,i,a) => f && a.indexOf(f) === i).map(f =>
