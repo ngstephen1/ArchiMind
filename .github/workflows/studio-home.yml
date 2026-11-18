@@ -11,6 +11,7 @@ on:
       - src/archimind/town/design.py
       - frontend/realistic_viewer/town/bedroom_cameras.js
       - frontend/realistic_viewer/town/studio_furniture.js
+      - frontend/realistic_viewer/town/studio_textiles.js
       - frontend/realistic_viewer/town/home_board.js
 permissions:
   contents: read

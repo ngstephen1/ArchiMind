@@ -1,3 +1,4 @@
+import { turnedCoverlet } from "./studio_textiles.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { studioFurniture, studioFinishes, salonDetails } from "./studio_furniture.js";
 import * as T from "three";
@@ -597,7 +598,7 @@ export function createTown(canvas, status, action) {
     const epoch = generation;
     const selectedLoads = [];
     canvas.dataset.collection = "procedural";
-    function replaceCollection(binding, fallback, item) {
+    function replaceCollection(binding, fallback, item, onVerified) {
       if (!binding) return;
       canvas.dataset.collection = "loading";
       selectedLoads.push(fitBedroomChair(
@@ -605,7 +606,7 @@ export function createTown(canvas, status, action) {
           .then(([model]) => finishBedroomConcept(model, surfaces)),
         fallback, item, -1, () => generation === epoch, clear,
       ).then(status => {
-        if (status === "verified") clear(fallback);
+        if (status === "verified") { clear(fallback); onVerified?.(); }
         return status;
       }));
     }
@@ -861,7 +862,16 @@ export function createTown(canvas, status, action) {
             );
           const fallback = queenBed(f);
           group.add(fallback);
-          replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f);
+          replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f, () => {
+            if (!h.rooms.some(p => p.design.room.id === "salon")) return;
+            const textile = turnedCoverlet(f);
+            const geometry = new T.BufferGeometry();
+            const coords = textile.vertices.flatMap(([a,b,c]) => [a,c,-b]);
+            geometry.setAttribute("position", new T.Float32BufferAttribute(coords, 3));
+            geometry.setIndex(textile.faces.flat());
+            geometry.computeVertexNormals();
+            mesh(group, geometry, "#d5c4a9", 0, 0, 0);
+          });
         } else if (f.id === "desk-chair") {
           const desk = part.design.furniture.find(
             (item) => item.id === "belaya",

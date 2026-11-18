@@ -1,3 +1,4 @@
+import { turnedCoverlet } from "./studio_textiles.js";
 import { bedroomManifest } from "./bedroom_manifest.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
 import { studioFinishes,studioFurniture,salonDetails } from "./studio_furniture.js";
@@ -12,7 +13,8 @@ export function homeBoard(snapshot) {
     finishes:studioFinishes, bedroom,
     rooms:snapshot.home.rooms.map(part => {
       const {room,furniture}=part.design;
-      return {room, origin:part.origin, details:salonDetails(part), furniture:furniture.map(f=>({...f,
+      const hasBed = studio && room.id === "bedroom" && bedroom.furniture.some(f => f.id === "queen-bed" && f.source?.kind === "concept");
+      return {room, origin:part.origin, textile:hasBed ? turnedCoverlet(furniture.find(f=>f.id==="queen-bed")) : null, details:salonDetails(part), furniture:furniture.map(f=>({...f,
         parts:studio && room.id!=="bedroom" ? studioFurniture(f,part.suite_yaw_deg):[]})),
         cameras:bedroomCameras(part)};
     })

@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 import bpy
+import numpy as np
 from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -60,6 +61,7 @@ def studio_piece(piece, finishes):
 
 def gray_studies(scene, board, out):
     """Six unobstructed eye positions per benchmark room, all inside its shell."""
+    assessments = []
     previous = scene.camera
     width, height = scene.render.resolution_x, scene.render.resolution_y
     count = scene.cycles.samples
@@ -101,6 +103,24 @@ def gray_studies(scene, board, out):
             scene.camera = camera({"eye": eye, "target": focus, "fov": 58}, name)
             scene.render.filepath = str(out / (name + ".png"))
             bpy.ops.render.render(write_still=True)
+            image = bpy.data.images.load(scene.render.filepath)
+            pixels = np.empty(len(image.pixels), dtype=np.float32)
+            image.pixels.foreach_get(pixels)
+            rgb = pixels.reshape((-1, 4))[:, :3]
+            luma = rgb @ np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+            low, high = np.percentile(luma, [5, 95])
+            assessments.append(
+                {
+                    "view": name,
+                    "eye": eye,
+                    "range_p05_p95": [float(low), float(high)],
+                    "review": "check flat lighting"
+                    if high - low < 0.10
+                    else "tonal range present",
+                }
+            )
+            bpy.data.images.remove(image)
+    (out / "camera-studies.json").write_text(json.dumps(assessments, indent=2))
     scene.camera = previous
     scene.view_layers[0].material_override = None
     scene.render.resolution_x, scene.render.resolution_y = width, height
@@ -123,17 +143,18 @@ def sample_benchmark(scene, out):
         bpy.ops.render.render(write_still=True)
         timings[samples] = round(time.monotonic() - start, 2)
         img = bpy.data.images.load(str(path))
-        crops[samples] = list(img.pixels)[::16]
+        rgba = np.empty(len(img.pixels), dtype=np.float32)
+        img.pixels.foreach_get(rgba)
+        crops[samples] = rgba.reshape((-1, 4))[::4, :3].copy()
         bpy.data.images.remove(img)
     errors = {}
     for n, vals in crops.items():
-        err = sorted(abs(a - b) for a, b in zip(vals, crops[512], strict=True))
-        errors[n] = err[int(0.95 * (len(err) - 1))]
+        errors[n] = float(np.percentile(np.abs(vals - crops[512]), 95))
     selected = next(n for n in (128, 256, 512) if errors[n] <= 0.015)
     scene.render.use_border = scene.render.use_crop_to_border = False
     scene.render.image_settings.file_format = "PNG"
     scene.cycles.samples = selected
-    return {"max_samples": selected, "seconds": timings, "p95_linear_red_error": errors}
+    return {"max_samples": selected, "seconds": timings, "p95_linear_rgb_error": errors}
 
 
 def render(args):
@@ -216,9 +237,22 @@ def render(args):
         bump.inputs["Distance"].default_value = 0.0016
         tree.links.new(tex.outputs["Fac"], bump.inputs["Height"])
         tree.links.new(bump.outputs["Normal"], shader.inputs["Normal"])
+    coverlet = None
     views = []
     for part in board["rooms"]:
         room = part["room"]
+        if textile := part.get("textile"):
+            cloth_mesh = bpy.data.meshes.new(textile["name"])
+            cloth_mesh.from_pydata(textile["vertices"], [], textile["faces"])
+            cloth_mesh.update()
+            coverlet = bpy.data.objects.new(textile["name"], cloth_mesh)
+            bpy.context.collection.objects.link(coverlet)
+            coverlet.location = (*part["origin"], 0)
+            cloth_mesh.materials.append(mats["linen"])
+            for poly in cloth_mesh.polygons:
+                poly.use_smooth = True
+            seam = coverlet.modifiers.new("Turned fabric edge", "SOLIDIFY")
+            seam.thickness = 0.003
         if room["id"] != "bedroom":
             before = set(bpy.data.objects)
             bedroom.architecture(room, mats)
@@ -285,6 +319,7 @@ def render(args):
         scene.cycles.device = "GPU"
     hero = next((name for room, name in views if room == "salon"), views[0][1])
     scene.camera = bpy.data.objects[hero]
+    cloth_name = coverlet.name if coverlet else None
     bpy.ops.file.pack_all()
     bpy.ops.wm.save_as_mainfile(filepath=str(out / "home.blend"), compress=True)
     bpy.ops.wm.open_mainfile(filepath=str(out / "home.blend"))
@@ -307,6 +342,12 @@ def render(args):
     for room, name in views:
         scene.camera = bpy.data.objects[name]
         photo(name)
+    if cloth_name:
+        scene.camera = bpy.data.objects["bedroom-bedside"]
+        cloth = bpy.data.objects[cloth_name]
+        cloth.hide_render = True
+        photo("bedroom-bedside-before")
+        cloth.hide_render = False
     scene.camera = bpy.data.objects[hero]
     scene.render.use_freestyle = True
     scene.view_layers[0].material_override = bedroom.surface("Drawing paper", "EEEDE8")

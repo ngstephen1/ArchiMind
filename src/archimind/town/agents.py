@@ -158,6 +158,28 @@ def coordinate(req, previous, interpret, emit):
         else:
             homes = generate(brief, previous, on_progress=progress)
             emit("C", "completed", "Furnishing complete", {"candidates": len(homes)})
+        if brief.formal_salon or any(
+            p["design"]["room"]["id"] == "salon" for h in homes for p in h["rooms"]
+        ):
+            for h in homes:
+                rooms = {
+                    p["design"]["room"]["id"]: p["design"]["room"] for p in h["rooms"]
+                }
+                window = rooms["salon"]["windows"][0]
+                emit(
+                    "E",
+                    "completed",
+                    "Compose client views",
+                    {
+                        "home_id": h["id"],
+                        "palette": h["palette"],
+                        "salon_subjects": ["salon-suite", "salon-dining"],
+                        "daylight_opening": window["id"],
+                        "daylight_wall": window["wall"],
+                        "lighting_studies": ["daylight", "pendant evening"],
+                        "camera_proofs": "Available after the applied revision is rendered in Cycles.",
+                    },
+                )
         for check in checks:
             check.result()
         emit(

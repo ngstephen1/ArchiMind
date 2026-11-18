@@ -173,6 +173,31 @@ def book(directory):
             + "</table>"
         )
     css = """*{box-sizing:border-box}body{margin:auto;max-width:1120px;color:#24382f;background:#eeeae1;font:16px/1.4 system-ui}section{padding:3.5%;background:#faf8f2;margin:15px 0}h1,h2{font:normal 2.8em/1.1 Georgia;margin:.25em 0 .5em}img,svg{width:100%;display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}figure{margin:0}figcaption,footer{font-size:.85em}footer{margin-top:1em;border-top:1px solid #b8ac97;padding-top:.6em}table{border-collapse:collapse;width:100%;margin-top:1em}td,th{text-align:left;border-bottom:1px solid #ccc;padding:.2em}i{width:2em;height:1em;display:inline-block;margin-right:.6em}.compare{position:relative}.ink{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}@media(max-width:650px){.grid{grid-template-columns:1fr}}@page{size:A3 landscape;margin:12mm}@media print{body{max-width:none;font-size:11pt;background:white}section{margin:0;padding:0;break-after:page}section:last-child{break-after:auto}section>img,.compare{width:82%}.grid{grid-template-columns:1fr 1fr}.grid svg{max-height:32vh}label{display:none}*{print-color-adjust:exact}}"""
+    if "camera-studies.json" in receipt["files"]:
+        studies = json.loads((directory / "camera-studies.json").read_text())
+        panels = "".join(
+            "<figure>"
+            + img(s["view"])
+            + f"<figcaption>{esc(s['view'])} · {esc(s['review'])}</figcaption></figure>"
+            for s in studies
+        )
+        if "bedroom-bedside-before.png" in receipt["files"]:
+            panels += (
+                "<h2>Coverlet study</h2>"
+                + img("bedroom-bedside-before")
+                + img("bedroom-bedside")
+            )
+        (directory / "studies.html").write_text(
+            '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Camera studies</title><style>'
+            + css
+            + '</style><section><h1>Camera studies</h1><p>Six candidates per benchmark room. Labels describe the contrast measured in each gray render.</p><div class="grid">'
+            + panels
+            + '</div><a href="index.html">Return to client book</a></section></html>'
+        )
+        pages[0] += (
+            '<a href="studies.html" class="online">Open the camera and coverlet studies</a>'
+        )
+        css += "@media print{.online{display:none}}"
     footer = f"Revision {board['revision']} · {esc(board['home_id'][:12])} · Interior design presentation"
     (directory / "index.html").write_text(
         '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Studio House</title><style>'
