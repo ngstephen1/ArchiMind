@@ -1,0 +1,18 @@
+[
+  {
+    "project": "f08f4541-8845-4c8a-b430-dc3535c60542",
+    "revision": 5,
+    "home_id": "ae24e6415edc8862f1ca1db49b18c8f65e83e5ab54e10ae0214904d040807e56",
+    "manifest_sha256": "ccd37f88c10cfdccfc340cd0f31ed2823b30f053c57fc65fd4f86277307beabd",
+    "pdf": "https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r5-4K.pdf",
+    "url": "https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r5-4K.zip"
+  },
+  {
+    "project": "f08f4541-8845-4c8a-b430-dc3535c60542",
+    "revision": 6,
+    "home_id": "8a35302725a32d5fbb4a297e77c5a27f69aef6e0593817ba49c4899cc7e5ae71",
+    "manifest_sha256": "13f1b86dc42464a137528ccbd97c5ea53d01e10d19842dfdad681746c7c523bc",
+    "pdf": "https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6.pdf",
+    "url": "https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6-proof.zip"
+  }
+]

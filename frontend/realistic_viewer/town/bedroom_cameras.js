@@ -194,6 +194,45 @@ export function bedroomCameras(part, aspect = 16 / 9) {
           "No clear view of the complete subject. Showing the doorway view.",
         );
   }
+  if (room.id === "salon") {
+    const suite=furniture.find(f=>f.id==="salon-suite"), dining=furniture.find(f=>f.id==="salon-dining");
+    const subjects=[suite,dining].filter(Boolean);
+    if(subjects.length===2){
+      const pts=subjects.map(center);
+      const target=[(pts[0][0]*.54+pts[1][0]*.46),(pts[0][1]*.54+pts[1][1]*.46),1.08];
+      const candidates=[];
+      for(const x of [.24,w*.25,w*.5,w*.75,w-.24])
+        for(const y of [.24,d*.5,d-.24]){
+          const eye=[x,y,1.44];
+          if(furniture.some(f=>x>f.x_m-.18 && x<f.x_m+f.width_m+.18 && y>f.y_m-.18 && y<f.y_m+f.depth_m+.18))continue;
+          if(subjects.some(subject => furniture.some(f => !subjects.includes(f) && obstructs(eye,center(subject),bounds(f))))) continue;
+          for(const angle of [45,52,59,65]){
+            if(!fits(eye,target,subjects,aspect,angle))continue;
+            const dist=Math.hypot(x-target[0],y-target[1]);
+            const ds=pts.map(p=>Math.hypot(x-p[0],y-p[1]));
+            candidates.push({eye,angle,score:dist*Math.tan(angle*Math.PI/360) + angle*.006 - Math.min(1.5,Math.abs(ds[0]-ds[1]))*.12});
+            break;
+          }
+        }
+      candidates.sort((a,b)=>a.score-b.score);
+      if(candidates.length){
+        const chosen=candidates[0];
+        return [{id:"overview", label:"Salon and dining", eye:world(chosen.eye),target:world(target),fov:chosen.angle,reason:null},
+          detail("seating","Conversation group",[suite.id],2.8),detail("dining","Dining group",[dining.id],2.5)];
+      }
+    }
+  }
+  const ensemble = furniture.find(f => ["reading-suite", "breakfast-suite", "writing-suite"].includes(f.id));
+  if (ensemble) {
+    const companion = furniture.find(f => f.id !== ensemble.id);
+    return [detail("overview", room.name, [ensemble.id], 3.4), detail("ensemble", ensemble.name, [ensemble.id], 2.15),
+      ...(companion ? [detail(companion.id, companion.name, [companion.id], 1.9)] : [])];
+  }
+  if (room.id !== "bedroom") {
+    const primary = furniture[0], secondary = furniture[1] || primary;
+    return [overview, ...[primary, secondary].filter((f,i,a) => f && a.indexOf(f) === i).map(f =>
+      detail(f.id, f.name, [f.id], 2.25))];
+  }
   return [
     overview,
     detail("desk", "Desk and chair", ["belaya", "desk-chair"], 2.25),

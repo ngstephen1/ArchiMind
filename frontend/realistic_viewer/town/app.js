@@ -1,3 +1,6 @@
+import studioPublications from "./studio_publications.json";
+import {homeBoard} from "./home_board.js";
+import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
@@ -298,6 +301,7 @@ bind("generate", async () => {
         depth: Number(el("depth").value),
         seed: 42 + revision,
         priority: el("priority").value,
+        formal_salon: el("formalSalon").checked,
         palette: el("palette").value,
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
@@ -480,21 +484,35 @@ bind("chairApply", async () => {
 });
 
 let boardHome;
-let exportUrl;
+let exportUrl, homeUrl;
 
-function showExport(manifest, hash) {
+function showExport(manifest, hash, studio, studioHash) {
   if (exportUrl) URL.revokeObjectURL(exportUrl);
   exportUrl = URL.createObjectURL(new Blob([manifestText(manifest)], {type:"application/json"}));
   const manifestLink = node("a","Download bedroom manifest");
   manifestLink.href = exportUrl;
   manifestLink.download = "bedroom-r" + manifest.revision + "-" + hash.slice(0,12) + ".json";
-  el("boardExports").replaceChildren(manifestLink);
+  if(homeUrl) URL.revokeObjectURL(homeUrl);
+  homeUrl=URL.createObjectURL(new Blob([manifestText(studio)],{type:"application/json"}));
+  const whole=node("a","Download whole-home scene manifest");
+  whole.href=homeUrl; whole.download="home-r"+revision+"-"+boardHome.id.slice(0,12)+".json";
+  el("boardExports").replaceChildren(manifestLink, node("p",""),whole);
+  const studioRelease = publicationFor(studio, studioHash, studioPublications);
+  if (studioRelease) {
+    const pdf = node("a", "Open the whole-home client book (PDF)");
+    pdf.href = studioRelease.pdf;
+    pdf.target = "_blank";
+    pdf.rel = "noopener";
+    const pack = node("a", "Download the editable scene, images and camera studies");
+    pack.href = studioRelease.url;
+    el("boardExports").append(node("p",""), pdf, node("p",""), pack);
+  }
   const publication = publicationFor(manifest,hash);
   if (publication) {
     const link = node("a","Download the Blender scene and three finished stills");
     link.href = publication.url;
     el("boardExports").append(node("p",""),link);
-  } else {
+  } else if (!studioRelease) {
     el("boardExports").append(node("p","Offline renders have not been published for this exact revision."));
   }
 }
@@ -510,8 +528,9 @@ el("present").onclick = async () => {
   if (revision) {
     try {
       const manifest = bedroomManifest({project, revision, home: boardHome});
-      manifestDigest(manifest).then(hash => {
-        if (generation === boardGeneration) showExport(manifest,hash);
+      const studio = homeBoard({project, revision, home: boardHome});
+      Promise.all([manifestDigest(manifest), manifestDigest(studio)]).then(([hash, studioHash]) => {
+        if (generation === boardGeneration) showExport(manifest, hash, studio, studioHash);
       }).catch(() => { if (generation === boardGeneration) el("boardExports").textContent = "Revision export unavailable."; });
     } catch { el("boardExports").textContent = "Revision export unavailable."; }
   }
@@ -568,19 +587,30 @@ el("present").onclick = async () => {
             [f.width_m, f.depth_m, f.height_m]
               .map((v) => v.toFixed(2))
               .join(" × ") +
-            " m (W × D × H)",
+            ` m (W × D × H) · Room position (${f.x_m.toFixed(2)}, ${f.y_m.toFixed(2)}) m`,
         ),
       );
   }
+  el("boardRoom").replaceChildren(...h.rooms.map(p=>new Option(p.design.room.name,p.design.room.id)));
+  el("boardRoom").value="bedroom";
+  await showRoom(h,"bedroom");
+};
+el("boardRoom").onchange=()=>showRoom(boardHome,el("boardRoom").value);
+let photoSerial=0;
+async function showRoom(h,id){
+  const generation=++photoSerial;
+  const part=h.rooms.find(p=>p.design.room.id===id);
+  el("elevations").replaceChildren(node("h3",part.design.room.name+" · schematic elevations"),roomElevation(part,"north"),roomElevation(part,"east"));
+  el("printBoard").disabled=true;
   el("whyAnswer").textContent = "";
-  el("photos").textContent = "Rendering bedroom views…";
+  el("photos").textContent = "Rendering "+part.design.room.name+" views…";
   try {
-    const { images, views, chair, desk, collection } = await world.bedroomViews(h);
-    if (boardGeneration !== generation || !el("board").open) return;
+    const { images, views, chair, desk, collection } = await world.bedroomViews(h,id);
+    if (photoSerial !== generation || !el("board").open) return;
     el("photos").replaceChildren();
-    if (desk === "placeholder") el("photos").append(node("p", "Belaya mesh unavailable. A placeholder marks its reservation."));
-    if (collection === "placeholder") el("photos").append(node("p","Bedroom collection mesh unavailable. A procedural piece marks its reservation."));
-    if (chair === "placeholder")
+    if (id==="bedroom" && desk === "placeholder") el("photos").append(node("p", "Belaya mesh unavailable. A placeholder marks its reservation."));
+    if (id==="bedroom" && collection === "placeholder") el("photos").append(node("p","Bedroom collection mesh unavailable. A procedural piece marks its reservation."));
+    if (id==="bedroom" && chair === "placeholder")
       el("photos").append(node("p", "Designer chair unavailable in these views. The procedural chair marks its reservation."));
     images.forEach((src, i) => {
       const fig = document.createElement("figure"),
@@ -591,11 +621,11 @@ el("present").onclick = async () => {
       el("photos").append(fig);
     });
   } catch {
-    if (boardGeneration !== generation || !el("board").open) return;
+    if (photoSerial !== generation || !el("board").open) return;
     el("photos").textContent =
-      "Bedroom views could not be rendered on this device.";
+      "Room views could not be rendered on this device.";
   } finally {
-    if (generation === boardGeneration) el("printBoard").disabled = false;
+    if (generation === photoSerial) el("printBoard").disabled = false;
   }
 };
 el("askWhy").onclick = () =>
