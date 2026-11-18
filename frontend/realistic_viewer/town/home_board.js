@@ -1,6 +1,6 @@
 import { bedroomManifest } from "./bedroom_manifest.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
-import { studioFinishes,studioFurniture } from "./studio_furniture.js";
+import { studioFinishes,studioFurniture,salonDetails } from "./studio_furniture.js";
 
 export function homeBoard(snapshot) {
   const bedroom = bedroomManifest(snapshot);
@@ -12,7 +12,7 @@ export function homeBoard(snapshot) {
     finishes:studioFinishes, bedroom,
     rooms:snapshot.home.rooms.map(part => {
       const {room,furniture}=part.design;
-      return {room, origin:part.origin, furniture:furniture.map(f=>({...f,
+      return {room, origin:part.origin, details:salonDetails(part), furniture:furniture.map(f=>({...f,
         parts:studio && room.id!=="bedroom" ? studioFurniture(f):[]})),
         cameras:bedroomCameras(part)};
     })

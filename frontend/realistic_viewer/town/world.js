@@ -1,5 +1,5 @@
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
-import { studioFurniture, studioFinishes } from "./studio_furniture.js";
+import { studioFurniture, studioFinishes, salonDetails } from "./studio_furniture.js";
 import * as T from "three";
 import { bedroomSurfaces, finishBedroomConcept, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
@@ -812,6 +812,14 @@ export function createTown(canvas, status, action) {
         0.012,
         "#ba7e5c",
       );
+      function studioPiece(p) {
+        const [w,d,h]=p.wdh,[x,y,z]=p.xyz;
+        const rounded=p.shape==="sphere" || p.shape==="cylinder";
+        const geom=p.shape==="sphere"?new T.SphereGeometry(.5,20,12):p.shape==="cylinder"?new T.CylinderGeometry(.5,.5,1,24):new RoundedBoxGeometry(w,h,d,2,p.radius);
+        const obj=mesh(group,geom,studioFinishes[p.finish],x,z,-y);
+        if(rounded)obj.scale.set(w,h,d);
+      }
+      salonDetails(part).forEach(studioPiece);
       for (const f of part.design.furniture) {
         const x = f.x_m + f.width_m / 2,
           z = -f.y_m - f.depth_m / 2,
@@ -821,10 +829,7 @@ export function createTown(canvas, status, action) {
         indoor.push([ox + f.x_m, -oy - f.y_m - d, ox + f.x_m + w, -oy - f.y_m]);
         const pieces = r.id !== "bedroom" && h.rooms.some((p) => p.design.room.id === "salon") ? studioFurniture(f) : [];
         if (pieces.length) {
-          for (const p of pieces) {
-            const [w,d,h] = p.wdh, [x,y,z] = p.xyz;
-            mesh(group, new RoundedBoxGeometry(w,h,d,2,p.radius), studioFinishes[p.finish],x,z,-y);
-          }
+          pieces.forEach(studioPiece);
           continue;
         }
         if (f.id === "queen-bed") {

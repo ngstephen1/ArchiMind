@@ -5,6 +5,7 @@ import hashlib
 import json
 import math
 import sys
+import time
 import tempfile
 from pathlib import Path
 
@@ -34,6 +35,105 @@ def camera(view, name):
     obj.location = convert(view["eye"])
     bedroom.aim(obj, convert(view["target"]))
     return obj
+
+
+def studio_piece(piece, finishes):
+    name, mat, dims = piece["name"], finishes[piece["finish"]], piece["wdh"]
+    if piece["shape"] == "sphere":
+        bpy.ops.mesh.primitive_uv_sphere_add(
+            segments=24, ring_count=14, radius=0.5, location=piece["xyz"]
+        )
+    elif piece["shape"] == "cylinder":
+        bpy.ops.mesh.primitive_cylinder_add(
+            vertices=32, radius=0.5, depth=1, location=piece["xyz"]
+        )
+    else:
+        return bedroom.box(name, piece["xyz"], dims, mat, piece["radius"])
+    obj = bpy.context.object
+    obj.name = name
+    obj.dimensions = dims
+    obj.data.materials.append(mat)
+    for poly in obj.data.polygons:
+        poly.use_smooth = len(poly.vertices) <= 4
+    return obj
+
+
+def gray_studies(scene, board, out):
+    """Six unobstructed eye positions per benchmark room, all inside its shell."""
+    previous = scene.camera
+    width, height = scene.render.resolution_x, scene.render.resolution_y
+    count = scene.cycles.samples
+    scene.render.resolution_x, scene.render.resolution_y = 480, 270
+    scene.cycles.samples = 4
+    scene.view_layers[0].material_override = bedroom.surface("Gray model", "BEBEBA")
+    for part in board["rooms"]:
+        room = part["room"]
+        if room["id"] not in ("bedroom", "salon"):
+            continue
+        w, d = room["width_m"], room["depth_m"]
+        focus = part["cameras"][0]["target"]
+        poses = []
+        for sx, sy in [
+            (0, 0),
+            (1, 0),
+            (1, 1),
+            (0, 1),
+            (0.5, 0),
+            (0, 0.5),
+            (0.5, 1),
+            (1, 0.5),
+            (0.25, 0.25),
+            (0.75, 0.75),
+            (0.25, 0.75),
+            (0.75, 0.25),
+        ]:
+            x = 0.24 + sx * (w - 0.48)
+            y = 0.24 + sy * (d - 0.48)
+            if any(
+                f["x_m"] - 0.16 < x < f["x_m"] + f["width_m"] + 0.16
+                and f["y_m"] - 0.16 < y < f["y_m"] + f["depth_m"] + 0.16
+                for f in part["furniture"]
+            ):
+                continue
+            poses.append([part["origin"][0] + x, 1.52, -(part["origin"][1] + y)])
+        for index, eye in enumerate(poses[:6]):
+            name = f"study-{room['id']}-{index + 1}"
+            scene.camera = camera({"eye": eye, "target": focus, "fov": 58}, name)
+            scene.render.filepath = str(out / (name + ".png"))
+            bpy.ops.render.render(write_still=True)
+    scene.camera = previous
+    scene.view_layers[0].material_override = None
+    scene.render.resolution_x, scene.render.resolution_y = width, height
+    scene.cycles.samples = count
+
+
+def sample_benchmark(scene, out):
+    """Compare linear RGB on the central salon detail against the 512-sample crop."""
+    scene.render.use_border = scene.render.use_crop_to_border = True
+    scene.render.border_min_x, scene.render.border_max_x = 0.42, 0.54
+    scene.render.border_min_y, scene.render.border_max_y = 0.38, 0.56
+    scene.render.image_settings.file_format = "OPEN_EXR"
+    crops = {}
+    timings = {}
+    for samples in (128, 256, 512):
+        scene.cycles.samples = samples
+        path = out / f"benchmark-{samples}.exr"
+        scene.render.filepath = str(path)
+        start = time.monotonic()
+        bpy.ops.render.render(write_still=True)
+        timings[samples] = round(time.monotonic() - start, 2)
+        img = bpy.data.images.load(str(path))
+        crops[samples] = list(img.pixels)[::16]
+        bpy.data.images.remove(img)
+    errors = {}
+    for n, vals in crops.items():
+        err = sorted(abs(a - b) for a, b in zip(vals, crops[512], strict=True))
+        errors[n] = err[int(0.95 * (len(err) - 1))]
+    selected = next(n for n in (128, 256, 512) if errors[n] <= 0.015)
+    scene.render.use_border = scene.render.use_crop_to_border = False
+    scene.render.image_settings.file_format = "PNG"
+    scene.cycles.samples = selected
+    return {"max_samples": selected, "seconds": timings, "p95_linear_red_error": errors}
 
 
 def render(args):
@@ -92,15 +192,11 @@ def render(args):
         if room["id"] != "bedroom":
             before = set(bpy.data.objects)
             bedroom.architecture(room, mats)
+            for piece in part["details"]:
+                studio_piece(piece, finishes)
             for item in part["furniture"]:
                 for piece in item["parts"]:
-                    bedroom.box(
-                        item["name"] + " / " + piece["name"],
-                        piece["xyz"],
-                        piece["wdh"],
-                        finishes[piece["finish"]],
-                        piece["radius"],
-                    )
+                    studio_piece(piece, finishes)
                 if not item["parts"]:
                     bedroom.box(
                         "Reservation / " + item["name"],
@@ -117,18 +213,6 @@ def render(args):
                     x = item["x_m"] + item["width_m"] / 2
                     y = item["y_m"] + item["depth_m"] / 2
                     for dx in (-0.42, 0, 0.42):
-                        bedroom.box(
-                            "Pendant suspension",
-                            (x + dx, y, 2.48),
-                            (0.012, 0.012, 0.64),
-                            finishes["brass"],
-                        )
-                        bpy.ops.mesh.primitive_uv_sphere_add(
-                            radius=0.11, location=(x + dx, y, 2.1)
-                        )
-                        globe = bpy.context.object
-                        globe.name = "Opal pendant"
-                        globe.data.materials.append(mats["ivory"])
                         bedroom.light(
                             "Pendant practical",
                             (x + dx, y, 1.98),
@@ -177,9 +261,18 @@ def render(args):
     scene = bpy.context.scene
     assert scene["board_sha256"] == hashlib.sha256(source).hexdigest()
 
+    gray_studies(scene, board, out)
+    benchmark = sample_benchmark(scene, out) if not args.proof else None
+
     def photo(name):
         scene.render.filepath = str(out / (name + ".png"))
         bpy.ops.render.render(write_still=True)
+        if not args.proof:
+            scene.render.image_settings.file_format = "OPEN_EXR"
+            bpy.data.images["Render Result"].save_render(
+                str(out / (name + ".exr")), scene=scene
+            )
+            scene.render.image_settings.file_format = "PNG"
 
     for room, name in views:
         scene.camera = bpy.data.objects[name]
@@ -205,6 +298,7 @@ def render(args):
                 "manifest_sha256": scene["board_sha256"],
                 "devices": devices or ["CPU"],
                 "samples": scene.cycles.samples,
+                "benchmark": benchmark,
                 "size": [scene.render.resolution_x, scene.render.resolution_y],
                 "files": {p.name: bedroom.sha(p) for p in out.iterdir() if p.is_file()},
             },
