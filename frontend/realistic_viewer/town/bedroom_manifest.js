@@ -1,5 +1,6 @@
 import { bedroomCameras } from "./bedroom_cameras.js";
 import { PRODUCT_ASSETS, productSceneAdmission, productSceneBudget, validateProductBindings } from "../src/product_assets.js";
+import surfaces from "./materials/bedroom-sources.json" with { type: "json" };
 import publications from "./bedroom_publications.json" with { type: "json" };
 
 const bedDesk = PRODUCT_ASSETS["abo-b074l4976t-amazon-co-uk"];
@@ -49,6 +50,7 @@ export function bedroomManifest({project, revision, home}) {
     ({id,label,eye_xyz_m:fromThree(eye),target_xyz_m:fromThree(target),vertical_fov_degrees:fov,reason}));
   return {schema_version:1, project, revision, home_id:home.id, palette:home.palette,
     coordinates:"Bedroom-local metres: +X east, +Y north, +Z up", origin_xy_m:bedroom.origin,
+    surface_sources:surfaces.map(({asset,local,sha256,source_sha256})=>({asset,local,sha256,source_sha256})),
     room:structuredClone(room), furniture:items, cameras};
 }
 

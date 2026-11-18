@@ -1,0 +1,216 @@
+{
+  "cameras": [
+    {
+      "eye_xyz_m": [
+        5.087,
+        2.8465,
+        1.57
+      ],
+      "id": "doorway",
+      "label": "Doorway",
+      "reason": null,
+      "target_xyz_m": [
+        1.0113500000000002,
+        5.17335,
+        0.58
+      ],
+      "vertical_fov_degrees": 69
+    },
+    {
+      "eye_xyz_m": [
+        2.83,
+        0.2999999999999998,
+        1.57
+      ],
+      "id": "desk",
+      "label": "Desk and chair",
+      "reason": null,
+      "target_xyz_m": [
+        4.57,
+        1.640468294322491,
+        0.5535709201097488
+      ],
+      "vertical_fov_degrees": 58
+    },
+    {
+      "eye_xyz_m": [
+        2.83,
+        4.900000000000001,
+        1.57
+      ],
+      "id": "bedside",
+      "label": "Bedside",
+      "reason": null,
+      "target_xyz_m": [
+        1.8800000000000001,
+        6.178,
+        0.742
+      ],
+      "vertical_fov_degrees": 58
+    }
+  ],
+  "coordinates": "Bedroom-local metres: +X east, +Y north, +Z up",
+  "furniture": [
+    {
+      "center_floor_xyz_m": [
+        4.57,
+        2.0009365886449815,
+        0
+      ],
+      "footprint_xy_m": [
+        3.77,
+        1.6
+      ],
+      "id": "belaya",
+      "name": "Belaya writing desk",
+      "reservation_wdh_m": [
+        1.6,
+        0.8018731772899628,
+        0.7516312003135682
+      ],
+      "rotation_deg": 0,
+      "source": {
+        "id": "abo-b074l4976t-amazon-co-uk",
+        "kind": "catalog",
+        "sha256": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+        "translation_m": [
+          0,
+          0.08341898024082184,
+          0
+        ],
+        "version": "1.0.0"
+      }
+    },
+    {
+      "center_floor_xyz_m": [
+        0.8,
+        5.393,
+        0
+      ],
+      "footprint_xy_m": [
+        0,
+        4.393
+      ],
+      "id": "queen-bed",
+      "name": "Queen Bed",
+      "reservation_wdh_m": [
+        1.6,
+        2,
+        0.6
+      ],
+      "rotation_deg": 0,
+      "source": null
+    },
+    {
+      "center_floor_xyz_m": [
+        4.57,
+        1.28,
+        0
+      ],
+      "footprint_xy_m": [
+        4.33,
+        1.02
+      ],
+      "id": "desk-chair",
+      "name": "Oak writing chair with sage upholstery",
+      "reservation_wdh_m": [
+        0.48,
+        0.52,
+        0.83
+      ],
+      "rotation_deg": 180,
+      "source": {
+        "id": "oak-sage-writing-chair",
+        "kind": "concept",
+        "sha256": "609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258",
+        "translation_m": [
+          0,
+          0,
+          0
+        ],
+        "version": "1.1.0"
+      }
+    },
+    {
+      "center_floor_xyz_m": [
+        1.8800000000000001,
+        6.178,
+        0
+      ],
+      "footprint_xy_m": [
+        1.6400000000000001,
+        5.963
+      ],
+      "id": "bedside-lamp",
+      "name": "Nightstand with reading lamp",
+      "reservation_wdh_m": [
+        0.48,
+        0.43,
+        1.06
+      ],
+      "rotation_deg": 0,
+      "source": null
+    }
+  ],
+  "home_id": "e47e0e25b822d13eb73f7df992aa28fa6d2d289aca037482b75da59d5d2ea799",
+  "origin_xy_m": [
+    0,
+    6.607
+  ],
+  "palette": "oak",
+  "project": "26bda387-7853-4fa9-99b7-13d6c1064de7",
+  "revision": 3,
+  "room": {
+    "ceiling_height_m": 2.8,
+    "depth_m": 6.393,
+    "doors": [
+      {
+        "height_m": 2.15,
+        "id": "bedroom-door",
+        "offset_m": 2.6464999999999996,
+        "wall": "east",
+        "width_m": 1.1
+      }
+    ],
+    "id": "bedroom",
+    "name": "Bedroom",
+    "width_m": 5.827,
+    "windows": [
+      {
+        "height_m": 1.15,
+        "id": "bedroom-window",
+        "offset_m": 2.4965,
+        "sill_height_m": 1,
+        "wall": "west",
+        "width_m": 1.4
+      }
+    ]
+  },
+  "schema_version": 1,
+  "surface_sources": [
+    {
+      "asset": "oak_veneer_01",
+      "local": "oak-veneer-512.jpg",
+      "sha256": "a47e7b1de36638bbe6945cf2154140211d1f7c76ecf24cd317a3201735c0f32d",
+      "source_sha256": "c14681f72f59f17bff568cae7a837641443b607b899f0c279cd64a5638f877a7"
+    },
+    {
+      "asset": "rough_linen",
+      "local": "linen-normal-256.jpg",
+      "sha256": "79f4699154defeeeecc01b6fa50ce026e866922fefc805c943164d9981bfcdf4",
+      "source_sha256": "e2402166d1a489f7414814e69e1836ab672aa24e30bec2d41fea356f81687e53"
+    },
+    {
+      "asset": "urban_courtyard_02",
+      "local": "courtyard-256.hdr",
+      "sha256": "ed2d9a91852dcf21d1340ce1958c37f39b33d16189092b05d106ec6b4ac1f64e",
+      "source_sha256": "e67375321c7c2f413bc1a2855f9e4b391181a40fd6a34058bb7fac410d03b59e"
+    },
+    {
+      "asset": "rough_linen",
+      "local": "linen-weave-512.jpg",
+      "sha256": "1a72bc0366e14394ffb109132a4c98c091b9954c2c3b7b9cb89242238939ca61",
+      "source_sha256": "04897d7611d7390ddf5b2c6f7273f448dfc48341fdbd1f4f207fa30b331d7f57"
+    }
+  ]
+}

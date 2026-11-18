@@ -53,7 +53,7 @@ def box(name, location, dimensions, mat, bevel=0):
 
 
 def material_image(row, directory):
-    original = directory / row["asset"]
+    original = directory / row["source_sha256"]
     if original.is_file() and sha(original) == row["source_sha256"]:
         return original
     thumbnail = SURFACES / row["local"]
@@ -62,7 +62,7 @@ def material_image(row, directory):
     return thumbnail
 
 
-def texture(mat, image, period, normal=False):
+def texture(mat, image, period, normal=False, tint=False):
     # Object coordinates in metres keep the grain consistent across boards.
     tree = mat.node_tree
     uv = tree.nodes.new("ShaderNodeTexCoord")
@@ -81,6 +81,18 @@ def texture(mat, image, period, normal=False):
         bump.inputs["Strength"].default_value = 0.27
         tree.links.new(tex.outputs["Color"], bump.inputs["Color"])
         tree.links.new(bump.outputs["Normal"], shader.inputs["Normal"])
+    elif tint:
+        # Convert source luminance to a neutral weave so the saved fabric hue survives.
+        neutral = tree.nodes.new("ShaderNodeValToRGB")
+        neutral.color_ramp.elements[0].color = (0.55, 0.55, 0.55, 1)
+        neutral.color_ramp.elements[1].color = (1, 1, 1, 1)
+        tree.links.new(tex.outputs["Color"], neutral.inputs[0])
+        blend = tree.nodes.new("ShaderNodeMixRGB")
+        blend.blend_type = "MULTIPLY"
+        blend.inputs[0].default_value = 1
+        blend.inputs[1].default_value = shader.inputs["Base Color"].default_value
+        tree.links.new(neutral.outputs["Color"], blend.inputs[2])
+        tree.links.new(blend.outputs[0], shader.inputs["Base Color"])
     else:
         tree.links.new(tex.outputs["Color"], shader.inputs["Base Color"])
 
@@ -335,7 +347,7 @@ def load_furniture(item, registry, materials):
     return digest
 
 
-def render(manifest_path, output, originals):
+def render(manifest_path, output, originals, inspect_only=False):
     manifest = json.loads(manifest_path.read_bytes())
     if manifest.get("schema_version") != 1 or manifest.get("revision", 0) < 1:
         raise ValueError("A version 1 applied bedroom manifest is required")
@@ -373,18 +385,25 @@ def render(manifest_path, output, originals):
     rows = json.loads((SURFACES / "bedroom-sources.json").read_text())
     images = {}
     surface_hashes = {}
+    expected = [
+        {key: row[key] for key in ("asset", "local", "sha256", "source_sha256")}
+        for row in rows
+    ]
+    if manifest["surface_sources"] != expected:
+        raise ValueError("Saved surface sources differ from this renderer checkout")
     for row in rows:
         file = material_image(row, originals)
-        images[row["asset"]] = bpy.data.images.load(str(file))
-        surface_hashes[row["asset"]] = sha(file)
-    images["rough_linen"].colorspace_settings.name = "Non-Color"
-    texture(m["oak"], images["oak_veneer_01"], 1.8)
+        images[row["local"]] = bpy.data.images.load(str(file))
+        surface_hashes[row["local"]] = sha(file)
+    images["linen-normal-256.jpg"].colorspace_settings.name = "Non-Color"
+    texture(m["oak"], images["oak-veneer-512.jpg"], 1.8)
     for mat in (m["rug"], m["linen"]):
-        texture(mat, images["rough_linen"], 0.30, normal=True)
+        texture(mat, images["linen-normal-256.jpg"], 0.30, normal=True)
+    texture(m["linen"], images["linen-weave-512.jpg"], 0.30, tint=True)
     scene.world = bpy.data.worlds.new("Courtyard daylight")
     scene.world.use_nodes = True
     env = scene.world.node_tree.nodes.new("ShaderNodeTexEnvironment")
-    env.image = images["urban_courtyard_02"]
+    env.image = images["courtyard-256.hdr"]
     bg = scene.world.node_tree.nodes.get("Background")
     scene.world.node_tree.links.new(env.outputs["Color"], bg.inputs["Color"])
     bg.inputs["Strength"].default_value = 0.8
@@ -397,6 +416,13 @@ def render(manifest_path, output, originals):
         for a in registry_data.get(key, [])
     }
     used = {f["id"]: load_furniture(f, registry, m) for f in manifest["furniture"]}
+    for mat in bpy.data.materials:
+        name = mat.name.split(".")[0]
+        if name == "Oiled oak":
+            texture(mat, images["oak-veneer-512.jpg"], 1.8)
+        if name in {"Oat upholstery", "Ivory linen", "Sage linen"}:
+            texture(mat, images["linen-weave-512.jpg"], 0.30, tint=True)
+            texture(mat, images["linen-normal-256.jpg"], 0.30, normal=True)
     for f in manifest["furniture"]:
         if f["id"] == "queen-bed":
             x, y = f["footprint_xy_m"]
@@ -446,6 +472,10 @@ def render(manifest_path, output, originals):
     # Reopen the portable scene before producing the downloadable images.
     bpy.ops.wm.open_mainfile(filepath=str(output / "bedroom.blend"))
     scene = bpy.context.scene
+    if scene["manifest_sha256"] != sha(manifest_path):
+        raise ValueError("Saved scene identity changed")
+    if inspect_only:
+        return
     for cam in manifest["cameras"]:
         scene.camera = bpy.data.objects[cam["id"]]
         scene.render.filepath = str(output / (cam["id"] + ".png"))
@@ -469,4 +499,8 @@ def render(manifest_path, output, originals):
 
 
 if __name__ == "__main__":
-    render(*(Path(arg).resolve() for arg in sys.argv[sys.argv.index("--") + 1 :]))
+    args = sys.argv[sys.argv.index("--") + 1 :]
+    render(
+        *(Path(arg).resolve() for arg in args[:3]),
+        inspect_only=args[3:] == ["--inspect-only"],
+    )

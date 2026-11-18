@@ -40,8 +40,14 @@ jobs:
                   print(f"Using checked-in derivative of {source['asset']}: {exc}")
                   continue
               assert len(data)==source["source_bytes"] and hashlib.sha256(data).hexdigest()==source["source_sha256"]
-              (directory/source["asset"]).write_bytes(data)
+              (directory/source["source_sha256"]).write_bytes(data)
           PY
+      - name: Reopen the earlier gentle and deep applied chair revisions
+        run: |
+          for revision in 2 3; do
+            "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" --background --factory-startup --python-exit-code 1 \
+              --python scripts/render_saved_bedroom.py -- "design/bedroom-showcase/history/r$revision.json" "$RUNNER_TEMP/r$revision" "$RUNNER_TEMP/surfaces" --inspect-only
+          done
       - name: Reconstruct, reopen and render the applied revision
         run: |
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" --background --factory-startup --python-exit-code 1 \
