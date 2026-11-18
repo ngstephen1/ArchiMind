@@ -1,0 +1,46 @@
+name: Town bedroom browser
+on:
+  pull_request:
+    paths:
+      - frontend/realistic_viewer/town/**
+      - scripts/check_bedroom_walkthrough.py
+      - .github/workflows/town-bedroom.yml
+  workflow_dispatch:
+concurrency:
+  group: town-bedroom-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  bedroom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "20"
+      - name: Prepare local Town and browser driver
+        run: |
+          python -m pip install -e . -r services/town/requirements.txt playwright==1.56.0
+          npm ci --prefix frontend/realistic_viewer --ignore-scripts
+          TOWN_MODE=local node frontend/realistic_viewer/town/build.mjs
+      - name: Capture and check seed 42
+        env:
+          TOWN_MODE: local
+          TOWN_STATIC: ${{ github.workspace }}/dist/town
+          TOWN_DB: ${{ runner.temp }}/bedroom-check.sqlite3
+        run: |
+          python -c 'from archimind.town.service import initialize; initialize()'
+          python -m archimind.town.worker & worker=$!
+          python -m uvicorn archimind.town.api:app --port 8790 & api=$!
+          trap 'kill "$worker" "$api" 2>/dev/null || true' EXIT
+          curl --retry 10 --retry-delay 1 --retry-connrefused -fsS http://127.0.0.1:8790/health
+          python scripts/check_bedroom_walkthrough.py --output "$RUNNER_TEMP/bedroom-photos"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: town-bedroom-photos
+          path: ${{ runner.temp }}/bedroom-photos/

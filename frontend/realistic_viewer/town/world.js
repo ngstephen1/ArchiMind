@@ -1,4 +1,6 @@
 import * as T from "three";
+import { bedroomSurfaces, finishBedroomConcept, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
+import { bedroomCameras } from "./bedroom_cameras.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import {
@@ -278,7 +280,8 @@ export function createTown(canvas, status, action) {
     }
   }
   for (let i = 0; i < 12; i++) tree(-36 + i * 6.5, 13 + (i % 2), i);
-  for (let i = 0; i < 8; i++) tree(-31 + i * 9, -12.5, i + 3);
+  // The north row sits beyond both the 16 m maximum house and the rear shops.
+  for (let i = 0; i < 8; i++) tree(-31 + i * 9, -28, i + 3);
   for (const x of [-7, 9]) {
     solid(street, x, 0.5, 4, 2, 0.14, 0.53, "#855f40", obstacles);
     for (const dx of [-0.76, 0.76])
@@ -390,12 +393,37 @@ export function createTown(canvas, status, action) {
     lastY,
     phase = 0,
     generation = 0,
+    deskReady = Promise.resolve(),
     collectionReady = Promise.resolve("procedural"),
     chairReady = Promise.resolve("procedural");
   const roomJump = document.getElementById("roomJump");
+  const photoControls = document.getElementById("photoControls");
+  const photoView = document.getElementById("photoView");
+  const photoReason = document.getElementById("photoReason");
+  let preset = null;
+  function selectPhoto() {
+    const part = home?.rooms.find((p) => p.design.room.id === "bedroom");
+    preset = (photoView.value && part)
+      ? bedroomCameras(part, camera.aspect).find((item) => item.id === photoView.value)
+      : null;
+    photoReason.textContent = preset?.reason || "";
+    canvas.dataset.camera = preset?.id || "walking";
+    look = false;
+    keys.clear();
+  }
+  photoView.onchange = () => {
+    selectPhoto();
+    if (!preset) canvas.focus();
+  };
+  function walkView() {
+    if (!preset) return;
+    photoView.value = "";
+    selectPhoto();
+  }
   roomJump.onchange = () => {
     const part = home.rooms.find((r) => r.design.room.id === roomJump.value);
     if (!inside || !part) return;
+    walkView();
     const r = part.design.room,
       door = r.doors[0],
       fromWest = door.wall === "west";
@@ -465,6 +493,7 @@ export function createTown(canvas, status, action) {
       ? Math.hypot(pos.x - doorX, pos.z) < 1.8
       : Math.hypot(pos.x - doorX, pos.z) < 2.5;
   function enter(value) {
+    walkView();
     inside = value;
     hero.visible = !inside;
     street.visible = true;
@@ -477,7 +506,8 @@ export function createTown(canvas, status, action) {
   }
   function refresh() {
     const text = inside ? "Exit house" : "Enter house",
-      place = inside ? roomName || "Entrance hall" : "Market Square";
+      place = preset ? "Bedroom" : inside ? roomName || "Entrance hall" : "Market Square";
+    photoControls.hidden = !inside;
     if (roomJump.hidden === inside) roomJump.hidden = !inside;
     if (action.textContent !== text) action.textContent = text;
     if (action.disabled === near()) action.disabled = !action.disabled;
@@ -509,6 +539,7 @@ export function createTown(canvas, status, action) {
     const geometries = new Set(),
       materials = new Set();
     g.traverse((o) => {
+      if (o.isSpotLight) o.shadow.dispose();
       if (o.userData.nativeSource || !o.isMesh) return;
       if (o.isInstancedMesh) o.dispose();
       if (o.geometry !== unit) geometries.add(o.geometry);
@@ -517,7 +548,7 @@ export function createTown(canvas, status, action) {
     });
     geometries.forEach((v) => v.dispose());
     materials.forEach((v) => {
-      v.map?.dispose();
+      if (!v.userData.townSharedMaps) v.map?.dispose();
       v.bumpMap?.dispose();
       v.dispose();
     });
@@ -557,7 +588,9 @@ export function createTown(canvas, status, action) {
       m.bumpScale = woven ? 0.0018 : 0.0024;
     }
   }
+  const surfaces = bedroomSurfaces(renderer, mats);
   function load(h) {
+    walkView();
     generation++;
     const epoch = generation;
     const selectedLoads = [];
@@ -566,7 +599,8 @@ export function createTown(canvas, status, action) {
       if (!binding) return;
       canvas.dataset.collection = "loading";
       selectedLoads.push(fitBedroomChair(
-        loadBedroomConcept(binding, new URL("./assets/", document.baseURI)),
+        Promise.all([loadBedroomConcept(binding, new URL("./assets/", document.baseURI)), surfaces.ready])
+          .then(([model]) => finishBedroomConcept(model, surfaces)),
         fallback, item, -1, () => generation === epoch, clear,
       ).then(status => {
         if (status === "verified") clear(fallback);
@@ -576,6 +610,7 @@ export function createTown(canvas, status, action) {
     home = h;
     canvas.dataset.chair = "procedural";
     chairReady = Promise.resolve("procedural");
+    deskReady = Promise.resolve();
     clear(interior);
     clear(hero);
     indoor.length = 0;
@@ -758,72 +793,8 @@ export function createTown(canvas, status, action) {
             block(group, x, 0.016, -z - 0.125, 0.006, 0.003, 0.25, "#a78c6f");
         }
       }
-      for (const win of r.windows) {
-        const xx = win.wall === "east" ? r.width_m : 0,
-          zz = -win.offset_m - win.width_m / 2;
-        if (r.id === "bedroom") {
-          const inner = xx === 0 ? 0.12 : xx - 0.12;
-          const light = new T.PointLight(0xffeed1, 18, 9, 2);
-          light.position.set(inner, win.sill_height_m + win.height_m * 0.6, zz);
-          group.add(light);
-          block(
-            group,
-            inner,
-            2.38,
-            zz,
-            0.05,
-            0.05,
-            win.width_m + 0.42,
-            "#9a7546",
-          );
-          for (const side of [-1, 1])
-            for (let fold = 0; fold < 7; fold++)
-              block(
-                group,
-                inner + 0.018 * Math.cos(fold),
-                1.29,
-                zz + side * (win.width_m / 2 + 0.16 - fold * 0.046),
-                0.042,
-                2.12,
-                0.056,
-                fold % 2 ? "#d5c9b5" : "#e9e1cd",
-              );
-        }
-        const pane = block(
-          group,
-          xx,
-          win.sill_height_m + win.height_m / 2,
-          zz,
-          0.025,
-          win.height_m,
-          win.width_m,
-          "#aac9ce",
-        );
-        pane.material.transparent = true;
-        pane.material.opacity = 0.22;
-        pane.material.depthWrite = false;
-        pane.castShadow = false;
-        block(
-          group,
-          xx,
-          win.sill_height_m,
-          zz,
-          0.19,
-          0.07,
-          win.width_m + 0.1,
-          "#e8dec9",
-        );
-        block(
-          group,
-          xx,
-          win.sill_height_m + win.height_m / 2,
-          zz,
-          0.09,
-          win.height_m,
-          0.045,
-          "#efe9dc",
-        );
-      }
+      for (const win of r.windows)
+        furnishedWindow(group, r, win, surfaces, block);
       // Wall-mounted print, clear of the window and of the circulation door.
       const artX = r.width_m * 0.51;
       block(group, artX, 1.55, -r.depth_m + 0.055, 1.05, 0.73, 0.06, "#6e5541");
@@ -851,7 +822,7 @@ export function createTown(canvas, status, action) {
             right = Math.min(r.width_m - 0.06, f.x_m + w + 0.58);
           const front = Math.max(0.06, f.y_m - 0.55),
             back = Math.min(r.depth_m - 0.06, f.y_m + d * 0.72);
-          block(
+          const rug = block(
             group,
             (left + right) / 2,
             0.027,
@@ -861,6 +832,7 @@ export function createTown(canvas, status, action) {
             back - front,
             "#bd9471",
           );
+          scaledUV(rug, [0.30 * 1024 / 1026, 0.30]);
           for (const edge of [front + 0.048, back - 0.048])
             block(
               group,
@@ -910,7 +882,9 @@ export function createTown(canvas, status, action) {
         } else if (f.id === "bedside-lamp") {
           const fallback = new T.Group();
           group.add(fallback);
-          block(fallback, x, 0.28, z, w, 0.56, d, "#966d48").material = oak;
+          const cabinet = block(fallback, x, 0.28, z, w, 0.56, d, "#966d48");
+          cabinet.material = surfaces.veneer;
+          scaledUV(cabinet, [1.8, 1.8]);
           block(fallback, x, 0.36, z + d * 0.49, 0.13, 0.025, 0.018, "#9a7546");
           mesh(
             fallback,
@@ -945,7 +919,7 @@ export function createTown(canvas, status, action) {
             canvas.dataset.desk = "placeholder";
             continue;
           }
-          deskSource()
+          deskReady = deskSource()
             .then((model) => {
               if (epoch !== generation) return;
               const obj = nativeProductInstance(model, f, record);
@@ -1107,7 +1081,7 @@ export function createTown(canvas, status, action) {
     if (ok(pos.x, pos.z + dz)) pos.z += dz;
   }
   const active = () =>
-    !document.querySelector("dialog[open]") &&
+    !preset && !document.querySelector("dialog[open]") &&
     !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
   window.addEventListener("keydown", (e) => {
     if (!active()) return;
@@ -1132,6 +1106,7 @@ export function createTown(canvas, status, action) {
   window.addEventListener("keyup", (e) => keys.delete(e.code));
   window.addEventListener("blur", () => keys.clear());
   canvas.onpointerdown = (e) => {
+    if (preset) return;
     look = true;
     canvas.setPointerCapture(e.pointerId);
     lastX = e.clientX;
@@ -1160,6 +1135,7 @@ export function createTown(canvas, status, action) {
   new ResizeObserver(() => {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
+    if (preset) selectPhoto();
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
   }).observe(canvas);
   let before = performance.now();
@@ -1232,74 +1208,66 @@ export function createTown(canvas, status, action) {
       roomName = part?.design.room.name || "Entrance hall";
     }
     refresh();
+    if (preset) {
+      camera.position.fromArray(preset.eye);
+      camera.lookAt(...preset.target);
+    }
+    const fov = preset?.fov || 61;
+    if (camera.fov !== fov) {
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+    }
+    scene.environment = (inside && surfaces.environment) || map.texture;
     renderer.render(scene, camera);
   });
   return {
     load,
     async bedroomViews(snapshot) {
-      const original = home,
-        wasInside = inside,
-        eye = pos.clone(),
-        heading = yaw,
-        tilt = pitch;
+      const original = home, originalPreset = photoView.value;
+      const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
+      if (home !== snapshot) load(snapshot);
+      const epoch = generation;
       try {
-        if (home !== snapshot) load(snapshot);
-        try {
-          await deskSource();
-        } catch {
-          /* Keep the labeled placeholder. */
-        }
+        await deskReady;
         const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
-        if (home !== snapshot) throw Error("Presentation source changed.");
-        enter(true);
-        roomJump.value = "bedroom";
-        roomJump.onchange();
-        const part = home.rooms.find((p) => p.design.room.id === "bedroom");
-        const items = part.design.furniture;
-        const photo = (point, target) => {
-          const cam = new T.PerspectiveCamera(70, 1.6, 0.04, 130);
-          cam.position.copy(point);
-          cam.lookAt(target);
-          const size = renderer.getSize(new T.Vector2());
-          renderer.setSize(960, 600, false);
-          try {
+        await surfaces.ready;
+        if (epoch !== generation) throw Error("Presentation source changed.");
+        const part = snapshot.rooms.find((p) => p.design.room.id === "bedroom");
+        const views = bedroomCameras(part);
+        const visible = [hero, street, interior, avatar].map((o) => o.visible);
+        const size = renderer.getSize(new T.Vector2());
+        const ratio = renderer.getPixelRatio();
+        const oldEnv = scene.environment;
+        try {
+          hero.visible = avatar.visible = false;
+          street.visible = interior.visible = true;
+          scene.environment = surfaces.environment || oldEnv;
+          renderer.setPixelRatio(1);
+          renderer.setSize(1280, 720, false);
+          const images = views.map((view) => {
+            const cam = new T.PerspectiveCamera(view.fov, 16/9, 0.04, 130);
+            cam.position.fromArray(view.eye);
+            cam.lookAt(...view.target);
             renderer.render(scene, cam);
-            return canvas.toDataURL("image/jpeg", 0.87);
-          } finally {
-            renderer.setSize(size.x, size.y, false);
-          }
-        };
-        const target = (f) =>
-          new T.Vector3(
-            part.origin[0] + f.x_m + f.width_m / 2,
-            0.58,
-            -part.origin[1] - f.y_m - f.depth_m / 2,
-          );
-        const center = items
-          .reduce((a, f) => a.add(target(f)), new T.Vector3())
-          .divideScalar(items.length);
-        const view = photo(new T.Vector3(pos.x, 1.57, pos.z), center);
-        const door = part.design.room.doors[0],
-          r = part.design.room;
-        const doorway = new T.Vector3(
-          part.origin[0] + (door.wall === "west" ? 0.28 : r.width_m - 0.28),
-          1.57,
-          -part.origin[1] - door.offset_m - door.width_m / 2,
-        );
-        return {
-          images: [view, photo(doorway, target(items.find((f) => f.id === "queen-bed")))],
-          chair: renderedChair, collection: renderedCollection,
-        };
+            return canvas.toDataURL("image/jpeg", 0.9);
+          });
+          return { images, views, chair: renderedChair, desk: canvas.dataset.desk, collection: renderedCollection };
+        } finally {
+          renderer.setPixelRatio(ratio);
+          renderer.setSize(size.x,size.y,false);
+          [hero, street, interior, avatar].forEach((o,i) => {o.visible = visible[i];});
+          scene.environment = oldEnv;
+        }
       } finally {
-        if (home !== original) load(original);
-        enter(wasInside);
-        pos.copy(eye);
-        yaw = heading;
-        pitch = tilt;
-        refresh();
+        if (epoch === generation && original !== snapshot) {
+          load(original); enter(wasInside);
+          pos.copy(eye); yaw = heading; pitch = tilt;
+          photoView.value = originalPreset; selectPhoto();
+        }
       }
     },
     visit: () => {
+      walkView();
       pos.set(doorX, 0, 1.6);
       yaw = 0;
       pitch = 0;

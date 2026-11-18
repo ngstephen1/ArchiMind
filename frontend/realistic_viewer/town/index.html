@@ -27,6 +27,16 @@
         <span>ARCHIMIND / TOWN WALK</span>
         <h1 id="place">Market Square</h1>
       </div>
+      <div class="photo-controls" id="photoControls" hidden>
+        <label for="photoView">Bedroom camera</label>
+        <select id="photoView">
+          <option value="">Walking view</option>
+          <option value="doorway">Doorway</option>
+          <option value="desk">Desk and chair</option>
+          <option value="bedside">Bedside</option>
+        </select>
+        <small id="photoReason" role="status"></small>
+      </div>
       <div class="walk">
         <select id="roomJump" aria-label="Visit a room" hidden>
           <option value="">Visit a room…</option></select
@@ -47,7 +57,7 @@
         >Desk shown as a placeholder</span
       ><span id="collectionStatus" role="status" hidden>Bedroom collection mesh unavailable · showing procedural furniture</span><span id="chairStatus" role="status" hidden>Designer chair unavailable · showing the procedural chair</span
       ><a href="./assets/BELAYA_ATTRIBUTION.txt">Belaya desk credits</a
-      ><a id="editor">Streamlit editor ↗</a>
+      ><a href="./assets/bedroom-sources.json">Bedroom material credits</a><a id="editor">Streamlit editor ↗</a>
     </footer>
     <dialog id="panel">
       <form method="dialog" class="title">

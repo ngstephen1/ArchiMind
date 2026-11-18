@@ -526,7 +526,9 @@ bind("chairApply", async () => {
 let boardHome;
 const node = (tag, text) =>
   Object.assign(document.createElement(tag), { textContent: text });
+let boardGeneration = 0;
 el("present").onclick = async () => {
+  const generation = ++boardGeneration;
   boardHome = applied;
   const h = boardHome;
   el("boardSource").textContent =
@@ -588,8 +590,10 @@ el("present").onclick = async () => {
   el("whyAnswer").textContent = "";
   el("photos").textContent = "Rendering bedroom views…";
   try {
-    const { images, chair, collection } = await world.bedroomViews(h);
+    const { images, views, chair, desk, collection } = await world.bedroomViews(h);
+    if (boardGeneration !== generation || !el("board").open) return;
     el("photos").replaceChildren();
+    if (desk === "placeholder") el("photos").append(node("p", "Belaya mesh unavailable. A placeholder marks its reservation."));
     if (collection === "placeholder") el("photos").append(node("p","Bedroom collection mesh unavailable. A procedural piece marks its reservation."));
     if (chair === "placeholder")
       el("photos").append(node("p", "Designer chair unavailable in these views. The procedural chair marks its reservation."));
@@ -597,11 +601,12 @@ el("present").onclick = async () => {
       const fig = document.createElement("figure"),
         img = new Image();
       img.src = src;
-      img.alt = i ? "Bedroom from doorway" : "Bedroom overview";
-      fig.append(img, node("figcaption", img.alt + " · Eye height 1.57 m"));
+      img.alt = views[i].reason ? "Doorway overview" : views[i].label;
+      fig.append(img, node("figcaption", views[i].label + " · " + (views[i].reason || "Eye height 1.57 m")));
       el("photos").append(fig);
     });
   } catch {
+    if (boardGeneration !== generation || !el("board").open) return;
     el("photos").textContent =
       "Bedroom views could not be rendered on this device.";
   }

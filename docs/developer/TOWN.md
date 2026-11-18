@@ -61,7 +61,13 @@ A separate PostgreSQL 16 smoke test created the private schema, queued a brief, 
 
 ## Bedroom presentation and evidence
 
-Use **Design presentation** in the town footer for the applied revision, or for the packaged showcase before applying a design. The two bedroom photographs are rendered from the same home as the dimensioned plan and furniture schedule. The material board describes the rendered bedroom finishes. Use **Print presentation** to print or save it as a PDF in the browser. Earlier saved homes retain their recorded furniture inventory.
+Inside the home, choose **Bedroom camera → Doorway**, **Desk and chair** or **Bedside**. Each lens uses the saved openings and furniture bounds. Detail cameras check framing and lines of sight inside the bedroom. For a missing subject or blocked composition, the selector explains why it is showing the doorway view. Choose **Walking view** to resume the same position and heading.
+
+Both the browser and print presentation capture these views at 1280 × 720. Surface maps are packaged with the app. The bedside veneer and curtain linen use physical-scale UVs. The courtyard provides interior ambient reflections, while each bedroom window directs a soft light through its measured opening. The sources, licenses, derivations and hashes are listed in the [surface manifest](../../frontend/realistic_viewer/town/materials/bedroom-sources.json).
+
+![Doorway, desk and bedside photographs of the saved seed-42 bedroom](../images/saved-bedroom-photographs.jpg)
+
+Use **Design presentation** in the town footer for the applied revision, or for the packaged showcase before applying a design. The three bedroom photographs are rendered from the same home as the dimensioned plan and furniture schedule. The material board describes the rendered bedroom finishes. Use **Print presentation** to print or save it as a PDF in the browser. Earlier saved homes retain their recorded furniture inventory.
 
 The local explanation control supports questions about the writing station, rug and reading light. The explanations use authored rules and measurements calculated from the displayed revision. Regression tests vary furniture positions, dimensions and inventory to verify the answers. In particular the desk-to-window distance is measurable; glare depends on screen orientation, time and lighting. Bedroom Chat also shows reviewed uses, variant, material/style evidence where available, and the actual planning footprint for each search result.
 
@@ -72,7 +78,7 @@ The timber image is the 1k diffuse map from [Poly Haven Wood Floor](https://poly
 1. Apply a generated home. Reopen **Design a home** and expand **Bedroom designer chair**.
 2. Choose a released version and select **Preview in bedroom**. Walk around the desk to inspect the backrest and upholstery. The preview uses the current saved room and leaves its furniture schedule available under **Design presentation**.
 3. Reopen **Design a home**. Choose **Apply chair to my home** to save the preview as a new revision, or **Discard chair preview** to return to the saved home.
-4. Open **Design presentation** to see the saved version, its native dimensions, its footprint reservation and two views of that bedroom. **Restore previous revision** can restore the earlier chair as a new revision.
+4. Open **Design presentation** to see the saved version, its native dimensions, its footprint reservation and three views of that bedroom. **Restore previous revision** can restore the earlier chair as a new revision.
 
 The project service checks the chair's release and the saved bedroom reservation on both Preview and Apply. It accepts a release identity and the current base revision. The built Town site serves the release registry, hash-named meshes and preview images alongside the existing viewer assets. A missing or corrupt mesh leaves the procedural chair in place and the walkthrough and presentation label the fallback. Local mode uses the existing project database. The public walk-through has no private editing controls.
 

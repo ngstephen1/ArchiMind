@@ -19,6 +19,16 @@ await copyFile(
   new URL("materials/wood-floor.jpg", src),
   new URL("assets/wood-floor.jpg", out),
 );
+const materialDir = new URL("materials/", src);
+const surfaceManifest = await readFile(new URL("bedroom-sources.json", materialDir));
+for (const entry of JSON.parse(surfaceManifest)) {
+  if (!/^[a-z0-9-]+\.(jpg|hdr)$/.test(entry.local)) throw Error("Invalid surface filename");
+  const local = await readFile(new URL(entry.local, materialDir));
+  if (local.length !== entry.bytes || createHash("sha256").update(local).digest("hex") !== entry.sha256)
+    throw Error("Bedroom surface digest mismatch: " + entry.local);
+  await writeFile(new URL("assets/" + entry.local, out), local);
+}
+await writeFile(new URL("assets/bedroom-sources.json", out), surfaceManifest);
 const assets = new URL("../../../src/archimind/_viewer_assets/", src);
 // Only publish content-addressed artifacts referenced by the release registry.
 const registryBytes = await readFile(new URL("designer_registry.json", assets));

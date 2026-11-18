@@ -1,0 +1,54 @@
+[
+  {
+    "asset": "oak_veneer_01",
+    "source": "https://polyhaven.com/a/oak_veneer_01",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/oak_veneer_01/oak_veneer_01_diff_1k.jpg",
+    "source_bytes": 641756,
+    "source_sha256": "c14681f72f59f17bff568cae7a837641443b607b899f0c279cd64a5638f877a7",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "local": "oak-veneer-512.jpg",
+    "bytes": 36125,
+    "sha256": "a47e7b1de36638bbe6945cf2154140211d1f7c76ecf24cd317a3201735c0f32d",
+    "derivation": "Pillow RGB thumbnail within 512x512, Lanczos, JPEG quality=82 optimized. sRGB."
+  },
+  {
+    "asset": "rough_linen",
+    "source": "https://polyhaven.com/a/rough_linen",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rough_linen/rough_linen_nor_gl_1k.jpg",
+    "source_bytes": 916843,
+    "source_sha256": "e2402166d1a489f7414814e69e1836ab672aa24e30bec2d41fea356f81687e53",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "local": "linen-normal-256.jpg",
+    "bytes": 2593,
+    "sha256": "79f4699154defeeeecc01b6fa50ce026e866922fefc805c943164d9981bfcdf4",
+    "derivation": "Pillow RGB thumbnail within 256x256, Lanczos, JPEG quality=84 optimized. Tangent-space OpenGL normal."
+  },
+  {
+    "asset": "urban_courtyard_02",
+    "source": "https://polyhaven.com/a/urban_courtyard_02",
+    "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/1k/urban_courtyard_02_1k.hdr",
+    "source_bytes": 1696269,
+    "source_sha256": "e67375321c7c2f413bc1a2855f9e4b391181a40fd6a34058bb7fac410d03b59e",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "local": "courtyard-256.hdr",
+    "bytes": 87236,
+    "sha256": "ed2d9a91852dcf21d1340ce1958c37f39b33d16189092b05d106ec6b4ac1f64e",
+    "derivation": "ffmpeg -i INPUT -vf scale=256:128:flags=area -frames:v 1 OUTPUT.hdr"
+  },
+  {
+    "asset": "rough_linen",
+    "source": "https://polyhaven.com/a/rough_linen",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rough_linen/rough_linen_diff_1k.jpg",
+    "source_bytes": 835801,
+    "source_sha256": "04897d7611d7390ddf5b2c6f7273f448dfc48341fdbd1f4f207fa30b331d7f57",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "local": "linen-weave-512.jpg",
+    "bytes": 57311,
+    "sha256": "1a72bc0366e14394ffb109132a4c98c091b9954c2c3b7b9cb89242238939ca61",
+    "derivation": "Pillow grayscale, 1% autocontrast, round(170+0.33*luminance), Lanczos thumbnail within 512x512, JPEG quality=89 optimized. Neutral weave for tinting."
+  }
+]
