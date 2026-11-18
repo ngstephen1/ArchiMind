@@ -84,7 +84,9 @@ def apply_style(home, style):
         design = RoomDesign.model_validate(part["design"])
         # Seeded by the room itself so a re-dress of unchanged geometry is stable.
         seed = int(hashlib.sha256(design.room.id.encode()).hexdigest()[:8], 16)
-        part["style"] = style_payload(design, pack, seed)
+        # A user-chosen designer chair keeps its reservation.
+        designer = {"desk-chair"} if part.get("designer_chair") else set()
+        part["style"] = style_payload(design, pack, seed, designer_ids=designer)
     return home
 
 
@@ -101,7 +103,7 @@ def style_clause(clause):
     if clause == "warm finishes":
         clause = "oak finishes"
     core = re.sub(
-        r"^(?:(?:please )?make (?:it|the home|everything) |go |use |(?:a|an) )+",
+        r"^(?:(?:please )?make (?:it|the home|everything) |go |use |(?:a|an|the) )+",
         "",
         clause,
     )
@@ -140,7 +142,7 @@ def interpret_offline(brief, text):
     )
     for clause in re.split(r"\s+(?:and|with|in)\s+|[;,]", message):
         clause = " ".join(clause.split())
-        clause = re.sub(r"^(?:a|an) ", "", clause)
+        clause = re.sub(r"^(?:a|an|the) ", "", clause)
         if clause == "move the study desk closer to its window":
             values["closer_study_desk"] = True
             continue

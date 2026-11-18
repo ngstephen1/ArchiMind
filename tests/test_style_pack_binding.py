@@ -161,3 +161,36 @@ def test_pack_furniture_choices_are_released_models_with_measured_sizes():
                 assert abs(choice.height_m - (y1 - y0)) < 0.01, choice.asset_id
                 measured += 1
     assert measured >= 20
+
+
+def test_a_designer_reservation_keeps_its_piece_and_gets_no_pack_model():
+    pack = _pack_with("chair", ("polyhaven:metal_stool", 0.45, 0.47, 0.46))
+    seat = _item("desk-chair", "chair", 0.48, 0.52, 0.83)
+    other = _item("side-chair", "chair", 0.48, 0.52, 0.83)
+    bindings = {
+        b.furniture_id: b
+        for b in bind_furniture(_design(seat, other), pack, designer_ids={"desk-chair"})
+    }
+    assert bindings["desk-chair"].model_dump() == {
+        "furniture_id": "desk-chair",
+        "asset_id": None,
+        "reason": "designer",
+    }
+    assert bindings["side-chair"].asset_id == "polyhaven:metal_stool"
+
+
+def test_town_designer_chair_reservation_is_not_bound_to_a_pack_model():
+    from archimind.town.design import apply_style
+
+    home = generate(Brief(style="industrial_loft"))[0]
+    bedroom = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "bedroom")
+    bedroom["designer_chair"] = {"binding": {}, "name": "Chair"}
+    apply_style(home, "industrial_loft")
+    seat = next(
+        b for b in bedroom["style"]["bindings"] if b["furniture_id"] == "desk-chair"
+    )
+    assert seat == {
+        "furniture_id": "desk-chair",
+        "asset_id": None,
+        "reason": "designer",
+    }

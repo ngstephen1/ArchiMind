@@ -1,5 +1,6 @@
 """Real offline source/wheel builds and isolated installed-resource verification."""
 
+import json
 import os
 import subprocess
 import sys
@@ -99,13 +100,31 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             assert archive.read(name) == path.read_bytes()
         for name in preserved:
             assert archive.read(name) == (ROOT / "src" / name).read_bytes()
-        assert {Path(n).name for n in archive.namelist() if n.endswith(".glb")} == {
+        pack_prefix = "archimind/_viewer_assets/packs/assets/"
+        assert {
+            Path(n).name
+            for n in archive.namelist()
+            if n.endswith(".glb") and not n.startswith(pack_prefix)
+        } == {
             "SheenChair.glb",
             "CharlesArmchair.glb",
             "BelayaDesk.glb",
             "designer-54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81.glb",
             "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
         }
+        # Style-pack files are content-addressed and governed by packs/releases.json.
+        releases = json.loads(
+            (ROOT / "src/archimind/_viewer_assets/packs/releases.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        released = {f"{f['sha256']}.{f['ext']}" for r in releases for f in r["files"]}
+        packed = {Path(n).name for n in archive.namelist() if n.startswith(pack_prefix)}
+        assert packed == released
+        assert (
+            sum(archive.getinfo(pack_prefix + n).file_size for n in packed)
+            <= 120 * 1024 * 1024
+        )
         assert sum(n.endswith("/CharlesArmchair.glb") for n in archive.namelist()) == 1
         assert not any(n.endswith((".blend", ".3dm")) for n in archive.namelist())
         assert not any(n.endswith("/.env") for n in archive.namelist())

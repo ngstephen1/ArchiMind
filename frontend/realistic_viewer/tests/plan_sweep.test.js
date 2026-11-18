@@ -87,3 +87,20 @@ test("sweep position maps t to room x extent", () => {
   assert.equal(sweep.position(), 3);
   sweep.dispose();
 });
+
+test("a material swapped in while the sweep is active (restyle) becomes the new original", () => {
+  const r = room();
+  const sweep = createPlanSweep(r);
+  sweep.set(0.5);
+  const packFloor = new THREE.MeshStandardMaterial({ color: "#445566" });
+  r.floor.material = packFloor; // a style pack lands mid-sweep
+  sweep.set(0.4);
+  assert.equal(r.floor.material.color.getHexString(), "445566", "sweep clones the new material");
+  sweep.set(0);
+  sweep.set(1);
+  assert.equal(r.floor.material, packFloor, "restore returns the pack material, not the stale one");
+  r.floor.material = r.floorMat; // undo restores the legacy material while the sweep is at 1
+  sweep.set(0.5);
+  sweep.set(1);
+  assert.equal(r.floor.material, r.floorMat);
+});

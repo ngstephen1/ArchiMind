@@ -173,7 +173,10 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
     if(style){
       composer=createComposer(renderer,scene,camera,tier);
       const center=new THREE.Vector3(room.width_m/2,room.ceiling_height_m/2,-room.depth_m/2);
+      // Restyles swap materials: return the Plan/Room sweep to Room first so none of its materials are recorded.
+      const resetSweep=()=>{if(!sweep)return;sweep.set(1);const input=root.querySelector('.sweep');if(input)input.value='100';};
       const dress=(pack,packTier)=>{
+        resetSweep();
         // Swap legacy lighting and finishes for the pack's; the undo restores them exactly.
         const swaps=[],tiled=[];const swap=(mesh,material)=>{swaps.push([mesh,mesh.material]);tiled.push(material);mesh.material=material;};
         const floorSurface=pack.surface('floor');if(floorSurface)swap(floor,tiledSurface(floorSurface,room.width_m,room.depth_m));
@@ -192,7 +195,7 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
         let furniture=null,undone=false;
         furnitureReady.then(()=>{if(!undone&&!disposed)furniture=dressFurniture({bindings:style.bindings,furniture:data.design.furniture,pack,objects:furnitureObjects,parent:owned});furniture.ready.then(({failed})=>{if(undone||disposed)return;furnitureStatus=furnitureFallbackText(failed,data.design.furniture);if(failed.length)root.dataset.styleState='partial';refreshStatus();});});
         return()=>{
-          undone=true;furniture?.undo();furnitureStatus='';decor.dispose();lights.dispose();hemisphere.visible=sun.visible=true;
+          resetSweep();undone=true;furniture?.undo();furnitureStatus='';decor.dispose();lights.dispose();hemisphere.visible=sun.visible=true;
           scene.environment=legacy.environment;scene.environmentIntensity=legacy.environmentIntensity;renderer.toneMappingExposure=legacy.exposure;
           for(const [mesh,material] of swaps.reverse())mesh.material=material;tiled.forEach(disposeTiled);
         };

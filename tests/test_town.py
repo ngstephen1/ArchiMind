@@ -301,7 +301,18 @@ def test_designer_chair_preview_apply_fallback_and_undo(local, monkeypatch):
     }
     assert home["id"] == digest({k: v for k, v in home.items() if k != "id"})
     original = copy.deepcopy(home)
-    next(r for r in original["rooms"] if "designer_chair" in r).pop("designer_chair")
+    chosen = next(r for r in original["rooms"] if "designer_chair" in r)
+    chosen.pop("designer_chair")
+    # The chosen chair's reservation keeps it: no pack model is bound there.
+    assert {
+        "furniture_id": "desk-chair",
+        "asset_id": None,
+        "reason": "designer",
+    } in chosen["style"]["bindings"]
+    old_bedroom = next(
+        r for r in old["rooms"] if r["design"]["room"]["id"] == "bedroom"
+    )
+    chosen["style"]["bindings"] = old_bedroom["style"]["bindings"]
     assert original | {"id": old["id"]} == old
     assert local.get(f"/api/projects/{p}").json()["home"] == old
     for key, value in (

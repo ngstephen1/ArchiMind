@@ -9,12 +9,17 @@ from .models import StylePack
 from .registry import load_releases
 
 
-def style_payload(design: RoomDesign, pack: StylePack, seed: int) -> dict:
+def style_payload(
+    design: RoomDesign, pack: StylePack, seed: int, *, designer_ids=frozenset()
+) -> dict:
     """Exactly {style_pack, bindings, dressing, skipped}; deterministic for a seed."""
     dressing = place_dressing(design, pack, seed)
     return {
         "style_pack": {"id": pack.id, "version": pack.version},
-        "bindings": [b.model_dump(mode="json") for b in bind_furniture(design, pack)],
+        "bindings": [
+            b.model_dump(mode="json")
+            for b in bind_furniture(design, pack, designer_ids=designer_ids)
+        ],
         "dressing": [i.model_dump(mode="json") for i in dressing.items],
         "skipped": dressing.skipped,
     }

@@ -48,13 +48,35 @@ export function dressTownSurfaces(group, pack) {
     const { x, y, z } = o.scale;
     const flat = role === "floor" || role === "ceiling";
     const material = flat ? tiledSurface(base, x, z) : tiledSurface(base, Math.max(x, z), y);
-    swaps.push([o, o.material]);
+    swaps.push([o, o.material, material]);
     o.material = material;
   });
   return () => {
-    for (const [mesh, original] of swaps.reverse()) {
-      disposeTiled(mesh.material);
+    // Dispose what this call made, whatever the mesh shows now (the sweep may have swapped it).
+    for (const [mesh, original, tiled] of swaps.reverse()) {
+      disposeTiled(tiled);
       mesh.material = original;
     }
+  };
+}
+
+// Status text for a Town home's pack from the world canvas dataset ('' when
+// nothing failed): fallback surfaces, failed pack furniture, or no pack at all.
+export function townStyleStatus(data) {
+  if (data.styleState === "unavailable") return "Style pack unavailable; showing standard finishes.";
+  const parts = [];
+  if (data.styleState === "partial" && data.styleFailures)
+    parts.push("Fallback materials: " + data.styleFailures.split(",").join(", "));
+  if (data.styleFurniture) parts.push(data.styleFurniture);
+  return parts.join(" · ");
+}
+
+// Lighting for a view inside a home: the pack's when it is dressed, else the Town's.
+export function interiorLook(packLook, townLook) {
+  if (!packLook) return { ...townLook };
+  return {
+    environment: packLook.environment?.texture || townLook.environment,
+    intensity: packLook.intensity,
+    exposure: packLook.exposure,
   };
 }

@@ -34,7 +34,13 @@ export function createPlanSweep({ renderer, root }) {
 
   function entry(mesh) {
     if (!state.has(mesh)) state.set(mesh, { original: mesh.material, clone: null, edges: null, overlay: null });
-    return state.get(mesh);
+    const s = state.get(mesh);
+    // A restyle may swap the material while the sweep is active: adopt it.
+    if (mesh.material !== s.original && mesh.material !== s.clone && mesh.material !== white) {
+      dropClone(s);
+      s.original = mesh.material;
+    }
+    return s;
   }
   function edgesFor(mesh, s) {
     if (!s.edges) {
@@ -59,6 +65,7 @@ export function createPlanSweep({ renderer, root }) {
   }
   function restore() {
     for (const [mesh, s] of state) {
+      if (mesh.material !== s.clone && mesh.material !== white) s.original = mesh.material;
       mesh.material = s.original;
       dropClone(s);
       if (s.edges) s.edges.visible = false;

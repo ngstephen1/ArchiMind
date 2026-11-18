@@ -326,8 +326,9 @@ def scene_payload(build: StudioBuild, candidate) -> dict:
         payload["schema_version"] = 5
         payload["designer_chair"] = build.designer_chair.model_dump(mode="json")
     if build.style is not None:
+        designer = {DESIGNER_CHAIR_SLOT} if build.designer_chair is not None else set()
         payload["style"] = style_payload(
-            candidate.design, load_pack(build.style), build.seed
+            candidate.design, load_pack(build.style), build.seed, designer_ids=designer
         )
     if len(json.dumps(payload).encode()) > 262144:
         raise StudioError("The complete scene exceeds the recipe byte budget.")

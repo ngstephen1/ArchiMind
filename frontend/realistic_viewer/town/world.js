@@ -10,7 +10,7 @@ import {
   productSceneAdmission,
 } from "../src/product_assets.js";
 import { fitBedroomChair } from "./designer_chair.js";
-import { townSurfaceSource, LEGACY_WALL_COLORS, dressWhenCurrent, dressTownSurfaces } from "./style_source.js";
+import { townSurfaceSource, LEGACY_WALL_COLORS, dressWhenCurrent, dressTownSurfaces, interiorLook } from "./style_source.js";
 import { loadStylePack, kelvinToColor } from "../src/style_pack.js";
 import { browserTier, createComposer } from "../src/render_quality.js";
 import { loadDesignerChair } from "../src/designer_chair.js";
@@ -18,7 +18,7 @@ import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
 import { buildDressing } from "../src/dressing.js";
 import { createPlanSweep } from "../src/plan_sweep.js";
-import { dressFurniture } from "../src/pack_furniture.js";
+import { dressFurniture, furnitureFallbackText } from "../src/pack_furniture.js";
 import { FLOOR_SLAB, dressingOrigin } from "./floor.js";
 
 export function createTown(canvas, status, action) {
@@ -403,6 +403,7 @@ export function createTown(canvas, status, action) {
   let tierOverride = null,
     styleGen = 0,
     packLook = null,
+    stylePending = Promise.resolve(),
     composer = null,
     qualityButton = null;
   const tier = () => browserTier(tierOverride);
@@ -449,34 +450,54 @@ export function createTown(canvas, status, action) {
       lights.push(light);
     }
     interior.add(...lights);
-    const decor = [];
+    const decor = [],
+      ready = [],
+      furnitureFailed = [];
+    let live = true;
     for (const part of home.rooms) {
       if (!Array.isArray(part.style?.dressing)) continue;
       const holder = new T.Group();
       holder.position.set(...dressingOrigin(part));
       interior.add(holder);
-      decor.push({ holder, handle: buildDressing(holder, part.style.dressing, pack, packTier) });
-      if (Array.isArray(part.style.bindings))
-        decor.push({
-          holder,
-          handle: {
-            dispose: dressFurniture({
-              bindings: part.style.bindings,
-              furniture: part.design.furniture,
-              pack,
-              objects: roomFurniture.get(part.design.room.id) || new Map(),
-              parent: holder,
-            }).undo,
-          },
+      const dressing = buildDressing(holder, part.style.dressing, pack, packTier);
+      decor.push({ holder, handle: dressing });
+      ready.push(dressing.ready);
+      if (Array.isArray(part.style.bindings)) {
+        const furniture = dressFurniture({
+          bindings: part.style.bindings,
+          furniture: part.design.furniture,
+          pack,
+          objects: roomFurniture.get(part.design.room.id) || new Map(),
+          parent: holder,
         });
+        decor.push({ holder, handle: { dispose: furniture.undo } });
+        ready.push(
+          furniture.ready.then(({ failed }) =>
+            furnitureFailed.push(...part.design.furniture.filter((f) => failed.includes(f.id))),
+          ),
+        );
+      }
     }
+    // Name pack furniture that fell back to the procedural piece, while this look is live.
+    const allReady = Promise.all(ready).then(() => {
+      if (!live) return;
+      const text = furnitureFallbackText(
+        furnitureFailed.map((f) => f.id),
+        furnitureFailed,
+      );
+      if (text) canvas.dataset.styleFurniture = text;
+      else delete canvas.dataset.styleFurniture;
+    });
     packLook = {
       pack,
       lights,
       environment,
       intensity: lighting.environment_intensity ?? 0.6,
       exposure: lighting.exposure ?? 1,
+      ready: allReady,
       undo: () => {
+        live = false;
+        delete canvas.dataset.styleFurniture;
         decor.forEach(({ holder, handle }) => {
           handle.dispose();
           holder.removeFromParent();
@@ -498,10 +519,13 @@ export function createTown(canvas, status, action) {
     canvas.dataset.stylePack = source.ref.id + "@" + source.ref.version;
     canvas.dataset.styleState = "loading";
     canvas.dataset.tier = packTier;
-    dressWhenCurrent(
+    stylePending = dressWhenCurrent(
       loadStylePack({ baseUrl: new URL("./assets/", document.baseURI).href, ref: source.ref, tier: packTier, isCurrent: current }),
       current,
       (pack) => {
+        // Restyles swap materials: return the sweep to Room first.
+        sweep?.set(1);
+        if (sweepInput) sweepInput.value = "100";
         releasePackLook();
         dressInterior(pack, packTier);
       },
@@ -680,14 +704,15 @@ export function createTown(canvas, status, action) {
   function load(h) {
     generation++;
     const epoch = generation;
+    // Dispose the sweep first so the pack look is released from real materials.
+    sweep?.dispose();
+    sweep = null;
+    if (sweepInput) sweepInput.value = "100";
     releasePackLook();
     delete canvas.dataset.stylePack;
     delete canvas.dataset.styleState;
     delete canvas.dataset.styleFailures;
     home = h;
-    sweep?.dispose();
-    sweep = null;
-    if (sweepInput) sweepInput.value = "100";
     canvas.dataset.chair = "procedural";
     chairReady = Promise.resolve("procedural");
     clear(interior);
@@ -1348,9 +1373,10 @@ export function createTown(canvas, status, action) {
     refresh();
     // Inside a pack home, its environment, exposure and (high tier) AO apply.
     const look = inside && packLook;
-    scene.environment = look ? look.environment?.texture || townLook.environment : townLook.environment;
-    scene.environmentIntensity = look ? look.intensity : townLook.intensity;
-    renderer.toneMappingExposure = look ? look.exposure : townLook.exposure;
+    const lit = interiorLook(look, townLook);
+    scene.environment = lit.environment;
+    scene.environmentIntensity = lit.intensity;
+    renderer.toneMappingExposure = lit.exposure;
     if (look && composer) composer.render();
     else renderer.render(scene, camera);
   });
@@ -1388,6 +1414,9 @@ export function createTown(canvas, status, action) {
           /* Keep the labeled placeholder. */
         }
         const renderedChair = await chairReady;
+        // A pack home is photographed dressed: wait for its pack, decor and furniture.
+        await stylePending;
+        await packLook?.ready;
         if (home !== snapshot) throw Error("Presentation source changed.");
         enter(true);
         roomJump.value = "bedroom";
@@ -1400,6 +1429,10 @@ export function createTown(canvas, status, action) {
           cam.lookAt(target);
           const size = renderer.getSize(new T.Vector2());
           renderer.setSize(960, 600, false);
+          const lit = interiorLook(packLook, townLook);
+          scene.environment = lit.environment;
+          scene.environmentIntensity = lit.intensity;
+          renderer.toneMappingExposure = lit.exposure;
           try {
             renderer.render(scene, cam);
             return canvas.toDataURL("image/jpeg", 0.87);

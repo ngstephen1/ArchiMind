@@ -3,6 +3,7 @@ import { explanation } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
+import { townStyleStatus } from "./style_source.js";
 import modernClassic from "../../../src/archimind/_viewer_assets/packs/modern_classic.json";
 import industrialLoft from "../../../src/archimind/_viewer_assets/packs/industrial_loft.json";
 import scandinavian from "../../../src/archimind/_viewer_assets/packs/scandinavian.json";
@@ -35,7 +36,13 @@ world.load(showcase);
 new MutationObserver(() => {
   el("assetStatus").hidden = el("world").dataset.desk !== "placeholder";
   el("chairStatus").hidden = el("world").dataset.chair !== "placeholder";
-}).observe(el("world"), { attributes: true, attributeFilter: ["data-desk", "data-chair"] });
+  const style = townStyleStatus(el("world").dataset);
+  el("styleStatus").textContent = style;
+  el("styleStatus").hidden = !style;
+}).observe(el("world"), {
+  attributes: true,
+  attributeFilter: ["data-desk", "data-chair", "data-style-state", "data-style-failures", "data-style-furniture"],
+});
 const notify = (text) => (el("notice").textContent = text);
 async function api(path, body) {
   const r = await fetch(cfg.api + path, {

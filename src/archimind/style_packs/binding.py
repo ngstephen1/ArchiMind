@@ -31,10 +31,18 @@ def _fills(choice, item) -> bool:
     return footprint >= MIN_FILL and choice.height_m >= MIN_FILL * item.height_m
 
 
-def bind_furniture(design: RoomDesign, pack: StylePack) -> list[PackBinding]:
-    """One binding per furniture item, in furniture-ID order."""
+def bind_furniture(
+    design: RoomDesign, pack: StylePack, *, designer_ids=frozenset()
+) -> list[PackBinding]:
+    """One binding per furniture item, in furniture-ID order. Reservations in
+    ``designer_ids`` keep the designer piece the user chose: no pack model."""
     bindings = []
     for item in sorted(design.furniture, key=lambda f: f.id):
+        if item.id in designer_ids:
+            bindings.append(
+                PackBinding(furniture_id=item.id, asset_id=None, reason="designer")
+            )
+            continue
         choices = (
             ()
             if item.category in PROCEDURAL_CATEGORIES

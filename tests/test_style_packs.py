@@ -302,3 +302,14 @@ def test_surface_tint_is_optional_hex():
     assert SurfaceSpec.model_validate(base | {"tint": "#c8a165"}).tint == "#c8a165"
     with pytest.raises(ValueError):
         SurfaceSpec.model_validate(base | {"tint": "brass"})
+
+
+def test_style_phrases_with_the_resolve_to_one_style():
+    from archimind.town.design import Brief, interpret_offline
+
+    for text in (
+        "bright study in the japandi style",
+        "the japandi style",
+        "make it the japandi style",
+    ):
+        assert interpret_offline(Brief(), text).style == "japandi", text
