@@ -9,7 +9,7 @@ import {createAssetPool} from './asset_pool.js';
 import {fittedInstance,placeholder,footprint,instanceMetrics,quadGeometry} from './room_objects.js';
 import {queenBed,addWallFinish,contactTexture} from './bedroom_finishes.js';
 import {conceptInstance,DESIGNER_CHAIR_SLOT,placeDesignerChair} from './concept_assets.js';
-import {loadDesignerChair} from './designer_chair.js';
+import {loadBedroomConcept,loadDesignerChair} from './designer_chair.js';
 
 import {PRODUCT_ASSETS,boundedProductBytes,verifyDecodedProduct,nativeProductInstance,productSceneBudget,productSceneAdmission} from './product_assets.js';
 
@@ -79,7 +79,7 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
   const fail=()=>{status.textContent='Room viewer unavailable: invalid scene data or WebGL 2 unavailable.';status.dataset.state='error';root.dataset.state='error';};
   try{
     const data=validateScene(input),room=data.design.room,fs=[...data.design.furniture].sort((a,b)=>a.id.localeCompare(b.id));
-    const conceptRoom=data.schema_version===4 || data.schema_version===5;
+    const conceptRoom=[4,5,6].includes(data.schema_version);
     const bindings=new Map(data.asset_bindings.map(b=>[b.furniture_id,b.asset_id]));root.dataset.state='loading';
     const concepts=new Map((data.concept_assets??[]).map(r=>[r.recipe_id,r])),conceptBindings=new Map((data.concept_bindings??[]).map(b=>[b.furniture_id,b.recipe_id]));
     root.querySelector('.room-info').textContent=`${room.name} · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · X east, Y north, Z up. ${data.schema_version===3?'Canonical layout. Only explicitly approved product bindings use native-scale meshes; other objects are labeled placeholders.':'Canonical data; illustrative fitted mesh validity is not established.'}`;
@@ -171,10 +171,11 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
       const metrics=[];let failedInstances=0,designerLoads=0;
       for(const f of fs){
         const id=bindings.get(f.id),source=sourceModels.get(id);let object,kind;
-        if(data.designer_chair && f.id===DESIGNER_CHAIR_SLOT){
+        const released = data.designer_collection?.find(binding=>f.id==='studio:'+binding.concept_id);
+        if(released || (data.designer_chair && f.id===DESIGNER_CHAIR_SLOT)){
           designerLoads++;
           try{
-            const model=await loadDesignerChair(data.designer_chair,new URL('./',import.meta.url));
+            const model=await (released ? loadBedroomConcept(released,new URL('./',import.meta.url)) : loadDesignerChair(data.designer_chair,new URL('./',import.meta.url)));
             if(disposed){disposeObject(model);return;}
             object=placeDesignerChair(model,f);kind='designer_concept';owned.add(object);
           }catch{if(disposed)return;failedInstances++;}

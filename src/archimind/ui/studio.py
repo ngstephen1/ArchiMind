@@ -4,7 +4,11 @@ import os
 
 import streamlit as st
 
-from archimind.assets.designer_concepts import approved_chairs, preview_bytes
+from archimind.assets.designer_concepts import (
+    approved_chairs,
+    approved_collection,
+    preview_bytes,
+)
 from archimind.models import Door, Room, Window
 from archimind.render import render_design_3d, render_floorplan
 from archimind.render.realistic_viewer import _component
@@ -89,6 +93,42 @@ def _review_designer_chair():
     return ChairBinding(
         concept_id=chair.concept_id, version=chair.version, sha256=chair.sha256
     ), False
+
+
+def _review_collection(draft):
+    if draft.room_kind != "Bedroom":
+        return (), False
+    selected = []
+    records = {row.concept_id: row for row in approved_collection()}
+    for key, label in (
+        ("upholstered-linen-bed", "Use the linen platform bed"),
+        ("oak-bedside-lamp", "Add the oak nightstand with reading lamp"),
+    ):
+        if not st.checkbox(label, key=f"studio_release_{key}"):
+            continue
+        asset = records.get(key)
+        if not asset:
+            st.warning(f"{label}: release unavailable. Clear the selection to build.")
+            return (), True
+        try:
+            preview = preview_bytes(asset, "three-quarter")
+        except ValueError:
+            st.warning(
+                "Bedroom concept preview unavailable. Clear the selection to build."
+            )
+            return (), True
+        st.image(preview, caption=asset.name, width=220)
+        st.caption(
+            f"v{asset.version} · {asset.width_m:g} × {asset.depth_m:g} × {asset.height_m:g} m (W × D × H)."
+        )
+        if key == "upholstered-linen-bed":
+            st.caption(
+                "Uses the released bed dimensions in place of a single proposed bed, or adds a bed if none was proposed."
+            )
+        selected.append(
+            ChairBinding(concept_id=key, version=asset.version, sha256=asset.sha256)
+        )
+    return tuple(selected), False
 
 
 def render_studio():
@@ -237,17 +277,23 @@ def render_studio():
             key="studio_plan_review",
         )
         chair_binding, chair_problem = _review_designer_chair()
+        collection, collection_problem = _review_collection(draft)
         if st.button(
             "Build 3D room",
             key="studio_build_button",
             type="primary",
             disabled=chair_problem
+            or collection_problem
             or (draft.source == "ai_concept" and not (allow and enabled)),
         ):
             try:
                 with st.spinner("Placing furniture and building bounded 3D recipes…"):
                     built = build_room(
-                        draft, int(seed), allow_live=allow, designer_chair=chair_binding
+                        draft,
+                        int(seed),
+                        allow_live=allow,
+                        designer_chair=chair_binding,
+                        designer_collection=collection,
                     )
             except StudioError as e:
                 st.error(str(e))
@@ -278,6 +324,10 @@ def render_studio():
     if built.designer_chair is not None:
         st.caption(
             f"Designer chair · {built.designer_chair.concept_id} · version {built.designer_chair.version} · SHA-256 {built.designer_chair.sha256}"
+        )
+    for asset in built.designer_collection:
+        st.caption(
+            f"Bedroom release · {asset.concept_id} · v{asset.version} · SHA-256 {asset.sha256}"
         )
     result = built.result()
     if result.status != "complete":

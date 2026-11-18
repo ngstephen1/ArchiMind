@@ -15,7 +15,7 @@ function snapshot(dispose){
 }
 export function createSceneManager(mount){
   const entries=new WeakMap();
-  const roomSignature=data=>[2,3,4,5].includes(data?.schema_version)?JSON.stringify(data.design?.room):null;
+  const roomSignature=data=>[2,3,4,5,6].includes(data?.schema_version)?JSON.stringify(data.design?.room):null;
   return function update(host,data,{owner=host}={}){
     // An obsolete entrypoint must not displace a current scene on a live owner.
     if(host.isConnected===false||owner.isConnected===false)return ()=>{};
