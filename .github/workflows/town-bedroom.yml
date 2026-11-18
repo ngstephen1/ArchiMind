@@ -6,6 +6,9 @@ on:
       - scripts/check_bedroom_walkthrough.py
       - .github/workflows/town-bedroom.yml
   workflow_dispatch:
+concurrency:
+  group: town-bedroom-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
