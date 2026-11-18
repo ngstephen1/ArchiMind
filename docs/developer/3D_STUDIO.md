@@ -82,7 +82,7 @@ ArchiMind modification notice are in `frontend/realistic_viewer/vendor/spoken-wo
 the build copies both into the installed viewer resources and adds attribution.
 
 ArchiMind's adapter calls only box, cylinder/cone and sphere recording methods.
-It builds geometry with the repository's existing Three.js 0.186.1 dependency.
+It builds geometry with the repository's existing Three.js 0.187.0 dependency.
 It does not import upstream voice, speech, provider host, fonts/media, world
 runtime, persistence, worker execution or model-written JavaScript. No dependency
 or model download was added.

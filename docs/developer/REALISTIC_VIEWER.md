@@ -12,7 +12,7 @@ unchanged. C01 stays disabled; no live model or image-generation API is used.
 ## Architecture and local setup
 
 Node 20.13.1 / npm 10.5.2 were available locally. The frontend pins Three.js
-**0.186.1** and esbuild **0.28.2**, with a committed lockfile. Plain ES modules
+**0.187.0** and esbuild **0.28.2**, with a committed lockfile. Plain ES modules
 avoid an extra UI framework. `npm run build` writes the bundled ES module and
 static files under `src/archimind/_viewer_assets/`; these are intentionally
 versioned and included in the Python wheel. No Node process, npm installation,
