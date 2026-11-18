@@ -17,7 +17,7 @@
     },
     "frontend/realistic_viewer/src/room_viewer.js": {
       "before_sha256": "f02138b362bc9c2807ed28837a430bca47db12130af4e4ced9139b26c7ec943d",
-      "after_sha256": "c27482bdace3117b35eca85eff0da7d0a2507fd3d197b1d25d884e89b17d6053"
+      "after_sha256": "7807eafcecf9e4f6df96746c97124f3899d1edcc0343bc19f4c947808c8046e3"
     },
     "frontend/realistic_viewer/tests/room.test.js": {
       "before_sha256": "6f24b3de023ec69f79b6d7cb580b1cfb5a10fa307a81d3ed613a58db0f591b01",
@@ -33,7 +33,7 @@
     },
     "src/archimind/_viewer_assets/viewer.js": {
       "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
-      "after_sha256": "e34a11c7093b32dd50e101e3ae76afebd76cdbabee2891c60f140e240d6d9b8a"
+      "after_sha256": "f61318ae9311d4af44ae1dbdbbc7f61eaf24085aa4325b8de5a17b0cc5f9fc9d"
     },
     "src/archimind/render/floorplan_2d.py": {
       "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",

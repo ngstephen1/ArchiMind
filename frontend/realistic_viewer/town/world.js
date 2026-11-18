@@ -17,6 +17,7 @@ import { loadDesignerChair } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
 import { buildDressing } from "../src/dressing.js";
+import { createPlanSweep } from "../src/plan_sweep.js";
 
 export function createTown(canvas, status, action) {
   const renderer = new T.WebGLRenderer({
@@ -658,6 +659,8 @@ export function createTown(canvas, status, action) {
       m.bumpScale = woven ? 0.0018 : 0.0024;
     }
   }
+  let sweep = null,
+    sweepInput = null;
   function load(h) {
     generation++;
     const epoch = generation;
@@ -666,6 +669,9 @@ export function createTown(canvas, status, action) {
     delete canvas.dataset.styleState;
     delete canvas.dataset.styleFailures;
     home = h;
+    sweep?.dispose();
+    sweep = null;
+    if (sweepInput) sweepInput.value = "100";
     canvas.dataset.chair = "procedural";
     chairReady = Promise.resolve("procedural");
     clear(interior);
@@ -1323,6 +1329,15 @@ export function createTown(canvas, status, action) {
   });
   return {
     load,
+    // Plan ↔ Room over the home's interior only; a pure view change.
+    bindSweep(input) {
+      sweepInput = input;
+      input.value = "100";
+      input.oninput = () => {
+        sweep ||= createPlanSweep({ renderer, root: interior });
+        sweep.set(Number(input.value) / 100);
+      };
+    },
     bindQuality(button) {
       qualityButton = button;
       button.onclick = () => {

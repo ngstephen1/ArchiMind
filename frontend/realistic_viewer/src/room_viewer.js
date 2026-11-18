@@ -14,6 +14,7 @@ import {browserTier,configureRenderer,createComposer} from './render_quality.js'
 import {loadStylePack,applyLighting} from './style_pack.js';
 import {splitStyle,createRoomStyle,tiledSurface,disposeTiled} from './room_style.js';
 import {buildDressing} from './dressing.js';
+import {createPlanSweep} from './plan_sweep.js';
 
 import {PRODUCT_ASSETS,boundedProductBytes,verifyDecodedProduct,nativeProductInstance,productSceneBudget,productSceneAdmission} from './product_assets.js';
 
@@ -68,16 +69,16 @@ function placeholderLabel(f){
 }
 export function mountRoomViewer(host,input,{viewState=null}={}){
   const root=document.createElement('section');root.dataset.viewer='realistic-room';
-  root.innerHTML=`<div class="stage room-stage"><div class="status" role="status">Loading architectural room…</div></div><div class="toolbar"><button class="reset" type="button">Reset camera</button><button class="interior" type="button">Room-level view</button><label><input type="checkbox" class="front" checked> Front walls</label><label><input type="checkbox" class="outlines" checked> Canonical footprints</label><button class="quality" type="button" hidden>Quality: High</button></div><p class="room-info"></p><ul class="objects"></ul><p class="metrics" aria-live="polite"></p>`;
+  root.innerHTML=`<div class="stage room-stage"><div class="status" role="status">Loading architectural room…</div></div><div class="toolbar"><button class="reset" type="button">Reset camera</button><button class="interior" type="button">Room-level view</button><label><input type="checkbox" class="front" checked> Front walls</label><label><input type="checkbox" class="outlines" checked> Canonical footprints</label><button class="quality" type="button" hidden>Quality: High</button><label class="sweep-control">Plan <input class="sweep" type="range" min="0" max="100" value="100" aria-label="Plan to room view"> Room</label></div><p class="room-info"></p><ul class="objects"></ul><p class="metrics" aria-live="polite"></p>`;
   host.appendChild(root);const stage=root.querySelector('.stage'),status=root.querySelector('.status');
-  let renderer,scene,camera,controls,envTarget,resizeObserver,visibility,frame,disposed=false,visible=true,userCamera=false,composer=null,styleControl=null,baseStatus='';
+  let renderer,scene,camera,controls,envTarget,resizeObserver,visibility,frame,disposed=false,visible=true,userCamera=false,composer=null,styleControl=null,sweep=null,baseStatus='';
   const owned=new THREE.Group(),instances=new THREE.Group(),footprints=new THREE.Group(),walls=new THREE.Group();
   const releases=[];const start=performance.now();
   const cleanup=()=>{
     if(disposed)return;
     disposed=true;cancelAnimationFrame(frame);resizeObserver?.disconnect();visibility?.disconnect();controls?.dispose();
     // GLB instances share resources. Only their pool owns/disposes those resources.
-    styleControl?.dispose();composer?.dispose();instances.clear();owned.traverse(o=>o.shadow?.dispose?.());disposeObject(owned);envTarget?.dispose();releases.forEach(release=>release());
+    sweep?.dispose();sweep=null;styleControl?.dispose();composer?.dispose();instances.clear();owned.traverse(o=>o.shadow?.dispose?.());disposeObject(owned);envTarget?.dispose();releases.forEach(release=>release());
     renderer?.dispose();renderer?.forceContextLoss();root.dataset.cleanup='complete';root.remove();
   };
   const refreshStatus=()=>{if(disposed||!baseStatus)return;const extra=styleControl?.statusText();status.textContent=extra?`${baseStatus} · ${extra}`:baseStatus;};
@@ -201,6 +202,9 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
       };
       styleControl.start().then(refreshStatus);
     }
+    // Plan ↔ Room is a pure view change over everything in the scene.
+    sweep=createPlanSweep({renderer,root:scene});
+    const sweepInput=root.querySelector('.sweep');sweepInput.value='100';sweepInput.oninput=()=>sweep.set(Number(sweepInput.value)/100);
     const animate=()=>{if(disposed)return;frame=requestAnimationFrame(animate);if(visible){controls.update();draw();}};animate();
     (async()=>{
       const sourceModels=new Map(),failed=new Set(data.unavailable_assets),loadsBefore=pool.loads;
