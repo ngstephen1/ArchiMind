@@ -24,10 +24,14 @@ const assets = new URL("../../../src/archimind/_viewer_assets/", src);
 // Only publish content-addressed artifacts referenced by the release registry.
 const registryBytes = await readFile(new URL("designer_registry.json", assets));
 const registry = JSON.parse(registryBytes);
-if (registry.schema_version !== 1 || !Array.isArray(registry.chairs))
-  throw Error("Invalid designer chair release registry.");
+const releases =
+  registry.schema_version === 2 ? registry.pieces
+  : registry.schema_version === 1 ? registry.chairs
+  : null;
+if (!Array.isArray(releases))
+  throw Error("Invalid designer piece release registry.");
 const designerAssets = new Set();
-for (const chair of registry.chairs) {
+for (const chair of releases) {
   for (const [hash, ext] of [
     [chair.sha256, "glb"],
     [chair.front_sha256, "png"],
