@@ -25,5 +25,31 @@
       "height_m": 0.83,
       "bytes": 80944
     }
+  ],
+  "bedroom": [
+    {
+      "concept_id": "oak-bedside-lamp",
+      "version": "1.0.0",
+      "name": "Oak nightstand and reading lamp",
+      "sha256": "5d0044a1acf345f50fa80443c7f722bb2267960bf3a69cd581a310586e8c84d3",
+      "front_sha256": "7f07207120b041fa31dd275f45b0a98eb984d93d857742a2b390b56da2c4321e",
+      "three_quarter_sha256": "38152ced73e4bd764775fdaa09b18eba48906fb3af8e0a36bd0a0ce61635d833",
+      "width_m": 0.48,
+      "depth_m": 0.43,
+      "height_m": 1.06,
+      "bytes": 150160
+    },
+    {
+      "concept_id": "upholstered-linen-bed",
+      "version": "1.0.0",
+      "name": "Linen platform bed",
+      "sha256": "3f475788571c146b30a8e5e6a6c8eb33970622e789d66e37821f962e60ad175f",
+      "front_sha256": "ed92bf79109e87864b697858841bed50c3476808c21de52b279e071e773614a2",
+      "three_quarter_sha256": "4ceeb1317362cda2a2fe2264988de8def81c3e7342a1c1eb1ef2accdaa2e44c6",
+      "width_m": 1.6,
+      "depth_m": 2.0,
+      "height_m": 0.6,
+      "bytes": 113452
+    }
   ]
 }
