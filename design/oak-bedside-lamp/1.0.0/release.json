@@ -1,0 +1,63 @@
+{
+  "authoring": {
+    "concept_id": "oak-bedside-lamp",
+    "version": "1.0.0",
+    "name": "Oak nightstand and reading lamp",
+    "dimensions_wdh_m": [
+      0.48,
+      0.43,
+      1.06
+    ],
+    "parts": [
+      "Tapered foot 1.1",
+      "Tapered foot 1.2",
+      "Tapered foot 2.1",
+      "Tapered foot 2.2",
+      "Open shelf",
+      "Oak case",
+      "Left stile",
+      "Right stile",
+      "Drawer front",
+      "Drawer edge pull",
+      "Cantilevered top",
+      "Footed lamp base",
+      "Lamp stem",
+      "Pleated shade",
+      "Brass finial"
+    ],
+    "finishes": [
+      "Antique brass",
+      "Oiled oak",
+      "Parchment"
+    ],
+    "blender": "5.1.2",
+    "reopened": true,
+    "sha256": {
+      "editable.blend": "c3fa77db5f10639d0df83d34b92038fef8983133e78465fb7d2a8245ba5a9ff2",
+      "model.glb": "5d0044a1acf345f50fa80443c7f722bb2267960bf3a69cd581a310586e8c84d3",
+      "front.png": "7f07207120b041fa31dd275f45b0a98eb984d93d857742a2b390b56da2c4321e",
+      "three-quarter.png": "38152ced73e4bd764775fdaa09b18eba48906fb3af8e0a36bd0a0ce61635d833"
+    },
+    "recipe_sha256": "067bdab2077ece5fad6ead35ba3822646657f608d8132bca5d77bcc12ab34513"
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.23999999463558197,
+        0.0,
+        -0.2150000035762787
+      ],
+      [
+        0.23999999463558197,
+        1.059999942779541,
+        0.2150000035762787
+      ]
+    ],
+    "mesh_instances": 15,
+    "triangles": 6124,
+    "materials": 3,
+    "textures": 0
+  },
+  "authoring_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44233437901",
+  "attribution": "Original ArchiMind geometry and base materials."
+}

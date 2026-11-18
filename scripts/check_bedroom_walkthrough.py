@@ -60,11 +60,25 @@ def check(url: str, output: Path):
 
         page.locator("#design").click()
         page.locator("#chairApply").click()
-        page.get_by_text("Designer chair saved in revision 2.", exact=True).wait_for()
+        page.get_by_text(
+            "Designer furniture saved in revision 2.", exact=True
+        ).wait_for()
+        for option, new_revision in [("2", 3), ("3", 4)]:
+            page.locator("#chairStudio summary").click()
+            page.locator("#chairChoice").select_option(option)
+            page.locator("#chairPreview").click()
+            page.wait_for_function(
+                "document.querySelector('#world').dataset.collection === 'verified' && !document.querySelector('#panel').open"
+            )
+            page.locator("#design").click()
+            page.locator("#chairApply").click()
+            page.get_by_text(
+                f"Designer furniture saved in revision {new_revision}.", exact=True
+            ).wait_for()
         page.locator('#panel [aria-label="Close studio"]').click()
         page.locator("#present").click()
         page.wait_for_function("document.querySelectorAll('#photos img').length === 3")
-        assert "revision 2" in page.locator("#boardSource").inner_text()
+        assert "revision 4" in page.locator("#boardSource").inner_text()
         for image, name, label in zip(
             page.locator("#photos img").all(),
             ("doorway", "desk", "bedside"),
@@ -97,11 +111,14 @@ def check(url: str, output: Path):
         page.get_by_text(
             "Designer chair unavailable in these views.", exact=False
         ).wait_for()
+        page.get_by_text(
+            "Bedroom collection mesh unavailable.", exact=False
+        ).last.wait_for()
         assert not errors, errors
         (output / "check.json").write_text(
             json.dumps(
                 {
-                    "applied_revision": 2,
+                    "applied_revision": 4,
                     "seed": 42,
                     "raf_ms_median": statistics.median(frames),
                     "navigation_load_ms": page.evaluate(
