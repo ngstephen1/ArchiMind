@@ -391,3 +391,20 @@ button[aria-pressed="true"] {
     animation: none;
   }
 }
+
+.photo-controls {
+  position: absolute;
+  top: 18px;
+  right: 3vw;
+  width: min(155px, 42vw);
+  padding: 8px 12px;
+  background: #fffdf5ef;
+  border-radius: 8px;
+  color: #294339;
+}
+.photo-controls label { margin: 0 0 3px; font-size: 12px; font-weight: bold; }
+.photo-controls select { padding: 5px; font-size: 13px; }
+#photoReason:not(:empty) { display: block; margin-top: 4px; }
+@media(max-width:620px) {
+  .photo-controls { top: 12px; width: 132px; padding: 6px 8px; }
+}
