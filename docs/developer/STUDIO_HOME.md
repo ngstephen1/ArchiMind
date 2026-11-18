@@ -6,7 +6,7 @@ The seed-42 demonstration is a 15 × 16 m single-storey home with six furnished 
 
 ## Client books
 
-[Open revision 5 (sage)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r5.pdf) · [Open revision 6 (terracotta)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6.pdf) · [Download the scenes and all proof images](https://github.com/ngstephen1/ArchiMind/releases/tag/studio-house-r5-r6-preview)
+[Open the revision-5 GPU client book (sage)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r5-4K.pdf) · [Open revision 6 (terracotta)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6.pdf) · [Download the scenes and all proof images](https://github.com/ngstephen1/ArchiMind/releases/tag/studio-house-r5-r6-preview)
 
 ![Same salon camera rendered in daylight, linework and evening light](../images/studio-salon-studies.jpg)
 
@@ -14,9 +14,13 @@ Town matches the saved project, revision, home ID and full exported manifest dig
 
 ### 4K salon and camera-matched studies
 
-[Open the 3840 × 2160 Falcon daylight image](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-Daylight-4K.jpg). This frame uses the revision-5 manifest and window-aligned salon camera. Cycles ran on one NVIDIA A30 with OptiX. The salon benchmark returned 95th-percentile linear RGB errors of 0.030 at 128 samples and 0.024 at 256 against the 512-sample crop. The 0.015 threshold selected 512. Three display grades were compared from the same EXR. This JPEG uses AgX Medium High Contrast and −0.65 EV to retain separation between the sofa, chairs and pale walls. The two whole-home books above are CPU review prints.
+[Open the 3840 × 2160 Falcon daylight image](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-Daylight-4K.jpg). This frame uses the revision-5 manifest and window-aligned salon camera. Cycles ran on one NVIDIA A30 with OptiX. The salon benchmark returned 95th-percentile linear RGB errors of 0.030 at 128 samples and 0.024 at 256 against the 512-sample crop. The 0.015 threshold selected 512. Three display grades were compared from the same EXR. This JPEG uses AgX Medium High Contrast and −0.65 EV to retain separation between the sofa, chairs and pale walls. The revision-5 client book uses the full-room GPU renders. Revision 6 has a separately rendered 960 × 540 CPU book.
 
 [Open the A3 salon sheet](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-4K.pdf) to compare the daylight, evening and line drawing alongside the measured furnishing plan. [Download the three scene-linear OpenEXR masters with their manifest](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-Linear-Masters.tar.gz) for independent grading.
+
+The revision-5 [portable scene and gallery](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r5-4K.zip) includes 18 full-resolution room cameras, three additional lighting, linework and bedding comparisons, twelve smaller gray camera studies, the packed Blender scene, source notices and the printable book. Open `index.html` locally for the drawing slider and `studies.html` for the camera and bedding comparisons. The [bedroom detail sheet](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Bedroom-4K.pdf) pairs two finished views with the controlled CPU bedding comparison.
+
+The A30 job finished the room frames and coverlet comparison, then stopped on Freestyle initialization in the staged script. A concurrent step in that same allocation produced the corrected salon lighting and linework. A follow-up Slurm job reopened the packed scene, validated and assembled all 21 full-size views with their scene-linear masters, and wrote the final receipt. The packed gallery contains JPEG display copies and separate hashes for those copies and their sources.
 
 ## Walk through the saved design
 
