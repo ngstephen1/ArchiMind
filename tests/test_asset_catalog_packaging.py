@@ -107,6 +107,7 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
         }
         assert sum(n.endswith("/CharlesArmchair.glb") for n in archive.namelist()) == 1
+        assert not any(n.endswith((".blend", ".3dm")) for n in archive.namelist())
         assert not any(n.endswith("/.env") for n in archive.namelist())
         assert not any("furniture_source_candidates" in n for n in archive.namelist())
         assert not any("08F1" in n for n in archive.namelist())
@@ -119,6 +120,19 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         )
     with tarfile.open(sdist) as archive:
         names = archive.getnames()
+        for version in ("1.0.0", "1.1.0"):
+            for file in (
+                "chair.blend",
+                "release.json",
+                "cad/chair.3dm",
+                "cad/cad-evidence.json",
+            ):
+                relative = f"design/oak-sage-writing-chair/{version}/{file}"
+                member = next(n for n in names if n.endswith("/" + relative))
+                assert (
+                    archive.extractfile(member).read() == (ROOT / relative).read_bytes()
+                )
+
         assert any(n.endswith("/scripts/inspect_furniture_assets.py") for n in names)
         assert any(n.endswith("/scripts/build_product_registry.py") for n in names)
         assert any(

@@ -6,6 +6,9 @@ on:
     paths:
       - scripts/author_designer_chair.py
       - scripts/test_blender_operator.py
+      - scripts/*rhino_chair*.py
+      - tests/test_rhino_chair.py
+      - design/oak-sage-writing-chair/**
       - .github/workflows/blender-chair.yml
 
 permissions:
@@ -43,3 +46,20 @@ jobs:
           name: blender-chair-candidates
           path: ${{ runner.temp }}/chairs
           if-no-files-found: error
+
+  portable-cad:
+    name: Reopen and measure editable Rhino archives
+    needs: blender
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - name: Test CAD round trips with the optional openNURBS binding
+        run: |
+          python -m pip install rhino3dm==8.35.0 pytest==9.2.0
+          python -m pytest -q tests/test_rhino_chair.py
