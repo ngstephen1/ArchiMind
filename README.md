@@ -8,7 +8,7 @@
   <a href="https://streamlit.io/"><img src="docs/assets/streamlit.svg" alt="Streamlit" height="32" /></a>
   <a href="https://docs.pydantic.dev/"><img src="docs/assets/pydantic.svg" alt="Pydantic" height="32" /></a>
   <a href="https://github.com/langchain-ai/langgraph"><img src="docs/assets/langgraph.svg" alt="LangGraph" height="32" /></a>
-  <a href="docs/developer/CHAT_BEDROOM.md"><img src="docs/assets/openai.svg" alt="OpenAI design interpretation, styling and visual review" height="32" /></a>
+  <a href="docs/developer/TOWN.md#follow-a-design-run"><img src="docs/assets/openai.svg" alt="OpenAI design interpretation, styling and visual review" height="32" /></a>
 </p>
 
 <p align="center">

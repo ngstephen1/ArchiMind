@@ -558,3 +558,45 @@ def test_chair_edit_keeps_the_original_and_revalidates():
     validate_home(after)
     with pytest.raises(ValueError, match="unlock"):
         generate(edit.model_copy(update={"locks": ["bedroom"]}), previous=before)
+
+
+def test_controls_only_team_uses_controls_when_styling_unavailable(local, monkeypatch):
+    from archimind.town import agents, design_review
+
+    req = service.Request.model_validate(
+        job(
+            service.create("local-designer")["project"],
+            live=True,
+            agent_team=True,
+            message="  ",
+            brief={"priority": "bright study", "palette": "sage"},
+        )
+    )
+    schemas = []
+    monkeypatch.setattr(
+        service.provider, "configuration", lambda consent: ("fixture", "fixture")
+    )
+    monkeypatch.setenv("ARCHIMIND_ENABLE_CODEX_ADVISOR", "0")
+
+    def respond(schema, content, **_):
+        schemas.append(schema)
+        if schema is design_review.Direction:
+            raise service.provider.StudioError("Stylist unavailable.")
+        assert schema is design_review.VisualReview
+        assert '"priority": "bright study"' in content[0]["text"]
+        assert '"palette": "sage"' in content[0]["text"]
+        assert '"style": null' in content[0]["text"]
+        return schema(
+            observation="Window visible.",
+            recommendation="Check at desk height.",
+            uncertainty="No lux reading.",
+        )
+
+    monkeypatch.setattr(service.provider, "request", respond)
+    events = []
+    homes = agents.coordinate(
+        req, None, service.interpret, lambda *event: events.append(event)
+    )
+    assert homes and all(home["palette"] == "sage" for home in homes)
+    assert schemas == [design_review.Direction, design_review.VisualReview]
+    assert any(agent == "E" and state == "failed" for agent, state, *_ in events)

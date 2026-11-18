@@ -207,6 +207,8 @@ def expire_jobs(q, now):
 
 def interpret(req, previous):
     brief = req.brief
+    if req.agent_team and not req.message.strip():
+        return brief
     if req.live:
         cfg = provider.configuration(True)
         facts = {

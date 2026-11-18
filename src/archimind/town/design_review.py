@@ -94,17 +94,28 @@ def plan_png(home):
             stroke_width=1,
             stroke_fill="#faf7ee",
         )
+    entry = point(home["hall"] + 0.8, 0)
+    draw.polygon(
+        [entry, (entry[0] - 4, entry[1] + 7), (entry[0] + 4, entry[1] + 7)],
+        fill="#bb6932",
+    )
     data = io.BytesIO()
     im.save(data, format="PNG")
     return data.getvalue()
 
 
-def review_candidates(req, homes, style):
+def review_candidates(req, homes, style, brief):
     content = [
         {
             "type": "input_text",
-            "text": "Review the pictured candidate plans in order against the brief and the stylist's proposal. Green blocks are furniture, blue lines windows and orange lines doors. Cite visible room relationships. Distinguish suggestions from verified measurements. "
-            + json.dumps({"brief": req.message, "style": style.model_dump()}),
+            "text": "Review the pictured candidate plans in order against the brief and the stylist's proposal. Green blocks are furniture, blue lines windows and orange lines doors. The orange triangle marks the house entrance. Cite visible room relationships. Distinguish suggestions from verified measurements. "
+            + json.dumps(
+                {
+                    "brief": req.message,
+                    "controls": brief.model_dump(),
+                    "style": style.model_dump() if style else None,
+                }
+            ),
         }
     ]
     for home in homes:
@@ -128,7 +139,7 @@ def codex_review(req, home):
     )
     result = request_codex_advice(
         RoomDesign.model_validate(room),
-        req.message or "Review bedroom furniture placement.",
+        req.message.strip() or "Review bedroom furniture placement.",
         allow_live_usage=True,
     )
     return {

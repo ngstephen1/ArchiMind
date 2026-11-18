@@ -50,7 +50,7 @@ export function timeline(container, events, status) {
     engine.src = "assets/" + (ai ? "openai" : "python") + ".svg";
     engine.alt = ai ? "OpenAI" : "Python";
     engine.className = "agent-engine";
-    if (latest && latest.state !== "skipped") title.append(engine);
+    if (latest && latest.state !== "skipped" && !latest.task.startsWith("Codex CLI")) title.append(engine);
     title.append(badge, name, detail);
     card.append(title);
     for (const e of log) {
@@ -60,7 +60,7 @@ export function timeline(container, events, status) {
       if (e.artifact.advice) {
         const advice = e.artifact.advice;
         const analysis = document.createElement("p");
-        analysis.textContent = advice.design_analysis;
+        analysis.textContent = "Layout A · " + e.artifact.room + " · " + e.artifact.candidate.slice(0, 8) + " — " + advice.design_analysis;
         card.append(analysis);
         const items = document.createElement("ul");
         for (const suggestion of advice.suggestions) {

@@ -6,8 +6,8 @@ import io
 import os
 import sqlite3
 from pathlib import Path
-from tempfile import NamedTemporaryFile
-from uuid import UUID
+from tempfile import TemporaryDirectory
+from uuid import UUID, uuid4
 
 from openai import APIError, OpenAI
 from PIL import Image
@@ -42,10 +42,15 @@ def render(home, brief, images):
     if not response.data or not response.data[0].b64_json:
         raise ValueError("Image generation returned no image.")
     data = base64.b64decode(response.data[0].b64_json, validate=True)
-    with Image.open(io.BytesIO(data)) as image:
-        if image.format != "PNG":
-            raise ValueError("Expected a PNG concept image.")
-        image.verify()
+    try:
+        with Image.open(io.BytesIO(data)) as image:
+            if image.format != "PNG":
+                raise ValueError("Expected a PNG concept image.")
+            image.verify()
+        with Image.open(io.BytesIO(data)) as image:
+            image.load()
+    except (SyntaxError, OSError) as exc:
+        raise ValueError("The concept PNG could not be decoded.") from exc
     return data
 
 
@@ -76,22 +81,25 @@ def main():
         ).get("OPENAI_API_KEY")
         if not key:
             parser.error("Configure OPENAI_API_KEY in the environment or local .env.")
-        with OpenAI(api_key=key, max_retries=0, timeout=180) as client:
-            data = render(home, args.direction, client.images)
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        destination = (
+            args.output_dir
+            / f"{args.project}-r{args.revision}-concept-{uuid4().hex}.png"
+        )
+        with TemporaryDirectory(dir=args.output_dir) as staging:
+            temporary = Path(staging) / "concept.tmp"
+            with (
+                temporary.open("xb") as output,
+                OpenAI(api_key=key, max_retries=0, timeout=180) as client,
+            ):
+                output.write(render(home, args.direction, client.images))
+            temporary.replace(destination)
     except APIError:
         parser.exit(1, "The OpenAI image request failed. No retry was made.\n")
     except (ValueError, OSError, sqlite3.Error, service.Problem) as exc:
         parser.exit(1, f"Concept unavailable: {exc}\n")
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(
-        prefix=f"{args.project}-r{args.revision}-concept-",
-        suffix=".png",
-        dir=args.output_dir,
-        delete=False,
-    ) as output:
-        output.write(data)
-    print(output.name)
+    print(destination)
 
 
 if __name__ == "__main__":

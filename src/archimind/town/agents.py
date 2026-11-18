@@ -96,7 +96,9 @@ def coordinate(req, previous, interpret, emit):
         tasks = [
             (
                 "A",
-                "OpenAI · Interpret brief" if req.live else "Interpret requirements",
+                "OpenAI · Interpret brief"
+                if req.live and req.message.strip()
+                else "Read requirements and controls",
                 lambda: interpret(req, previous),
             ),
             ("B", "Find eligible evidence", lambda: search(req.message)),
@@ -128,8 +130,13 @@ def coordinate(req, previous, interpret, emit):
         ]
         futures = [pool.submit(task, *t) for t in tasks]
         brief = futures[0].result()
-        for future in futures[1:]:
+        for future in futures[1:4]:
             future.result()
+        try:
+            style = futures[4].result()
+        except StudioError:
+            # The task recorded the advisory failure. Use the resolved design controls.
+            style = None
         emit(
             "E",
             "completed",
@@ -197,12 +204,11 @@ def coordinate(req, previous, interpret, emit):
         for check in checks:
             check.result()
         if req.agent_team and homes:
-            style = futures[4].result()
             visual = pool.submit(
                 task,
                 "D",
                 "OpenAI · Review plan images",
-                lambda: design_review.review_candidates(req, homes, style),
+                lambda: design_review.review_candidates(req, homes, style, brief),
             )
             if (
                 os.getenv("TOWN_MODE") == "local"

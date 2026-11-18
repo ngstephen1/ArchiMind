@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - frontend/realistic_viewer/town/**
+      - src/archimind/town/**
       - scripts/check_bedroom_walkthrough.py
       - tests/town_browser_worker.py
       - .github/workflows/town-bedroom.yml
