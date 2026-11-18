@@ -321,3 +321,71 @@ def test_recipe_generation_never_exceeds_two_concurrent_requests(monkeypatch):
     monkeypatch.setattr(provider, "request", request)
     build_room(draft, allow_live=True)
     assert counts == {"active": 0, "maximum": 2, "calls": 3}
+
+
+def test_registered_designer_chair_enters_both_validated_layouts(monkeypatch):
+    binding = workflow.ChairBinding(
+        concept_id="writing-chair", version="1.0.0", sha256="a" * 64
+    )
+    record = SimpleNamespace(
+        name="Fixture chair", width_m=0.48, depth_m=0.52, height_m=0.83
+    )
+    resolved = []
+
+    def resolve(concept_id, version, sha256):
+        assert (concept_id, version, sha256) == (
+            binding.concept_id,
+            binding.version,
+            binding.sha256,
+        )
+        resolved.append(1)
+        return record
+
+    monkeypatch.setattr(workflow, "resolve_chair", resolve)
+    draft = propose_room(room(), "Bedroom", "sample", offline=True)
+    legacy = build_room(draft)
+    assert "designer_chair" not in legacy.model_dump(mode="json")
+    built = build_room(draft, designer_chair=binding)
+    assert built.model_calls == 0 and built.snapshot_id != legacy.snapshot_id
+    assert len(built.recipes) == len(legacy.recipes)
+    assert len(built.result().candidates) == 2
+    for candidate in built.result().candidates:
+        chair = next(
+            f
+            for f in candidate.design.furniture
+            if f.id == workflow.DESIGNER_CHAIR_SLOT
+        )
+        assert candidate.validation.status == "passed"
+        assert (chair.width_m, chair.depth_m, chair.height_m, chair.rotation_deg) == (
+            0.48,
+            0.52,
+            0.83,
+            0,
+        )
+        data = scene_payload(built, candidate)
+        assert (
+            data["schema_version"] == 5
+            and data["designer_chair"] == binding.model_dump()
+        )
+        assert data["design"] == candidate.design.model_dump(mode="json")
+        assert all(b["asset_id"] is None for b in data["asset_bindings"])
+        assert chair.id not in [b["furniture_id"] for b in data["concept_bindings"]]
+    assert resolved == [1]
+
+
+def test_stale_chair_cannot_start_generation(monkeypatch):
+    def reject(*_):
+        raise ValueError
+
+    monkeypatch.setattr(workflow, "resolve_chair", reject)
+    monkeypatch.setattr(
+        workflow,
+        "generate_layout_candidates",
+        lambda *args, **kw: pytest.fail("Unexpected generation"),
+    )
+    draft = propose_room(room(), "Bedroom", "sample", offline=True)
+    binding = workflow.ChairBinding(
+        concept_id="writing-chair", version="9.0.0", sha256="f" * 64
+    )
+    with pytest.raises(StudioError, match="unavailable"):
+        build_room(draft, designer_chair=binding)

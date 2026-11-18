@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "concept_id": "oak-sage-writing-chair",
+  "version": "1.0.0",
+  "variant": "gentle",
+  "rhino3dm_version": "8.35.0",
+  "archive_version": 80,
+  "unit": "millimeter",
+  "cad_sha256": "99cb83a19fd3b51c2fdd7a978dd661425d2e49adc1102b741f4fc09aab73494e",
+  "released_glb_sha256": "54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81",
+  "author_script_sha256": "1376389a45dc1bfcb50d1cb8204d74f9fc0b57d1b5261c0dc1432fe603624239",
+  "cad_author_script_sha256": "6c0aa7b9bf66f16550e9171331f0f4676d0c6e5ecac2f338ac9ffd90942ee94b",
+  "closed_mesh_parts": 10,
+  "editable_nurbs_side_skins": 10,
+  "quadratic_backrest_bend_mm": 42.0,
+  "cad_mm": {
+    "width": 480.0,
+    "depth": 520.0,
+    "height": 830.0,
+    "seat_height": 455.0
+  },
+  "glb_mm": {
+    "width": 479.99998927116394,
+    "depth": 519.9999809265137,
+    "height": 829.9999833106995,
+    "seat_height": 455.00001311302185
+  },
+  "absolute_deltas_mm": {
+    "width": 1.0728836059570312e-05,
+    "depth": 1.9073486328125e-05,
+    "height": 1.6689300537109375e-05,
+    "seat_height": 1.3113021850585938e-05
+  },
+  "max_per_part_bound_error_mm": 1.6689300537109375e-05,
+  "tolerance_mm": 1.0,
+  "verification": "offline file write/reopen and binary GLB comparison",
+  "licensed_rhino_mcp_acceptance": "pending"
+}

@@ -45,6 +45,7 @@
       <span id="revision">Studio House · Showcase</span
       ><span id="assetStatus" role="status" hidden
         >Desk shown as a placeholder</span
+      ><span id="chairStatus" role="status" hidden>Designer chair unavailable · showing the procedural chair</span
       ><a href="./assets/BELAYA_ATTRIBUTION.txt">Belaya desk credits</a
       ><a id="editor">Streamlit editor ↗</a>
     </footer>
@@ -136,6 +137,16 @@
         ><button id="cancel" hidden>Cancel job</button
         ><button id="undo" hidden>Restore previous revision</button>
       </div>
+      <details id="chairStudio" hidden>
+        <summary>Bedroom designer chair</summary>
+        <p id="chairNotice" role="status"></p>
+        <label id="chairPicker" hidden>Released chair<select id="chairChoice"></select></label>
+        <div class="actions">
+          <button id="chairPreview" hidden>Preview in bedroom</button>
+          <button id="chairApply" hidden>Apply chair to my home</button>
+          <button id="chairDiscard" hidden>Discard chair preview</button>
+        </div>
+      </details>
       <section id="alternatives" hidden>
         <h3>Compare alternatives</h3>
         <div id="choices"></div>

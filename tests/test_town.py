@@ -253,3 +253,87 @@ def test_study_desk_edit_preserves_other_rooms_and_improves_measured_distance():
             assert old == new
     with pytest.raises(ValueError, match="unlock"):
         generate(edit.model_copy(update={"locks": ["study"]}), home)
+
+
+def test_designer_chair_preview_apply_fallback_and_undo(local, monkeypatch):
+    from types import SimpleNamespace
+
+    from archimind.town import designer_chair
+    from archimind.town.design import digest
+
+    binding = {"concept_id": "fixture-chair", "version": "1.0.0", "sha256": "1" * 64}
+    chair = SimpleNamespace(
+        **binding,
+        width_m=0.47,
+        depth_m=0.50,
+        height_m=0.83,
+        name="Fixture chair",
+        variant_label="Gentle back",
+    )
+    monkeypatch.setattr(designer_chair, "approved_chairs", lambda: ())
+    assert local.get("/api/designer-chairs").json() == {"chairs": []}
+    p = service.create("local-designer")["project"]
+    url = f"/api/projects/{p}/designer-chair"
+    old = json.loads(SHOWCASE.read_text())
+    with service.transaction() as q:
+        service.apply(q, "local-designer", p, 0, old)
+    request = {"base": 1, "binding": binding}
+
+    def resolve(**fields):
+        if fields != binding:
+            raise ValueError("Unavailable")
+        return chair
+
+    monkeypatch.setattr(designer_chair, "approved_chairs", lambda: (chair,))
+    monkeypatch.setattr(designer_chair, "resolve_chair", resolve)
+    assert (
+        local.get("/api/designer-chairs").json()["chairs"][0]["name"] == "Fixture chair"
+    )
+    preview = local.post(url + "/preview", json=request).json()
+    assert preview["base"] == 1
+    home = preview["home"]
+    room = next(r for r in home["rooms"] if r["design"]["room"]["id"] == "bedroom")
+    assert room["designer_chair"] == {
+        "binding": binding,
+        "name": "Fixture chair",
+        "dimensions_wdh_m": [0.47, 0.5, 0.83],
+        "variant_label": "Gentle back",
+    }
+    assert home["id"] == digest({k: v for k, v in home.items() if k != "id"})
+    original = copy.deepcopy(home)
+    next(r for r in original["rooms"] if "designer_chair" in r).pop("designer_chair")
+    assert original | {"id": old["id"]} == old
+    assert local.get(f"/api/projects/{p}").json()["home"] == old
+    for key, value in (
+        ("base", True),
+        ("binding", binding | {"url": "external"}),
+        ("binding", binding | {"sha256": "2" * 64}),
+    ):
+        assert local.post(
+            url + "/preview", json=request | {key: value}
+        ).status_code in (400, 409)
+    other = service.create("another-designer")["project"]
+    assert (
+        local.post(
+            f"/api/projects/{other}/designer-chair/preview", json=request
+        ).status_code
+        == 404
+    )
+    apply = request | {"preview_id": home["id"]}
+    assert (
+        local.post(url + "/apply", json=apply | {"preview_id": "old"}).status_code
+        == 409
+    )
+    chair.depth_m = 0.53
+    assert local.post(url + "/apply", json=apply).status_code == 400
+    chair.depth_m = 0.50
+    assert local.post(url + "/apply", json=apply).json() == {
+        "project": p,
+        "revision": 2,
+        "home": home,
+    }
+    assert local.get(f"/api/projects/{p}").json()["home"] == home
+    assert local.get(f"/api/projects/{p}?revision=1").json()["home"] == old
+    assert local.post(url + "/apply", json=apply).status_code == 409
+    assert local.post(url + "/preview", json=request | {"base": 2}).status_code == 409
+    assert local.post(f"/api/projects/{p}/undo", json={"base": 2}).json()["home"] == old

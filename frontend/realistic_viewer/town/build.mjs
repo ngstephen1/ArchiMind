@@ -1,5 +1,6 @@
 import { build } from "esbuild";
-import { copyFile, mkdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 const src = new URL("./", import.meta.url),
   out = new URL("../../../dist/town/", src);
 await mkdir(new URL("assets/", out), { recursive: true });
@@ -19,6 +20,34 @@ await copyFile(
   new URL("assets/wood-floor.jpg", out),
 );
 const assets = new URL("../../../src/archimind/_viewer_assets/", src);
+// Only publish content-addressed artifacts referenced by the release registry.
+const registryBytes = await readFile(new URL("designer_registry.json", assets));
+const registry = JSON.parse(registryBytes);
+if (registry.schema_version !== 1 || !Array.isArray(registry.chairs))
+  throw Error("Invalid designer chair release registry.");
+const designerAssets = new Set();
+for (const chair of registry.chairs) {
+  for (const [hash, ext] of [
+    [chair.sha256, "glb"],
+    [chair.front_sha256, "png"],
+    [chair.three_quarter_sha256, "png"],
+  ]) {
+    if (typeof hash !== "string" || !/^[0-9a-f]{64}$/.test(hash))
+      throw Error("Invalid designer chair artifact digest.");
+    const name = "designer-" + hash + "." + ext;
+    if (designerAssets.has(name)) continue;
+    const bytes = await readFile(new URL(name, assets));
+    if (createHash("sha256").update(bytes).digest("hex") !== hash)
+      throw Error("Invalid designer chair artifact: " + name);
+    await writeFile(new URL("assets/" + name, out), bytes);
+    designerAssets.add(name);
+  }
+}
+for (const name of await readdir(new URL("assets/", out))) {
+  if (/^designer-[a-f0-9]{64}\.(glb|png)$/.test(name) && !designerAssets.has(name))
+    await unlink(new URL("assets/" + name, out));
+}
+await writeFile(new URL("assets/designer_registry.json", out), registryBytes);
 for (const f of [
   "BelayaDesk.glb",
   "BELAYA_ATTRIBUTION.txt",

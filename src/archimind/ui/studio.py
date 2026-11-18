@@ -4,11 +4,17 @@ import os
 
 import streamlit as st
 
+from archimind.assets.designer_concepts import approved_chairs, preview_bytes
 from archimind.models import Door, Room, Window
 from archimind.render import render_design_3d, render_floorplan
 from archimind.render.realistic_viewer import _component
 from archimind.studio.contracts import StudioError, digest
-from archimind.studio.workflow import build_room, propose_room, scene_payload
+from archimind.studio.workflow import (
+    ChairBinding,
+    build_room,
+    propose_room,
+    scene_payload,
+)
 
 DRAFT = "studio_draft"
 BUILD = "studio_build"
@@ -35,6 +41,54 @@ def room_from_editor(width, depth, height, doors, windows):
             for i, row in enumerate(records(windows), 1)
         ],
     )
+
+
+def _review_designer_chair():
+    options = {chair.sha256: chair for chair in approved_chairs()}
+    key = "studio_designer_chair"
+    previous = st.session_state.get(key)
+    if not options and not previous:
+        return None, False
+
+    def label(key):
+        if key is None:
+            return "No additional chair"
+        chair = options.get(key)
+        return (
+            f"{chair.name} · {chair.variant_label} · v{chair.version}"
+            if chair
+            else "Unavailable chair"
+        )
+
+    choices = [None, *options]
+    if previous and previous not in choices:
+        choices.append(previous)
+    selected = st.selectbox(
+        "Add a designer chair",
+        choices,
+        index=choices.index(previous),
+        format_func=label,
+        key=key,
+    )
+    if selected is None:
+        return None, False
+    chair = options.get(selected)
+    if chair is None:
+        st.warning("The selected chair is unavailable. Choose another option to build.")
+        return None, True
+    try:
+        front = preview_bytes(chair, "front")
+        angled = preview_bytes(chair, "three-quarter")
+    except ValueError:
+        st.warning("Chair previews are unavailable. Choose another option to build.")
+        return None, True
+    st.image([front, angled], caption=["Front", "Three-quarter"], width=220)
+    st.caption(
+        f"One additional designer chair · {chair.width_m:g} × {chair.depth_m:g} × {chair.height_m:g} m (W × D × H)."
+    )
+    return ChairBinding(
+        concept_id=chair.concept_id, version=chair.version, sha256=chair.sha256
+    ), False
 
 
 def render_studio():
@@ -182,15 +236,19 @@ def render_studio():
             hide_index=True,
             key="studio_plan_review",
         )
+        chair_binding, chair_problem = _review_designer_chair()
         if st.button(
             "Build 3D room",
             key="studio_build_button",
             type="primary",
-            disabled=draft.source == "ai_concept" and not (allow and enabled),
+            disabled=chair_problem
+            or (draft.source == "ai_concept" and not (allow and enabled)),
         ):
             try:
                 with st.spinner("Placing furniture and building bounded 3D recipes…"):
-                    built = build_room(draft, int(seed), allow_live=allow)
+                    built = build_room(
+                        draft, int(seed), allow_live=allow, designer_chair=chair_binding
+                    )
             except StudioError as e:
                 st.error(str(e))
             except Exception:
@@ -216,6 +274,10 @@ def render_studio():
     ):
         st.info(
             "Room inputs changed. The displayed room still belongs to the earlier build."
+        )
+    if built.designer_chair is not None:
+        st.caption(
+            f"Designer chair · {built.designer_chair.concept_id} · version {built.designer_chair.version} · SHA-256 {built.designer_chair.sha256}"
         )
     result = built.result()
     if result.status != "complete":

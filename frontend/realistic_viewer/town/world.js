@@ -9,6 +9,8 @@ import {
   productSceneBudget,
   productSceneAdmission,
 } from "../src/product_assets.js";
+import { fitBedroomChair } from "./designer_chair.js";
+import { loadDesignerChair } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
 
@@ -387,7 +389,8 @@ export function createTown(canvas, status, action) {
     lastX,
     lastY,
     phase = 0,
-    generation = 0;
+    generation = 0,
+    chairReady = Promise.resolve("procedural");
   const roomJump = document.getElementById("roomJump");
   roomJump.onchange = () => {
     const part = home.rooms.find((r) => r.design.room.id === roomJump.value);
@@ -557,6 +560,8 @@ export function createTown(canvas, status, action) {
     generation++;
     const epoch = generation;
     home = h;
+    canvas.dataset.chair = "procedural";
+    chairReady = Promise.resolve("procedural");
     clear(interior);
     clear(hero);
     indoor.length = 0;
@@ -859,10 +864,12 @@ export function createTown(canvas, status, action) {
             (item) => item.id === "belaya",
           );
           const side = desk && desk.y_m > f.y_m ? 1 : -1;
+          const fallback = new T.Group();
+          group.add(fallback);
           for (const a of [-1, 1])
             for (const b of [-1, 1])
               block(
-                group,
+                fallback,
                 x + a * 0.19,
                 0.21,
                 z + b * 0.2,
@@ -871,8 +878,19 @@ export function createTown(canvas, status, action) {
                 0.043,
                 "#866446",
               );
-          block(group, x, 0.44, z, w, 0.08, d, "#879582");
-          block(group, x, 0.646, z + side * 0.23, w, 0.36, 0.048, "#866446");
+          block(fallback, x, 0.44, z, w, 0.08, d, "#879582");
+          block(fallback, x, 0.646, z + side * 0.23, w, 0.36, 0.048, "#866446");
+          if (r.id === "bedroom" && part.designer_chair) {
+            canvas.dataset.chair = "loading";
+            const baseUrl = new URL("./assets/", document.baseURI);
+            chairReady = fitBedroomChair(
+              loadDesignerChair(part.designer_chair.binding, baseUrl),
+              fallback, f, side, () => generation === epoch, clear,
+            ).then((result) => {
+              if (generation === epoch) canvas.dataset.chair = result;
+              return result;
+            });
+          }
         } else if (f.id === "bedside-lamp") {
           block(group, x, 0.28, z, w, 0.56, d, "#966d48").material = oak;
           block(group, x, 0.36, z + d * 0.49, 0.13, 0.025, 0.018, "#9a7546");
@@ -1012,7 +1030,7 @@ export function createTown(canvas, status, action) {
         }
       }
       // Batch only stable meshes; native desk loading may replace its stand-in later.
-      if (!part.design.furniture.some((f) => f.id === "belaya")) batch(group);
+      if (!part.designer_chair && !part.design.furniture.some((f) => f.id === "belaya")) batch(group);
     }
     for (const part of h.rooms) {
       const room = part.design.room,
@@ -1041,6 +1059,7 @@ export function createTown(canvas, status, action) {
       );
     if (inside) enter(true);
     refresh();
+    return chairReady;
   }
   function move(dx, dz) {
     const coll = inside ? indoor : [...obstacles, ...heroObstacles];
@@ -1204,6 +1223,8 @@ export function createTown(canvas, status, action) {
         } catch {
           /* Keep the labeled placeholder. */
         }
+        const renderedChair = await chairReady;
+        if (home !== snapshot) throw Error("Presentation source changed.");
         enter(true);
         roomJump.value = "bedroom";
         roomJump.onchange();
@@ -1239,10 +1260,10 @@ export function createTown(canvas, status, action) {
           1.57,
           -part.origin[1] - door.offset_m - door.width_m / 2,
         );
-        return [
-          view,
-          photo(doorway, target(items.find((f) => f.id === "queen-bed"))),
-        ];
+        return {
+          images: [view, photo(doorway, target(items.find((f) => f.id === "queen-bed")))],
+          chair: renderedChair,
+        };
       } finally {
         if (home !== original) load(original);
         enter(wasInside);

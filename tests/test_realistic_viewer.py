@@ -31,6 +31,8 @@ def test_asset_provenance_file_and_model_license():
         "SheenChair.glb",
         "CharlesArmchair.glb",
         "BelayaDesk.glb",
+        "designer-54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81.glb",
+        "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
     }
 
 
