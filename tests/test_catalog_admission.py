@@ -476,6 +476,9 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
     studio = studio_receipt["authorized_migrations"]
     studio_review = studio_receipt["merge_review"]["authorized_migrations"]
     bedroom_view = studio_receipt["bedroom_view"]["authorized_migrations"]
+    dependency_updates = json.loads(
+        (ROOT / "docs/data/DEPENDENCY_MANIFEST_MIGRATIONS.json").read_text()
+    )
     for name, expected in receipt["frozen_files"].items():
         if name in migrations:
             assert migrations[name]["before_sha256"] == expected
@@ -510,6 +513,11 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
         if name in bedroom_view:
             assert bedroom_view[name]["before_sha256"] == expected
             expected = bedroom_view[name]["after_sha256"]
+        if name == "pyproject.toml":
+            for update in dependency_updates:
+                assert set(update) == {"pyproject.toml"}
+                assert update[name]["before_sha256"] == expected
+                expected = update[name]["after_sha256"]
         assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
     catalog_bytes = (ROOT / "src/archimind/assets/furniture_catalog.json").read_bytes()
     assert hashlib.sha256(catalog_bytes).hexdigest() == receipt["catalog"]["sha256"]

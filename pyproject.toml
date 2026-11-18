@@ -9,16 +9,16 @@ description = "Foundation for a multi-agent interior design and spatial planning
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "streamlit==1.66.1",
-    "pydantic==2.14.1",
+    "streamlit==1.67.0",
+    "pydantic==2.14.3",
     "plotly==7.1.0",
     "shapely==2.2.0",
     "langgraph==1.2.18",
-    "openai==3.40.0",
+    "openai==3.51.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest==9.1.1", "ruff==0.17.3", "build==1.6.1"]
+dev = ["pytest==9.2.0", "ruff==0.17.5", "build==1.6.1"]
 
 [tool.setuptools.packages.find]
 where = ["src"]

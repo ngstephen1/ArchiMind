@@ -530,6 +530,9 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     studio = studio_receipt["authorized_migrations"]
     studio_review = studio_receipt["merge_review"]["authorized_migrations"]
     bedroom_view = studio_receipt["bedroom_view"]["authorized_migrations"]
+    dependency_updates = json.loads(
+        (ROOT / "docs/data/DEPENDENCY_MANIFEST_MIGRATIONS.json").read_text()
+    )
     for path, expected in pins["baseline_files"].items():
         if path in migrations:
             assert migrations[path]["before_sha256"] == expected
@@ -570,6 +573,11 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
         if path in bedroom_view:
             assert bedroom_view[path]["before_sha256"] == expected
             expected = bedroom_view[path]["after_sha256"]
+        if path == "pyproject.toml":
+            for update in dependency_updates:
+                assert set(update) == {"pyproject.toml"}
+                assert update[path]["before_sha256"] == expected
+                expected = update[path]["after_sha256"]
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")
