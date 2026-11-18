@@ -16,6 +16,7 @@ from starlette.responses import JSONResponse
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
+from . import designer_chair
 from . import service as db
 
 
@@ -46,11 +47,23 @@ def identity(request):
 def handle(request, data):
     owner = identity(request)
     path = request.path_params.get("path", "").split("/")
+    if path == ["designer-chairs"] and request.method == "GET":
+        return {"chairs": designer_chair.chair_options()}
     if path == ["projects"] and request.method == "POST":
         return db.create(owner)
     if path == ["jobs"] and request.method == "POST":
         return db.enqueue(owner, db.Request.model_validate(data))
     with db.transaction() as q:
+        if (
+            len(path) == 4
+            and path[0] == "projects"
+            and path[2] == "designer-chair"
+            and path[3] in {"preview", "apply"}
+            and request.method == "POST"
+        ):
+            return designer_chair.chair_change(
+                q, owner, path[1], data, apply=path[3] == "apply"
+            )
         if len(path) == 2 and path[0] == "projects" and request.method == "GET":
             p = path[1]
             head = db.project(q, owner, p)

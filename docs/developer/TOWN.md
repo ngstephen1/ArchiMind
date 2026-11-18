@@ -67,6 +67,15 @@ The local explanation control supports questions about the writing station, rug 
 
 The timber image is the 1k diffuse map from [Poly Haven Wood Floor](https://polyhaven.com/a/wood_floor), used under the [CC0 asset license](https://polyhaven.com/license). Its upstream MD5 is b7e927d2bf2f8f103820ff3890c8407c. Linen and plaster detail and the light at the modeled window are procedural.
 
+## Preview a released designer chair
+
+1. Apply a generated home. Reopen **Design a home** and expand **Bedroom designer chair**.
+2. Choose a released version and select **Preview in bedroom**. Walk around the desk to inspect the backrest and upholstery. The preview uses the current saved room and leaves its furniture schedule available under **Design presentation**.
+3. Reopen **Design a home**. Choose **Apply chair to my home** to save the preview as a new revision, or **Discard chair preview** to return to the saved home.
+4. Open **Design presentation** to see the saved version, its native dimensions, its footprint reservation and two views of that bedroom. **Restore previous revision** can restore the earlier chair as a new revision.
+
+The project service checks the chair's release and the saved bedroom reservation on both Preview and Apply. It accepts a release identity and the current base revision. The built Town site serves the release registry, hash-named meshes and preview images alongside the existing viewer assets. A missing or corrupt mesh leaves the procedural chair in place and the walkthrough and presentation label the fallback. Local mode uses the existing project database. The public walk-through has no private editing controls.
+
 ## Follow a design run
 
 Open **Design a home** and submit “Design a five-room home with a quiet bedroom and a bright study.” The Design team panel follows five concurrent worker tasks. A interprets the brief, B searches catalog evidence and the optional configured reference pack, C reads the lot and plans rooms, D checks geometry, and E resolves the finish. Expand a card for the recorded inputs or findings. Only A can call a model, through the existing explicit opt-in. The other specialists run local Python. Reference matches are evidence for review and cannot authorize a mesh or change a furniture binding.

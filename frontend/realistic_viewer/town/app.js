@@ -12,13 +12,17 @@ let project = url.searchParams.get("project"),
   applied = showcase,
   job = null,
   alternatives = [],
-  selected = 0;
+  selected = 0,
+  chairPreview = null,
+  chairEpoch = 0,
+  releasedChairs = [];
 const token = () => sessionStorage.getItem("town-session") || "";
 const world = createTown(el("world"), el("place"), el("door"));
 world.load(showcase);
 new MutationObserver(() => {
   el("assetStatus").hidden = el("world").dataset.desk !== "placeholder";
-}).observe(el("world"), { attributes: true, attributeFilter: ["data-desk"] });
+  el("chairStatus").hidden = el("world").dataset.chair !== "placeholder";
+}).observe(el("world"), { attributes: true, attributeFilter: ["data-desk", "data-chair"] });
 const notify = (text) => (el("notice").textContent = text);
 async function api(path, body) {
   const r = await fetch(cfg.api + path, {
@@ -59,7 +63,13 @@ function links() {
   }
   editor.href = target;
 }
+function resetChairPreview() {
+  chairEpoch++;
+  chairPreview = null;
+  el("chairApply").hidden = el("chairDiscard").hidden = true;
+}
 function sync(data) {
+  resetChairPreview();
   revision = data.revision;
   if (data.history) {
     el("briefHistory").hidden = !data.history.length;
@@ -83,6 +93,8 @@ function sync(data) {
     watch(data.latest_job).catch((e) => notify(e.message));
   el("revision").textContent = "Studio House · Revision " + revision;
   applied = data.home || showcase;
+  el("chairStudio").hidden = revision === 0 || (data.head !== undefined && data.head !== revision);
+  el("chairStudio").open = false;
   world.load(applied);
   el("width").value = applied.width;
   el("depth").value = applied.depth;
@@ -298,6 +310,7 @@ function show() {
   draw();
 }
 bind("generate", async () => {
+  resetChairPreview();
   if (!local && !cfg.supabase)
     throw Error("Public tour only. Design service is not configured.");
   if (!local && !token()) throw Error("Sign in to generate.");
@@ -423,6 +436,7 @@ bind("cancel", async () => {
   notify("Cancelled. Your applied home is preserved.");
 });
 bind("visit", () => {
+  resetChairPreview();
   el("revision").textContent =
     "Preview · Layout " + String.fromCharCode(65 + selected) + " · Unapplied";
   world.load(alternatives[selected]);
@@ -442,6 +456,66 @@ bind("undo", async () => {
   sync(await api("/projects/" + project + "/undo", { base: revision }));
   el("alternatives").hidden = true;
   notify("Previous home restored as revision " + revision + ".");
+});
+
+el("chairStudio").ontoggle = async () => {
+  if (!el("chairStudio").open || chairPreview) return;
+  const epoch = ++chairEpoch;
+  el("chairPicker").hidden = el("chairPreview").hidden = true;
+  el("chairNotice").textContent = "Checking released chairs…";
+  try {
+    const { chairs } = await api("/designer-chairs");
+    if (epoch !== chairEpoch) return;
+    releasedChairs = chairs;
+    el("chairChoice").replaceChildren(
+      ...chairs.map((c, i) => new Option(c.name + " · " + c.version, String(i))),
+    );
+    el("chairPicker").hidden = el("chairPreview").hidden = !chairs.length;
+    el("chairNotice").textContent = chairs.length
+      ? "Preview the chair at its native size in this revision."
+      : "No designer chair has been released. The bedroom uses its procedural chair.";
+  } catch (e) {
+    if (epoch === chairEpoch) el("chairNotice").textContent = e.message;
+  }
+};
+function discardChair() {
+  resetChairPreview();
+  world.load(applied);
+  el("revision").textContent = "Studio House · Revision " + revision;
+  el("chairNotice").textContent = "Showing your saved bedroom.";
+}
+el("chairChoice").onchange = discardChair;
+bind("chairDiscard", discardChair);
+bind("chairPreview", async () => {
+  resetChairPreview();
+  const epoch = chairEpoch;
+  const { concept_id, version, sha256 } = releasedChairs[Number(el("chairChoice").value)];
+  const request = { base: revision, binding: { concept_id, version, sha256 } };
+  const { home } = await api("/projects/" + project + "/designer-chair/preview", request);
+  if (epoch !== chairEpoch) return;
+  if ((await world.load(home)) !== "verified") {
+    if (epoch === chairEpoch) {
+      discardChair();
+      el("chairNotice").textContent = "Chair preview unavailable. Your saved bedroom is still displayed.";
+    }
+    return;
+  }
+  if (epoch !== chairEpoch) return;
+  chairPreview = { ...request, preview_id: home.id };
+  el("chairApply").hidden = el("chairDiscard").hidden = false;
+  el("chairNotice").textContent = "Bedroom preview ready. Apply to save a new revision.";
+  el("revision").textContent = "Bedroom chair preview · Unsaved";
+  world.visit();
+  el("door").click();
+  el("roomJump").value = "bedroom";
+  el("roomJump").onchange();
+  el("panel").close();
+});
+bind("chairApply", async () => {
+  if (!chairPreview) return;
+  sync(await api("/projects/" + project + "/designer-chair/apply", chairPreview));
+  el("alternatives").hidden = true;
+  notify("Designer chair saved in revision " + revision + ".");
 });
 
 let boardHome;
@@ -494,7 +568,10 @@ el("present").onclick = async () => {
       el("schedule").append(
         node(
           "div",
-          f.name +
+          (f.id === "desk-chair" && p.designer_chair
+            ? p.designer_chair.name + " · Designer concept v" + p.designer_chair.binding.version +
+              " · Native " + p.designer_chair.dimensions_wdh_m.join(" × ") + " m · Reservation"
+            : f.name) +
             " · " +
             [f.width_m, f.depth_m, f.height_m]
               .map((v) => v.toFixed(2))
@@ -506,9 +583,11 @@ el("present").onclick = async () => {
   el("whyAnswer").textContent = "";
   el("photos").textContent = "Rendering bedroom views…";
   try {
-    const views = await world.bedroomViews(h);
+    const { images, chair } = await world.bedroomViews(h);
     el("photos").replaceChildren();
-    views.forEach((src, i) => {
+    if (chair === "placeholder")
+      el("photos").append(node("p", "Designer chair unavailable in these views. The procedural chair marks its reservation."));
+    images.forEach((src, i) => {
       const fig = document.createElement("figure"),
         img = new Image();
       img.src = src;
