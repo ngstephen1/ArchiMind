@@ -113,13 +113,16 @@ class Request(BaseModel):
     brief: Brief
     message: str = Field(max_length=1800, default="")
     live: bool = False
+    agent_team: bool = False
 
 
 def enqueue(owner, req):
     p, j = str(req.project), str(req.id)
     with transaction() as q:
         head = project(q, owner, p)
-        raw = req.model_dump_json()
+        raw = req.model_dump_json(
+            exclude={"agent_team"} if not req.agent_team else set()
+        )
         existing = q(
             "SELECT request FROM jobs WHERE id=? AND owner=?", (j, owner)
         ).fetchone()
@@ -131,8 +134,16 @@ def enqueue(owner, req):
             raise Problem("Project changed. Reload this revision.", 409)
         now = int(time.time())
         expire_jobs(q, now)
+        if req.agent_team and not req.live:
+            raise Problem("The design team requires live interpretation.")
+        if (
+            req.agent_team
+            and os.getenv("TOWN_MODE") == "local"
+            and not os.getenv("OPENAI_API_KEY", "").strip()
+        ):
+            raise Problem("Configure the server OPENAI_API_KEY to generate a home.")
         if req.live:
-            if not req.message.strip():
+            if not req.message.strip() and not req.agent_team:
                 raise Problem("Enter a design request.")
             if os.getenv("ARCHIMIND_ENABLE_OPENAI_STUDIO") != "1":
                 raise Problem("Live interpretation is disabled on this server.")
@@ -149,16 +160,18 @@ def enqueue(owner, req):
             >= 3
         ):
             raise Problem("Daily limit of three design jobs reached.", 429)
-        # Each live job makes at most one bounded model call. Reserve quota before queueing.
+        # Reserve three calls for team jobs and one for legacy interpretation.
         if req.live:
             used = q(
-                "SELECT count(*) FROM jobs WHERE created>=? AND request LIKE ?",
-                (day, '%"live":true%'),
+                "SELECT COALESCE(SUM(CASE WHEN request LIKE ? THEN 3 ELSE 1 END),0) "
+                "FROM jobs WHERE created>=? AND request LIKE ?",
+                ('%"agent_team":true%', day, '%"live":true%'),
             ).fetchone()[0]
             cap = int(os.getenv("TOWN_DAILY_MODEL_CALLS", "0"))
             reserve = int(os.getenv("TOWN_CALL_RESERVE_MICROUSD", "0"))
             budget = int(os.getenv("TOWN_DAILY_MICROUSD", "0"))
-            if used >= cap or reserve <= 0 or (used + 1) * reserve > budget:
+            total = used + (3 if req.agent_team else 1)
+            if total > cap or reserve <= 0 or total * reserve > budget:
                 raise Problem("The operator's daily AI allowance is exhausted.", 429)
         q(
             "INSERT INTO jobs(id,owner,project,base,created,status,request) VALUES(?,?,?,?,?,'queued',?)",

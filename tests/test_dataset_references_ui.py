@@ -147,7 +147,6 @@ def app():
 
 
 def submit(a, text=TEXT):
-    a.checkbox(key="chat_bedroom_allow_live").check().run()
     return a.chat_input(key="chat_bedroom_message").set_value(text).run()
 
 

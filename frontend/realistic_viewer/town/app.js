@@ -292,7 +292,8 @@ bind("generate", async () => {
       project,
       base: revision,
       message: el("message").value,
-      live: el("live").checked,
+      live: true,
+      agent_team: true,
       brief: {
         width: Number(el("width").value),
         depth: Number(el("depth").value),

@@ -32,7 +32,7 @@ def configuration(allow_live: bool) -> tuple[str, str]:
 
 def request(
     schema: type[BaseModel],
-    prompt: str,
+    prompt: str | list[dict],
     *,
     config,
     deadline: float,

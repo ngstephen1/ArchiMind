@@ -56,7 +56,6 @@ def app():
 
 
 def submit(a, text=TEXT):
-    a.checkbox(key="chat_bedroom_allow_live").check().run()
     return a.chat_input(key="chat_bedroom_message").set_value(text).run()
 
 
@@ -257,7 +256,6 @@ def test_reset_keeps_consent_usable_and_starts_fresh_turns(spies):
     a.button(key="generate_layouts").click().run()
     result = a.session_state[ui.RESULT_KEY]
     a.button(key="chat_bedroom_reset").click().run()
-    assert a.checkbox(key="chat_bedroom_allow_live").value
     assert not a.chat_input(key="chat_bedroom_message").disabled
     a.chat_input(key="chat_bedroom_message").set_value(TEXT).run()
     assert not a.exception

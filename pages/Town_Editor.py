@@ -123,7 +123,9 @@ with st.form("town_edit"):
         [r["design"]["room"]["id"] for r in home["rooms"]] if home else [],
     )
     brief = st.text_area("Design brief (optional)")
-    live = st.checkbox("Authorize one live interpretation request")
+    st.caption(
+        "Generate sends the brief and floor plans to OpenAI for interpretation, styling and visual review (up to three calls). A configured local Codex CLI also reviews the bedroom."
+    )
     if st.form_submit_button("Generate alternatives", disabled=rev != snapshot["head"]):
         st.session_state["town_job:" + p] = call(
             "/jobs",
@@ -132,7 +134,8 @@ with st.form("town_edit"):
                 "project": p,
                 "base": rev,
                 "message": brief,
-                "live": live,
+                "live": True,
+                "agent_team": True,
                 "brief": {
                     "width": w,
                     "depth": d,

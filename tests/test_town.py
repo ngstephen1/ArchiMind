@@ -382,3 +382,121 @@ def test_bedroom_collection_is_revision_bound_and_preserves_reservations(local):
         ]
         assert local.get(endpoint + "?revision=1").json()["home"] == original
     assert local.post(endpoint + "/undo", json={"base": 3}).json()["home"] == prior
+
+
+@pytest.mark.parametrize("vision_fails", [False, True])
+def test_design_team_reviews_real_candidates_and_reserves_three_calls(
+    local, monkeypatch, vision_fails
+):
+    import base64
+
+    from archimind.town import design_review
+
+    for key, value in {
+        "ARCHIMIND_ENABLE_OPENAI_STUDIO": "1",
+        "TOWN_DAILY_MODEL_CALLS": "3",
+        "TOWN_CALL_RESERVE_MICROUSD": "10",
+        "TOWN_DAILY_MICROUSD": "30",
+        "ARCHIMIND_ENABLE_CODEX_ADVISOR": "1",
+    }.items():
+        monkeypatch.setenv(key, value)
+    project = service.create("local-designer")["project"]
+    req = job(project, message="A quiet bedroom", live=True, agent_team=True)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert local.post("/api/jobs", json=req).status_code == 400
+    monkeypatch.setenv("OPENAI_API_KEY", "fixture")
+    calls = []
+    images = {}
+    codex = []
+
+    def provider(schema, content, **kwargs):
+        calls.append(schema)
+        if schema is service.Interpretation:
+            return schema(
+                priority="quiet bedroom",
+                palette="sage",
+                lock_rooms=[],
+                clarification="",
+                unsupported=[],
+                lock_furniture=[],
+            )
+        if schema is design_review.Direction:
+            return schema(
+                material_direction="Linen.",
+                lighting_direction="Window light.",
+                tradeoff="Glare.",
+            )
+        assert schema is design_review.VisualReview
+        for label, image in zip(content[1::2], content[2::2], strict=True):
+            images[label["text"].removeprefix("Candidate ")] = base64.b64decode(
+                image["image_url"].split(",", 1)[1], validate=True
+            )
+        if vision_fails:
+            raise service.provider.StudioError("Visual review unavailable.")
+        return schema(
+            observation="One bedroom.",
+            recommendation="Review daylight.",
+            uncertainty="No luminance data.",
+        )
+
+    def advisor(req, home):
+        codex.append(home["id"])
+        return {"status": "failure", "message": "Codex login unavailable."}
+
+    monkeypatch.setattr(service.provider, "request", provider)
+    monkeypatch.setattr(design_review, "codex_review", advisor)
+    j = local.post("/api/jobs", json=req).json()["job"]
+    assert local.post("/api/jobs", json=req).json()["job"] == j
+    assert service.work_once()
+    result = local.get("/api/jobs/" + j).json()
+    assert len(calls) == 3 and len(set(calls)) == 3 and len(codex) == 1
+    assert local.get("/api/projects/" + project).json()["revision"] == 0
+    assert (
+        local.post(
+            "/api/jobs", json=job(project, message="Again", live=True)
+        ).status_code
+        == 429
+    )
+    if vision_fails:
+        assert result == {"status": "failed", "result": "Visual review unavailable."}
+    else:
+        assert result["status"] == "ready"
+        homes = result["result"]
+        assert codex == [homes[0]["id"]]
+        assert images == {home["id"]: design_review.plan_png(home) for home in homes}
+        events = local.get(f"/api/jobs/{j}/events").json()["events"]
+        visual = next(
+            e
+            for e in events
+            if e["state"] == "completed" and e["task"] == "OpenAI · Review plan images"
+        )
+        assert visual["artifact"]["candidate_ids"] == list(images)
+        assert any(
+            e["state"] == "failed" and e["task"].startswith("Codex CLI") for e in events
+        )
+
+
+def test_concept_image_uses_validated_saved_plan(monkeypatch):
+    import base64
+    from types import SimpleNamespace
+
+    from archimind.town.design_review import plan_png
+
+    monkeypatch.syspath_prepend(str(SHOWCASE.parents[3] / "scripts"))
+    from render_ai_concept import render
+
+    home = json.loads(SHOWCASE.read_text())
+    expected = plan_png(home)
+    calls = []
+
+    def edit(**args):
+        calls.append(args)
+        return SimpleNamespace(
+            data=[SimpleNamespace(b64_json=base64.b64encode(expected))]
+        )
+
+    assert render(home, "Sage and oak", SimpleNamespace(edit=edit)) == expected
+    assert len(calls) == 1
+    assert calls[0]["image"] == ("measured-plan.png", expected, "image/png")
+    assert calls[0]["n"] == 1
+    assert home == json.loads(SHOWCASE.read_text())

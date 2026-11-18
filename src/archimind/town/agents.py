@@ -13,6 +13,7 @@ from archimind.datasets.search import (
     search_references,
 )
 
+from . import design_review
 from .design import PROGRAM, digest, generate, validate_home
 
 ROLES = {
@@ -71,7 +72,12 @@ def coordinate(req, previous, interpret, emit):
             artifact = (
                 value.model_dump(mode="json") if hasattr(value, "model_dump") else value
             )
-            emit(agent, "completed", label, artifact)
+            state = (
+                "failed"
+                if label.startswith("Codex CLI") and artifact.get("status") != "success"
+                else "completed"
+            )
+            emit(agent, state, label, artifact)
             return value
         except Exception:
             emit(agent, "failed", label, {})
@@ -87,7 +93,11 @@ def coordinate(req, previous, interpret, emit):
 
     with ThreadPoolExecutor(max_workers=5, thread_name_prefix="town-agent") as pool:
         tasks = [
-            ("A", "Interpret requirements", lambda: interpret(req, previous)),
+            (
+                "A",
+                "OpenAI · Interpret brief" if req.live else "Interpret requirements",
+                lambda: interpret(req, previous),
+            ),
             ("B", "Find eligible evidence", lambda: search(req.message)),
             (
                 "C",
@@ -102,11 +112,17 @@ def coordinate(req, previous, interpret, emit):
             ("D", "Check starting geometry", baseline),
             (
                 "E",
-                "Inspect finish options",
-                lambda: {
-                    "starting_palette": previous["palette"] if previous else None,
-                    "options": SWATCH,
-                },
+                "OpenAI · Generate styling direction"
+                if req.agent_team
+                else "Inspect finish options",
+                lambda: (
+                    design_review.direction(req)
+                    if req.agent_team
+                    else {
+                        "starting_palette": previous["palette"] if previous else None,
+                        "options": SWATCH,
+                    }
+                ),
             ),
         ]
         futures = [pool.submit(task, *t) for t in tasks]
@@ -156,6 +172,26 @@ def coordinate(req, previous, interpret, emit):
             emit("C", "completed", "Furnishing complete", {"candidates": len(homes)})
         for check in checks:
             check.result()
+        if req.agent_team and homes:
+            style = futures[4].result()
+            visual = pool.submit(
+                task,
+                "D",
+                "OpenAI · Review plan images",
+                lambda: design_review.review_candidates(req, homes, style),
+            )
+            if (
+                os.getenv("TOWN_MODE") == "local"
+                and os.getenv("ARCHIMIND_ENABLE_CODEX_ADVISOR") == "1"
+            ):
+                task(
+                    "E",
+                    "Codex CLI · Review bedroom placement",
+                    lambda: design_review.codex_review(req, homes[0]),
+                )
+            else:
+                emit("E", "skipped", "Codex CLI · Local advisor unavailable", {})
+            visual.result()
         emit(
             "E",
             "completed",

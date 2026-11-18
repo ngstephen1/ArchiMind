@@ -8,7 +8,7 @@
   <a href="https://streamlit.io/"><img src="docs/assets/streamlit.svg" alt="Streamlit" height="32" /></a>
   <a href="https://docs.pydantic.dev/"><img src="docs/assets/pydantic.svg" alt="Pydantic" height="32" /></a>
   <a href="https://github.com/langchain-ai/langgraph"><img src="docs/assets/langgraph.svg" alt="LangGraph" height="32" /></a>
-  <a href="docs/developer/CHAT_BEDROOM.md"><img src="docs/assets/openai.svg" alt="OpenAI (optional live interpretation and advice)" height="32" /></a>
+  <a href="docs/developer/CHAT_BEDROOM.md"><img src="docs/assets/openai.svg" alt="OpenAI design interpretation, styling and visual review" height="32" /></a>
 </p>
 
 <p align="center">
@@ -176,7 +176,7 @@ Run these commands from the repository root. Choose the experience you want, or 
 | Experience | Launch command | Where to go |
 | --- | --- | --- |
 | Room layouts and offline 3D Studio | `.venv/bin/python -m streamlit run app.py --server.port 8501` | [Main app](http://127.0.0.1:8501) or [3D Studio](http://127.0.0.1:8501/?workspace=studio). In Studio, choose **Load example furnishing plan** and **Build 3D room**. |
-| Live Bedroom Chat | `.venv/bin/python scripts/run_chat.py --port 8502` | [Chat app](http://127.0.0.1:8502). Select **Chat bedroom**, enable live interpretation, submit measurements, choose furniture, then **Prepare → Review → Generate Layouts**. |
+| Live Bedroom Chat | `.venv/bin/python scripts/run_chat.py --port 8502` | [Chat app](http://127.0.0.1:8502). Select **Chat bedroom**, submit measurements, choose furniture, then **Prepare → Review → Generate Layouts**. |
 | Live 3D Studio | `.venv/bin/python scripts/run_studio.py --port 8503` | [Studio](http://127.0.0.1:8503/?workspace=studio). Review the proposed furnishing plan before building it. |
 
 The two live launchers read `OPENAI_API_KEY` from the server environment or the ignored root `.env` file. The offline example and the default Town walkthrough work without a key.
@@ -1368,19 +1368,13 @@ and verification record.
 Later phases remain proposed work. This prototype does not provide CAD/BIM outputs,
 construction guidance, or building-code/accessibility certification.
 
+## Town AI design team
+
+**Design a home → Generate** runs two OpenAI agents in parallel for the brief and styling. Once Python validates the candidate layouts, OpenAI reviews their floor-plan images. Animated cards identify the engine, task and recorded results. The local worker can ask Codex CLI for a bedroom placement critique using its own login. See the [Town guide](docs/developer/TOWN.md#follow-a-design-run) for setup, budgets and rendering a concept illustration from a saved revision.
+
 ## Configuration and project boundaries
 
-The optional [Codex Design Advisor backend](docs/developer/CODEX_ADVISOR.md) is
-implemented separately as C01. It is disabled by default
-(`ARCHIMIND_ENABLE_CODEX_ADVISOR=0`), requires explicit per-call live-usage opt-in,
-and is limited to local single-user testing. It returns unvalidated suggestions;
-there is no advisor UI or automatic placement application.
-
-`.env.example` documents default-off API settings. Normal Streamlit startup does
-not load environment files automatically; the explicit local `run_chat.py` and
-`run_studio.py` launchers can load the ignored `.env`. Authorized adapters read
-`OPENAI_API_KEY` server-side after their gates pass. The default app needs no key,
-and no key is sent to the browser. Codex CLI authentication is separate.
+The [Codex Design Advisor](docs/developer/CODEX_ADVISOR.md) provides local single-user placement suggestions through the Town launcher. Town uses the server-side OpenAI key for its design team. The local Town, Chat and Studio launchers read it from the environment or ignored `.env`. Codex CLI uses its own login. Browsing and viewing saved layouts require no model request.
 
 Local virtual environments, secrets, caches, databases, generated renders, and
 temporary outputs are excluded from Git.
