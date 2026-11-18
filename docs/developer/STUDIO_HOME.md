@@ -12,9 +12,11 @@ The seed-42 demonstration is a 15 × 16 m single-storey home with six furnished 
 
 Town matches the saved project, revision, home ID and full exported manifest digest before offering a published book. Other applied designs can export their own manifest.
 
-### First 4K salon view
+### 4K salon and camera-matched studies
 
-[Open the 3840 × 2160 Falcon daylight image](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-Daylight-4K.jpg). This frame uses the revision-5 manifest and window-aligned salon camera. Cycles ran on one NVIDIA A30 with OptiX. The salon benchmark returned 95th-percentile linear RGB errors of 0.030 at 128 samples and 0.024 at 256 against the 512-sample crop. The 0.015 threshold selected 512. Three display grades were compared from the same EXR. This JPEG uses AgX Medium High Contrast and −0.65 EV to retain separation between the sofa, chairs and pale walls. The PDFs above are CPU review prints.
+[Open the 3840 × 2160 Falcon daylight image](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-Daylight-4K.jpg). This frame uses the revision-5 manifest and window-aligned salon camera. Cycles ran on one NVIDIA A30 with OptiX. The salon benchmark returned 95th-percentile linear RGB errors of 0.030 at 128 samples and 0.024 at 256 against the 512-sample crop. The 0.015 threshold selected 512. Three display grades were compared from the same EXR. This JPEG uses AgX Medium High Contrast and −0.65 EV to retain separation between the sofa, chairs and pale walls. The two whole-home books above are CPU review prints.
+
+[Open the A3 salon sheet](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-4K.pdf) to compare the daylight, evening and line drawing alongside the measured furnishing plan. [Download the three scene-linear OpenEXR masters with their manifest](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-Salon-Linear-Masters.tar.gz) for independent grading.
 
 ## Walk through the saved design
 
