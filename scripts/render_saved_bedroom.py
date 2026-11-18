@@ -420,16 +420,18 @@ def load_furniture(item, registry, materials):
 
 
 def render(manifest_path, output, originals, inspect_only=False):
-    manifest = json.loads(manifest_path.read_bytes())
+    manifest_bytes = manifest_path.read_bytes()
+    manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
+    manifest = json.loads(manifest_bytes)
     if manifest.get("schema_version") != 1 or manifest.get("revision", 0) < 1:
         raise ValueError("A version 1 applied bedroom manifest is required")
     if [cam["id"] for cam in manifest["cameras"]] != ["doorway", "desk", "bedside"]:
         raise ValueError("Unexpected camera set")
     output.mkdir(parents=True, exist_ok=False)
-    (output / "manifest.json").write_bytes(manifest_path.read_bytes())
+    (output / "manifest.json").write_bytes(manifest_bytes)
     bpy.ops.wm.read_factory_settings(use_empty=True)
     scene = bpy.context.scene
-    scene["manifest_sha256"] = sha(manifest_path)
+    scene["manifest_sha256"] = manifest_sha256
     scene["saved_revision"] = manifest["revision"]
     scene["home_id"] = manifest["home_id"]
     scene["project"] = manifest["project"]
@@ -545,7 +547,7 @@ def render(manifest_path, output, originals, inspect_only=False):
     # Reopen the portable scene before producing the downloadable images.
     bpy.ops.wm.open_mainfile(filepath=str(output / "bedroom.blend"))
     scene = bpy.context.scene
-    if scene["manifest_sha256"] != sha(manifest_path):
+    if scene["manifest_sha256"] != manifest_sha256:
         raise ValueError("Saved scene identity changed")
     if inspect_only:
         return
@@ -557,7 +559,7 @@ def render(manifest_path, output, originals, inspect_only=False):
         (output / name).write_bytes((ASSETS / "furniture" / name).read_bytes())
     (output / "surface-sources.json").write_text(json.dumps(rows, indent=2))
     receipt = {
-        "manifest_sha256": sha(manifest_path),
+        "manifest_sha256": manifest_sha256,
         "project": manifest["project"],
         "revision": manifest["revision"],
         "home_id": manifest["home_id"],
