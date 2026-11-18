@@ -45,6 +45,15 @@ if __name__ == "__main__":
     subprocess.run(
         ["node", "frontend/realistic_viewer/town/build.mjs"], cwd=ROOT, check=True
     )
+    from run_with_agent import settings_from_dotenv
+
+    for key, value in settings_from_dotenv(ROOT / ".env").items():
+        os.environ.setdefault(key, value)
+    os.environ.setdefault("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    os.environ.setdefault("ARCHIMIND_ENABLE_CODEX_ADVISOR", "1")
+    os.environ.setdefault("TOWN_DAILY_MODEL_CALLS", "9")
+    os.environ.setdefault("TOWN_DAILY_MICROUSD", "900000")
+    os.environ.setdefault("TOWN_CALL_RESERVE_MICROUSD", "100000")
     initialize()
     worker = subprocess.Popen([sys.executable, "-m", "archimind.town.worker"], cwd=ROOT)
     editor = subprocess.Popen(

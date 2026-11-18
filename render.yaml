@@ -15,19 +15,25 @@ services:
       - key: TOWN_ORIGIN
         sync: false
       - key: ARCHIMIND_ENABLE_OPENAI_STUDIO
-        value: "0"
+        value: "1"
       - key: TOWN_DAILY_MODEL_CALLS
-        value: "0"
+        sync: false
+      - key: TOWN_DAILY_MICROUSD
+        sync: false
+      - key: TOWN_CALL_RESERVE_MICROUSD
+        sync: false
   - type: worker
     name: archimind-town-worker
     runtime: python
     buildCommand: pip install -r services/town/requirements.txt
     startCommand: python -m archimind.town.worker
     envVars:
+      - key: OPENAI_API_KEY
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: ARCHIMIND_ENABLE_OPENAI_STUDIO
-        value: "0"
+        value: "1"
   - type: web
     name: archimind-town-editor
     runtime: python

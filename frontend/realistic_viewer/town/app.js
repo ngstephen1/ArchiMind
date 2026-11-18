@@ -295,7 +295,8 @@ bind("generate", async () => {
       project,
       base: revision,
       message: el("message").value,
-      live: el("live").checked,
+      live: true,
+      agent_team: true,
       brief: {
         width: Number(el("width").value),
         depth: Number(el("depth").value),
@@ -381,7 +382,10 @@ async function watch(id) {
         if (result.status === "ready") {
           alternatives = result.result;
           show();
-          notify("Checks complete. Preview a layout before applying it.");
+          const missingCritique = history.some(e => e.task === "OpenAI · Review plan images" && e.state === "failed");
+          notify(missingCritique
+            ? "Spatial checks passed. AI visual review unavailable. Preview a layout before applying it."
+            : "Checks complete. Preview a layout before applying it.");
         } else notify(result.result || "Cancelled.");
         return;
       }

@@ -19,6 +19,10 @@ await copyFile(
   new URL("materials/wood-floor.jpg", src),
   new URL("assets/wood-floor.jpg", out),
 );
+for (const engine of ["openai", "python"]) {
+  const source = new URL("../../../docs/assets/" + engine + ".svg", src);
+  await copyFile(source, new URL("assets/" + engine + ".svg", out));
+}
 const materialDir = new URL("materials/", src);
 const surfaceManifest = await readFile(new URL("bedroom-sources.json", materialDir));
 for (const entry of JSON.parse(surfaceManifest)) {

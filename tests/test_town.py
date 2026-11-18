@@ -140,10 +140,8 @@ def test_owner_and_budget(local, monkeypatch):
         return schema(
             priority="balanced",
             palette="oak",
-            lock_rooms=[],
             clarification="Which room needs daylight?",
             unsupported=[],
-            lock_furniture=[],
         )
 
     monkeypatch.setattr(service.provider, "request", clarify)
@@ -384,6 +382,135 @@ def test_bedroom_collection_is_revision_bound_and_preserves_reservations(local):
     assert local.post(endpoint + "/undo", json={"base": 3}).json()["home"] == prior
 
 
+@pytest.mark.parametrize(
+    ("vision_fails", "salon"), [(False, False), (True, False), (False, True)]
+)
+def test_design_team_reviews_real_candidates_and_reserves_three_calls(
+    local, monkeypatch, vision_fails, salon
+):
+    import base64
+
+    from archimind.town import design_review
+
+    for key, value in {
+        "ARCHIMIND_ENABLE_OPENAI_STUDIO": "1",
+        "TOWN_DAILY_MODEL_CALLS": "3",
+        "TOWN_CALL_RESERVE_MICROUSD": "10",
+        "TOWN_DAILY_MICROUSD": "30",
+        "ARCHIMIND_ENABLE_CODEX_ADVISOR": "1",
+    }.items():
+        monkeypatch.setenv(key, value)
+    project = service.create("local-designer")["project"]
+    req = job(
+        project,
+        message="Plan a quiet bedroom and bright study. Keep the measured lot and five standard rooms.",
+        live=True,
+        agent_team=True,
+    )
+    if salon:
+        req["brief"] = {"width": 15, "depth": 16, "formal_salon": True}
+        req["message"] = "Entertain guests in a formal salon."
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert local.post("/api/jobs", json=req).status_code == 400
+    monkeypatch.setenv("OPENAI_API_KEY", "fixture")
+    calls = []
+    images = {}
+    codex = []
+
+    def provider(schema, content, **kwargs):
+        calls.append(schema)
+        if schema is service.NewHomeInterpretation:
+            assert {"lock_rooms", "lock_furniture"}.isdisjoint(schema.model_fields)
+            return schema(
+                priority="quiet bedroom",
+                palette="sage",
+                clarification="",
+                unsupported=[],
+            )
+        if schema is design_review.Direction:
+            return schema(
+                material_direction="Linen.",
+                lighting_direction="Window light.",
+                tradeoff="Glare.",
+            )
+        assert schema is design_review.VisualReview
+        for label, image in zip(content[1::2], content[2::2], strict=True):
+            images[label["text"].removeprefix("Candidate ")] = base64.b64decode(
+                image["image_url"].split(",", 1)[1], validate=True
+            )
+        if vision_fails:
+            raise service.provider.StudioError("Visual review unavailable.")
+        return schema(
+            observation="One bedroom.",
+            recommendation="Review daylight.",
+            uncertainty="No luminance data.",
+        )
+
+    def advisor(req, home):
+        codex.append(home["id"])
+        return {"status": "failure", "message": "Codex login unavailable."}
+
+    monkeypatch.setattr(service.provider, "request", provider)
+    monkeypatch.setattr(design_review, "codex_review", advisor)
+    j = local.post("/api/jobs", json=req).json()["job"]
+    assert local.post("/api/jobs", json=req).json()["job"] == j
+    assert service.work_once()
+    result = local.get("/api/jobs/" + j).json()
+    assert len(calls) == 3 and len(set(calls)) == 3 and len(codex) == 1
+    assert local.get("/api/projects/" + project).json()["revision"] == 0
+    assert (
+        local.post(
+            "/api/jobs", json=job(project, message="Again", live=True)
+        ).status_code
+        == 429
+    )
+    assert result["status"] == "ready"
+    homes = result["result"]
+    assert all(h["evidence"]["reachable_rooms"] == (6 if salon else 5) for h in homes)
+    assert codex == [homes[0]["id"]]
+    assert images == {home["id"]: design_review.plan_png(home) for home in homes}
+    events = local.get(f"/api/jobs/{j}/events").json()["events"]
+    visual = [e for e in events if e["task"] == "OpenAI · Review plan images"][-1]
+    if vision_fails:
+        assert visual["state"] == "failed"
+        assert (
+            local.post(f"/api/jobs/{j}/apply", json={"index": 0}).json()["home"]
+            == homes[0]
+        )
+    else:
+        assert visual["state"] == "completed"
+        assert visual["artifact"]["candidate_ids"] == list(images)
+    assert any(
+        e["state"] == "failed" and e["task"].startswith("Codex CLI") for e in events
+    )
+
+
+def test_concept_image_uses_validated_saved_plan(monkeypatch):
+    import base64
+    from types import SimpleNamespace
+
+    from archimind.town.design_review import plan_png
+
+    monkeypatch.syspath_prepend(str(SHOWCASE.parents[3] / "scripts"))
+    from render_ai_concept import render
+
+    home = json.loads(SHOWCASE.read_text())
+    expected = plan_png(home)
+    calls = []
+
+    def edit(**args):
+        calls.append(args)
+        return SimpleNamespace(
+            data=[SimpleNamespace(b64_json=base64.b64encode(expected))]
+        )
+
+    assert render(home, "Sage and oak", SimpleNamespace(edit=edit)) == expected
+    assert len(calls) == 1
+    assert calls[0]["image"] == ("measured-plan.png", expected, "image/png")
+    assert calls[0]["n"] == 1
+    assert home == json.loads(SHOWCASE.read_text())
+
+
 def test_entertaining_home_has_distinct_salon_and_clearance_reservations():
     brief = interpret_offline(Brief(width=15, depth=16), "entertaining guests")
     home = generate(brief)[0]
@@ -431,3 +558,45 @@ def test_chair_edit_keeps_the_original_and_revalidates():
     validate_home(after)
     with pytest.raises(ValueError, match="unlock"):
         generate(edit.model_copy(update={"locks": ["bedroom"]}), previous=before)
+
+
+def test_controls_only_team_uses_controls_when_styling_unavailable(local, monkeypatch):
+    from archimind.town import agents, design_review
+
+    req = service.Request.model_validate(
+        job(
+            service.create("local-designer")["project"],
+            live=True,
+            agent_team=True,
+            message="  ",
+            brief={"priority": "bright study", "palette": "sage"},
+        )
+    )
+    schemas = []
+    monkeypatch.setattr(
+        service.provider, "configuration", lambda consent: ("fixture", "fixture")
+    )
+    monkeypatch.setenv("ARCHIMIND_ENABLE_CODEX_ADVISOR", "0")
+
+    def respond(schema, content, **_):
+        schemas.append(schema)
+        if schema is design_review.Direction:
+            raise service.provider.StudioError("Stylist unavailable.")
+        assert schema is design_review.VisualReview
+        assert '"priority": "bright study"' in content[0]["text"]
+        assert '"palette": "sage"' in content[0]["text"]
+        assert '"style": null' in content[0]["text"]
+        return schema(
+            observation="Window visible.",
+            recommendation="Check at desk height.",
+            uncertainty="No lux reading.",
+        )
+
+    monkeypatch.setattr(service.provider, "request", respond)
+    events = []
+    homes = agents.coordinate(
+        req, None, service.interpret, lambda *event: events.append(event)
+    )
+    assert homes and all(home["palette"] == "sage" for home in homes)
+    assert schemas == [design_review.Direction, design_review.VisualReview]
+    assert any(agent == "E" and state == "failed" for agent, state, *_ in events)
