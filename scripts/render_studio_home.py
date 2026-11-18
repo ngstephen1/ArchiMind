@@ -157,6 +157,54 @@ def sample_benchmark(scene, out):
     return {"max_samples": selected, "seconds": timings, "p95_linear_rgb_error": errors}
 
 
+def save_view(scene, out, name, linear_master):
+    scene.render.filepath = str(out / (name + ".png"))
+    bpy.ops.render.render(write_still=True)
+    if linear_master:
+        scene.render.image_settings.file_format = "OPEN_EXR"
+        bpy.data.images["Render Result"].save_render(
+            str(out / (name + ".exr")), scene=scene
+        )
+        scene.render.image_settings.file_format = "PNG"
+
+
+def lighting_studies(scene, out, hero, linear_master):
+    scene.camera = bpy.data.objects[hero]
+    scene.render.use_freestyle = True
+    scene.view_layers[0].material_override = bedroom.surface("Drawing paper", "EEEDE8")
+    settings = scene.view_layers[0].freestyle_settings
+    outline = (
+        settings.linesets[0]
+        if len(settings.linesets)
+        else settings.linesets.new("Silhouettes")
+    )
+    outline.select_silhouette = outline.select_border = True
+    outline.select_crease = False
+    if not outline.linestyle:
+        outline.linestyle = bpy.data.linestyles.new("Silhouette ink")
+    outline.linestyle.color = (0.025, 0.033, 0.031)
+    outline.linestyle.thickness = scene.render.resolution_x / 960
+    crease = settings.linesets.new("Furniture and joinery")
+    crease.select_silhouette = crease.select_border = False
+    crease.select_crease = True
+    if not crease.linestyle:
+        crease.linestyle = bpy.data.linestyles.new("Joinery ink")
+    crease.linestyle.color = (0.19, 0.18, 0.15)
+    crease.linestyle.thickness = 0.48 * scene.render.resolution_x / 960
+    save_view(scene, out, hero + "-drawing", linear_master)
+    scene.render.use_freestyle = False
+    scene.view_layers[0].material_override = None
+    scene.world.node_tree.nodes.get("Background").inputs[
+        "Strength"
+    ].default_value = 0.035
+    for lamp in bpy.data.lights:
+        if lamp.type == "SUN":
+            lamp.energy = 0
+        elif "aylight" in lamp.name:
+            lamp.energy *= 0.045
+    save_view(scene, out, hero + "-evening", linear_master)
+
+
 def render(args):
     source = args.manifest.read_bytes()
     board = json.loads(source)
@@ -329,59 +377,16 @@ def render(args):
     gray_studies(scene, board, out)
     benchmark = sample_benchmark(scene, out) if not args.proof else None
 
-    def photo(name):
-        scene.render.filepath = str(out / (name + ".png"))
-        bpy.ops.render.render(write_still=True)
-        if not args.proof:
-            scene.render.image_settings.file_format = "OPEN_EXR"
-            bpy.data.images["Render Result"].save_render(
-                str(out / (name + ".exr")), scene=scene
-            )
-            scene.render.image_settings.file_format = "PNG"
-
     for room, name in views:
         scene.camera = bpy.data.objects[name]
-        photo(name)
+        save_view(scene, out, name, not args.proof)
     if cloth_name:
         scene.camera = bpy.data.objects["bedroom-bedside"]
         cloth = bpy.data.objects[cloth_name]
         cloth.hide_render = True
-        photo("bedroom-bedside-before")
+        save_view(scene, out, "bedroom-bedside-before", not args.proof)
         cloth.hide_render = False
-    scene.camera = bpy.data.objects[hero]
-    scene.render.use_freestyle = True
-    scene.view_layers[0].material_override = bedroom.surface("Drawing paper", "EEEDE8")
-    settings = scene.view_layers[0].freestyle_settings
-    outline = (
-        settings.linesets[0]
-        if len(settings.linesets)
-        else settings.linesets.new("Silhouettes")
-    )
-    outline.select_silhouette = outline.select_border = True
-    outline.select_crease = False
-    if not outline.linestyle:
-        outline.linestyle = bpy.data.linestyles.new("Silhouette ink")
-    outline.linestyle.color = (0.025, 0.033, 0.031)
-    outline.linestyle.thickness = scene.render.resolution_x / 960
-    crease = settings.linesets.new("Furniture and joinery")
-    crease.select_silhouette = crease.select_border = False
-    crease.select_crease = True
-    if not crease.linestyle:
-        crease.linestyle = bpy.data.linestyles.new("Joinery ink")
-    crease.linestyle.color = (0.19, 0.18, 0.15)
-    crease.linestyle.thickness = 0.48 * scene.render.resolution_x / 960
-    photo(hero + "-drawing")
-    scene.render.use_freestyle = False
-    scene.view_layers[0].material_override = None
-    scene.world.node_tree.nodes.get("Background").inputs[
-        "Strength"
-    ].default_value = 0.035
-    for lamp in bpy.data.lights:
-        if lamp.type == "SUN":
-            lamp.energy = 0
-        elif "aylight" in lamp.name:
-            lamp.energy *= 0.045
-    photo(hero + "-evening")
+    lighting_studies(scene, out, hero, not args.proof)
     (out / "receipt.json").write_text(
         json.dumps(
             {

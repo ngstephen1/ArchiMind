@@ -1,7 +1,10 @@
 // Room-local metres, Z up. One indexed surface feeds both the walk-through and Cycles.
 export function turnedCoverlet(bed) {
   if (!bed || bed.id !== "queen-bed") return null;
-  const vertices = [], faces = [], columns = 44, rows = 18;
+  const vertices = [],
+    faces = [],
+    columns = 44,
+    rows = 18;
   for (let j = 0; j <= rows; j++) {
     const v = j / rows;
     for (let i = 0; i <= columns; i++) {
@@ -13,7 +16,9 @@ export function turnedCoverlet(bed) {
       const turnover = Math.exp(-((v - 0.86) ** 2) / 0.006);
       vertices.push([
         bed.x_m + bed.width_m * (0.004 + 0.992 * u),
-        bed.y_m + bed.depth_m * (0.18 + 0.48 * v) + 0.016 * Math.sin(8 * u + 2 * v),
+        bed.y_m +
+          bed.depth_m * (0.18 + 0.48 * v) +
+          0.016 * Math.sin(8 * u + 2 * v),
         0.506 + lift * (0.45 + 0.55 * v) + 0.034 * turnover - 0.072 * hem * hem,
       ]);
       if (i && j) {
@@ -23,5 +28,5 @@ export function turnedCoverlet(bed) {
       }
     }
   }
-  return {name: "Stonewashed coverlet", vertices, faces};
+  return { name: "Stonewashed coverlet", vertices, faces };
 }
