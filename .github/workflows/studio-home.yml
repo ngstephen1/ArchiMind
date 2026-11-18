@@ -1,0 +1,46 @@
+name: Studio home proof
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/whole-home-client-studio]
+    paths:
+      - scripts/render_studio_home.py
+      - .github/workflows/studio-home.yml
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Install the pinned Blender binary
+        working-directory: ${{ runner.temp }}
+        run: |
+          name=blender-5.1.2-linux-x64.tar.xz
+          curl -fsSL --retry 2 "https://download.blender.org/release/Blender5.1/$name" -o blender.tar.xz ||
+            curl -fsSL --retry 2 "https://ftp.halifax.rwth-aachen.de/blender/release/Blender5.1/$name" -o blender.tar.xz
+          echo 'aaccb355f50183979b698bcce7467103a76261b5fa59f4972295842662a285fb  blender.tar.xz' | sha256sum -c
+          tar xf blender.tar.xz
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "20"
+      - name: Replay applied studio home and export the scene
+        run: |
+          python -m pip install -e . -r services/town/requirements.txt
+          npm ci --prefix frontend/realistic_viewer --ignore-scripts
+          python scripts/run_studio_home.py --export "$RUNNER_TEMP/saved.json"
+          node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/saved.json" "$RUNNER_TEMP/manifest.json"
+      - name: Reopen the editable scene and render every room
+        run: |
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/proof" --proof
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: studio-home-proof
+          path: ${{ runner.temp }}/proof
+          if-no-files-found: error

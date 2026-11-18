@@ -194,6 +194,11 @@ export function bedroomCameras(part, aspect = 16 / 9) {
           "No clear view of the complete subject. Showing the doorway view.",
         );
   }
+  if (room.id !== "bedroom") {
+    const primary = furniture[0], secondary = furniture[1] || primary;
+    return [overview, ...[primary, secondary].filter((f,i,a) => f && a.indexOf(f) === i).map(f =>
+      detail(f.id, f.name, [f.id], 2.25))];
+  }
   return [
     overview,
     detail("desk", "Desk and chair", ["belaya", "desk-chair"], 2.25),

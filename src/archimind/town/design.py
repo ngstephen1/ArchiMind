@@ -18,9 +18,18 @@ from archimind.assets.selection import build_render_bindings
 from archimind.geometry import generate_layout_candidates, validate_accessibility
 from archimind.models import Door, Furniture, Room, RoomDesign, Window
 
-Kind = Literal["bedroom", "study", "living", "kitchen-dining", "bathroom"]
+Kind = Literal["salon", "bedroom", "study", "living", "kitchen-dining", "bathroom"]
 PROGRAM = ["bedroom", "study", "living", "kitchen-dining", "bathroom"]
+STUDIO_ITEMS = {
+    "salon": [
+        ("salon-suite", "seating", 2.8, 2.35, 0.94),
+        ("salon-dining", "dining", 2.2, 2.05, 1.0),
+    ],
+    "living": [("media-console", "storage", 1.6, 0.38, 0.64)],
+    "study": [("bookcase", "storage", 0.85, 0.34, 1.75)],
+}
 ITEMS = {
+    "salon": [],
     "bedroom": [("queen-bed", "bed", 1.6, 2, 0.6)],
     "living": [
         ("sofa", "sofa", 2, 0.85, 0.86),
@@ -45,10 +54,11 @@ class Brief(BaseModel):
     priority: Literal[
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ] = "balanced"
+    formal_salon: bool = False
     palette: Literal["oak", "sage", "terracotta"] = "oak"
     seed: int = Field(default=42, ge=0, le=1000000)
     closer_study_desk: bool = False
-    locks: list[Kind] = Field(default_factory=list, max_length=5)
+    locks: list[Kind] = Field(default_factory=list, max_length=6)
 
 
 def interpret_offline(brief, text):
@@ -73,6 +83,15 @@ def interpret_offline(brief, text):
         clause = re.sub(r"^(?:a|an) ", "", clause)
         if clause == "move the study desk closer to its window":
             values["closer_study_desk"] = True
+            continue
+        if clause in {"formal salon", "entertaining guests", "salon for entertaining"}:
+            values["formal_salon"] = True
+            continue
+        if clause == "quiet work":
+            clause = "quiet bedroom and bright study"
+            priorities[clause] = clause
+        if clause == "compact everyday living":
+            values.update(width=10.5, depth=11.5)
             continue
         if clause == "writing desk":
             # Every generated bedroom includes the qualified Belaya.
@@ -174,7 +193,7 @@ def validate_home(home):
     shell = box(0, 0, width, depth)
     coverage = unary_union(areas)
     if (
-        sorted(kinds) != sorted(PROGRAM)
+        sorted(kinds) != sorted(PROGRAM + (["salon"] if "salon" in kinds else []))
         or shell.symmetric_difference(coverage).area > 1e-5
         or sum(a.area for a in areas) - coverage.area > 1e-5
     ):
@@ -290,6 +309,16 @@ def generate(brief, previous=None, *, on_progress=None):
         previous["depth"],
     ):
         raise ValueError("Keep the shell dimensions to preserve locked rooms.")
+    salon = brief.formal_salon or bool(
+        previous
+        and any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+    )
+    if (
+        salon
+        and brief.locks
+        and not any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+    ):
+        raise ValueError("Adding a salon requires repartitioning. Unlock rooms first.")
     candidates = []
     for attempt in range(8):
         rng = random.Random(brief.seed + 7919 * attempt)
@@ -299,6 +328,8 @@ def generate(brief, previous=None, *, on_progress=None):
             rng.shuffle(row)
         if "quiet bedroom" in brief.priority:
             rows[0] = ["living", "bedroom"]
+        if salon:
+            rows[0].insert(0, "salon")
         partitions = []
         for side, row in enumerate(rows):
             x = 0 if side == 0 else hall + 1.6
@@ -380,6 +411,7 @@ def generate(brief, previous=None, *, on_progress=None):
                     rotation_deg=0,
                 )
                 for i, c, a, b, z in ITEMS[k]
+                + (STUDIO_ITEMS.get(k, []) if salon else [])
             ]
             proofs = {}
             if k == "bedroom":
@@ -420,7 +452,7 @@ def generate(brief, previous=None, *, on_progress=None):
             rooms=rooms,
             palette=brief.palette,
         )
-        if len(rooms) != 5:
+        if len(rooms) != len(PROGRAM) + int(salon):
             continue
         try:
             validate_home(home)
@@ -429,7 +461,7 @@ def generate(brief, previous=None, *, on_progress=None):
         bedroom = next(p for p in rooms if p["design"]["room"]["id"] == "bedroom")
         rear = bedroom["origin"][1] + bedroom["design"]["room"]["depth_m"] / 2
         home["evidence"] = {
-            "reachable_rooms": 5,
+            "reachable_rooms": len(rooms),
             "bedroom_center_from_front_m": round(rear, 2),
             "study_window_width_m": next(
                 p for p in rooms if p["design"]["room"]["id"] == "study"

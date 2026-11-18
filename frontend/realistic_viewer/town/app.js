@@ -1,3 +1,5 @@
+import {homeBoard} from "./home_board.js";
+import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
@@ -298,6 +300,7 @@ bind("generate", async () => {
         depth: Number(el("depth").value),
         seed: 42 + revision,
         priority: el("priority").value,
+        formal_salon: el("formalSalon").checked,
         palette: el("palette").value,
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
@@ -480,7 +483,7 @@ bind("chairApply", async () => {
 });
 
 let boardHome;
-let exportUrl;
+let exportUrl, homeUrl;
 
 function showExport(manifest, hash) {
   if (exportUrl) URL.revokeObjectURL(exportUrl);
@@ -488,7 +491,11 @@ function showExport(manifest, hash) {
   const manifestLink = node("a","Download bedroom manifest");
   manifestLink.href = exportUrl;
   manifestLink.download = "bedroom-r" + manifest.revision + "-" + hash.slice(0,12) + ".json";
-  el("boardExports").replaceChildren(manifestLink);
+  if(homeUrl) URL.revokeObjectURL(homeUrl);
+  homeUrl=URL.createObjectURL(new Blob([manifestText(homeBoard({project,revision,home:boardHome}))],{type:"application/json"}));
+  const whole=node("a","Download whole-home scene manifest");
+  whole.href=homeUrl; whole.download="home-r"+revision+"-"+boardHome.id.slice(0,12)+".json";
+  el("boardExports").replaceChildren(manifestLink, node("p",""),whole);
   const publication = publicationFor(manifest,hash);
   if (publication) {
     const link = node("a","Download the Blender scene and three finished stills");
@@ -572,15 +579,26 @@ el("present").onclick = async () => {
         ),
       );
   }
+  el("boardRoom").replaceChildren(...h.rooms.map(p=>new Option(p.design.room.name,p.design.room.id)));
+  el("boardRoom").value="bedroom";
+  await showRoom(h,"bedroom");
+};
+el("boardRoom").onchange=()=>showRoom(boardHome,el("boardRoom").value);
+let photoSerial=0;
+async function showRoom(h,id){
+  const generation=++photoSerial;
+  const part=h.rooms.find(p=>p.design.room.id===id);
+  el("elevations").replaceChildren(node("h3",part.design.room.name+" · schematic elevations"),roomElevation(part,"north"),roomElevation(part,"east"));
+  el("printBoard").disabled=true;
   el("whyAnswer").textContent = "";
-  el("photos").textContent = "Rendering bedroom views…";
+  el("photos").textContent = "Rendering "+part.design.room.name+" views…";
   try {
-    const { images, views, chair, desk, collection } = await world.bedroomViews(h);
-    if (boardGeneration !== generation || !el("board").open) return;
+    const { images, views, chair, desk, collection } = await world.bedroomViews(h,id);
+    if (photoSerial !== generation || !el("board").open) return;
     el("photos").replaceChildren();
-    if (desk === "placeholder") el("photos").append(node("p", "Belaya mesh unavailable. A placeholder marks its reservation."));
-    if (collection === "placeholder") el("photos").append(node("p","Bedroom collection mesh unavailable. A procedural piece marks its reservation."));
-    if (chair === "placeholder")
+    if (id==="bedroom" && desk === "placeholder") el("photos").append(node("p", "Belaya mesh unavailable. A placeholder marks its reservation."));
+    if (id==="bedroom" && collection === "placeholder") el("photos").append(node("p","Bedroom collection mesh unavailable. A procedural piece marks its reservation."));
+    if (id==="bedroom" && chair === "placeholder")
       el("photos").append(node("p", "Designer chair unavailable in these views. The procedural chair marks its reservation."));
     images.forEach((src, i) => {
       const fig = document.createElement("figure"),
@@ -591,11 +609,11 @@ el("present").onclick = async () => {
       el("photos").append(fig);
     });
   } catch {
-    if (boardGeneration !== generation || !el("board").open) return;
+    if (photoSerial !== generation || !el("board").open) return;
     el("photos").textContent =
-      "Bedroom views could not be rendered on this device.";
+      "Room views could not be rendered on this device.";
   } finally {
-    if (generation === boardGeneration) el("printBoard").disabled = false;
+    if (generation === photoSerial) el("printBoard").disabled = false;
   }
 };
 el("askWhy").onclick = () =>

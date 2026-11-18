@@ -408,3 +408,5 @@ button[aria-pressed="true"] {
 @media(max-width:620px) {
   .photo-controls { top: 12px; width: 132px; padding: 6px 8px; }
 }
+#elevations img { width: 50%; height: auto; vertical-align: top }
+@media(max-width:600px){#elevations img{width:100%}}

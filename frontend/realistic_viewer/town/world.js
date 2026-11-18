@@ -1,3 +1,5 @@
+import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
+import { studioFurniture, studioFinishes } from "./studio_furniture.js";
 import * as T from "three";
 import { bedroomSurfaces, finishBedroomConcept, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
@@ -817,6 +819,14 @@ export function createTown(canvas, status, action) {
           d = f.depth_m,
           t = f.height_m;
         indoor.push([ox + f.x_m, -oy - f.y_m - d, ox + f.x_m + w, -oy - f.y_m]);
+        const pieces = r.id !== "bedroom" && h.rooms.some((p) => p.design.room.id === "salon") ? studioFurniture(f) : [];
+        if (pieces.length) {
+          for (const p of pieces) {
+            const [w,d,h] = p.wdh, [x,y,z] = p.xyz;
+            mesh(group, new RoundedBoxGeometry(w,h,d,2,p.radius), studioFinishes[p.finish],x,z,-y);
+          }
+          continue;
+        }
         if (f.id === "queen-bed") {
           const left = Math.max(0.06, f.x_m - 0.58),
             right = Math.min(r.width_m - 0.06, f.x_m + w + 0.58);
@@ -1222,7 +1232,7 @@ export function createTown(canvas, status, action) {
   });
   return {
     load,
-    async bedroomViews(snapshot) {
+    async bedroomViews(snapshot, roomId = "bedroom") {
       const original = home, originalPreset = photoView.value;
       const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
       if (home !== snapshot) load(snapshot);
@@ -1232,7 +1242,7 @@ export function createTown(canvas, status, action) {
         const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
         await surfaces.ready;
         if (epoch !== generation) throw Error("Presentation source changed.");
-        const part = snapshot.rooms.find((p) => p.design.room.id === "bedroom");
+        const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
         const views = bedroomCameras(part);
         const visible = [hero, street, interior, avatar].map((o) => o.visible);
         const size = renderer.getSize(new T.Vector2());
