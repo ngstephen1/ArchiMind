@@ -5,8 +5,9 @@ import {
   productSceneBudget,
   validateProductBindings,
 } from "../src/product_assets.js";
-import surfaces from "./materials/bedroom-sources.json" with { type: "json" };
-import publications from "./bedroom_publications.json" with { type: "json" };
+import indexes from "./bedroom_indexes.cjs";
+
+const { surfaces, publications } = indexes;
 
 const bedDesk = PRODUCT_ASSETS["abo-b074l4976t-amazon-co-uk"];
 const dim = (item) => [item.width_m, item.depth_m, item.height_m];
