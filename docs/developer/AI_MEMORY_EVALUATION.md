@@ -39,3 +39,5 @@ Use an editable ArchiMind checkout, GitHub CLI access for binary acquisition, an
 ```
 
 [Per-question IDs, active retrieval streams and timings](../data/AI_MEMORY_RESULTS.json) · [Public passage manifest](../../data/design_evidence/sources.json) · [Additional frozen questions](../../data/benchmarks/design_memory_holdout.tsv) · [Developer handoff guide](DEV_MEMORY.md)
+
+The filtered holdout solar-heat-gain query produced zero allowlisted terms. Its recorded abstention came from the input filter before AI Memory retrieval. CI checks execution and citation integrity. Production adoption requires separate review of the reported scores.

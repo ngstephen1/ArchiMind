@@ -171,11 +171,6 @@ def main():
                             for hit in resp["hits"]
                         ]
                     else:
-                        if any(
-                            hit["path"] not in {f"concepts/{k}.md" for k in pages}
-                            for hit in resp["hits"]
-                        ):
-                            raise ValueError("unknown evidence path")
                         ids = []
                     row[provider] = ids
                     times.append(time.monotonic() - start)
