@@ -1,21 +1,13 @@
-# Security Policy
+# Security policy
 
-## Supported Versions
+## Version information
 
-Use this section to tell people about which versions of your project are
-currently being supported with security updates.
+Include the affected release or Git commit in your report. ArchiMind's development branch is `main`. Maintainers document the affected versions and any available fix in the security advisory.
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 5.1.x   | :white_check_mark: |
-| 5.0.x   | :x:                |
-| 4.0.x   | :white_check_mark: |
-| < 4.0   | :x:                |
+## Report a vulnerability
 
-## Reporting a Vulnerability
+Use [Report a vulnerability](https://github.com/ngstephen1/ArchiMind/security/advisories/new) to contact the maintainers privately. For public feature requests and ordinary bugs, use the issue tracker.
 
-Use this section to tell people how to report a vulnerability.
+Describe the affected component, deployment mode, expected behavior, observed impact, and any evidence you can safely share. Remove credentials, private room designs, and identifying user data from logs and screenshots.
 
-Tell them where to go, how often they can expect to get an update on a
-reported vulnerability, what to expect if the vulnerability is accepted or
-declined, etc.
+Maintainers can ask follow-up questions and coordinate a fix through the private report. Check the report thread for updates.
