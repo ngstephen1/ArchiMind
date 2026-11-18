@@ -10,7 +10,7 @@ from . import inspection
 
 
 @dataclass(frozen=True)
-class DesignerChair:
+class DesignerConcept:
     concept_id: str
     version: str
     name: str
@@ -22,6 +22,9 @@ class DesignerChair:
     height_m: float
     bytes: int
 
+
+@dataclass(frozen=True)
+class DesignerChair(DesignerConcept):
     @property
     def variant_label(self):
         # The reviewed bend is the distinguishing dimension of these releases.
@@ -34,23 +37,38 @@ def _dir():
     return files("archimind").joinpath("_viewer_assets")
 
 
+CHAIR_SIZE = (0.48, 0.52, 0.83)
+BEDROOM_SIZES = {
+    "upholstered-linen-bed": (1.6, 2.0, 0.6),
+    "oak-bedside-lamp": (0.48, 0.43, 1.06),
+}
+
+
 def approved_chairs() -> tuple[DesignerChair, ...]:
+    return _approved("chairs", DesignerChair, {"oak-sage-writing-chair": CHAIR_SIZE})
+
+
+def approved_collection() -> tuple[DesignerConcept, ...]:
+    return _approved("bedroom", DesignerConcept, BEDROOM_SIZES)
+
+
+def _approved(group, record_type, sizes):
     """List released concepts in publication order. Missing registry disables the option."""
     try:
         registry = json.loads(_dir().joinpath("designer_registry.json").read_bytes())
         if registry["schema_version"] != 1:
             return ()
-        records = tuple(DesignerChair(**row) for row in registry["chairs"])
+        records = tuple(record_type(**row) for row in registry[group])
         seen = set()
         for row in records:
             if (
-                row.concept_id != "oak-sage-writing-chair"
+                row.concept_id not in sizes
                 or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", row.version)
                 or any(
                     not re.fullmatch("[0-9a-f]{64}", h)
                     for h in (row.sha256, row.front_sha256, row.three_quarter_sha256)
                 )
-                or (row.width_m, row.depth_m, row.height_m) != (0.48, 0.52, 0.83)
+                or (row.width_m, row.depth_m, row.height_m) != sizes[row.concept_id]
                 or not 0 < row.bytes <= inspection.MAX_GLB_BYTES
                 or (row.concept_id, row.version) in seen
             ):
@@ -74,7 +92,15 @@ def _asset(digest, suffix):
 
 
 def resolve_chair(concept_id, version, sha256) -> DesignerChair:
-    for chair in approved_chairs():
+    return _resolve(approved_chairs(), concept_id, version, sha256)
+
+
+def resolve_collection(concept_id, version, sha256):
+    return _resolve(approved_collection(), concept_id, version, sha256)
+
+
+def _resolve(records, concept_id, version, sha256):
+    for chair in records:
         if (concept_id, version, sha256) == (
             chair.concept_id,
             chair.version,
@@ -93,6 +119,10 @@ def preview_bytes(chair, view):
 
 
 def inspect_chair(data):
+    return inspect_concept(data, CHAIR_SIZE)
+
+
+def inspect_concept(data, dimensions):
     """Measure actual transformed vertices and qualify the material-only concept."""
     if not 0 < len(data) <= inspection.MAX_GLB_BYTES:
         raise ValueError("Designer asset byte limit")
@@ -103,9 +133,12 @@ def inspect_chair(data):
         doc, inspection._accessors(doc, views)
     )
     actual = (*bounds.min_xyz, *bounds.max_xyz)
-    expected = (-0.24, 0.0, -0.26, 0.24, 0.83, 0.26)
+    w, d, h = dimensions
+    expected = (-w / 2, 0.0, -d / 2, w / 2, h, d / 2)
     if any(abs(a - b) > 1e-6 for a, b in zip(actual, expected, strict=True)):
-        raise ValueError("Designer chair must fit its native floor-centred reservation")
+        raise ValueError(
+            "Designer geometry must fit its native floor-centred reservation"
+        )
     if not 0 < triangles <= inspection.MAX_ASSET_TRIANGLES:
         raise ValueError("Designer chair triangle limit")
     return {

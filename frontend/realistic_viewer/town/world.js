@@ -10,7 +10,7 @@ import {
   productSceneAdmission,
 } from "../src/product_assets.js";
 import { fitBedroomChair } from "./designer_chair.js";
-import { loadDesignerChair } from "../src/designer_chair.js";
+import { loadDesignerChair, loadBedroomConcept } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
 
@@ -390,6 +390,7 @@ export function createTown(canvas, status, action) {
     lastY,
     phase = 0,
     generation = 0,
+    collectionReady = Promise.resolve("procedural"),
     chairReady = Promise.resolve("procedural");
   const roomJump = document.getElementById("roomJump");
   roomJump.onchange = () => {
@@ -559,6 +560,16 @@ export function createTown(canvas, status, action) {
   function load(h) {
     generation++;
     const epoch = generation;
+    const selectedLoads = [];
+    canvas.dataset.collection = "procedural";
+    function replaceCollection(binding, fallback, item) {
+      if (!binding) return;
+      canvas.dataset.collection = "loading";
+      selectedLoads.push(fitBedroomChair(
+        loadBedroomConcept(binding, new URL("./assets/", document.baseURI)),
+        fallback, item, -1, () => generation === epoch, clear,
+      ));
+    }
     home = h;
     canvas.dataset.chair = "procedural";
     chairReady = Promise.resolve("procedural");
@@ -858,7 +869,9 @@ export function createTown(canvas, status, action) {
               0.032,
               "#795d4b",
             );
-          group.add(queenBed(f));
+          const fallback = queenBed(f);
+          group.add(fallback);
+          replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f);
         } else if (f.id === "desk-chair") {
           const desk = part.design.furniture.find(
             (item) => item.id === "belaya",
@@ -892,25 +905,28 @@ export function createTown(canvas, status, action) {
             });
           }
         } else if (f.id === "bedside-lamp") {
-          block(group, x, 0.28, z, w, 0.56, d, "#966d48").material = oak;
-          block(group, x, 0.36, z + d * 0.49, 0.13, 0.025, 0.018, "#9a7546");
+          const fallback = new T.Group();
+          group.add(fallback);
+          block(fallback, x, 0.28, z, w, 0.56, d, "#966d48").material = oak;
+          block(fallback, x, 0.36, z + d * 0.49, 0.13, 0.025, 0.018, "#9a7546");
           mesh(
-            group,
+            fallback,
             new T.CylinderGeometry(0.09, 0.1, 0.025, 20),
             "#9a7546",
             x,
             0.575,
             z,
           );
-          block(group, x, 0.7, z, 0.025, 0.25, 0.025, "#9a7546");
+          block(fallback, x, 0.7, z, 0.025, 0.25, 0.025, "#9a7546");
           mesh(
-            group,
+            fallback,
             new T.CylinderGeometry(0.102, 0.146, 0.22, 32),
             "#eddfbd",
             x,
             0.95,
             z,
           );
+          replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f);
           const bulb = new T.PointLight(0xffcf92, 3, 3);
           bulb.position.set(x, 0.81, z);
           group.add(bulb);
@@ -1030,7 +1046,7 @@ export function createTown(canvas, status, action) {
         }
       }
       // Batch only stable meshes; native desk loading may replace its stand-in later.
-      if (!part.designer_chair && !part.design.furniture.some((f) => f.id === "belaya")) batch(group);
+      if (!part.designer_collection && !part.designer_chair && !part.design.furniture.some((f) => f.id === "belaya")) batch(group);
     }
     for (const part of h.rooms) {
       const room = part.design.room,
@@ -1059,7 +1075,14 @@ export function createTown(canvas, status, action) {
       );
     if (inside) enter(true);
     refresh();
-    return chairReady;
+    collectionReady = Promise.all(selectedLoads).then(states => {
+      const result = states.length ? (states.every(s => s === "verified") ? "verified" : "placeholder") : "procedural";
+      if (epoch === generation) canvas.dataset.collection = result;
+      return result;
+    });
+    return Promise.all([chairReady, collectionReady]).then(states =>
+      states.includes("placeholder") ? "placeholder" : states.includes("verified") ? "verified" : "procedural"
+    );
   }
   function move(dx, dz) {
     const coll = inside ? indoor : [...obstacles, ...heroObstacles];
@@ -1223,7 +1246,7 @@ export function createTown(canvas, status, action) {
         } catch {
           /* Keep the labeled placeholder. */
         }
-        const renderedChair = await chairReady;
+        const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
         if (home !== snapshot) throw Error("Presentation source changed.");
         enter(true);
         roomJump.value = "bedroom";
@@ -1262,7 +1285,7 @@ export function createTown(canvas, status, action) {
         );
         return {
           images: [view, photo(doorway, target(items.find((f) => f.id === "queen-bed")))],
-          chair: renderedChair,
+          chair: renderedChair, collection: renderedCollection,
         };
       } finally {
         if (home !== original) load(original);

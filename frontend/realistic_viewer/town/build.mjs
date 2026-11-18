@@ -26,7 +26,7 @@ const registry = JSON.parse(registryBytes);
 if (registry.schema_version !== 1 || !Array.isArray(registry.chairs))
   throw Error("Invalid designer chair release registry.");
 const designerAssets = new Set();
-for (const chair of registry.chairs) {
+for (const chair of [...registry.chairs, ...(registry.bedroom || [])]) {
   for (const [hash, ext] of [
     [chair.sha256, "glb"],
     [chair.front_sha256, "png"],

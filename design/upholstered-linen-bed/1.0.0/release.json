@@ -1,0 +1,60 @@
+{
+  "authoring": {
+    "concept_id": "upholstered-linen-bed",
+    "version": "1.0.0",
+    "name": "Linen platform bed",
+    "dimensions_wdh_m": [
+      1.6,
+      2.0,
+      0.6
+    ],
+    "parts": [
+      "Recessed oak plinth",
+      "Upholstered perimeter",
+      "Mattress, linen ticking",
+      "Slipcovered head rail",
+      "Loft duvet",
+      "Duvet turnover",
+      "Left pillow",
+      "Left welt",
+      "Right pillow",
+      "Right welt",
+      "Folded sage coverlet"
+    ],
+    "finishes": [
+      "Ivory linen",
+      "Oat upholstery",
+      "Oiled oak",
+      "Sage linen"
+    ],
+    "blender": "5.1.2",
+    "reopened": true,
+    "sha256": {
+      "editable.blend": "f42255b0116c89044069d35a5eb7d50588f2535692c21eaf2614643a5c802658",
+      "model.glb": "3f475788571c146b30a8e5e6a6c8eb33970622e789d66e37821f962e60ad175f",
+      "front.png": "ed92bf79109e87864b697858841bed50c3476808c21de52b279e071e773614a2",
+      "three-quarter.png": "4ceeb1317362cda2a2fe2264988de8def81c3e7342a1c1eb1ef2accdaa2e44c6"
+    },
+    "recipe_sha256": "067bdab2077ece5fad6ead35ba3822646657f608d8132bca5d77bcc12ab34513"
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.800000011920929,
+        0.0,
+        -1.0
+      ],
+      [
+        0.800000011920929,
+        0.6000000238418579,
+        1.0
+      ]
+    ],
+    "mesh_instances": 11,
+    "triangles": 5824,
+    "materials": 4,
+    "textures": 0
+  },
+  "authoring_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44233437901",
+  "attribution": "Original ArchiMind geometry and base materials."
+}
