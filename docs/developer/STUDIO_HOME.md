@@ -4,6 +4,8 @@ The seed-42 demonstration is a 15 × 16 m single-storey home with six furnished 
 
 ![Formal salon in the Town walk-through, saved revision 5](../images/studio-house-town.jpg)
 
+To generate a new home and publish its own book, follow [Nguyen’s fresh-home runbook](FRESH_HOME_CLIENT_DEMO.md). For revision-aware chatbot answers, see [Hieu’s design evidence handoff](HIEU_DESIGN_EVIDENCE_HANDOFF.md).
+
 ## Client books
 
 [Open the revision-5 GPU client book (sage)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r5-4K.pdf) · [Open revision 6 (terracotta)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6.pdf) · [Download the scenes and all proof images](https://github.com/ngstephen1/ArchiMind/releases/tag/studio-house-r5-r6-preview)
