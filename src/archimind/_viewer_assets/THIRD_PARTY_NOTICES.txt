@@ -1,4 +1,4 @@
-Three.js 0.186.1 (including addons), MIT license.
+Three.js 0.187.0 (including addons), MIT license.
 
 The MIT License
 

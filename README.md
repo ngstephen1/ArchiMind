@@ -411,7 +411,7 @@ licensed **CC0-1.0**, from
 Its source, revision, checksum, download date, and license notices are bundled
 with the asset. There is exactly one furniture GLB; no dataset is included.
 
-Three.js 0.186.1, GLTFLoader and OrbitControls are bundled locally, with pinned
+Three.js 0.187.0, GLTFLoader and OrbitControls are bundled locally, with pinned
 npm dependencies and a lockfile. The committed build works offline after Python
 setup; Node/npm are needed only to rebuild or run frontend tests. No CDN, HDRI
 download, or model API is used at runtime. The viewer preserves supplied PBR

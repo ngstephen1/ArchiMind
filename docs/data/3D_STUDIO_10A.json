@@ -822,5 +822,41 @@
         "after_sha256": "5b0435e6de107a68c581d90389f428d89062937df8a8375ff7ab6f6c486139c9"
       }
     }
+  },
+  "three_0_187": {
+    "authorized_migrations": {
+      "README.md": {
+        "before_sha256": "8671d3a3ddaba262206a533b2a2019aa072f666d5b5621c57383f6499c9119a5",
+        "after_sha256": "bc7d239bf2b7b82f0588ccab6361e2cd7f8ca6b149d2739c0cb67726c76bc4b3"
+      },
+      "docs/developer/3D_STUDIO.md": {
+        "before_sha256": "ad8cc4abab6b6020e6b537e36c7647e9074d6c37df71931dfdd983d2289d2dd8",
+        "after_sha256": "e744fee7750667593435907694e2b1462c0b763974c86787e6bd38bb8e2d38d8"
+      },
+      "docs/developer/REALISTIC_VIEWER.md": {
+        "before_sha256": "05f0f15c45eaa17ce993d103c46066e8bc4e21385e6277848c368a1d669e5f6b",
+        "after_sha256": "61a84eab854e3cf2e7f4d90552263032b9942b9b873b89e5173ec575664b72e3"
+      },
+      "frontend/realistic_viewer/build.mjs": {
+        "before_sha256": "ea637777f5192794716b3041f6c2be95cd5c1e1f5dcadf3c9059c7d0fd12d9c1",
+        "after_sha256": "13726b0b7570643fe2214fd7dbfe0b1cd787f0954396d648f67a551f57d95458"
+      },
+      "frontend/realistic_viewer/package-lock.json": {
+        "before_sha256": "00ddb3aaf64fe5359fc697964912bf888f8c49192e5ce11550aa196b79a6650c",
+        "after_sha256": "e7e79cefa37a270e2aa5b99afc228cf96883e3d30da6dd3d4010fe56ace0dce6"
+      },
+      "frontend/realistic_viewer/package.json": {
+        "before_sha256": "0b804fc388824caca68d78039535a58a2fa98c3d640100b1132e320bf6dcf252",
+        "after_sha256": "ca97aaf6ff9b6ff0a0645ddccafdc7f88466c21243cdf80d8d62f4352a623e48"
+      },
+      "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
+        "before_sha256": "bb004b63f18f0961566d5b11bfbbd487309763cbbd3beb09baab832783a59e8c",
+        "after_sha256": "cd06cfd0faa200f053a40fbe02b15590a3b6e3da085191b831dc012f7aec2e48"
+      },
+      "src/archimind/_viewer_assets/viewer.js": {
+        "before_sha256": "5b0435e6de107a68c581d90389f428d89062937df8a8375ff7ab6f6c486139c9",
+        "after_sha256": "46a70ea75d9a435965636da0aa70211b9e8c204a804fdc82eea6d3571377b6a3"
+      }
+    }
   }
 }

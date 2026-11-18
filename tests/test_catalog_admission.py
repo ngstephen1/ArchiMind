@@ -476,6 +476,7 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
     studio = studio_receipt["authorized_migrations"]
     studio_review = studio_receipt["merge_review"]["authorized_migrations"]
     bedroom_view = studio_receipt["bedroom_view"]["authorized_migrations"]
+    viewer_update = studio_receipt["three_0_187"]["authorized_migrations"]
     dependency_updates = json.loads(
         (ROOT / "docs/data/DEPENDENCY_MANIFEST_MIGRATIONS.json").read_text()
     )
@@ -513,6 +514,9 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
         if name in bedroom_view:
             assert bedroom_view[name]["before_sha256"] == expected
             expected = bedroom_view[name]["after_sha256"]
+        if name in viewer_update:
+            assert viewer_update[name]["before_sha256"] == expected
+            expected = viewer_update[name]["after_sha256"]
         if name == "pyproject.toml":
             for update in dependency_updates:
                 assert set(update) == {"pyproject.toml"}
