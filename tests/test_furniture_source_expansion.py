@@ -532,6 +532,7 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     bedroom_view = studio_receipt["bedroom_view"]["authorized_migrations"]
     viewer_update = studio_receipt["three_0_187"]["authorized_migrations"]
     designer_chair = studio_receipt["designer_chair"]["authorized_migrations"]
+    collection = studio_receipt["bedroom_collection"]["authorized_migrations"]
     dependency_updates = json.loads(
         (ROOT / "docs/data/DEPENDENCY_MANIFEST_MIGRATIONS.json").read_text()
     )
@@ -581,6 +582,9 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
         if path in designer_chair:
             assert designer_chair[path]["before_sha256"] == expected
             expected = designer_chair[path]["after_sha256"]
+        if path in collection:
+            assert collection[path]["before_sha256"] == expected
+            expected = collection[path]["after_sha256"]
         if path == "pyproject.toml":
             for update in dependency_updates:
                 assert set(update) == {"pyproject.toml"}

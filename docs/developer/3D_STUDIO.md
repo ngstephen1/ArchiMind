@@ -164,3 +164,9 @@ other work. Exact desktop/narrow viewport acceptance, a complete ordinary-browse
 live workflow and visual quality of model-created furniture remain pending.
 Mocked, live backend, Node geometry and browser evidence remain separate.
 Existing product and dataset evidence is preserved.
+
+### Released bedroom collection
+
+Load the offline bedroom example and choose **Use the linen platform bed** or **Add the oak nightstand with reading lamp** before building the room. The bed replaces the proposed bed and uses its reviewed 1.60 × 2.00 × 0.60 m reservation. The nightstand and lamp share one 0.48 × 0.43 × 1.06 m reservation. Both can accompany either designer chair. The viewer verifies each revision's GLB digest and native bounds. A loading failure leaves a labeled placeholder in the same validated position.
+
+Each release includes its editable original and inspection receipt. The bed has separate pillows, welt seams, duvet, head rail and folded sage coverlet. The nightstand has separate drawer, pull, lamp stem, shade and brass finial. [Linen bed](../../design/upholstered-linen-bed/1.0.0) · [Oak nightstand](../../design/oak-bedside-lamp/1.0.0) · [Blender authoring run](https://github.com/ngstephen1/ArchiMind/actions/runs/44233437901)
