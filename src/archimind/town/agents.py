@@ -12,7 +12,6 @@ from archimind.datasets.search import (
     load_reference_pack,
     search_references,
 )
-
 from archimind.style_packs import LEGACY_PALETTE_TO_STYLE, all_packs, load_pack
 
 from .design import PROGRAM, apply_style, digest, generate, style_clause, validate_home

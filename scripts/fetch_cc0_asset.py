@@ -60,7 +60,13 @@ def polyhaven_material_plan(files, roles, high_roles):
                 raise ValueError(f"Poly Haven asset has no {size} {role} map")
             tier = "both" if len(sizes) == 1 else ("low" if size == "1k" else "high")
             plan.append(
-                {"role": role, "tier": tier, "px": _PX[size], "url": fmt["url"], "md5": fmt.get("md5")}
+                {
+                    "role": role,
+                    "tier": tier,
+                    "px": _PX[size],
+                    "url": fmt["url"],
+                    "md5": fmt.get("md5"),
+                }
             )
     return plan
 
@@ -140,7 +146,14 @@ def _hdr_size(data):
 
 
 def _get(url, workdir, md5=None):
-    if not url.startswith(("https://dl.polyhaven.org/", "https://api.polyhaven.com/", "https://ambientcg.com/", "https://acg-download.struffelproductions.com/")):
+    if not url.startswith(
+        (
+            "https://dl.polyhaven.org/",
+            "https://api.polyhaven.com/",
+            "https://ambientcg.com/",
+            "https://acg-download.struffelproductions.com/",
+        )
+    ):
         raise ValueError(f"Refusing unexpected download host: {url}")
     request = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
     with urllib.request.urlopen(request, timeout=60) as response:
@@ -163,7 +176,13 @@ def _store(data, ext):
 
 
 def _file(role, tier, data, ext, size=None):
-    row = {"role": role, "tier": tier, "sha256": _store(data, ext), "ext": ext, "bytes": len(data)}
+    row = {
+        "role": role,
+        "tier": tier,
+        "sha256": _store(data, ext),
+        "ext": ext,
+        "bytes": len(data),
+    }
     if size:
         row["width_px"], row["height_px"] = size
     return row
@@ -177,7 +196,15 @@ def fetch_polyhaven(slug, kind, roles, high_roles, workdir):
         for item in polyhaven_material_plan(files, roles, high_roles):
             raw = _get(item["url"], workdir, item["md5"])
             checksums.append(item["md5"])
-            rows.append(_file(item["role"], item["tier"], to_webp(raw, item["px"]), "webp", (item["px"], item["px"])))
+            rows.append(
+                _file(
+                    item["role"],
+                    item["tier"],
+                    to_webp(raw, item["px"]),
+                    "webp",
+                    (item["px"], item["px"]),
+                )
+            )
     elif kind == "environment":
         entry = files["hdri"]["1k"]["hdr"]
         raw = _get(entry["url"], workdir, entry["md5"])
@@ -187,37 +214,72 @@ def fetch_polyhaven(slug, kind, roles, high_roles, workdir):
         entry = files["gltf"]["1k"]["gltf"]
         doc = json.loads(_get(entry["url"], workdir, entry.get("md5")))
         resources = {
-            uri: _get(meta["url"], workdir, meta.get("md5")) for uri, meta in entry.get("include", {}).items()
+            uri: _get(meta["url"], workdir, meta.get("md5"))
+            for uri, meta in entry.get("include", {}).items()
         }
         checksums.append(entry.get("md5"))
         rows.append(_file("model", "both", pack_glb(doc, resources), "glb"))
     authors = sorted(info.get("authors", {})) or ["Poly Haven"]
-    return info.get("name", slug), authors, f"https://polyhaven.com/a/{slug}", rows, checksums
+    return (
+        info.get("name", slug),
+        authors,
+        f"https://polyhaven.com/a/{slug}",
+        rows,
+        checksums,
+    )
 
 
 def fetch_ambientcg(slug, kind, roles, high_roles, workdir):
     if kind != "material":
         raise ValueError("ambientCG support covers materials only")
     meta = json.loads(
-        _get(f"https://ambientcg.com/api/v2/full_json?id={slug}&include=downloadData", workdir)
+        _get(
+            f"https://ambientcg.com/api/v2/full_json?id={slug}&include=downloadData",
+            workdir,
+        )
     )["foundAssets"][0]
-    downloads = meta["downloadFolders"]["default"]["downloadFiletypeCategories"]["zip"]["downloads"]
+    downloads = meta["downloadFolders"]["default"]["downloadFiletypeCategories"]["zip"][
+        "downloads"
+    ]
     rows = []
     for size in ("1K", "2K"):
         wanted = [r for r in roles if size == "1K" or r in high_roles]
         if not wanted:
             continue
-        link = next(d["downloadLink"] for d in downloads if d["attribute"] == f"{size}-JPG")
+        link = next(
+            d["downloadLink"] for d in downloads if d["attribute"] == f"{size}-JPG"
+        )
         with zipfile.ZipFile(io.BytesIO(_get(link, workdir))) as archive:
             names = archive.namelist()
             for role in wanted:
-                member = next((n for n in names if n.endswith(f"_{AMBIENTCG_SUFFIX[role]}.jpg") and "/" not in n), None)
+                member = next(
+                    (
+                        n
+                        for n in names
+                        if n.endswith(f"_{AMBIENTCG_SUFFIX[role]}.jpg") and "/" not in n
+                    ),
+                    None,
+                )
                 if member is None:
                     raise ValueError(f"ambientCG asset has no {role} map")
                 px = 1024 if size == "1K" else 2048
-                tier = "both" if role not in high_roles else ("low" if size == "1K" else "high")
-                rows.append(_file(role, tier, to_webp(archive.read(member), px), "webp", (px, px)))
-    return meta.get("displayName", slug), ["ambientCG"], f"https://ambientcg.com/view?id={slug}", rows, []
+                tier = (
+                    "both"
+                    if role not in high_roles
+                    else ("low" if size == "1K" else "high")
+                )
+                rows.append(
+                    _file(
+                        role, tier, to_webp(archive.read(member), px), "webp", (px, px)
+                    )
+                )
+    return (
+        meta.get("displayName", slug),
+        ["ambientCG"],
+        f"https://ambientcg.com/view?id={slug}",
+        rows,
+        [],
+    )
 
 
 def record(asset_id, kind, url, upstream, rows, name, authors):
@@ -226,15 +288,27 @@ def record(asset_id, kind, url, upstream, rows, name, authors):
     from archimind.style_packs.release import verify_release
 
     release = AssetRelease.model_validate(
-        {"asset_id": asset_id, "kind": kind, "license": "CC0-1.0", "source_url": url,
-         "upstream_checksum": upstream, "files": rows}
+        {
+            "asset_id": asset_id,
+            "kind": kind,
+            "license": "CC0-1.0",
+            "source_url": url,
+            "upstream_checksum": upstream,
+            "files": rows,
+        }
     )
     verify_release(release, PACKS / "assets")
     path = PACKS / "releases.json"
-    releases = [r for r in json.loads(path.read_text(encoding="utf-8")) if r["asset_id"] != asset_id]
+    releases = [
+        r
+        for r in json.loads(path.read_text(encoding="utf-8"))
+        if r["asset_id"] != asset_id
+    ]
     releases.append(release.model_dump(mode="json"))
     releases.sort(key=lambda r: r["asset_id"])
-    path.write_text(json.dumps(releases, indent=2) + "\n", encoding="utf-8", newline="\n")
+    path.write_text(
+        json.dumps(releases, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     notices = PACKS / "THIRD_PARTY_NOTICES.txt"
     lines = notices.read_text(encoding="utf-8").splitlines() if notices.exists() else []
     lines = [line for line in lines if not line.startswith(asset_id + " ")]
@@ -246,10 +320,14 @@ def record(asset_id, kind, url, upstream, rows, name, authors):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     parser.add_argument("--source", choices=("polyhaven", "ambientcg"), required=True)
     parser.add_argument("--id", required=True)
-    parser.add_argument("--kind", choices=("material", "environment", "model"), required=True)
+    parser.add_argument(
+        "--kind", choices=("material", "environment", "model"), required=True
+    )
     parser.add_argument("--roles", default="diffuse,normal,roughness")
     parser.add_argument("--high-roles", default="diffuse")
     args = parser.parse_args(argv)
@@ -259,11 +337,22 @@ def main(argv=None):
     high = [r for r in args.high_roles.split(",") if r]
     fetch = fetch_polyhaven if args.source == "polyhaven" else fetch_ambientcg
     with tempfile.TemporaryDirectory(prefix="archimind-cc0-") as tmp:
-        name, authors, url, rows, sums = fetch(args.id, args.kind, roles, high, Path(tmp))
+        name, authors, url, rows, sums = fetch(
+            args.id, args.kind, roles, high, Path(tmp)
+        )
     upstream = ("md5:" + ",".join(s for s in sums if s))[:128] if any(sums) else None
-    release = record(f"{args.source}:{args.id}", args.kind, url, upstream, rows, name, authors)
-    print(json.dumps({"asset_id": release.asset_id, "files": len(release.files),
-                      "bytes": sum(f.bytes for f in release.files)}))
+    release = record(
+        f"{args.source}:{args.id}", args.kind, url, upstream, rows, name, authors
+    )
+    print(
+        json.dumps(
+            {
+                "asset_id": release.asset_id,
+                "files": len(release.files),
+                "bytes": sum(f.bytes for f in release.files),
+            }
+        )
+    )
 
 
 if __name__ == "__main__":

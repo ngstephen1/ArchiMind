@@ -105,7 +105,9 @@ def test_registry_v2_lists_pieces_by_category(tmp_path, monkeypatch):
 
 
 def test_v1_registry_still_loads_as_chairs(tmp_path, monkeypatch):
-    row = _piece_row("oak-sage-writing-chair", "1.0.0", "chair", (0.48, 0.52, 0.83), "1")
+    row = _piece_row(
+        "oak-sage-writing-chair", "1.0.0", "chair", (0.48, 0.52, 0.83), "1"
+    )
     del row["category"]
     _write_registry(tmp_path, monkeypatch, {"schema_version": 1, "chairs": [row]})
     pieces = concepts.approved_pieces()
@@ -138,8 +140,12 @@ def test_inspect_piece_measures_released_chair_and_rejects_off_reservation_bound
 
 
 def test_packaged_registry_is_v2_and_keeps_chair_releases():
-    registry = json.loads(concepts._dir().joinpath("designer_registry.json").read_bytes())
+    registry = json.loads(
+        concepts._dir().joinpath("designer_registry.json").read_bytes()
+    )
     assert registry["schema_version"] == 2 and "chairs" not in registry
     assert {p["category"] for p in registry["pieces"]} == {"chair"}
     piece = concepts.approved_pieces("chair")[1]
-    assert concepts.resolve_piece(piece.concept_id, piece.version, piece.sha256) == piece
+    assert (
+        concepts.resolve_piece(piece.concept_id, piece.version, piece.sha256) == piece
+    )

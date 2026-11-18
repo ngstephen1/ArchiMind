@@ -39,14 +39,28 @@ def test_all_five_packs_load_and_validate():
         assert isinstance(pack, StylePack)
         assert load_pack(pack.id) is pack
         assert set(pack.surfaces) == {
-            "floor", "wall", "ceiling", "trim", "door", "window_frame", "worktop", "tile", "metal"
+            "floor",
+            "wall",
+            "ceiling",
+            "trim",
+            "door",
+            "window_frame",
+            "worktop",
+            "tile",
+            "metal",
         }
         for surface in pack.surfaces.values():
             assert surface.fallback_color.startswith("#") and surface.tiling_m > 0
         assert pack.lighting.exposure > 0
         assert set(pack.plan_theme.model_dump()) == {
-            "wall_fill", "wall_stroke", "floor_fill", "furniture_fill",
-            "furniture_stroke", "label_color", "door_color", "window_color",
+            "wall_fill",
+            "wall_stroke",
+            "floor_fill",
+            "furniture_fill",
+            "furniture_stroke",
+            "label_color",
+            "door_color",
+            "window_color",
         }
     assert DEFAULT_STYLE == "scandinavian"
 
@@ -89,14 +103,24 @@ def test_offline_style_clause(text, style):
 
 @pytest.mark.parametrize(
     "word,style",
-    [("oak", "scandinavian"), ("sage", "japandi"), ("use terracotta finishes", "mid_century"), ("warm finishes", "scandinavian")],
+    [
+        ("oak", "scandinavian"),
+        ("sage", "japandi"),
+        ("use terracotta finishes", "mid_century"),
+        ("warm finishes", "scandinavian"),
+    ],
 )
 def test_legacy_finish_words_map(word, style):
     assert interpret_offline(Brief(style="japandi"), word).style == style
 
 
 def test_two_styles_or_unknown_style_ask_for_clarification():
-    for text in ["japandi and industrial loft", "gothic style", "japandi industrial loft", "sage and industrial"]:
+    for text in [
+        "japandi and industrial loft",
+        "gothic style",
+        "japandi industrial loft",
+        "sage and industrial",
+    ]:
         with pytest.raises(ValueError) as raised:
             interpret_offline(Brief(), text)
         assert str(raised.value) == CLARIFY
@@ -115,22 +139,35 @@ def test_resolve_style_phrase():
     assert resolve_style_phrase("japandi") == "japandi"
     assert resolve_style_phrase("New York loft") == "industrial_loft"
     assert resolve_style_phrase("gothic") is None
-    assert LEGACY_PALETTE_TO_STYLE == {"oak": "scandinavian", "sage": "japandi", "terracotta": "mid_century"}
+    assert LEGACY_PALETTE_TO_STYLE == {
+        "oak": "scandinavian",
+        "sage": "japandi",
+        "terracotta": "mid_century",
+    }
     assert STYLE_TO_LEGACY_PALETTE == {
-        "scandinavian": "oak", "modern_classic": "oak", "industrial_loft": "oak",
-        "japandi": "sage", "mid_century": "terracotta",
+        "scandinavian": "oak",
+        "modern_classic": "oak",
+        "industrial_loft": "oak",
+        "japandi": "sage",
+        "mid_century": "terracotta",
     }
 
 
 def test_brief_accepts_legacy_palette_field():
     assert Brief.model_validate({"palette": "sage"}).style == "japandi"
-    assert Brief.model_validate({"palette": "oak", "style": "mid_century"}).style == "mid_century"
+    assert (
+        Brief.model_validate({"palette": "oak", "style": "mid_century"}).style
+        == "mid_century"
+    )
     assert "palette" not in Brief().model_dump()
 
 
 def test_new_home_records_pack_and_legacy_palette():
     home = generate(Brief(style="japandi"), None)[0]
-    assert home["style_pack"] == {"id": "japandi", "version": load_pack("japandi").version}
+    assert home["style_pack"] == {
+        "id": "japandi",
+        "version": load_pack("japandi").version,
+    }
     assert home["palette"] == "sage"
 
 
@@ -138,7 +175,10 @@ def test_packaged_showcase_is_a_scandinavian_pack_home():
     showcase = json.loads(
         (ROOT / "frontend/realistic_viewer/town/showcase.json").read_text()
     )
-    assert showcase["style_pack"] == {"id": "scandinavian", "version": load_pack("scandinavian").version}
+    assert showcase["style_pack"] == {
+        "id": "scandinavian",
+        "version": load_pack("scandinavian").version,
+    }
     assert showcase["palette"] == "oak"
 
 
@@ -155,7 +195,10 @@ def _coordinate(message, previous, brief):
     events = []
     req = SimpleNamespace(brief=brief, message=message, live=False, base=1)
     homes = agents.coordinate(
-        req, previous, lambda r, p: interpret_offline(r.brief, r.message), lambda *e: events.append(e)
+        req,
+        previous,
+        lambda r, p: interpret_offline(r.brief, r.message),
+        lambda *e: events.append(e),
     )
     return homes, events
 
@@ -164,7 +207,12 @@ def test_style_only_edit_preserves_geometry_and_redresses_locked_rooms():
     previous = generate(Brief(), None)[0]
     homes, events = _coordinate("make it japandi", previous, Brief(locks=["bedroom"]))
     (home,) = homes
-    assert home["rooms"] == previous["rooms"]
+    assert [
+        {k: r[k] for k in ("origin", "asset_bindings", "design")} for r in home["rooms"]
+    ] == [
+        {k: r[k] for k in ("origin", "asset_bindings", "design")}
+        for r in previous["rooms"]
+    ]
     assert home["style_pack"]["id"] == "japandi" and home["palette"] == "sage"
     assert home["id"] != previous["id"]
     assert ("C", "skipped", "Style edit preserves geometry", {}) in events
@@ -172,7 +220,13 @@ def test_style_only_edit_preserves_geometry_and_redresses_locked_rooms():
     assert resolved[3] == {"style_pack": home["style_pack"], "name": "Japandi"}
     legacy = legacy_home_fixture()
     (redressed,), _ = _coordinate("use sage finishes", legacy, Brief())
-    assert redressed["rooms"] == legacy["rooms"]
+    assert [
+        {k: r[k] for k in ("origin", "asset_bindings", "design")}
+        for r in redressed["rooms"]
+    ] == [
+        {k: r[k] for k in ("origin", "asset_bindings", "design")}
+        for r in legacy["rooms"]
+    ]
     assert redressed["style_pack"]["id"] == "japandi"
 
 
@@ -180,7 +234,10 @@ def test_live_interpreter_schema_offers_only_the_five_styles():
     schema = service.Interpretation.model_json_schema()
     assert "palette" not in schema["properties"]
     style = schema["properties"]["style"]
-    assert style.get("enum") == STYLES or schema["$defs"][style["$ref"].split("/")[-1]]["enum"] == STYLES
+    assert (
+        style.get("enum") == STYLES
+        or schema["$defs"][style["$ref"].split("/")[-1]]["enum"] == STYLES
+    )
 
 
 @pytest.fixture
@@ -199,11 +256,22 @@ def test_api_accepts_legacy_palette_field(local):
     for brief in ({"palette": "sage"}, {"style": "industrial_loft"}):
         response = local.post(
             "/api/jobs",
-            json={"id": str(uuid.uuid4()), "project": p, "base": 0, "brief": brief, "message": ""},
+            json={
+                "id": str(uuid.uuid4()),
+                "project": p,
+                "base": 0,
+                "brief": brief,
+                "message": "",
+            },
         )
         assert response.status_code == 200, response.text
         assert service.work_once()
     request = service.Request.model_validate(
-        {"id": str(uuid.uuid4()), "project": p, "base": 0, "brief": {"palette": "terracotta"}}
+        {
+            "id": str(uuid.uuid4()),
+            "project": p,
+            "base": 0,
+            "brief": {"palette": "terracotta"},
+        }
     )
     assert request.brief.style == "mid_century"

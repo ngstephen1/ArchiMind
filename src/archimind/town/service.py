@@ -11,8 +11,8 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 from archimind.studio import provider
-from archimind.town.agents import coordinate
 from archimind.style_packs import StyleId
+from archimind.town.agents import coordinate
 from archimind.town.design import Brief, Kind, interpret_offline
 
 SCHEMA = [

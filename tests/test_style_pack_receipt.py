@@ -36,9 +36,9 @@ def test_receipt_records_owner_authorization():
 def test_chain_without_style_packs_is_the_pre_11a_state():
     before = expected_pins(ROOT, include_style_packs=False)
     after = expected_pins(ROOT)
-    migrations = json.loads(
-        (ROOT / "docs/data/STYLE_PACKS_11A.json").read_text()
-    )["authorized_migrations"]
+    migrations = json.loads((ROOT / "docs/data/STYLE_PACKS_11A.json").read_text())[
+        "authorized_migrations"
+    ]
     for path, entry in migrations.items():
         assert entry["before_sha256"] == before[path]
         assert entry["after_sha256"] == after[path]

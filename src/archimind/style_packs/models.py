@@ -10,10 +10,20 @@ from typing import Annotated, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
-StyleId = Literal["modern_classic", "industrial_loft", "scandinavian", "japandi", "mid_century"]
+StyleId = Literal[
+    "modern_classic", "industrial_loft", "scandinavian", "japandi", "mid_century"
+]
 STYLE_IDS: tuple[str, ...] = StyleId.__args__
 SurfaceRole = Literal[
-    "floor", "wall", "ceiling", "trim", "door", "window_frame", "worktop", "tile", "metal"
+    "floor",
+    "wall",
+    "ceiling",
+    "trim",
+    "door",
+    "window_frame",
+    "worktop",
+    "tile",
+    "metal",
 ]
 SURFACE_ROLES: tuple[str, ...] = SurfaceRole.__args__
 FurnitureCategory = Literal[
@@ -22,7 +32,10 @@ FurnitureCategory = Literal[
 
 Hex = Annotated[str, StringConstraints(pattern=r"^#[0-9a-f]{6}$")]
 AssetId = Annotated[
-    str, StringConstraints(pattern=r"^(polyhaven|ambientcg|designer):[A-Za-z0-9_.@-]+$", max_length=128)
+    str,
+    StringConstraints(
+        pattern=r"^(polyhaven|ambientcg|designer):[A-Za-z0-9_.@-]+$", max_length=128
+    ),
 ]
 SemVer = Annotated[str, StringConstraints(pattern=r"^[0-9]+\.[0-9]+\.[0-9]+$")]
 Sha256 = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
@@ -104,9 +117,9 @@ class StylePack(_Strict):
     id: StyleId
     version: SemVer
     name: Annotated[str, StringConstraints(min_length=1, max_length=40)]
-    aliases: tuple[Annotated[str, StringConstraints(pattern=r"^[a-z][a-z -]*[a-z]$")], ...] = Field(
-        min_length=1, max_length=16
-    )
+    aliases: tuple[
+        Annotated[str, StringConstraints(pattern=r"^[a-z][a-z -]*[a-z]$")], ...
+    ] = Field(min_length=1, max_length=16)
     surfaces: dict[SurfaceRole, SurfaceSpec]
     furniture: dict[FurnitureCategory, tuple[FurnitureChoice, ...]]
     decor: DecorRules
@@ -119,7 +132,18 @@ class StylePack(_Strict):
         ids = [s.asset_id for s in self.surfaces.values()]
         ids += [c.asset_id for choices in self.furniture.values() for c in choices]
         decor = self.decor
-        ids += [a for a in (decor.rug, decor.art, decor.curtain, decor.pendant, decor.plant, decor.floor_lamp) if a]
+        ids += [
+            a
+            for a in (
+                decor.rug,
+                decor.art,
+                decor.curtain,
+                decor.pendant,
+                decor.plant,
+                decor.floor_lamp,
+            )
+            if a
+        ]
         ids += [c.asset_id for c in decor.accents]
         if self.lighting.environment_asset_id:
             ids.append(self.lighting.environment_asset_id)

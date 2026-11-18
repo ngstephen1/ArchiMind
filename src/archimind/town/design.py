@@ -27,6 +27,7 @@ from archimind.style_packs import (
     resolve_style_phrase,
     styles_mentioned,
 )
+from archimind.style_packs.scene import style_payload
 
 Kind = Literal["bedroom", "study", "living", "kitchen-dining", "bathroom"]
 PROGRAM = ["bedroom", "study", "living", "kitchen-dining", "bathroom"]
@@ -74,9 +75,16 @@ class Brief(BaseModel):
 
 
 def apply_style(home, style):
-    """Record the home's pack and the palette older readers understand."""
-    home["style_pack"] = {"id": style, "version": load_pack(style).version}
+    """Record the home's pack, the palette older readers understand, and dress
+    every room (locked ones included) from that pack."""
+    pack = load_pack(style)
+    home["style_pack"] = {"id": style, "version": pack.version}
     home["palette"] = STYLE_TO_LEGACY_PALETTE[style]
+    for part in home["rooms"]:
+        design = RoomDesign.model_validate(part["design"])
+        # Seeded by the room itself so a re-dress of unchanged geometry is stable.
+        seed = int(hashlib.sha256(design.room.id.encode()).hexdigest()[:8], 16)
+        part["style"] = style_payload(design, pack, seed)
     return home
 
 
@@ -92,7 +100,11 @@ def style_clause(clause):
     clause = " ".join(clause.lower().strip().rstrip(".!").split())
     if clause == "warm finishes":
         clause = "oak finishes"
-    core = re.sub(r"^(?:(?:please )?make (?:it|the home|everything) |go |use |(?:a|an) )+", "", clause)
+    core = re.sub(
+        r"^(?:(?:please )?make (?:it|the home|everything) |go |use |(?:a|an) )+",
+        "",
+        clause,
+    )
     marked = bool(re.search(_STYLE_MARKERS + "$", core))
     core = re.sub(_STYLE_MARKERS + "$", "", core)
     if core in LEGACY_PALETTE_TO_STYLE:
@@ -100,7 +112,9 @@ def style_clause(clause):
     if style := resolve_style_phrase(core):
         return style
     mentioned = styles_mentioned(clause) | {
-        LEGACY_PALETTE_TO_STYLE[w] for w in clause.split() if w in LEGACY_PALETTE_TO_STYLE
+        LEGACY_PALETTE_TO_STYLE[w]
+        for w in clause.split()
+        if w in LEGACY_PALETTE_TO_STYLE
     }
     if mentioned or marked or clause.startswith("make it "):
         raise ValueError(STYLE_CLARIFICATION)

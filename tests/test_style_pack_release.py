@@ -45,8 +45,15 @@ def _material(tmp_path, data, *, px=(1024, 1024), **overrides):
         "source_url": "https://polyhaven.com/a/fixture_floor",
         "upstream_checksum": None,
         "files": [
-            {"role": "diffuse", "tier": "low", "sha256": digest, "ext": "webp",
-             "bytes": len(data), "width_px": px[0], "height_px": px[1]}
+            {
+                "role": "diffuse",
+                "tier": "low",
+                "sha256": digest,
+                "ext": "webp",
+                "bytes": len(data),
+                "width_px": px[0],
+                "height_px": px[1],
+            }
         ],
     }
     row.update(overrides)
@@ -65,10 +72,16 @@ def test_release_requires_license_source_and_hash(tmp_path):
         with pytest.raises(ValueError):
             AssetRelease.model_validate(raw | bad)
     with pytest.raises(ValueError, match="source"):
-        verify_release(AssetRelease.model_validate(raw | {"source_url": "https://example.com/x"}), tmp_path)
+        verify_release(
+            AssetRelease.model_validate(raw | {"source_url": "https://example.com/x"}),
+            tmp_path,
+        )
     with pytest.raises(ValueError, match="diffuse"):
         verify_release(
-            AssetRelease.model_validate(raw | {"files": [raw["files"][0] | {"role": "normal"}]}), tmp_path
+            AssetRelease.model_validate(
+                raw | {"files": [raw["files"][0] | {"role": "normal"}]}
+            ),
+            tmp_path,
         )
 
 
@@ -97,16 +110,35 @@ def test_model_release_passes_glb_inspection_budgets(tmp_path):
     chair = concepts.approved_chairs()[0]
     data = concepts._asset(chair.sha256, "glb")
     digest = _store(tmp_path, data, "glb")
-    release = AssetRelease.model_validate({
-        "asset_id": "polyhaven:fixture_chair", "kind": "model", "license": "CC0-1.0",
-        "source_url": "https://polyhaven.com/a/fixture_chair", "upstream_checksum": None,
-        "files": [{"role": "model", "tier": "both", "sha256": digest, "ext": "glb", "bytes": len(data)}],
-    })
+    release = AssetRelease.model_validate(
+        {
+            "asset_id": "polyhaven:fixture_chair",
+            "kind": "model",
+            "license": "CC0-1.0",
+            "source_url": "https://polyhaven.com/a/fixture_chair",
+            "upstream_checksum": None,
+            "files": [
+                {
+                    "role": "model",
+                    "tier": "both",
+                    "sha256": digest,
+                    "ext": "glb",
+                    "bytes": len(data),
+                }
+            ],
+        }
+    )
     facts = verify_release(release, tmp_path)
     assert facts["polyhaven:fixture_chair"]["triangles"] == 3712
     junk = b"glTF" + b"\0" * 40
     bad = _store(tmp_path, junk, "glb")
-    broken = release.model_copy(update={"files": (release.files[0].model_copy(update={"sha256": bad, "bytes": len(junk)}),)})
+    broken = release.model_copy(
+        update={
+            "files": (
+                release.files[0].model_copy(update={"sha256": bad, "bytes": len(junk)}),
+            )
+        }
+    )
     with pytest.raises(ValueError):
         verify_release(broken, tmp_path)
 
@@ -114,17 +146,42 @@ def test_model_release_passes_glb_inspection_budgets(tmp_path):
 def test_hdr_environment_header_and_size_are_checked(tmp_path):
     hdr = b"#?RADIANCE\nFORMAT=32-bit_rle_rgbe\n\n-Y 512 +X 1024\n" + b"\0" * 64
     digest = _store(tmp_path, hdr, "hdr")
-    release = AssetRelease.model_validate({
-        "asset_id": "polyhaven:fixture_room", "kind": "environment", "license": "CC0-1.0",
-        "source_url": "https://polyhaven.com/a/fixture_room", "upstream_checksum": None,
-        "files": [{"role": "hdr", "tier": "both", "sha256": digest, "ext": "hdr", "bytes": len(hdr),
-                   "width_px": 1024, "height_px": 512}],
-    })
+    release = AssetRelease.model_validate(
+        {
+            "asset_id": "polyhaven:fixture_room",
+            "kind": "environment",
+            "license": "CC0-1.0",
+            "source_url": "https://polyhaven.com/a/fixture_room",
+            "upstream_checksum": None,
+            "files": [
+                {
+                    "role": "hdr",
+                    "tier": "both",
+                    "sha256": digest,
+                    "ext": "hdr",
+                    "bytes": len(hdr),
+                    "width_px": 1024,
+                    "height_px": 512,
+                }
+            ],
+        }
+    )
     verify_release(release, tmp_path)
     big = b"#?RADIANCE\nFORMAT=32-bit_rle_rgbe\n\n-Y 2048 +X 4096\n" + b"\0" * 64
     bad = _store(tmp_path, big, "hdr")
     with pytest.raises(ValueError, match="1k"):
-        verify_release(release.model_copy(update={"files": (release.files[0].model_copy(update={"sha256": bad, "bytes": len(big)}),)}), tmp_path)
+        verify_release(
+            release.model_copy(
+                update={
+                    "files": (
+                        release.files[0].model_copy(
+                            update={"sha256": bad, "bytes": len(big)}
+                        ),
+                    )
+                }
+            ),
+            tmp_path,
+        )
 
 
 def test_every_packaged_release_verifies():
@@ -148,29 +205,80 @@ def test_every_cc0_release_has_a_notice_line():
     for release in load_releases().values():
         if release.license == "CC0-1.0":
             assert f"{release.asset_id} " in notices and release.source_url in notices
-    bundle = (ROOT / "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt").read_text(encoding="utf-8")
+    bundle = (ROOT / "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt").read_text(
+        encoding="utf-8"
+    )
     assert notices.strip() in bundle
 
 
 # --- fetch_cc0_asset.py helpers (no network) ---
 
 POLYHAVEN_FILES = {
-    "Diffuse": {"1k": {"jpg": {"url": "https://dl.polyhaven.org/a/d_1k.jpg", "md5": "a" * 32, "size": 10}},
-                "2k": {"jpg": {"url": "https://dl.polyhaven.org/a/d_2k.jpg", "md5": "b" * 32, "size": 20}}},
-    "nor_gl": {"1k": {"jpg": {"url": "https://dl.polyhaven.org/a/n_1k.jpg", "md5": "c" * 32, "size": 10}}},
-    "Rough": {"1k": {"jpg": {"url": "https://dl.polyhaven.org/a/r_1k.jpg", "md5": "d" * 32, "size": 10}}},
-    "AO": {"1k": {"jpg": {"url": "https://dl.polyhaven.org/a/ao_1k.jpg", "md5": "e" * 32, "size": 10}}},
+    "Diffuse": {
+        "1k": {
+            "jpg": {
+                "url": "https://dl.polyhaven.org/a/d_1k.jpg",
+                "md5": "a" * 32,
+                "size": 10,
+            }
+        },
+        "2k": {
+            "jpg": {
+                "url": "https://dl.polyhaven.org/a/d_2k.jpg",
+                "md5": "b" * 32,
+                "size": 20,
+            }
+        },
+    },
+    "nor_gl": {
+        "1k": {
+            "jpg": {
+                "url": "https://dl.polyhaven.org/a/n_1k.jpg",
+                "md5": "c" * 32,
+                "size": 10,
+            }
+        }
+    },
+    "Rough": {
+        "1k": {
+            "jpg": {
+                "url": "https://dl.polyhaven.org/a/r_1k.jpg",
+                "md5": "d" * 32,
+                "size": 10,
+            }
+        }
+    },
+    "AO": {
+        "1k": {
+            "jpg": {
+                "url": "https://dl.polyhaven.org/a/ao_1k.jpg",
+                "md5": "e" * 32,
+                "size": 10,
+            }
+        }
+    },
 }
 
 
 def test_polyhaven_material_plan_picks_roles_and_tiers():
-    plan = FETCH["polyhaven_material_plan"](POLYHAVEN_FILES, roles=["diffuse", "normal", "roughness"], high_roles=["diffuse"])
+    plan = FETCH["polyhaven_material_plan"](
+        POLYHAVEN_FILES,
+        roles=["diffuse", "normal", "roughness"],
+        high_roles=["diffuse"],
+    )
     assert [(p["role"], p["tier"], p["px"]) for p in plan] == [
-        ("diffuse", "low", 1024), ("diffuse", "high", 2048), ("normal", "both", 1024), ("roughness", "both", 1024),
+        ("diffuse", "low", 1024),
+        ("diffuse", "high", 2048),
+        ("normal", "both", 1024),
+        ("roughness", "both", 1024),
     ]
     assert plan[1]["url"].endswith("d_2k.jpg") and plan[1]["md5"] == "b" * 32
     with pytest.raises(ValueError, match="ao_missing"):
-        FETCH["polyhaven_material_plan"]({"Diffuse": POLYHAVEN_FILES["Diffuse"]}, roles=["diffuse", "ao_missing"], high_roles=[])
+        FETCH["polyhaven_material_plan"](
+            {"Diffuse": POLYHAVEN_FILES["Diffuse"]},
+            roles=["diffuse", "ao_missing"],
+            high_roles=[],
+        )
 
 
 def test_texture_conversion_resizes_to_requested_px_as_webp():
@@ -198,5 +306,13 @@ def test_gltf_with_external_buffers_packs_into_a_single_glb():
 
 
 def test_notice_line_format():
-    line = FETCH["notice_line"]("polyhaven:oak_floor", "Oak Floor", ["Rico Cilliers"], "https://polyhaven.com/a/oak_floor")
-    assert line == "polyhaven:oak_floor — Oak Floor by Rico Cilliers, CC0 1.0 (public domain dedication), https://polyhaven.com/a/oak_floor"
+    line = FETCH["notice_line"](
+        "polyhaven:oak_floor",
+        "Oak Floor",
+        ["Rico Cilliers"],
+        "https://polyhaven.com/a/oak_floor",
+    )
+    assert (
+        line
+        == "polyhaven:oak_floor — Oak Floor by Rico Cilliers, CC0 1.0 (public domain dedication), https://polyhaven.com/a/oak_floor"
+    )

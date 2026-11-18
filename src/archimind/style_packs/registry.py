@@ -24,9 +24,7 @@ STYLE_TO_LEGACY_PALETTE: dict[str, str] = {
     "japandi": "sage",
     "mid_century": "terracotta",
 }
-STYLE_CLARIFICATION = (
-    "Choose one style: modern classic, industrial loft, Scandinavian, Japandi or mid-century."
-)
+STYLE_CLARIFICATION = "Choose one style: modern classic, industrial loft, Scandinavian, Japandi or mid-century."
 _TIER_ORDER = {"low": ("low", "both", "high"), "high": ("high", "both", "low")}
 
 
@@ -94,12 +92,17 @@ class PackStatus:
     low_bytes: int
 
 
-def pack_status(pack: StylePack, releases: dict[str, AssetRelease] | None = None) -> PackStatus:
+def pack_status(
+    pack: StylePack, releases: dict[str, AssetRelease] | None = None
+) -> PackStatus:
     """A pack is released only when every asset it references is released."""
     releases = load_releases() if releases is None else releases
     ids = pack.asset_ids()
     missing = tuple(
-        a for a in ids if a not in releases and not (a.startswith("designer:") and _designer_released(a))
+        a
+        for a in ids
+        if a not in releases
+        and not (a.startswith("designer:") and _designer_released(a))
     )
     return PackStatus(
         released=not missing,

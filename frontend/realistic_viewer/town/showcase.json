@@ -109,6 +109,36 @@
           }
         ],
         "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "bedside-lamp",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "belaya",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "desk-chair",
+            "asset_id": "designer:oak-sage-writing-chair@1.1.0",
+            "reason": "designer"
+          },
+          {
+            "furniture_id": "queen-bed",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [],
+        "skipped": []
       }
     },
     {
@@ -182,6 +212,26 @@
           }
         ],
         "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "coffee-table",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "sofa",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [],
+        "skipped": []
       }
     },
     {
@@ -255,6 +305,26 @@
           }
         ],
         "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "counter",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "dining-table",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [],
+        "skipped": []
       }
     },
     {
@@ -328,6 +398,26 @@
           }
         ],
         "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "tub",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "vanity",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [],
+        "skipped": []
       }
     },
     {
@@ -384,6 +474,21 @@
           }
         ],
         "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "work-table",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [],
+        "skipped": []
       }
     }
   ],
@@ -397,5 +502,5 @@
     "bedroom_center_from_front_m": 3.3,
     "study_window_width_m": 1.4
   },
-  "id": "62e5a0c67b1ed128509106e1fca957cdc332772902ea41c24eb00549d70b3a83"
+  "id": "7f75a6a169f55c84c41b4198ba1f68a87c886ba38f3567151360cadd57b138cc"
 }

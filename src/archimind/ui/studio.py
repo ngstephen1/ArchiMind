@@ -15,6 +15,15 @@ from archimind.studio.workflow import (
     propose_room,
     scene_payload,
 )
+from archimind.style_packs import load_pack
+
+STYLE_ORDER = (
+    "scandinavian",
+    "modern_classic",
+    "industrial_loft",
+    "japandi",
+    "mid_century",
+)
 
 DRAFT = "studio_draft"
 BUILD = "studio_build"
@@ -160,6 +169,13 @@ def render_studio():
     seed = st.number_input(
         "Layout seed", min_value=0, max_value=2**32 - 1, value=42, key="studio_seed"
     )
+    style = st.selectbox(
+        "Style",
+        STYLE_ORDER,
+        format_func=lambda s: load_pack(s).name,
+        key="studio_style",
+        help="Surfaces, furniture models, decor and lighting come from this style pack.",
+    )
     room, problem = None, None
     try:
         room = room_from_editor(width, depth, height, doors, windows)
@@ -247,7 +263,11 @@ def render_studio():
             try:
                 with st.spinner("Placing furniture and building bounded 3D recipes…"):
                     built = build_room(
-                        draft, int(seed), allow_live=allow, designer_chair=chair_binding
+                        draft,
+                        int(seed),
+                        allow_live=allow,
+                        designer_chair=chair_binding,
+                        style=style,
                     )
             except StudioError as e:
                 st.error(str(e))

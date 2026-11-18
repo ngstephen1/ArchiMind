@@ -85,13 +85,17 @@ def verify_release(release: AssetRelease, directory: Path | None = None) -> dict
             if max(size) > inspection.MAX_TEXTURE_DIMENSION:
                 raise ValueError(f"{name}: {file.role} texture exceeds 2048 px")
             if size != (file.width_px, file.height_px):
-                raise ValueError(f"{name}: {file.role} pixel size {size} differs from record")
+                raise ValueError(
+                    f"{name}: {file.role} pixel size {size} differs from record"
+                )
         elif file.ext == "hdr":
             size = _hdr_size(data)
             if max(size) > 1024:
                 raise ValueError(f"{name}: environment maps ship at 1k only")
             if size != (file.width_px, file.height_px):
-                raise ValueError(f"{name}: environment pixel size {size} differs from record")
+                raise ValueError(
+                    f"{name}: environment pixel size {size} differs from record"
+                )
         elif file.ext == "glb":
             facts[name] = _glb_facts(data)
     return facts

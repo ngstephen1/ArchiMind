@@ -389,3 +389,35 @@ def test_stale_chair_cannot_start_generation(monkeypatch):
     )
     with pytest.raises(StudioError, match="unavailable"):
         build_room(draft, designer_chair=binding)
+
+
+def test_studio_scene_carries_style_and_snapshot_lists_asset_hashes():
+    from archimind.assets.designer_concepts import approved_chairs
+
+    draft = propose_room(room(), "Bedroom", "calm", offline=True)
+    legacy = build_room(draft, 42)
+    assert "style" not in json.loads(legacy.model_dump_json())
+    assert "style" not in scene_payload(legacy, legacy.result().candidates[0])
+    built = build_room(draft, 42, style="japandi")
+    assert built.style == "japandi" and built.snapshot_id != legacy.snapshot_id
+    candidate = built.result().candidates[0]
+    scene = scene_payload(built, candidate)
+    style = scene["style"]
+    assert style["style_pack"] == {"id": "japandi", "version": "1.0.0"}
+    assert {b["furniture_id"] for b in style["bindings"]} == {
+        f.id for f in candidate.design.furniture
+    }
+    assert scene["design"] == candidate.design.model_dump(mode="json")
+    scandi = build_room(draft, 42, style="scandinavian")
+    snapshot = json.loads(scandi.model_dump_json())
+    chair = approved_chairs()[0]
+    bound = {
+        b["asset_id"]
+        for c in scandi.result().candidates
+        for b in scene_payload(scandi, c)["style"]["bindings"]
+    }
+    if "designer:oak-sage-writing-chair@1.1.0" in bound:
+        assert snapshot["style_assets"]["designer:oak-sage-writing-chair@1.1.0"] == [
+            chair.sha256
+        ]
+    assert set(snapshot["style_assets"]) == bound - {None}
