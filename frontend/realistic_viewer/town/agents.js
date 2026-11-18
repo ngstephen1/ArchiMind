@@ -57,12 +57,33 @@ export function timeline(container, events, status) {
       const line = document.createElement("p");
       line.textContent = e.state + " · " + e.task;
       card.append(line);
-      if (e.artifact.material_direction || e.artifact.observation || e.artifact.advice?.design_analysis) {
+      if (e.artifact.advice) {
+        const advice = e.artifact.advice;
+        const analysis = document.createElement("p");
+        analysis.textContent = advice.design_analysis;
+        card.append(analysis);
+        const items = document.createElement("ul");
+        for (const suggestion of advice.suggestions) {
+          const item = document.createElement("li");
+          item.textContent = suggestion.furniture_id + " at (" + suggestion.x_m + ", " +
+            suggestion.y_m + ") m — " + suggestion.explanation;
+          items.append(item);
+        }
+        if (advice.suggestions.length) {
+          const heading = document.createElement("strong");
+          heading.textContent = "Suggested placements · require spatial validation";
+          card.append(heading, items);
+        }
+        for (const limitation of advice.limitations) {
+          const note = document.createElement("p");
+          note.textContent = "Limitation: " + limitation;
+          card.append(note);
+        }
+      } else if (e.artifact.material_direction || e.artifact.observation) {
         const summary = document.createElement("p");
         summary.textContent = [
           e.artifact.material_direction, e.artifact.lighting_direction, e.artifact.tradeoff,
           e.artifact.observation, e.artifact.recommendation, e.artifact.uncertainty,
-          e.artifact.advice?.design_analysis,
         ].filter(Boolean).join(" ");
         card.append(summary);
       } else if (Object.keys(e.artifact).length) {
