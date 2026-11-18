@@ -302,7 +302,7 @@ def main():
                 p.error("supply --author and the four handoff fields")
             note.update(
                 repository=REPO,
-                branch=git("branch", "--show-current"),
+                branch=git("branch", "--show-current") or "(detached HEAD)",
                 base_commit=git("rev-parse", "HEAD"),
                 author=a.author,
             )
