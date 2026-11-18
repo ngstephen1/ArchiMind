@@ -1,3 +1,5 @@
+import { PRODUCT_ASSETS } from "../src/product_assets.js";
+
 // Distances are plan measurements from the selected revision, expressed in metres.
 function gap(a, b) {
   const dx = Math.max(0, a.x_m - b.x_m - b.width_m, b.x_m - a.x_m - a.width_m);
@@ -5,12 +7,29 @@ function gap(a, b) {
   return Math.hypot(dx, dy);
 }
 
-export function explanation(home, question) {
+export function explanation(home, question, manifest = null) {
   const bedroom = home.rooms.find(p => p.design.room.id === "bedroom");
   const {room, furniture} = bedroom.design;
   const get = id => furniture.find(f => f.id === id);
   const desk = get("belaya"), bed = get("queen-bed");
   const q = question.toLowerCase();
+  if (/\boak\b/.test(q)) {
+    if (!manifest || manifest.home_id !== home.id)
+      return "The verified bedroom manifest is unavailable for this design.";
+    const matches = [];
+    for (const item of manifest.furniture) {
+      const source = item.source;
+      const record = source?.kind === "catalog" && PRODUCT_ASSETS[source.id];
+      if (record && record.sha256 === source.sha256 && record.variant_label?.toLowerCase() === "oak")
+        matches.push(item.name + " (" + item.id + "), catalog " + source.id + ", variant_label = Oak");
+    }
+    const palette = home.palette === "oak" ? " The home also uses an authored oak palette." : "";
+    return (matches.length ? "Selected bedroom pieces with catalog oak evidence: " + matches.join("; ") + "." :
+      "No selected bedroom piece has a verified oak catalog variant.") + palette +
+      " A variant label does not establish solid-oak construction.";
+  }
+  if (/study/.test(q) && /desk|window/.test(q))
+    return "This evidence control measures the bedroom desk. The study requires its own desk and opening measurements.";
   if (/rug/.test(q) && bed) {
     const width = Math.min(room.width_m - .06, bed.x_m + bed.width_m + .58) - Math.max(.06, bed.x_m - .58);
     return "The rug spans " + width.toFixed(2) + " m across the bed. Its nominal side extension is 0.58 m, clipped to leave 0.06 m at the walls.";
@@ -23,9 +42,9 @@ export function explanation(home, question) {
       return name + " has a native width of " + dimensions_wdh_m[0].toFixed(2) +
         " m. Its reserved footprint is " + chair.width_m.toFixed(2) + " × " +
         chair.depth_m.toFixed(2) + " m. The gap from that reservation to the desk is " +
-        gap(chair, desk).toFixed(2) + " m. Under-desk knee clearance has not been measured.";
+        gap(chair, desk).toFixed(2) + " m. Under-desk knee clearance has not been measured. Fit requires the clear width between supports and underside height. Source: bedroom desk-chair and belaya footprints.";
     }
-    return "The writing chair is " + chair.width_m.toFixed(2) + " m wide. The closest edges of its footprint and the desk are " + gap(chair,desk).toFixed(2) + " m apart. Under-desk knee clearance has not been measured.";
+    return "The writing chair is " + chair.width_m.toFixed(2) + " m wide. The closest edges of its footprint and the desk are " + gap(chair,desk).toFixed(2) + " m apart. Under-desk knee clearance has not been measured. Fit requires the clear width between supports and underside height. Source: bedroom desk-chair and belaya footprints.";
   }
   if (/lamp|nightstand|bedside/.test(q)) {
     const table = get("bedside-lamp");
@@ -40,7 +59,7 @@ export function explanation(home, question) {
       const y=w.wall==="south"?0:w.wall==="north"?room.depth_m:along;
       return {wall:w.wall,distance:Math.hypot(desk.x_m+desk.width_m/2-x,desk.y_m+desk.depth_m/2-y)};
     }).sort((a,b)=>a.distance-b.distance);
-    return "Belaya provides a writing surface. Its center is " + windows[0].distance.toFixed(2) + " m from the nearest window center on the " + windows[0].wall + " wall in plan. Screen glare has not been evaluated.";
+    return "Belaya provides a writing surface. Its center is " + windows[0].distance.toFixed(2) + " m from the nearest window center on the " + windows[0].wall + " wall in plan. Source: bedroom belaya footprint and room window opening. This measures proximity. Placement intent and screen glare have not been established.";
   }
   return "Ask about the writing desk, window, chair, bedside lamp or rug in this revision.";
 }

@@ -1,6 +1,11 @@
 name: Studio home proof
 on:
   workflow_dispatch:
+    inputs:
+      fresh_home:
+        description: Render the fresh-home acceptance manifest only
+        type: boolean
+        default: false
   push:
     branches: [feat/whole-home-client-studio]
     paths:
@@ -37,7 +42,11 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
           node-version: "20"
+      - name: Stage the fresh-home manifest
+        if: inputs.fresh_home
+        run: cp docs/data/fresh-home/before.json "$RUNNER_TEMP/manifest.json"
       - name: Replay applied studio home and export the scene
+        if: ${{ !inputs.fresh_home }}
         run: |
           python -m pip install -e . -r services/town/requirements.txt
           npm ci --prefix frontend/realistic_viewer --ignore-scripts
@@ -58,6 +67,7 @@ jobs:
           if-no-files-found: error
 
       - name: Replay a chair and palette edit and render the next revision independently
+        if: ${{ !inputs.fresh_home }}
         run: |
           python scripts/run_studio_home.py --edited --export "$RUNNER_TEMP/edited.json"
           node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/edited.json" "$RUNNER_TEMP/edited-board.json"
@@ -76,6 +86,7 @@ jobs:
           assert original["files"]["bedroom-desk.png"] != edited["files"]["bedroom-desk.png"]
           PYTHON
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ !inputs.fresh_home }}
         with:
           name: studio-home-edited-proof
           path: ${{ runner.temp }}/edited-proof
