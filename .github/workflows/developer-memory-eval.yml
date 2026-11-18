@@ -1,0 +1,35 @@
+name: Design memory retrieval comparison
+on:
+  pull_request:
+    paths:
+      - 'scripts/benchmark_ai_memory.py'
+      - 'data/benchmarks/design_memory_holdout.tsv'
+      - '.github/workflows/developer-memory-eval.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  attestations: read
+jobs:
+  benchmark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - name: Acquire the locked tools and embedding files
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m pip install -e .
+          python scripts/dev_memory.py install
+          python -m archimind.design_evidence install
+          PYTHONPATH=scripts python -c 'from benchmark_ai_memory import MODEL, models, Path; models(Path.home()/".local/share/archimind-ai-memory/models"/MODEL)'
+      - name: Evaluate the public passages with loopback networking only
+        run: |
+          python_bin=$(command -v python)
+          sudo unshare --net -- sh -ec 'ip link set lo up; sudo -H -u "$1" "$2" -m archimind.design_evidence build; exec sudo -H -u "$1" "$2" scripts/benchmark_ai_memory.py /tmp/archimind-evaluation.json' sh "$(id -un)" "$python_bin"
+          jq '{scores, measurements}' /tmp/archimind-evaluation.json >> "$GITHUB_STEP_SUMMARY"
