@@ -68,7 +68,7 @@ def test_live_interpreter_hands_multiple_goals_to_geometry(monkeypatch):
         base=0,
         live=True,
         message="I take calls at home and want a short trip from the bedroom to the bathroom.",
-        brief=Brief(),
+        brief=interpret_offline(Brief(), "bathroom near study"),
     )
 
     def interpret(schema, prompt, **kwargs):
@@ -87,4 +87,4 @@ def test_live_interpreter_hands_multiple_goals_to_geometry(monkeypatch):
     monkeypatch.setattr(service.provider, "configuration", lambda _: None)
     monkeypatch.setattr(service.provider, "request", interpret)
     result = service.interpret(req, None)
-    assert len(generate(result)[0]["evidence"]["room_preferences"]) == 2
+    assert len(generate(result)[0]["evidence"]["room_preferences"]) == 3

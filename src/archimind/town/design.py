@@ -410,6 +410,8 @@ def generate(brief, previous=None, *, on_progress=None):
         if goal.room == goal.target or (pair in pairs and pairs[pair] != goal.relation):
             raise ValueError("Clarify the conflicting room-distance preferences.")
         pairs[pair] = goal.relation
+    if pairs and brief.locks:
+        raise ValueError("Unlock rooms before comparing different room placements.")
     if pairs and (brief.shift_bedroom_chair or brief.closer_study_desk):
         raise ValueError(
             "Apply room-distance preferences separately from a furniture move."

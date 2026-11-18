@@ -250,10 +250,19 @@ def interpret(req, previous):
             if len(match) != 1:
                 raise Problem("Clarify which room contains the furniture to lock.")
             locks.update(match)
+        goals = []
+        seen = set()
+        for goal in [*brief.room_goals, *parsed.room_goals]:
+            key = (*sorted((goal.room, goal.target)), goal.relation)
+            if key not in seen:
+                goals.append(goal)
+                seen.add(key)
+        if len(goals) > 4:
+            raise Problem("Choose at most four distinct room preferences.")
         brief = brief.model_copy(
             update={
                 "priority": parsed.priority,
-                "room_goals": parsed.room_goals or brief.room_goals,
+                "room_goals": goals,
                 "formal_salon": parsed.formal_salon or brief.formal_salon,
                 "palette": parsed.palette,
                 "locks": sorted(locks),
