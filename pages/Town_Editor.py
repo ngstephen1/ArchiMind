@@ -174,6 +174,11 @@ if j:
                         st.json(event["artifact"], expanded=False)
             if state == "running":
                 st.status(last["task"], state="running")
+        if feed["status"] == "ready" and any(
+            e["state"] == "failed" and e["task"] == "OpenAI · Review plan images"
+            for e in feed["events"]
+        ):
+            st.warning("Spatial checks passed. AI visual review unavailable.")
         plans = [
             e
             for e in feed["events"]

@@ -6,6 +6,7 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+from archimind.studio.contracts import StudioError
 from archimind.assets import load_catalog
 from archimind.datasets.search import (
     ReferenceQuery,
@@ -214,7 +215,11 @@ def coordinate(req, previous, interpret, emit):
                 )
             else:
                 emit("E", "skipped", "Codex CLI · Local advisor unavailable", {})
-            visual.result()
+            try:
+                visual.result()
+            except StudioError:
+                # The task recorded a failed critique. Spatial checks already passed.
+                pass
         emit(
             "E",
             "completed",

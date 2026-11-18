@@ -382,7 +382,10 @@ async function watch(id) {
         if (result.status === "ready") {
           alternatives = result.result;
           show();
-          notify("Checks complete. Preview a layout before applying it.");
+          const missingCritique = history.some(e => e.task === "OpenAI · Review plan images" && e.state === "failed");
+          notify(missingCritique
+            ? "Spatial checks passed. AI visual review unavailable. Preview a layout before applying it."
+            : "Checks complete. Preview a layout before applying it.");
         } else notify(result.result || "Cancelled.");
         return;
       }

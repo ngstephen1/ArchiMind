@@ -4,18 +4,16 @@ import runpy
 from unittest.mock import patch
 
 from archimind.town.design_review import Direction, VisualReview
-from archimind.town.service import Interpretation
+from archimind.town.service import NewHomeInterpretation
 
 
 def response(schema, content, **kwargs):
-    if schema is Interpretation:
-        return Interpretation(
+    if schema is NewHomeInterpretation:
+        return schema(
             priority="balanced",
             palette="oak",
-            lock_rooms=[],
             clarification="",
             unsupported=[],
-            lock_furniture=[],
         )
     if schema is Direction:
         return Direction(

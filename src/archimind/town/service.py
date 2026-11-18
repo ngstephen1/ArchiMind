@@ -180,18 +180,21 @@ def enqueue(owner, req):
     return {"job": j}
 
 
-class Interpretation(BaseModel):
+class NewHomeInterpretation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     priority: Literal[
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ]
     palette: Literal["oak", "sage", "terracotta"]
     formal_salon: bool = False
-    lock_rooms: list[Kind] = Field(max_length=6)
     clarification: str = Field(max_length=500)
     unsupported: list[str] = Field(max_length=8)
     shift_bedroom_chair: bool = False
     closer_study_desk: bool = False
+
+
+class Interpretation(NewHomeInterpretation):
+    lock_rooms: list[Kind] = Field(max_length=6)
     lock_furniture: list[str] = Field(max_length=12)
 
 
@@ -220,8 +223,8 @@ def interpret(req, previous):
             "request": req.message,
         }
         parsed = provider.request(
-            Interpretation,
-            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for palette and priority unless text explicitly requests a different supported option. Supported: single storey, five base rooms, optional additional formal salon with a dining group for entertaining, global palette, quiet bedroom and bright study priorities, repositioning the bedroom desk chair, moving the existing study desk closer to its window, locks, seed. List unsupported mandatory requests; ask for clarification if ambiguous. For furniture locks, return the IDs (the whole containing room will be preserved). Never silently drop requirements. "
+            Interpretation if previous else NewHomeInterpretation,
+            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for palette and priority unless text explicitly requests a different supported option. Supported: single storey, five base rooms, optional additional formal salon with a dining group for entertaining, global palette, quiet bedroom and bright study priorities, repositioning the bedroom desk chair, moving the existing study desk closer to its window, locks, seed. List unsupported mandatory requests; ask for clarification if ambiguous. Keeping the five standard rooms requests the program. If no previous rooms exist and the user explicitly wants to preserve an existing placement or move existing furniture, ask for clarification. On an applied revision, return the IDs for explicit placement locks (the whole containing room will be preserved). Never silently drop requirements. "
             + json.dumps(facts),
             config=cfg,
             deadline=time.monotonic() + 30,
@@ -231,8 +234,10 @@ def interpret(req, previous):
                 parsed.clarification
                 or "Unsupported requirements: " + ", ".join(parsed.unsupported)
             )
-        locks = set(brief.locks) | set(parsed.lock_rooms)
-        for item in parsed.lock_furniture:
+        locks = set(brief.locks)
+        if isinstance(parsed, Interpretation):
+            locks.update(parsed.lock_rooms)
+        for item in parsed.lock_furniture if isinstance(parsed, Interpretation) else ():
             match = [
                 r["design"]["room"]["id"]
                 for r in (previous or {}).get("rooms", [])
