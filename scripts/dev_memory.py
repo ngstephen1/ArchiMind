@@ -283,10 +283,10 @@ def main():
         ["git", "rev-parse", "--show-toplevel"], text=True
     ).strip()
     remote = git("remote", "get-url", "origin").removesuffix(".git")
-    if Path(checkout).resolve() != ROOT or remote not in {
-        f"https://github.com/{REPO}",
-        f"git@github.com:{REPO}",
-        f"ssh://git@github.com/{REPO}",
+    if Path(checkout).resolve() != ROOT or remote.casefold() not in {
+        f"https://github.com/{REPO.casefold()}",
+        f"git@github.com:{REPO.casefold()}",
+        f"ssh://git@github.com/{REPO.casefold()}",
     }:
         p.error("run inside the ArchiMind checkout")
     if not (data / "started").exists() or not owns_listener(
@@ -306,16 +306,16 @@ def main():
                 base_commit=git("rev-parse", "HEAD"),
                 author=a.author,
             )
-        print(
-            json.dumps(
-                rpc(
-                    data,
-                    port,
-                    "memory_handoff_begin",
-                    {"summary": json.dumps(validate(note))},
-                )
-            )
-        )
+        summary = json.dumps(validate(note), ensure_ascii=False)
+        if len(summary) > 3000:
+            p.error("serialized handoff exceeds the 3000-character service limit")
+        with (data / "submit.lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX)
+            pending = rpc(data, port, "memory_handoff_list", {"limit": 100})
+            if len(pending["handoffs"]) >= 100:
+                p.error("accept an open handoff before creating another (limit 100)")
+            result = rpc(data, port, "memory_handoff_begin", {"summary": summary})
+        print(json.dumps(result))
         return
     rows = rpc(data, port, "memory_handoff_list", {"limit": 100})["handoffs"]
     notes = {}
