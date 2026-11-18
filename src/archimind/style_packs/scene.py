@@ -4,20 +4,19 @@ from archimind.assets.designer_concepts import approved_pieces
 from archimind.models import RoomDesign
 
 from .binding import bind_furniture
+from .decor import place_dressing
 from .models import StylePack
 from .registry import load_releases
 
 
 def style_payload(design: RoomDesign, pack: StylePack, seed: int) -> dict:
-    """Exactly {style_pack, bindings, dressing, skipped}; deterministic for a seed.
-
-    ``seed`` drives decor placement (dressing/skipped), filled in by the decor step.
-    """
+    """Exactly {style_pack, bindings, dressing, skipped}; deterministic for a seed."""
+    dressing = place_dressing(design, pack, seed)
     return {
         "style_pack": {"id": pack.id, "version": pack.version},
         "bindings": [b.model_dump(mode="json") for b in bind_furniture(design, pack)],
-        "dressing": [],
-        "skipped": [],
+        "dressing": [i.model_dump(mode="json") for i in dressing.items],
+        "skipped": dressing.skipped,
     }
 
 

@@ -13,6 +13,7 @@ import {loadDesignerChair} from './designer_chair.js';
 import {browserTier,configureRenderer,createComposer} from './render_quality.js';
 import {loadStylePack,applyLighting} from './style_pack.js';
 import {splitStyle,createRoomStyle,tiledSurface,disposeTiled} from './room_style.js';
+import {buildDressing} from './dressing.js';
 
 import {PRODUCT_ASSETS,boundedProductBytes,verifyDecodedProduct,nativeProductInstance,productSceneBudget,productSceneAdmission} from './product_assets.js';
 
@@ -183,8 +184,9 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
         const legacy={environment:scene.environment,environmentIntensity:scene.environmentIntensity,exposure:renderer.toneMappingExposure};
         hemisphere.visible=sun.visible=false;
         const lights=applyLighting(scene,renderer,pack,packTier,{center,span});
+        const decor=buildDressing(owned,style.dressing,pack,packTier);
         return()=>{
-          lights.dispose();hemisphere.visible=sun.visible=true;
+          decor.dispose();lights.dispose();hemisphere.visible=sun.visible=true;
           scene.environment=legacy.environment;scene.environmentIntensity=legacy.environmentIntensity;renderer.toneMappingExposure=legacy.exposure;
           for(const [mesh,material] of swaps.reverse())mesh.material=material;tiled.forEach(disposeTiled);
         };

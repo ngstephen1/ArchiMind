@@ -16,6 +16,7 @@ import { browserTier, createComposer } from "../src/render_quality.js";
 import { loadDesignerChair } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
+import { buildDressing } from "../src/dressing.js";
 
 export function createTown(canvas, status, action) {
   const renderer = new T.WebGLRenderer({
@@ -445,6 +446,14 @@ export function createTown(canvas, status, action) {
       lights.push(light);
     }
     interior.add(...lights);
+    const decor = [];
+    for (const part of home.rooms) {
+      if (!Array.isArray(part.style?.dressing)) continue;
+      const holder = new T.Group();
+      holder.position.set(part.origin[0], 0, -part.origin[1]);
+      interior.add(holder);
+      decor.push({ holder, handle: buildDressing(holder, part.style.dressing, pack, packTier) });
+    }
     packLook = {
       pack,
       lights,
@@ -452,6 +461,10 @@ export function createTown(canvas, status, action) {
       intensity: lighting.environment_intensity ?? 0.6,
       exposure: lighting.exposure ?? 1,
       undo: () => {
+        decor.forEach(({ holder, handle }) => {
+          handle.dispose();
+          holder.removeFromParent();
+        });
         undoSurfaces();
         seams.forEach((o) => (o.visible = true));
       },
