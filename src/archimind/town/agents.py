@@ -6,13 +6,13 @@ import re
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-from archimind.studio.contracts import StudioError
 from archimind.assets import load_catalog
 from archimind.datasets.search import (
     ReferenceQuery,
     load_reference_pack,
     search_references,
 )
+from archimind.studio.contracts import StudioError
 
 from . import design_review
 from .design import PROGRAM, digest, generate, validate_home
