@@ -168,6 +168,8 @@ On later launches, run only the last command. Open [Town](http://127.0.0.1:8790)
 
 **Open the finished bedroom.** With the same Town dependencies, run `.venv/bin/python scripts/run_bedroom_showcase.py` instead of the Town launcher. Follow the printed link to open revision 5, walk through it, and select **Design presentation** for the plan, furniture schedule, three views and matching Blender download. This launcher uses a temporary database for your edits. [Showcase and downloads](docs/developer/BEDROOM_PRESENTATION.md)
 
+**Tour the six-room Studio House.** Run `.venv/bin/python scripts/run_studio_home.py` with the Town dependencies above. Open the printed revision link and choose **Design presentation**. The room selector switches between the formal salon, bedroom, living room, kitchen–dining room, study and bathroom. The guide also covers the printable client book, editable Blender scene and saved chair-and-finish edit. [Studio House guide](docs/developer/STUDIO_HOME.md)
+
 #### Architecture diagram
 
 Follow the brief through Town’s five worker roles or the room workspaces to validation and rendering. The lower panel documents the designer-chair authoring branch at `524f3c9`. Its Blender and portable Rhino CAD work belongs to [PR #21](https://github.com/ngstephen1/ArchiMind/pull/21). Live Rhino MCP verification is pending in this snapshot.
