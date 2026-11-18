@@ -18,6 +18,7 @@ let project = url.searchParams.get("project"),
   releasedChairs = [];
 const token = () => sessionStorage.getItem("town-session") || "";
 const world = createTown(el("world"), el("place"), el("door"));
+world.bindQuality(el("quality"));
 world.load(showcase);
 new MutationObserver(() => {
   el("assetStatus").hidden = el("world").dataset.desk !== "placeholder";

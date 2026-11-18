@@ -10,6 +10,9 @@ import {
   productSceneAdmission,
 } from "../src/product_assets.js";
 import { fitBedroomChair } from "./designer_chair.js";
+import { townSurfaceSource, LEGACY_WALL_COLORS, dressWhenCurrent, dressTownSurfaces } from "./style_source.js";
+import { loadStylePack, kelvinToColor } from "../src/style_pack.js";
+import { browserTier, createComposer } from "../src/render_quality.js";
 import { loadDesignerChair } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
@@ -35,6 +38,7 @@ export function createTown(canvas, status, action) {
   scene.environmentIntensity = 0.35;
   env.dispose();
   pm.dispose();
+  const townLook = { environment: map.texture, intensity: 0.35, exposure: renderer.toneMappingExposure };
   scene.add(new T.HemisphereLight(0xfff3de, 0x9a9780, 1.45));
   const sun = new T.DirectionalLight(0xffe3b5, 2.7);
   sun.position.set(-24, 38, 24);
@@ -391,6 +395,91 @@ export function createTown(canvas, status, action) {
     phase = 0,
     generation = 0,
     chairReady = Promise.resolve("procedural");
+  // Style packs: only homes with `style_pack` are dressed; the exterior keeps its look.
+  let tierOverride = null,
+    styleGen = 0,
+    packLook = null,
+    composer = null,
+    qualityButton = null;
+  const tier = () => browserTier(tierOverride);
+  function releasePackLook() {
+    if (!packLook) return;
+    const look = packLook;
+    packLook = null;
+    look.undo();
+    look.lights.forEach((l) => l.removeFromParent());
+    look.environment?.dispose();
+    look.pack.dispose();
+    composer?.dispose();
+    composer = null;
+  }
+  function updateQuality() {
+    if (!qualityButton) return;
+    qualityButton.hidden = townSurfaceSource(home).kind !== "pack";
+    qualityButton.textContent = "Quality: " + (tier() === "high" ? "High" : "Low");
+  }
+  function dressInterior(pack, packTier) {
+    const lighting = pack.manifest.lighting || {};
+    const undoSurfaces = dressTownSurfaces(interior, pack);
+    const seams = [];
+    interior.traverse((o) => {
+      if (o.userData.legacySeam && o.visible) {
+        o.visible = false;
+        seams.push(o);
+      }
+    });
+    let environment = null;
+    if (pack.environment) {
+      const pmrem = new T.PMREMGenerator(renderer);
+      pack.environment.mapping = T.EquirectangularReflectionMapping;
+      environment = pmrem.fromEquirectangular(pack.environment);
+      pmrem.dispose();
+    }
+    const fill = lighting.fill || {};
+    const lights = [new T.HemisphereLight(fill.sky_color || "#eef2f7", fill.ground_color || "#b9ab96", fill.intensity ?? 0.5)];
+    const warm = kelvinToColor(lighting.sun?.kelvin ?? 5600);
+    for (const part of home.rooms) {
+      const r = part.design.room,
+        light = new T.PointLight(warm, 6 * (lighting.sun?.intensity ?? 2), Math.max(r.width_m, r.depth_m) * 1.6, 2);
+      light.position.set(part.origin[0] + r.width_m / 2, 2.45, -part.origin[1] - r.depth_m / 2);
+      lights.push(light);
+    }
+    interior.add(...lights);
+    packLook = {
+      pack,
+      lights,
+      environment,
+      intensity: lighting.environment_intensity ?? 0.6,
+      exposure: lighting.exposure ?? 1,
+      undo: () => {
+        undoSurfaces();
+        seams.forEach((o) => (o.visible = true));
+      },
+    };
+    composer = createComposer(renderer, scene, camera, packTier);
+    composer.setSize(canvas.clientWidth, canvas.clientHeight);
+    canvas.dataset.styleFailures = pack.failures.join(",");
+  }
+  function requestPack(epoch) {
+    const source = townSurfaceSource(home);
+    if (source.kind !== "pack") return;
+    const mine = ++styleGen,
+      packTier = tier(),
+      current = () => generation === epoch && styleGen === mine;
+    canvas.dataset.stylePack = source.ref.id + "@" + source.ref.version;
+    canvas.dataset.styleState = "loading";
+    canvas.dataset.tier = packTier;
+    dressWhenCurrent(
+      loadStylePack({ baseUrl: new URL("./assets/", document.baseURI).href, ref: source.ref, tier: packTier, isCurrent: current }),
+      current,
+      (pack) => {
+        releasePackLook();
+        dressInterior(pack, packTier);
+      },
+    ).then((state) => {
+      if (state !== "superseded") canvas.dataset.styleState = state;
+    });
+  }
   const roomJump = document.getElementById("roomJump");
   roomJump.onchange = () => {
     const part = home.rooms.find((r) => r.design.room.id === roomJump.value);
@@ -559,6 +648,10 @@ export function createTown(canvas, status, action) {
   function load(h) {
     generation++;
     const epoch = generation;
+    releasePackLook();
+    delete canvas.dataset.stylePack;
+    delete canvas.dataset.styleState;
+    delete canvas.dataset.styleFailures;
     home = h;
     canvas.dataset.chair = "procedural";
     chairReady = Promise.resolve("procedural");
@@ -635,7 +728,7 @@ export function createTown(canvas, status, action) {
         );
       }
     batch(hero);
-    block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf");
+    block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf").userData.surface = "ceiling";
     delete canvas.dataset.desk;
     const bindings = h.rooms.flatMap((p) => p.asset_bindings || []);
     const admitted =
@@ -660,11 +753,7 @@ export function createTown(canvas, status, action) {
       block(interior, doorX, 2.61, -z, 0.34, 0.17, 0.34, "#e1cc98");
     }
 
-    const wallColor = {
-      oak: "#e5d6bc",
-      sage: "#bac6ad",
-      terracotta: "#d8ab91",
-    }[h.palette];
+    const wallColor = LEGACY_WALL_COLORS[h.palette];
     for (const part of h.rooms) {
       const [ox, oy] = part.origin,
         r = part.design.room,
@@ -696,6 +785,7 @@ export function createTown(canvas, status, action) {
           Math.abs(a[1] - b[1]) || 0.1,
           wallColor,
         );
+        wall.userData.surface = "wall";
         if (q.bottom === 0) {
           block(
             group,
@@ -706,7 +796,7 @@ export function createTown(canvas, status, action) {
             0.13,
             wall.scale.z + 0.022,
             "#eadfcb",
-          );
+          ).userData.surface = "trim";
         }
         if (q.bottom < 1.7 && q.top > 0.25)
           indoor.push([
@@ -727,6 +817,7 @@ export function createTown(canvas, status, action) {
         r.id === "bathroom" ? "#b4b8b1" : "#ba9a70",
       );
       if (r.id === "bedroom") flooring.material = oak;
+      flooring.userData.surface = r.id === "bathroom" ? "tile" : "floor";
       for (let row = 0; r.id !== "bedroom" && row < r.depth_m / 0.25; row++) {
         const z = row * 0.25;
         block(
@@ -738,10 +829,10 @@ export function createTown(canvas, status, action) {
           0.003,
           0.006,
           "#a78c6f",
-        );
+        ).userData.legacySeam = true;
         for (let x = 0.4 + (row % 3) * 0.53; x < r.width_m; x += 1.75) {
           if (z + 0.25 < r.depth_m)
-            block(group, x, 0.016, -z - 0.125, 0.006, 0.003, 0.25, "#a78c6f");
+            block(group, x, 0.016, -z - 0.125, 0.006, 0.003, 0.25, "#a78c6f").userData.legacySeam = true;
         }
       }
       for (const win of r.windows) {
@@ -1059,6 +1150,8 @@ export function createTown(canvas, status, action) {
       );
     if (inside) enter(true);
     refresh();
+    updateQuality();
+    requestPack(epoch);
     return chairReady;
   }
   function move(dx, dz) {
@@ -1135,6 +1228,7 @@ export function createTown(canvas, status, action) {
     camera.aspect = canvas.clientWidth / canvas.clientHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    composer?.setSize(canvas.clientWidth, canvas.clientHeight);
   }).observe(canvas);
   let before = performance.now();
   renderer.setAnimationLoop((now) => {
@@ -1206,10 +1300,25 @@ export function createTown(canvas, status, action) {
       roomName = part?.design.room.name || "Entrance hall";
     }
     refresh();
-    renderer.render(scene, camera);
+    // Inside a pack home, its environment, exposure and (high tier) AO apply.
+    const look = inside && packLook;
+    scene.environment = look ? look.environment?.texture || townLook.environment : townLook.environment;
+    scene.environmentIntensity = look ? look.intensity : townLook.intensity;
+    renderer.toneMappingExposure = look ? look.exposure : townLook.exposure;
+    if (look && composer) composer.render();
+    else renderer.render(scene, camera);
   });
   return {
     load,
+    bindQuality(button) {
+      qualityButton = button;
+      button.onclick = () => {
+        tierOverride = tier() === "high" ? "low" : "high";
+        updateQuality();
+        requestPack(generation);
+      };
+      updateQuality();
+    },
     async bedroomViews(snapshot) {
       const original = home,
         wasInside = inside,

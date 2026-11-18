@@ -1,7 +1,8 @@
 import { build } from "esbuild";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 const src = new URL("./", import.meta.url),
   out = new URL("../../../dist/town/", src);
 await mkdir(new URL("assets/", out), { recursive: true });
@@ -67,6 +68,10 @@ await copyFile(
   new URL("../node_modules/three/LICENSE", src),
   new URL("assets/THREE-LICENSE.txt", out),
 );
+// Style packs load lazily per pack from assets/packs/ (content-addressed files).
+const packsSrc = new URL("packs/", assets);
+if (existsSync(packsSrc))
+  await cp(packsSrc, new URL("assets/packs/", out), { recursive: true });
 const local = process.env.TOWN_MODE === "local";
 await writeFile(
   new URL("config.json", out),
