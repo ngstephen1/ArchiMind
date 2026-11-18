@@ -568,7 +568,10 @@ export function createTown(canvas, status, action) {
       selectedLoads.push(fitBedroomChair(
         loadBedroomConcept(binding, new URL("./assets/", document.baseURI)),
         fallback, item, -1, () => generation === epoch, clear,
-      ));
+      ).then(status => {
+        if (status === "verified") clear(fallback);
+        return status;
+      }));
     }
     home = h;
     canvas.dataset.chair = "procedural";
