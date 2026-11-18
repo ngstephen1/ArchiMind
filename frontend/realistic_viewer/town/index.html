@@ -81,7 +81,7 @@
         >Design brief<textarea
           id="message"
           rows="3"
-          placeholder="Try “bright study and sage finishes”."
+          placeholder="Try “quiet study and bathroom near bedroom”."
         ></textarea>
       </label>
       <div class="grid">
@@ -157,6 +157,11 @@
       </details>
       <section id="alternatives" hidden>
         <h3>Compare alternatives</h3>
+        <fieldset id="tradeoff" hidden>
+          <legend>Which matters more for this home?</legend>
+          <label>Top priority <select id="tradeoffGoal"></select></label>
+          <p id="recommendation" role="status"></p>
+        </fieldset>
         <div id="choices"></div>
         <canvas
           id="plan"

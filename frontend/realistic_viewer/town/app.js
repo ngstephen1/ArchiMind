@@ -1,3 +1,4 @@
+import { competingGoals } from "./tradeoff.js";
 import studioPublications from "./studio_publications.json";
 import {homeBoard} from "./home_board.js";
 import {roomElevation} from "./elevations.js";
@@ -220,6 +221,12 @@ function evidence(h) {
   const e = h.evidence;
   el("evidence").textContent =
     `${e.reachable_rooms} rooms reachable after furnishing · Bedroom center ${e.bedroom_center_from_front_m} m from front · Study window ${e.study_window_width_m} m wide. Distance and window size are proxies for privacy and daylight.`;
+  if (e.room_preferences?.length) {
+    const measures = e.room_preferences.map(g =>
+      `${g.room} ${g.relation === "near" ? "near" : "away from"} ${g.target}: ${g.center_distance_m.toFixed(2)} m`);
+    el("evidence").textContent += " Room-center distances in plan · " + measures.join(" · ") +
+      ". These preferences rank validated layouts. They do not measure walking routes or sound levels.";
+  }
   if (e.study_desk_window_center_distance_m) {
     const gap = e.study_desk_window_center_distance_m;
     el("evidence").textContent +=
@@ -257,6 +264,29 @@ function evidence(h) {
     b.setAttribute("aria-pressed", String(i === selected)),
   );
 }
+function showTradeoff() {
+  const goals = competingGoals(alternatives);
+  el("tradeoff").hidden = goals.length === 0;
+  const select = el("tradeoffGoal");
+  select.replaceChildren(new Option("Balance all preferences", ""));
+  el("recommendation").textContent = "";
+  select.onchange = null;
+  if (!goals.length) return;
+  for (const [index, goal] of goals.entries()) {
+    const verb = goal.relation === "near" ? "Bring closer together" : "Put farther apart";
+    select.add(new Option(`${verb} — ${goal.room} and ${goal.target}`, String(index)));
+  }
+  function recommend() {
+    const goal = select.value === "" ? null : goals[Number(select.value)];
+    selected = goal?.winner ?? 0;
+    el("recommendation").textContent = goal
+      ? `Prioritizing this goal ${selected ? "changes the recommendation from A to B" : "keeps A as the recommendation"}. Room centers: A ${goal.distances[0].toFixed(3)} m, B ${goal.distances[1].toFixed(3)} m.`
+      : "Layout A is recommended with all preferences weighted equally.";
+    draw();
+  }
+  select.onchange = recommend;
+  el("recommendation").textContent = "Layout A is recommended with all preferences weighted equally.";
+}
 function show() {
   el("alternatives").hidden = false;
   el("choices").replaceChildren();
@@ -270,6 +300,7 @@ function show() {
     el("choices").append(b);
   });
   selected = 0;
+  showTradeoff();
   draw();
 }
 bind("generate", async () => {

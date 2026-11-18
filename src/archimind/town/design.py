@@ -58,6 +58,15 @@ STUDIO_ENSEMBLES = {
 }
 
 
+class RoomGoal(BaseModel):
+    """A preference scored using straight-line room-center distance in plan."""
+
+    model_config = ConfigDict(extra="forbid")
+    room: Kind
+    relation: Literal["near", "far"]
+    target: Kind
+
+
 class Brief(BaseModel):
     model_config = ConfigDict(extra="forbid")
     width: float = Field(default=13, ge=9, le=15)
@@ -65,6 +74,7 @@ class Brief(BaseModel):
     priority: Literal[
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ] = "balanced"
+    room_goals: list[RoomGoal] = Field(default_factory=list, max_length=4)
     formal_salon: bool = False
     palette: Literal["oak", "sage", "terracotta"] = "oak"
     seed: int = Field(default=42, ge=0, le=1000000)
@@ -93,6 +103,26 @@ def interpret_offline(brief, text):
     for clause in re.split(r"\s+(?:and|with)\s+|[;,]", message):
         clause = " ".join(clause.split())
         clause = re.sub(r"^(?:a|an) ", "", clause)
+        if clause == "quiet study":
+            values["room_goals"].append(
+                dict(room="study", relation="far", target="living")
+            )
+            continue
+        rooms = "|".join(["salon", *PROGRAM])
+        pair = re.fullmatch(
+            rf"(?:put |place )?(?:the )?({rooms}) (near|away from) (?:the )?({rooms})",
+            clause,
+        )
+        if pair:
+            room, relation, target = pair.groups()
+            values["room_goals"].append(
+                dict(
+                    room=room,
+                    relation="near" if relation == "near" else "far",
+                    target=target,
+                )
+            )
+            continue
         if clause == "move the bedroom desk chair":
             values["shift_bedroom_chair"] = True
             continue
@@ -127,7 +157,7 @@ def interpret_offline(brief, text):
             continue
         else:
             raise ValueError(
-                "Offline briefs support ‘quiet bedroom’, ‘bright study’, a finish, or ‘keep the bedroom’. Revise the request or explicitly enable live interpretation."
+                "Offline briefs support ‘quiet bedroom’, ‘bright study’, ‘quiet study’, ‘study away from living’, ‘bathroom near bedroom’, a finish, or ‘keep the bedroom’. Revise the request or explicitly enable live interpretation."
             )
         if key in updates and updates[key] != value:
             if key == "priority" and {updates[key], value} == {
@@ -374,6 +404,18 @@ def revise_study_desk(brief, previous):
 
 
 def generate(brief, previous=None, *, on_progress=None):
+    pairs = {}
+    for goal in brief.room_goals:
+        pair = tuple(sorted((goal.room, goal.target)))
+        if goal.room == goal.target or (pair in pairs and pairs[pair] != goal.relation):
+            raise ValueError("Clarify the conflicting room-distance preferences.")
+        pairs[pair] = goal.relation
+    if pairs and brief.locks:
+        raise ValueError("Unlock rooms before comparing different room placements.")
+    if pairs and (brief.shift_bedroom_chair or brief.closer_study_desk):
+        raise ValueError(
+            "Apply room-distance preferences separately from a furniture move."
+        )
     if brief.shift_bedroom_chair or brief.closer_study_desk:
         if (
             brief.formal_salon
@@ -406,6 +448,8 @@ def generate(brief, previous=None, *, on_progress=None):
         and not any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
     ):
         raise ValueError("Adding a salon requires repartitioning. Unlock rooms first.")
+    if not salon and any("salon" in pair for pair in pairs):
+        raise ValueError("Include a formal salon before requesting its placement.")
     candidates = []
     for attempt in range(8):
         rng = random.Random(brief.seed + 7919 * attempt)
@@ -569,12 +613,29 @@ def generate(brief, previous=None, *, on_progress=None):
                 "basis": "A reserved dining group includes a 0.50 m withdrawal strip behind each chair row.",
                 "seating": "A three-piece conversation group faces the central coffee table.",
             }
+        if pairs:
+            centers = {
+                r["design"]["room"]["id"]: (
+                    r["origin"][0] + r["design"]["room"]["width_m"] / 2,
+                    r["origin"][1] + r["design"]["room"]["depth_m"] / 2,
+                )
+                for r in rooms
+            }
+            home["evidence"]["room_preferences"] = [
+                dict(
+                    room=a,
+                    target=b,
+                    relation=relation,
+                    center_distance_m=round(math.dist(centers[a], centers[b]), 3),
+                )
+                for (a, b), relation in sorted(pairs.items())
+            ]
         home["id"] = digest(home)
         if home not in candidates:
             candidates.append(home)
-            if on_progress:
+            if on_progress and not pairs:
                 on_progress("Furnished candidate", home)
-        if len(candidates) == 2:
+        if not pairs and len(candidates) == 2:
             break
     if not candidates:
         if salon:
@@ -584,4 +645,26 @@ def generate(brief, previous=None, *, on_progress=None):
         raise ValueError("Search exhausted without a connected furnished home.")
     if "quiet bedroom" in brief.priority:
         candidates.sort(key=lambda c: -c["evidence"]["bedroom_center_from_front_m"])
+    if pairs:
+
+        def cost(candidate):
+            return sum(
+                row["center_distance_m"] * (1 if row["relation"] == "near" else -1)
+                for row in candidate["evidence"]["room_preferences"]
+            )
+
+        evaluated = len(candidates)
+        candidates.sort(key=cost)
+        candidates = candidates[:2]
+        if on_progress:
+            on_progress(
+                "Compared room placements",
+                {
+                    "validated_alternatives": evaluated,
+                    "returned": len(candidates),
+                    "method": "Equal-weight sum of room-center distances; nearer or farther as requested.",
+                },
+            )
+            for candidate in candidates:
+                on_progress("Furnished candidate", candidate)
     return candidates
