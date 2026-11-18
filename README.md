@@ -166,6 +166,8 @@ npm ci --prefix frontend/realistic_viewer
 
 On later launches, run only the last command. Open [Town](http://127.0.0.1:8790), select **Design a home**, and try `bright study and sage finishes`. Compare A/B, preview one, then **Apply to my home** to inspect that saved revision in the [editor](http://127.0.0.1:8791). If the launcher reports an occupied port, check the running API with `curl -fsS http://127.0.0.1:8790/health` and the editor with `curl -fsS http://127.0.0.1:8791/_stcore/health`. [Town controls and deployment guide](docs/developer/TOWN.md)
 
+**Open the finished bedroom.** With the same Town dependencies, run `.venv/bin/python scripts/run_bedroom_showcase.py` instead of the Town launcher. Follow the printed link to open revision 5, walk through it, and select **Design presentation** for the plan, furniture schedule, three views and matching Blender download. This launcher uses a temporary database for your edits. [Showcase and downloads](docs/developer/BEDROOM_PRESENTATION.md)
+
 #### Architecture diagram
 
 Follow the brief through Town’s five worker roles or the room workspaces to validation and rendering. The lower panel documents the designer-chair authoring branch at `524f3c9`. Its Blender and portable Rhino CAD work belongs to [PR #21](https://github.com/ngstephen1/ArchiMind/pull/21). Live Rhino MCP verification is pending in this snapshot.

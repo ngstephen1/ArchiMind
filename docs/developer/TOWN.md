@@ -93,3 +93,7 @@ The working plan shows proposed partitions and furnished candidates. Final alter
 Generate a home and apply a layout. Open **Design a home → Bedroom designer furniture**, choose a piece and select **Preview in bedroom**. Reopen the design panel and choose **Apply furniture to my home** to save the next revision. Repeat to combine either writing chair with the linen platform bed and oak nightstand. **Design presentation** shows the saved pieces. **Restore previous revision** restores the prior choices. Each mesh fits the corresponding generated reservation at its original scale. Missing or corrupt mesh data leaves procedural furniture in place and adds an availability label.
 
 ![Saved Town bedroom with the upholstered bed and reading lamp](../images/town-bedroom-collection.jpg)
+
+## Export a bedroom presentation
+
+From **Design presentation**, print the saved plan, three bedroom views, material board and furniture schedule, or download the revision manifest for Blender. The [bedroom presentation guide](BEDROOM_PRESENTATION.md) includes the seed-42 release and operator command for another saved project.

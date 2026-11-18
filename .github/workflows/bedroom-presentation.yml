@@ -1,0 +1,71 @@
+name: Render saved bedroom in Cycles
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/bedroom-presentation]
+    paths:
+      - .github/workflows/bedroom-presentation.yml
+      - scripts/render_saved_bedroom.py
+      - design/bedroom-showcase/manifest.json
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Install the pinned Blender binary
+        working-directory: ${{ runner.temp }}
+        run: |
+          name=blender-5.1.2-linux-x64.tar.xz
+          curl -fsSL --retry 2 "https://download.blender.org/release/Blender5.1/$name" -o blender.tar.xz ||
+            curl -fsSL --retry 2 "https://ftp.halifax.rwth-aachen.de/blender/release/Blender5.1/$name" -o blender.tar.xz
+          echo 'aaccb355f50183979b698bcce7467103a76261b5fa59f4972295842662a285fb  blender.tar.xz' | sha256sum -c
+          tar xf blender.tar.xz
+      - name: Verify high resolution surface originals
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,pathlib,urllib.request
+          directory=pathlib.Path(os.environ["RUNNER_TEMP"])/"surfaces"
+          directory.mkdir()
+          for source in json.loads(pathlib.Path("frontend/realistic_viewer/town/materials/bedroom-sources.json").read_text()):
+              try:
+                  req=urllib.request.Request(source["url"],headers={"User-Agent":"ArchiMind showcase; github.com/ngstephen1/ArchiMind"})
+                  with urllib.request.urlopen(req,timeout=25) as response:
+                      data=response.read(source["source_bytes"]+1)
+              except OSError as exc:
+                  print(f"Using checked-in derivative of {source['asset']}: {exc}")
+                  continue
+              assert len(data)==source["source_bytes"] and hashlib.sha256(data).hexdigest()==source["source_sha256"]
+              (directory/source["source_sha256"]).write_bytes(data)
+          PY
+      - name: Reopen the earlier gentle and deep applied chair revisions
+        run: |
+          for revision in 2 3; do
+            "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" --background --factory-startup --python-exit-code 1 \
+              --python scripts/render_saved_bedroom.py -- "design/bedroom-showcase/history/r$revision.json" "$RUNNER_TEMP/r$revision" "$RUNNER_TEMP/surfaces" --inspect-only
+          done
+      - name: Reconstruct, reopen and render the applied revision
+        run: |
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" --background --factory-startup --python-exit-code 1 \
+            --python scripts/render_saved_bedroom.py -- design/bedroom-showcase/manifest.json "$RUNNER_TEMP/bedroom" "$RUNNER_TEMP/surfaces"
+      - name: Verify scene binding and output membership
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,pathlib,struct
+          p=pathlib.Path(os.environ["RUNNER_TEMP"])/"bedroom"
+          receipt=json.loads((p/"receipt.json").read_text())
+          assert receipt["manifest_sha256"]==hashlib.sha256(pathlib.Path("design/bedroom-showcase/manifest.json").read_bytes()).hexdigest()
+          for name in ("doorway","desk","bedside"):
+              data=(p/(name+".png")).read_bytes()
+              assert struct.unpack(">II",data[16:24])==(1920,1080)
+          assert all(len(v)==64 for v in receipt["asset_sha256_or_fallback"].values())
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: saved-bedroom-cycles
+          path: ${{ runner.temp }}/bedroom
+          if-no-files-found: error
