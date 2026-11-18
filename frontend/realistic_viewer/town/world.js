@@ -411,7 +411,10 @@ export function createTown(canvas, status, action) {
     look = false;
     keys.clear();
   }
-  photoView.onchange = selectPhoto;
+  photoView.onchange = () => {
+    selectPhoto();
+    if (!preset) canvas.focus();
+  };
   function walkView() {
     if (!preset) return;
     photoView.value = "";

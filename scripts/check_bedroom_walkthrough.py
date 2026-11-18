@@ -59,6 +59,7 @@ def check(url: str, output: Path):
             assert canvas.get_attribute("data-camera") == view
             assert page.locator("#photoReason").text_content() == ""
         page.locator("#photoView").select_option("")
+        assert canvas.evaluate("element => element === document.activeElement")
         assert initial == canvas.screenshot(), "Walking view was not restored"
 
         page.locator("#design").click()
