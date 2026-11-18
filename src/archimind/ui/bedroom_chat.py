@@ -133,6 +133,10 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
         st.info(
             "Live interpretation is disabled by the server. Set ARCHIMIND_ENABLE_OPENAI_REQUIREMENTS=1 and provide server API credentials to use chat; existing input modes remain available."
         )
+    elif not allow:
+        st.info(
+            "Check “Enable live interpretation for submitted messages” to unlock the message box."
+        )
     st.caption(
         "Submitting sends this conversation to the configured OpenAI model once. No automatic retries. Up to 20 user turns and 12,000 UTF-8 context bytes; no silent truncation. Product/Prepare/Generate controls make no model requests."
     )
@@ -263,6 +267,19 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
             )
             st.caption(
                 f"{record.search.reviewed_name} · Metadata qualified · Published {published} m W×D×H · Generation {dims} m · Native mesh {'approved' if option.render_qualified else 'unavailable; placeholder'}"
+            )
+            uses = ", ".join(record.search.usage_tags or ()) or "unrecorded"
+            style = (
+                ", ".join(v.value for v in record.search.styles or ()) or "unrecorded"
+            )
+            materials = (
+                ", ".join(v.value for v in record.search.materials or ())
+                or "unrecorded"
+            )
+            st.caption(
+                f"Why this candidate? Reviewed use: {uses}. Variant: {record.variant_label}. "
+                f"Material: {materials}. Style: {style}. Its generation footprint is "
+                f"{dims[0]:.2f} × {dims[1]:.2f} m; fit with other items is checked at generation."
             )
             st.markdown(
                 f"[Product evidence]({record.source.metadata_url}) · [{record.legal.license_id}]({record.legal.license_url})"

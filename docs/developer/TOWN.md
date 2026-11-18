@@ -1,0 +1,74 @@
+# ArchiMind Town
+
+Market Square is a single-player, third-person walking scene with one enterable Studio House. Inside, the camera moves to eye height. A public visitor can tour the packaged house. A designer can generate alternatives on a measured lot, walk through a preview and apply a revision. The town and the Streamlit editor share the same Python API.
+
+![Market Square seen from the pedestrian crossing](../images/town-market-square.jpg)
+
+## Run from the repository
+
+Use Node 20 or later and the project's Python 3.11+ environment. With dependencies already installed, only the last command is needed.
+
+```sh
+npm ci --prefix frontend/realistic_viewer
+.venv/bin/python -m pip install -r services/town/requirements.txt
+.venv/bin/python scripts/run_town.py
+```
+
+Open [the town](http://127.0.0.1:8790). Use WASD to walk, drag to look, and use **E** at the front door. **Visit showcase** takes you to the doorstep. In the house, **Visit a room** frames the furniture. Touch controls support walking and turning. **Design a home** opens the design panel. Try `bright study and sage finishes`, leave live interpretation off, generate and inspect A and B. Previewing an alternative leaves the saved revision intact. Choose **Apply to my home**, then follow **Streamlit editor** to inspect the same room sizes and furniture for that revision. Regenerate with **Keep these rooms** to preserve a room. From the second applied revision onwards, **Restore previous revision** saves a copy of the previous home as a new revision.
+
+The launcher serves the town/API on port 8790 and the [standalone editor](http://127.0.0.1:8791) on 8791. It starts a worker and uses a loopback-only SQLite store at `storage/town-designer.sqlite3`. Override the file with `TOWN_DB`. Ctrl-C stops these processes. Local mode represents a single designer.
+
+## How generation works
+
+- The supported program is one rectangular, single-storey 9–15 m by 9–16 m home with a bedroom, study, living room, kitchen-dining room and bathroom. The seed determines the hall position, bay widths, room order, room depths and furniture search seeds. Search tries at most eight partitions and retains up to two distinct valid homes.
+- **Quiet bedroom** places the bedroom behind the living room and ranks alternatives by distance from the front. **Bright study** increases the study window width. These are design proxies. Acoustic isolation and daylight simulation remain unevaluated.
+- Each furnished room passes the existing layout generator and spatial validator. The whole-home check verifies that rooms and hall tile the lot, hall-facing doorways and external windows align, and a 0.6 m clearance envelope connects the entrance to an interior point in every furnished room. It does not certify a building design.
+- A lock preserves a room's placement, openings and furniture. The first implementation holds all partition boundaries fixed for a locked revision and regenerates the unlocked furnishings. The palette applies to the whole home.
+- The deterministic interpreter accepts complete supported clauses, including `quiet bedroom`, `bright study`, `use oak` and `keep the bedroom`. Compose with “and” or a semicolon. An unknown clause or incompatible priorities produce a message before the saved design changes. The optional live interpreter may return a clarification, a priority, a palette or a lock. Python constructs the partitions, resolves product evidence and validates geometry.
+- Belaya uses the existing Policy B factory and an explicit render binding. The browser checks the binding, resource budgets, GLB bytes, decoded geometry, texture sizes, placement and native scale. Missing evidence or a failed download yields a labeled placeholder. The bed, other furnishings and town architecture are illustrative geometry. The house generator uses a fixed furniture program. Public dataset packs, arbitrary mesh generation and automatic furnishing of every town building remain outside this implementation.
+
+![A generated bedroom with procedural bedding and the native desk](../images/town-bedroom.jpg)
+
+## Hosting the town and editor separately
+
+| Component | Entry point | Configuration |
+|---|---|---|
+| Vercel static town | Root `vercel.json` builds `dist/town` | Public build variables `TOWN_API_URL` (ends in `/api`), `TOWN_EDITOR_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`. Use the publishable/anon key only. |
+| Render API | `archimind.town.api:app` | `DATABASE_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `TOWN_ORIGIN` equal to the exact town origin. Liveness path `/health`. |
+| Render worker | `python -m archimind.town.worker` | Same private Postgres database as the API. Optional provider credentials belong on the worker. |
+| Streamlit editor | `streamlit run pages/Town_Editor.py` | `TOWN_API_URL`, `TOWN_SITE_URL`, and Supabase public sign-in configuration. Health path `/_stcore/health`. |
+| Supabase | Auth and Postgres | Enable password sign-in and set the confirmation redirect for the frontend. Use a server role allowed to create and own the dedicated archimind_town schema. |
+
+Render prompts for credentials on each service when the Blueprint is first created. [Render Blueprint reference](https://render.com/docs/blueprint-spec#prompting-for-secret-values)
+
+The town ships the pinned desk and attribution with its static bundle. Keep the Vercel origin on HTTPS for browser SHA-256. Private editor links carry the project UUID and revision only. Each client signs in independently. The API verifies the bearer token with Supabase and checks project ownership. The application tables have row-level security and revoke direct access for anonymous and authenticated Supabase roles. To open a historical revision in the editor, use its revision-specific URL and select **Open latest** before editing. A stale apply receives HTTP 409.
+
+The API reserves one of three daily design jobs per owner. Duplicate request IDs return the existing job for identical input. Queued and in-flight work can be cancelled. A failed or expired job leaves the applied home available. Model requests default to zero. To enable them, configure the existing studio flag on the API and worker, the worker's server-side provider key, and the API's `TOWN_DAILY_MODEL_CALLS`, `TOWN_DAILY_MICROUSD` and `TOWN_CALL_RESERVE_MICROUSD`. The last value is an operator-supplied conservative maximum cost per call for the pinned model and token limits. The service reserves this amount for each admitted live job, even if it later fails. Billing reconciliation is external. One submission authorizes at most one model request. Walking, previews, switching layouts and reopening projects require none.
+
+## Verification
+
+```sh
+.venv/bin/python -m pytest -q tests/test_town.py
+npm test --prefix frontend/realistic_viewer
+node frontend/realistic_viewer/town/build.mjs
+curl -fsS http://127.0.0.1:8790/health
+curl -fsS http://127.0.0.1:8791/_stcore/health
+```
+
+The town tests cover twelve measured briefs, reproducible showcase output, room locks, authored product evidence, missing doors, offline text, owner isolation, stale revisions, quota reservation, a mocked provider clarification, cancellation and undo. Local Chrome checks exercised generation, application and walking at 1440 × 1000 and 390 × 844, and opening the saved revision in Streamlit. Narrow Chrome simulates a viewport. Physical-phone performance, photorealism, paid model behavior and authenticated multi-user operation on the managed hosts require separate acceptance.
+
+A separate PostgreSQL 16 smoke test created the private schema, queued a brief, validated and applied a home, reopened the revision, and verified row security and denied client grants. A browser round trip submitted an offline brief in Streamlit, applied revision 2, opened it in the narrow town view and restored revision 1 as revision 3.
+
+## Bedroom presentation and evidence
+
+Use **Design presentation** in the town footer for the applied revision, or for the packaged showcase before applying a design. The two bedroom photographs are rendered from the same home as the dimensioned plan and furniture schedule. The material board describes the rendered bedroom finishes. Use **Print presentation** to print or save it as a PDF in the browser. Earlier saved homes retain their recorded furniture inventory.
+
+The local explanation control supports questions about the writing station, rug and reading light. The explanations use authored rules and measurements calculated from the displayed revision. Regression tests vary furniture positions, dimensions and inventory to verify the answers. In particular the desk-to-window distance is measurable; glare depends on screen orientation, time and lighting. Bedroom Chat also shows reviewed uses, variant, material/style evidence where available, and the actual planning footprint for each search result.
+
+The timber image is the 1k diffuse map from [Poly Haven Wood Floor](https://polyhaven.com/a/wood_floor), used under the [CC0 asset license](https://polyhaven.com/license). Its upstream MD5 is b7e927d2bf2f8f103820ff3890c8407c. Linen and plaster detail and the light at the modeled window are procedural.
+
+## Follow a design run
+
+Open **Design a home** and submit “Design a five-room home with a quiet bedroom and a bright study.” The Design team panel follows five concurrent worker tasks. A interprets the brief, B searches catalog evidence and the optional configured reference pack, C reads the lot and plans rooms, D checks geometry, and E resolves the finish. Expand a card for the recorded inputs or findings. Only A can call a model, through the existing explicit opt-in. The other specialists run local Python. Reference matches are evidence for review and cannot authorize a mesh or change a furniture binding.
+
+The working plan shows proposed partitions and furnished candidates. Final alternatives appear after validation. **Apply to my home** saves the selected alternative. The Streamlit Town editor reads the same private run. Reloading either client at the same base revision restores the event history. Short tasks can finish between polls. **Replay recorded work** in Town steps through those events at a slower pace.
