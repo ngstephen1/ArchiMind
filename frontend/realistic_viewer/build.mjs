@@ -13,3 +13,6 @@ await writeFile(new URL('THIRD_PARTY_NOTICES.txt',out), `Three.js ${threePackage
 await writeFile(new URL('SPOKEN_WORLD_LICENSE.txt',out),await readFile(new URL('./vendor/spoken-world/LICENSE',import.meta.url),'utf8'));
 await writeFile(new URL('SPOKEN_WORLD_NOTICE.txt',out),await readFile(new URL('./vendor/spoken-world/NOTICE',import.meta.url),'utf8'));
 await writeFile(new URL('THIRD_PARTY_NOTICES.txt',out),await readFile(new URL('THIRD_PARTY_NOTICES.txt',out),'utf8')+'\n\n'+await readFile(new URL('./vendor/spoken-world/NOTICE',import.meta.url),'utf8')+'\nSee SPOKEN_WORLD_LICENSE.txt.\n');
+// CC0 style-pack assets: one attribution line per released asset (written by scripts/fetch_cc0_asset.py).
+const packNotices = await readFile(new URL('packs/THIRD_PARTY_NOTICES.txt',out),'utf8').catch(()=>'');
+if (packNotices.trim()) await writeFile(new URL('THIRD_PARTY_NOTICES.txt',out),await readFile(new URL('THIRD_PARTY_NOTICES.txt',out),'utf8')+'\n'+packNotices);

@@ -9,7 +9,7 @@
   "authorized_migrations": {
     "frontend/realistic_viewer/build.mjs": {
       "before_sha256": "13726b0b7570643fe2214fd7dbfe0b1cd787f0954396d648f67a551f57d95458",
-      "after_sha256": "dd8da37a7840c8b251f4ffbfd718e97bc04ed80b0b042c41e2b416b208da69d5"
+      "after_sha256": "986f625cab5c4e2167853c1a563b01ad93dc134590ddf36191cd831de0040d0c"
     },
     "frontend/realistic_viewer/package.json": {
       "before_sha256": "ca97aaf6ff9b6ff0a0645ddccafdc7f88466c21243cdf80d8d62f4352a623e48",
@@ -26,6 +26,10 @@
     "pyproject.toml": {
       "before_sha256": "8d3c90f7a7826f6b9bdcbf76bd2723e17bc13e48d4018fcd56a364e8d7d513ab",
       "after_sha256": "379d95bdf520188f74a5acdee5800fbc61520fda321d20e55241653d434b8dc4"
+    },
+    "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
+      "before_sha256": "cd06cfd0faa200f053a40fbe02b15590a3b6e3da085191b831dc012f7aec2e48",
+      "after_sha256": "ce95e7cedd5c9e4fabff839b4cacb008d6d8361b26a499eadcebacda49027c17"
     },
     "src/archimind/_viewer_assets/viewer.js": {
       "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",

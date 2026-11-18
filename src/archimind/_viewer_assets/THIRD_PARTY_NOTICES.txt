@@ -30,3 +30,5 @@ Apache License, Version 2.0. Modified by ArchiMind: pure ES-module extraction.
 Only the part recorder is adapted. Fonts, media, voice, model host and world runtime are not included.
 
 See SPOKEN_WORLD_LICENSE.txt.
+
+Style pack assets: CC0 1.0 sources (Poly Haven, ambientCG). One line per released asset.
