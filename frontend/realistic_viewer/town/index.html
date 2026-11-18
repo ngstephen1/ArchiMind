@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="icon" href="data:," />
+    <title>Market Square · ArchiMind Town</title>
+    <link rel="stylesheet" href="./town.css" />
+  </head>
+  <body>
+    <header>
+      <div class="brand">
+        <span class="mark" aria-hidden="true">⌂</span> ArchiMind <i>Town</i>
+      </div>
+      <nav>
+        <button id="tour">Visit showcase</button
+        ><button id="design" class="dark">Design a home ↗</button>
+      </nav>
+    </header>
+    <main>
+      <canvas
+        id="world"
+        aria-label="Walkable town and home interiors"
+        tabindex="0"
+      ></canvas>
+      <div class="place">
+        <span>ARCHIMIND / TOWN WALK</span>
+        <h1 id="place">Market Square</h1>
+      </div>
+      <div class="walk">
+        <select id="roomJump" aria-label="Visit a room" hidden>
+          <option value="">Visit a room…</option></select
+        ><span>WASD to walk · Drag to look</span
+        ><button id="door" disabled>Enter house</button>
+      </div>
+      <div class="pad" aria-label="Walking controls">
+        <button data-key="ArrowLeft" aria-label="Turn left">↶</button
+        ><button data-key="KeyW" aria-label="Forward">↑</button
+        ><button data-key="KeyS" aria-label="Back">↓</button
+        ><button data-key="ArrowRight" aria-label="Turn right">↷</button>
+      </div>
+    </main>
+    <footer>
+      <button id="present">Design presentation</button>
+      <span id="revision">Studio House · Showcase</span
+      ><span id="assetStatus" role="status" hidden
+        >Desk shown as a placeholder</span
+      ><a href="./assets/BELAYA_ATTRIBUTION.txt">Belaya desk credits</a
+      ><a id="editor">Streamlit editor ↗</a>
+    </footer>
+    <dialog id="panel">
+      <form method="dialog" class="title">
+        <h2>Home studio</h2>
+        <button aria-label="Close studio">×</button>
+      </form>
+      <p id="account"></p>
+      <button id="logout" hidden>Sign out</button>
+      <section id="auth" hidden>
+        <label
+          >Email<input id="email" type="email" autocomplete="username" /></label
+        ><label
+          >Password<input
+            id="password"
+            type="password"
+            autocomplete="current-password" /></label
+        ><button id="login">Sign in</button>
+        <button id="signup">Create account</button>
+      </section>
+      <label
+        >Design brief<textarea
+          id="message"
+          rows="3"
+          placeholder="Try “bright study and sage finishes”."
+        ></textarea>
+      </label>
+      <div class="grid">
+        <label
+          >Lot width (m)<input
+            id="width"
+            type="number"
+            min="9"
+            max="15"
+            value="13"
+            step=".1" /></label
+        ><label
+          >Lot depth (m)<input
+            id="depth"
+            type="number"
+            min="9"
+            max="16"
+            value="13"
+            step=".1"
+        /></label>
+      </div>
+      <div class="grid">
+        <label
+          >Priority<select id="priority">
+            <option>balanced</option>
+            <option>quiet bedroom</option>
+            <option>bright study</option>
+          </select></label
+        ><label
+          >Finishes<select id="palette">
+            <option>oak</option>
+            <option>sage</option>
+            <option>terracotta</option>
+          </select></label
+        >
+      </div>
+      <fieldset id="locks">
+        <legend>Keep these rooms in the next revision</legend>
+      </fieldset>
+      <label class="check"
+        ><input type="checkbox" id="live" />Use one AI request to interpret my
+        brief</label
+      >
+      <details id="briefHistory" hidden>
+        <summary>Recent design briefs</summary>
+        <ol></ol>
+      </details>
+      <section id="runStudio" hidden>
+        <h3>Design team</h3>
+        <p id="runPrompt"></p>
+        <div id="agentCards"></div>
+        <button type="button" id="replayAgents" hidden>
+          Replay recorded work</button
+        ><small id="replayLabel" role="status"></small>
+        <figure id="draftFigure" hidden>
+          <canvas id="draftPlan" width="560" height="390"></canvas>
+          <figcaption>Working plan · awaiting final release</figcaption>
+        </figure>
+      </section>
+      <p id="notice" role="status"></p>
+      <div class="actions">
+        <button id="generate" class="dark">Generate layouts</button
+        ><button id="cancel" hidden>Cancel job</button
+        ><button id="undo" hidden>Restore previous revision</button>
+      </div>
+      <section id="alternatives" hidden>
+        <h3>Compare alternatives</h3>
+        <div id="choices"></div>
+        <canvas
+          id="plan"
+          width="560"
+          height="390"
+          aria-label="Floor plan of the selected alternative"
+        ></canvas>
+        <p id="evidence"></p>
+        <div class="actions">
+          <button id="visit">Walk through preview</button
+          ><button id="apply" class="dark">Apply to my home</button>
+        </div>
+      </section>
+    </dialog>
+    <script type="module" src="./town.js"></script>
+    <dialog id="board">
+      <form method="dialog" class="title">
+        <h2>Design presentation</h2>
+        <button aria-label="Close presentation">×</button>
+      </form>
+      <p id="boardSource"></p>
+      <canvas id="boardPlan" width="580" height="400"></canvas>
+      <section id="photos"></section>
+      <h3>Bedroom material board</h3>
+      <div id="swatches"></div>
+      <h3>Furniture schedule</h3>
+      <div id="schedule"></div>
+      <h3>Ask about this bedroom</h3>
+      <label
+        >Design question<input
+          id="whyQuery"
+          placeholder="Why is the chair next to the desk?" /></label
+      ><button id="askWhy">Explain</button>
+      <p id="whyAnswer" role="status"></p>
+      <button id="printBoard">Print presentation</button>
+    </dialog>
+  </body>
+</html>

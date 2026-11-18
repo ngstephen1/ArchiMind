@@ -1,0 +1,6 @@
+{
+  "framework": null,
+  "installCommand": "cd frontend/realistic_viewer && npm ci",
+  "buildCommand": "node frontend/realistic_viewer/town/build.mjs",
+  "outputDirectory": "dist/town"
+}

@@ -1,0 +1,45 @@
+services:
+  - type: web
+    name: archimind-town-api
+    healthCheckPath: /health
+    runtime: python
+    buildCommand: pip install -r services/town/requirements.txt
+    startCommand: python -c 'from archimind.town.service import initialize; initialize()' && uvicorn archimind.town.api:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: TOWN_ORIGIN
+        sync: false
+      - key: ARCHIMIND_ENABLE_OPENAI_STUDIO
+        value: "0"
+      - key: TOWN_DAILY_MODEL_CALLS
+        value: "0"
+  - type: worker
+    name: archimind-town-worker
+    runtime: python
+    buildCommand: pip install -r services/town/requirements.txt
+    startCommand: python -m archimind.town.worker
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: ARCHIMIND_ENABLE_OPENAI_STUDIO
+        value: "0"
+  - type: web
+    name: archimind-town-editor
+    runtime: python
+    buildCommand: pip install .
+    startCommand: streamlit run pages/Town_Editor.py --server.address=0.0.0.0 --server.port=$PORT --server.headless=true
+    healthCheckPath: /_stcore/health
+    envVars:
+      - key: TOWN_API_URL
+        sync: false
+      - key: TOWN_SITE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
