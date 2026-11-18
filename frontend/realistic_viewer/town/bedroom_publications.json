@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "project": "26bda387-7853-4fa9-99b7-13d6c1064de7",
+    "revision": 5,
+    "home_id": "05de28749d9e26f2b8dea666394903af1b37ef2a35704e35ef7adfd0d4759d08",
+    "manifest_sha256": "03b0ff5671e667a667d4d29ee7e325e02a5b4240f893b91e67aea1d9bbeea886",
+    "url": "https://github.com/ngstephen1/ArchiMind/releases/download/bedroom-showcase-r5/bedroom-r5-cycles.zip"
+  }
+]
