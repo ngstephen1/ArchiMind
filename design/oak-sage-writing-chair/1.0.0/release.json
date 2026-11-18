@@ -1,0 +1,83 @@
+{
+  "authoring": {
+    "schema_version": 1,
+    "concept_id": "oak-sage-writing-chair",
+    "version": "1.0.0",
+    "name": "Oak writing chair with sage upholstery",
+    "variant": "gentle",
+    "seat_height_m": 0.455,
+    "dimensions_wdh_m": [
+      0.48,
+      0.52,
+      0.83
+    ],
+    "blender_version": "5.1.2",
+    "attribution": "Original ArchiMind chair geometry, materials and studio lighting. Modeled from numeric profiles; no external mesh, image or texture inputs.",
+    "inputs": {
+      "author_script_sha256": "1376389a45dc1bfcb50d1cb8204d74f9fc0b57d1b5261c0dc1432fe603624239",
+      "width_mm": 480,
+      "depth_mm": 520,
+      "height_mm": 830,
+      "seat_height_mm": 455,
+      "back_bend_mm": 42,
+      "parts": [
+        "Left front leg",
+        "Left rear leg",
+        "Left back upright",
+        "Right front leg",
+        "Right rear leg",
+        "Right back upright",
+        "Laminated oak seat shell",
+        "Sage seat cushion",
+        "Seat perimeter welt",
+        "Steam-bent oak backrest"
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up",
+      "finishes": {
+        "Oak": [
+          "BA8D61",
+          0.42
+        ],
+        "Oak end grain": [
+          "986C48",
+          0.5
+        ],
+        "Sage upholstery": [
+          "91A388",
+          0.85
+        ],
+        "Upholstery piping": [
+          "697F61",
+          0.76
+        ]
+      }
+    },
+    "sha256": {
+      "chair.blend": "196bb75dc0b4deb2a109ea461bcc817a6a2f0cc009fcae51b01fcaac296ebcff",
+      "chair.glb": "54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81",
+      "front.png": "068a466dc327682c6313a2764aeb177a992c0cacffc69535f2fc0e5c72e0fed8",
+      "three-quarter.png": "3562c36f9f4ac6b5fd9f43278011f7319a9238d3f4c9c64a7daa1376e94b2a50"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.23999999463558197,
+        0.0,
+        -0.25999999046325684
+      ],
+      [
+        0.23999999463558197,
+        0.8299999833106995,
+        0.25999999046325684
+      ]
+    ],
+    "mesh_instances": 10,
+    "triangles": 3712,
+    "materials": 4,
+    "textures": 0
+  },
+  "operator_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44219907523",
+  "review": "Front and three-quarter images reviewed; approved as a concept chair."
+}

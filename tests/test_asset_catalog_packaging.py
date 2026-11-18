@@ -103,6 +103,8 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             "SheenChair.glb",
             "CharlesArmchair.glb",
             "BelayaDesk.glb",
+            "designer-54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81.glb",
+            "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
         }
         assert sum(n.endswith("/CharlesArmchair.glb") for n in archive.namelist()) == 1
         assert not any(n.endswith("/.env") for n in archive.namelist())
@@ -215,6 +217,12 @@ def offline(event, args):
         raise AssertionError('Catalog attempted external work')
 sys.addaudithook(offline)
 import archimind
+from archimind.assets.designer_concepts import approved_chairs, resolve_chair, preview_bytes
+chairs = approved_chairs()
+assert [c.version for c in chairs] == ["1.0.0", "1.1.0"]
+for chair in chairs:
+    assert resolve_chair(chair.concept_id, chair.version, chair.sha256) == chair
+    assert all(preview_bytes(chair, view).startswith(b"\\x89PNG") for view in ("front", "three-quarter"))
 import archimind.datasets as dataset_module
 from archimind.datasets.fixtures import build_synthetic_pack
 assert Path(dataset_module.__file__).resolve().is_relative_to(target)
