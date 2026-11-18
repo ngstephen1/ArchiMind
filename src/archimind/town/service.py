@@ -173,7 +173,8 @@ class Interpretation(BaseModel):
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ]
     palette: Literal["oak", "sage", "terracotta"]
-    lock_rooms: list[Kind] = Field(max_length=5)
+    formal_salon: bool = False
+    lock_rooms: list[Kind] = Field(max_length=6)
     clarification: str = Field(max_length=500)
     unsupported: list[str] = Field(max_length=8)
     closer_study_desk: bool = False
@@ -206,7 +207,7 @@ def interpret(req, previous):
         }
         parsed = provider.request(
             Interpretation,
-            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for palette and priority unless text explicitly requests a different supported option. Supported: single storey, five listed rooms, global palette, quiet bedroom and bright study priorities, moving the existing study desk closer to its window, locks, seed. List unsupported mandatory requests; ask for clarification if ambiguous. For furniture locks, return the IDs (the whole containing room will be preserved). Never silently drop requirements. "
+            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for palette and priority unless text explicitly requests a different supported option. Supported: single storey, five base rooms, optional additional formal salon with a dining group for entertaining, global palette, quiet bedroom and bright study priorities, moving the existing study desk closer to its window, locks, seed. List unsupported mandatory requests; ask for clarification if ambiguous. For furniture locks, return the IDs (the whole containing room will be preserved). Never silently drop requirements. "
             + json.dumps(facts),
             config=cfg,
             deadline=time.monotonic() + 30,
@@ -229,6 +230,7 @@ def interpret(req, previous):
         brief = brief.model_copy(
             update={
                 "priority": parsed.priority,
+                "formal_salon": parsed.formal_salon or brief.formal_salon,
                 "palette": parsed.palette,
                 "locks": sorted(locks),
                 "closer_study_desk": parsed.closer_study_desk

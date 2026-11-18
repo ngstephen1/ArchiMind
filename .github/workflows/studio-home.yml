@@ -6,6 +6,10 @@ on:
     paths:
       - scripts/render_studio_home.py
       - .github/workflows/studio-home.yml
+      - src/archimind/town/design.py
+      - frontend/realistic_viewer/town/bedroom_cameras.js
+      - frontend/realistic_viewer/town/studio_furniture.js
+      - frontend/realistic_viewer/town/home_board.js
 permissions:
   contents: read
 jobs:
@@ -39,6 +43,11 @@ jobs:
       - name: Reopen the editable scene and render every room
         run: |
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/proof" --proof
+      - name: Make the revision-bound client book and print to PDF
+        run: |
+          python scripts/publish_studio_board.py "$RUNNER_TEMP/proof"
+          google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/proof/Studio-House.pdf" "file://$RUNNER_TEMP/proof/index.html"
+          test -s "$RUNNER_TEMP/proof/Studio-House.pdf"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: studio-home-proof

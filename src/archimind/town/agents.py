@@ -95,7 +95,7 @@ def coordinate(req, previous, interpret, emit):
                 lambda: {
                     "width_m": req.brief.width,
                     "depth_m": req.brief.depth,
-                    "program": PROGRAM,
+                    "program": PROGRAM + (["salon"] if req.brief.formal_salon else []),
                     "existing_rooms": len(previous["rooms"]) if previous else 0,
                 },
             ),
@@ -143,6 +143,10 @@ def coordinate(req, previous, interpret, emit):
             )
             and (brief.width, brief.depth) == (previous["width"], previous["depth"])
             and brief.priority == "balanced"
+            and (
+                not brief.formal_salon
+                or any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+            )
         )
         if finish_only:
             home = copy.deepcopy(previous)

@@ -47,6 +47,11 @@ def render(args):
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
     (out / "manifest.json").write_bytes(source)
+    for name in ("BELAYA_ATTRIBUTION.txt", "ABO_LICENSE_CC_BY_4.0.txt"):
+        (out / name).write_bytes((bedroom.ASSETS / "furniture" / name).read_bytes())
+    (out / "surface-sources.json").write_bytes(
+        (bedroom.SURFACES / "bedroom-sources.json").read_bytes()
+    )
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         path = tmp / "manifest.json"
@@ -164,7 +169,7 @@ def render(args):
         if not devices:
             raise RuntimeError("No OptiX device detected")
         scene.cycles.device = "GPU"
-    hero = next((name for room, name in views if name == "salon-doorway"), views[0][1])
+    hero = next((name for room, name in views if room == "salon"), views[0][1])
     scene.camera = bpy.data.objects[hero]
     bpy.ops.file.pack_all()
     bpy.ops.wm.save_as_mainfile(filepath=str(out / "home.blend"), compress=True)

@@ -23,7 +23,7 @@ PROGRAM = ["bedroom", "study", "living", "kitchen-dining", "bathroom"]
 STUDIO_ITEMS = {
     "salon": [
         ("salon-suite", "seating", 2.8, 2.35, 0.94),
-        ("salon-dining", "dining", 2.2, 2.05, 1.0),
+        ("salon-dining", "dining", 2.2, 2.92, 1.0),
     ],
     "living": [("media-console", "storage", 1.6, 0.38, 0.64)],
     "study": [("bookcase", "storage", 0.85, 0.34, 1.75)],
@@ -467,6 +467,13 @@ def generate(brief, previous=None, *, on_progress=None):
                 p for p in rooms if p["design"]["room"]["id"] == "study"
             )["design"]["room"]["windows"][0]["width_m"],
         }
+        if salon:
+            home["evidence"]["salon"] = {
+                "dining_places": 4,
+                "chair_pullout_m": 0.5,
+                "basis": "A reserved dining group includes a 0.50 m withdrawal strip behind each chair row.",
+                "seating": "A three-piece conversation group faces the central coffee table.",
+            }
         home["id"] = digest(home)
         if home not in candidates:
             candidates.append(home)
