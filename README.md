@@ -131,11 +131,11 @@ generated design.
 
 ### 01 · Create the environment
 
-Use **Python 3.11+**. The local environment was configured with **CPython 3.11.13**
+From the directory containing your clone, use **Python 3.11+**. The local environment was configured with **CPython 3.11.13**
 using `/opt/homebrew/bin/python3.11`.
 
 ```bash
-cd /Users/macbook/Hack/ArchiMind
+cd ArchiMind
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
@@ -144,14 +144,33 @@ python -m pip install -e ".[dev]"
 Create `.venv` once. For an existing environment, activate it and reinstall after
 dependency changes. The editable `src/` package imports without setting `PYTHONPATH`.
 
-### 02 · Open the application
+### 02 · Run locally
 
-```bash
-python -m streamlit run app.py
+Run these commands from the repository root. Choose the experience you want, or use separate terminals to run them together. Press **Ctrl-C** in a launcher's terminal to stop it.
+
+| Experience | Launch command | Where to go |
+| --- | --- | --- |
+| Room layouts and offline 3D Studio | `.venv/bin/python -m streamlit run app.py --server.port 8501` | [Main app](http://127.0.0.1:8501) or [3D Studio](http://127.0.0.1:8501/?workspace=studio). In Studio, choose **Load example furnishing plan** and **Build 3D room**. |
+| Live Bedroom Chat | `.venv/bin/python scripts/run_chat.py --port 8502` | [Chat app](http://127.0.0.1:8502). Select **Chat bedroom**, enable live interpretation, submit measurements, choose furniture, then **Prepare → Review → Generate Layouts**. |
+| Live 3D Studio | `.venv/bin/python scripts/run_studio.py --port 8503` | [Studio](http://127.0.0.1:8503/?workspace=studio). Review the proposed furnishing plan before building it. |
+
+The two live launchers read `OPENAI_API_KEY` from the server environment or the ignored root `.env` file. The offline example and the default Town walkthrough work without a key.
+
+**Town, design worker and home editor.** With Node 20+ and the Python environment above, install the Town dependencies once and start all three components with one launcher:
+
+```sh
+npm ci --prefix frontend/realistic_viewer
+.venv/bin/python -m pip install -r services/town/requirements.txt
+.venv/bin/python scripts/run_town.py
 ```
 
-Open the printed Local URL, normally **http://localhost:8501**. Stop with
-`Control-C`.
+On later launches, run only the last command. Open [Town](http://127.0.0.1:8790), select **Design a home**, and try `bright study and sage finishes`. Compare A/B, preview one, then **Apply to my home** to inspect that saved revision in the [editor](http://127.0.0.1:8791). If the launcher reports an occupied port, check the running API with `curl -fsS http://127.0.0.1:8790/health` and the editor with `curl -fsS http://127.0.0.1:8791/_stcore/health`. [Town controls and deployment guide](docs/developer/TOWN.md)
+
+#### Architecture diagram
+
+Follow the brief through Town’s five worker roles or the room workspaces to validation and rendering. The lower panel documents the designer-chair authoring branch at `524f3c9`. Its Blender and portable Rhino CAD work belongs to [PR #21](https://github.com/ngstephen1/ArchiMind/pull/21). Live Rhino MCP verification is pending in this snapshot.
+
+[![ArchiMind design runtime, services, and 3D authoring architecture](docs/images/ArchiMind_Architecture.png)](docs/images/ArchiMind_Architecture.svg)
 
 ### 03 · Verify the foundation
 
