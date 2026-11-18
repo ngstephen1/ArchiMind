@@ -1,6 +1,6 @@
 # Present a saved bedroom
 
-Open **Client presentation** in Town to see the applied revision, dimensioned floor plan, three camera views, material board and furniture schedule. **Print presentation** opens the browser's print dialog, where you can save a PDF. The photos use Doorway, Desk and chair, and Bedside. An obstruction message identifies a detail that uses the doorway framing. The printout includes the project revision and shortened home content ID.
+Open **Design presentation** in Town to see the applied revision, dimensioned floor plan, three camera views, material board and furniture schedule. **Print presentation** opens the browser's print dialog, where you can save a PDF. The photos use Doorway, Desk and chair, and Bedside. An obstruction message identifies a detail that uses the doorway framing. The printout includes the project revision and shortened home content ID.
 
 **Download bedroom manifest** saves the operator input for the current revision. The Blender download appears for a published revision only when the project ID, revision number, full home content ID and SHA-256 of the canonical manifest all match. A newly edited home can immediately show its own browser photos and generate its own manifest. Offline renders can be published separately after inspection.
 

@@ -94,4 +94,4 @@ Generate a home and apply a layout. Open **Design a home → Bedroom designer fu
 
 ## Export a bedroom presentation
 
-From **Client presentation**, print the saved plan, three bedroom views, material board and furniture schedule, or download the revision manifest for Blender. The [bedroom presentation guide](BEDROOM_PRESENTATION.md) includes the seed-42 release and operator command for another saved project.
+From **Design presentation**, print the saved plan, three bedroom views, material board and furniture schedule, or download the revision manifest for Blender. The [bedroom presentation guide](BEDROOM_PRESENTATION.md) includes the seed-42 release and operator command for another saved project.
