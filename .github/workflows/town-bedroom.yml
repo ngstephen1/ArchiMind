@@ -4,6 +4,7 @@ on:
     paths:
       - frontend/realistic_viewer/town/**
       - scripts/check_bedroom_walkthrough.py
+      - tests/town_browser_worker.py
       - .github/workflows/town-bedroom.yml
   workflow_dispatch:
 concurrency:
@@ -28,14 +29,20 @@ jobs:
           python -m pip install -e . -r services/town/requirements.txt playwright==1.56.0
           npm ci --prefix frontend/realistic_viewer --ignore-scripts
           TOWN_MODE=local node frontend/realistic_viewer/town/build.mjs
-      - name: Capture and check seed 42
+      - name: Capture and check seed 42 with offline model responses
         env:
           TOWN_MODE: local
+          ARCHIMIND_ENABLE_OPENAI_STUDIO: "1"
+          ARCHIMIND_ENABLE_CODEX_ADVISOR: "0"
+          OPENAI_API_KEY: offline-browser-fixture
+          TOWN_DAILY_MODEL_CALLS: "3"
+          TOWN_CALL_RESERVE_MICROUSD: "1"
+          TOWN_DAILY_MICROUSD: "3"
           TOWN_STATIC: ${{ github.workspace }}/dist/town
           TOWN_DB: ${{ runner.temp }}/bedroom-check.sqlite3
         run: |
           python -c 'from archimind.town.service import initialize; initialize()'
-          python -m archimind.town.worker & worker=$!
+          python tests/town_browser_worker.py & worker=$!
           python -m uvicorn archimind.town.api:app --port 8790 & api=$!
           trap 'kill "$worker" "$api" 2>/dev/null || true' EXIT
           curl --retry 10 --retry-delay 1 --retry-connrefused -fsS http://127.0.0.1:8790/health
