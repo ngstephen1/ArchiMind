@@ -810,5 +810,17 @@
         "after_sha256": "7b801114599ae58e45034d445de0f6c7333ea7b4091f4993312429da861b123b"
       }
     }
+  },
+  "bedroom_view": {
+    "authorized_migrations": {
+      "frontend/realistic_viewer/src/room_viewer.js": {
+        "before_sha256": "683fc653265396968d918658916cb78e59ed0549fdebaa864c9957caaa33e336",
+        "after_sha256": "27464afbb0107555ad7ddbebe1367a30d6527d2ee6d912805d240bca46e05a25"
+      },
+      "src/archimind/_viewer_assets/viewer.js": {
+        "before_sha256": "7b801114599ae58e45034d445de0f6c7333ea7b4091f4993312429da861b123b",
+        "after_sha256": "5b0435e6de107a68c581d90389f428d89062937df8a8375ff7ab6f6c486139c9"
+      }
+    }
   }
 }

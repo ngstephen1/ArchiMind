@@ -529,6 +529,7 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     studio_receipt = json.loads((ROOT / "docs/data/3D_STUDIO_10A.json").read_text())
     studio = studio_receipt["authorized_migrations"]
     studio_review = studio_receipt["merge_review"]["authorized_migrations"]
+    bedroom_view = studio_receipt["bedroom_view"]["authorized_migrations"]
     for path, expected in pins["baseline_files"].items():
         if path in migrations:
             assert migrations[path]["before_sha256"] == expected
@@ -566,6 +567,9 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
         if path in studio_review:
             assert studio_review[path]["before_sha256"] == expected
             expected = studio_review[path]["after_sha256"]
+        if path in bedroom_view:
+            assert bedroom_view[path]["before_sha256"] == expected
+            expected = bedroom_view[path]["after_sha256"]
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")
