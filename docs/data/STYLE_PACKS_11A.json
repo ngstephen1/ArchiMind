@@ -34,6 +34,10 @@
     "src/archimind/_viewer_assets/viewer.js": {
       "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
       "after_sha256": "e34a11c7093b32dd50e101e3ae76afebd76cdbabee2891c60f140e240d6d9b8a"
+    },
+    "src/archimind/render/floorplan_2d.py": {
+      "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",
+      "after_sha256": "5373acf686af9834f6f8b6b289b512330f39df9653dcc92904aca183f839f960"
     }
   }
 }

@@ -321,7 +321,10 @@ def render_studio():
         f"{label} · Validation: {candidate.validation.status} · Comparison score: {candidate.score.total:g} · {result.attempts_used} search attempts. Rotation is 0°; no building-code or functional suitability certification."
     )
     st.plotly_chart(
-        render_floorplan(candidate.design),
+        render_floorplan(
+            candidate.design,
+            plan_theme=load_pack(built.style).plan_theme if built.style else None,
+        ),
         width="stretch",
         theme=None,
         key="studio_floorplan",

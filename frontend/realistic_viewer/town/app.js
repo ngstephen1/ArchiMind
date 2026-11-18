@@ -2,6 +2,16 @@ import { timeline } from "./agents.js";
 import { explanation } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
+import { planColors } from "./plan_colors.js";
+import modernClassic from "../../../src/archimind/_viewer_assets/packs/modern_classic.json";
+import industrialLoft from "../../../src/archimind/_viewer_assets/packs/industrial_loft.json";
+import scandinavian from "../../../src/archimind/_viewer_assets/packs/scandinavian.json";
+import japandi from "../../../src/archimind/_viewer_assets/packs/japandi.json";
+import midCentury from "../../../src/archimind/_viewer_assets/packs/mid_century.json";
+// Plan themes ship in the bundle so the 2D plan never waits on a fetch.
+const PACK_MANIFESTS = Object.fromEntries(
+  [modernClassic, industrialLoft, scandinavian, japandi, midCentury].map((m) => [m.id, m]),
+);
 import showcase from "./showcase.json";
 const el = (id) => document.getElementById(id);
 const cfg = await fetch("./config.json").then((r) => r.json());
@@ -214,11 +224,12 @@ function draw() {
 }
 function floorPlan(h, c) {
   const ctx = c.getContext("2d");
+  const colors = planColors(h, PACK_MANIFESTS[h.style_pack?.id] || null);
   ctx.clearRect(0, 0, c.width, c.height);
   const s = Math.min(510 / h.width, 350 / h.depth),
     ox = (c.width - h.width * s) / 2,
     oy = c.height - 20;
-  ctx.fillStyle = "#e2d3af";
+  ctx.fillStyle = colors.site;
   ctx.fillRect(ox, oy - s * h.depth, s * h.width, s * h.depth);
   for (const p of h.rooms) {
     const r = p.design.room,
@@ -226,24 +237,24 @@ function floorPlan(h, c) {
       y = oy - s * p.origin[1],
       w = s * r.width_m,
       d = s * r.depth_m;
-    ctx.fillStyle = "#f9f6ec";
+    ctx.fillStyle = colors.room;
     ctx.fillRect(x + 1, y - d + 1, w - 2, d - 2);
-    ctx.strokeStyle = "#46584a";
+    ctx.strokeStyle = colors.wall;
     ctx.strokeRect(x, y - d, w, d);
     for (const f of p.design.furniture) {
-      ctx.fillStyle = "#b5bfac";
-      ctx.fillRect(
-        x + s * f.x_m,
-        y - s * (f.y_m + f.depth_m),
-        s * f.width_m,
-        s * f.depth_m,
-      );
+      ctx.fillStyle = colors.furniture;
+      const rect = [x + s * f.x_m, y - s * (f.y_m + f.depth_m), s * f.width_m, s * f.depth_m];
+      ctx.fillRect(...rect);
+      if (colors.furnitureStroke) {
+        ctx.strokeStyle = colors.furnitureStroke;
+        ctx.strokeRect(...rect);
+      }
     }
     for (const opening of [...r.windows, ...r.doors]) {
       const xx = x + (opening.wall === "east" ? w : 0),
         yy = y - s * opening.offset_m;
       ctx.strokeStyle =
-        opening.sill_height_m === undefined ? "#dfb855" : "#609aab";
+        opening.sill_height_m === undefined ? colors.door : colors.window;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(xx, yy);
@@ -251,7 +262,7 @@ function floorPlan(h, c) {
       ctx.stroke();
       ctx.lineWidth = 1;
     }
-    ctx.fillStyle = "#233e35";
+    ctx.fillStyle = colors.label;
     ctx.font = "14px sans-serif";
     ctx.fillText(r.name, x + 6, y - d + 18);
   }

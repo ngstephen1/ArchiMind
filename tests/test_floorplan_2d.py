@@ -219,3 +219,58 @@ def test_app_displays_the_canonical_sample_and_caption() -> None:
     assert tuple(_trace(figure, "door", id="south-door").x) == pytest.approx(
         (0.6, 1.45)
     )
+
+
+def _plan_json(figure):
+    import json
+
+    return json.loads(figure.to_json())
+
+
+def test_plan_without_theme_is_unchanged():
+    import json
+    from pathlib import Path
+
+    from archimind.examples import create_sample_bedroom
+
+    snapshot = Path(__file__).parent / "fixtures" / "floorplan_legacy_bedroom.json"
+    expected = json.loads(snapshot.read_text(encoding="utf-8"))
+    assert _plan_json(render_floorplan(create_sample_bedroom())) == expected
+    assert (
+        _plan_json(render_floorplan(create_sample_bedroom(), plan_theme=None))
+        == expected
+    )
+
+
+def test_plan_theme_colours_walls_and_furniture():
+    from archimind.examples import create_sample_bedroom
+    from archimind.style_packs import load_pack
+
+    theme = load_pack("mid_century").plan_theme
+    design = create_sample_bedroom()
+    plain = render_floorplan(design)
+    themed = render_floorplan(design, plan_theme=theme)
+    by_kind = lambda fig, kind: [
+        t for t in fig.data if (t.meta or {}).get("kind") == kind
+    ]  # noqa: E731
+    assert {t.line.color for t in by_kind(themed, "wall")} == {theme.wall_fill}
+    assert {t.fillcolor for t in by_kind(themed, "furniture")} == {theme.furniture_fill}
+    assert {t.line.color for t in by_kind(themed, "furniture")} == {
+        theme.furniture_stroke
+    }
+    assert {t.textfont.color for t in by_kind(themed, "furniture_label")} == {
+        theme.label_color
+    }
+    assert {t.line.color for t in by_kind(themed, "door")} == {theme.door_color}
+    assert {t.line.color for t in by_kind(themed, "window")} == {theme.window_color}
+    assert themed.layout.shapes[0].fillcolor == theme.floor_fill
+    # Geometry and labels are untouched.
+    for a, b in zip(plain.data, themed.data):
+        assert (a.x, a.y, a.text, a.meta) == (b.x, b.y, b.text, b.meta)
+    # A plain dict theme works too.
+    assert (
+        render_floorplan(design, plan_theme=theme.model_dump())
+        .layout.shapes[0]
+        .fillcolor
+        == theme.floor_fill
+    )

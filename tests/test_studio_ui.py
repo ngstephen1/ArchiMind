@@ -23,7 +23,9 @@ def test_offline_review_build_and_ab_never_make_provider_calls(monkeypatch):
     handoff = []
     real_floor = studio.render_floorplan
     monkeypatch.setattr(
-        studio, "render_floorplan", lambda d: (handoff.append(d), real_floor(d))[1]
+        studio,
+        "render_floorplan",
+        lambda d, **kw: (handoff.append(d), real_floor(d, **kw))[1],
     )
     # Components are opaque to AppTest; geometry is verified in JS/browser tests.
     scenes = []
@@ -171,6 +173,13 @@ def test_studio_style_select_defaults_to_scandinavian(monkeypatch):
     monkeypatch.setattr(
         studio, "_component", lambda: lambda **kw: scenes.append(kw["data"])
     )
+    themes = []
+    real_floor = studio.render_floorplan
+    monkeypatch.setattr(
+        studio,
+        "render_floorplan",
+        lambda d, **kw: (themes.append(kw.get("plan_theme")), real_floor(d, **kw))[1],
+    )
     app = AppTest.from_string(APP, default_timeout=30).run()
     select = app.selectbox(key="studio_style")
     assert select.value == "scandinavian"
@@ -187,3 +196,6 @@ def test_studio_style_select_defaults_to_scandinavian(monkeypatch):
     assert not app.exception
     assert app.session_state[studio.BUILD].style == "japandi"
     assert scenes[-1]["style"]["style_pack"]["id"] == "japandi"
+    from archimind.style_packs import load_pack
+
+    assert themes[-1] == load_pack("japandi").plan_theme
