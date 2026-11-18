@@ -124,6 +124,15 @@ main {
 footer {
   font-size: 13px;
 }
+#sweepControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+#sweep {
+  width: 110px;
+}
 a {
   color: #34584b;
 }

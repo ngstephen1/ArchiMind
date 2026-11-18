@@ -15,7 +15,7 @@ import {loadStylePack,applyLighting} from './style_pack.js';
 import {splitStyle,createRoomStyle,tiledSurface,disposeTiled} from './room_style.js';
 import {buildDressing} from './dressing.js';
 import {createPlanSweep} from './plan_sweep.js';
-import {dressFurniture} from './pack_furniture.js';
+import {dressFurniture,furnitureFallbackText} from './pack_furniture.js';
 
 import {PRODUCT_ASSETS,boundedProductBytes,verifyDecodedProduct,nativeProductInstance,productSceneBudget,productSceneAdmission} from './product_assets.js';
 
@@ -72,7 +72,7 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
   const root=document.createElement('section');root.dataset.viewer='realistic-room';
   root.innerHTML=`<div class="stage room-stage"><div class="status" role="status">Loading architectural room…</div></div><div class="toolbar"><button class="reset" type="button">Reset camera</button><button class="interior" type="button">Room-level view</button><label><input type="checkbox" class="front" checked> Front walls</label><label><input type="checkbox" class="outlines" checked> Canonical footprints</label><button class="quality" type="button" hidden>Quality: High</button><label class="sweep-control">Plan <input class="sweep" type="range" min="0" max="100" value="100" aria-label="Plan to room view"> Room</label></div><p class="room-info"></p><ul class="objects"></ul><p class="metrics" aria-live="polite"></p>`;
   host.appendChild(root);const stage=root.querySelector('.stage'),status=root.querySelector('.status');
-  let renderer,scene,camera,controls,envTarget,resizeObserver,visibility,frame,disposed=false,visible=true,userCamera=false,composer=null,styleControl=null,sweep=null,baseStatus='';
+  let renderer,scene,camera,controls,envTarget,resizeObserver,visibility,frame,disposed=false,visible=true,userCamera=false,composer=null,styleControl=null,sweep=null,baseStatus='',furnitureStatus='';
   // Pack furniture swaps wait until every procedural/product object exists.
   const furnitureObjects=new Map();let markFurnitureReady;const furnitureReady=new Promise(resolve=>{markFurnitureReady=resolve;});
   const owned=new THREE.Group(),instances=new THREE.Group(),footprints=new THREE.Group(),walls=new THREE.Group();
@@ -84,7 +84,7 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
     sweep?.dispose();sweep=null;styleControl?.dispose();composer?.dispose();instances.clear();owned.traverse(o=>o.shadow?.dispose?.());disposeObject(owned);envTarget?.dispose();releases.forEach(release=>release());
     renderer?.dispose();renderer?.forceContextLoss();root.dataset.cleanup='complete';root.remove();
   };
-  const refreshStatus=()=>{if(disposed||!baseStatus)return;const extra=styleControl?.statusText();status.textContent=extra?`${baseStatus} · ${extra}`:baseStatus;};
+  const refreshStatus=()=>{if(disposed||!baseStatus)return;const extra=[styleControl?.statusText(),furnitureStatus].filter(Boolean).join(' · ');status.textContent=extra?`${baseStatus} · ${extra}`:baseStatus;};
   const fail=()=>{status.textContent='Room viewer unavailable: invalid scene data or WebGL 2 unavailable.';status.dataset.state='error';root.dataset.state='error';};
   try{
     const {scene:sceneInput,style}=splitStyle(input),data=validateScene(sceneInput),room=data.design.room,fs=[...data.design.furniture].sort((a,b)=>a.id.localeCompare(b.id));
@@ -190,9 +190,9 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
         const lights=applyLighting(scene,renderer,pack,packTier,{center,span});
         const decor=buildDressing(owned,style.dressing,pack,packTier);
         let furniture=null,undone=false;
-        furnitureReady.then(()=>{if(!undone&&!disposed)furniture=dressFurniture({bindings:style.bindings,furniture:data.design.furniture,pack,objects:furnitureObjects,parent:owned});});
+        furnitureReady.then(()=>{if(!undone&&!disposed)furniture=dressFurniture({bindings:style.bindings,furniture:data.design.furniture,pack,objects:furnitureObjects,parent:owned});furniture.ready.then(({failed})=>{if(undone||disposed)return;furnitureStatus=furnitureFallbackText(failed,data.design.furniture);if(failed.length)root.dataset.styleState='partial';refreshStatus();});});
         return()=>{
-          undone=true;furniture?.undo();decor.dispose();lights.dispose();hemisphere.visible=sun.visible=true;
+          undone=true;furniture?.undo();furnitureStatus='';decor.dispose();lights.dispose();hemisphere.visible=sun.visible=true;
           scene.environment=legacy.environment;scene.environmentIntensity=legacy.environmentIntensity;renderer.toneMappingExposure=legacy.exposure;
           for(const [mesh,material] of swaps.reverse())mesh.material=material;tiled.forEach(disposeTiled);
         };

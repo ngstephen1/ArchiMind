@@ -53,3 +53,10 @@ export function dressFurniture({ bindings, furniture, pack, objects, parent }) {
     },
   };
 }
+
+/** Status text naming furniture whose pack model failed to load ('' when none). */
+export function furnitureFallbackText(failed, furniture) {
+  if (!failed.length) return '';
+  const names = new Map(furniture.map(f => [f.id, f.name || f.id]));
+  return 'Fallback furniture: ' + failed.map(id => names.get(id) || id).sort().join(', ');
+}

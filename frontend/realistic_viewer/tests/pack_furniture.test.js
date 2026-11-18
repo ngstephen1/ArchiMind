@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import * as T from "three";
-import { placePackModel, dressFurniture } from "../src/pack_furniture.js";
+import { placePackModel, dressFurniture, furnitureFallbackText } from "../src/pack_furniture.js";
 
 const sofa = { id: "sofa", category: "sofa", x_m: 1, y_m: 2, width_m: 2, depth_m: 0.9, height_m: 0.86, rotation_deg: 0 };
 const model = () => {
@@ -53,4 +53,10 @@ test("an undo before models arrive leaves nothing behind", async () => {
   await handle.ready;
   assert.equal(parent.children.length, 0);
   assert.equal(objects.get("sofa")[0].visible, true);
+});
+
+test("the status names furniture whose pack model failed, by its display name", () => {
+  const furniture = [{ id: "sofa", name: "Sofa" }, { id: "t", name: "Coffee table" }];
+  assert.equal(furnitureFallbackText(["t", "sofa"], furniture), "Fallback furniture: Coffee table, Sofa");
+  assert.equal(furnitureFallbackText([], furniture), "");
 });
