@@ -488,6 +488,7 @@ bind("chairApply", async () => {
 });
 
 let boardHome;
+let evidenceManifest;
 let exportUrl, homeUrl;
 
 function showExport(manifest, hash, studio, studioHash) {
@@ -528,10 +529,12 @@ el("present").onclick = async () => {
   const generation = ++boardGeneration;
   el("printBoard").disabled = true;
   boardHome = applied;
+  evidenceManifest = null;
   el("boardExports").replaceChildren();
   if (revision) {
     try {
       const manifest = bedroomManifest({project, revision, home: boardHome});
+      evidenceManifest = manifest;
       const studio = homeBoard({project, revision, home: boardHome});
       Promise.all([manifestDigest(manifest), manifestDigest(studio)]).then(([hash, studioHash]) => {
         if (generation === boardGeneration) showExport(manifest, hash, studio, studioHash);
@@ -632,11 +635,11 @@ async function showRoom(h,id){
     if (generation === photoSerial) el("printBoard").disabled = false;
   }
 };
-el("askWhy").onclick = () =>
-  (el("whyAnswer").textContent = explanation(
-    boardHome,
-    el("whyQuery").value.toLowerCase(),
-  ));
+el("askWhy").onclick = () => {
+  const answer = explanation(boardHome, el("whyQuery").value.toLowerCase(), evidenceManifest);
+  const source = evidenceManifest ? `Project ${evidenceManifest.project} · Revision ${evidenceManifest.revision}` : "Bedroom preview";
+  el("whyAnswer").textContent = `${source} · Bedroom · ${answer}`;
+};
 el("printBoard").onclick = () => window.print();
 
 // Chromium retains modal scroll position during printing. Print a normal-flow
