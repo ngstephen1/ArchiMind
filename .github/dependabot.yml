@@ -1,11 +1,24 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# Please see the documentation for all configuration options:
-# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
-
 version: 2
 updates:
-  - package-ecosystem: "pip"
-    directory: "/" # Location of package manifests
+  # The root project pins the app and test tools. Town's hosted API and worker
+  # also install from services/town/requirements.txt.
+  - package-ecosystem: pip
+    directories:
+      - "/"
+      - "/services/town"
     schedule:
-      interval: "weekly"
+      interval: weekly
+
+  # Three.js and esbuild produce the viewer shipped in the Python package.
+  # Review the lockfile change with the rebuilt viewer and its CI checks.
+  - package-ecosystem: npm
+    directory: "/frontend/realistic_viewer"
+    schedule:
+      interval: weekly
+
+  # CI pins actions by commit SHA. Track new upstream releases so those pins
+  # receive updates through the same review process as application dependencies.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
