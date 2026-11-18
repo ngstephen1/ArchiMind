@@ -37,5 +37,18 @@
     "bytes": 87236,
     "sha256": "ed2d9a91852dcf21d1340ce1958c37f39b33d16189092b05d106ec6b4ac1f64e",
     "derivation": "ffmpeg -i INPUT -vf scale=256:128:flags=area -frames:v 1 OUTPUT.hdr"
+  },
+  {
+    "asset": "rough_linen",
+    "source": "https://polyhaven.com/a/rough_linen",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rough_linen/rough_linen_diff_1k.jpg",
+    "source_bytes": 835801,
+    "source_sha256": "04897d7611d7390ddf5b2c6f7273f448dfc48341fdbd1f4f207fa30b331d7f57",
+    "license": "CC0-1.0",
+    "license_url": "https://polyhaven.com/license",
+    "local": "linen-weave-512.jpg",
+    "bytes": 57311,
+    "sha256": "1a72bc0366e14394ffb109132a4c98c091b9954c2c3b7b9cb89242238939ca61",
+    "derivation": "Pillow grayscale, 1% autocontrast, round(170+0.33*luminance), Lanczos thumbnail within 512x512, JPEG quality=89 optimized. Neutral weave for tinting."
   }
 ]

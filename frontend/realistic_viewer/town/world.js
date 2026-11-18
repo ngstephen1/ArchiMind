@@ -1,5 +1,5 @@
 import * as T from "three";
-import { bedroomSurfaces, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
+import { bedroomSurfaces, finishBedroomConcept, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -544,7 +544,7 @@ export function createTown(canvas, status, action) {
     });
     geometries.forEach((v) => v.dispose());
     materials.forEach((v) => {
-      v.map?.dispose();
+      if (!v.userData.townSharedMaps) v.map?.dispose();
       v.bumpMap?.dispose();
       v.dispose();
     });
@@ -595,7 +595,8 @@ export function createTown(canvas, status, action) {
       if (!binding) return;
       canvas.dataset.collection = "loading";
       selectedLoads.push(fitBedroomChair(
-        loadBedroomConcept(binding, new URL("./assets/", document.baseURI)),
+        Promise.all([loadBedroomConcept(binding, new URL("./assets/", document.baseURI)), surfaces.ready])
+          .then(([model]) => finishBedroomConcept(model, surfaces)),
         fallback, item, -1, () => generation === epoch, clear,
       ));
     }
