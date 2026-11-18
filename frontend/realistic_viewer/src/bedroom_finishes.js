@@ -90,7 +90,7 @@ export function queenBed(f) {
 
 // Attach trim to its wall so the cutaway hides its frames as well as its panels.
 export function addWallFinish(parent, room, wall, panels) {
-  const trim = new THREE.MeshStandardMaterial({color:'#e4d8c7',roughness:.66});
+  const trim = new THREE.MeshStandardMaterial({color:'#e4d8c7',roughness:.66,name:'trim'});
   const horizontal = wall==='north' || wall==='south';
   function board(along, height, length, depth, thickness) {
     if (length<=0 || thickness<=0) return;
