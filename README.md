@@ -48,6 +48,31 @@ To enable local opt-in chat with credentials in the ignored `.env` file:
 .venv/bin/python scripts/run_chat.py --port 8502
 ```
 
+### 3D Studio — procedural room concepts
+
+The separate **3D Studio** workspace builds furnished rectangular bedrooms,
+living rooms and home offices. Set room measurements and openings, propose a
+furnishing plan, review its proposed dimensions, then explicitly build A/B layouts.
+Python places and validates the furniture; bounded primitive recipes supply the
+3D details. These are concept objects, separate from qualified catalog products.
+
+Run the normal app and follow **Open 3D Studio**, or open
+`http://localhost:8501/?workspace=studio`. **Load example furnishing plan → Build
+3D room** works offline and uses fixed, labeled examples. Optional custom AI
+creation uses server-side credentials and explicit action consent:
+
+```sh
+.venv/bin/python scripts/run_studio.py --port 8503
+```
+
+The integration adapts the Apache-2.0 part recorder from
+[Spoken World](https://github.com/ryannli/spoken-world/tree/2c398a545eca4364ff6029940cecc4719c21b862).
+Voice, generated JavaScript execution and its world runtime are excluded.
+An authorized four-request backend smoke created three furniture recipes and two
+validated alternatives; their actual Three.js bounds passed. Complete live-UI
+acceptance and visual quality of model-created furniture remain unverified. See the
+[3D Studio guide](docs/developer/3D_STUDIO.md) for limits and verification.
+
 
 **ArchiMind AI** is an ADS 5984 software project exploring how natural-language
 room requirements can become validated floor plans and interactive 3D interiors.
@@ -1305,10 +1330,11 @@ implemented separately as C01. It is disabled by default
 and is limited to local single-user testing. It returns unvalidated suggestions;
 there is no advisor UI or automatic placement application.
 
-`.env.example` documents optional API settings with interpretation disabled.
-ArchiMind does not load environment files automatically. The optional interpreter
-reads `OPENAI_API_KEY` from the process environment only after authorization gates
-pass. Codex CLI authentication is separate. The Streamlit app uses no API key.
+`.env.example` documents default-off API settings. Normal Streamlit startup does
+not load environment files automatically; the explicit local `run_chat.py` and
+`run_studio.py` launchers can load the ignored `.env`. Authorized adapters read
+`OPENAI_API_KEY` server-side after their gates pass. The default app needs no key,
+and no key is sent to the browser. Codex CLI authentication is separate.
 
 Local virtual environments, secrets, caches, databases, generated renders, and
 temporary outputs are excluded from Git.

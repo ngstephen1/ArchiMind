@@ -1,0 +1,814 @@
+{
+  "schema_version": 1,
+  "feature": "Spoken World procedural 3D Studio integration",
+  "observed_on": "2026-11-17",
+  "branch": "feat/spoken-world-3d-studio",
+  "baseline_commit": "012038c21bea896129fb760e4363b1d5fd08c44e",
+  "status": "IMPLEMENTED_LIVE_BACKEND_VERIFIED_BROWSER_PARTIAL",
+  "upstream": {
+    "repository": "https://github.com/ryannli/spoken-world",
+    "commit": "2c398a545eca4364ff6029940cecc4719c21b862",
+    "license": "Apache-2.0",
+    "adaptation": "Pure makeBuilder part recorder from app/js/core.js, isolated as an ES module. ArchiMind adapter calls only approved primitives; no generated JavaScript execution.",
+    "attribution": [
+      "frontend/realistic_viewer/vendor/spoken-world/LICENSE",
+      "frontend/realistic_viewer/vendor/spoken-world/NOTICE",
+      "src/archimind/_viewer_assets/SPOKEN_WORLD_LICENSE.txt",
+      "src/archimind/_viewer_assets/SPOKEN_WORLD_NOTICE.txt"
+    ],
+    "excluded": [
+      "voice",
+      "speech",
+      "provider host",
+      "world runtime",
+      "workers for model-written code",
+      "fonts/media",
+      "upstream Three.js r128"
+    ]
+  },
+  "scope": {
+    "room_types": [
+      "Bedroom",
+      "Living room",
+      "Home office"
+    ],
+    "workspace": "/?workspace=studio",
+    "source_modes": [
+      "offline_demo",
+      "ai_concept"
+    ],
+    "catalog_or_dataset_mixing": false,
+    "new_dependencies": [],
+    "new_model_downloads": 0,
+    "new_live_api_requests": 4,
+    "limitations": [
+      "Concept geometry, not verified products, physical engineering or CAD/BIM",
+      "Zero outer yaw; rectangular rooms and floor-standing objects only",
+      "Brief placement wishes are not enforced constraints",
+      "No semantic or visual-quality certification for model outputs"
+    ]
+  },
+  "budgets": {
+    "plan_requests_per_action": 1,
+    "recipe_requests_per_build_max": 8,
+    "recipe_request_concurrency_max": 2,
+    "recipe_request_deadline_seconds": 180,
+    "request_timeout_seconds_max": 30,
+    "request_output_tokens_max": 8192,
+    "automatic_retries": 0,
+    "unique_recipes_max": 8,
+    "furniture_instances_max": 12,
+    "parts_per_recipe_max": 64,
+    "finishes_per_recipe_max": 8,
+    "combined_payload_bytes_max": 262144,
+    "render_bounds_float32_allowance_m": 2e-06,
+    "placement_validator_tolerance_changed": false
+  },
+  "contracts": {
+    "new_component_schema": 4,
+    "old_component_versions_preserved": [
+      1,
+      2,
+      3
+    ],
+    "product_bindings": "All null in concept scenes; application-owned studio IDs only",
+    "recipes": "Strict immutable JSON; homogeneous XYZ arrays; finite normalized parts, containment and grounding checked twice",
+    "placement": "Existing seeded max-two/500-attempt generator, then independent zero-tolerance candidate acceptance before recipe requests",
+    "state": "Frozen input/result/recipe snapshot; pending edits and failed actions keep displayed result; normal returned empty result replaces it honestly",
+    "credentials": "Server process only, dedicated feature flag and explicit action consent. No browser/provider keys in payloads or snapshots."
+  },
+  "verification": {
+    "focused_python": {
+      "command": ".venv/bin/python -m pytest -q tests/test_studio.py tests/test_studio_ui.py",
+      "passed": 28,
+      "seconds": 2.82,
+      "provider": "Mocked, network and subprocess calls blocked in provider tests",
+      "scope": "Final provider nullable-content guard included"
+    },
+    "frontend": {
+      "command": "npm test",
+      "passed": 110,
+      "failed": 0,
+      "scope": "Existing 91 plus 19 new concept cases: four primitive meshes, invalid data, six Python room A/B fixtures, budget/identity and owner-camera lifecycle"
+    },
+    "bundle": {
+      "command": "npm run check && npm run build",
+      "status": "passed"
+    },
+    "full_python": {
+      "command": ".venv/bin/python -m pytest -q --basetemp=/tmp/archimind-3d-studio-work/pytest",
+      "passed": 2207,
+      "failed": 0,
+      "seconds": 195.73,
+      "scope": "Integrated tree before final SDK-nullable-reasoning guard and its regression; focused tests after guard and final exact-commit CI recorded separately"
+    },
+    "lint_format_dependencies_health": {
+      "lint": "passed full Ruff",
+      "format": "249 Python files already formatted",
+      "dependencies": "pip check passed",
+      "health": "200 ok; temporary server stopped",
+      "diff_check": "passed after final sources"
+    },
+    "packaging": {
+      "status": "passed",
+      "command": "Existing test_catalog_in_source_wheel_and_isolated_install in full local suite",
+      "method": "One coordinated offline source/wheel build --no-isolation, install --no-deps --no-index --no-compile, isolated interpreter outside checkout, blocked sockets/processes",
+      "limitations": "Local artifacts predate the final nullable-reasoning guard; final CI repeats exact-source build/resource checks",
+      "artifacts": [
+        {
+          "filename": "archimind-0.1.0-py3-none-any.whl",
+          "bytes": 11369226,
+          "sha256": "c2d3a1c64874ae6322d093a7cceb32898c75bd5c4c80e77fbd8aa475c7003790"
+        },
+        {
+          "filename": "archimind-0.1.0.tar.gz",
+          "bytes": 12092958,
+          "sha256": "68434340532b0f68bb3e504e94dfe86911684490397545fcefb51c390af1249f"
+        }
+      ],
+      "wheel_studio_members": [
+        "archimind/_viewer_assets/SPOKEN_WORLD_LICENSE.txt",
+        "archimind/_viewer_assets/SPOKEN_WORLD_NOTICE.txt",
+        "archimind/studio/__init__.py",
+        "archimind/studio/contracts.py",
+        "archimind/studio/fixtures.py",
+        "archimind/studio/provider.py",
+        "archimind/studio/workflow.py",
+        "archimind/ui/studio.py"
+      ],
+      "sdist_attribution_members": [
+        "archimind-0.1.0/docs/developer/3D_STUDIO.md",
+        "archimind-0.1.0/frontend/realistic_viewer/vendor/spoken-world/LICENSE",
+        "archimind-0.1.0/frontend/realistic_viewer/vendor/spoken-world/NOTICE"
+      ],
+      "installed_studio_smoke": "Imported from installed target; built offline room and emitted schema4; legacy installed catalog/chat contracts also passed"
+    },
+    "live_provider": {
+      "request_budget": 4,
+      "authorization": "User approved up to four requests in this turn",
+      "method": "Live backend through the ordinary Studio provider; not ordinary-browser live acceptance",
+      "status": "passed",
+      "plan_items": 3,
+      "snapshot": "52cd84db662f47a053ffff66fe49579f87ad2cea88fbc9cbb8b2650cd2c4c70c",
+      "outcome": "complete",
+      "candidates": 2,
+      "attempts": 9,
+      "recipes": 3,
+      "parts": [
+        20,
+        21,
+        26
+      ],
+      "dimensions": [
+        {
+          "name": "Pale oak platform bed with muted sage upholstered headboard",
+          "wdh_m": [
+            1.6,
+            2.05,
+            0.95
+          ]
+        },
+        {
+          "name": "Compact pale oak writing desk",
+          "wdh_m": [
+            1.2,
+            0.6,
+            0.75
+          ]
+        },
+        {
+          "name": "Low storage cabinet in pale oak with muted sage front",
+          "wdh_m": [
+            0.95,
+            0.38,
+            0.72
+          ]
+        }
+      ],
+      "requests": [
+        {
+          "number": 1,
+          "schema": "FurnishingPlan",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "status": "completed",
+          "usage": {
+            "input_tokens": 617,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_12h_tokens": 0,
+                "ttl_30m_tokens": 0
+              }
+            },
+            "output_tokens": 329,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 946
+          },
+          "seconds": 4.919
+        },
+        {
+          "number": 2,
+          "schema": "Recipe",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "status": "completed",
+          "usage": {
+            "input_tokens": 678,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_12h_tokens": 0,
+                "ttl_30m_tokens": 0
+              }
+            },
+            "output_tokens": 986,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1664
+          },
+          "seconds": 6.176
+        },
+        {
+          "number": 3,
+          "schema": "Recipe",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "status": "completed",
+          "usage": {
+            "input_tokens": 669,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_12h_tokens": 0,
+                "ttl_30m_tokens": 0
+              }
+            },
+            "output_tokens": 1039,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 1708
+          },
+          "seconds": 6.213
+        },
+        {
+          "number": 4,
+          "schema": "Recipe",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "status": "completed",
+          "usage": {
+            "input_tokens": 690,
+            "input_tokens_details": {
+              "cache_write_tokens": 0,
+              "cached_tokens": 0,
+              "cache_write_tokens_details": {
+                "ttl_12h_tokens": 0,
+                "ttl_30m_tokens": 0
+              }
+            },
+            "output_tokens": 1331,
+            "output_tokens_details": {
+              "reasoning_tokens": 0
+            },
+            "total_tokens": 2021
+          },
+          "seconds": 6.925
+        }
+      ],
+      "budget_exhausted": true
+    },
+    "browser": {
+      "status": "PARTIAL_ORDINARY_APP_OFFLINE",
+      "entrypoint": "app.py, 127.0.0.1:8774/?workspace=studio, live flag 0",
+      "method": "Native Chrome through CUA; browser access host unavailable",
+      "observed": [
+        "Explicit offline plan review and Build",
+        "Two validated seed-42 alternatives, nine search attempts",
+        "Three visible detailed concept objects: bed, desk, storage",
+        "Native renderer reports scale-preserving concept data, zero placeholders and zero GLB loads",
+        "Found dark-theme contrast issues, then applied Studio-only control-panel background and Plotly theme=None. Updated loaded status and canvas accessibility label observed; full post-fix viewport matrix remains pending."
+      ],
+      "limitations": [
+        "Native viewport dimensions were not measured; no 1440x1000 or 390x844 claim",
+        "A/B, pending edit, failure and camera contracts covered by AppTest/deterministic frontend, not complete ordinary-browser replay",
+        "User switched Chrome to unrelated work; stopped UI actions and did not interfere",
+        "No clean-console, GPU-memory, physical-device or live-provider visual-quality claim"
+      ]
+    },
+    "development_failures": [
+      "Initial backend invalid-room path leaked raw schema exception; prevalidated into sanitized StudioError before provider access",
+      "Replaced positional tuple prefixItems with homogeneous exact-length provider arrays after schema review",
+      "Native Chrome rerun notification became detached before a click; refreshed AX state; no forced input or app defect attributed",
+      "SDK permits reasoning items with content null; added a defensive nullable-content guard and focused regression after the full local suite. Four successful live responses were already accepted; no extra live calls or automatic retry."
+    ],
+    "live_geometry": {
+      "method": "Actual Three.js schema4 validation and geometry construction on both live payloads; no browser/GPU claim",
+      "results": [
+        {
+          "layout": "A",
+          "objects": [
+            {
+              "id": "studio:1:1",
+              "meshes": 7,
+              "triangles": 240,
+              "min": [
+                3.575999987125397,
+                -2.8610229740877458e-09,
+                -3.608000018596649
+              ],
+              "max": [
+                4.92000002861023,
+                0.3894999921321869,
+                -1.7219999814033509
+              ]
+            },
+            {
+              "id": "studio:2:1",
+              "meshes": 7,
+              "triangles": 252,
+              "min": [
+                0.048000013828277566,
+                -1.7881393032936899e-09,
+                -3.9879999876022336
+              ],
+              "max": [
+                1.1519999861717225,
+                0.6675000190734863,
+                -3.4420000135898587
+              ]
+            },
+            {
+              "id": "studio:3:1",
+              "meshes": 4,
+              "triangles": 312,
+              "min": [
+                0.02375001311302183,
+                -6.723404055719584e-09,
+                -1.8091000014543532
+              ],
+              "max": [
+                0.9262499868869781,
+                0.5220000147819519,
+                -1.4708999985456466
+              ]
+            }
+          ],
+          "triangles": 804,
+          "scale": 1
+        },
+        {
+          "layout": "B",
+          "objects": [
+            {
+              "id": "studio:1:1",
+              "meshes": 7,
+              "triangles": 240,
+              "min": [
+                2.1359999871253965,
+                -2.8610229740877458e-09,
+                -1.968000018596649
+              ],
+              "max": [
+                3.4800000286102293,
+                0.3894999921321869,
+                -0.08199998140335074
+              ]
+            },
+            {
+              "id": "studio:2:1",
+              "meshes": 7,
+              "triangles": 252,
+              "min": [
+                0.048000013828277566,
+                -1.7881393032936899e-09,
+                -3.9879999876022336
+              ],
+              "max": [
+                1.1519999861717225,
+                0.6675000190734863,
+                -3.4420000135898587
+              ]
+            },
+            {
+              "id": "studio:3:1",
+              "meshes": 4,
+              "triangles": 312,
+              "min": [
+                4.013750013113022,
+                -6.723404055719584e-09,
+                -3.9791000014543534
+              ],
+              "max": [
+                4.916249986886978,
+                0.5220000147819519,
+                -3.6408999985456467
+              ]
+            }
+          ],
+          "triangles": 804,
+          "scale": 1
+        }
+      ],
+      "scene_payload_sha256": "9e7c0140b32a496d7f82ee00ee996ca5b72ce3f132becc18db25fbefb6d03535"
+    },
+    "final_focused": {
+      "command": ".venv/bin/python -m pytest -q tests/test_furniture_source_expansion.py tests/test_catalog_admission.py tests/test_studio.py tests/test_studio_ui.py",
+      "passed": 88,
+      "seconds": 5.25
+    }
+  },
+  "preservation": {
+    "historical_receipts_edited": false,
+    "catalog_product_releases_and_model_bytes_changed": false,
+    "dataset_modules_changed": false,
+    "protected_untracked_directories": [
+      ".agents/",
+      ".claude/"
+    ],
+    "hash_method": "SHA-256 of bytes; append a new migration after existing design-agent/09A migration chain without replacing historical pins",
+    "baseline_ledger_external": "/tmp/archimind-3d-studio-work/baseline.json"
+  },
+  "delivery": {
+    "main_merged": false,
+    "note": "Feature branch only; exact commit/CI link supplied with delivery"
+  },
+  "authorized_migrations": {
+    ".env.example": {
+      "before_sha256": "ca817007bceac3aa1cd78096ba8e2f9786f8cd2236254cbf7316514816a4e34d",
+      "after_sha256": "9793c483a61db0a877e306a80c4ee7c2f184e7475af4455cb58c0ba369b7cf19"
+    },
+    "MANIFEST.in": {
+      "before_sha256": "b43b5ecd6d303f13a6a14b4f52e148b68b1944518aeaafdca045e203e05c10ec",
+      "after_sha256": "4ed2672bc0ff5d32ffc9f79c3c5060a1d932f568c0e522d2390ca8ced208393a"
+    },
+    "README.md": {
+      "before_sha256": "2c06c16f299bfc7c103f9ba47f6ab5cf3e7e6666eb0b82eed6597373fc31d40e",
+      "after_sha256": "8671d3a3ddaba262206a533b2a2019aa072f666d5b5621c57383f6499c9119a5"
+    },
+    "app.py": {
+      "before_sha256": "f7de9c7a9a11c97cf6f0ed9aecf00d2b6fbfadb3f62a1db7bdfc85caf0a90371",
+      "after_sha256": "0598cb97463e053e59885c72c57cdba3c1731fd02f388007e3216ca879a78ea9"
+    },
+    "docs/developer/STATUS.md": {
+      "before_sha256": "8d7c97a82ea2f595f1cf71c7303e6daf94e2696a9f0382888ab0a837f6cf0d95",
+      "after_sha256": "bf150afdd07a494257904e5f4d8cb8280314c7a5940ca07682584d099301a378"
+    },
+    "frontend/realistic_viewer/build.mjs": {
+      "before_sha256": "5a4e87adb0a8814553167f049e74be7f0f68f281a2f991838558a0a90dc73455",
+      "after_sha256": "ea637777f5192794716b3041f6c2be95cd5c1e1f5dcadf3c9059c7d0fd12d9c1"
+    },
+    "frontend/realistic_viewer/package.json": {
+      "before_sha256": "b7c522d4da88bb53c3ca64a42bf735e362a6af89b51d53d8e47bc15b34f9fe29",
+      "after_sha256": "0b804fc388824caca68d78039535a58a2fa98c3d640100b1132e320bf6dcf252"
+    },
+    "frontend/realistic_viewer/src/main.js": {
+      "before_sha256": "a8a9e78f653198cf41e1323528e974fa9d534b89abdaefa7a00b3d83057c1c53",
+      "after_sha256": "f9bc3b2ab346799b3ca4f8671fe039bca5c25701202814335090691be0f2d4bf"
+    },
+    "frontend/realistic_viewer/src/room_geometry.js": {
+      "before_sha256": "f1d7a82c8c1759f6a30abf380ddbe161eb1871e07b0be6e2a49efd13ff718a9e",
+      "after_sha256": "261482a022c7357b6538e6d626fd0187f60d49af76bd06403ba3571eebbf2988"
+    },
+    "frontend/realistic_viewer/src/room_viewer.js": {
+      "before_sha256": "65a28345562616471ffb8f58a73bf3a1ca8266436c33d8975a038e548317ca1a",
+      "after_sha256": "683fc653265396968d918658916cb78e59ed0549fdebaa864c9957caaa33e336"
+    },
+    "frontend/realistic_viewer/src/scene_lifecycle.js": {
+      "before_sha256": "066f6ab41384b56d69151f0ea86351994375b5829027435e1ee451798dc00af5",
+      "after_sha256": "dd81ebf9623d405c5c1bee93b928eabb1cb0cfb9a5481cbf6275a925a5b55e1e"
+    },
+    "frontend/realistic_viewer/src/viewer.css": {
+      "before_sha256": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
+      "after_sha256": "ce8a7bc471c26907d8a14916b4db8f4c25018537a08932190163c6fc532bb9d6"
+    },
+    "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
+      "before_sha256": "274b12859cec8f4023ef0fffb742a2cf7c169137c81aa1c050ced36a071d4a1f",
+      "after_sha256": "bb004b63f18f0961566d5b11bfbbd487309763cbbd3beb09baab832783a59e8c"
+    },
+    "src/archimind/_viewer_assets/viewer.css": {
+      "before_sha256": "1f43b2b2492ee88aaa39f26b647a6da25a430fc56df5881e99e1114735291b2f",
+      "after_sha256": "ce8a7bc471c26907d8a14916b4db8f4c25018537a08932190163c6fc532bb9d6"
+    },
+    "src/archimind/_viewer_assets/viewer.js": {
+      "before_sha256": "955aa651b06abbdfaa28dc78f6563119cfcd881a00e846c2c9b9ac28e688d66e",
+      "after_sha256": "935492e49615ec430999e0989e8a1583ba08b5fcbe737e749d691b1f07964325"
+    },
+    "src/archimind/_viewer_assets/viewer.js.LEGAL.txt": {
+      "before_sha256": "cc7cc7e2f53d5db0235ab2226e85fc6e91655161573b39813b41bb00e5919674",
+      "after_sha256": "03a9501ac101fdababacff1181a61bf1001c51ed9b1653ffb00fc1746167dfc1"
+    },
+    "tests/test_asset_catalog_packaging.py": {
+      "before_sha256": "124a66cd4fdc5b3af4a7a979a0d6d1e5616e89ecf238214543c1ad356e0bb1d3",
+      "after_sha256": "08221d4acc8dc35a7d824aa35c62f8a4ac99ab9374c1006a80756a7fb96c6cc3"
+    },
+    "tests/test_catalog_admission.py": {
+      "before_sha256": "fe2c57aec99e737c6951f78c1203cd5dd003c33359fdc4dda3b5420ee9abe832",
+      "after_sha256": "8ca77e72dbf18f3324bcba0b6bdb8502b52ed403a2a2d68b3036ab3610de263d"
+    },
+    "tests/test_furniture_source_expansion.py": {
+      "before_sha256": "baf4b0f30d4c0e9fd0d60ffb29945cb0f5a058f8d56ec43a27bcd416852ee26f",
+      "after_sha256": "79486db6a2c722e40c060aac45fed06b9cb687e8d27c469c08e7be72c8a46337"
+    }
+  },
+  "artifact_hashes": {
+    "frontend/realistic_viewer/src/spoken_world/parts.js": "d3dd173e8331dcff5261e6e7ff3273c1dd1891f40f67995e7234d76ec3d9195e",
+    "frontend/realistic_viewer/tests/fixtures/studio-rooms.json": "10260dfa2f155bf26028135f7660bd5afb78beadebd681e3f2a652cec36afa71",
+    "src/archimind/_viewer_assets/viewer.js": "935492e49615ec430999e0989e8a1583ba08b5fcbe737e749d691b1f07964325",
+    "src/archimind/_viewer_assets/viewer.css": "ce8a7bc471c26907d8a14916b4db8f4c25018537a08932190163c6fc532bb9d6",
+    "src/archimind/_viewer_assets/SPOKEN_WORLD_LICENSE.txt": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "src/archimind/_viewer_assets/SPOKEN_WORLD_NOTICE.txt": "57cc0b9e95e1947deb3d56bfffe698ec1626c3d57aa3c49a179ab265cad07d8d"
+  },
+  "storage": {
+    "first_observer_stop": {
+      "unix_time": 1794950450.113536,
+      "available_bytes": 2089103360,
+      "loss_bytes": 76886016,
+      "stop": true
+    },
+    "response": "Paused builds/tests below 2 GiB. Deliberate authorized recovery removed regenerable uv cache only; fresh observer after cleanup, no environments/project evidence removed.",
+    "cleanup_commands": [
+      "uv cache prune --offline --cache-dir /Users/macbook/.cache/uv",
+      "uv cache clean --offline --cache-dir /Users/macbook/.cache/uv"
+    ],
+    "cache_clean_report": "2.4 GiB reclaimed; prune separately reported 97 MiB. OS capacity also fluctuates independently.",
+    "post_clean_samples": [
+      {
+        "unix_time": 1794950648.755816,
+        "available_bytes": 3679621120,
+        "loss_bytes": null,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950678.759486,
+        "available_bytes": 3633975296,
+        "loss_bytes": 45645824,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950708.7644749,
+        "available_bytes": 3629391872,
+        "loss_bytes": 4583424,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950738.766769,
+        "available_bytes": 3533557760,
+        "loss_bytes": 95834112,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950768.7726731,
+        "available_bytes": 5786550272,
+        "loss_bytes": -2252992512,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950798.779026,
+        "available_bytes": 5770616832,
+        "loss_bytes": 15933440,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950828.785598,
+        "available_bytes": 5562716160,
+        "loss_bytes": 207900672,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950858.8037,
+        "available_bytes": 5363806208,
+        "loss_bytes": 198909952,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950888.8285089,
+        "available_bytes": 5563305984,
+        "loss_bytes": -199499776,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950918.84697,
+        "available_bytes": 5389279232,
+        "loss_bytes": 174026752,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950948.860919,
+        "available_bytes": 5165281280,
+        "loss_bytes": 223997952,
+        "stop": false
+      },
+      {
+        "unix_time": 1794950978.877753,
+        "available_bytes": 5445279744,
+        "loss_bytes": -279998464,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951008.889697,
+        "available_bytes": 5636562944,
+        "loss_bytes": -191283200,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951038.892812,
+        "available_bytes": 5647556608,
+        "loss_bytes": -10993664,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951068.901131,
+        "available_bytes": 5721726976,
+        "loss_bytes": -74170368,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951098.9064388,
+        "available_bytes": 4637925376,
+        "loss_bytes": 1083801600,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951128.911063,
+        "available_bytes": 4740984832,
+        "loss_bytes": -103059456,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951158.9131289,
+        "available_bytes": 4736126976,
+        "loss_bytes": 4857856,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951188.91802,
+        "available_bytes": 4732850176,
+        "loss_bytes": 3276800,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951218.92379,
+        "available_bytes": 4721721344,
+        "loss_bytes": 11128832,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951248.924564,
+        "available_bytes": 4770013184,
+        "loss_bytes": -48291840,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951278.929025,
+        "available_bytes": 4736057344,
+        "loss_bytes": 33955840,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951308.9334788,
+        "available_bytes": 4295102464,
+        "loss_bytes": 440954880,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951338.942595,
+        "available_bytes": 3273830400,
+        "loss_bytes": 1021272064,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951368.968829,
+        "available_bytes": 3090857984,
+        "loss_bytes": 182972416,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951398.976929,
+        "available_bytes": 3070062592,
+        "loss_bytes": 20795392,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951428.981678,
+        "available_bytes": 4117839872,
+        "loss_bytes": -1047777280,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951458.987299,
+        "available_bytes": 4136349696,
+        "loss_bytes": -18509824,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951489.000213,
+        "available_bytes": 4124876800,
+        "loss_bytes": 11472896,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951519.0101461,
+        "available_bytes": 4120092672,
+        "loss_bytes": 4784128,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951549.014192,
+        "available_bytes": 4094402560,
+        "loss_bytes": 25690112,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951579.024777,
+        "available_bytes": 3867734016,
+        "loss_bytes": 226668544,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951609.077079,
+        "available_bytes": 5146009600,
+        "loss_bytes": -1278275584,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951639.0603871,
+        "available_bytes": 5444562944,
+        "loss_bytes": -298553344,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951669.045856,
+        "available_bytes": 7074779136,
+        "loss_bytes": -1630216192,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951699.0475771,
+        "available_bytes": 7174090752,
+        "loss_bytes": -99311616,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951729.053459,
+        "available_bytes": 7159169024,
+        "loss_bytes": 14921728,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951759.060547,
+        "available_bytes": 7178584064,
+        "loss_bytes": -19415040,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951789.06692,
+        "available_bytes": 7174553600,
+        "loss_bytes": 4030464,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951819.072039,
+        "available_bytes": 7173836800,
+        "loss_bytes": 716800,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951849.0760598,
+        "available_bytes": 7170936832,
+        "loss_bytes": 2899968,
+        "stop": false
+      },
+      {
+        "unix_time": 1794951879.0807512,
+        "available_bytes": 7168004096,
+        "loss_bytes": 2932736,
+        "stop": false
+      }
+    ],
+    "post_clean_stop": false,
+    "sampling_limit": "Finite approximately 30-second periodic observer; capacity floor 2 GiB; fluctuations reported, not continuous stability proof.",
+    "observer_exited": true,
+    "task_owned_browser_test_server_stopped": true,
+    "final_reading": {
+      "unix_time": 1794951922.1761699,
+      "available_bytes": 7171317760
+    },
+    "minimum_post_clean_bytes": 3070062592,
+    "maximum_post_clean_bytes": 7178584064,
+    "sample_count": 42,
+    "limit": "Observed finite samples only; no causal attribution or guarantee of future free capacity"
+  },
+  "merge_review": {
+    "base_commit": "ea50d19f03bc50e5fd637c67205908cdd411895d",
+    "authorized_migrations": {
+      "src/archimind/_viewer_assets/viewer.js": {
+        "before_sha256": "935492e49615ec430999e0989e8a1583ba08b5fcbe737e749d691b1f07964325",
+        "after_sha256": "7b801114599ae58e45034d445de0f6c7333ea7b4091f4993312429da861b123b"
+      }
+    }
+  }
+}

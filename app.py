@@ -12,6 +12,12 @@ def main() -> None:
     """Preserve the sample preview and add button-driven layout alternatives."""
     st.set_page_config(page_title="ArchiMind AI", layout="centered")
 
+    if st.query_params.get("workspace") == "studio":
+        from archimind.ui.studio import render_studio
+
+        render_studio()
+        return
+
     st.title("ArchiMind AI")
     st.subheader("AI Interior Design & 3D Spatial Planning")
     st.write(
@@ -23,6 +29,7 @@ def main() -> None:
     phase, status = st.columns(2)
     phase.metric("Current development phase", "Task 09A")
     status.metric("Application status", "Running")
+    st.link_button("Open 3D Studio", "?workspace=studio")
 
     st.divider()
     st.subheader("Planned capabilities")

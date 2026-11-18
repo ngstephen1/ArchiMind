@@ -1,3 +1,11 @@
+/*! SPDX-License-Identifier: Apache-2.0
+ * Adapted from Spoken World, Copyright 2026 ryannli.
+ * Source: app/js/core.js at 2c398a545eca4364ff6029940cecc4719c21b862.
+ * Modified: isolated the pure part recorder and exported it as an ES module.
+ * No world runtime, model-written code execution, browser storage or provider code.
+ * See vendor/spoken-world/LICENSE and NOTICE.
+ */
+
 Bundled license information:
 
 three/build/three.core.js:

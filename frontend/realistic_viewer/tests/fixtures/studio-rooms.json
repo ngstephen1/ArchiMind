@@ -1,0 +1,2744 @@
+[
+  {
+    "kind": "Bedroom",
+    "label": "A",
+    "snapshot": "aac5644f51a688fbb8c4d26d896fdf37ec9f6cd851ceafed19d949769cdf9b9d",
+    "payload": {
+      "schema_version": 4,
+      "design": {
+        "room": {
+          "id": "bedroom",
+          "name": "Bedroom",
+          "width_m": 5.0,
+          "depth_m": 4.0,
+          "ceiling_height_m": 2.7,
+          "doors": [
+            {
+              "id": "south-door",
+              "wall": "south",
+              "offset_m": 0.6,
+              "width_m": 0.85,
+              "height_m": 2.1
+            }
+          ],
+          "windows": [
+            {
+              "id": "north-window",
+              "wall": "north",
+              "offset_m": 2.7,
+              "width_m": 1.5,
+              "height_m": 1.2,
+              "sill_height_m": 0.9
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "studio:1:1",
+            "name": "Queen bed",
+            "category": "bed",
+            "x_m": 3.4,
+            "y_m": 1.69,
+            "width_m": 1.6,
+            "depth_m": 2.0,
+            "height_m": 0.8,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:2:1",
+            "name": "Writing desk",
+            "category": "desk",
+            "x_m": 0.0,
+            "y_m": 3.3,
+            "width_m": 1.4,
+            "depth_m": 0.7,
+            "height_m": 0.75,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:3:1",
+            "name": "Wardrobe",
+            "category": "storage",
+            "x_m": 0.0,
+            "y_m": 1.4,
+            "width_m": 1.0,
+            "depth_m": 0.5,
+            "height_m": 1.8,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "asset_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "asset_id": null
+        }
+      ],
+      "unavailable_assets": [],
+      "concept_assets": [
+        {
+          "recipe_id": "concept-1",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.25,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.125,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.96,
+                0.35,
+                0.88
+              ],
+              "center": [
+                0.5,
+                0.425,
+                0.55
+              ],
+              "color": "#eee8da",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                1.0,
+                0.08
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.04
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.35,
+                0.1,
+                0.2
+              ],
+              "center": [
+                0.27,
+                0.65,
+                0.2
+              ],
+              "color": "#f6f1e8",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.35,
+                0.1,
+                0.2
+              ],
+              "center": [
+                0.73,
+                0.65,
+                0.2
+              ],
+              "color": "#f6f1e8",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.95,
+                0.05,
+                0.55
+              ],
+              "center": [
+                0.5,
+                0.625,
+                0.7
+              ],
+              "color": "#66858a",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-2",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.1,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.95,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.5,
+                0.15,
+                0.75
+              ],
+              "center": [
+                0.5,
+                0.825,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-3",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.025,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.975,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                1.0,
+                0.04
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.02
+              ],
+              "color": "#80684f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.025,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.25,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.75,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.975,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.18,
+                0.355,
+                0.45
+              ],
+              "color": "#456b74",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.3,
+                0.355,
+                0.45
+              ],
+              "color": "#ab5b45",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.42,
+                0.355,
+                0.45
+              ],
+              "color": "#d3b37a",
+              "roughness": 0.75
+            }
+          ]
+        }
+      ],
+      "concept_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "recipe_id": "concept-1"
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "recipe_id": "concept-2"
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "recipe_id": "concept-3"
+        }
+      ],
+      "surfaces": {
+        "wall_color": "#e8e1d5",
+        "floor_color": "#bfaa88"
+      }
+    }
+  },
+  {
+    "kind": "Bedroom",
+    "label": "B",
+    "snapshot": "aac5644f51a688fbb8c4d26d896fdf37ec9f6cd851ceafed19d949769cdf9b9d",
+    "payload": {
+      "schema_version": 4,
+      "design": {
+        "room": {
+          "id": "bedroom",
+          "name": "Bedroom",
+          "width_m": 5.0,
+          "depth_m": 4.0,
+          "ceiling_height_m": 2.7,
+          "doors": [
+            {
+              "id": "south-door",
+              "wall": "south",
+              "offset_m": 0.6,
+              "width_m": 0.85,
+              "height_m": 2.1
+            }
+          ],
+          "windows": [
+            {
+              "id": "north-window",
+              "wall": "north",
+              "offset_m": 2.7,
+              "width_m": 1.5,
+              "height_m": 1.2,
+              "sill_height_m": 0.9
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "studio:1:1",
+            "name": "Queen bed",
+            "category": "bed",
+            "x_m": 1.96,
+            "y_m": 0.0,
+            "width_m": 1.6,
+            "depth_m": 2.0,
+            "height_m": 0.8,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:2:1",
+            "name": "Writing desk",
+            "category": "desk",
+            "x_m": 0.0,
+            "y_m": 3.3,
+            "width_m": 1.4,
+            "depth_m": 0.7,
+            "height_m": 0.75,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:3:1",
+            "name": "Wardrobe",
+            "category": "storage",
+            "x_m": 3.94,
+            "y_m": 3.5,
+            "width_m": 1.0,
+            "depth_m": 0.5,
+            "height_m": 1.8,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "asset_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "asset_id": null
+        }
+      ],
+      "unavailable_assets": [],
+      "concept_assets": [
+        {
+          "recipe_id": "concept-1",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.25,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.125,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.96,
+                0.35,
+                0.88
+              ],
+              "center": [
+                0.5,
+                0.425,
+                0.55
+              ],
+              "color": "#eee8da",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                1.0,
+                0.08
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.04
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.35,
+                0.1,
+                0.2
+              ],
+              "center": [
+                0.27,
+                0.65,
+                0.2
+              ],
+              "color": "#f6f1e8",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.35,
+                0.1,
+                0.2
+              ],
+              "center": [
+                0.73,
+                0.65,
+                0.2
+              ],
+              "color": "#f6f1e8",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.95,
+                0.05,
+                0.55
+              ],
+              "center": [
+                0.5,
+                0.625,
+                0.7
+              ],
+              "color": "#66858a",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-2",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.1,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.95,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.5,
+                0.15,
+                0.75
+              ],
+              "center": [
+                0.5,
+                0.825,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-3",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.025,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.975,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                1.0,
+                0.04
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.02
+              ],
+              "color": "#80684f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.025,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.25,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.75,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.975,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.18,
+                0.355,
+                0.45
+              ],
+              "color": "#456b74",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.3,
+                0.355,
+                0.45
+              ],
+              "color": "#ab5b45",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.42,
+                0.355,
+                0.45
+              ],
+              "color": "#d3b37a",
+              "roughness": 0.75
+            }
+          ]
+        }
+      ],
+      "concept_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "recipe_id": "concept-1"
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "recipe_id": "concept-2"
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "recipe_id": "concept-3"
+        }
+      ],
+      "surfaces": {
+        "wall_color": "#e8e1d5",
+        "floor_color": "#bfaa88"
+      }
+    }
+  },
+  {
+    "kind": "Living room",
+    "label": "A",
+    "snapshot": "01d33b4a0feff3a00ee3e51e72010dfdbadd9db7b0b7f80544907c699a4f0ec9",
+    "payload": {
+      "schema_version": 4,
+      "design": {
+        "room": {
+          "id": "bedroom",
+          "name": "Bedroom",
+          "width_m": 5.0,
+          "depth_m": 4.0,
+          "ceiling_height_m": 2.7,
+          "doors": [
+            {
+              "id": "south-door",
+              "wall": "south",
+              "offset_m": 0.6,
+              "width_m": 0.85,
+              "height_m": 2.1
+            }
+          ],
+          "windows": [
+            {
+              "id": "north-window",
+              "wall": "north",
+              "offset_m": 2.7,
+              "width_m": 1.5,
+              "height_m": 1.2,
+              "sill_height_m": 0.9
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "studio:1:1",
+            "name": "Sofa",
+            "category": "sofa",
+            "x_m": 0.0,
+            "y_m": 3.05,
+            "width_m": 2.2,
+            "depth_m": 0.95,
+            "height_m": 0.9,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:2:1",
+            "name": "Coffee table",
+            "category": "table",
+            "x_m": 3.94,
+            "y_m": 3.4,
+            "width_m": 1.0,
+            "depth_m": 0.6,
+            "height_m": 0.45,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:3:1",
+            "name": "Reading chair",
+            "category": "chair",
+            "x_m": 0.0,
+            "y_m": 0.92,
+            "width_m": 0.7,
+            "depth_m": 0.7,
+            "height_m": 0.8,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "asset_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "asset_id": null
+        }
+      ],
+      "unavailable_assets": [],
+      "concept_assets": [
+        {
+          "recipe_id": "concept-1",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.15,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.475,
+                0.5
+              ],
+              "color": "#69878d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.45,
+                0.15
+              ],
+              "center": [
+                0.5,
+                0.775,
+                0.075
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.12,
+                0.2,
+                0.95
+              ],
+              "center": [
+                0.06,
+                0.65,
+                0.5
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.12,
+                0.2,
+                0.95
+              ],
+              "center": [
+                0.94,
+                0.65,
+                0.5
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.38,
+                0.06,
+                0.7
+              ],
+              "center": [
+                0.28,
+                0.58,
+                0.55
+              ],
+              "color": "#88a2a5",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.38,
+                0.06,
+                0.7
+              ],
+              "center": [
+                0.72,
+                0.58,
+                0.55
+              ],
+              "color": "#88a2a5",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-2",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.1,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.95,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-3",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.15,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.475,
+                0.5
+              ],
+              "color": "#69878d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.45,
+                0.15
+              ],
+              "center": [
+                0.5,
+                0.775,
+                0.075
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            }
+          ]
+        }
+      ],
+      "concept_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "recipe_id": "concept-1"
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "recipe_id": "concept-2"
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "recipe_id": "concept-3"
+        }
+      ],
+      "surfaces": {
+        "wall_color": "#e8e1d5",
+        "floor_color": "#bfaa88"
+      }
+    }
+  },
+  {
+    "kind": "Living room",
+    "label": "B",
+    "snapshot": "01d33b4a0feff3a00ee3e51e72010dfdbadd9db7b0b7f80544907c699a4f0ec9",
+    "payload": {
+      "schema_version": 4,
+      "design": {
+        "room": {
+          "id": "bedroom",
+          "name": "Bedroom",
+          "width_m": 5.0,
+          "depth_m": 4.0,
+          "ceiling_height_m": 2.7,
+          "doors": [
+            {
+              "id": "south-door",
+              "wall": "south",
+              "offset_m": 0.6,
+              "width_m": 0.85,
+              "height_m": 2.1
+            }
+          ],
+          "windows": [
+            {
+              "id": "north-window",
+              "wall": "north",
+              "offset_m": 2.7,
+              "width_m": 1.5,
+              "height_m": 1.2,
+              "sill_height_m": 0.9
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "studio:1:1",
+            "name": "Sofa",
+            "category": "sofa",
+            "x_m": 0.0,
+            "y_m": 1.64,
+            "width_m": 2.2,
+            "depth_m": 0.95,
+            "height_m": 0.9,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:2:1",
+            "name": "Coffee table",
+            "category": "table",
+            "x_m": 0.32,
+            "y_m": 2.82,
+            "width_m": 1.0,
+            "depth_m": 0.6,
+            "height_m": 0.45,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:3:1",
+            "name": "Reading chair",
+            "category": "chair",
+            "x_m": 2.48,
+            "y_m": 0.0,
+            "width_m": 0.7,
+            "depth_m": 0.7,
+            "height_m": 0.8,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "asset_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "asset_id": null
+        }
+      ],
+      "unavailable_assets": [],
+      "concept_assets": [
+        {
+          "recipe_id": "concept-1",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.15,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.475,
+                0.5
+              ],
+              "color": "#69878d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.45,
+                0.15
+              ],
+              "center": [
+                0.5,
+                0.775,
+                0.075
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.12,
+                0.2,
+                0.95
+              ],
+              "center": [
+                0.06,
+                0.65,
+                0.5
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.12,
+                0.2,
+                0.95
+              ],
+              "center": [
+                0.94,
+                0.65,
+                0.5
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.38,
+                0.06,
+                0.7
+              ],
+              "center": [
+                0.28,
+                0.58,
+                0.55
+              ],
+              "color": "#88a2a5",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.38,
+                0.06,
+                0.7
+              ],
+              "center": [
+                0.72,
+                0.58,
+                0.55
+              ],
+              "color": "#88a2a5",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-2",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.1,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.95,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-3",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.15,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.475,
+                0.5
+              ],
+              "color": "#69878d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.45,
+                0.15
+              ],
+              "center": [
+                0.5,
+                0.775,
+                0.075
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            }
+          ]
+        }
+      ],
+      "concept_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "recipe_id": "concept-1"
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "recipe_id": "concept-2"
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "recipe_id": "concept-3"
+        }
+      ],
+      "surfaces": {
+        "wall_color": "#e8e1d5",
+        "floor_color": "#bfaa88"
+      }
+    }
+  },
+  {
+    "kind": "Home office",
+    "label": "A",
+    "snapshot": "1343bd7cb2695eba4e9f43bbde50cb22f3ee2b6036a0a9e007819d27a05d1e0c",
+    "payload": {
+      "schema_version": 4,
+      "design": {
+        "room": {
+          "id": "bedroom",
+          "name": "Bedroom",
+          "width_m": 5.0,
+          "depth_m": 4.0,
+          "ceiling_height_m": 2.7,
+          "doors": [
+            {
+              "id": "south-door",
+              "wall": "south",
+              "offset_m": 0.6,
+              "width_m": 0.85,
+              "height_m": 2.1
+            }
+          ],
+          "windows": [
+            {
+              "id": "north-window",
+              "wall": "north",
+              "offset_m": 2.7,
+              "width_m": 1.5,
+              "height_m": 1.2,
+              "sill_height_m": 0.9
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "studio:1:1",
+            "name": "Work desk",
+            "category": "desk",
+            "x_m": 0.28,
+            "y_m": 2.74,
+            "width_m": 1.4,
+            "depth_m": 0.7,
+            "height_m": 0.75,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:2:1",
+            "name": "Task chair",
+            "category": "chair",
+            "x_m": 2.54,
+            "y_m": 0.0,
+            "width_m": 0.6,
+            "depth_m": 0.6,
+            "height_m": 0.85,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:3:1",
+            "name": "Bookcase",
+            "category": "storage",
+            "x_m": 0.0,
+            "y_m": 3.6,
+            "width_m": 0.8,
+            "depth_m": 0.4,
+            "height_m": 1.8,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "asset_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "asset_id": null
+        }
+      ],
+      "unavailable_assets": [],
+      "concept_assets": [
+        {
+          "recipe_id": "concept-1",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.1,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.95,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.5,
+                0.15,
+                0.75
+              ],
+              "center": [
+                0.5,
+                0.825,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-2",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.15,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.475,
+                0.5
+              ],
+              "color": "#69878d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.45,
+                0.15
+              ],
+              "center": [
+                0.5,
+                0.775,
+                0.075
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-3",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.025,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.975,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                1.0,
+                0.04
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.02
+              ],
+              "color": "#80684f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.025,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.25,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.75,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.975,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.18,
+                0.355,
+                0.45
+              ],
+              "color": "#456b74",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.3,
+                0.355,
+                0.45
+              ],
+              "color": "#ab5b45",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.42,
+                0.355,
+                0.45
+              ],
+              "color": "#d3b37a",
+              "roughness": 0.75
+            }
+          ]
+        }
+      ],
+      "concept_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "recipe_id": "concept-1"
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "recipe_id": "concept-2"
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "recipe_id": "concept-3"
+        }
+      ],
+      "surfaces": {
+        "wall_color": "#e8e1d5",
+        "floor_color": "#bfaa88"
+      }
+    }
+  },
+  {
+    "kind": "Home office",
+    "label": "B",
+    "snapshot": "1343bd7cb2695eba4e9f43bbde50cb22f3ee2b6036a0a9e007819d27a05d1e0c",
+    "payload": {
+      "schema_version": 4,
+      "design": {
+        "room": {
+          "id": "bedroom",
+          "name": "Bedroom",
+          "width_m": 5.0,
+          "depth_m": 4.0,
+          "ceiling_height_m": 2.7,
+          "doors": [
+            {
+              "id": "south-door",
+              "wall": "south",
+              "offset_m": 0.6,
+              "width_m": 0.85,
+              "height_m": 2.1
+            }
+          ],
+          "windows": [
+            {
+              "id": "north-window",
+              "wall": "north",
+              "offset_m": 2.7,
+              "width_m": 1.5,
+              "height_m": 1.2,
+              "sill_height_m": 0.9
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "studio:1:1",
+            "name": "Work desk",
+            "category": "desk",
+            "x_m": 3.55,
+            "y_m": 3.3,
+            "width_m": 1.4,
+            "depth_m": 0.7,
+            "height_m": 0.75,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:2:1",
+            "name": "Task chair",
+            "category": "chair",
+            "x_m": 0.0,
+            "y_m": 0.95,
+            "width_m": 0.6,
+            "depth_m": 0.6,
+            "height_m": 0.85,
+            "rotation_deg": 0
+          },
+          {
+            "id": "studio:3:1",
+            "name": "Bookcase",
+            "category": "storage",
+            "x_m": 0.68,
+            "y_m": 0.75,
+            "width_m": 0.8,
+            "depth_m": 0.4,
+            "height_m": 1.8,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "asset_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "asset_id": null
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "asset_id": null
+        }
+      ],
+      "unavailable_assets": [],
+      "concept_assets": [
+        {
+          "recipe_id": "concept-1",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.1,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.95,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.06,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.06
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.9,
+                0.08
+              ],
+              "center": [
+                0.94,
+                0.45,
+                0.94
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.5,
+                0.15,
+                0.75
+              ],
+              "center": [
+                0.5,
+                0.825,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-2",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.15,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.475,
+                0.5
+              ],
+              "color": "#69878d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.45,
+                0.15
+              ],
+              "center": [
+                0.5,
+                0.775,
+                0.075
+              ],
+              "color": "#59777d",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.08,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.08
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.4,
+                0.08
+              ],
+              "center": [
+                0.92,
+                0.2,
+                0.92
+              ],
+              "color": "#554b40",
+              "roughness": 0.75
+            }
+          ]
+        },
+        {
+          "recipe_id": "concept-3",
+          "parts": [
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.025,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.05,
+                1.0,
+                1.0
+              ],
+              "center": [
+                0.975,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                1.0,
+                0.04
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.02
+              ],
+              "color": "#80684f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.025,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.25,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.5,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.75,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                1.0,
+                0.05,
+                1.0
+              ],
+              "center": [
+                0.5,
+                0.975,
+                0.5
+              ],
+              "color": "#98734f",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.18,
+                0.355,
+                0.45
+              ],
+              "color": "#456b74",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.3,
+                0.355,
+                0.45
+              ],
+              "color": "#ab5b45",
+              "roughness": 0.75
+            },
+            {
+              "kind": "box",
+              "size": [
+                0.08,
+                0.16,
+                0.7
+              ],
+              "center": [
+                0.42,
+                0.355,
+                0.45
+              ],
+              "color": "#d3b37a",
+              "roughness": 0.75
+            }
+          ]
+        }
+      ],
+      "concept_bindings": [
+        {
+          "furniture_id": "studio:1:1",
+          "recipe_id": "concept-1"
+        },
+        {
+          "furniture_id": "studio:2:1",
+          "recipe_id": "concept-2"
+        },
+        {
+          "furniture_id": "studio:3:1",
+          "recipe_id": "concept-3"
+        }
+      ],
+      "surfaces": {
+        "wall_color": "#e8e1d5",
+        "floor_color": "#bfaa88"
+      }
+    }
+  }
+]

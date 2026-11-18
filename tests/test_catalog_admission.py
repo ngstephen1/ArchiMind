@@ -472,6 +472,9 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
         .get("resume3", {})
         .get("authorized_migrations", {})
     )
+    studio_receipt = json.loads((ROOT / "docs/data/3D_STUDIO_10A.json").read_text())
+    studio = studio_receipt["authorized_migrations"]
+    studio_review = studio_receipt["merge_review"]["authorized_migrations"]
     for name, expected in receipt["frozen_files"].items():
         if name in migrations:
             assert migrations[name]["before_sha256"] == expected
@@ -497,6 +500,12 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
         if name in chat_resume:
             assert chat_resume[name]["before_sha256"] == expected
             expected = chat_resume[name]["after_sha256"]
+        if name in studio:
+            assert studio[name]["before_sha256"] == expected
+            expected = studio[name]["after_sha256"]
+        if name in studio_review:
+            assert studio_review[name]["before_sha256"] == expected
+            expected = studio_review[name]["after_sha256"]
         assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
     catalog_bytes = (ROOT / "src/archimind/assets/furniture_catalog.json").read_bytes()
     assert hashlib.sha256(catalog_bytes).hexdigest() == receipt["catalog"]["sha256"]

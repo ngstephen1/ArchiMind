@@ -84,6 +84,16 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         "archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt",
     ]
     with zipfile.ZipFile(wheel) as archive:
+        for path in sorted((ROOT / "src/archimind/studio").glob("*.py")):
+            assert (
+                archive.read(path.relative_to(ROOT / "src").as_posix())
+                == path.read_bytes()
+            )
+        for name in ("SPOKEN_WORLD_LICENSE.txt", "SPOKEN_WORLD_NOTICE.txt"):
+            assert (
+                archive.read("archimind/_viewer_assets/" + name)
+                == (ROOT / "src/archimind/_viewer_assets" / name).read_bytes()
+            )
         for path in sorted((ROOT / "src/archimind/datasets").glob("*.py")):
             name = path.relative_to(ROOT / "src").as_posix()
             assert archive.read(name) == path.read_bytes()
@@ -408,6 +418,12 @@ for name in ('archimind.agents.catalog_conversation',
     assert Path(sys.modules[name].__file__).resolve().is_relative_to(target)
 data = CatalogConversationExtraction.model_validate_json(sys.argv[2])
 conversation = (CatalogChatTurn(id=1,role='user',content=sys.argv[3]),)
+from archimind.studio.workflow import propose_room, build_room, scene_payload
+import archimind.studio as studio_module
+assert Path(studio_module.__file__).resolve().is_relative_to(target)
+studio_build = build_room(propose_room(base.room,'Bedroom','Offline installed package',offline=True))
+assert studio_build.result().candidates
+assert scene_payload(studio_build,studio_build.result().candidates[0])['schema_version'] == 4
 assert interpret_catalog_conversation(conversation).status == 'unavailable'
 draft = reconcile_catalog_extraction(data,conversation).draft
 chat = prepare_chat_specification(draft,
