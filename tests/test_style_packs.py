@@ -76,12 +76,25 @@ def test_pack_json_round_trips_and_rejects_unknown_fields():
         StylePack.model_validate(raw | {"id": "gothic"})
 
 
-def test_releases_start_empty_and_packs_report_missing_assets():
-    assert load_releases() == {}
+def test_every_pack_has_released_surfaces_and_lighting():
+    releases = load_releases()
+    for pack in all_packs():
+        for surface in pack.surfaces.values():
+            assert releases[surface.asset_id].kind == "material"
+        assert releases[pack.lighting.environment_asset_id].kind == "environment"
     status = pack_status(load_pack("japandi"))
-    assert not status.released
-    assert load_pack("japandi").surfaces["floor"].asset_id in status.missing
-    assert status.high_bytes == status.low_bytes == 0
+    assert status.released and status.missing == ()
+    assert 0 < status.low_bytes < status.high_bytes
+    # A pack naming an unreleased asset reports it as missing.
+    floor = (
+        load_pack("japandi")
+        .surfaces["floor"]
+        .model_copy(update={"asset_id": "polyhaven:not_fetched"})
+    )
+    broken = load_pack("japandi").model_copy(
+        update={"surfaces": {**load_pack("japandi").surfaces, "floor": floor}}
+    )
+    assert pack_status(broken).missing == ("polyhaven:not_fetched",)
 
 
 @pytest.mark.parametrize(
@@ -275,3 +288,17 @@ def test_api_accepts_legacy_palette_field(local):
         }
     )
     assert request.brief.style == "mid_century"
+
+
+def test_surface_tint_is_optional_hex():
+    from archimind.style_packs.models import SurfaceSpec
+
+    base = {
+        "asset_id": "polyhaven:white_stucco",
+        "tiling_m": 2.0,
+        "fallback_color": "#f2f0eb",
+    }
+    assert SurfaceSpec.model_validate(base).tint is None
+    assert SurfaceSpec.model_validate(base | {"tint": "#c8a165"}).tint == "#c8a165"
+    with pytest.raises(ValueError):
+        SurfaceSpec.model_validate(base | {"tint": "brass"})

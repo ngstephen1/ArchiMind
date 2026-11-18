@@ -9,49 +9,58 @@
   ],
   "surfaces": {
     "floor": {
-      "asset_id": "polyhaven:oak_veneer_01",
-      "tiling_m": 1.4,
-      "fallback_color": "#c4a47c"
+      "asset_id": "polyhaven:hinoki_planks",
+      "tiling_m": 1.8,
+      "fallback_color": "#c4a47c",
+      "tint": null
     },
     "wall": {
       "asset_id": "polyhaven:beige_wall_001",
-      "tiling_m": 2.0,
-      "fallback_color": "#e4d9c8"
+      "tiling_m": 2.4,
+      "fallback_color": "#e4d9c8",
+      "tint": null
     },
     "ceiling": {
-      "asset_id": "polyhaven:white_plaster_02",
-      "tiling_m": 2.0,
-      "fallback_color": "#efe8dc"
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 2.4,
+      "fallback_color": "#efe8dc",
+      "tint": "#f3ece0"
     },
     "trim": {
-      "asset_id": "polyhaven:dark_wood",
+      "asset_id": "polyhaven:american_walnut_veneer",
       "tiling_m": 1.0,
-      "fallback_color": "#3d3127"
+      "fallback_color": "#3d3127",
+      "tint": "#5a4636"
     },
     "door": {
-      "asset_id": "polyhaven:oak_veneer_01",
-      "tiling_m": 1.0,
-      "fallback_color": "#b89670"
+      "asset_id": "polyhaven:ash_veneer",
+      "tiling_m": 1.2,
+      "fallback_color": "#b89670",
+      "tint": null
     },
     "window_frame": {
-      "asset_id": "polyhaven:dark_wood",
+      "asset_id": "polyhaven:american_walnut_veneer",
       "tiling_m": 1.0,
-      "fallback_color": "#3a2f26"
+      "fallback_color": "#3a2f26",
+      "tint": "#5a4636"
     },
     "worktop": {
-      "asset_id": "polyhaven:oak_veneer_01",
+      "asset_id": "polyhaven:ash_veneer",
       "tiling_m": 1.2,
-      "fallback_color": "#bf9d74"
+      "fallback_color": "#bf9d74",
+      "tint": null
     },
     "tile": {
-      "asset_id": "polyhaven:beige_wall_001",
-      "tiling_m": 0.8,
-      "fallback_color": "#ddd2c0"
+      "asset_id": "polyhaven:marble_01",
+      "tiling_m": 1.0,
+      "fallback_color": "#ddd2c0",
+      "tint": null
     },
     "metal": {
-      "asset_id": "polyhaven:brushed_metal",
+      "asset_id": "ambientcg:Metal009",
       "tiling_m": 1.0,
-      "fallback_color": "#3a3a38"
+      "fallback_color": "#3a3a38",
+      "tint": "#4a4a46"
     }
   },
   "furniture": {},

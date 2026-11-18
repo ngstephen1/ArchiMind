@@ -18,6 +18,7 @@ import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
 import { buildDressing } from "../src/dressing.js";
 import { createPlanSweep } from "../src/plan_sweep.js";
+import { dressFurniture } from "../src/pack_furniture.js";
 
 export function createTown(canvas, status, action) {
   const renderer = new T.WebGLRenderer({
@@ -454,6 +455,19 @@ export function createTown(canvas, status, action) {
       holder.position.set(part.origin[0], 0, -part.origin[1]);
       interior.add(holder);
       decor.push({ holder, handle: buildDressing(holder, part.style.dressing, pack, packTier) });
+      if (Array.isArray(part.style.bindings))
+        decor.push({
+          holder,
+          handle: {
+            dispose: dressFurniture({
+              bindings: part.style.bindings,
+              furniture: part.design.furniture,
+              pack,
+              objects: roomFurniture.get(part.design.room.id) || new Map(),
+              parent: holder,
+            }).undo,
+          },
+        });
     }
     packLook = {
       pack,
@@ -661,6 +675,7 @@ export function createTown(canvas, status, action) {
   }
   let sweep = null,
     sweepInput = null;
+  const roomFurniture = new Map();
   function load(h) {
     generation++;
     const epoch = generation;
@@ -675,6 +690,7 @@ export function createTown(canvas, status, action) {
     canvas.dataset.chair = "procedural";
     chairReady = Promise.resolve("procedural");
     clear(interior);
+    roomFurniture.clear();
     clear(hero);
     indoor.length = 0;
     heroObstacles.length = 0;
@@ -935,7 +951,10 @@ export function createTown(canvas, status, action) {
         0.012,
         "#ba7e5c",
       );
+      const tagged = new Map();
+      roomFurniture.set(part.design.room.id, tagged);
       for (const f of part.design.furniture) {
+        const before = group.children.length;
         const x = f.x_m + f.width_m / 2,
           z = -f.y_m - f.depth_m / 2,
           w = f.width_m,
@@ -1138,9 +1157,16 @@ export function createTown(canvas, status, action) {
           block(group, x, t * 0.47, z, w, t * 0.94, d, "#a48c73");
           block(group, x, t * 0.97, z, w, t * 0.06, d, "#e1dbcc");
         }
+        tagged.set(f.id, group.children.slice(before));
       }
       // Batch only stable meshes; native desk loading may replace its stand-in later.
-      if (!part.designer_chair && !part.design.furniture.some((f) => f.id === "belaya")) batch(group);
+      // Pack homes stay unbatched so pack models can replace individual pieces.
+      if (
+        !part.designer_chair &&
+        !part.design.furniture.some((f) => f.id === "belaya") &&
+        townSurfaceSource(h).kind !== "pack"
+      )
+        batch(group);
     }
     for (const part of h.rooms) {
       const room = part.design.room,

@@ -43,10 +43,15 @@ export function buildDressing(group, dressing, pack, tier) {
       const trim = pack?.surface?.('trim');
       return [part(new THREE.BoxGeometry(w, h, d), trim || mat(fallback(pack, 'trim', '#f4f3ef')), 0, h / 2, 0)];
     },
-    art: (w, h, d) => [
-      part(new THREE.BoxGeometry(w, h, d), mat(fallback(pack, 'metal', '#3a3a38'), { metalness: 0.4, roughness: 0.5 }), 0, h / 2, 0),
-      part(new THREE.BoxGeometry(w * 0.86, h * 0.84, d * 1.2), mat(theme.door_color || '#a08262'), 0, h / 2, 0),
-    ],
+    art: (w, h, d, item) => {
+      // Inset the canvas along the wall and let it stand proud of the frame.
+      const alongX = item.wall !== 'east' && item.wall !== 'west';
+      const cw = alongX ? w * 0.86 : w * 1.2, cd = alongX ? d * 1.2 : d * 0.86;
+      return [
+        part(new THREE.BoxGeometry(w, h, d), mat(fallback(pack, 'metal', '#3a3a38'), { metalness: 0.4, roughness: 0.5 }), 0, h / 2, 0),
+        part(new THREE.BoxGeometry(cw, h * 0.84, cd), mat(theme.door_color || '#a08262'), 0, h / 2, 0),
+      ];
+    },
     pendant: (w, h) => {
       const shade = Math.min(0.3, h * 0.45);
       return [
@@ -71,7 +76,7 @@ export function buildDressing(group, dressing, pack, tier) {
     holder.position.set(item.x_m + item.width_m / 2, item.z_m, -(item.y_m + item.depth_m / 2));
     const procedural = () => {
       // Wall-mounted boxes are stored already rotated; draw them axis-aligned.
-      for (const mesh of shapes[item.kind](item.width_m, item.height_m, item.depth_m)) holder.add(mesh);
+      for (const mesh of shapes[item.kind](item.width_m, item.height_m, item.depth_m, item)) holder.add(mesh);
     };
     if (MODEL_KINDS.has(item.kind) && item.asset_id) {
       pending.push(Promise.resolve(pack?.model?.(item.asset_id)).catch(() => null).then(model => {

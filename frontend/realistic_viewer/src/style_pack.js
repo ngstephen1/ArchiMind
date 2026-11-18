@@ -111,7 +111,7 @@ export async function loadStylePack({baseUrl, ref, tier, fetchBytes = defaultFet
     if (!release || release.kind !== 'material') return {role, material: fallbackMaterial(spec), status: 'unreleased'};
     const textures = [];
     try {
-      const material = new THREE.MeshStandardMaterial({color: '#ffffff', roughness: 1, metalness: 0});
+      const material = new THREE.MeshStandardMaterial({color: /^#[0-9a-f]{6}$/.test(spec.tint || '') ? spec.tint : '#ffffff', roughness: 1, metalness: 0});
       textures.push(material);
       for (const [fileRole, slot] of Object.entries(MAP_ROLES)) {
         const file = pickFile(release, fileRole, tier);

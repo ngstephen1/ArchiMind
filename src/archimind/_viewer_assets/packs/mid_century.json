@@ -11,49 +11,58 @@
   ],
   "surfaces": {
     "floor": {
-      "asset_id": "polyhaven:wood_floor_deck",
-      "tiling_m": 1.4,
-      "fallback_color": "#7a5235"
+      "asset_id": "polyhaven:plank_flooring_04",
+      "tiling_m": 1.8,
+      "fallback_color": "#7a5235",
+      "tint": null
     },
     "wall": {
-      "asset_id": "polyhaven:white_plaster_02",
-      "tiling_m": 2.0,
-      "fallback_color": "#f1e9db"
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 2.4,
+      "fallback_color": "#f1e9db",
+      "tint": "#f5eddf"
     },
     "ceiling": {
-      "asset_id": "polyhaven:white_plaster_02",
-      "tiling_m": 2.0,
-      "fallback_color": "#f5efe4"
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 2.4,
+      "fallback_color": "#f5efe4",
+      "tint": null
     },
     "trim": {
       "asset_id": "polyhaven:dark_wood",
       "tiling_m": 1.0,
-      "fallback_color": "#5b3a24"
+      "fallback_color": "#5b3a24",
+      "tint": null
     },
     "door": {
       "asset_id": "polyhaven:dark_wood",
-      "tiling_m": 1.0,
-      "fallback_color": "#6b4529"
+      "tiling_m": 1.2,
+      "fallback_color": "#6b4529",
+      "tint": null
     },
     "window_frame": {
       "asset_id": "polyhaven:dark_wood",
       "tiling_m": 1.0,
-      "fallback_color": "#5b3a24"
+      "fallback_color": "#5b3a24",
+      "tint": null
     },
     "worktop": {
       "asset_id": "polyhaven:dark_wood",
       "tiling_m": 1.2,
-      "fallback_color": "#6e4a2f"
+      "fallback_color": "#6e4a2f",
+      "tint": null
     },
     "tile": {
-      "asset_id": "polyhaven:white_tiles",
-      "tiling_m": 0.8,
-      "fallback_color": "#e8d9b8"
+      "asset_id": "polyhaven:terrazzo_tiles",
+      "tiling_m": 1.0,
+      "fallback_color": "#e8d9b8",
+      "tint": null
     },
     "metal": {
-      "asset_id": "polyhaven:brass",
+      "asset_id": "ambientcg:Metal009",
       "tiling_m": 1.0,
-      "fallback_color": "#b08d57"
+      "fallback_color": "#b08d57",
+      "tint": "#d4ad6e"
     }
   },
   "furniture": {},

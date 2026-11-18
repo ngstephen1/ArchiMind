@@ -250,9 +250,10 @@ def test_plan_theme_colours_walls_and_furniture():
     design = create_sample_bedroom()
     plain = render_floorplan(design)
     themed = render_floorplan(design, plan_theme=theme)
-    by_kind = lambda fig, kind: [
-        t for t in fig.data if (t.meta or {}).get("kind") == kind
-    ]  # noqa: E731
+
+    def by_kind(fig, kind):
+        return [t for t in fig.data if (t.meta or {}).get("kind") == kind]
+
     assert {t.line.color for t in by_kind(themed, "wall")} == {theme.wall_fill}
     assert {t.fillcolor for t in by_kind(themed, "furniture")} == {theme.furniture_fill}
     assert {t.line.color for t in by_kind(themed, "furniture")} == {

@@ -13,48 +13,57 @@
   "surfaces": {
     "floor": {
       "asset_id": "polyhaven:concrete_floor_02",
-      "tiling_m": 2.0,
-      "fallback_color": "#8f8c88"
+      "tiling_m": 2.5,
+      "fallback_color": "#8f8c88",
+      "tint": null
     },
     "wall": {
-      "asset_id": "polyhaven:white_bricks",
-      "tiling_m": 1.6,
-      "fallback_color": "#e9e6e1"
+      "asset_id": "polyhaven:whitewashed_brick",
+      "tiling_m": 1.8,
+      "fallback_color": "#e9e6e1",
+      "tint": null
     },
     "ceiling": {
-      "asset_id": "polyhaven:concrete_wall_008",
+      "asset_id": "polyhaven:grey_plaster",
       "tiling_m": 2.5,
-      "fallback_color": "#c9c6c1"
+      "fallback_color": "#c9c6c1",
+      "tint": null
     },
     "trim": {
-      "asset_id": "polyhaven:metal_plate",
+      "asset_id": "ambientcg:Metal027",
       "tiling_m": 1.0,
-      "fallback_color": "#2b2b2b"
+      "fallback_color": "#2b2b2b",
+      "tint": null
     },
     "door": {
-      "asset_id": "polyhaven:metal_plate",
+      "asset_id": "ambientcg:Metal027",
       "tiling_m": 1.0,
-      "fallback_color": "#2f2f2f"
+      "fallback_color": "#2f2f2f",
+      "tint": null
     },
     "window_frame": {
-      "asset_id": "polyhaven:metal_plate",
+      "asset_id": "ambientcg:Metal027",
       "tiling_m": 1.0,
-      "fallback_color": "#1f1f1f"
+      "fallback_color": "#1f1f1f",
+      "tint": null
     },
     "worktop": {
       "asset_id": "polyhaven:concrete_floor_02",
       "tiling_m": 1.5,
-      "fallback_color": "#9a9792"
+      "fallback_color": "#9a9792",
+      "tint": null
     },
     "tile": {
-      "asset_id": "polyhaven:concrete_wall_008",
-      "tiling_m": 1.0,
-      "fallback_color": "#b7b4ae"
+      "asset_id": "polyhaven:long_white_tiles",
+      "tiling_m": 0.9,
+      "fallback_color": "#ecebe7",
+      "tint": null
     },
     "metal": {
-      "asset_id": "polyhaven:metal_plate",
+      "asset_id": "ambientcg:Metal027",
       "tiling_m": 1.0,
-      "fallback_color": "#262626"
+      "fallback_color": "#262626",
+      "tint": null
     }
   },
   "furniture": {},

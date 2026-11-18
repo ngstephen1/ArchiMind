@@ -56,3 +56,15 @@ test("a dressing model that fails to load falls back to the procedural shape", a
   assert.ok(handle.root.getObjectByName("plant").children.length > 0);
   handle.dispose();
 });
+
+test("art on an east or west wall insets its canvas along the wall, not through it", async () => {
+  const group = new T.Group();
+  const art = box("art", "art", { wall: "east", width_m: 0.03, depth_m: 1.2, height_m: 0.9, z_m: 1.05 });
+  const handle = buildDressing(group, [art], pack(), "high");
+  await handle.ready;
+  const [frame, canvas] = handle.root.getObjectByName("art").children;
+  const size = (m) => new T.Box3().setFromObject(m).getSize(new T.Vector3());
+  assert.ok(size(canvas).z < size(frame).z, "canvas narrower along the wall");
+  assert.ok(size(canvas).x > size(frame).x, "canvas stands proud of the frame");
+  handle.dispose();
+});

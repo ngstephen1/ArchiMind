@@ -131,3 +131,13 @@ test('applyLighting sets exposure, environment, sun and fill from the manifest a
   assert.equal(scene.environment, null);
   assert.equal(envDisposed, 1);
 });
+
+test('a released surface with a tint multiplies its texture by that colour', async () => {
+  const fixture = buildFixture();
+  fixture.manifest.surfaces.trim.tint = '#c8a165';
+  fixture.files.set('packs/scandinavian.json', new Uint8Array(Buffer.from(JSON.stringify(fixture.manifest))));
+  const pack = await load(fixture);
+  assert.ok(pack.surface('trim').map);
+  assert.equal(pack.surface('trim').color.getHexString(), 'c8a165');
+  assert.equal(pack.surface('floor').color.getHexString(), 'ffffff');
+});

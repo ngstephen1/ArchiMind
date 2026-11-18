@@ -15,9 +15,13 @@
       "before_sha256": "ca97aaf6ff9b6ff0a0645ddccafdc7f88466c21243cdf80d8d62f4352a623e48",
       "after_sha256": "bc5776dc531d0d55c16520c58d243ea8207395b44547ccc945e6b20267a7aa5e"
     },
+    "frontend/realistic_viewer/src/room_objects.js": {
+      "before_sha256": "13701603aa1c3b08c7a8409aa9fd0bf057c4a1123d9e6161f54341823ca87153",
+      "after_sha256": "548aa9f82ffa7a38aa00d2cd458c5c119f830d213dba4b3da0588878137afd5b"
+    },
     "frontend/realistic_viewer/src/room_viewer.js": {
       "before_sha256": "f02138b362bc9c2807ed28837a430bca47db12130af4e4ced9139b26c7ec943d",
-      "after_sha256": "7807eafcecf9e4f6df96746c97124f3899d1edcc0343bc19f4c947808c8046e3"
+      "after_sha256": "ea93e618e3d0a74b36b147ec61285be7756910460fd1b7ca57008280f636076e"
     },
     "frontend/realistic_viewer/tests/room.test.js": {
       "before_sha256": "6f24b3de023ec69f79b6d7cb580b1cfb5a10fa307a81d3ed613a58db0f591b01",
@@ -29,11 +33,11 @@
     },
     "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
       "before_sha256": "cd06cfd0faa200f053a40fbe02b15590a3b6e3da085191b831dc012f7aec2e48",
-      "after_sha256": "ce95e7cedd5c9e4fabff839b4cacb008d6d8361b26a499eadcebacda49027c17"
+      "after_sha256": "a40d5bf9f825f852ec072cb6e42d0f0aa91fd22555fbe5450dcf68c0ac4dc588"
     },
     "src/archimind/_viewer_assets/viewer.js": {
       "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
-      "after_sha256": "f61318ae9311d4af44ae1dbdbbc7f61eaf24085aa4325b8de5a17b0cc5f9fc9d"
+      "after_sha256": "b9b8110c933797c0af1c8e9474bf3ebd7a99c9dd113af6f16fdee719407f09ef"
     },
     "src/archimind/render/floorplan_2d.py": {
       "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",

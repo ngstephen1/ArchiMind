@@ -50,6 +50,8 @@ class SurfaceSpec(_Strict):
     asset_id: AssetId
     tiling_m: Metres
     fallback_color: Hex
+    # Multiplies a released texture (brass from brushed steel, painted trim).
+    tint: Hex | None = None
 
 
 class FurnitureChoice(_Strict):

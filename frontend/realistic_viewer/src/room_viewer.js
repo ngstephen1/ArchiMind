@@ -6,7 +6,7 @@ import {toThree} from './geometry.js';
 import {disposeObject} from './viewer.js';
 import {validateScene,wallQuads,openingQuad,cameraFrame,canonicalVolume} from './room_geometry.js';
 import {createAssetPool} from './asset_pool.js';
-import {fittedInstance,placeholder,footprint,instanceMetrics,quadGeometry} from './room_objects.js';
+import {fittedInstance,placeholder,footprint,instanceMetrics,quadGeometry,wallUV} from './room_objects.js';
 import {queenBed,addWallFinish,contactTexture} from './bedroom_finishes.js';
 import {conceptInstance,DESIGNER_CHAIR_SLOT,placeDesignerChair} from './concept_assets.js';
 import {loadDesignerChair} from './designer_chair.js';
@@ -15,6 +15,7 @@ import {loadStylePack,applyLighting} from './style_pack.js';
 import {splitStyle,createRoomStyle,tiledSurface,disposeTiled} from './room_style.js';
 import {buildDressing} from './dressing.js';
 import {createPlanSweep} from './plan_sweep.js';
+import {dressFurniture} from './pack_furniture.js';
 
 import {PRODUCT_ASSETS,boundedProductBytes,verifyDecodedProduct,nativeProductInstance,productSceneBudget,productSceneAdmission} from './product_assets.js';
 
@@ -72,6 +73,8 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
   root.innerHTML=`<div class="stage room-stage"><div class="status" role="status">Loading architectural room…</div></div><div class="toolbar"><button class="reset" type="button">Reset camera</button><button class="interior" type="button">Room-level view</button><label><input type="checkbox" class="front" checked> Front walls</label><label><input type="checkbox" class="outlines" checked> Canonical footprints</label><button class="quality" type="button" hidden>Quality: High</button><label class="sweep-control">Plan <input class="sweep" type="range" min="0" max="100" value="100" aria-label="Plan to room view"> Room</label></div><p class="room-info"></p><ul class="objects"></ul><p class="metrics" aria-live="polite"></p>`;
   host.appendChild(root);const stage=root.querySelector('.stage'),status=root.querySelector('.status');
   let renderer,scene,camera,controls,envTarget,resizeObserver,visibility,frame,disposed=false,visible=true,userCamera=false,composer=null,styleControl=null,sweep=null,baseStatus='';
+  // Pack furniture swaps wait until every procedural/product object exists.
+  const furnitureObjects=new Map();let markFurnitureReady;const furnitureReady=new Promise(resolve=>{markFurnitureReady=resolve;});
   const owned=new THREE.Group(),instances=new THREE.Group(),footprints=new THREE.Group(),walls=new THREE.Group();
   const releases=[];const start=performance.now();
   const cleanup=()=>{
@@ -118,7 +121,7 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
     const quads=wallQuads(room);
     for(const wall of ['south','east','north','west']){
       const panels=quads.filter(q=>q.wall===wall);if(!panels.length)continue;
-      const front=['south','east'].includes(wall);const mesh=new THREE.Mesh(quadGeometry(panels.map(q=>q.points)),new THREE.MeshStandardMaterial({color:data.surfaces?.wall_color??(wall==='north'?'#b2b6a4':'#e4d9cb'),roughness:.9,side:THREE.DoubleSide,transparent:front,opacity:front?.16:1,depthWrite:!front}));
+      const front=['south','east'].includes(wall);const mesh=new THREE.Mesh(quadGeometry(panels.map(q=>q.points),wallUV(room,wall)),new THREE.MeshStandardMaterial({color:data.surfaces?.wall_color??(wall==='north'?'#b2b6a4':'#e4d9cb'),roughness:.9,side:THREE.DoubleSide,transparent:front,opacity:front?.16:1,depthWrite:!front}));
       mesh.name=wall;mesh.userData={kind:'wall',wall,panels:panels.length};mesh.castShadow=!front;mesh.receiveShadow=true;walls.add(mesh);addWallFinish(mesh,room,wall,panels);
     }
     for(const o of [...room.doors,...room.windows]){
@@ -186,8 +189,10 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
         hemisphere.visible=sun.visible=false;
         const lights=applyLighting(scene,renderer,pack,packTier,{center,span});
         const decor=buildDressing(owned,style.dressing,pack,packTier);
+        let furniture=null,undone=false;
+        furnitureReady.then(()=>{if(!undone&&!disposed)furniture=dressFurniture({bindings:style.bindings,furniture:data.design.furniture,pack,objects:furnitureObjects,parent:owned});});
         return()=>{
-          decor.dispose();lights.dispose();hemisphere.visible=sun.visible=true;
+          undone=true;furniture?.undo();decor.dispose();lights.dispose();hemisphere.visible=sun.visible=true;
           scene.environment=legacy.environment;scene.environmentIntensity=legacy.environmentIntensity;renderer.toneMappingExposure=legacy.exposure;
           for(const [mesh,material] of swaps.reverse())mesh.material=material;tiled.forEach(disposeTiled);
         };
@@ -197,8 +202,8 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
       const label=()=>{quality.textContent=`Quality: ${styleControl.tier==='high'?'High':'Low'}`;};label();
       quality.onclick=()=>{
         const next=styleControl.tier==='high'?'low':'high';
-        configureRenderer(renderer,next);composer.dispose();composer=createComposer(renderer,scene,camera,next);resize();label();
-        styleControl.setTier(next).then(refreshStatus);refreshStatus();
+        configureRenderer(renderer,next);composer.dispose();composer=createComposer(renderer,scene,camera,next);resize();
+        styleControl.setTier(next).then(refreshStatus);label();refreshStatus();
       };
       styleControl.start().then(refreshStatus);
     }
@@ -233,9 +238,10 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
           catch{failed.add(id);}
         }
         if(!object){const isQueen=data.schema_version===3&&!id&&f.id==='queen-bed'&&f.category==='bed';object=isQueen?queenBed(f):placeholder(f);kind=conceptRoom?'concept_unavailable_placeholder':id?'asset_unavailable_placeholder':'procedural_placeholder';owned.add(object);if(isQueen)footprints.add(placeholderLabel(f));else owned.add(placeholderLabel(f));if(id)failedInstances++;}
-        metrics.push(instanceMetrics(object,f,kind));
+        metrics.push(instanceMetrics(object,f,kind));furnitureObjects.set(f.id,[object]);
         const row=document.createElement('li');row.textContent=`${f.name} · ${f.id} · ${f.category} · X/Y (${f.x_m}, ${f.y_m}) · W/D/H ${f.width_m} × ${f.depth_m} × ${f.height_m} m · ${kind.replaceAll('_',' ')}${id&&failed.has(id)?(admission&&!admission.admitted?' (mixed scene not yet qualified)':budget&&!budget.passed?' (scene resource budget exceeded)':' (local asset unavailable or failed qualification)'):PRODUCT_ASSETS[id]?` · native-scale ABO ${PRODUCT_ASSETS[id].product_id}, ${PRODUCT_ASSETS[id].variant_label}, CC BY 4.0`:''}`;root.querySelector('.objects').appendChild(row);
       }
+      markFurnitureReady();
       draw();
       const geometries=new Set();instances.traverse(o=>{if(o.isMesh)geometries.add(o.geometry);});
       const result={productBudget:budget,productAdmission:admission,instances:metrics,furnitureCount:fs.length,texturedInstances:metrics.filter(m=>m.kind==='textured').length,conceptInstances:metrics.filter(m=>['procedural_concept','designer_concept'].includes(m.kind)).length,placeholderInstances:metrics.filter(m=>m.kind.includes('placeholder')).length,assetLoadsThisMount:pool.loads-loadsBefore+designerLoads,uniqueAssetIds:assetIds.length,sharedAssetGeometries:geometries.size,loadMs:performance.now()-start,wallPanels:quads.map(q=>({wall:q.wall,left:q.left,right:q.right,bottom:q.bottom,top:q.top})),doors:room.doors,windows:room.windows,roomDimensions:[room.width_m,room.depth_m,room.ceiling_height_m],structuralTriangles:quads.length*2,triangles:metrics.reduce((s,m)=>s+m.triangles,0)};

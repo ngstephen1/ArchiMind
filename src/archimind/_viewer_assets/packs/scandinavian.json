@@ -10,49 +10,58 @@
   ],
   "surfaces": {
     "floor": {
-      "asset_id": "polyhaven:laminate_floor_02",
-      "tiling_m": 1.4,
-      "fallback_color": "#c9a97f"
+      "asset_id": "polyhaven:oak_wood_planks",
+      "tiling_m": 1.8,
+      "fallback_color": "#c9a97f",
+      "tint": "#f3e6d4"
     },
     "wall": {
-      "asset_id": "polyhaven:white_plaster_02",
-      "tiling_m": 2.0,
-      "fallback_color": "#f2f0eb"
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 2.4,
+      "fallback_color": "#f2f0eb",
+      "tint": null
     },
     "ceiling": {
-      "asset_id": "polyhaven:white_plaster_02",
-      "tiling_m": 2.0,
-      "fallback_color": "#f7f6f2"
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 2.4,
+      "fallback_color": "#f7f6f2",
+      "tint": null
     },
     "trim": {
-      "asset_id": "polyhaven:painted_wood",
+      "asset_id": "polyhaven:white_stucco",
       "tiling_m": 1.0,
-      "fallback_color": "#f5f3ee"
+      "fallback_color": "#f5f3ee",
+      "tint": null
     },
     "door": {
-      "asset_id": "polyhaven:painted_wood",
-      "tiling_m": 1.0,
-      "fallback_color": "#efece6"
+      "asset_id": "polyhaven:ash_veneer",
+      "tiling_m": 1.2,
+      "fallback_color": "#efece6",
+      "tint": null
     },
     "window_frame": {
-      "asset_id": "polyhaven:painted_wood",
+      "asset_id": "polyhaven:white_stucco",
       "tiling_m": 1.0,
-      "fallback_color": "#f5f3ee"
+      "fallback_color": "#f5f3ee",
+      "tint": null
     },
     "worktop": {
-      "asset_id": "polyhaven:oak_veneer_01",
+      "asset_id": "polyhaven:ash_veneer",
       "tiling_m": 1.2,
-      "fallback_color": "#c8a77c"
+      "fallback_color": "#c8a77c",
+      "tint": null
     },
     "tile": {
-      "asset_id": "polyhaven:white_tiles",
-      "tiling_m": 0.8,
-      "fallback_color": "#ecebe7"
+      "asset_id": "polyhaven:long_white_tiles",
+      "tiling_m": 0.9,
+      "fallback_color": "#ecebe7",
+      "tint": null
     },
     "metal": {
-      "asset_id": "polyhaven:brushed_metal",
+      "asset_id": "ambientcg:Metal009",
       "tiling_m": 1.0,
-      "fallback_color": "#a8a8a6"
+      "fallback_color": "#a8a8a6",
+      "tint": null
     }
   },
   "furniture": {

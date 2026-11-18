@@ -13,48 +13,57 @@
   "surfaces": {
     "floor": {
       "asset_id": "polyhaven:herringbone_parquet",
-      "tiling_m": 1.2,
-      "fallback_color": "#6b4a33"
+      "tiling_m": 1.6,
+      "fallback_color": "#6b4a33",
+      "tint": "#8c6c55"
     },
     "wall": {
       "asset_id": "polyhaven:painted_plaster_wall",
-      "tiling_m": 2.0,
-      "fallback_color": "#dcdcd6"
+      "tiling_m": 2.4,
+      "fallback_color": "#dcdcd6",
+      "tint": "#e3e3df"
     },
     "ceiling": {
-      "asset_id": "polyhaven:white_plaster_02",
-      "tiling_m": 2.0,
-      "fallback_color": "#f4f3ef"
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 2.4,
+      "fallback_color": "#f4f3ef",
+      "tint": null
     },
     "trim": {
-      "asset_id": "polyhaven:painted_plaster_wall",
+      "asset_id": "polyhaven:white_stucco",
       "tiling_m": 1.0,
-      "fallback_color": "#f7f6f2"
+      "fallback_color": "#f7f6f2",
+      "tint": "#fbfaf6"
     },
     "door": {
-      "asset_id": "polyhaven:painted_wood",
+      "asset_id": "polyhaven:white_stucco",
       "tiling_m": 1.0,
-      "fallback_color": "#ecebe6"
+      "fallback_color": "#ecebe6",
+      "tint": "#f1f0eb"
     },
     "window_frame": {
-      "asset_id": "polyhaven:painted_wood",
+      "asset_id": "polyhaven:white_stucco",
       "tiling_m": 1.0,
-      "fallback_color": "#f4f3ef"
+      "fallback_color": "#f4f3ef",
+      "tint": "#fbfaf6"
     },
     "worktop": {
       "asset_id": "polyhaven:marble_01",
-      "tiling_m": 1.2,
-      "fallback_color": "#e8e4dd"
+      "tiling_m": 1.4,
+      "fallback_color": "#e8e4dd",
+      "tint": null
     },
     "tile": {
       "asset_id": "polyhaven:marble_01",
       "tiling_m": 1.0,
-      "fallback_color": "#e2ddd5"
+      "fallback_color": "#e2ddd5",
+      "tint": null
     },
     "metal": {
-      "asset_id": "polyhaven:brass",
+      "asset_id": "ambientcg:Metal009",
       "tiling_m": 1.0,
-      "fallback_color": "#b08d57"
+      "fallback_color": "#b08d57",
+      "tint": "#d4ad6e"
     }
   },
   "furniture": {},
