@@ -23,7 +23,9 @@ def response(schema, content, **kwargs):
             lighting_direction="Fixture daylight.",
             tradeoff="Fixture finish.",
         )
-    if schema is VisualReview and any(item["type"] == "input_image" for item in content):
+    if schema is VisualReview and any(
+        item["type"] == "input_image" for item in content
+    ):
         return VisualReview(
             observation="Fixture visual observation.",
             recommendation="Inspect the saved bedroom.",

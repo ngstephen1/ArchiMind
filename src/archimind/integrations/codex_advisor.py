@@ -1,4 +1,4 @@
-"""Single-user local Codex advisor for Town and explicit operator requests.
+"""Optional, single-user local Codex advisor. No UI integration or auto-application.
 
 Read-only sandboxing limits writes, NOT confidentiality: the CLI can still access
 local files/credentials. Never expose this adapter through a public endpoint.
