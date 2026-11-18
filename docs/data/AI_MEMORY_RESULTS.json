@@ -1,0 +1,2525 @@
+{
+  "commit": "bc7faa7d847dd387e634ba8420d115b9dd4ecebe",
+  "manifest": "7407712e355e8c8facfce65685781a0047264c0d6677e8d72ba2ebf0333a6472",
+  "scores": {
+    "original_filtered": {
+      "lexical": [
+        22,
+        0
+      ],
+      "gbrain": [
+        15,
+        2
+      ],
+      "none": [
+        22,
+        0
+      ],
+      "local": [
+        24,
+        0
+      ]
+    },
+    "original_property": {
+      "lexical": [
+        22,
+        0
+      ],
+      "gbrain": [
+        5,
+        6
+      ],
+      "none": [
+        21,
+        0
+      ],
+      "local": [
+        23,
+        0
+      ]
+    },
+    "holdout_filtered": {
+      "lexical": [
+        5,
+        1
+      ],
+      "gbrain": [
+        3,
+        1
+      ],
+      "none": [
+        6,
+        1
+      ],
+      "local": [
+        6,
+        1
+      ]
+    },
+    "holdout_property": {
+      "lexical": [
+        4,
+        0
+      ],
+      "gbrain": [
+        0,
+        4
+      ],
+      "none": [
+        6,
+        0
+      ],
+      "local": [
+        5,
+        0
+      ]
+    }
+  },
+  "measurements": {
+    "lexical": {
+      "median_seconds": 0.000731
+    },
+    "gbrain": {
+      "median_seconds": 0.654271
+    },
+    "none": {
+      "streams": [
+        "entity",
+        "fts",
+        "graph",
+        "observation"
+      ],
+      "median_seconds": 0.0018,
+      "bytes": 5135456
+    },
+    "local": {
+      "streams": [
+        "entity",
+        "fts",
+        "graph",
+        "observation",
+        "vector"
+      ],
+      "median_seconds": 0.0088,
+      "bytes": 96470853
+    }
+  },
+  "rows": [
+    {
+      "question": "What is the Belaya desk's published width and depth?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "belaya",
+        "desk",
+        "published",
+        "width",
+        "depth"
+      ],
+      "lexical": [
+        "belaya-size",
+        "belaya-containment",
+        "gentle-chair"
+      ],
+      "gbrain": [],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "belaya-containment"
+      ],
+      "local": [
+        "gentle-chair",
+        "deep-chair",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "What is the Belaya desk's published width and depth?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "is",
+        "the",
+        "belaya",
+        "desk",
+        "s",
+        "published",
+        "width",
+        "and",
+        "depth"
+      ],
+      "lexical": [
+        "studio-program",
+        "belaya-size",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "mixed-scene"
+      ],
+      "local": [
+        "gentle-chair",
+        "deep-chair",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "What space does the planner reserve for Belaya?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "reserve",
+        "belaya"
+      ],
+      "lexical": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-program"
+      ],
+      "gbrain": [
+        "belaya-size",
+        "studio-program"
+      ],
+      "none": [
+        "belaya-size",
+        "mixed-scene",
+        "belaya-containment"
+      ],
+      "local": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What space does the planner reserve for Belaya?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "space",
+        "does",
+        "the",
+        "planner",
+        "reserve",
+        "for",
+        "belaya"
+      ],
+      "lexical": [
+        "studio-program",
+        "mixed-scene",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-program",
+        "belaya-size",
+        "mixed-scene"
+      ],
+      "local": [
+        "belaya-size",
+        "studio-program",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "Why does the desk reservation exceed its published depth?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "desk",
+        "reservation",
+        "published",
+        "depth"
+      ],
+      "lexical": [
+        "belaya-size",
+        "belaya-containment",
+        "charles-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "belaya-containment",
+        "charles-size"
+      ],
+      "local": [
+        "belaya-size",
+        "gentle-chair",
+        "deep-chair"
+      ]
+    },
+    {
+      "question": "Why does the desk reservation exceed its published depth?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "why",
+        "does",
+        "the",
+        "desk",
+        "reservation",
+        "exceed",
+        "its",
+        "published",
+        "depth"
+      ],
+      "lexical": [
+        "studio-program",
+        "studio-edit",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "belaya-containment",
+        "charles-size"
+      ],
+      "local": [
+        "belaya-size",
+        "belaya-containment",
+        "gentle-chair"
+      ]
+    },
+    {
+      "question": "Which oak writing desk is product B074L4976T?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "oak",
+        "desk",
+        "b074l4976t"
+      ],
+      "lexical": [
+        "belaya-size",
+        "studio-program",
+        "mixed-scene"
+      ],
+      "gbrain": [
+        "belaya-size"
+      ],
+      "none": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-program"
+      ],
+      "local": [
+        "belaya-size",
+        "studio-edit",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "Which oak writing desk is product B074L4976T?",
+      "expected_passage": "belaya-size",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "which",
+        "oak",
+        "writing",
+        "desk",
+        "is",
+        "product",
+        "b074l4976t"
+      ],
+      "lexical": [
+        "belaya-size",
+        "studio-edit",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "mixed-scene",
+        "gentle-chair"
+      ],
+      "local": [
+        "belaya-size",
+        "deep-chair",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "What are the Charles armchair published dimensions?",
+      "expected_passage": "charles-size",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "charles",
+        "armchair",
+        "published",
+        "dimensions"
+      ],
+      "lexical": [
+        "charles-size",
+        "belaya-size",
+        "mixed-scene"
+      ],
+      "gbrain": [
+        "charles-size"
+      ],
+      "none": [
+        "charles-size",
+        "belaya-size",
+        "mixed-scene"
+      ],
+      "local": [
+        "charles-size",
+        "belaya-size",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "What are the Charles armchair published dimensions?",
+      "expected_passage": "charles-size",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "are",
+        "the",
+        "charles",
+        "armchair",
+        "published",
+        "dimensions"
+      ],
+      "lexical": [
+        "charles-size",
+        "studio-program",
+        "mixed-scene"
+      ],
+      "gbrain": [
+        "charles-size"
+      ],
+      "none": [
+        "charles-size",
+        "belaya-size",
+        "mixed-scene"
+      ],
+      "local": [
+        "charles-size",
+        "belaya-size",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "How much planning depth does the Charles armchair need?",
+      "expected_passage": "charles-size",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "planning",
+        "depth",
+        "charles",
+        "armchair"
+      ],
+      "lexical": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "local": [
+        "mixed-scene",
+        "gentle-chair",
+        "charles-size"
+      ]
+    },
+    {
+      "question": "How much planning depth does the Charles armchair need?",
+      "expected_passage": "charles-size",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "how",
+        "much",
+        "planning",
+        "depth",
+        "does",
+        "the",
+        "charles",
+        "armchair",
+        "need"
+      ],
+      "lexical": [
+        "charles-size",
+        "mixed-scene",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "local": [
+        "mixed-scene",
+        "gentle-chair",
+        "charles-size"
+      ]
+    },
+    {
+      "question": "Which finish is the Charles armchair variant?",
+      "expected_passage": "charles-size",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "finish",
+        "charles",
+        "armchair"
+      ],
+      "lexical": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "charles-size",
+        "studio-edit",
+        "mixed-scene"
+      ],
+      "local": [
+        "mixed-scene",
+        "studio-edit",
+        "charles-size"
+      ]
+    },
+    {
+      "question": "Which finish is the Charles armchair variant?",
+      "expected_passage": "charles-size",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "which",
+        "finish",
+        "is",
+        "the",
+        "charles",
+        "armchair",
+        "variant"
+      ],
+      "lexical": [
+        "charles-size",
+        "studio-edit",
+        "mixed-scene"
+      ],
+      "gbrain": [],
+      "none": [
+        "charles-size",
+        "studio-edit",
+        "mixed-scene"
+      ],
+      "local": [
+        "mixed-scene",
+        "belaya-size",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "Can Charles and Belaya both render natively together?",
+      "expected_passage": "mixed-scene",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "charles",
+        "belaya",
+        "render"
+      ],
+      "lexical": [
+        "mixed-scene",
+        "belaya-size",
+        "charles-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-render",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "local": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-render"
+      ]
+    },
+    {
+      "question": "Can Charles and Belaya both render natively together?",
+      "expected_passage": "mixed-scene",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "can",
+        "charles",
+        "and",
+        "belaya",
+        "both",
+        "render",
+        "natively",
+        "together"
+      ],
+      "lexical": [
+        "mixed-scene",
+        "belaya-size",
+        "studio-identity"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-program",
+        "studio-render",
+        "mixed-scene"
+      ],
+      "local": [
+        "mixed-scene",
+        "studio-program",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "Why do mixed product scenes show placeholders?",
+      "expected_passage": "mixed-scene",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "mixed",
+        "placeholders"
+      ],
+      "lexical": [
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "gbrain": [
+        "belaya-size",
+        "mixed-scene"
+      ],
+      "none": [
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "local": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "Why do mixed product scenes show placeholders?",
+      "expected_passage": "mixed-scene",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "why",
+        "do",
+        "mixed",
+        "product",
+        "scenes",
+        "show",
+        "placeholders"
+      ],
+      "lexical": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-books"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-books"
+      ],
+      "local": [
+        "mixed-scene",
+        "belaya-size",
+        "studio-books"
+      ]
+    },
+    {
+      "question": "What is the Gentle chair's backrest bend?",
+      "expected_passage": "gentle-chair",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "gentle",
+        "chair",
+        "backrest",
+        "bend"
+      ],
+      "lexical": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "gbrain": [
+        "gentle-chair"
+      ],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What is the Gentle chair's backrest bend?",
+      "expected_passage": "gentle-chair",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "is",
+        "the",
+        "gentle",
+        "chair",
+        "s",
+        "backrest",
+        "bend"
+      ],
+      "lexical": [
+        "gentle-chair",
+        "studio-edit",
+        "studio-program"
+      ],
+      "gbrain": [
+        "gentle-chair"
+      ],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "mixed-scene"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "How wide is the Gentle writing chair?",
+      "expected_passage": "gentle-chair",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "gentle",
+        "chair"
+      ],
+      "lexical": [
+        "gentle-chair",
+        "studio-edit",
+        "deep-chair"
+      ],
+      "gbrain": [
+        "gentle-chair"
+      ],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "How wide is the Gentle writing chair?",
+      "expected_passage": "gentle-chair",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "how",
+        "wide",
+        "is",
+        "the",
+        "gentle",
+        "writing",
+        "chair"
+      ],
+      "lexical": [
+        "studio-edit",
+        "gentle-chair",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "belaya-size"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "How high is the Deep chair seat?",
+      "expected_passage": "deep-chair",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "deep",
+        "chair",
+        "seat"
+      ],
+      "lexical": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "gbrain": [
+        "deep-chair"
+      ],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "How high is the Deep chair seat?",
+      "expected_passage": "deep-chair",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "how",
+        "high",
+        "is",
+        "the",
+        "deep",
+        "chair",
+        "seat"
+      ],
+      "lexical": [
+        "studio-edit",
+        "deep-chair",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-render"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "How many closed mesh parts does Deep have?",
+      "expected_passage": "deep-chair",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "closed",
+        "mesh",
+        "parts",
+        "deep"
+      ],
+      "lexical": [
+        "deep-chair",
+        "gentle-chair",
+        "mixed-scene"
+      ],
+      "gbrain": [
+        "deep-chair"
+      ],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "charles-size"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "charles-size"
+      ]
+    },
+    {
+      "question": "How many closed mesh parts does Deep have?",
+      "expected_passage": "deep-chair",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "how",
+        "many",
+        "closed",
+        "mesh",
+        "parts",
+        "does",
+        "deep",
+        "have"
+      ],
+      "lexical": [
+        "deep-chair",
+        "gentle-chair",
+        "mixed-scene"
+      ],
+      "gbrain": [],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "charles-size"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "charles-size"
+      ]
+    },
+    {
+      "question": "How far does the Deep chair's back bend?",
+      "expected_passage": "deep-chair",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "deep",
+        "chair",
+        "bend"
+      ],
+      "lexical": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "gbrain": [
+        "deep-chair"
+      ],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "How far does the Deep chair's back bend?",
+      "expected_passage": "deep-chair",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "how",
+        "far",
+        "does",
+        "the",
+        "deep",
+        "chair",
+        "s",
+        "back",
+        "bend"
+      ],
+      "lexical": [
+        "deep-chair",
+        "studio-edit",
+        "mixed-scene"
+      ],
+      "gbrain": [],
+      "none": [
+        "deep-chair",
+        "mixed-scene",
+        "gentle-chair"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "Which palette does Studio House revision 5 use?",
+      "expected_passage": "studio-books",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "palette",
+        "studio",
+        "house",
+        "revision",
+        "5"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-publications",
+        "studio-edit",
+        "studio-books"
+      ],
+      "local": [
+        "studio-books",
+        "studio-publications",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "Which palette does Studio House revision 5 use?",
+      "expected_passage": "studio-books",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "which",
+        "palette",
+        "does",
+        "studio",
+        "house",
+        "revision",
+        "5",
+        "use"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "studio-publications",
+        "mixed-scene"
+      ],
+      "local": [
+        "studio-publications",
+        "studio-books",
+        "studio-render"
+      ]
+    },
+    {
+      "question": "What finish does revision 6 show?",
+      "expected_passage": "studio-books",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "finish",
+        "revision",
+        "6"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-identity",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-edit",
+        "studio-publications",
+        "studio-books"
+      ],
+      "local": [
+        "studio-books",
+        "studio-publications",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What finish does revision 6 show?",
+      "expected_passage": "studio-books",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "finish",
+        "does",
+        "revision",
+        "6",
+        "show"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-identity",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-edit",
+        "studio-publications",
+        "studio-books"
+      ],
+      "local": [
+        "studio-render",
+        "studio-books",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What identifies a published client book?",
+      "expected_passage": "studio-identity",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "published",
+        "client",
+        "book"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-books",
+        "studio-render"
+      ],
+      "gbrain": [
+        "studio-books",
+        "studio-identity"
+      ],
+      "none": [
+        "studio-identity",
+        "studio-books",
+        "studio-render"
+      ],
+      "local": [
+        "studio-identity",
+        "studio-books",
+        "studio-render"
+      ]
+    },
+    {
+      "question": "What identifies a published client book?",
+      "expected_passage": "studio-identity",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "identifies",
+        "a",
+        "published",
+        "client",
+        "book"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-books",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-identity",
+        "studio-books",
+        "studio-render"
+      ],
+      "local": [
+        "studio-identity",
+        "studio-books",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "Can another saved project use the same published book?",
+      "expected_passage": "studio-identity",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "project",
+        "published",
+        "book"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-publications",
+        "belaya-containment"
+      ],
+      "gbrain": [
+        "studio-identity"
+      ],
+      "none": [
+        "studio-identity",
+        "studio-publications",
+        "studio-books"
+      ],
+      "local": [
+        "studio-identity",
+        "studio-publications",
+        "studio-books"
+      ]
+    },
+    {
+      "question": "Can another saved project use the same published book?",
+      "expected_passage": "studio-identity",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "can",
+        "another",
+        "saved",
+        "project",
+        "use",
+        "the",
+        "same",
+        "published",
+        "book"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-render",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-identity",
+        "studio-render",
+        "belaya-size"
+      ],
+      "local": [
+        "studio-identity",
+        "studio-publications",
+        "studio-render"
+      ]
+    },
+    {
+      "question": "Which GPU rendered the salon daylight frame?",
+      "expected_passage": "studio-render",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "gpu",
+        "salon",
+        "daylight"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program",
+        "studio-books"
+      ],
+      "gbrain": [
+        "studio-render"
+      ],
+      "none": [
+        "studio-render",
+        "studio-books",
+        "studio-program"
+      ],
+      "local": [
+        "studio-render",
+        "studio-books",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "Which GPU rendered the salon daylight frame?",
+      "expected_passage": "studio-render",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "which",
+        "gpu",
+        "rendered",
+        "the",
+        "salon",
+        "daylight",
+        "frame"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-edit",
+        "studio-program"
+      ],
+      "gbrain": [
+        "studio-render"
+      ],
+      "none": [
+        "studio-render",
+        "studio-books",
+        "studio-program"
+      ],
+      "local": [
+        "studio-render",
+        "studio-books",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "What resolution was the revision 6 CPU proof?",
+      "expected_passage": "studio-render",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "resolution",
+        "revision",
+        "6",
+        "cpu"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-identity",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-render",
+        "studio-publications",
+        "studio-books"
+      ],
+      "local": [
+        "studio-render",
+        "studio-books",
+        "studio-publications"
+      ]
+    },
+    {
+      "question": "What resolution was the revision 6 CPU proof?",
+      "expected_passage": "studio-render",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "resolution",
+        "was",
+        "the",
+        "revision",
+        "6",
+        "cpu",
+        "proof"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-edit",
+        "studio-books"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-render",
+        "studio-books",
+        "studio-publications"
+      ],
+      "local": [
+        "studio-render",
+        "studio-books",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "How large is the seed-42 Studio House lot?",
+      "expected_passage": "studio-program",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "studio",
+        "house",
+        "lot"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-program"
+      ],
+      "gbrain": [
+        "studio-program"
+      ],
+      "none": [
+        "studio-program",
+        "studio-publications",
+        "studio-books"
+      ],
+      "local": [
+        "studio-program",
+        "studio-books",
+        "studio-publications"
+      ]
+    },
+    {
+      "question": "How large is the seed-42 Studio House lot?",
+      "expected_passage": "studio-program",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "how",
+        "large",
+        "is",
+        "the",
+        "seed",
+        "42",
+        "studio",
+        "house",
+        "lot"
+      ],
+      "lexical": [
+        "studio-program",
+        "studio-books",
+        "studio-publications"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-program",
+        "gentle-chair",
+        "studio-publications"
+      ],
+      "local": [
+        "studio-program",
+        "studio-books",
+        "studio-publications"
+      ]
+    },
+    {
+      "question": "What furniture groups are in the formal salon?",
+      "expected_passage": "studio-program",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "groups",
+        "salon"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program"
+      ],
+      "gbrain": [
+        "studio-program"
+      ],
+      "none": [
+        "studio-program",
+        "studio-render"
+      ],
+      "local": [
+        "studio-program",
+        "studio-render",
+        "studio-books"
+      ]
+    },
+    {
+      "question": "What furniture groups are in the formal salon?",
+      "expected_passage": "studio-program",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "furniture",
+        "groups",
+        "are",
+        "in",
+        "the",
+        "formal",
+        "salon"
+      ],
+      "lexical": [
+        "studio-program",
+        "studio-render",
+        "studio-edit"
+      ],
+      "gbrain": [
+        "studio-program"
+      ],
+      "none": [
+        "studio-program",
+        "studio-render"
+      ],
+      "local": [
+        "studio-program",
+        "studio-render",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "What moved when Studio House advanced to revision 6?",
+      "expected_passage": "studio-edit",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "moved",
+        "studio",
+        "house",
+        "revision",
+        "6"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-publications",
+        "studio-books",
+        "studio-render"
+      ],
+      "local": [
+        "studio-books",
+        "studio-publications",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What moved when Studio House advanced to revision 6?",
+      "expected_passage": "studio-edit",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "moved",
+        "when",
+        "studio",
+        "house",
+        "advanced",
+        "to",
+        "revision",
+        "6"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-publications",
+        "studio-books",
+        "studio-render"
+      ],
+      "local": [
+        "studio-books",
+        "studio-publications",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "Which finishes changed when the bedroom chair moved?",
+      "expected_passage": "studio-edit",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "finishes",
+        "bedroom",
+        "chair",
+        "moved"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "gentle-chair"
+      ],
+      "gbrain": [
+        "studio-edit"
+      ],
+      "none": [
+        "studio-edit",
+        "studio-program",
+        "gentle-chair"
+      ],
+      "local": [
+        "studio-edit",
+        "studio-program",
+        "gentle-chair"
+      ]
+    },
+    {
+      "question": "Which finishes changed when the bedroom chair moved?",
+      "expected_passage": "studio-edit",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "which",
+        "finishes",
+        "changed",
+        "when",
+        "the",
+        "bedroom",
+        "chair",
+        "moved"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "studio-render"
+      ],
+      "gbrain": [
+        "studio-edit"
+      ],
+      "none": [
+        "studio-edit",
+        "studio-program",
+        "gentle-chair"
+      ],
+      "local": [
+        "studio-edit",
+        "studio-program",
+        "gentle-chair"
+      ]
+    },
+    {
+      "question": "What glare in lux was measured at the Belaya monitor?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "glare",
+        "belaya"
+      ],
+      "lexical": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "mixed-scene",
+        "belaya-containment"
+      ],
+      "local": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What glare in lux was measured at the Belaya monitor?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "glare",
+        "in",
+        "lux",
+        "was",
+        "measured",
+        "at",
+        "the",
+        "belaya",
+        "monitor"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-render",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "mixed-scene",
+        "belaya-containment"
+      ],
+      "local": [
+        "belaya-size",
+        "mixed-scene",
+        "belaya-containment"
+      ]
+    },
+    {
+      "question": "Has the Deep chair passed a physical load test?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "deep",
+        "chair"
+      ],
+      "lexical": [
+        "deep-chair",
+        "studio-edit",
+        "gentle-chair"
+      ],
+      "gbrain": [
+        "deep-chair"
+      ],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "Has the Deep chair passed a physical load test?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "has",
+        "the",
+        "deep",
+        "chair",
+        "passed",
+        "a",
+        "physical",
+        "load",
+        "test"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "What is the verified retail price of the Charles armchair?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "charles",
+        "armchair"
+      ],
+      "lexical": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "gbrain": [
+        "charles-size"
+      ],
+      "none": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "local": [
+        "mixed-scene",
+        "charles-size",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "What is the verified retail price of the Charles armchair?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "is",
+        "the",
+        "verified",
+        "retail",
+        "price",
+        "of",
+        "the",
+        "charles",
+        "armchair"
+      ],
+      "lexical": [
+        "charles-size",
+        "studio-edit",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "local": [
+        "mixed-scene",
+        "charles-size",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "What is the acoustic insulation rating for Studio House?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "studio",
+        "house"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-render"
+      ],
+      "gbrain": [
+        "studio-render",
+        "studio-publications",
+        "studio-program"
+      ],
+      "none": [
+        "studio-publications",
+        "studio-books",
+        "studio-render"
+      ],
+      "local": [
+        "studio-books",
+        "studio-publications",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "What is the acoustic insulation rating for Studio House?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "is",
+        "the",
+        "acoustic",
+        "insulation",
+        "rating",
+        "for",
+        "studio",
+        "house"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-program",
+        "studio-publications"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-publications",
+        "studio-books",
+        "studio-render"
+      ],
+      "local": [
+        "studio-books",
+        "studio-publications",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "How long is the desk manufacturer's warranty?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "desk"
+      ],
+      "lexical": [
+        "belaya-size",
+        "studio-program",
+        "studio-edit"
+      ],
+      "gbrain": [
+        "studio-program",
+        "studio-edit",
+        "belaya-size"
+      ],
+      "none": [
+        "belaya-size",
+        "studio-program",
+        "studio-edit"
+      ],
+      "local": [
+        "belaya-size",
+        "studio-edit",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "How long is the desk manufacturer's warranty?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "how",
+        "long",
+        "is",
+        "the",
+        "desk",
+        "manufacturer",
+        "s",
+        "warranty"
+      ],
+      "lexical": [
+        "studio-program",
+        "studio-edit",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "mixed-scene",
+        "belaya-size",
+        "studio-program"
+      ],
+      "local": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What is the certified fire rating of the bedroom curtains?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "filtered",
+      "terms": [
+        "bedroom",
+        "curtains"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-edit",
+        "studio-program"
+      ],
+      "local": [
+        "studio-edit",
+        "studio-program",
+        "studio-books"
+      ]
+    },
+    {
+      "question": "What is the certified fire rating of the bedroom curtains?",
+      "expected_passage": "-",
+      "split": "original",
+      "mode": "property",
+      "terms": [
+        "what",
+        "is",
+        "the",
+        "certified",
+        "fire",
+        "rating",
+        "of",
+        "the",
+        "bedroom",
+        "curtains"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-edit",
+        "studio-program"
+      ],
+      "local": [
+        "studio-program",
+        "studio-edit",
+        "studio-render"
+      ]
+    },
+    {
+      "question": "What color walls followed sage in Studio House?",
+      "expected_passage": "studio-edit",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "sage",
+        "studio",
+        "house"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-render"
+      ],
+      "gbrain": [
+        "studio-books",
+        "studio-edit"
+      ],
+      "none": [
+        "studio-books",
+        "studio-edit",
+        "studio-publications"
+      ],
+      "local": [
+        "studio-books",
+        "studio-edit",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "What color walls followed sage in Studio House?",
+      "expected_passage": "studio-edit",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "what",
+        "color",
+        "walls",
+        "followed",
+        "sage",
+        "in",
+        "studio",
+        "house"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-edit",
+        "studio-books",
+        "studio-render"
+      ],
+      "local": [
+        "studio-books",
+        "studio-edit",
+        "studio-render"
+      ]
+    },
+    {
+      "question": "Which accelerator was used for the salon lighting render?",
+      "expected_passage": "studio-render",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "salon",
+        "lighting",
+        "render"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-render",
+        "studio-program"
+      ],
+      "local": [
+        "studio-render",
+        "studio-program",
+        "studio-books"
+      ]
+    },
+    {
+      "question": "Which accelerator was used for the salon lighting render?",
+      "expected_passage": "studio-render",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "which",
+        "accelerator",
+        "was",
+        "used",
+        "for",
+        "the",
+        "salon",
+        "lighting",
+        "render"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-render",
+        "studio-program"
+      ],
+      "local": [
+        "studio-render",
+        "studio-program",
+        "studio-books"
+      ]
+    },
+    {
+      "question": "What is the recorded depth of the native Charles planning box?",
+      "expected_passage": "charles-size",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "depth",
+        "native",
+        "charles",
+        "planning"
+      ],
+      "lexical": [
+        "mixed-scene",
+        "charles-size",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "local": [
+        "mixed-scene",
+        "belaya-size",
+        "charles-size"
+      ]
+    },
+    {
+      "question": "What is the recorded depth of the native Charles planning box?",
+      "expected_passage": "charles-size",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "what",
+        "is",
+        "the",
+        "recorded",
+        "depth",
+        "of",
+        "the",
+        "native",
+        "charles",
+        "planning",
+        "box"
+      ],
+      "lexical": [
+        "studio-program",
+        "studio-edit",
+        "mixed-scene"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-containment",
+        "charles-size",
+        "mixed-scene"
+      ],
+      "local": [
+        "mixed-scene",
+        "belaya-containment",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "Which archive specifies the shallow chair back curvature?",
+      "expected_passage": "gentle-chair",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "chair"
+      ],
+      "lexical": [
+        "studio-edit",
+        "gentle-chair",
+        "deep-chair"
+      ],
+      "gbrain": [
+        "studio-edit",
+        "studio-program",
+        "studio-render"
+      ],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "Which archive specifies the shallow chair back curvature?",
+      "expected_passage": "gentle-chair",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "which",
+        "archive",
+        "specifies",
+        "the",
+        "shallow",
+        "chair",
+        "back",
+        "curvature"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What does Town compare to offer a published client PDF?",
+      "expected_passage": "studio-identity",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "published",
+        "client"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-books",
+        "belaya-containment"
+      ],
+      "gbrain": [
+        "studio-books",
+        "studio-identity"
+      ],
+      "none": [
+        "studio-books",
+        "studio-identity",
+        "studio-render"
+      ],
+      "local": [
+        "studio-books",
+        "studio-identity",
+        "belaya-size"
+      ]
+    },
+    {
+      "question": "What does Town compare to offer a published client PDF?",
+      "expected_passage": "studio-identity",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "what",
+        "does",
+        "town",
+        "compare",
+        "to",
+        "offer",
+        "a",
+        "published",
+        "client",
+        "pdf"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-edit",
+        "studio-books"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-identity",
+        "studio-books",
+        "studio-publications"
+      ],
+      "local": [
+        "studio-identity",
+        "studio-books",
+        "studio-publications"
+      ]
+    },
+    {
+      "question": "Which two seating activities share the formal salon?",
+      "expected_passage": "studio-program",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "salon"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program"
+      ],
+      "gbrain": [
+        "studio-render",
+        "studio-program"
+      ],
+      "none": [
+        "studio-render",
+        "studio-program"
+      ],
+      "local": [
+        "studio-program",
+        "studio-render",
+        "studio-books"
+      ]
+    },
+    {
+      "question": "Which two seating activities share the formal salon?",
+      "expected_passage": "studio-program",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "which",
+        "two",
+        "seating",
+        "activities",
+        "share",
+        "the",
+        "formal",
+        "salon"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program",
+        "studio-edit"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-program",
+        "studio-render"
+      ],
+      "local": [
+        "studio-program",
+        "studio-render",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What fire resistance certification does the deep chair hold?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "deep",
+        "chair"
+      ],
+      "lexical": [
+        "deep-chair",
+        "studio-edit",
+        "gentle-chair"
+      ],
+      "gbrain": [
+        "deep-chair"
+      ],
+      "none": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What fire resistance certification does the deep chair hold?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "what",
+        "fire",
+        "resistance",
+        "certification",
+        "does",
+        "the",
+        "deep",
+        "chair",
+        "hold"
+      ],
+      "lexical": [
+        "studio-edit",
+        "mixed-scene",
+        "studio-program"
+      ],
+      "gbrain": [],
+      "none": [
+        "deep-chair",
+        "mixed-scene",
+        "gentle-chair"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "What is the measured solar heat gain in the study?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [],
+      "lexical": [],
+      "gbrain": [],
+      "none": [],
+      "local": []
+    },
+    {
+      "question": "What is the measured solar heat gain in the study?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "what",
+        "is",
+        "the",
+        "measured",
+        "solar",
+        "heat",
+        "gain",
+        "in",
+        "the",
+        "study"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "studio-program"
+      ],
+      "local": [
+        "studio-program",
+        "studio-render",
+        "charles-size"
+      ]
+    },
+    {
+      "question": "What was the manufacturing cost of the Gentle chair?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "gentle",
+        "chair"
+      ],
+      "lexical": [
+        "gentle-chair",
+        "studio-edit",
+        "deep-chair"
+      ],
+      "gbrain": [
+        "gentle-chair"
+      ],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ]
+    },
+    {
+      "question": "What was the manufacturing cost of the Gentle chair?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "what",
+        "was",
+        "the",
+        "manufacturing",
+        "cost",
+        "of",
+        "the",
+        "gentle",
+        "chair"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "studio-render"
+      ],
+      "gbrain": [],
+      "none": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "local": [
+        "deep-chair",
+        "gentle-chair",
+        "mixed-scene"
+      ]
+    },
+    {
+      "question": "What load in kilograms is the Belaya desk rated for?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "filtered",
+      "terms": [
+        "belaya",
+        "desk"
+      ],
+      "lexical": [
+        "belaya-size",
+        "studio-program",
+        "mixed-scene"
+      ],
+      "gbrain": [
+        "belaya-size",
+        "studio-program",
+        "studio-edit"
+      ],
+      "none": [
+        "belaya-size",
+        "studio-program",
+        "studio-edit"
+      ],
+      "local": [
+        "belaya-size",
+        "studio-edit",
+        "studio-program"
+      ]
+    },
+    {
+      "question": "What load in kilograms is the Belaya desk rated for?",
+      "expected_passage": "-",
+      "split": "holdout",
+      "mode": "property",
+      "terms": [
+        "what",
+        "load",
+        "in",
+        "kilograms",
+        "is",
+        "the",
+        "belaya",
+        "desk",
+        "rated",
+        "for"
+      ],
+      "lexical": [
+        "studio-program",
+        "studio-edit",
+        "belaya-size"
+      ],
+      "gbrain": [],
+      "none": [
+        "belaya-size",
+        "studio-program",
+        "studio-edit"
+      ],
+      "local": [
+        "belaya-size",
+        "studio-edit",
+        "mixed-scene"
+      ]
+    }
+  ]
+}
