@@ -1,0 +1,38 @@
+name: Local design evidence pilot
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/design-evidence.yml'
+      - 'src/archimind/design_evidence.py'
+      - 'data/design_evidence/**'
+      - 'data/benchmarks/design_evidence.tsv'
+      - 'scripts/*design_evidence.py'
+      - 'tests/test_design_evidence.py'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  attestations: read
+
+jobs:
+  installed:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - name: Acquire verified Linux release
+        run: python -m archimind.design_evidence install
+        env:
+          GH_TOKEN: ${{ github.token }}
+      - name: Rebuild and query with external networking disabled
+        run: |
+          python_bin=$(command -v python)
+          sudo unshare --net -- sudo -u "$(id -un)" env PYTHONPATH=src "$python_bin" scripts/check_design_evidence.py
