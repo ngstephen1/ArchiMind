@@ -3,11 +3,36 @@
 </p>
 
 <p align="center">
-  <a href="https://www.python.org/"><img src="docs/assets/python.svg" alt="Python" height="36" /></a>
-  <a href="https://streamlit.io/"><img src="docs/assets/streamlit.svg" alt="Streamlit" height="36" /></a>
-  <a href="https://docs.pydantic.dev/"><img src="docs/assets/pydantic.svg" alt="Pydantic" height="36" /></a>
-  <a href="https://docs.pytest.org/"><img src="docs/assets/pytest.svg" alt="pytest" height="36" /></a>
-  <a href="https://docs.astral.sh/ruff/"><img src="docs/assets/ruff.svg" alt="Ruff" height="36" /></a>
+  <strong>Application and agents</strong><br />
+  <a href="https://www.python.org/"><img src="docs/assets/python.svg" alt="Python" height="32" /></a>
+  <a href="https://streamlit.io/"><img src="docs/assets/streamlit.svg" alt="Streamlit" height="32" /></a>
+  <a href="https://docs.pydantic.dev/"><img src="docs/assets/pydantic.svg" alt="Pydantic" height="32" /></a>
+  <a href="https://github.com/langchain-ai/langgraph"><img src="docs/assets/langgraph.svg" alt="LangGraph" height="32" /></a>
+  <a href="docs/developer/CHAT_BEDROOM.md"><img src="docs/assets/openai.svg" alt="OpenAI (optional live interpretation and advice)" height="32" /></a>
+</p>
+
+<p align="center">
+  <strong>Visualization and asset authoring</strong><br />
+  <a href="https://plotly.com/python/"><img src="docs/assets/plotly.svg" alt="Plotly" height="32" /></a>
+  <a href="https://threejs.org/"><img src="docs/assets/threejs.svg" alt="Three.js" height="32" /></a>
+  <a href="https://www.khronos.org/gltf/"><img src="docs/assets/gltf.svg" alt="glTF (GLB assets)" height="32" /></a>
+  <a href="docs/developer/DESIGNER_CHAIR_AUTHORING.md"><img src="docs/assets/blender.svg" alt="Blender" height="32" /></a>
+  <a href="docs/developer/DESIGNER_CHAIR_AUTHORING.md"><img src="docs/assets/mcp.svg" alt="Model Context Protocol for Blender authoring" height="32" /></a>
+  <a href="docs/developer/RHINO_CHAIR.md"><img src="docs/assets/rhino.svg" alt="Rhino 3DM (offline CAD exchange)" height="32" /></a>
+</p>
+
+<p align="center">
+  <strong>Town storage and hosting</strong><br />
+  <a href="https://sqlite.org/"><img src="docs/assets/sqlite.svg" alt="SQLite (local Town storage)" height="32" /></a>
+  <a href="https://www.postgresql.org/"><img src="docs/assets/postgresql.svg" alt="PostgreSQL (hosted Town storage)" height="32" /></a>
+  <a href="https://supabase.com/"><img src="docs/assets/supabase.svg" alt="Supabase (hosted authentication and database)" height="32" /></a>
+  <a href="docs/developer/TOWN.md"><img src="docs/assets/vercel.svg" alt="Vercel (static Town frontend)" height="32" /></a>
+</p>
+
+<p align="center">
+  <strong>Development checks</strong><br />
+  <a href="https://docs.pytest.org/"><img src="docs/assets/pytest.svg" alt="pytest" height="32" /></a>
+  <a href="https://docs.astral.sh/ruff/"><img src="docs/assets/ruff.svg" alt="Ruff" height="32" /></a>
 </p>
 
 <p align="center">
@@ -1031,6 +1056,7 @@ claim. Task 05B exposes these same results in Streamlit alongside the Task 03 pr
 | Spatial geometry | Shapely 2.2.0 | Zero-rotation furniture containment and overlap checks |
 | Backend orchestration | LangGraph 1.2.18 | Bounded default workflow and optional post-critic recommendation |
 | Optional model adapters | OpenAI SDK 3.40.0 | Separately gated requirements, layout advice, design critique and standalone style planning; mock-verified |
+| Town persistence | SQLite locally, PostgreSQL in hosted mode | Saved projects, revisions and worker jobs |
 | Testing | pytest 9.1.1 | Smoke, model, renderer, and preview integration tests |
 | Code quality | Ruff 0.17.3 | Linting and formatting |
 | Packaging | build 1.6.1 + setuptools | Wheel and source distributions |
@@ -1045,7 +1071,6 @@ future tools are not added to project requirements prematurely.
 | :--- | :--- |
 | Further agent reasoning | Existing LangGraph + OpenAI backend |
 | 3D export | Trimesh |
-| Local persistence | SQLite |
 
 ## Quality checks
 
