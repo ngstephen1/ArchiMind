@@ -263,7 +263,12 @@ def test_designer_chair_preview_apply_fallback_and_undo(local, monkeypatch):
 
     binding = {"concept_id": "fixture-chair", "version": "1.0.0", "sha256": "1" * 64}
     chair = SimpleNamespace(
-        **binding, width_m=0.47, depth_m=0.50, height_m=0.83, name="Fixture chair"
+        **binding,
+        width_m=0.47,
+        depth_m=0.50,
+        height_m=0.83,
+        name="Fixture chair",
+        variant_label="Gentle back",
     )
     monkeypatch.setattr(designer_chair, "approved_chairs", lambda: ())
     assert local.get("/api/designer-chairs").json() == {"chairs": []}
@@ -292,6 +297,7 @@ def test_designer_chair_preview_apply_fallback_and_undo(local, monkeypatch):
         "binding": binding,
         "name": "Fixture chair",
         "dimensions_wdh_m": [0.47, 0.5, 0.83],
+        "variant_label": "Gentle back",
     }
     assert home["id"] == digest({k: v for k, v in home.items() if k != "id"})
     original = copy.deepcopy(home)

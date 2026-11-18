@@ -122,6 +122,7 @@ def test_explicit_chair_selection_preview_build_and_frozen_ab(monkeypatch):
 
     chair = SimpleNamespace(
         name="Fixture writing chair",
+        variant_label="Gentle back",
         concept_id="fixture-chair",
         version="1.0.0",
         sha256="b" * 64,

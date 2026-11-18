@@ -54,7 +54,11 @@ def _review_designer_chair():
         if key is None:
             return "No additional chair"
         chair = options.get(key)
-        return f"{chair.name} · v{chair.version}" if chair else "Unavailable chair"
+        return (
+            f"{chair.name} · {chair.variant_label} · v{chair.version}"
+            if chair
+            else "Unavailable chair"
+        )
 
     choices = [None, *options]
     if previous and previous not in choices:

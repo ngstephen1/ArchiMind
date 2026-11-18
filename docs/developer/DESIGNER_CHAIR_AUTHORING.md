@@ -31,6 +31,7 @@ Use Blender 5.1+ in a dedicated operator environment. The add-on runs Python wit
 
    ```python
    import runpy
+
    recipe = runpy.run_path("/absolute/checkout/scripts/author_designer_chair.py")
    result = recipe["author_chair"]("/absolute/operator/gentle", "gentle")
    ```
@@ -65,3 +66,5 @@ GLOBAL_TIMEOUT_SCALE=10 "$author_root/operator/bin/python" scripts/test_blender_
 Both variants passed the Linux Blender 5.1.2 operator exercise at commit `c223397`. The run used the real upstream MCP server and add-on in background mode. The interactive Codex setup above can be checked separately on the operator workstation. [CI run with candidate artifacts](https://github.com/ngstephen1/ArchiMind/actions/runs/44219907523)
 
 If a render or connection ends before the receipt arrives, inspect the operator console and the original output directory first. Use a fresh directory for a new run. Keep both preview views and source together when submitting a candidate for review. Stop the loopback listener from the add-on preferences when the session ends.
+
+The app opens the approved GLBs through **3D Studio → Add a designer chair** or the **Town editor → Bedroom chair** picker. Both released versions also have millimetre-scale Rhino 8 archives with editable part skins and backrest curves. [Rhino CAD and Codex operator instructions](RHINO_CHAIR.md)

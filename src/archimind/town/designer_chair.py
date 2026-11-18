@@ -13,6 +13,7 @@ def chair_options():
             "version": chair.version,
             "sha256": chair.sha256,
             "name": chair.name,
+            "variant_label": chair.variant_label,
             "width_m": chair.width_m,
             "depth_m": chair.depth_m,
             "height_m": chair.height_m,
@@ -63,6 +64,7 @@ def chair_change(q, owner, project, data, *, apply):
         "binding": binding,
         "name": chair.name,
         "dimensions_wdh_m": list(dimensions),
+        "variant_label": chair.variant_label,
     }
     validate_home(home)
     del home["id"]

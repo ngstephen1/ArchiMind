@@ -70,6 +70,9 @@ function resetChairPreview() {
 }
 function sync(data) {
   resetChairPreview();
+  releasedChairs = [];
+  el("chairChoice").replaceChildren();
+  el("chairPicker").hidden = el("chairPreview").hidden = true;
   revision = data.revision;
   if (data.history) {
     el("briefHistory").hidden = !data.history.length;
@@ -459,7 +462,7 @@ bind("undo", async () => {
 });
 
 el("chairStudio").ontoggle = async () => {
-  if (!el("chairStudio").open || chairPreview) return;
+  if (!el("chairStudio").open || chairPreview || releasedChairs.length) return;
   const epoch = ++chairEpoch;
   el("chairPicker").hidden = el("chairPreview").hidden = true;
   el("chairNotice").textContent = "Checking released chairs…";
@@ -468,7 +471,7 @@ el("chairStudio").ontoggle = async () => {
     if (epoch !== chairEpoch) return;
     releasedChairs = chairs;
     el("chairChoice").replaceChildren(
-      ...chairs.map((c, i) => new Option(c.name + " · " + c.version, String(i))),
+      ...chairs.map((c, i) => new Option(c.name + " · " + c.variant_label + " · " + c.version, String(i))),
     );
     el("chairPicker").hidden = el("chairPreview").hidden = !chairs.length;
     el("chairNotice").textContent = chairs.length
@@ -569,7 +572,7 @@ el("present").onclick = async () => {
         node(
           "div",
           (f.id === "desk-chair" && p.designer_chair
-            ? p.designer_chair.name + " · Designer concept v" + p.designer_chair.binding.version +
+            ? p.designer_chair.name + (p.designer_chair.variant_label ? " · " + p.designer_chair.variant_label : "") + " · Designer concept v" + p.designer_chair.binding.version +
               " · Native " + p.designer_chair.dimensions_wdh_m.join(" × ") + " m · Reservation"
             : f.name) +
             " · " +

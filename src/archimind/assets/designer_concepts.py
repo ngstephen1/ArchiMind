@@ -22,6 +22,13 @@ class DesignerChair:
     height_m: float
     bytes: int
 
+    @property
+    def variant_label(self):
+        # The reviewed bend is the distinguishing dimension of these releases.
+        return {"1.0.0": "Gentle back (42 mm)", "1.1.0": "Deep back (71 mm)"}.get(
+            self.version, f"Version {self.version}"
+        )
+
 
 def _dir():
     return files("archimind").joinpath("_viewer_assets")
