@@ -72,6 +72,46 @@
         "depth_m": 0.52,
         "height_m": 0.83
       }
+    ],
+    "lamp": [
+      {
+        "asset_id": "polyhaven:desk_lamp_arm_01",
+        "width_m": 0.202,
+        "depth_m": 0.614,
+        "height_m": 0.893
+      }
+    ],
+    "table": [
+      {
+        "asset_id": "polyhaven:side_table_01",
+        "width_m": 0.55,
+        "depth_m": 0.45,
+        "height_m": 0.551
+      }
+    ],
+    "desk": [
+      {
+        "asset_id": "polyhaven:SchoolDesk_01",
+        "width_m": 0.712,
+        "depth_m": 0.546,
+        "height_m": 0.883
+      }
+    ],
+    "storage": [
+      {
+        "asset_id": "polyhaven:ClassicNightstand_01",
+        "width_m": 0.568,
+        "depth_m": 0.424,
+        "height_m": 0.7
+      }
+    ],
+    "armchair": [
+      {
+        "asset_id": "polyhaven:modern_arm_chair_01",
+        "width_m": 0.82,
+        "depth_m": 0.987,
+        "height_m": 1.023
+      }
     ]
   },
   "decor": {

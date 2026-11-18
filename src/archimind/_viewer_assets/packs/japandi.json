@@ -63,7 +63,46 @@
       "tint": "#4a4a46"
     }
   },
-  "furniture": {},
+  "furniture": {
+    "lamp": [
+      {
+        "asset_id": "polyhaven:desk_lamp_arm_01",
+        "width_m": 0.202,
+        "depth_m": 0.614,
+        "height_m": 0.893
+      }
+    ],
+    "table": [
+      {
+        "asset_id": "polyhaven:chinese_tea_table",
+        "width_m": 0.841,
+        "depth_m": 0.836,
+        "height_m": 0.499
+      },
+      {
+        "asset_id": "polyhaven:folding_wooden_stool",
+        "width_m": 0.528,
+        "depth_m": 0.547,
+        "height_m": 0.442
+      }
+    ],
+    "chair": [
+      {
+        "asset_id": "polyhaven:chinese_stool",
+        "width_m": 0.599,
+        "depth_m": 0.506,
+        "height_m": 0.631
+      }
+    ],
+    "armchair": [
+      {
+        "asset_id": "polyhaven:chinese_armchair",
+        "width_m": 0.848,
+        "depth_m": 0.789,
+        "height_m": 1.587
+      }
+    ]
+  },
   "decor": {
     "rug": null,
     "art": null,

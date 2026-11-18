@@ -56,6 +56,21 @@ def test_binding_picks_first_choice_that_fits():
     }
 
 
+def test_pack_model_must_fill_most_of_its_reservation():
+    # A nightstand fits inside a bookcase reservation but would misstate the plan.
+    pack = _pack_with(
+        "storage",
+        ("polyhaven:nightstand", 0.57, 0.42, 0.7),
+        ("polyhaven:shelves", 0.9, 0.45, 1.7),
+    )
+    bookcase = _item("bookcase", "storage", 1.0, 0.5, 1.8)
+    (binding,) = bind_furniture(_design(bookcase), pack)
+    assert binding.asset_id == "polyhaven:shelves"
+    only_small = _pack_with("storage", ("polyhaven:nightstand", 0.57, 0.42, 0.7))
+    (binding,) = bind_furniture(_design(bookcase), only_small)
+    assert binding.reason == "procedural_fallback"
+
+
 def test_designer_choice_is_reported_as_designer():
     (binding,) = bind_furniture(
         _design(_item("desk-chair", "chair", 0.48, 0.52, 0.83)),
@@ -122,3 +137,27 @@ def test_town_rooms_carry_style_payload_and_locked_room_is_redressed():
         assert after["style"]["style_pack"]["id"] == "japandi"
     # The home digest covers each room's style payload.
     assert styled["id"] != home["id"]
+
+
+def test_pack_furniture_choices_are_released_models_with_measured_sizes():
+    from archimind.style_packs import all_packs, load_releases
+    from archimind.style_packs.release import verify_release
+
+    releases = load_releases()
+    measured = 0
+    for pack in all_packs():
+        for choices in pack.furniture.values():
+            for choice in choices:
+                if choice.asset_id.startswith("designer:"):
+                    continue
+                release = releases[choice.asset_id]
+                assert release.kind == "model"
+                (x0, y0, z0), (x1, y1, z1) = verify_release(release)[choice.asset_id][
+                    "bounds_xyz"
+                ]
+                # glTF native frame: x = width, z = depth, y = height.
+                assert abs(choice.width_m - (x1 - x0)) < 0.01, choice.asset_id
+                assert abs(choice.depth_m - (z1 - z0)) < 0.01, choice.asset_id
+                assert abs(choice.height_m - (y1 - y0)) < 0.01, choice.asset_id
+                measured += 1
+    assert measured >= 20

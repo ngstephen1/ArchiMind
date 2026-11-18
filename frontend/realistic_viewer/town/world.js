@@ -19,6 +19,7 @@ import { wallQuads } from "../src/room_geometry.js";
 import { buildDressing } from "../src/dressing.js";
 import { createPlanSweep } from "../src/plan_sweep.js";
 import { dressFurniture } from "../src/pack_furniture.js";
+import { FLOOR_SLAB, dressingOrigin } from "./floor.js";
 
 export function createTown(canvas, status, action) {
   const renderer = new T.WebGLRenderer({
@@ -452,7 +453,7 @@ export function createTown(canvas, status, action) {
     for (const part of home.rooms) {
       if (!Array.isArray(part.style?.dressing)) continue;
       const holder = new T.Group();
-      holder.position.set(part.origin[0], 0, -part.origin[1]);
+      holder.position.set(...dressingOrigin(part));
       interior.add(holder);
       decor.push({ holder, handle: buildDressing(holder, part.style.dressing, pack, packTier) });
       if (Array.isArray(part.style.bindings))
@@ -844,10 +845,10 @@ export function createTown(canvas, status, action) {
       const flooring = block(
         group,
         r.width_m / 2,
-        0.008,
+        FLOOR_SLAB.centerY,
         -r.depth_m / 2,
         r.width_m,
-        0.014,
+        FLOOR_SLAB.height,
         r.depth_m,
         r.id === "bathroom" ? "#b4b8b1" : "#ba9a70",
       );

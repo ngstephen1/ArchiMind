@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import {loadStylePack, kelvinToColor} from '../src/style_pack.js';
+import {loadStylePack, kelvinToColor, embeddedResourceOnly} from '../src/style_pack.js';
 import {buildFixture, fakeFetch, fakeDecodeTexture, fakeParseEnvironment, fakeParseModel, pathFor, ref} from './fixtures/style_pack_fixture.js';
 
 const load = (fixture, opts = {}, extra = {}) => loadStylePack({baseUrl: '/', ref, tier: 'low', fetchBytes: fakeFetch(fixture, opts),
@@ -140,4 +140,12 @@ test('a released surface with a tint multiplies its texture by that colour', asy
   assert.ok(pack.surface('trim').map);
   assert.equal(pack.surface('trim').color.getHexString(), 'c8a165');
   assert.equal(pack.surface('floor').color.getHexString(), 'ffffff');
+});
+
+test('pack models may read their own embedded images but never an external URL', () => {
+  // GLTFLoader turns a GLB's embedded images into blob: URLs before loading them.
+  assert.equal(embeddedResourceOnly('blob:http://127.0.0.1/abc'), 'blob:http://127.0.0.1/abc');
+  assert.equal(embeddedResourceOnly('data:image/png;base64,AAAA'), 'data:image/png;base64,AAAA');
+  for (const url of ['https://example.com/t.jpg', 'textures/wood.jpg', '/packs/x.webp'])
+    assert.throws(() => embeddedResourceOnly(url), /External model resource/);
 });

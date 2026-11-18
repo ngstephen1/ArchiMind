@@ -27,7 +27,11 @@ def test_asset_provenance_file_and_model_license():
     for name in ("README.md", "UPSTREAM_LICENSE.md", "CC0-1.0.txt", "CC-BY-4.0.txt"):
         assert (path.parent / name).is_file()
     assert "CC-BY-4.0" in (path.parent / "README.md").read_text()
-    assert {p.name for p in viewer.ASSET_DIR.rglob("*.glb")} == {
+    # Style-pack models are content-addressed and governed by packs/releases.json.
+    packs = viewer.ASSET_DIR / "packs"
+    assert {
+        p.name for p in viewer.ASSET_DIR.rglob("*.glb") if packs not in p.parents
+    } == {
         "SheenChair.glb",
         "CharlesArmchair.glb",
         "BelayaDesk.glb",

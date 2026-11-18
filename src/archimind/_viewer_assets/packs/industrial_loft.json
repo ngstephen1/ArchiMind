@@ -66,7 +66,68 @@
       "tint": null
     }
   },
-  "furniture": {},
+  "furniture": {
+    "lamp": [
+      {
+        "asset_id": "polyhaven:desk_lamp_arm_01",
+        "width_m": 0.202,
+        "depth_m": 0.614,
+        "height_m": 0.893
+      }
+    ],
+    "table": [
+      {
+        "asset_id": "polyhaven:industrial_coffee_table",
+        "width_m": 0.778,
+        "depth_m": 0.758,
+        "height_m": 0.638
+      },
+      {
+        "asset_id": "polyhaven:metal_stool_02",
+        "width_m": 0.448,
+        "depth_m": 0.473,
+        "height_m": 0.458
+      }
+    ],
+    "desk": [
+      {
+        "asset_id": "polyhaven:metal_office_desk",
+        "width_m": 2.0,
+        "depth_m": 0.947,
+        "height_m": 0.788
+      }
+    ],
+    "chair": [
+      {
+        "asset_id": "polyhaven:dining_chair_02",
+        "width_m": 0.434,
+        "depth_m": 0.576,
+        "height_m": 0.973
+      },
+      {
+        "asset_id": "polyhaven:metal_stool_02",
+        "width_m": 0.448,
+        "depth_m": 0.473,
+        "height_m": 0.458
+      }
+    ],
+    "storage": [
+      {
+        "asset_id": "polyhaven:steel_frame_shelves_03",
+        "width_m": 2.351,
+        "depth_m": 0.721,
+        "height_m": 2.312
+      }
+    ],
+    "sofa": [
+      {
+        "asset_id": "polyhaven:sofa_02",
+        "width_m": 1.807,
+        "depth_m": 0.818,
+        "height_m": 0.709
+      }
+    ]
+  },
   "decor": {
     "rug": null,
     "art": null,

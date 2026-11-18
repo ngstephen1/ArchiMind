@@ -33,11 +33,11 @@
     },
     "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
       "before_sha256": "cd06cfd0faa200f053a40fbe02b15590a3b6e3da085191b831dc012f7aec2e48",
-      "after_sha256": "a40d5bf9f825f852ec072cb6e42d0f0aa91fd22555fbe5450dcf68c0ac4dc588"
+      "after_sha256": "d9875a41ae0bd4625fda2e4d88ab77736bb14a214e7be6257eaa984c5aef9a22"
     },
     "src/archimind/_viewer_assets/viewer.js": {
       "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
-      "after_sha256": "b9b8110c933797c0af1c8e9474bf3ebd7a99c9dd113af6f16fdee719407f09ef"
+      "after_sha256": "d4abd11b97e352523437c68345bcfe7e4cd619e5619c1fc0c36609c7615bf3c9"
     },
     "src/archimind/render/floorplan_2d.py": {
       "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",

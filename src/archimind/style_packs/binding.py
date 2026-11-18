@@ -21,6 +21,16 @@ class PackBinding(BaseModel):
     reason: Literal["pack", "designer", "procedural_fallback"]
 
 
+# A model must cover this share of its reservation's footprint and height,
+# so a small piece never stands in for a large one.
+MIN_FILL = 0.5
+
+
+def _fills(choice, item) -> bool:
+    footprint = (choice.width_m * choice.depth_m) / (item.width_m * item.depth_m)
+    return footprint >= MIN_FILL and choice.height_m >= MIN_FILL * item.height_m
+
+
 def bind_furniture(design: RoomDesign, pack: StylePack) -> list[PackBinding]:
     """One binding per furniture item, in furniture-ID order."""
     bindings = []
@@ -37,6 +47,7 @@ def bind_furniture(design: RoomDesign, pack: StylePack) -> list[PackBinding]:
                 if c.width_m <= item.width_m + _EPS
                 and c.depth_m <= item.depth_m + _EPS
                 and c.height_m <= item.height_m + _EPS
+                and _fills(c, item)
             ),
             None,
         )

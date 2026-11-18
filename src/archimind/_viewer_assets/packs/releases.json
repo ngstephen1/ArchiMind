@@ -108,6 +108,96 @@
     ]
   },
   {
+    "asset_id": "polyhaven:ArmChair_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/ArmChair_01",
+    "upstream_checksum": "md5:39d1e4b0ffdde688c98335c9621e3aae",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "b94c509feec89be4895529807d6c0258124f656d9bee91088d0e260c3c529a26",
+        "ext": "glb",
+        "bytes": 768184,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:ClassicNightstand_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/ClassicNightstand_01",
+    "upstream_checksum": "md5:8c2c91db450dd05773d052450e5b5816",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "f621e3334a465c845cf59ae19bf694436dc71b68a049cbc5219e8c77b33fb9a5",
+        "ext": "glb",
+        "bytes": 443948,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:GreenChair_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/GreenChair_01",
+    "upstream_checksum": "md5:a891e84c1aa77d8f163609b347c1b421",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "b20c2ec1cc8b94de3616cf30e2403e6e701ef48e090cce7f4e9521bfdcd26503",
+        "ext": "glb",
+        "bytes": 607076,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:SchoolDesk_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/SchoolDesk_01",
+    "upstream_checksum": "md5:f327b010a117ab6af3dec7538cdf23ee",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "250585f12e7e089a3cf1e30bc7abe6da05afe1f2560ba3efb9a490723030e684",
+        "ext": "glb",
+        "bytes": 420656,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:Sofa_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/Sofa_01",
+    "upstream_checksum": "md5:b5f8106d38a9e8dcb52b883663bbeed1",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "15c4e0560fcdc0f8d0f09aea5d0e7748e9c36eb3a3fe69448c72235b67345e28",
+        "ext": "glb",
+        "bytes": 516996,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
     "asset_id": "polyhaven:american_walnut_veneer",
     "kind": "material",
     "license": "CC0-1.0",
@@ -243,6 +333,60 @@
     ]
   },
   {
+    "asset_id": "polyhaven:chinese_armchair",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/chinese_armchair",
+    "upstream_checksum": "md5:ecad26c95dbf2c7e631f848711700678",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "4dea6a578030d0ed70b30b508d68f016c1fdc7e7c61a560a5cfbbeae3332839e",
+        "ext": "glb",
+        "bytes": 1702284,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:chinese_stool",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/chinese_stool",
+    "upstream_checksum": "md5:260547e2e492af393aedd6a6a460c3a1",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "26c3185954b08b5f9f66058b4eebc1b950c72391dbd47d5cc1fd679e4f5e0d75",
+        "ext": "glb",
+        "bytes": 1792056,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:chinese_tea_table",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/chinese_tea_table",
+    "upstream_checksum": "md5:742112f24cdcf8c357aacc8f255664e5",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "6505e201a93f3d6a18bb7187a8f583290e31cc2aa73b3bd07df6c4631832563b",
+        "ext": "glb",
+        "bytes": 1580268,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
     "asset_id": "polyhaven:concrete_floor_02",
     "kind": "material",
     "license": "CC0-1.0",
@@ -329,6 +473,60 @@
         "bytes": 127264,
         "width_px": 1024,
         "height_px": 1024
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:desk_lamp_arm_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/desk_lamp_arm_01",
+    "upstream_checksum": "md5:29b204485d30e66ee3f183ef45bf4bb3",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "a53eeb902e0b5cdbb8cffa5cec038ce55d39c2c6ff8d789c15522ce4d8deb4d3",
+        "ext": "glb",
+        "bytes": 2874264,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:dining_chair_02",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/dining_chair_02",
+    "upstream_checksum": "md5:5aff75016e0943e84161de89dcc3ceb8",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "3b548b21fb89defc5708db46c0e9a048497b014329d510cbf8e7eb3ce1bbffa3",
+        "ext": "glb",
+        "bytes": 920096,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:folding_wooden_stool",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/folding_wooden_stool",
+    "upstream_checksum": "md5:a19174156f8a643c4f2cb14345beb204",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "c60a9385493c29f52b0883feacb118696d2f32de9850aaee9bbf77b72b1e666e",
+        "ext": "glb",
+        "bytes": 2266904,
+        "width_px": null,
+        "height_px": null
       }
     ]
   },
@@ -464,6 +662,24 @@
         "bytes": 5772,
         "width_px": 1024,
         "height_px": 1024
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:industrial_coffee_table",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/industrial_coffee_table",
+    "upstream_checksum": "md5:d6ca679d734d048126e431841052259d",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "c1c7bbf88d2686ca9ef3dcd772ab148bc158f42d291c2399b789ed65010761db",
+        "ext": "glb",
+        "bytes": 3243632,
+        "width_px": null,
+        "height_px": null
       }
     ]
   },
@@ -630,6 +846,96 @@
     ]
   },
   {
+    "asset_id": "polyhaven:metal_office_desk",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/metal_office_desk",
+    "upstream_checksum": "md5:723956efef6da35ad41494efa5c3b820",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "afc591a17be49bb928ba42738ab2d7a2951fa9c8849653d6d21599f426e648dd",
+        "ext": "glb",
+        "bytes": 1601008,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:metal_stool_02",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/metal_stool_02",
+    "upstream_checksum": "md5:52bc62d1b46276ef64133151d2388385",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "860f1ce79a7ee3a5a79ccf529faea72b0bfd6ccbe7af0a9f3d5b37c132899095",
+        "ext": "glb",
+        "bytes": 2539932,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:mid_century_lounge_chair",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/mid_century_lounge_chair",
+    "upstream_checksum": "md5:474bed17d25e794f39e60d1748dafcc6",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "0758be30dd704bd61d2e3d1d3005048aee8247df05b135b2942a0d0fefaef8e1",
+        "ext": "glb",
+        "bytes": 2085980,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:modern_arm_chair_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/modern_arm_chair_01",
+    "upstream_checksum": "md5:a5ce303bc2962fe98b733fcdfa5a842b",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "48d734dc771d461a8b0b15227ba79d2b97a95d6d86b9e9a14c5d6bb02010555f",
+        "ext": "glb",
+        "bytes": 2696208,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:modern_coffee_table_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/modern_coffee_table_01",
+    "upstream_checksum": "md5:f1c079ab5bc307630258cf3b40910511",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "3afe8a9cc9d80281265fee265e3704e1ebe555b56ddd6fef041ec62d7548250f",
+        "ext": "glb",
+        "bytes": 1330284,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
     "asset_id": "polyhaven:oak_wood_planks",
     "kind": "material",
     "license": "CC0-1.0",
@@ -765,6 +1071,114 @@
     ]
   },
   {
+    "asset_id": "polyhaven:round_wooden_table_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/round_wooden_table_01",
+    "upstream_checksum": "md5:9a2ad4a55a88ee7493a842026d944abc",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "800012b8131e9aa8659445d4b8dcb893675471fc08b3dfaa7f75c88c32f7efda",
+        "ext": "glb",
+        "bytes": 548808,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:side_table_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/side_table_01",
+    "upstream_checksum": "md5:4f72b88ca0cb4329d09d87788df495f3",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "397ed7c2df3d003750a0074300b1949f15bdb87466568a937d34f78e56565dca",
+        "ext": "glb",
+        "bytes": 504300,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:side_table_tall_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/side_table_tall_01",
+    "upstream_checksum": "md5:d3e52d74a2ad02b6ef370413cdb1077c",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "5f8505b58fe1a0e6f50a32c39678de1a97bd7f0ef55472783f4184fa1468c700",
+        "ext": "glb",
+        "bytes": 1553628,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:small_wooden_table_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/small_wooden_table_01",
+    "upstream_checksum": "md5:716b66952dc473d09a3ac5f48ef50a68",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "9f5d46932231cc41c26deaa43b26e8fb5aad0f89c074e87b678019cc433b1333",
+        "ext": "glb",
+        "bytes": 413764,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:sofa_02",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/sofa_02",
+    "upstream_checksum": "md5:ec2590dc8433a523d0fe9e507766c16f",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "db2bdf259b54a229cd8da123f6003bd46a2dbd36d846e39f80d53b2835d8bad6",
+        "ext": "glb",
+        "bytes": 425580,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:steel_frame_shelves_03",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/steel_frame_shelves_03",
+    "upstream_checksum": "md5:e389462d732290668ee1e33475afcd8d",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "04ff01729f72aa1177a14ccc75ea766a2467a54569d19362267ef51b0ae20dd4",
+        "ext": "glb",
+        "bytes": 3559476,
+        "width_px": null,
+        "height_px": null
+      }
+    ]
+  },
+  {
     "asset_id": "polyhaven:studio_small_09",
     "kind": "environment",
     "license": "CC0-1.0",
@@ -824,6 +1238,24 @@
         "bytes": 38774,
         "width_px": 1024,
         "height_px": 1024
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:vintage_wooden_drawer_01",
+    "kind": "model",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/vintage_wooden_drawer_01",
+    "upstream_checksum": "md5:88e36661f5a778b4b5b2c4a3715c4e11",
+    "files": [
+      {
+        "role": "model",
+        "tier": "both",
+        "sha256": "bb5175d7a013da068be8f971bc9be616f73d7955e4817ac5ce496cebc4b8e9b4",
+        "ext": "glb",
+        "bytes": 2082480,
+        "width_px": null,
+        "height_px": null
       }
     ]
   },

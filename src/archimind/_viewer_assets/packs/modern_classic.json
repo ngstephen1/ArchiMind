@@ -66,7 +66,68 @@
       "tint": "#d4ad6e"
     }
   },
-  "furniture": {},
+  "furniture": {
+    "lamp": [
+      {
+        "asset_id": "polyhaven:desk_lamp_arm_01",
+        "width_m": 0.202,
+        "depth_m": 0.614,
+        "height_m": 0.893
+      }
+    ],
+    "armchair": [
+      {
+        "asset_id": "polyhaven:GreenChair_01",
+        "width_m": 0.673,
+        "depth_m": 0.664,
+        "height_m": 1.059
+      },
+      {
+        "asset_id": "polyhaven:ArmChair_01",
+        "width_m": 0.848,
+        "depth_m": 0.766,
+        "height_m": 1.065
+      }
+    ],
+    "sofa": [
+      {
+        "asset_id": "polyhaven:Sofa_01",
+        "width_m": 1.571,
+        "depth_m": 0.658,
+        "height_m": 0.797
+      }
+    ],
+    "table": [
+      {
+        "asset_id": "polyhaven:round_wooden_table_01",
+        "width_m": 1.399,
+        "depth_m": 1.399,
+        "height_m": 1.005
+      },
+      {
+        "asset_id": "polyhaven:side_table_tall_01",
+        "width_m": 0.384,
+        "depth_m": 0.384,
+        "height_m": 0.761
+      }
+    ],
+    "storage": [
+      {
+        "asset_id": "polyhaven:ClassicNightstand_01",
+        "width_m": 0.568,
+        "depth_m": 0.424,
+        "height_m": 0.7
+      }
+    ],
+    "chair": [
+      {
+        "asset_id": "polyhaven:dining_chair_02",
+        "width_m": 0.434,
+        "depth_m": 0.576,
+        "height_m": 0.973
+      }
+    ]
+  },
   "decor": {
     "rug": null,
     "art": null,

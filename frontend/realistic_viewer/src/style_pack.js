@@ -42,9 +42,16 @@ async function defaultParseEnvironment(bytes) {
   return texture;
 }
 
+// A released GLB is self-contained: GLTFLoader may only load the blob:/data:
+// URLs it makes for the GLB's own embedded images, never anything external.
+export function embeddedResourceOnly(url) {
+  if (/^(blob|data):/.test(url)) return url;
+  throw new Error('External model resource');
+}
+
 async function defaultParseModel(bytes) {
   const manager = new THREE.LoadingManager();
-  manager.setURLModifier(() => { throw new Error('External model resource'); });
+  manager.setURLModifier(embeddedResourceOnly);
   const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength);
   return (await new GLTFLoader(manager).parseAsync(buffer, '')).scene;
 }
