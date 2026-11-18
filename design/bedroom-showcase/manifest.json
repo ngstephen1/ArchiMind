@@ -1,0 +1,210 @@
+{
+  "cameras": [
+    {
+      "eye_xyz_m": [
+        5.587,
+        3.1964999999999995,
+        1.57
+      ],
+      "id": "doorway",
+      "label": "Doorway",
+      "reason": null,
+      "target_xyz_m": [
+        1.0113500000000002,
+        5.17335,
+        0.58
+      ],
+      "vertical_fov_degrees": 69
+    },
+    {
+      "eye_xyz_m": [
+        2.83,
+        0.2999999999999998,
+        1.57
+      ],
+      "id": "desk",
+      "label": "Desk and chair",
+      "reason": null,
+      "target_xyz_m": [
+        4.57,
+        1.640468294322491,
+        0.5535709201097488
+      ],
+      "vertical_fov_degrees": 58
+    },
+    {
+      "eye_xyz_m": [
+        2.83,
+        4.900000000000001,
+        1.57
+      ],
+      "id": "bedside",
+      "label": "Bedside",
+      "reason": null,
+      "target_xyz_m": [
+        1.8800000000000001,
+        6.178,
+        0.742
+      ],
+      "vertical_fov_degrees": 58
+    }
+  ],
+  "coordinates": "Bedroom-local metres: +X east, +Y north, +Z up",
+  "furniture": [
+    {
+      "center_floor_xyz_m": [
+        4.57,
+        2.0009365886449815,
+        0
+      ],
+      "footprint_xy_m": [
+        3.77,
+        1.6
+      ],
+      "id": "belaya",
+      "name": "Belaya writing desk",
+      "reservation_wdh_m": [
+        1.6,
+        0.8018731772899628,
+        0.7516312003135682
+      ],
+      "rotation_deg": 0,
+      "source": {
+        "id": "abo-b074l4976t-amazon-co-uk",
+        "kind": "catalog",
+        "sha256": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+        "translation_m": [
+          0,
+          0.08341898024082184,
+          0
+        ],
+        "version": "1.0.0"
+      }
+    },
+    {
+      "center_floor_xyz_m": [
+        0.8,
+        5.393,
+        0
+      ],
+      "footprint_xy_m": [
+        0,
+        4.393
+      ],
+      "id": "queen-bed",
+      "name": "Linen platform bed",
+      "reservation_wdh_m": [
+        1.6,
+        2,
+        0.6
+      ],
+      "rotation_deg": 0,
+      "source": {
+        "id": "upholstered-linen-bed",
+        "kind": "concept",
+        "sha256": "3f475788571c146b30a8e5e6a6c8eb33970622e789d66e37821f962e60ad175f",
+        "translation_m": [
+          0,
+          0,
+          0
+        ],
+        "version": "1.0.0"
+      }
+    },
+    {
+      "center_floor_xyz_m": [
+        4.57,
+        1.28,
+        0
+      ],
+      "footprint_xy_m": [
+        4.33,
+        1.02
+      ],
+      "id": "desk-chair",
+      "name": "Oak writing chair with sage upholstery",
+      "reservation_wdh_m": [
+        0.48,
+        0.52,
+        0.83
+      ],
+      "rotation_deg": 180,
+      "source": {
+        "id": "oak-sage-writing-chair",
+        "kind": "concept",
+        "sha256": "609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258",
+        "translation_m": [
+          0,
+          0,
+          0
+        ],
+        "version": "1.1.0"
+      }
+    },
+    {
+      "center_floor_xyz_m": [
+        1.8800000000000001,
+        6.178,
+        0
+      ],
+      "footprint_xy_m": [
+        1.6400000000000001,
+        5.963
+      ],
+      "id": "bedside-lamp",
+      "name": "Oak nightstand and reading lamp",
+      "reservation_wdh_m": [
+        0.48,
+        0.43,
+        1.06
+      ],
+      "rotation_deg": 0,
+      "source": {
+        "id": "oak-bedside-lamp",
+        "kind": "concept",
+        "sha256": "5d0044a1acf345f50fa80443c7f722bb2267960bf3a69cd581a310586e8c84d3",
+        "translation_m": [
+          0,
+          0,
+          0
+        ],
+        "version": "1.0.0"
+      }
+    }
+  ],
+  "home_id": "05de28749d9e26f2b8dea666394903af1b37ef2a35704e35ef7adfd0d4759d08",
+  "origin_xy_m": [
+    0,
+    6.607
+  ],
+  "palette": "oak",
+  "project": "26bda387-7853-4fa9-99b7-13d6c1064de7",
+  "revision": 5,
+  "room": {
+    "ceiling_height_m": 2.8,
+    "depth_m": 6.393,
+    "doors": [
+      {
+        "height_m": 2.15,
+        "id": "bedroom-door",
+        "offset_m": 2.6464999999999996,
+        "wall": "east",
+        "width_m": 1.1
+      }
+    ],
+    "id": "bedroom",
+    "name": "Bedroom",
+    "width_m": 5.827,
+    "windows": [
+      {
+        "height_m": 1.15,
+        "id": "bedroom-window",
+        "offset_m": 2.4965,
+        "sill_height_m": 1,
+        "wall": "west",
+        "width_m": 1.4
+      }
+    ]
+  },
+  "schema_version": 1
+}
