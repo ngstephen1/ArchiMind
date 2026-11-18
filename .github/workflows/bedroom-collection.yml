@@ -22,7 +22,7 @@ jobs:
         run: |
           set -euo pipefail
           url=https://download.blender.org/release/Blender5.1/blender-5.1.2-linux-x64.tar.xz
-          curl --fail --location --retry 2 "$url" -o blender.tar.xz
+          curl --fail --location --retry 2 "$url" -o blender.tar.xz || curl --fail --location --retry 2 "https://ftp.halifax.rwth-aachen.de/blender/release/Blender5.1/blender-5.1.2-linux-x64.tar.xz" -o blender.tar.xz
           echo 'aaccb355f50183979b698bcce7467103a76261b5fa59f4972295842662a285fb  blender.tar.xz' | sha256sum -c
           tar xf blender.tar.xz
           echo "BLENDER_BIN=$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" >> "$GITHUB_ENV"
