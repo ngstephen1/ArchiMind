@@ -1,5 +1,5 @@
 import * as T from "three";
-import { bedroomSurfaces, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
+import { bedroomSurfaces, finishBedroomConcept, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
@@ -280,7 +280,8 @@ export function createTown(canvas, status, action) {
     }
   }
   for (let i = 0; i < 12; i++) tree(-36 + i * 6.5, 13 + (i % 2), i);
-  for (let i = 0; i < 8; i++) tree(-31 + i * 9, -12.5, i + 3);
+  // The north row sits beyond both the 16 m maximum house and the rear shops.
+  for (let i = 0; i < 8; i++) tree(-31 + i * 9, -28, i + 3);
   for (const x of [-7, 9]) {
     solid(street, x, 0.5, 4, 2, 0.14, 0.53, "#855f40", obstacles);
     for (const dx of [-0.76, 0.76])
@@ -544,7 +545,7 @@ export function createTown(canvas, status, action) {
     });
     geometries.forEach((v) => v.dispose());
     materials.forEach((v) => {
-      v.map?.dispose();
+      if (!v.userData.townSharedMaps) v.map?.dispose();
       v.bumpMap?.dispose();
       v.dispose();
     });
@@ -595,7 +596,8 @@ export function createTown(canvas, status, action) {
       if (!binding) return;
       canvas.dataset.collection = "loading";
       selectedLoads.push(fitBedroomChair(
-        loadBedroomConcept(binding, new URL("./assets/", document.baseURI)),
+        Promise.all([loadBedroomConcept(binding, new URL("./assets/", document.baseURI)), surfaces.ready])
+          .then(([model]) => finishBedroomConcept(model, surfaces)),
         fallback, item, -1, () => generation === epoch, clear,
       ));
     }

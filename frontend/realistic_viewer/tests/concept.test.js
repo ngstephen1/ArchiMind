@@ -88,3 +88,21 @@ test('studio chair is extra furniture with a closed binding and native placement
     assert.throws(()=>validateScene(invalid));
   }
 });
+
+test('bedroom collection binds a released bed only to its explicit slot',()=>{
+  const data=structuredClone(fixtures[0].payload);
+  data.schema_version=6;
+  const binding={concept_id:'upholstered-linen-bed',version:'1.0.0',sha256:'a'.repeat(64)};
+  data.designer_collection=[binding];
+  const bed={...furniture,id:'studio:'+binding.concept_id,category:'bed',width_m:1.6,depth_m:2,height_m:.6};
+  data.design.furniture.push(bed);
+  data.asset_bindings.push({furniture_id:bed.id,asset_id:null});
+  assert.equal(validateScene(data),data);
+  for(const mutate of [
+    d=>d.designer_collection.push(binding), d=>{d.designer_collection[0].url='invalid';},
+    d=>{d.design.furniture.at(-1).category='table';},d=>{d.designer_collection[0].concept_id='unknown';},
+    d=>{d.asset_bindings.at(-1).asset_id='sheen-chair';}
+  ]){
+    const invalid=structuredClone(data);mutate(invalid);assert.throws(()=>validateScene(invalid));
+  }
+});

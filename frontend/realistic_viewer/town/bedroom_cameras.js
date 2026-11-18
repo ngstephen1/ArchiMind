@@ -62,9 +62,18 @@ export function bedroomCameras(part, aspect = 16 / 9) {
   const world = ([x, y, z]) => [part.origin[0] + x, z, -part.origin[1] - y];
   const fov = 58;
   const door = openingFrame(room, room.doors[0]);
-  const entry = [door.x + door.nx * 0.24, door.y + door.ny * 0.24, 1.57];
+  const entrance = room.doors[0];
+  const entry = [door.x + door.nx * 0.74, door.y + door.ny * 0.74, 1.57];
   const bed = furniture.find((f) => f.id === "queen-bed");
   const focus = bed ? center(bed) : [w/2, d/2, 0.91];
+  const along = door.nx ? 1 : 0;
+  entry[along] += Math.sign(entry[along] - focus[along]) * Math.max(0,entrance.width_m / 2 - 0.20);
+  // Retain the clear opening threshold if a furnished interior corner is occupied.
+  if (furniture.some((f) => entry[0] >= f.x_m-0.16 && entry[0] <= f.x_m+f.width_m+0.16 &&
+      entry[1] >= f.y_m-0.16 && entry[1] <= f.y_m+f.depth_m+0.16)) {
+    entry[0] = door.x + door.nx*0.18;
+    entry[1] = door.y + door.ny*0.18;
+  }
   // Compose the arrival around the bed. A centered lens otherwise lands on bare
   // plaster whenever the seeded layout puts the desk and bed on the entrance wall.
   const overviewTarget = [focus[0]*0.90 + w*0.05, focus[1]*0.90 + d*0.05,

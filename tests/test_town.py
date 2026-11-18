@@ -337,3 +337,48 @@ def test_designer_chair_preview_apply_fallback_and_undo(local, monkeypatch):
     assert local.post(url + "/apply", json=apply).status_code == 409
     assert local.post(url + "/preview", json=request | {"base": 2}).status_code == 409
     assert local.post(f"/api/projects/{p}/undo", json={"base": 2}).json()["home"] == old
+
+
+def test_bedroom_collection_is_revision_bound_and_preserves_reservations(local):
+    original = json.loads(SHOWCASE.read_bytes())
+    p = service.create("local-designer")["project"]
+    with service.transaction() as q:
+        service.apply(q, "local-designer", p, 0, original)
+    endpoint = f"/api/projects/{p}"
+    records = local.get("/api/bedroom-collection").json()["concepts"]
+    assert len(records) == 2
+    for base, record in enumerate(records, 1):
+        binding = {k: record[k] for k in ("concept_id", "version", "sha256")}
+        req = {"base": base, "binding": binding}
+        path = endpoint + "/bedroom-collection"
+        assert (
+            local.post(
+                path + "/preview",
+                json=req | {"binding": binding | {"sha256": "0" * 64}},
+            ).status_code
+            == 409
+        )
+        prior = local.get(endpoint).json()["home"]
+        candidate = local.post(path + "/preview", json=req).json()["home"]
+        bedroom = next(
+            r for r in candidate["rooms"] if r["design"]["room"]["id"] == "bedroom"
+        )
+        assert len(bedroom["designer_collection"]) == base
+        assert local.get(endpoint).json()["home"] == prior
+        assert (
+            local.post(
+                path + "/apply", json=req | {"preview_id": candidate["id"]}
+            ).json()["home"]
+            == candidate
+        )
+        assert (
+            local.post(
+                path + "/apply", json=req | {"preview_id": candidate["id"]}
+            ).status_code
+            == 409
+        )
+        assert [r["design"] for r in candidate["rooms"]] == [
+            r["design"] for r in original["rooms"]
+        ]
+        assert local.get(endpoint + "?revision=1").json()["home"] == original
+    assert local.post(endpoint + "/undo", json={"base": 3}).json()["home"] == prior

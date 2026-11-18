@@ -25,6 +25,11 @@ export function bedroomSurfaces(renderer, materials) {
       veneer.color.set("#ffffff");
       veneer.needsUpdate = true;
     }),
+    loadMap("linen-weave-512.jpg", (tex) => {
+      tex.colorSpace = T.SRGBColorSpace;
+      fabric.map = tex;
+      fabric.needsUpdate = true;
+    }),
     loadMap("linen-normal-256.jpg", (tex) => {
       for (const m of [fabric, rug]) {
         m.normalMap = tex;
@@ -39,6 +44,41 @@ export function bedroomSurfaces(renderer, materials) {
     })
   ]);
   return { fabric, veneer, ready, get environment(){ return environment; } };
+}
+
+// These two reviewed concepts ship texture-free. Supply physical-scale UVs only
+// in the viewer, leaving the source geometry, product bindings and release bytes intact.
+export function finishBedroomConcept(model, surfaces) {
+  model.updateMatrixWorld(true);
+  model.traverse((piece) => {
+    if (!piece.isMesh) return;
+    const material = piece.material;
+    const wood = material.name === "Oiled oak";
+    const cloth = ["Oat upholstery", "Ivory linen", "Sage linen"].includes(material.name);
+    if (!wood && !cloth) return;
+    const geometry = piece.geometry;
+    const positions = geometry.getAttribute("position"), normals = geometry.getAttribute("normal");
+    const uv = new Float32Array(positions.count*2);
+    const point = new T.Vector3(), normal = new T.Vector3();
+    const transform = new T.Matrix3().getNormalMatrix(piece.matrixWorld);
+    const period = wood ? 1.8 : 0.30;
+    for (let i=0; i<positions.count; i++) {
+      point.fromBufferAttribute(positions,i).applyMatrix4(piece.matrixWorld);
+      normal.fromBufferAttribute(normals,i).applyMatrix3(transform);
+      const ax=Math.abs(normal.x), ay=Math.abs(normal.y), az=Math.abs(normal.z);
+      uv[i*2] = (ax > ay && ax > az ? point.z : point.x) / period;
+      uv[i*2+1] = (ay > ax && ay > az ? point.z : point.y) / period;
+    }
+    geometry.setAttribute("uv",new T.BufferAttribute(uv,2));
+    material.map = wood ? surfaces.veneer.map : surfaces.fabric.map;
+    if (cloth) {
+      material.normalMap = surfaces.fabric.normalMap;
+      material.normalScale.copy(surfaces.fabric.normalScale);
+    }
+    material.userData.townSharedMaps = true;
+    material.needsUpdate = true;
+  });
+  return model;
 }
 
 // World-scale UVs for a box; each scan repeats at its recorded physical size.
