@@ -1,0 +1,45 @@
+name: Blender chair authoring
+on:
+  workflow_dispatch:
+  push:
+    branches: [feat/blender-designer-chair]
+    paths:
+      - scripts/author_designer_chair.py
+      - scripts/test_blender_operator.py
+      - .github/workflows/blender-chair.yml
+
+permissions:
+  contents: read
+
+jobs:
+  blender:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: '3.11'
+      - name: Install pinned Blender and official MCP in the operator workspace
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -euo pipefail
+          url=https://download.blender.org/release/Blender5.1/blender-5.1.2-linux-x64.tar.xz
+          curl --fail --location --retry 2 "$url" -o blender.tar.xz
+          echo 'aaccb355f50183979b698bcce7467103a76261b5fa59f4972295842662a285fb  blender.tar.xz' | sha256sum -c
+          tar xf blender.tar.xz
+          git clone --depth=1 -b v1.0.3 https://projects.blender.org/lab/blender_mcp.git upstream
+          test "$(git -C upstream rev-parse HEAD)" = '2cea8d566dde07fbac28a61d698909d69724e853'
+          python -m pip install ./upstream/mcp
+          echo "BLENDER_BIN=$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" >> "$GITHUB_ENV"
+      - name: Author, inspect and reopen two editable chair revisions
+        env:
+          GLOBAL_TIMEOUT_SCALE: '10'
+        run: python scripts/test_blender_operator.py "$RUNNER_TEMP/upstream" "$RUNNER_TEMP/chairs"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: blender-chair-candidates
+          path: ${{ runner.temp }}/chairs
+          if-no-files-found: error
