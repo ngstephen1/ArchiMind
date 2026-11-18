@@ -152,6 +152,112 @@
       "source": null
     }
   ],
+  "hall_context": {
+    "depth_m": 13,
+    "opposite_rooms": [
+      {
+        "origin_xy_m": [
+          7.427,
+          -6.607
+        ],
+        "room": {
+          "ceiling_height_m": 2.8,
+          "depth_m": 4.271,
+          "doors": [
+            {
+              "height_m": 2.15,
+              "id": "kitchen-dining-door",
+              "offset_m": 1.5855,
+              "wall": "west",
+              "width_m": 1.1
+            }
+          ],
+          "id": "kitchen-dining",
+          "name": "Kitchen-Dining",
+          "width_m": 5.573,
+          "windows": [
+            {
+              "height_m": 1.15,
+              "id": "kitchen-dining-window",
+              "offset_m": 1.4355,
+              "sill_height_m": 1,
+              "wall": "east",
+              "width_m": 1.4
+            }
+          ]
+        }
+      },
+      {
+        "origin_xy_m": [
+          7.427,
+          -2.3360000000000003
+        ],
+        "room": {
+          "ceiling_height_m": 2.8,
+          "depth_m": 3.579,
+          "doors": [
+            {
+              "height_m": 2.15,
+              "id": "bathroom-door",
+              "offset_m": 1.2395,
+              "wall": "west",
+              "width_m": 1.1
+            }
+          ],
+          "id": "bathroom",
+          "name": "Bathroom",
+          "width_m": 5.573,
+          "windows": [
+            {
+              "height_m": 1.15,
+              "id": "bathroom-window",
+              "offset_m": 1.0895000000000001,
+              "sill_height_m": 1,
+              "wall": "east",
+              "width_m": 1.4
+            }
+          ]
+        }
+      },
+      {
+        "origin_xy_m": [
+          7.427,
+          1.2429999999999994
+        ],
+        "room": {
+          "ceiling_height_m": 2.8,
+          "depth_m": 5.15,
+          "doors": [
+            {
+              "height_m": 2.15,
+              "id": "study-door",
+              "offset_m": 2.0250000000000004,
+              "wall": "west",
+              "width_m": 1.1
+            }
+          ],
+          "id": "study",
+          "name": "Study",
+          "width_m": 5.573,
+          "windows": [
+            {
+              "height_m": 1.15,
+              "id": "study-window",
+              "offset_m": 1.8750000000000002,
+              "sill_height_m": 1,
+              "wall": "east",
+              "width_m": 1.4
+            }
+          ]
+        }
+      }
+    ],
+    "origin_xy_m": [
+      5.827,
+      -6.607
+    ],
+    "width_m": 1.6
+  },
   "home_id": "9585f6e1e2f1cc4e019cd93ee0bb5f1d4520615857ce2e11eb8ae1dac45b2fec",
   "origin_xy_m": [
     0,

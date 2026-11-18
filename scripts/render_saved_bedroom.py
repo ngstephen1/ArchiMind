@@ -113,6 +113,78 @@ def light(name, position, target, width, height, power, color):
     aim(obj, target)
 
 
+def hall_context(hall, bedroom, materials):
+    # Furnishings outside the bedroom are out of frame. Rebuild the adjacent
+    # corridor and opposite room shells so the interior door sees a real hall.
+    x, y = hall["origin_xy_m"]
+    w, d, h = hall["width_m"], hall["depth_m"], bedroom["ceiling_height_m"]
+    box("Hall floor", (x + w / 2, y + d / 2, -0.05), (w, d, 0.10), materials["oak"])
+    box(
+        "Hall runner",
+        (x + w / 2, y + d / 2, 0.014),
+        (0.9, d - 0.8, 0.018),
+        materials["clay"],
+    )
+    box(
+        "Hall ceiling",
+        (x + w / 2, y + d / 2, h + 0.05),
+        (w, d, 0.1),
+        materials["ivory"],
+    )
+    for end in (y, y + d):
+        box("Hall end", (x + w / 2, end, h / 2), (w, 0.12, h), materials["ivory"])
+    for neighbor in hall["opposite_rooms"]:
+        room = neighbor["room"]
+        nx, ny = neighbor["origin_xy_m"]
+        nw, nd = room["width_m"], room["depth_m"]
+        door = room["doors"][0]
+        seam = nx if door["wall"] == "west" else nx + nw
+        far = nx + nw if door["wall"] == "west" else nx
+        a, b = door["offset_m"], door["offset_m"] + door["width_m"]
+        for start, stop in [(0, a), (b, nd)]:
+            box(
+                "Hall partition",
+                (seam, ny + (start + stop) / 2, h / 2),
+                (0.12, stop - start, h),
+                materials["plaster"],
+            )
+        box(
+            "Hall lintel",
+            (seam, ny + (a + b) / 2, (h + door["height_m"]) / 2),
+            (0.12, b - a, h - door["height_m"]),
+            materials["plaster"],
+        )
+        box(
+            "Other room floor",
+            (nx + nw / 2, ny + nd / 2, -0.05),
+            (nw, nd, 0.10),
+            materials["oak"],
+        )
+        box(
+            "Other room backdrop",
+            (far, ny + nd / 2, h / 2),
+            (0.12, nd, h),
+            materials["ivory"],
+        )
+        for end in (ny, ny + nd):
+            box(
+                "Other room end",
+                (nx + nw / 2, end, h / 2),
+                (nw, 0.12, h),
+                materials["plaster"],
+            )
+    for t in (2.3, d / 2, d - 2.3):
+        light(
+            "Hall pendant",
+            (x + w / 2, y + t, h - 0.10),
+            (x + w / 2, y + t, 0.1),
+            0.32,
+            0.32,
+            22,
+            (1, 0.88, 0.75),
+        )
+
+
 def architecture(room, materials):
     w, d, h = room["width_m"], room["depth_m"], room["ceiling_height_m"]
     box(
@@ -409,6 +481,7 @@ def render(manifest_path, output, originals, inspect_only=False):
     bg.inputs["Strength"].default_value = 0.8
     room = manifest["room"]
     architecture(room, m)
+    hall_context(manifest["hall_context"], room, m)
     registry_data = json.loads((ASSETS / "designer_registry.json").read_text())
     registry = {
         (a["concept_id"], a["version"], a["sha256"])

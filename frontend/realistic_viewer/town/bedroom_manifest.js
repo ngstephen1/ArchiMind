@@ -51,6 +51,11 @@ export function bedroomManifest({project, revision, home}) {
   return {schema_version:1, project, revision, home_id:home.id, palette:home.palette,
     coordinates:"Bedroom-local metres: +X east, +Y north, +Z up", origin_xy_m:bedroom.origin,
     surface_sources:surfaces.map(({asset,local,sha256,source_sha256})=>({asset,local,sha256,source_sha256})),
+    hall_context:{
+      origin_xy_m:[home.hall-bedroom.origin[0],-bedroom.origin[1]], width_m:1.6, depth_m:home.depth,
+      opposite_rooms:home.rooms.filter(p=>p.design.room.doors[0].wall!==room.doors[0].wall)
+        .map(p=>({origin_xy_m:p.origin.map((v,i)=>v-bedroom.origin[i]),room:structuredClone(p.design.room)}))
+    },
     room:structuredClone(room), furniture:items, cameras};
 }
 
