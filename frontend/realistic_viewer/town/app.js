@@ -1,3 +1,4 @@
+import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
 import { explanation } from "./explanation.js";
@@ -477,12 +478,42 @@ bind("chairApply", async () => {
 });
 
 let boardHome;
+let exportUrl;
+let boardEpoch = 0;
+
+function showExport(manifest, hash) {
+  if (exportUrl) URL.revokeObjectURL(exportUrl);
+  exportUrl = URL.createObjectURL(new Blob([manifestText(manifest)], {type:"application/json"}));
+  const manifestLink = node("a","Download bedroom manifest");
+  manifestLink.href = exportUrl;
+  manifestLink.download = "bedroom-r" + manifest.revision + "-" + hash.slice(0,12) + ".json";
+  el("boardExports").replaceChildren(manifestLink);
+  const publication = publicationFor(manifest,hash);
+  if (publication) {
+    const link = node("a","Download the Blender scene and three finished stills");
+    link.href = publication.url;
+    el("boardExports").append(node("p",""),link);
+  } else {
+    el("boardExports").append(node("p","Offline renders have not been published for this exact revision."));
+  }
+}
+
 const node = (tag, text) =>
   Object.assign(document.createElement(tag), { textContent: text });
 let boardGeneration = 0;
 el("present").onclick = async () => {
   const generation = ++boardGeneration;
+  const epoch = ++boardEpoch;
   boardHome = applied;
+  el("boardExports").replaceChildren();
+  if (revision) {
+    try {
+      const manifest = bedroomManifest({project, revision, home: boardHome});
+      manifestDigest(manifest).then(hash => {
+        if (epoch === boardEpoch) showExport(manifest,hash);
+      }).catch(() => { if (epoch === boardEpoch) el("boardExports").textContent = "Revision export unavailable."; });
+    } catch { el("boardExports").textContent = "Revision export unavailable."; }
+  }
   const h = boardHome;
   el("boardSource").textContent =
     (revision ? "Saved revision " + revision : "Packaged showcase") +
@@ -582,7 +613,7 @@ window.addEventListener("beforeprint", () => {
   plan.src = el("boardPlan").toDataURL();
   plan.alt = "Dimensioned home plan";
   copy.querySelector("canvas").replaceWith(plan);
-  copy.querySelectorAll("button,input,label").forEach((n) => n.remove());
+  copy.querySelectorAll("button,input,label,#boardExports").forEach((n) => n.remove());
   while (copy.firstChild) sheet.appendChild(copy.firstChild);
   document.body.append(sheet);
 });
