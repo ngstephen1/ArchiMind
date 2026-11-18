@@ -8,9 +8,9 @@ from io import BytesIO
 from pathlib import Path
 
 from PIL import Image
+from release_designer_chair import _immutable, _json
 
 from archimind.assets.designer_concepts import BEDROOM_SIZES, inspect_concept
-from release_designer_chair import _immutable, _json
 
 
 def release(candidates, root, run):

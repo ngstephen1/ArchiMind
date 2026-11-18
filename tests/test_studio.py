@@ -389,3 +389,31 @@ def test_stale_chair_cannot_start_generation(monkeypatch):
     )
     with pytest.raises(StudioError, match="unavailable"):
         build_room(draft, designer_chair=binding)
+
+
+def test_released_bed_replaces_one_recipe_and_nightstand_is_added():
+    from archimind.assets.designer_concepts import approved_collection
+
+    draft = propose_room(room(), "Bedroom", "linen", offline=True)
+    releases = tuple(
+        workflow.ChairBinding(
+            concept_id=r.concept_id, version=r.version, sha256=r.sha256
+        )
+        for r in approved_collection()
+    )
+    assert len(releases) == 2
+    build = build_room(draft, designer_collection=releases)
+    assert build.model_calls == 0 and len(build.recipes) == 2
+    assert len(build.result().candidates) == 2
+    for candidate in build.result().candidates:
+        data = scene_payload(build, candidate)
+        assert data["schema_version"] == 6
+        assert len(data["designer_collection"]) == 2
+        assert sum(f.category == "bed" for f in candidate.design.furniture) == 1
+        assert all(b["asset_id"] is None for b in data["asset_bindings"])
+        assert candidate.validation.status == "passed"
+    with pytest.raises(StudioError, match="at most once"):
+        build_room(draft, designer_collection=(releases[0], releases[0]))
+    stale = releases[0].model_copy(update={"sha256": "0" * 64})
+    with pytest.raises(StudioError, match="unavailable"):
+        build_room(draft, designer_collection=(stale,))

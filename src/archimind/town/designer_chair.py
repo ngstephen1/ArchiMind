@@ -52,11 +52,14 @@ def chair_change(q, owner, project, data, *, apply, collection=False):
         (p for p in home["rooms"] if p["design"]["room"]["id"] == "bedroom"), None
     )
     items = bedroom["design"]["furniture"] if bedroom else []
-    slot, category = {
-        "upholstered-linen-bed": ("queen-bed", "bed"),
-        "oak-bedside-lamp": ("bedside-lamp", "table"),
-        "oak-sage-writing-chair": ("desk-chair", "chair"),
-    }[chair.concept_id]
+    slot, category = (
+        {
+            "upholstered-linen-bed": ("queen-bed", "bed"),
+            "oak-bedside-lamp": ("bedside-lamp", "table"),
+        }[chair.concept_id]
+        if collection
+        else ("desk-chair", "chair")
+    )
     seat = next((item for item in items if item["id"] == slot), None)
     if not seat or seat["category"] != category or seat["rotation_deg"] != 0:
         raise db.Problem("This bedroom has no matching furniture reservation.")
