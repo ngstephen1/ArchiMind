@@ -1,3 +1,4 @@
+import studioPublications from "./studio_publications.json";
 import {homeBoard} from "./home_board.js";
 import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
@@ -485,23 +486,33 @@ bind("chairApply", async () => {
 let boardHome;
 let exportUrl, homeUrl;
 
-function showExport(manifest, hash) {
+function showExport(manifest, hash, studio, studioHash) {
   if (exportUrl) URL.revokeObjectURL(exportUrl);
   exportUrl = URL.createObjectURL(new Blob([manifestText(manifest)], {type:"application/json"}));
   const manifestLink = node("a","Download bedroom manifest");
   manifestLink.href = exportUrl;
   manifestLink.download = "bedroom-r" + manifest.revision + "-" + hash.slice(0,12) + ".json";
   if(homeUrl) URL.revokeObjectURL(homeUrl);
-  homeUrl=URL.createObjectURL(new Blob([manifestText(homeBoard({project,revision,home:boardHome}))],{type:"application/json"}));
+  homeUrl=URL.createObjectURL(new Blob([manifestText(studio)],{type:"application/json"}));
   const whole=node("a","Download whole-home scene manifest");
   whole.href=homeUrl; whole.download="home-r"+revision+"-"+boardHome.id.slice(0,12)+".json";
   el("boardExports").replaceChildren(manifestLink, node("p",""),whole);
+  const studioRelease = publicationFor(studio, studioHash, studioPublications);
+  if (studioRelease) {
+    const pdf = node("a", "Open the whole-home client book (PDF)");
+    pdf.href = studioRelease.pdf;
+    pdf.target = "_blank";
+    pdf.rel = "noopener";
+    const pack = node("a", "Download the editable scene, images and camera studies");
+    pack.href = studioRelease.url;
+    el("boardExports").append(node("p",""), pdf, node("p",""), pack);
+  }
   const publication = publicationFor(manifest,hash);
   if (publication) {
     const link = node("a","Download the Blender scene and three finished stills");
     link.href = publication.url;
     el("boardExports").append(node("p",""),link);
-  } else {
+  } else if (!studioRelease) {
     el("boardExports").append(node("p","Offline renders have not been published for this exact revision."));
   }
 }
@@ -517,8 +528,9 @@ el("present").onclick = async () => {
   if (revision) {
     try {
       const manifest = bedroomManifest({project, revision, home: boardHome});
-      manifestDigest(manifest).then(hash => {
-        if (generation === boardGeneration) showExport(manifest,hash);
+      const studio = homeBoard({project, revision, home: boardHome});
+      Promise.all([manifestDigest(manifest), manifestDigest(studio)]).then(([hash, studioHash]) => {
+        if (generation === boardGeneration) showExport(manifest, hash, studio, studioHash);
       }).catch(() => { if (generation === boardGeneration) el("boardExports").textContent = "Revision export unavailable."; });
     } catch { el("boardExports").textContent = "Revision export unavailable."; }
   }

@@ -349,7 +349,7 @@ def render(args):
     scene["board_sha256"] = hashlib.sha256(source).hexdigest()
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.adaptive_threshold = 0.025 if args.proof else 0.012
-    scene.cycles.samples = 16 if args.proof else args.samples
+    scene.cycles.samples = 16 if args.proof else 128
     scene.render.resolution_x, scene.render.resolution_y = (
         (960, 540) if args.proof else (3840, 2160)
     )
@@ -411,5 +411,4 @@ if __name__ == "__main__":
     p.add_argument("--originals", type=Path, default=Path("output/surface-originals"))
     p.add_argument("--gpu", action="store_true")
     p.add_argument("--proof", action="store_true")
-    p.add_argument("--samples", type=int, choices=(128, 256, 512), default=128)
     render(p.parse_args(sys.argv[sys.argv.index("--") + 1 :]))

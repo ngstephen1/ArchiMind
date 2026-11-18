@@ -205,6 +205,7 @@ export function bedroomCameras(part, aspect = 16 / 9) {
         for(const y of [.24,d*.5,d-.24]){
           const eye=[x,y,1.44];
           if(furniture.some(f=>x>f.x_m-.18 && x<f.x_m+f.width_m+.18 && y>f.y_m-.18 && y<f.y_m+f.depth_m+.18))continue;
+          if(subjects.some(subject => furniture.some(f => !subjects.includes(f) && obstructs(eye,center(subject),bounds(f))))) continue;
           for(const angle of [45,52,59,65]){
             if(!fits(eye,target,subjects,aspect,angle))continue;
             const dist=Math.hypot(x-target[0],y-target[1]);

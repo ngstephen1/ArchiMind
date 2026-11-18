@@ -4,6 +4,14 @@ The seed-42 demonstration is a 15 × 16 m single-storey home with six furnished 
 
 ![Formal salon in the Town walk-through, saved revision 5](../images/studio-house-town.jpg)
 
+## Client books
+
+[Open revision 5 (sage)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r5.pdf) · [Open revision 6 (terracotta)](https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6.pdf) · [Download the scenes and all proof images](https://github.com/ngstephen1/ArchiMind/releases/tag/studio-house-r5-r6-preview)
+
+![Same salon camera rendered in daylight, linework and evening light](../images/studio-salon-studies.jpg)
+
+Town matches the saved project, revision, home ID and full exported manifest digest before offering a published book. Other applied designs can export their own manifest.
+
 ## Walk through the saved design
 
 From a checkout with the [Town dependencies](../../README.md#quick-start) installed, run the following command.

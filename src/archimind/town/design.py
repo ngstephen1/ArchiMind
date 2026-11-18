@@ -375,6 +375,14 @@ def revise_study_desk(brief, previous):
 
 def generate(brief, previous=None, *, on_progress=None):
     if brief.shift_bedroom_chair or brief.closer_study_desk:
+        if (
+            brief.formal_salon
+            and previous
+            and not any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+        ):
+            raise ValueError(
+                "Add the salon in a separate layout revision before moving furniture."
+            )
         home = (
             revise_bedroom_chair if brief.shift_bedroom_chair else revise_study_desk
         )(brief, previous)
@@ -569,6 +577,10 @@ def generate(brief, previous=None, *, on_progress=None):
         if len(candidates) == 2:
             break
     if not candidates:
+        if salon:
+            raise ValueError(
+                f"Search exhausted for a connected home with a formal salon on the {brief.width:g} × {brief.depth:g} m lot. Try more space or revise the room program."
+            )
         raise ValueError("Search exhausted without a connected furnished home.")
     if "quiet bedroom" in brief.priority:
         candidates.sort(key=lambda c: -c["evidence"]["bedroom_center_from_front_m"])
