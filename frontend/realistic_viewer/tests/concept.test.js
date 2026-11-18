@@ -2,7 +2,7 @@ import {test} from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import * as THREE from 'three';
-import {conceptInstance,validateRecipe} from '../src/concept_assets.js';
+import {conceptInstance,validateRecipe,DESIGNER_CHAIR_SLOT,placeDesignerChair} from '../src/concept_assets.js';
 import {validateScene} from '../src/room_geometry.js';
 import {disposeObject} from '../src/viewer.js';
 import {createSceneManager} from '../src/scene_lifecycle.js';
@@ -60,5 +60,31 @@ test('equivalent hex colors share a material and a draw call',()=>{
     assert.equal(object.children[0].material.color.getHexString(),'abcdef');
   } finally {
     disposeObject(object);
+  }
+});
+
+test('studio chair is extra furniture with a closed binding and native placement',()=>{
+  const data=structuredClone(fixtures[0].payload);
+  data.schema_version=5;
+  data.designer_chair={concept_id:'original-writing-chair',version:'1.0.0',sha256:'f'.repeat(64)};
+  const chair={...furniture,id:DESIGNER_CHAIR_SLOT,category:'chair',width_m:.48,depth_m:.52,height_m:.83};
+  data.design.furniture.push(chair);
+  data.asset_bindings.push({furniture_id:chair.id,asset_id:null});
+  assert.equal(validateScene(data),data);
+  const source=()=>new THREE.Mesh(new THREE.BoxGeometry(.48,.83,.52).translate(0,.415,0),new THREE.MeshBasicMaterial());
+  const mesh=placeDesignerChair(source(),chair);
+  assert.equal(mesh.userData.scale,1);
+  assert.equal(mesh.name,chair.id);
+  assert.deepEqual(mesh.position.toArray(),[chair.x_m+.24,0,-chair.y_m-.26]);
+  disposeObject(mesh);
+  assert.throws(()=>placeDesignerChair(source(),{...chair,depth_m:.40}));
+  for(const mutate of [
+    d=>{d.schema_version=4;}, d=>{d.designer_chair.url='file:///a.glb';},
+    d=>{d.designer_chair.sha256='unknown';}, d=>{d.design.furniture.at(-1).category='desk';},
+    d=>{d.asset_bindings.at(-1).asset_id='sheen-chair';}, d=>{d.concept_bindings.pop();},
+  ]){
+    const invalid=structuredClone(data);
+    mutate(invalid);
+    assert.throws(()=>validateScene(invalid));
   }
 });

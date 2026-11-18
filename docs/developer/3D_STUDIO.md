@@ -87,6 +87,20 @@ It does not import upstream voice, speech, provider host, fonts/media, world
 runtime, persistence, worker execution or model-written JavaScript. No dependency
 or model download was added.
 
+## Include a Blender designer chair
+
+After loading a plan, use **Add a designer chair** to choose a released version.
+The review shows both packaged previews and its measured width, depth and height.
+**Build 3D room** adds one chair to the submitted furniture list before placement
+and accessibility validation. Selecting a version or changing layouts makes zero
+model requests. Rebuilding with a different version creates a new snapshot.
+
+Chair-enabled scenes use schema version 5. The snapshot pins the concept ID,
+version and GLB SHA-256. The renderer loads the matching packaged mesh at native
+scale into its validated reservation. An unavailable mesh leaves a labeled
+placeholder at the same coordinates. The selector appears when an approved
+release is available. Plans built without a chair continue to use version 4.
+
 ## Recipe and renderer contract
 
 The model returns strict JSON data, checked again by Python and the frontend:

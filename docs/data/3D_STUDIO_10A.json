@@ -858,5 +858,48 @@
         "after_sha256": "46a70ea75d9a435965636da0aa70211b9e8c204a804fdc82eea6d3571377b6a3"
       }
     }
+  },
+  "designer_chair": {
+    "browser": {
+      "room": "Offline bedroom, seed 42, 5 x 4 x 2.7 m",
+      "entrypoint": "streamlit run app.py, /?workspace=studio; live provider disabled",
+      "viewport": [1440, 1000],
+      "reviewed_versions": ["1.0.0", "1.1.0"],
+      "validated_alternatives": 2,
+      "attempts": 13,
+      "mesh_instances": 10,
+      "chair_triangles": 3712,
+      "chair_scale": 1,
+      "chair_xy_m": {"A": [0, 1.7], "B": [4.52, 0.32]},
+      "chair_wdh_m": [0.48, 0.52, 0.83],
+      "unavailable_case": "An intercepted local GLB response returned HTTP 404 for v1.1.0, Layout B. Three procedural items remained visible along with one labeled placeholder at the validated chair location.",
+      "recovery": "Removing the interception and switching to Layout A restored the native chair at a 390 x 844 CSS viewport."
+    },
+    "authorized_migrations": {
+      "docs/developer/3D_STUDIO.md": {
+        "before_sha256": "e744fee7750667593435907694e2b1462c0b763974c86787e6bd38bb8e2d38d8",
+        "after_sha256": "e221710af3f968fc159441565aba6f6b89168508ce2524c14077db6327e170a3"
+      },
+      "frontend/realistic_viewer/src/main.js": {
+        "before_sha256": "f9bc3b2ab346799b3ca4f8671fe039bca5c25701202814335090691be0f2d4bf",
+        "after_sha256": "bed9873c239099e1692f71be45b2187fec1dc1fbdbe077e26a73939210e36f32"
+      },
+      "frontend/realistic_viewer/src/room_geometry.js": {
+        "before_sha256": "261482a022c7357b6538e6d626fd0187f60d49af76bd06403ba3571eebbf2988",
+        "after_sha256": "ed9f32e2b92dd1350f15d108abfddf2cc213f946314ad765b5bfdede6a31d781"
+      },
+      "frontend/realistic_viewer/src/room_viewer.js": {
+        "before_sha256": "27464afbb0107555ad7ddbebe1367a30d6527d2ee6d912805d240bca46e05a25",
+        "after_sha256": "f02138b362bc9c2807ed28837a430bca47db12130af4e4ced9139b26c7ec943d"
+      },
+      "frontend/realistic_viewer/src/scene_lifecycle.js": {
+        "before_sha256": "dd81ebf9623d405c5c1bee93b928eabb1cb0cfb9a5481cbf6275a925a5b55e1e",
+        "after_sha256": "060af0397ba927a4c85e215ee89a193fd719b38b0c14acd564fde0b3b0e40b2c"
+      },
+      "src/archimind/_viewer_assets/viewer.js": {
+        "before_sha256": "46a70ea75d9a435965636da0aa70211b9e8c204a804fdc82eea6d3571377b6a3",
+        "after_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5"
+      }
+    }
   }
 }

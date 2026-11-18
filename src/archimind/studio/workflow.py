@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from pydantic import Field, model_validator
 
+from archimind.assets.designer_concepts import resolve_chair
 from archimind.geometry import (
     LayoutGenerationResult,
     generate_layout_candidates,
@@ -14,6 +15,8 @@ from archimind.geometry import (
 from archimind.models import Furniture, Room, RoomDesign
 from archimind.studio import provider
 from archimind.studio.contracts import (
+    MAX_ASSETS,
+    MAX_INSTANCES,
     Frozen,
     FurnishingPlan,
     Recipe,
@@ -88,31 +91,78 @@ def propose_room(
         ) from None
 
 
-def specification(draft: StudioDraft) -> RoomDesign:
+DESIGNER_CHAIR_SLOT = "studio:designer-chair"
+
+
+class ChairBinding(Frozen):
+    concept_id: str = Field(min_length=1, max_length=80)
+    version: str = Field(min_length=1, max_length=32)
+    sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
+
+
+def specification(
+    draft: StudioDraft, *, designer_chair: ChairBinding | None = None
+) -> RoomDesign:
     draft = StudioDraft.model_validate_json(draft.model_dump_json())
+    furniture = [
+        Furniture(
+            id=f"studio:{index}:{instance}",
+            name=item.name,
+            category=item.category,
+            x_m=0.0,
+            y_m=0.0,
+            width_m=item.width_m,
+            depth_m=item.depth_m,
+            height_m=item.height_m,
+        )
+        for index, item in enumerate(draft.plan.items, 1)
+        for instance in range(1, item.quantity + 1)
+    ]
+    if designer_chair is not None:
+        if len(furniture) >= MAX_INSTANCES or len(draft.plan.items) >= MAX_ASSETS:
+            raise StudioError(
+                "Adding a chair would exceed the Studio furnishing limit."
+            )
+        try:
+            chair = resolve_chair(
+                designer_chair.concept_id, designer_chair.version, designer_chair.sha256
+            )
+        except ValueError:
+            raise StudioError(
+                "The selected designer chair is unavailable. Review the current options."
+            ) from None
+        room = draft.room()
+        if (
+            chair.width_m > room.width_m
+            or chair.depth_m > room.depth_m
+            or chair.height_m > room.ceiling_height_m
+        ):
+            raise StudioError("The designer chair exceeds this room's measurements.")
+        furniture.append(
+            Furniture(
+                id=DESIGNER_CHAIR_SLOT,
+                name=chair.name,
+                category="chair",
+                x_m=0.0,
+                y_m=0.0,
+                width_m=chair.width_m,
+                depth_m=chair.depth_m,
+                height_m=chair.height_m,
+            )
+        )
     return RoomDesign(
         room=draft.room(),
         name=f"{draft.room_kind} — procedural concepts",
-        furniture=[
-            Furniture(
-                id=f"studio:{index}:{instance}",
-                name=item.name,
-                category=item.category,
-                x_m=0.0,
-                y_m=0.0,
-                width_m=item.width_m,
-                depth_m=item.depth_m,
-                height_m=item.height_m,
-            )
-            for index, item in enumerate(draft.plan.items, 1)
-            for instance in range(1, item.quantity + 1)
-        ],
+        furniture=furniture,
     )
 
 
 class StudioBuild(Frozen):
     draft: StudioDraft
     recipes: tuple[Recipe, ...]
+    designer_chair: ChairBinding | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
     result_json: str
     seed: int = Field(ge=0, le=2**32 - 1)
     model_calls: int = Field(ge=0, le=8)
@@ -131,11 +181,24 @@ class StudioBuild(Frozen):
             result.candidates and len(self.recipes) != len(self.draft.plan.items)
         ):
             raise ValueError("Incomplete or inconsistent concept snapshot")
+        for candidate in result.candidates:
+            chairs = [
+                f for f in candidate.design.furniture if f.id == DESIGNER_CHAIR_SLOT
+            ]
+            if len(chairs) != int(self.designer_chair is not None) or any(
+                f.category != "chair" or f.rotation_deg != 0 for f in chairs
+            ):
+                raise ValueError("Inconsistent designer chair binding")
         return self
 
 
 def build_room(
-    draft: StudioDraft, seed: int = 42, *, allow_live=False, client_factory=None
+    draft: StudioDraft,
+    seed: int = 42,
+    *,
+    allow_live=False,
+    client_factory=None,
+    designer_chair: ChairBinding | None = None,
 ) -> StudioBuild:
     draft = StudioDraft.model_validate_json(draft.model_dump_json())
     config = (
@@ -145,7 +208,7 @@ def build_room(
         raise StudioError(
             "The configured model changed. Propose the plan again before building."
         )
-    design = specification(draft)
+    design = specification(draft, designer_chair=designer_chair)
     result = generate_layout_candidates(
         design.room, design.furniture, seed=seed, max_candidates=2, max_attempts=500
     )
@@ -203,6 +266,7 @@ def build_room(
             calls = len(recipes)
     return StudioBuild(
         draft=draft,
+        designer_chair=designer_chair,
         recipes=recipes,
         result_json=result.model_dump_json(),
         seed=seed,
@@ -238,6 +302,9 @@ def scene_payload(build: StudioBuild, candidate) -> dict:
             "floor_color": build.draft.plan.floor_color,
         },
     }
+    if build.designer_chair is not None:
+        payload["schema_version"] = 5
+        payload["designer_chair"] = build.designer_chair.model_dump(mode="json")
     if len(json.dumps(payload).encode()) > 262144:
         raise StudioError("The complete scene exceeds the recipe byte budget.")
     return payload

@@ -115,3 +115,50 @@ def test_failed_offline_example_clears_pending_ai_plan(monkeypatch):
     assert all(button.key != "studio_build_button" for button in app.button)
     assert app.session_state[studio.BUILD] == displayed
     assert calls == [False, True]
+
+
+def test_explicit_chair_selection_preview_build_and_frozen_ab(monkeypatch):
+    from types import SimpleNamespace
+
+    chair = SimpleNamespace(
+        name="Fixture writing chair",
+        concept_id="fixture-chair",
+        version="1.0.0",
+        sha256="b" * 64,
+        width_m=0.48,
+        depth_m=0.52,
+        height_m=0.83,
+    )
+    monkeypatch.setattr(studio, "approved_chairs", lambda: (chair,))
+    previews = []
+    monkeypatch.setattr(
+        studio,
+        "preview_bytes",
+        lambda record, view: previews.append(view) or b"fixture",
+    )
+    monkeypatch.setattr(studio.st, "image", lambda *args, **kw: None)
+    monkeypatch.setattr("archimind.studio.workflow.resolve_chair", lambda *a: chair)
+    scenes = []
+    monkeypatch.setattr(
+        studio, "_component", lambda: lambda **kw: scenes.append(kw["data"])
+    )
+    app = AppTest.from_string(APP, default_timeout=30).run()
+    app.button(key="studio_example").click().run()
+    assert not previews and studio.BUILD not in app.session_state
+    app.selectbox(key="studio_designer_chair").set_value(chair.sha256).run()
+    assert (
+        previews == ["front", "three-quarter"] and studio.BUILD not in app.session_state
+    )
+    app.button(key="studio_build_button").click().run()
+    assert not app.exception
+    built = app.session_state[studio.BUILD]
+    assert built.designer_chair.sha256 == chair.sha256
+    app.radio(key="studio_selection_1").set_value("Layout B").run()
+    assert scenes[-1]["design"] == built.result().candidates[1].design.model_dump(
+        mode="json"
+    )
+    app.selectbox(key="studio_designer_chair").set_value(None).run()
+    assert (
+        app.session_state[studio.BUILD] == built
+        and scenes[-1]["designer_chair"]["sha256"] == chair.sha256
+    )
