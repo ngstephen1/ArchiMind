@@ -481,7 +481,6 @@ bind("chairApply", async () => {
 
 let boardHome;
 let exportUrl;
-let boardEpoch = 0;
 
 function showExport(manifest, hash) {
   if (exportUrl) URL.revokeObjectURL(exportUrl);
@@ -505,15 +504,15 @@ const node = (tag, text) =>
 let boardGeneration = 0;
 el("present").onclick = async () => {
   const generation = ++boardGeneration;
-  const epoch = ++boardEpoch;
+  el("printBoard").disabled = true;
   boardHome = applied;
   el("boardExports").replaceChildren();
   if (revision) {
     try {
       const manifest = bedroomManifest({project, revision, home: boardHome});
       manifestDigest(manifest).then(hash => {
-        if (epoch === boardEpoch) showExport(manifest,hash);
-      }).catch(() => { if (epoch === boardEpoch) el("boardExports").textContent = "Revision export unavailable."; });
+        if (generation === boardGeneration) showExport(manifest,hash);
+      }).catch(() => { if (generation === boardGeneration) el("boardExports").textContent = "Revision export unavailable."; });
     } catch { el("boardExports").textContent = "Revision export unavailable."; }
   }
   const h = boardHome;
@@ -595,6 +594,8 @@ el("present").onclick = async () => {
     if (boardGeneration !== generation || !el("board").open) return;
     el("photos").textContent =
       "Bedroom views could not be rendered on this device.";
+  } finally {
+    if (generation === boardGeneration) el("printBoard").disabled = false;
   }
 };
 el("askWhy").onclick = () =>

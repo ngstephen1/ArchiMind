@@ -6,9 +6,15 @@ Open **Design presentation** in Town to see the applied revision, dimensioned fl
 
 ## Seed-42 showcase
 
+![Three Cycles photographs from the applied seed-42 Town bedroom](../images/bedroom-showcase-cycles.jpg)
+
 [Download the Blender bedroom and three 1920 × 1080 Cycles stills](https://github.com/ngstephen1/ArchiMind/releases/download/bedroom-showcase-r5/bedroom-r5-cycles.zip) or [open the release with the film and PDF](https://github.com/ngstephen1/ArchiMind/releases/tag/bedroom-showcase-r5).
 
 The example follows saved project `26bda387-7853-4fa9-99b7-13d6c1064de7` through two versions of the oak writing chair. Revision 5 combines the deep back, linen platform bed, bedside table with reading lamp and qualified Belaya desk. The [manifest](../../design/bedroom-showcase/manifest.json) records actual metre-space positions, opening offsets, native release hashes, surface-map provenance and three camera poses. Camera locations are bedroom-local with east, north and up axes. Both earlier applied chair manifests are retained in the adjacent history directory.
+
+To visit the published bedroom locally, install the usual Town dependencies, launch `.venv/bin/python scripts/run_bedroom_showcase.py`, and open its printed revision URL. The temporary database restores the five actual applied revisions at launch. Select **Design presentation**, then compare the scene download with the walkthrough.
+
+Blender 5.1.2 rendered the published scene on a CPU after reopening the packed project. All four material maps used their pinned high-resolution originals. The archive SHA-256 is `bfd1ef7c5eb267606feafb57566145911a2243902bc9f6c4b17dbd8c7598a7a2`. [Render and reopen checks](https://github.com/ngstephen1/ArchiMind/actions/runs/44236803543)
 
 ## Render another applied revision
 
