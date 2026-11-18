@@ -35,6 +35,27 @@ function obstructs(eye, target, [min, max]) {
   return last > 0.001 && first < 0.999;
 }
 
+// Confirm that every corner of the reserved subject fits in the perspective lens.
+function fits(eye, target, subjects, aspect, fov) {
+  const dot = (a, b) => a.reduce((sum, v, i) => sum + v*b[i], 0);
+  const unit = (v) => v.map((n) => n / Math.hypot(...v));
+  const forward = unit(target.map((v, i) => v-eye[i]));
+  const right = unit([forward[1], -forward[0], 0]);
+  const up = [-forward[2]*right[1], forward[2]*right[0],
+    forward[0]*right[1]-forward[1]*right[0]];
+  const half = Math.tan(fov * Math.PI / 360) * 0.94;
+  return subjects.every((item) => {
+    const [a, b] = bounds(item);
+    for (const x of [a[0], b[0]]) for (const y of [a[1], b[1]]) for (const z of [0,b[2]]) {
+      const relative = [x-eye[0],y-eye[1],z-eye[2]];
+      const distance = dot(relative, forward);
+      if (distance < 0.04 || Math.abs(dot(relative, right)) > distance*half*aspect ||
+          Math.abs(dot(relative, up)) > distance*half) return false;
+    }
+    return true;
+  });
+}
+
 export function bedroomCameras(part, aspect = 16 / 9) {
   const { room, furniture } = part.design;
   const { width_m: w, depth_m: d } = room;
@@ -42,8 +63,14 @@ export function bedroomCameras(part, aspect = 16 / 9) {
   const fov = 58;
   const door = openingFrame(room, room.doors[0]);
   const entry = [door.x + door.nx * 0.24, door.y + door.ny * 0.24, 1.57];
+  const bed = furniture.find((f) => f.id === "queen-bed");
+  const focus = bed ? center(bed) : [w/2, d/2, 0.91];
+  // Compose the arrival around the bed. A centered lens otherwise lands on bare
+  // plaster whenever the seeded layout puts the desk and bed on the entrance wall.
+  const overviewTarget = [focus[0]*0.90 + w*0.05, focus[1]*0.90 + d*0.05,
+    bed ? Math.max(0.58, focus[2]) : 0.91];
   const overview = { id: "doorway", label: "Doorway", eye: world(entry),
-    target: world([w/2, d/2, 0.91]), fov, reason: null };
+    target: world(overviewTarget), fov: 69, reason: null };
   function detail(id, label, ids, preferredDistance) {
     const subjects = ids.map((key) => furniture.find((f) => f.id === key));
     const fallback = (message) => ({ ...overview, id, label, reason: message });
@@ -63,6 +90,7 @@ export function bedroomCameras(part, aspect = 16 / 9) {
       if (furniture.some((f) => x >= f.x_m-0.17 && x <= f.x_m+f.width_m+0.17 &&
         y >= f.y_m-0.17 && y <= f.y_m+f.depth_m+0.17)) continue;
       if (subjects.some((s) => furniture.some((f) => !subjects.includes(f) && obstructs(eye, center(s), bounds(f))))) continue;
+      if (!fits(eye, target, subjects, aspect, fov)) continue;
       const dx = (x-target[0])/distance, dy = (y-target[1])/distance;
       const chairSide = subjects[1] && Math.sign(center(subjects[1])[1] - center(primary)[1]);
       const frontalPenalty = chairSide ? Math.max(0, 0.45 - dy * chairSide) * 3.2 : 0;
