@@ -95,6 +95,12 @@ def test_two_clients_apply_undo_and_cancel(local):
     assert service.work_once()
     h = local.get("/api/jobs/" + j).json()["result"][0]
     assert local.get("/api/projects/" + p).json()["home"] is None
+    for invalid_index in (True, False, 1.0, "0", -1, 2, None):
+        assert (
+            post("/api/jobs/" + j + "/apply", json={"index": invalid_index}).status_code
+            == 400
+        )
+    assert local.get("/api/projects/" + p).json()["revision"] == 0
     assert post("/api/jobs/" + j + "/apply", json={"index": 0}).json()["home"] == h
     assert post("/api/jobs/" + j + "/apply", json={"index": 0}).status_code == 409
     j2 = post("/api/jobs", json=job(p, 1)).json()["job"]

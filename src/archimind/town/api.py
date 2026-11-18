@@ -130,13 +130,11 @@ def handle(request, data):
                     (path[1],),
                 )
                 return {"cancelled": True}
-            if (
-                request.method == "POST"
-                and path[-1] == "apply"
-                and status == "ready"
-                and data.get("index") in range(len(result))
-            ):
-                return db.apply(q, owner, p, base, result[data["index"]])
+            if request.method == "POST" and path[-1] == "apply" and status == "ready":
+                index = data.get("index")
+                if type(index) is not int or not 0 <= index < len(result):
+                    raise db.Problem("Choose a valid layout index.")
+                return db.apply(q, owner, p, base, result[index])
     raise db.Problem("Unavailable action.", 404)
 
 
