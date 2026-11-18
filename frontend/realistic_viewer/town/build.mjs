@@ -1,12 +1,13 @@
 import { build } from "esbuild";
+import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 const src = new URL("./", import.meta.url),
   out = new URL("../../../dist/town/", src);
 await mkdir(new URL("assets/", out), { recursive: true });
 await build({
-  entryPoints: [new URL("app.js", src).pathname],
-  outfile: new URL("town.js", out).pathname,
+  entryPoints: [fileURLToPath(new URL("app.js", src))],
+  outfile: fileURLToPath(new URL("town.js", out)),
   bundle: true,
   format: "esm",
   minify: true,

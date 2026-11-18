@@ -1,0 +1,15 @@
+{
+  "task": "11A photoreal style packs",
+  "plan": "docs/superpowers/plans/2026-11-17-photoreal-style-packs.md",
+  "authorization": {
+    "by": "owner",
+    "date": "2026-11-17",
+    "scope": "docs/superpowers/specs/2026-11-17-photoreal-style-packs-design.md"
+  },
+  "authorized_migrations": {
+    "frontend/realistic_viewer/build.mjs": {
+      "before_sha256": "13726b0b7570643fe2214fd7dbfe0b1cd787f0954396d648f67a551f57d95458",
+      "after_sha256": "dd8da37a7840c8b251f4ffbfd718e97bc04ed80b0b042c41e2b416b208da69d5"
+    }
+  }
+}

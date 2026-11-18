@@ -1,8 +1,9 @@
 import {build} from 'esbuild';
+import {fileURLToPath} from 'node:url';
 import {copyFile, mkdir, readFile, writeFile} from 'node:fs/promises';
 const out = new URL('../../src/archimind/_viewer_assets/', import.meta.url);
 await mkdir(out, {recursive:true});
-await build({entryPoints:[new URL('./src/main.js',import.meta.url).pathname], outfile:new URL('viewer.js',out).pathname,
+await build({entryPoints:[fileURLToPath(new URL('./src/main.js',import.meta.url))], outfile:fileURLToPath(new URL('viewer.js',out)),
   bundle:true, format:'esm', platform:'browser', target:['es2022'], minify:true, legalComments:'linked', logLevel:'info'});
 for (const file of ['viewer.css','standalone.js','index.html','standalone-room.js','room.html']) {
   await copyFile(new URL(`./src/${file}`,import.meta.url),new URL(file,out));
