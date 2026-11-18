@@ -67,3 +67,11 @@ test("tagged interior meshes take tiled pack surfaces and the undo restores shar
   assert.equal(wall.material, shared);
   assert.equal(floor.material, shared);
 });
+
+test("style select reflects the home's pack, or its legacy palette's mapped style", async () => {
+  const { homeStyle, STYLE_NAMES } = await import("../town/style_names.js");
+  assert.equal(homeStyle({ palette: "sage", style_pack: { id: "industrial_loft", version: "1.0.0" } }), "industrial_loft");
+  assert.equal(homeStyle({ palette: "terracotta" }), "mid_century");
+  assert.equal(homeStyle({ palette: "oak", style_pack: { id: "gothic" } }), "scandinavian");
+  assert.deepEqual(Object.keys(STYLE_NAMES), ["scandinavian", "modern_classic", "industrial_loft", "japandi", "mid_century"]);
+});

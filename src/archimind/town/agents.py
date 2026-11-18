@@ -13,7 +13,9 @@ from archimind.datasets.search import (
     search_references,
 )
 
-from .design import PROGRAM, digest, generate, validate_home
+from archimind.style_packs import LEGACY_PALETTE_TO_STYLE, all_packs, load_pack
+
+from .design import PROGRAM, apply_style, digest, generate, style_clause, validate_home
 
 ROLES = {
     "A": "Brief and constraints",
@@ -22,7 +24,6 @@ ROLES = {
     "D": "Spatial critic",
     "E": "Style and presentation",
 }
-SWATCH = {"oak": "#e5d6bc", "sage": "#bac6ad", "terracotta": "#d8ab91"}
 
 
 def search(message):
@@ -102,10 +103,10 @@ def coordinate(req, previous, interpret, emit):
             ("D", "Check starting geometry", baseline),
             (
                 "E",
-                "Inspect finish options",
+                "Inspect style options",
                 lambda: {
-                    "starting_palette": previous["palette"] if previous else None,
-                    "options": SWATCH,
+                    "starting_style": starting_style(previous),
+                    "options": {p.id: p.name for p in all_packs()},
                 },
             ),
         ]
@@ -113,11 +114,15 @@ def coordinate(req, previous, interpret, emit):
         brief = futures[0].result()
         for future in futures[1:]:
             future.result()
+        pack = load_pack(brief.style)
         emit(
             "E",
             "completed",
-            "Resolved finish",
-            {"palette": brief.palette, "swatch": SWATCH[brief.palette]},
+            "Resolved style",
+            {
+                "style_pack": {"id": pack.id, "version": pack.version},
+                "name": pack.name,
+            },
         )
         checks = []
 
@@ -135,21 +140,21 @@ def coordinate(req, previous, interpret, emit):
                     )
                 )
 
-        finish_only = (
+        # Style is per home: a style-only message re-dresses every room, locked
+        # ones included, and keeps geometry, openings and furniture positions.
+        style_only = (
             previous
-            and re.fullmatch(
-                r"(?:use )?(oak|sage|terracotta)(?: finishes)?[.!]?",
-                req.message.strip().lower(),
-            )
+            and _style_only_message(req.message)
             and (brief.width, brief.depth) == (previous["width"], previous["depth"])
             and brief.priority == "balanced"
+            and not brief.closer_study_desk
         )
-        if finish_only:
+        if style_only:
             home = copy.deepcopy(previous)
-            home["palette"] = brief.palette
+            apply_style(home, brief.style)
             home.pop("id")
             home["id"] = digest(home)
-            emit("C", "skipped", "Finish edit preserves geometry", {})
+            emit("C", "skipped", "Style edit preserves geometry", {})
             homes = [home]
         else:
             homes = generate(brief, previous, on_progress=progress)
@@ -160,6 +165,24 @@ def coordinate(req, previous, interpret, emit):
             "E",
             "completed",
             "Prepare presentation",
-            {"candidates": [h["id"] for h in homes], "palette": brief.palette},
+            {
+                "candidates": [h["id"] for h in homes],
+                "style_pack": {"id": pack.id, "version": pack.version},
+            },
         )
         return homes
+
+
+def starting_style(previous):
+    if not previous:
+        return None
+    return previous.get("style_pack", {}).get("id") or LEGACY_PALETTE_TO_STYLE.get(
+        previous.get("palette")
+    )
+
+
+def _style_only_message(message):
+    try:
+        return style_clause(message) is not None
+    except ValueError:
+        return False

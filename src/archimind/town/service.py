@@ -12,6 +12,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from archimind.studio import provider
 from archimind.town.agents import coordinate
+from archimind.style_packs import StyleId
 from archimind.town.design import Brief, Kind, interpret_offline
 
 SCHEMA = [
@@ -172,7 +173,7 @@ class Interpretation(BaseModel):
     priority: Literal[
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ]
-    palette: Literal["oak", "sage", "terracotta"]
+    style: StyleId
     lock_rooms: list[Kind] = Field(max_length=5)
     clarification: str = Field(max_length=500)
     unsupported: list[str] = Field(max_length=8)
@@ -206,7 +207,7 @@ def interpret(req, previous):
         }
         parsed = provider.request(
             Interpretation,
-            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for palette and priority unless text explicitly requests a different supported option. Supported: single storey, five listed rooms, global palette, quiet bedroom and bright study priorities, moving the existing study desk closer to its window, locks, seed. List unsupported mandatory requests; ask for clarification if ambiguous. For furniture locks, return the IDs (the whole containing room will be preserved). Never silently drop requirements. "
+            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for style and priority unless text explicitly requests a different supported option. Supported: single storey, five listed rooms, one global style for the whole home (exactly one of modern_classic, industrial_loft, scandinavian, japandi, mid_century; the finish words oak, sage and terracotta mean scandinavian, japandi and mid_century; ask for clarification if two styles or any other style is requested), quiet bedroom and bright study priorities, moving the existing study desk closer to its window, locks, seed. List unsupported mandatory requests; ask for clarification if ambiguous. For furniture locks, return the IDs (the whole containing room will be preserved). Never silently drop requirements. "
             + json.dumps(facts),
             config=cfg,
             deadline=time.monotonic() + 30,
@@ -229,7 +230,7 @@ def interpret(req, previous):
         brief = brief.model_copy(
             update={
                 "priority": parsed.priority,
-                "palette": parsed.palette,
+                "style": parsed.style,
                 "locks": sorted(locks),
                 "closer_study_desk": parsed.closer_study_desk
                 or brief.closer_study_desk,

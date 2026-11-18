@@ -139,7 +139,7 @@ def test_owner_and_budget(local, monkeypatch):
         seen.append(prompt)
         return schema(
             priority="balanced",
-            palette="oak",
+            style="scandinavian",
             lock_rooms=[],
             clarification="Which room needs daylight?",
             unsupported=[],
@@ -166,9 +166,9 @@ def test_compound_offline_brief_preserves_unsupported_constraints():
     brief = interpret_offline(
         Brief(), "Bright study and sage finishes; keep the bedroom."
     )
-    assert (brief.priority, brief.palette, brief.locks) == (
+    assert (brief.priority, brief.style, brief.locks) == (
         "bright study",
-        "sage",
+        "japandi",
         ["bedroom"],
     )
     with pytest.raises(ValueError, match="Offline briefs"):
@@ -180,7 +180,7 @@ def test_compound_offline_brief_preserves_unsupported_constraints():
     home = generate(combined)[0]
     assert home["evidence"]["study_window_width_m"] == 2.5
     assert home["evidence"]["bedroom_center_from_front_m"] > combined.depth / 2
-    with pytest.raises(ValueError, match="one finish"):
+    with pytest.raises(ValueError, match="Choose one style"):
         interpret_offline(Brief(), "oak and terracotta")
 
 

@@ -387,11 +387,15 @@
       }
     }
   ],
+  "style_pack": {
+    "id": "scandinavian",
+    "version": "1.0.0"
+  },
   "palette": "oak",
   "evidence": {
     "reachable_rooms": 5,
     "bedroom_center_from_front_m": 3.3,
     "study_window_width_m": 1.4
   },
-  "id": "01038627c0a488536275ed3c5d04cac244ab8addf151c3c10e30108006ab0964"
+  "id": "62e5a0c67b1ed128509106e1fca957cdc332772902ea41c24eb00549d70b3a83"
 }

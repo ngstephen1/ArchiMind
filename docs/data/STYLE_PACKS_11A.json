@@ -23,6 +23,10 @@
       "before_sha256": "6f24b3de023ec69f79b6d7cb580b1cfb5a10fa307a81d3ed613a58db0f591b01",
       "after_sha256": "643ce0aec7d8ea4926638c446999e28b8da800df0c347e9810d66dfbb6338fef"
     },
+    "pyproject.toml": {
+      "before_sha256": "8d3c90f7a7826f6b9bdcbf76bd2723e17bc13e48d4018fcd56a364e8d7d513ab",
+      "after_sha256": "379d95bdf520188f74a5acdee5800fbc61520fda321d20e55241653d434b8dc4"
+    },
     "src/archimind/_viewer_assets/viewer.js": {
       "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
       "after_sha256": "875869b9820a16eab6a70aa60af9d61d8247732e22ce2f2b96b07e44c639ff6e"

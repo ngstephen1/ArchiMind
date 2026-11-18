@@ -1,0 +1,107 @@
+{
+  "id": "japandi",
+  "version": "1.0.0",
+  "name": "Japandi",
+  "aliases": [
+    "japandi",
+    "zen",
+    "wabi sabi"
+  ],
+  "surfaces": {
+    "floor": {
+      "asset_id": "polyhaven:oak_veneer_01",
+      "tiling_m": 1.4,
+      "fallback_color": "#c4a47c"
+    },
+    "wall": {
+      "asset_id": "polyhaven:beige_wall_001",
+      "tiling_m": 2.0,
+      "fallback_color": "#e4d9c8"
+    },
+    "ceiling": {
+      "asset_id": "polyhaven:white_plaster_02",
+      "tiling_m": 2.0,
+      "fallback_color": "#efe8dc"
+    },
+    "trim": {
+      "asset_id": "polyhaven:dark_wood",
+      "tiling_m": 1.0,
+      "fallback_color": "#3d3127"
+    },
+    "door": {
+      "asset_id": "polyhaven:oak_veneer_01",
+      "tiling_m": 1.0,
+      "fallback_color": "#b89670"
+    },
+    "window_frame": {
+      "asset_id": "polyhaven:dark_wood",
+      "tiling_m": 1.0,
+      "fallback_color": "#3a2f26"
+    },
+    "worktop": {
+      "asset_id": "polyhaven:oak_veneer_01",
+      "tiling_m": 1.2,
+      "fallback_color": "#bf9d74"
+    },
+    "tile": {
+      "asset_id": "polyhaven:beige_wall_001",
+      "tiling_m": 0.8,
+      "fallback_color": "#ddd2c0"
+    },
+    "metal": {
+      "asset_id": "polyhaven:brushed_metal",
+      "tiling_m": 1.0,
+      "fallback_color": "#3a3a38"
+    }
+  },
+  "furniture": {},
+  "decor": {
+    "rug": null,
+    "art": null,
+    "curtain": null,
+    "pendant": null,
+    "plant": null,
+    "floor_lamp": null,
+    "mouldings": false,
+    "accents": []
+  },
+  "lighting": {
+    "environment_asset_id": "polyhaven:kiara_interior",
+    "environment_intensity": 0.7,
+    "exposure": 0.95,
+    "sun": {
+      "direction": [
+        0.7,
+        0.45,
+        0.4
+      ],
+      "intensity": 2.0,
+      "kelvin": 3800
+    },
+    "fill": {
+      "sky_color": "#f3ebde",
+      "ground_color": "#a08a6e",
+      "intensity": 0.55
+    }
+  },
+  "plan_theme": {
+    "wall_fill": "#3d3127",
+    "wall_stroke": "#2a211a",
+    "floor_fill": "#f1eadf",
+    "furniture_fill": "#d8c8b0",
+    "furniture_stroke": "#6b5843",
+    "label_color": "#3d3127",
+    "door_color": "#a08262",
+    "window_color": "#8aa29a"
+  },
+  "quality": {
+    "high": {
+      "texture_px": 2048,
+      "decor_density": 1.0
+    },
+    "low": {
+      "texture_px": 1024,
+      "decor_density": 0.5
+    }
+  }
+}

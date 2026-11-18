@@ -1,0 +1,117 @@
+{
+  "id": "scandinavian",
+  "version": "1.0.0",
+  "name": "Scandinavian",
+  "aliases": [
+    "scandinavian",
+    "scandi",
+    "nordic",
+    "hygge"
+  ],
+  "surfaces": {
+    "floor": {
+      "asset_id": "polyhaven:laminate_floor_02",
+      "tiling_m": 1.4,
+      "fallback_color": "#c9a97f"
+    },
+    "wall": {
+      "asset_id": "polyhaven:white_plaster_02",
+      "tiling_m": 2.0,
+      "fallback_color": "#f2f0eb"
+    },
+    "ceiling": {
+      "asset_id": "polyhaven:white_plaster_02",
+      "tiling_m": 2.0,
+      "fallback_color": "#f7f6f2"
+    },
+    "trim": {
+      "asset_id": "polyhaven:painted_wood",
+      "tiling_m": 1.0,
+      "fallback_color": "#f5f3ee"
+    },
+    "door": {
+      "asset_id": "polyhaven:painted_wood",
+      "tiling_m": 1.0,
+      "fallback_color": "#efece6"
+    },
+    "window_frame": {
+      "asset_id": "polyhaven:painted_wood",
+      "tiling_m": 1.0,
+      "fallback_color": "#f5f3ee"
+    },
+    "worktop": {
+      "asset_id": "polyhaven:oak_veneer_01",
+      "tiling_m": 1.2,
+      "fallback_color": "#c8a77c"
+    },
+    "tile": {
+      "asset_id": "polyhaven:white_tiles",
+      "tiling_m": 0.8,
+      "fallback_color": "#ecebe7"
+    },
+    "metal": {
+      "asset_id": "polyhaven:brushed_metal",
+      "tiling_m": 1.0,
+      "fallback_color": "#a8a8a6"
+    }
+  },
+  "furniture": {
+    "chair": [
+      {
+        "asset_id": "designer:oak-sage-writing-chair@1.1.0",
+        "width_m": 0.48,
+        "depth_m": 0.52,
+        "height_m": 0.83
+      }
+    ]
+  },
+  "decor": {
+    "rug": null,
+    "art": null,
+    "curtain": null,
+    "pendant": null,
+    "plant": null,
+    "floor_lamp": null,
+    "mouldings": false,
+    "accents": []
+  },
+  "lighting": {
+    "environment_asset_id": "polyhaven:studio_small_09",
+    "environment_intensity": 0.8,
+    "exposure": 1.0,
+    "sun": {
+      "direction": [
+        0.4,
+        0.8,
+        0.3
+      ],
+      "intensity": 1.8,
+      "kelvin": 6200
+    },
+    "fill": {
+      "sky_color": "#eef2f7",
+      "ground_color": "#b9ab96",
+      "intensity": 0.6
+    }
+  },
+  "plan_theme": {
+    "wall_fill": "#3a3f45",
+    "wall_stroke": "#262a2e",
+    "floor_fill": "#f6f2ea",
+    "furniture_fill": "#e3d6c2",
+    "furniture_stroke": "#8a7357",
+    "label_color": "#3a3f45",
+    "door_color": "#b89a74",
+    "window_color": "#7ea4bd"
+  },
+  "quality": {
+    "high": {
+      "texture_px": 2048,
+      "decor_density": 1.0
+    },
+    "low": {
+      "texture_px": 1024,
+      "decor_density": 0.5
+    }
+  }
+}

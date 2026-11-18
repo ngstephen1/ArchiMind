@@ -1,6 +1,7 @@
 import { timeline } from "./agents.js";
 import { explanation } from "./explanation.js";
 import { createTown } from "./world.js";
+import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import showcase from "./showcase.json";
 const el = (id) => document.getElementById(id);
 const cfg = await fetch("./config.json").then((r) => r.json());
@@ -102,7 +103,7 @@ function sync(data) {
   world.load(applied);
   el("width").value = applied.width;
   el("depth").value = applied.depth;
-  el("palette").value = applied.palette;
+  el("style").value = homeStyle(applied);
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
   url.searchParams.set("project", project);
@@ -290,8 +291,8 @@ function evidence(h) {
       (changed.length
         ? changed.join(", ") + " changed."
         : "room geometry and furniture retained.") +
-      " Finish: " +
-      h.palette +
+      " Style: " +
+      STYLE_NAMES[homeStyle(h)] +
       ".";
   }
   Array.from(el("choices").children).forEach((b, i) =>
@@ -342,7 +343,7 @@ bind("generate", async () => {
         depth: Number(el("depth").value),
         seed: 42 + revision,
         priority: el("priority").value,
-        palette: el("palette").value,
+        style: el("style").value,
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
         ),
