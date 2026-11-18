@@ -16,3 +16,6 @@
 !src/archimind/_viewer_assets/furniture/ABO_LICENSE_CC_BY_4.0.txt
 !frontend/realistic_viewer/town/materials/
 !frontend/realistic_viewer/town/materials/wood-floor.jpg
+!src/archimind/_viewer_assets/designer_registry.json
+!src/archimind/_viewer_assets/designer-*.glb
+!src/archimind/_viewer_assets/designer-*.png

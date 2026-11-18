@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "chairs": [
+    {
+      "concept_id": "oak-sage-writing-chair",
+      "version": "1.0.0",
+      "name": "Oak writing chair with sage upholstery",
+      "sha256": "54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81",
+      "front_sha256": "068a466dc327682c6313a2764aeb177a992c0cacffc69535f2fc0e5c72e0fed8",
+      "three_quarter_sha256": "3562c36f9f4ac6b5fd9f43278011f7319a9238d3f4c9c64a7daa1376e94b2a50",
+      "width_m": 0.48,
+      "depth_m": 0.52,
+      "height_m": 0.83,
+      "bytes": 80844
+    },
+    {
+      "concept_id": "oak-sage-writing-chair",
+      "version": "1.1.0",
+      "name": "Oak writing chair with sage upholstery",
+      "sha256": "609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258",
+      "front_sha256": "783cdf7836957293d01857b460012cde056418e49e8a2fb4cc0631fce149ee47",
+      "three_quarter_sha256": "b9177c302c64e7e27a9a9d7e534b315197e48d8ee77febc3cf6a76f34a8c2e65",
+      "width_m": 0.48,
+      "depth_m": 0.52,
+      "height_m": 0.83,
+      "bytes": 80944
+    }
+  ]
+}

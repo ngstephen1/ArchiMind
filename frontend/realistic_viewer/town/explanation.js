@@ -6,7 +6,8 @@ function gap(a, b) {
 }
 
 export function explanation(home, question) {
-  const {room, furniture} = home.rooms.find(p => p.design.room.id === "bedroom").design;
+  const bedroom = home.rooms.find(p => p.design.room.id === "bedroom");
+  const {room, furniture} = bedroom.design;
   const get = id => furniture.find(f => f.id === id);
   const desk = get("belaya"), bed = get("queen-bed");
   const q = question.toLowerCase();
@@ -17,6 +18,13 @@ export function explanation(home, question) {
   if (/chair/.test(q)) {
     const chair = get("desk-chair");
     if (!chair || !desk) return "This revision has no recorded desk-and-chair pair.";
+    if (bedroom.designer_chair) {
+      const {name, dimensions_wdh_m} = bedroom.designer_chair;
+      return name + " has a native width of " + dimensions_wdh_m[0].toFixed(2) +
+        " m. Its reserved footprint is " + chair.width_m.toFixed(2) + " × " +
+        chair.depth_m.toFixed(2) + " m. The gap from that reservation to the desk is " +
+        gap(chair, desk).toFixed(2) + " m. Under-desk knee clearance has not been measured.";
+    }
     return "The writing chair is " + chair.width_m.toFixed(2) + " m wide. The closest edges of its footprint and the desk are " + gap(chair,desk).toFixed(2) + " m apart. Under-desk knee clearance has not been measured.";
   }
   if (/lamp|nightstand|bedside/.test(q)) {

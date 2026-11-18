@@ -16,7 +16,20 @@ export function validateRecipe(recipe){
   if(new Set(recipe.parts.map(p=>p.color.toLowerCase()+'|'+p.roughness)).size>8)throw Error('Too many concept materials');
   return recipe;
 }
+export const DESIGNER_CHAIR_SLOT='studio:designer-chair';
 export function validateConceptScene(data){
+  if(data.schema_version===5){
+    const {designer_chair:binding,...rest}=data;
+    const chair=data.design.furniture.find(f=>f.id===DESIGNER_CHAIR_SLOT);
+    if(!chair || chair.category!=='chair' || chair.rotation_deg!==0 || !exact(binding,['concept_id','version','sha256']) ||
+       typeof binding.concept_id!=='string' || binding.concept_id.length>80 || !binding.concept_id ||
+       typeof binding.version!=='string' || binding.version.length>32 || !binding.version ||
+       !/^[0-9a-f]{64}$/.test(binding.sha256) || data.design.furniture.length>12 || data.concept_assets?.length>=8 ||
+       data.asset_bindings.some(b=>b.asset_id!==null))throw Error('Invalid designer chair scene');
+    // The structural validator checked the complete design. Each other object needs its own recipe.
+    validateConceptScene({...rest,schema_version:4,design:{...data.design,furniture:data.design.furniture.filter(f=>f!==chair)}});
+    return data;
+  }
   if(!exact(data,['schema_version','design','asset_bindings','unavailable_assets','concept_assets','concept_bindings','surfaces'])||data.schema_version!==4||!Array.isArray(data.concept_assets)||!data.concept_assets.length||data.concept_assets.length>8||!Array.isArray(data.concept_bindings)||data.concept_bindings.length>12||data.unavailable_assets.length||data.asset_bindings.some(b=>b.asset_id!==null))throw Error('Invalid concept scene');
   if(!exact(data.surfaces,['wall_color','floor_color'])||!Object.values(data.surfaces).every(color))throw Error('Invalid concept surfaces');
   const assets=new Map();
@@ -66,4 +79,26 @@ export function conceptInstance(recipe,f){
     group.name=f.id;group.userData={furnitureId:f.id,kind:'procedural_concept',scale:1};return group;
   }catch(error){disposeObject(group);throw error;}
   finally{for(const b of buckets.values())b.geometries.forEach(g=>g.dispose());}
+}
+
+
+// The loader returns an owned, native-scale group centered on its floor anchor.
+// Use a parent group so placement preserves authoring/normalization transforms.
+export function placeDesignerChair(source, furniture){
+  const group=new THREE.Group();
+  group.add(source);
+  group.position.set(furniture.x_m+furniture.width_m/2,0,-furniture.y_m-furniture.depth_m/2);
+  group.updateMatrixWorld(true);
+  const box=new THREE.Box3().setFromObject(group,true), measured=box.getSize(new THREE.Vector3());
+  const expected=[furniture.width_m,furniture.height_m,furniture.depth_m];
+  const tolerance=0.00001;
+  if(measured.toArray().some((n,i)=>!Number.isFinite(n)||Math.abs(n-expected[i])>tolerance) ||
+     Math.abs(box.min.y)>tolerance || Math.abs(box.min.x-furniture.x_m)>tolerance ||
+     Math.abs(box.max.z+furniture.y_m)>tolerance){
+    disposeObject(group);
+    throw Error('Designer chair does not match the validated reservation');
+  }
+  group.name=furniture.id;
+  group.userData={furnitureId:furniture.id,kind:'designer_concept',scale:1};
+  return group;
 }

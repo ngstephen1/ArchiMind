@@ -5,7 +5,7 @@ const keys=(o,names)=>o&&typeof o==='object'&&!Array.isArray(o)&&Object.keys(o).
 const text=v=>typeof v==='string'&&v.trim().length>0&&v.length<=256;
 const finite=(v,lo,hi)=>typeof v==='number'&&Number.isFinite(v)&&v>=lo&&v<=hi;
 export function validateScene(data) {
-  if(data?.schema_version===4){
+  if(data?.schema_version===4 || data?.schema_version===5){
     validateScene({schema_version:2,design:data.design,asset_bindings:data.asset_bindings,unavailable_assets:data.unavailable_assets});
     return validateConceptScene(data);
   }

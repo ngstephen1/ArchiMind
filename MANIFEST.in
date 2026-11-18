@@ -65,3 +65,8 @@ include docs/data/CHAT_BEDROOM_09A.md
 recursive-include frontend/realistic_viewer/vendor *
 include docs/developer/3D_STUDIO.md
 include docs/data/3D_STUDIO_10A.json
+
+# Editable originals and receipts accompany the source release for operator reproduction.
+recursive-include design/oak-sage-writing-chair *.blend *.3dm *.json
+include docs/developer/DESIGNER_CHAIR_AUTHORING.md
+include docs/developer/RHINO_CHAIR.md
