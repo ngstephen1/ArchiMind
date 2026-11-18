@@ -5,7 +5,7 @@ on:
       - 'scripts/benchmark_ai_memory.py'
       - 'scripts/dev_memory.py'
       - 'data/benchmarks/design_evidence.tsv'
-      - 'src/archimind/design_evidence/**'
+      - 'src/archimind/design_evidence.py'
       - 'data/benchmarks/design_memory_holdout.tsv'
       - '.github/workflows/developer-memory-eval.yml'
   workflow_dispatch:
