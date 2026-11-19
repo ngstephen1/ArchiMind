@@ -152,5 +152,23 @@
       "pyproject.toml",
       "src/archimind/_viewer_assets/viewer.js"
     ]
+  },
+  "merge_review_migrations": {
+    "frontend/realistic_viewer/src/room_viewer.js": {
+      "before_sha256": "eb21582ec102cd2f693064751346fca6a532618bb3d3783f41c93e4bc3507a32",
+      "after_sha256": "824ffd9dcccb9182f328cb4f4d181df92298b076f03a44ebcbb1d6f31d81bca4"
+    },
+    "src/archimind/_viewer_assets/viewer.js": {
+      "before_sha256": "3a47841b6ee32034301af2d3a007ea8cace1c29642d5d4a676e829c2d1cfe23d",
+      "after_sha256": "640acab0628af46d65679a05cdd6b039cb9b4462de9d96cd445c3727dee2fd62"
+    },
+    "frontend/realistic_viewer/src/scene_lifecycle.js": {
+      "before_sha256": "01080157022b75303dbc4fddb8696daad1f6c20734a4e006c3964a52a9e441a3",
+      "after_sha256": "3d3d6f873267208e0730239c8f1c8cdd4fffdcd3ef2c70888c652a1fd62efb27"
+    },
+    "frontend/realistic_viewer/tests/lifecycle.test.js": {
+      "before_sha256": "b1bb3736f5fc2127078a6a5e849a6e4b2f8df697c3861b611b8009244df89f98",
+      "after_sha256": "8864a4fe4ca3145066d727c080b82741dc494aa6922648fe1a815b5df1765dfd"
+    }
   }
 }

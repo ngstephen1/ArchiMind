@@ -17,7 +17,7 @@ import {
 import { fitBedroomChair } from "./designer_chair.js";
 import { townSurfaceSource, LEGACY_WALL_COLORS, dressWhenCurrent, dressTownSurfaces, interiorLook } from "./style_source.js";
 import { loadStylePack, kelvinToColor } from "../src/style_pack.js";
-import { browserTier, createComposer } from "../src/render_quality.js";
+import { isSoftwareRenderer, browserTier, createComposer } from "../src/render_quality.js";
 import { loadDesignerChair, loadBedroomConcept } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
@@ -414,7 +414,8 @@ export function createTown(canvas, status, action) {
     stylePending = Promise.resolve(),
     composer = null,
     qualityButton = null;
-  const tier = () => browserTier(tierOverride);
+  const softwareRenderer = isSoftwareRenderer(renderer);
+  const tier = () => browserTier(tierOverride, softwareRenderer);
   function releasePackLook() {
     if (!packLook) return;
     const look = packLook;
@@ -472,7 +473,7 @@ export function createTown(canvas, status, action) {
       ready.push(dressing.ready);
       if (Array.isArray(part.style.bindings)) {
         const furniture = dressFurniture({
-          bindings: part.style.bindings,
+          bindings: part.style.bindings.filter((b) => b.furniture_id !== "belaya"),
           furniture: part.design.furniture,
           pack,
           objects: roomFurniture.get(part.design.room.id) || new Map(),
@@ -527,8 +528,10 @@ export function createTown(canvas, status, action) {
     canvas.dataset.stylePack = source.ref.id + "@" + source.ref.version;
     canvas.dataset.styleState = "loading";
     canvas.dataset.tier = packTier;
+    const surfaceRoles = new Set();
+    interior.traverse((o) => { if (o.isMesh && o.userData.surface) surfaceRoles.add(o.userData.surface); });
     stylePending = dressWhenCurrent(
-      loadStylePack({ baseUrl: new URL("./assets/", document.baseURI).href, ref: source.ref, tier: packTier, isCurrent: current }),
+      loadStylePack({ baseUrl: new URL("./assets/", document.baseURI).href, ref: source.ref, tier: packTier, surfaceRoles, isCurrent: current }),
       current,
       (pack) => {
         // Restyles swap materials: return the sweep to Room first.

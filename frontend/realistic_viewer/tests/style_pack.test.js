@@ -163,3 +163,13 @@ test('designer pieces load lazily from the designer registry, verified by size a
   assert.equal(await broken.model('designer:../evil@1.0.0'), null);
   assert.deepEqual(broken.failures, ['designer:test-bed@1.0.0', 'designer:test-bed@9.9.9', 'designer:../evil@1.0.0']);
 });
+
+test('only requested surfaces fetch their texture files', async () => {
+  const fixture = buildFixture(), log = [];
+  const pack = await load(fixture, {log}, {surfaceRoles: new Set(['floor'])});
+  assert.ok(pack.surface('floor').map);
+  assert.equal(pack.surface('wall'), null);
+  const plaster = fixture.releases.find(row => row.asset_id === fixture.manifest.surfaces.wall.asset_id);
+  for (const file of plaster.files) assert.ok(!log.includes(`packs/assets/${file.sha256}.${file.ext}`));
+  pack.dispose();
+});

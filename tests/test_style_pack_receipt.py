@@ -39,7 +39,19 @@ def test_chain_without_style_packs_is_the_pre_11a_state():
     migrations = json.loads((ROOT / "docs/data/STYLE_PACKS_11A.json").read_text())[
         "authorized_migrations"
     ]
-    for path, entry in migrations.items():
-        assert entry["before_sha256"] == before[path]
-        assert entry["after_sha256"] == after[path]
-    assert {p for p in before if before[p] != after[p]} == set(migrations)
+    review = json.loads((ROOT / "docs/data/STYLE_PACKS_11A.json").read_text())[
+        "merge_review_migrations"
+    ]
+    assert review.keys() <= before.keys()
+    for path in migrations.keys() | review.keys():
+        expected = before[path]
+        if path in migrations:
+            assert expected == migrations[path]["before_sha256"]
+            expected = migrations[path]["after_sha256"]
+        if path in review:
+            assert expected == review[path]["before_sha256"]
+            expected = review[path]["after_sha256"]
+        assert expected == after[path]
+    assert {
+        p for p in before if before[p] != after[p]
+    } == migrations.keys() | review.keys()

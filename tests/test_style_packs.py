@@ -206,7 +206,9 @@ def _coordinate(message, previous, brief):
     from archimind.town import agents
 
     events = []
-    req = SimpleNamespace(brief=brief, message=message, live=False, base=1, agent_team=False)
+    req = SimpleNamespace(
+        brief=brief, message=message, live=False, base=1, agent_team=False
+    )
     homes = agents.coordinate(
         req,
         previous,

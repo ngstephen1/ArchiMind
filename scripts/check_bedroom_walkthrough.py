@@ -53,14 +53,17 @@ def check(url: str, output: Path):
         )
         page.screenshot(path=output / "walkthrough.png")
         canvas = page.locator("#world")
-        initial = canvas.screenshot()
+        # This fixed canvas needs no scroll or element-stability wait.
+        clip = canvas.bounding_box()
+        assert clip and clip["width"] > 0 and clip["height"] > 0
+        initial = page.screenshot(clip=clip)
         for view in ("doorway", "desk", "bedside"):
             page.locator("#photoView").select_option(view)
             assert canvas.get_attribute("data-camera") == view
             assert page.locator("#photoReason").text_content() == ""
         page.locator("#photoView").select_option("")
         assert canvas.evaluate("element => element === document.activeElement")
-        assert initial == canvas.screenshot(), "Walking view was not restored"
+        assert initial == page.screenshot(clip=clip), "Walking view was not restored"
 
         page.locator("#design").click()
         page.locator("#chairApply").click()

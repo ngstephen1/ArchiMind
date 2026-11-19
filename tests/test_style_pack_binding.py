@@ -128,7 +128,9 @@ def test_town_rooms_carry_style_payload_and_locked_room_is_redressed():
         ids = {f["id"] for f in part["design"]["furniture"]}
         assert {b["furniture_id"] for b in part["style"]["bindings"]} == ids
     brief = interpret_offline(Brief(locks=["bedroom"]), "make it japandi")
-    req = SimpleNamespace(brief=brief, message="make it japandi", live=False, base=1, agent_team=False)
+    req = SimpleNamespace(
+        brief=brief, message="make it japandi", live=False, base=1, agent_team=False
+    )
     (styled,) = agents.coordinate(
         req, home, lambda r, p: interpret_offline(r.brief, r.message), lambda *e: None
     )
@@ -189,6 +191,10 @@ def test_town_designer_chair_reservation_is_not_bound_to_a_pack_model():
     seat = next(
         b for b in bedroom["style"]["bindings"] if b["furniture_id"] == "desk-chair"
     )
+    desk = next(
+        b for b in bedroom["style"]["bindings"] if b["furniture_id"] == "belaya"
+    )
+    assert desk["asset_id"] is None
     assert seat == {
         "furniture_id": "desk-chair",
         "asset_id": None,

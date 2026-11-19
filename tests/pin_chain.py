@@ -47,7 +47,10 @@ def _migration_steps(root: Path, include_style_packs: bool) -> list[dict]:
         assert set(update) == {"pyproject.toml"}
         steps.append(update)
     if include_style_packs and (root / STYLE_PACKS_RECEIPT).exists():
-        steps.append(_load(root, STYLE_PACKS_RECEIPT)["authorized_migrations"])
+        receipt = _load(root, STYLE_PACKS_RECEIPT)
+        steps.extend(
+            [receipt["authorized_migrations"], receipt["merge_review_migrations"]]
+        )
     return steps
 
 

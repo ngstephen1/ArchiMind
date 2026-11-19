@@ -119,6 +119,7 @@ def apply_style(home, style):
         # A user-chosen designer chair keeps its reservation.
         designer = {"desk-chair"} if part.get("designer_chair") else set()
         designer |= set(part.get("designer_collection", {}))
+        designer.add("belaya")  # Town renders this reserved product or its fallback.
         part["style"] = style_payload(design, pack, seed, designer_ids=designer)
     return home
 

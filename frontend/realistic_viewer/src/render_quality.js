@@ -12,18 +12,25 @@ export const TIER_SETTINGS = Object.freeze({
   low: Object.freeze({shadowMapSize: 1024, textureSize: '1k', decorDensity: 0.5}),
 });
 
-export function chooseTier({viewportWidth, deviceMemory, override} = {}) {
+export function chooseTier({viewportWidth, deviceMemory, softwareRenderer, override} = {}) {
   if (override === 'high' || override === 'low') return override;
+  if (softwareRenderer) return 'low';
   if (typeof viewportWidth === 'number' && viewportWidth < 700) return 'low';
   if (typeof deviceMemory === 'number' && deviceMemory < 4) return 'low';
   return 'high';
 }
 
 // Tier for this browser; `override` is the user's toggle choice, if any.
-export function browserTier(override) {
+export function isSoftwareRenderer(renderer) {
+  const gl = renderer.getContext();
+  const debug = gl.getExtension('WEBGL_debug_renderer_info');
+  return Boolean(debug && /swiftshader|llvmpipe|software rasterizer/i.test(gl.getParameter(debug.UNMASKED_RENDERER_WEBGL)));
+}
+
+export function browserTier(override, softwareRenderer = false) {
   const nav = typeof navigator === 'undefined' ? {} : navigator;
   const width = typeof innerWidth === 'number' ? innerWidth : undefined;
-  return chooseTier({viewportWidth: width, deviceMemory: nav.deviceMemory, override});
+  return chooseTier({viewportWidth: width, deviceMemory: nav.deviceMemory, softwareRenderer, override});
 }
 
 export function configureRenderer(renderer, tier) {

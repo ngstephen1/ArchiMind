@@ -60,6 +60,14 @@ def _candidate(tmp_path, wdh):
 
 def test_release_piece_appends_v2_record_with_category(tmp_path):
     candidate, root, digests = _candidate(tmp_path, (0.48, 0.52, 0.83))
+    path = root / "src/archimind/_viewer_assets/designer_registry.json"
+    original = json.loads(path.read_text())
+    chairs = [r for r in original["pieces"] if r["category"] == "chair"]
+    path.write_text(
+        json.dumps(
+            {"schema_version": 1, "chairs": chairs, "bedroom": original["bedroom"]}
+        )
+    )
     record = RELEASE["release"](
         candidate,
         root,
@@ -72,7 +80,8 @@ def test_release_piece_appends_v2_record_with_category(tmp_path):
         (root / "src/archimind/_viewer_assets/designer_registry.json").read_text()
     )
     assert registry["schema_version"] == 2
-    assert registry["pieces"][-1] == record
+    assert registry["bedroom"] == original["bedroom"]
+    assert registry["pieces"] == [*chairs, record]
     archive = root / "design/walnut-side-table/1.0.0"
     assert (archive / "piece.blend").exists()
     receipt = json.loads((archive / "release.json").read_text())

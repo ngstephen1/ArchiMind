@@ -142,10 +142,10 @@ def release(candidate, root, source, *, category="chair", wdh=None):
     try:
         registry = json.loads(path.read_bytes())
         if registry["schema_version"] == 1:
-            registry = {
-                "schema_version": 2,
-                "pieces": [{**r, "category": "chair"} for r in registry["chairs"]],
-            }
+            registry["pieces"] = [
+                {**row, "category": "chair"} for row in registry.pop("chairs")
+            ]
+            registry["schema_version"] = 2
         if registry["schema_version"] != 2:
             raise ValueError("Unsupported designer registry")
         previous = [

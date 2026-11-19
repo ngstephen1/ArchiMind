@@ -1,3 +1,4 @@
+import json
 import math
 
 import pytest
@@ -72,7 +73,8 @@ def test_live_interpreter_hands_multiple_goals_to_geometry(monkeypatch):
     )
 
     def interpret(schema, prompt, **kwargs):
-        assert req.message in prompt
+        assert json.loads(prompt)["request"] == req.message
+        assert req.message not in kwargs["task_instructions"]
         return schema(
             priority="balanced",
             style="scandinavian",

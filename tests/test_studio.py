@@ -434,7 +434,13 @@ def test_released_bed_replaces_one_recipe_and_nightstand_is_added():
         for r in approved_collection()
     )
     assert len(releases) == 2
-    build = build_room(draft, designer_collection=releases)
+    build = build_room(draft, designer_collection=releases, style="scandinavian")
+    bindings = [
+        b
+        for c in build.result().candidates
+        for b in scene_payload(build, c)["style"]["bindings"]
+    ]
+    assert build.style_assets == workflow.asset_hashes(b["asset_id"] for b in bindings)
     assert build.model_calls == 0 and len(build.recipes) == 2
     assert len(build.result().candidates) == 2
     for candidate in build.result().candidates:

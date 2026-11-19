@@ -277,6 +277,13 @@ class StudioBuild(Frozen):
         return self
 
 
+def _studio_style(design, pack, seed, chair, collection):
+    reserved = {f"studio:{binding.concept_id}" for binding in collection}
+    if chair is not None:
+        reserved.add(DESIGNER_CHAIR_SLOT)
+    return style_payload(design, pack, seed, designer_ids=reserved)
+
+
 def build_room(
     draft: StudioDraft,
     seed: int = 42,
@@ -360,7 +367,9 @@ def build_room(
         style_assets = asset_hashes(
             b["asset_id"]
             for c in result.candidates
-            for b in style_payload(c.design, pack, seed)["bindings"]
+            for b in _studio_style(
+                c.design, pack, seed, designer_chair, designer_collection
+            )["bindings"]
         )
     return StudioBuild(
         draft=draft,
@@ -414,10 +423,12 @@ def scene_payload(build: StudioBuild, candidate) -> dict:
             b.model_dump(mode="json") for b in build.designer_collection
         ]
     if build.style is not None:
-        designer = {DESIGNER_CHAIR_SLOT} if build.designer_chair is not None else set()
-        designer |= {f"studio:{b.concept_id}" for b in build.designer_collection}
-        payload["style"] = style_payload(
-            candidate.design, load_pack(build.style), build.seed, designer_ids=designer
+        payload["style"] = _studio_style(
+            candidate.design,
+            load_pack(build.style),
+            build.seed,
+            build.designer_chair,
+            build.designer_collection,
         )
     if len(json.dumps(payload).encode()) > 262144:
         raise StudioError("The complete scene exceeds the recipe byte budget.")

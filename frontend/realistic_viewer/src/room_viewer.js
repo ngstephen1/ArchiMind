@@ -10,7 +10,7 @@ import {fittedInstance,placeholder,footprint,instanceMetrics,quadGeometry,wallUV
 import {queenBed,addWallFinish,contactTexture} from './bedroom_finishes.js';
 import {conceptInstance,DESIGNER_CHAIR_SLOT,placeDesignerChair} from './concept_assets.js';
 import {loadBedroomConcept,loadDesignerChair} from './designer_chair.js';
-import {browserTier,configureRenderer,createComposer} from './render_quality.js';
+import {isSoftwareRenderer, browserTier,configureRenderer,createComposer} from './render_quality.js';
 import {loadStylePack,applyLighting} from './style_pack.js';
 import {splitStyle,createRoomStyle,tiledSurface,disposeTiled} from './room_style.js';
 import {buildDressing} from './dressing.js';
@@ -95,7 +95,7 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
     if(conceptRoom){root.dataset.conceptRoom='true';root.querySelector('.room-info').textContent=`${room.name} · Procedural concept room, not catalog products · ${room.width_m} × ${room.depth_m} × ${room.ceiling_height_m} m · reservation-based spatial checks; no product or building-code certification.`;}
     scene=new THREE.Scene();scene.background=new THREE.Color('#e9e2d8');scene.add(owned,instances);owned.add(walls,footprints);
     renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=.85;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFShadowMap;
-    const tier=style?browserTier(viewState?.tier):null;if(style)configureRenderer(renderer,tier);
+    const tier=style?browserTier(viewState?.tier,isSoftwareRenderer(renderer)):null;if(style)configureRenderer(renderer,tier);
     renderer.domElement.setAttribute('aria-label',conceptRoom?'Procedural concept room with measured openings and generated furniture':'Experimental room with wall openings, native-scale products and labeled procedural furniture');stage.prepend(renderer.domElement);
     const env=new RoomEnvironment(),pmrem=new THREE.PMREMGenerator(renderer);envTarget=pmrem.fromScene(env,.04);scene.environment=envTarget.texture;scene.environmentIntensity=.45;disposeObject(env);pmrem.dispose();
     const hemisphere=new THREE.HemisphereLight(0xf2f6ff,0xa79a86,.8);owned.add(hemisphere);
@@ -200,7 +200,7 @@ export function mountRoomViewer(host,input,{viewState=null}={}){
           for(const [mesh,material] of swaps.reverse())mesh.material=material;tiled.forEach(disposeTiled);
         };
       };
-      styleControl=createRoomStyle({style,tier,root,apply:dress,loadPack:({ref,tier:t,isCurrent})=>loadStylePack({baseUrl:new URL('./',import.meta.url).href,ref,tier:t,isCurrent})});
+      styleControl=createRoomStyle({style,tier,root,apply:dress,loadPack:({ref,tier:t,isCurrent})=>loadStylePack({baseUrl:new URL('./',import.meta.url).href,ref,tier:t,isCurrent,surfaceRoles:new Set(['floor','wall','trim'])})});
       const quality=root.querySelector('.quality');quality.hidden=false;
       const label=()=>{quality.textContent=`Quality: ${styleControl.tier==='high'?'High':'Low'}`;};label();
       quality.onclick=()=>{

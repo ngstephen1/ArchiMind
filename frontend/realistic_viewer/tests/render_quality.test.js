@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import {chooseTier, configureRenderer, createComposer, TIER_SETTINGS} from '../src/render_quality.js';
 
 test('tier: narrow or low-memory is low, override wins', () => {
+  assert.equal(chooseTier({softwareRenderer: true}), 'low');
+  assert.equal(chooseTier({softwareRenderer: true, override: 'high'}), 'high');
   assert.equal(chooseTier({viewportWidth: 390}), 'low');
   assert.equal(chooseTier({viewportWidth: 1440, deviceMemory: 2}), 'low');
   assert.equal(chooseTier({viewportWidth: 1440, deviceMemory: 8}), 'high');

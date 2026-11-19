@@ -86,7 +86,7 @@ export function kelvinToColor(kelvin) {
   return new THREE.Color().setRGB(clamp(r), clamp(g), clamp(b), THREE.SRGBColorSpace);
 }
 
-export async function loadStylePack({baseUrl, ref, tier, fetchBytes = defaultFetch, isCurrent = () => true,
+export async function loadStylePack({baseUrl, ref, tier, surfaceRoles, fetchBytes = defaultFetch, isCurrent = () => true,
   decodeTexture = defaultDecodeTexture, parseEnvironment = defaultParseEnvironment, parseModel = defaultParseModel}) {
   if (!ref || typeof ref.id !== 'string' || !/^[a-z_]+$/.test(ref.id) || typeof ref.version !== 'string') throw unavailable();
   const url = path => baseUrl + path;
@@ -140,7 +140,8 @@ export async function loadStylePack({baseUrl, ref, tier, fetchBytes = defaultFet
     }
   }
 
-  const loaded = await Promise.all(Object.entries(manifest.surfaces).map(([role, spec]) => loadSurface(role, spec)));
+  const requested = Object.entries(manifest.surfaces).filter(([role]) => !surfaceRoles || surfaceRoles.has(role));
+  const loaded = await Promise.all(requested.map(([role, spec]) => loadSurface(role, spec)));
   const surfaces = new Map();
   for (const {role, material, status, textures} of loaded) {
     surfaces.set(role, material);

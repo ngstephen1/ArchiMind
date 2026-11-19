@@ -66,7 +66,9 @@ def patch_windows_stdio_client():
                     raise queue.Empty
                 line = inbox.get(timeout=remaining)
             except queue.Empty:
-                raise RuntimeError(f"Timeout waiting for response to {method}") from None
+                raise RuntimeError(
+                    f"Timeout waiting for response to {method}"
+                ) from None
             if not line:
                 raise RuntimeError("MCP server closed stdout unexpectedly")
             try:
@@ -195,7 +197,9 @@ def run_pieces(upstream, output, concepts):
                 },
             )
             if metadata.get("concept_id") != concept:
-                raise RuntimeError(f"Blender authoring failed for {concept}: {metadata}")
+                raise RuntimeError(
+                    f"Blender authoring failed for {concept}: {metadata}"
+                )
             objects = session._test_tool("get_objects_summary")
             if objects.get("status") != "ok":
                 raise RuntimeError(f"Scene inspection failed: {objects}")
