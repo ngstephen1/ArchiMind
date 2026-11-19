@@ -16,7 +16,9 @@ permissions:
 jobs:
   bedroom:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    # Chromium renders the furnished home on a software GPU. Allow the desktop
+    # and narrow walkthroughs to finish and upload their presentation images.
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
