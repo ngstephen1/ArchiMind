@@ -124,7 +124,7 @@
           {
             "furniture_id": "belaya",
             "asset_id": null,
-            "reason": "procedural_fallback"
+            "reason": "designer"
           },
           {
             "furniture_id": "desk-chair",
@@ -863,5 +863,5 @@
     "bedroom_center_from_front_m": 3.3,
     "study_window_width_m": 1.4
   },
-  "id": "5ff73d248ec7c7afd83593a73faeab09abc8e41921beab0caf190fc71d65a2e7"
+  "id": "73025da193c76c4555e42bf9df04090cdfab130ef90c46eab1b02f1db7b23538"
 }
