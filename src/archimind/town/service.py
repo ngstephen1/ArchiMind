@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from archimind.studio import provider
 from archimind.style_packs import StyleId
 from archimind.town.agents import coordinate
-from archimind.town.design import Brief, Kind, interpret_offline
+from archimind.town.design import Brief, Kind, RoomGoal, interpret_offline
 
 SCHEMA = [
     "CREATE TABLE IF NOT EXISTS job_events (job TEXT NOT NULL, seq INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(job,seq))",
@@ -114,13 +114,17 @@ class Request(BaseModel):
     brief: Brief
     message: str = Field(max_length=1800, default="")
     live: bool = False
+    agent_team: bool = False
 
 
 def enqueue(owner, req):
     p, j = str(req.project), str(req.id)
     with transaction() as q:
         head = project(q, owner, p)
-        raw = req.model_dump_json()
+        excluded = {} if req.agent_team else {"agent_team": True}
+        if not req.brief.room_goals:
+            excluded["brief"] = {"room_goals"}
+        raw = req.model_dump_json(exclude=excluded)
         existing = q(
             "SELECT request FROM jobs WHERE id=? AND owner=?", (j, owner)
         ).fetchone()
@@ -132,8 +136,16 @@ def enqueue(owner, req):
             raise Problem("Project changed. Reload this revision.", 409)
         now = int(time.time())
         expire_jobs(q, now)
+        if req.agent_team and not req.live:
+            raise Problem("The design team requires live interpretation.")
+        if (
+            req.agent_team
+            and os.getenv("TOWN_MODE") == "local"
+            and not os.getenv("OPENAI_API_KEY", "").strip()
+        ):
+            raise Problem("Configure the server OPENAI_API_KEY to generate a home.")
         if req.live:
-            if not req.message.strip():
+            if not req.message.strip() and not req.agent_team:
                 raise Problem("Enter a design request.")
             if os.getenv("ARCHIMIND_ENABLE_OPENAI_STUDIO") != "1":
                 raise Problem("Live interpretation is disabled on this server.")
@@ -150,16 +162,18 @@ def enqueue(owner, req):
             >= 3
         ):
             raise Problem("Daily limit of three design jobs reached.", 429)
-        # Each live job makes at most one bounded model call. Reserve quota before queueing.
+        # Reserve three calls for team jobs and one for legacy interpretation.
         if req.live:
             used = q(
-                "SELECT count(*) FROM jobs WHERE created>=? AND request LIKE ?",
-                (day, '%"live":true%'),
+                "SELECT COALESCE(SUM(CASE WHEN request LIKE ? THEN 3 ELSE 1 END),0) "
+                "FROM jobs WHERE created>=? AND request LIKE ?",
+                ('%"agent_team":true%', day, '%"live":true%'),
             ).fetchone()[0]
             cap = int(os.getenv("TOWN_DAILY_MODEL_CALLS", "0"))
             reserve = int(os.getenv("TOWN_CALL_RESERVE_MICROUSD", "0"))
             budget = int(os.getenv("TOWN_DAILY_MICROUSD", "0"))
-            if used >= cap or reserve <= 0 or (used + 1) * reserve > budget:
+            total = used + (3 if req.agent_team else 1)
+            if total > cap or reserve <= 0 or total * reserve > budget:
                 raise Problem("The operator's daily AI allowance is exhausted.", 429)
         q(
             "INSERT INTO jobs(id,owner,project,base,created,status,request) VALUES(?,?,?,?,?,'queued',?)",
@@ -168,16 +182,22 @@ def enqueue(owner, req):
     return {"job": j}
 
 
-class Interpretation(BaseModel):
+class NewHomeInterpretation(BaseModel):
     model_config = ConfigDict(extra="forbid")
     priority: Literal[
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ]
     style: StyleId
-    lock_rooms: list[Kind] = Field(max_length=5)
+    room_goals: list[RoomGoal] = Field(default_factory=list, max_length=4)
+    formal_salon: bool = False
     clarification: str = Field(max_length=500)
     unsupported: list[str] = Field(max_length=8)
+    shift_bedroom_chair: bool = False
     closer_study_desk: bool = False
+
+
+class Interpretation(NewHomeInterpretation):
+    lock_rooms: list[Kind] = Field(max_length=6)
     lock_furniture: list[str] = Field(max_length=12)
 
 
@@ -190,6 +210,8 @@ def expire_jobs(q, now):
 
 def interpret(req, previous):
     brief = req.brief
+    if req.agent_team and not req.message.strip():
+        return brief
     if req.live:
         cfg = provider.configuration(True)
         facts = {
@@ -206,8 +228,8 @@ def interpret(req, previous):
             "request": req.message,
         }
         parsed = provider.request(
-            Interpretation,
-            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for style and priority unless text explicitly requests a different supported option. Supported: single storey, five listed rooms, one global style for the whole home (exactly one of modern_classic, industrial_loft, scandinavian, japandi, mid_century; the finish words oak, sage and terracotta mean scandinavian, japandi and mid_century; ask for clarification if two styles or any other style is requested), quiet bedroom and bright study priorities, moving the existing study desk closer to its window, locks, seed. List unsupported mandatory requests; ask for clarification if ambiguous. For furniture locks, return the IDs (the whole containing room will be preserved). Never silently drop requirements. "
+            Interpretation if previous else NewHomeInterpretation,
+            "Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for style and priority unless text explicitly requests a different supported option. Supported: single storey, five base rooms, optional additional formal salon with a dining group for entertaining, one global style for the whole home (exactly one of modern_classic, industrial_loft, scandinavian, japandi, mid_century; the finish words oak, sage and terracotta mean scandinavian, japandi and mid_century; ask for clarification if two styles or any other style is requested), quiet bedroom and bright study priorities, repositioning the bedroom desk chair, moving the existing study desk closer to its window, locks, seed. Translate lifestyle briefs into up to four room_goals using actual room IDs. Examples: focused remote work or a quiet study means prefer the study far from living or salon; frequent hosting can favor kitchen-dining near salon; nighttime bathroom access can favor bathroom near bedroom. These are relative room-center distances, not acoustic, travel-distance or accessibility guarantees. Preserve explicit controls. A request to explain a proposed plan does not require a previous home. The salon has four documented dining seats; do not promise six. List unsupported mandatory requests; ask for clarification if ambiguous. Keeping the five standard rooms requests the program. If no previous rooms exist and the user explicitly wants to preserve an existing placement or move existing furniture, ask for clarification. On an applied revision, return the IDs for explicit placement locks (the whole containing room will be preserved). Never silently drop requirements. "
             + json.dumps(facts),
             config=cfg,
             deadline=time.monotonic() + 30,
@@ -217,8 +239,10 @@ def interpret(req, previous):
                 parsed.clarification
                 or "Unsupported requirements: " + ", ".join(parsed.unsupported)
             )
-        locks = set(brief.locks) | set(parsed.lock_rooms)
-        for item in parsed.lock_furniture:
+        locks = set(brief.locks)
+        if isinstance(parsed, Interpretation):
+            locks.update(parsed.lock_rooms)
+        for item in parsed.lock_furniture if isinstance(parsed, Interpretation) else ():
             match = [
                 r["design"]["room"]["id"]
                 for r in (previous or {}).get("rooms", [])
@@ -227,11 +251,24 @@ def interpret(req, previous):
             if len(match) != 1:
                 raise Problem("Clarify which room contains the furniture to lock.")
             locks.update(match)
+        goals = []
+        seen = set()
+        for goal in [*brief.room_goals, *parsed.room_goals]:
+            key = (*sorted((goal.room, goal.target)), goal.relation)
+            if key not in seen:
+                goals.append(goal)
+                seen.add(key)
+        if len(goals) > 4:
+            raise Problem("Choose at most four distinct room preferences.")
         brief = brief.model_copy(
             update={
                 "priority": parsed.priority,
                 "style": parsed.style,
+                "room_goals": goals,
+                "formal_salon": parsed.formal_salon or brief.formal_salon,
                 "locks": sorted(locks),
+                "shift_bedroom_chair": parsed.shift_bedroom_chair
+                or brief.shift_bedroom_chair,
                 "closer_study_desk": parsed.closer_study_desk
                 or brief.closer_study_desk,
             }

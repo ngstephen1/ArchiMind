@@ -150,3 +150,30 @@ def test_packaged_registry_is_v2_and_keeps_chair_releases():
     assert (
         concepts.resolve_piece(piece.concept_id, piece.version, piece.sha256) == piece
     )
+
+
+def test_collection_geometry_and_editable_originals_match_release_receipts():
+    root = Path(__file__).resolve().parents[1]
+    records = concepts.approved_collection()
+    assert set(concepts.BEDROOM_SIZES) == {row.concept_id for row in records}
+    for record in records:
+        archive = root / "design" / record.concept_id / record.version
+        receipt = json.loads((archive / "release.json").read_bytes())
+        assert receipt["authoring"]["reopened"] is True
+        assert (
+            hashlib.sha256((archive / "editable.blend").read_bytes()).hexdigest()
+            == receipt["authoring"]["sha256"]["editable.blend"]
+        )
+        assert [record.width_m, record.depth_m, record.height_m] == receipt[
+            "authoring"
+        ]["dimensions_wdh_m"]
+        data = concepts._asset(record.sha256, "glb")
+        assert receipt["inspection"] == json.loads(
+            json.dumps(
+                concepts.inspect_concept(
+                    data, concepts.BEDROOM_SIZES[record.concept_id]
+                )
+            )
+        )
+        with pytest.raises(ValueError):
+            concepts.resolve_chair(record.concept_id, record.version, record.sha256)

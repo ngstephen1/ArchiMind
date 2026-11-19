@@ -128,7 +128,7 @@ def test_town_rooms_carry_style_payload_and_locked_room_is_redressed():
         ids = {f["id"] for f in part["design"]["furniture"]}
         assert {b["furniture_id"] for b in part["style"]["bindings"]} == ids
     brief = interpret_offline(Brief(locks=["bedroom"]), "make it japandi")
-    req = SimpleNamespace(brief=brief, message="make it japandi", live=False, base=1)
+    req = SimpleNamespace(brief=brief, message="make it japandi", live=False, base=1, agent_team=False)
     (styled,) = agents.coordinate(
         req, home, lambda r, p: interpret_offline(r.brief, r.message), lambda *e: None
     )

@@ -400,3 +400,40 @@ button[aria-pressed="true"] {
     animation: none;
   }
 }
+
+.photo-controls {
+  position: absolute;
+  top: 18px;
+  right: 3vw;
+  width: min(155px, 42vw);
+  padding: 8px 12px;
+  background: #fffdf5ef;
+  border-radius: 8px;
+  color: #294339;
+}
+.photo-controls label { margin: 0 0 3px; font-size: 12px; font-weight: bold; }
+.photo-controls select { padding: 5px; font-size: 13px; }
+#photoReason:not(:empty) { display: block; margin-top: 4px; }
+@media(max-width:620px) {
+  .photo-controls { top: 12px; width: 132px; padding: 6px 8px; }
+}
+
+#agentCards summary { grid-template-columns: 2rem minmax(0,1fr) auto; align-items: center; }
+#agentCards summary b { grid-column: 1; grid-row: 1 / 3; }
+#agentCards summary strong { grid-column: 2; grid-row: 1; }
+#agentCards summary small { grid-column: 2 / -1; grid-row: 2; }
+#agentCards .agent-engine { grid-column: 3; grid-row: 1; height: 19px; }
+#agentCards details[data-state="running"] {
+  border-left: 3px solid #26735c;
+  background: linear-gradient(110deg,#edf6ed 22%,#d0e7db 48%,#edf6ed 74%);
+  background-size: 210% 100%;
+  animation: agentactivity 1.8s linear infinite;
+}
+@keyframes agentactivity { from { background-position: 140% 0; } to { background-position: -50% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  #agentCards details[data-state="running"] { animation: none; }
+}
+
+
+#elevations img { width: 50%; height: auto; vertical-align: top }
+@media(max-width:600px){#elevations img{width:100%}}

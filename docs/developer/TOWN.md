@@ -43,7 +43,7 @@ Render prompts for credentials on each service when the Blueprint is first creat
 
 The town ships the pinned desk and attribution with its static bundle. Keep the Vercel origin on HTTPS for browser SHA-256. Private editor links carry the project UUID and revision only. Each client signs in independently. The API verifies the bearer token with Supabase and checks project ownership. The application tables have row-level security and revoke direct access for anonymous and authenticated Supabase roles. To open a historical revision in the editor, use its revision-specific URL and select **Open latest** before editing. A stale apply receives HTTP 409.
 
-The API reserves one of three daily design jobs per owner. Duplicate request IDs return the existing job for identical input. Queued and in-flight work can be cancelled. A failed or expired job leaves the applied home available. Model requests default to zero. To enable them, configure the existing studio flag on the API and worker, the worker's server-side provider key, and the API's `TOWN_DAILY_MODEL_CALLS`, `TOWN_DAILY_MICROUSD` and `TOWN_CALL_RESERVE_MICROUSD`. The last value is an operator-supplied conservative maximum cost per call for the pinned model and token limits. The service reserves this amount for each admitted live job, even if it later fails. Billing reconciliation is external. One submission authorizes at most one model request. Walking, previews, switching layouts and reopening projects require none.
+The API reserves one of three daily design jobs per owner. Duplicate request IDs return the existing job for identical input. Queued and in-flight work can be cancelled. A failed or expired job leaves the applied home available. Town and the editor submit an AI team job on **Generate**. A job reserves three OpenAI calls before admission, including jobs that later fail or need clarification. Legacy API callers can still submit an offline job or a one-call interpretation job. The local launcher reads the server key from the environment or ignored `.env` and defaults to nine reserved calls per UTC day. The hosted API needs the studio flag and positive `TOWN_DAILY_MODEL_CALLS`, `TOWN_DAILY_MICROUSD` and `TOWN_CALL_RESERVE_MICROUSD`. The worker needs the studio flag and `OPENAI_API_KEY`. The monetary settings are operator estimates. Codex uses its own account and its usage is separate. Walking, previews, switching layouts and reopening projects require none.
 
 ## Verification
 
@@ -61,7 +61,13 @@ A separate PostgreSQL 16 smoke test created the private schema, queued a brief, 
 
 ## Bedroom presentation and evidence
 
-Use **Design presentation** in the town footer for the applied revision, or for the packaged showcase before applying a design. The two bedroom photographs are rendered from the same home as the dimensioned plan and furniture schedule. The material board describes the rendered bedroom finishes. Use **Print presentation** to print or save it as a PDF in the browser. Earlier saved homes retain their recorded furniture inventory.
+Inside the home, choose **Bedroom camera → Doorway**, **Desk and chair** or **Bedside**. Each lens uses the saved openings and furniture bounds. Detail cameras check framing and lines of sight inside the bedroom. For a missing subject or blocked composition, the selector explains why it is showing the doorway view. Choose **Walking view** to resume the same position and heading.
+
+Both the browser and print presentation capture these views at 1280 × 720. Surface maps are packaged with the app. The bedside veneer and curtain linen use physical-scale UVs. The courtyard provides interior ambient reflections, while each bedroom window directs a soft light through its measured opening. The sources, licenses, derivations and hashes are listed in the [surface manifest](../../frontend/realistic_viewer/town/materials/bedroom-sources.json).
+
+![Doorway, desk and bedside photographs of the saved seed-42 bedroom](../images/saved-bedroom-photographs.jpg)
+
+Use **Design presentation** in the town footer for the applied revision, or for the packaged showcase before applying a design. The three bedroom photographs are rendered from the same home as the dimensioned plan and furniture schedule. The material board describes the rendered bedroom finishes. Use **Print presentation** to print or save it as a PDF in the browser. Earlier saved homes retain their recorded furniture inventory.
 
 The local explanation control supports questions about the writing station, rug and reading light. The explanations use authored rules and measurements calculated from the displayed revision. Regression tests vary furniture positions, dimensions and inventory to verify the answers. In particular the desk-to-window distance is measurable; glare depends on screen orientation, time and lighting. Bedroom Chat also shows reviewed uses, variant, material/style evidence where available, and the actual planning footprint for each search result.
 
@@ -72,12 +78,33 @@ The timber image is the 1k diffuse map from [Poly Haven Wood Floor](https://poly
 1. Apply a generated home. Reopen **Design a home** and expand **Bedroom designer chair**.
 2. Choose a released version and select **Preview in bedroom**. Walk around the desk to inspect the backrest and upholstery. The preview uses the current saved room and leaves its furniture schedule available under **Design presentation**.
 3. Reopen **Design a home**. Choose **Apply chair to my home** to save the preview as a new revision, or **Discard chair preview** to return to the saved home.
-4. Open **Design presentation** to see the saved version, its native dimensions, its footprint reservation and two views of that bedroom. **Restore previous revision** can restore the earlier chair as a new revision.
+4. Open **Design presentation** to see the saved version, its native dimensions, its footprint reservation and three views of that bedroom. **Restore previous revision** can restore the earlier chair as a new revision.
 
 The project service checks the chair's release and the saved bedroom reservation on both Preview and Apply. It accepts a release identity and the current base revision. The built Town site serves the release registry, hash-named meshes and preview images alongside the existing viewer assets. A missing or corrupt mesh leaves the procedural chair in place and the walkthrough and presentation label the fallback. Local mode uses the existing project database. The public walk-through has no private editing controls.
 
 ## Follow a design run
 
-Open **Design a home** and submit “Design a five-room home with a quiet bedroom and a bright study.” The Design team panel follows five concurrent worker tasks. A interprets the brief, B searches catalog evidence and the optional configured reference pack, C reads the lot and plans rooms, D checks geometry, and E resolves the finish. Expand a card for the recorded inputs or findings. Only A can call a model, through the existing explicit opt-in. The other specialists run local Python. Reference matches are evidence for review and cannot authorize a mesh or change a furniture binding.
+Open **Design a home** and submit “Design a five-room home with a quiet bedroom and a bright study.” A (OpenAI) interprets the brief while E (OpenAI) proposes a material and daylight direction. At the same time, B searches catalog evidence, C inspects the lot and D checks the starting geometry using Python. After furnishing and deterministic candidate validation, D sends north-up PNGs of the actual candidate floor plans, their IDs, the brief and the proposed styling to OpenAI for visual critique. In the local launcher E can concurrently ask the authenticated Codex CLI to review the first candidate’s bedroom. Hosted workers skip Codex. Expand each card for results, uncertainty, failure or skip reasons. Agent activity, timing and engine badges follow recorded worker events. A new-home interpretation can specify the room program. Placement locks require an applied revision. When a provider error prevents visual critique, the design team records the failed step and offers candidates that passed spatial validation. The visual and CLI observations are advice. Python validates geometry and the user chooses which candidate to apply. Reference matches are evidence for review and cannot authorize a mesh or change a furniture binding.
 
 The working plan shows proposed partitions and furnished candidates. Final alternatives appear after validation. **Apply to my home** saves the selected alternative. The Streamlit Town editor reads the same private run. Reloading either client at the same base revision restores the event history. Short tasks can finish between polls. **Replay recorded work** in Town steps through those events at a slower pace.
+
+### Furnish a saved bedroom
+
+Generate a home and apply a layout. Open **Design a home → Bedroom designer furniture**, choose a piece and select **Preview in bedroom**. Reopen the design panel and choose **Apply furniture to my home** to save the next revision. Repeat to combine either writing chair with the linen platform bed and oak nightstand. **Design presentation** shows the saved pieces. **Restore previous revision** restores the prior choices. Each mesh fits the corresponding generated reservation at its original scale. Missing or corrupt mesh data leaves procedural furniture in place and adds an availability label.
+
+![Saved Town bedroom with the upholstered bed and reading lamp](../images/town-bedroom-collection.jpg)
+
+## Export a bedroom presentation
+
+From **Design presentation**, print the saved plan, three bedroom views, material board and furniture schedule, or download the revision manifest for Blender. The [bedroom presentation guide](BEDROOM_PRESENTATION.md) includes the seed-42 release and operator command for another saved project.
+
+
+## Generate an illustrative concept from a saved revision
+
+Apply a candidate, copy its project UUID and revision from the editor, then run:
+
+```sh
+.venv/bin/python scripts/render_ai_concept.py PROJECT_UUID REVISION --direction "An eye-level bedroom view with soft window light, oak and sage linen"
+```
+
+This local command makes one separately billed GPT Image edit request using the measured plan. It writes a PNG into `output/concepts/` and prints its path. The concept can depart from the model geometry. Use the measured plan and 3D views for placement decisions. The CLI uses the local Town database by default and accepts `--database` for a different local deployment. The Town job allowance applies to web jobs only.

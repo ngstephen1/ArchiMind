@@ -2,7 +2,7 @@
 
 The catalog-aware Requirements Interpreter preserves its legacy three-item API.
 The Chat bedroom input mode now shares the existing generation/results area.
-Choose the mode, explicitly opt in, submit measurements and answer clarifications.
+Choose the mode, submit measurements and answer clarifications.
 Choose each product, compatible procedural template or explicit omission, then
 Prepare → Review → Generate Layouts. Review the original source quotes and units,
 room/openings and each generation reservation before generation. Seed changes
@@ -32,8 +32,7 @@ Start locally from the repository with the existing environment:
 The launcher reads only OPENAI_API_KEY and ARCHIMIND_OPENAI_MODEL from the local,
 ignored .env file (existing environment wins), enables the server gate and binds
 127.0.0.1. It never evaluates shell expressions or prints credentials. The normal
-`streamlit run app.py` path remains disabled unless configured explicitly. Every
-submitted message still needs the visible user opt-in. Rotate credentials that
+`streamlit run app.py` path remains disabled unless configured explicitly. Pressing Send authorizes one live request for the submitted conversation. Rotate credentials that
 have been pasted into chat; keep .env out of commits and screenshots.
 
 Use `agents.catalog_conversation.interpret_catalog_conversation(turns,
@@ -66,7 +65,7 @@ One submission is one request, no SDK retry/tools, fixed official client,
 limited to 20 user turns / 12000 UTF-8 context bytes; no truncation or implicit
 context reset. Credentials stay in the server environment, never transcripts.
 
-New conversation preserves the visible consent preference and clears pending
+New conversation clears pending
 turns, choices and preparation before widgets render. It submits nothing by
 itself. A fresh message is still required for any new request. Variable chat
 content has a stable container so pending edits do not move the selected viewer.

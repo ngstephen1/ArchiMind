@@ -20,7 +20,11 @@ if __name__ == "__main__":
     from archimind.town.service import initialize
 
     # Check both endpoints before starting children or building the site.
-    for port in (8790, 8791):
+    town_port = int(os.getenv("TOWN_PORT", "8790"))
+    editor_port = int(os.getenv("TOWN_EDITOR_PORT", "8791"))
+    if town_port == editor_port:
+        raise SystemExit("Choose distinct town and editor ports.")
+    for port in (town_port, editor_port):
         with socket.socket() as check:
             check.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
@@ -30,17 +34,26 @@ if __name__ == "__main__":
                     raise
                 raise SystemExit(
                     f"Port {port} is already in use. If Town is running, open "
-                    "http://127.0.0.1:8790 (town) or http://127.0.0.1:8791 (editor). "
+                    f"http://127.0.0.1:{town_port} (town) or http://127.0.0.1:{editor_port} (editor). "
                     f"To identify the listener, run: lsof -nP -iTCP:{port} -sTCP:LISTEN"
                 ) from None
-    os.environ["TOWN_EDITOR_URL"] = "http://127.0.0.1:8791"
-    os.environ["TOWN_API_URL"] = "http://127.0.0.1:8790/api"
-    os.environ["TOWN_SITE_URL"] = "http://127.0.0.1:8790"
+    os.environ["TOWN_EDITOR_URL"] = f"http://127.0.0.1:{editor_port}"
+    os.environ["TOWN_API_URL"] = f"http://127.0.0.1:{town_port}/api"
+    os.environ["TOWN_SITE_URL"] = f"http://127.0.0.1:{town_port}"
     for key in ("SUPABASE_URL", "SUPABASE_ANON_KEY"):
         os.environ.pop(key, None)
     subprocess.run(
         ["node", "frontend/realistic_viewer/town/build.mjs"], cwd=ROOT, check=True
     )
+    from run_with_agent import settings_from_dotenv
+
+    for key, value in settings_from_dotenv(ROOT / ".env").items():
+        os.environ.setdefault(key, value)
+    os.environ.setdefault("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    os.environ.setdefault("ARCHIMIND_ENABLE_CODEX_ADVISOR", "1")
+    os.environ.setdefault("TOWN_DAILY_MODEL_CALLS", "9")
+    os.environ.setdefault("TOWN_DAILY_MICROUSD", "900000")
+    os.environ.setdefault("TOWN_CALL_RESERVE_MICROUSD", "100000")
     initialize()
     worker = subprocess.Popen([sys.executable, "-m", "archimind.town.worker"], cwd=ROOT)
     editor = subprocess.Popen(
@@ -51,14 +64,14 @@ if __name__ == "__main__":
             "run",
             "pages/Town_Editor.py",
             "--server.address=127.0.0.1",
-            "--server.port=8791",
+            f"--server.port={editor_port}",
             "--server.headless=true",
             "--browser.gatherUsageStats=false",
         ],
         cwd=ROOT,
     )
     try:
-        uvicorn.run("archimind.town.api:app", host="127.0.0.1", port=8790)
+        uvicorn.run("archimind.town.api:app", host="127.0.0.1", port=town_port)
     finally:
         editor.terminate()
         worker.terminate()

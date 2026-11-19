@@ -12,8 +12,10 @@ from archimind.datasets.search import (
     load_reference_pack,
     search_references,
 )
+from archimind.studio.contracts import StudioError
 from archimind.style_packs import LEGACY_PALETTE_TO_STYLE, all_packs, load_pack
 
+from . import design_review
 from .design import PROGRAM, apply_style, digest, generate, style_clause, validate_home
 
 ROLES = {
@@ -71,7 +73,12 @@ def coordinate(req, previous, interpret, emit):
             artifact = (
                 value.model_dump(mode="json") if hasattr(value, "model_dump") else value
             )
-            emit(agent, "completed", label, artifact)
+            state = (
+                "failed"
+                if label.startswith("Codex CLI") and artifact.get("status") != "success"
+                else "completed"
+            )
+            emit(agent, state, label, artifact)
             return value
         except Exception:
             emit(agent, "failed", label, {})
@@ -87,7 +94,13 @@ def coordinate(req, previous, interpret, emit):
 
     with ThreadPoolExecutor(max_workers=5, thread_name_prefix="town-agent") as pool:
         tasks = [
-            ("A", "Interpret requirements", lambda: interpret(req, previous)),
+            (
+                "A",
+                "OpenAI · Interpret brief"
+                if req.live and req.message.strip()
+                else "Read requirements and controls",
+                lambda: interpret(req, previous),
+            ),
             ("B", "Find eligible evidence", lambda: search(req.message)),
             (
                 "C",
@@ -95,24 +108,35 @@ def coordinate(req, previous, interpret, emit):
                 lambda: {
                     "width_m": req.brief.width,
                     "depth_m": req.brief.depth,
-                    "program": PROGRAM,
+                    "program": PROGRAM + (["salon"] if req.brief.formal_salon else []),
                     "existing_rooms": len(previous["rooms"]) if previous else 0,
                 },
             ),
             ("D", "Check starting geometry", baseline),
             (
                 "E",
-                "Inspect style options",
-                lambda: {
-                    "starting_style": starting_style(previous),
-                    "options": {p.id: p.name for p in all_packs()},
-                },
+                "OpenAI · Generate styling direction"
+                if req.agent_team
+                else "Inspect style options",
+                lambda: (
+                    design_review.direction(req)
+                    if req.agent_team
+                    else {
+                        "starting_style": starting_style(previous),
+                        "options": {p.id: p.name for p in all_packs()},
+                    }
+                ),
             ),
         ]
         futures = [pool.submit(task, *t) for t in tasks]
         brief = futures[0].result()
-        for future in futures[1:]:
+        for future in futures[1:4]:
             future.result()
+        try:
+            style = futures[4].result()
+        except StudioError:
+            # The task recorded the advisory failure. Use the resolved design controls.
+            style = None
         pack = load_pack(brief.style)
         emit(
             "E",
@@ -145,8 +169,13 @@ def coordinate(req, previous, interpret, emit):
             previous
             and _style_only_message(req.message)
             and (brief.width, brief.depth) == (previous["width"], previous["depth"])
+            and not brief.room_goals
             and brief.priority == "balanced"
             and not brief.closer_study_desk
+            and (
+                not brief.formal_salon
+                or any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
+            )
         )
         if style_only:
             home = copy.deepcopy(previous)
@@ -158,8 +187,50 @@ def coordinate(req, previous, interpret, emit):
         else:
             homes = generate(brief, previous, on_progress=progress)
             emit("C", "completed", "Furnishing complete", {"candidates": len(homes)})
+        for h in homes:
+            rooms = {p["design"]["room"]["id"]: p["design"]["room"] for p in h["rooms"]}
+            if "salon" not in rooms:
+                continue
+            window = rooms["salon"]["windows"][0]
+            emit(
+                "E",
+                "completed",
+                "Compose client views",
+                {
+                    "home_id": h["id"],
+                    "palette": h["palette"],
+                    "salon_subjects": ["salon-suite", "salon-dining"],
+                    "daylight_opening": window["id"],
+                    "daylight_wall": window["wall"],
+                    "lighting_studies": ["daylight", "pendant evening"],
+                    "camera_proofs": "Available after the applied revision is rendered in Cycles.",
+                },
+            )
         for check in checks:
             check.result()
+        if req.agent_team and homes:
+            visual = pool.submit(
+                task,
+                "D",
+                "OpenAI · Review plan images",
+                lambda: design_review.review_candidates(req, homes, style, brief),
+            )
+            if (
+                os.getenv("TOWN_MODE") == "local"
+                and os.getenv("ARCHIMIND_ENABLE_CODEX_ADVISOR") == "1"
+            ):
+                task(
+                    "E",
+                    "Codex CLI · Review bedroom placement",
+                    lambda: design_review.codex_review(req, homes[0]),
+                )
+            else:
+                emit("E", "skipped", "Codex CLI · Local advisor unavailable", {})
+            try:
+                visual.result()
+            except StudioError:
+                # The task recorded a failed critique. Spatial checks already passed.
+                pass
         emit(
             "E",
             "completed",

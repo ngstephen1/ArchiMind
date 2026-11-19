@@ -111,6 +111,8 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
             "BelayaDesk.glb",
             "designer-54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81.glb",
             "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
+            "designer-5d0044a1acf345f50fa80443c7f722bb2267960bf3a69cd581a310586e8c84d3.glb",
+            "designer-3f475788571c146b30a8e5e6a6c8eb33970622e789d66e37821f962e60ad175f.glb",
         }
         # Style-pack files are content-addressed and governed by packs/releases.json.
         releases = json.loads(
@@ -147,6 +149,14 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
                 "cad/cad-evidence.json",
             ):
                 relative = f"design/oak-sage-writing-chair/{version}/{file}"
+                member = next(n for n in names if n.endswith("/" + relative))
+                assert (
+                    archive.extractfile(member).read() == (ROOT / relative).read_bytes()
+                )
+
+        for concept in ("oak-bedside-lamp", "upholstered-linen-bed"):
+            for filename in ("editable.blend", "release.json"):
+                relative = f"design/{concept}/1.0.0/{filename}"
                 member = next(n for n in names if n.endswith("/" + relative))
                 assert (
                     archive.extractfile(member).read() == (ROOT / relative).read_bytes()
@@ -256,6 +266,12 @@ assert [c.version for c in chairs] == ["1.0.0", "1.1.0"]
 for chair in chairs:
     assert resolve_chair(chair.concept_id, chair.version, chair.sha256) == chair
     assert all(preview_bytes(chair, view).startswith(b"\\x89PNG") for view in ("front", "three-quarter"))
+from archimind.assets.designer_concepts import approved_collection, resolve_collection
+collection = approved_collection()
+assert {item.concept_id for item in collection} == {"oak-bedside-lamp", "upholstered-linen-bed"}
+for item in collection:
+    assert resolve_collection(item.concept_id, item.version, item.sha256) == item
+    assert all(preview_bytes(item, view).startswith(b"\\x89PNG") for view in ("front", "three-quarter"))
 import archimind.datasets as dataset_module
 from archimind.datasets.fixtures import build_synthetic_pack
 assert Path(dataset_module.__file__).resolve().is_relative_to(target)

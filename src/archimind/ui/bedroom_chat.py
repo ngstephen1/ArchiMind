@@ -124,18 +124,10 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
     for turn in turns:
         with st.chat_message(turn.role):
             st.write(turn.content)
-    allow = st.checkbox(
-        "Enable live interpretation for submitted messages",
-        key="chat_bedroom_allow_live",
-    )
     enabled = os.environ.get("ARCHIMIND_ENABLE_OPENAI_REQUIREMENTS", "0") == "1"
     if not enabled:
         st.info(
             "Live interpretation is disabled by the server. Set ARCHIMIND_ENABLE_OPENAI_REQUIREMENTS=1 and provide server API credentials to use chat; existing input modes remain available."
-        )
-    elif not allow:
-        st.info(
-            "Check “Enable live interpretation for submitted messages” to unlock the message box."
         )
     st.caption(
         "Submitting sends this conversation to the configured OpenAI model once. No automatic retries. Up to 20 user turns and 12,000 UTF-8 context bytes; no silent truncation. Product/Prepare/Generate controls make no model requests."
@@ -143,10 +135,10 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
     message = st.chat_input(
         "Describe your bedroom or answer the clarification",
         key="chat_bedroom_message",
-        disabled=not (allow and enabled),
+        disabled=not enabled,
         max_chars=4000,
     )
-    if message:
+    if message and enabled:
         st.session_state.pop(PREPARED, None)
         st.session_state.pop(SIGNATURE, None)
         proposed = (
@@ -165,7 +157,7 @@ def render_bedroom_chat() -> PreparedCatalogSpecification | None:
             )
             return None
         with st.spinner("Interpreting requirements…"):
-            result = interpret_catalog_conversation(proposed, allow_live=allow)
+            result = interpret_catalog_conversation(proposed, allow_live=True)
         answer = CatalogChatTurn(
             id=proposed[-1].id + 1,
             role="assistant",

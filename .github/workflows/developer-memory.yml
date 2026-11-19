@@ -1,0 +1,25 @@
+name: Developer memory
+on:
+  pull_request:
+    paths:
+      - 'scripts/dev_memory.py'
+      - 'scripts/check_dev_memory.py'
+      - '.github/workflows/developer-memory.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  handoff:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify and install the pinned binary
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/dev_memory.py install
+      - name: Exercise handoffs with external networking disabled
+        run: |
+          sudo unshare --net -- sh -ec 'ip link set lo up; exec sudo -H -u "$1" python3 scripts/check_dev_memory.py' sh "$(id -un)"

@@ -1,0 +1,93 @@
+name: Studio home proof
+on:
+  workflow_dispatch:
+    inputs:
+      fresh_home:
+        description: Render the fresh-home acceptance manifest only
+        type: boolean
+        default: false
+  push:
+    branches: [feat/whole-home-client-studio]
+    paths:
+      - scripts/*studio_home.py
+      - scripts/publish_studio_board.py
+      - scripts/render_saved_bedroom.py
+      - .github/workflows/studio-home.yml
+      - src/archimind/town/design.py
+      - frontend/realistic_viewer/town/bedroom_cameras.js
+      - frontend/realistic_viewer/town/studio_furniture.js
+      - frontend/realistic_viewer/town/studio_textiles.js
+      - frontend/realistic_viewer/town/home_board.js
+permissions:
+  contents: read
+jobs:
+  render:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Install the pinned Blender binary
+        working-directory: ${{ runner.temp }}
+        run: |
+          name=blender-5.1.2-linux-x64.tar.xz
+          curl -fsSL --retry 2 "https://download.blender.org/release/Blender5.1/$name" -o blender.tar.xz ||
+            curl -fsSL --retry 2 "https://ftp.halifax.rwth-aachen.de/blender/release/Blender5.1/$name" -o blender.tar.xz
+          echo 'aaccb355f50183979b698bcce7467103a76261b5fa59f4972295842662a285fb  blender.tar.xz' | sha256sum -c
+          tar xf blender.tar.xz
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "20"
+      - name: Stage the fresh-home manifest
+        if: inputs.fresh_home
+        run: cp docs/data/fresh-home/before.json "$RUNNER_TEMP/manifest.json"
+      - name: Replay applied studio home and export the scene
+        if: ${{ !inputs.fresh_home }}
+        run: |
+          python -m pip install -e . -r services/town/requirements.txt
+          npm ci --prefix frontend/realistic_viewer --ignore-scripts
+          python scripts/run_studio_home.py --export "$RUNNER_TEMP/saved.json"
+          node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/saved.json" "$RUNNER_TEMP/manifest.json"
+      - name: Reopen the editable scene and render every room
+        run: |
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/proof" --proof
+      - name: Make the revision-bound client book and print to PDF
+        run: |
+          python scripts/publish_studio_board.py "$RUNNER_TEMP/proof"
+          google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/proof/Studio-House.pdf" "file://$RUNNER_TEMP/proof/index.html"
+          test -s "$RUNNER_TEMP/proof/Studio-House.pdf"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: studio-home-proof
+          path: ${{ runner.temp }}/proof
+          if-no-files-found: error
+
+      - name: Replay a chair and palette edit and render the next revision independently
+        if: ${{ !inputs.fresh_home }}
+        run: |
+          python scripts/run_studio_home.py --edited --export "$RUNNER_TEMP/edited.json"
+          node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/edited.json" "$RUNNER_TEMP/edited-board.json"
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/edited-board.json" "$RUNNER_TEMP/edited-proof" --proof
+          python scripts/publish_studio_board.py "$RUNNER_TEMP/edited-proof"
+          google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/edited-proof/Studio-House.pdf" "file://$RUNNER_TEMP/edited-proof/index.html"
+          python - "$RUNNER_TEMP" <<'PYTHON'
+          import json, sys
+          from pathlib import Path
+          original, edited = [
+              json.loads((Path(sys.argv[1]) / name / "receipt.json").read_bytes())
+              for name in ("proof", "edited-proof")
+          ]
+          assert (original["revision"], edited["revision"]) == (5, 6)
+          assert original["home_id"] != edited["home_id"]
+          assert original["files"]["bedroom-desk.png"] != edited["files"]["bedroom-desk.png"]
+          PYTHON
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ !inputs.fresh_home }}
+        with:
+          name: studio-home-edited-proof
+          path: ${{ runner.temp }}/edited-proof
+          if-no-files-found: error

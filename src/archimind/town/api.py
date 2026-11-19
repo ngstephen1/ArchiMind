@@ -49,6 +49,8 @@ def handle(request, data):
     path = request.path_params.get("path", "").split("/")
     if path == ["designer-chairs"] and request.method == "GET":
         return {"chairs": designer_chair.chair_options()}
+    if path == ["bedroom-collection"] and request.method == "GET":
+        return {"concepts": designer_chair.chair_options(collection=True)}
     if path == ["projects"] and request.method == "POST":
         return db.create(owner)
     if path == ["jobs"] and request.method == "POST":
@@ -57,12 +59,17 @@ def handle(request, data):
         if (
             len(path) == 4
             and path[0] == "projects"
-            and path[2] == "designer-chair"
+            and path[2] in {"designer-chair", "bedroom-collection"}
             and path[3] in {"preview", "apply"}
             and request.method == "POST"
         ):
             return designer_chair.chair_change(
-                q, owner, path[1], data, apply=path[3] == "apply"
+                q,
+                owner,
+                path[1],
+                data,
+                apply=path[3] == "apply",
+                collection=path[2] == "bedroom-collection",
             )
         if len(path) == 2 and path[0] == "projects" and request.method == "GET":
             p = path[1]

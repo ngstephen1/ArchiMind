@@ -39,13 +39,25 @@ def test_asset_provenance_file_and_model_license():
         *(
             f"designer-{p['sha256']}.glb"
             for p in json.loads(
-                (viewer.ASSET_DIR / "designer_registry.json").read_text(encoding="utf-8")
+                (viewer.ASSET_DIR / "designer_registry.json").read_text(
+                    encoding="utf-8"
+                )
             )["pieces"]
+        ),
+        *(
+            f"designer-{p['sha256']}.glb"
+            for p in json.loads(
+                (viewer.ASSET_DIR / "designer_registry.json").read_text(
+                    encoding="utf-8"
+                )
+            )["bedroom"]
         ),
     }
     assert {
         "designer-54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81.glb",
         "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
+        "designer-5d0044a1acf345f50fa80443c7f722bb2267960bf3a69cd581a310586e8c84d3.glb",
+        "designer-3f475788571c146b30a8e5e6a6c8eb33970622e789d66e37821f962e60ad175f.glb",
     } <= {p.name for p in viewer.ASSET_DIR.glob("designer-*.glb")}
 
 

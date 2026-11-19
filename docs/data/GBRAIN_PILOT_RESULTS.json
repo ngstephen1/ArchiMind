@@ -1,0 +1,545 @@
+{
+  "manifest": "7407712e355e8c8facfce65685781a0047264c0d6677e8d72ba2ebf0333a6472",
+  "answerable": 24,
+  "unsupported": 6,
+  "metrics": {
+    "gbrain": {
+      "top_three": 15,
+      "empty_on_unsupported": 2
+    },
+    "lexical": {
+      "top_three": 22,
+      "empty_on_unsupported": 0
+    }
+  },
+  "gbrain_median_seconds": 0.741,
+  "rows": [
+    {
+      "question": "What is the Belaya desk's published width and depth?",
+      "expected_passage": "belaya-size",
+      "gbrain": [],
+      "lexical": [
+        "belaya-size",
+        "belaya-containment",
+        "gentle-chair"
+      ],
+      "town_products": [
+        {
+          "product": "Movian Belaya writing desk \u2014 Oak",
+          "matched": [
+            "desk",
+            "desk"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz"
+        }
+      ],
+      "seconds": 0.876
+    },
+    {
+      "question": "What space does the planner reserve for Belaya?",
+      "expected_passage": "belaya-size",
+      "gbrain": [
+        "belaya-size",
+        "studio-program"
+      ],
+      "lexical": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-program"
+      ],
+      "town_products": [],
+      "seconds": 0.832
+    },
+    {
+      "question": "Why does the desk reservation exceed its published depth?",
+      "expected_passage": "belaya-size",
+      "gbrain": [],
+      "lexical": [
+        "belaya-size",
+        "belaya-containment",
+        "charles-size"
+      ],
+      "town_products": [
+        {
+          "product": "Movian Belaya writing desk \u2014 Oak",
+          "matched": [
+            "desk",
+            "desk"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz"
+        }
+      ],
+      "seconds": 0.839
+    },
+    {
+      "question": "Which oak writing desk is product B074L4976T?",
+      "expected_passage": "belaya-size",
+      "gbrain": [
+        "belaya-size"
+      ],
+      "lexical": [
+        "belaya-size",
+        "studio-program",
+        "mixed-scene"
+      ],
+      "town_products": [
+        {
+          "product": "Movian Belaya writing desk \u2014 Oak",
+          "matched": [
+            "desk",
+            "desk",
+            "writing desk",
+            "writing"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz"
+        }
+      ],
+      "seconds": 0.748
+    },
+    {
+      "question": "What are the Charles armchair published dimensions?",
+      "expected_passage": "charles-size",
+      "gbrain": [
+        "charles-size"
+      ],
+      "lexical": [
+        "charles-size",
+        "belaya-size",
+        "mixed-scene"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "armchair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.768
+    },
+    {
+      "question": "How much planning depth does the Charles armchair need?",
+      "expected_passage": "charles-size",
+      "gbrain": [],
+      "lexical": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "armchair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.739
+    },
+    {
+      "question": "Which finish is the Charles armchair variant?",
+      "expected_passage": "charles-size",
+      "gbrain": [],
+      "lexical": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "armchair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.728
+    },
+    {
+      "question": "Can Charles and Belaya both render natively together?",
+      "expected_passage": "mixed-scene",
+      "gbrain": [],
+      "lexical": [
+        "mixed-scene",
+        "belaya-size",
+        "charles-size"
+      ],
+      "town_products": [],
+      "seconds": 0.732
+    },
+    {
+      "question": "Why do mixed product scenes show placeholders?",
+      "expected_passage": "mixed-scene",
+      "gbrain": [
+        "belaya-size",
+        "mixed-scene"
+      ],
+      "lexical": [
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "town_products": [],
+      "seconds": 0.739
+    },
+    {
+      "question": "What is the Gentle chair's backrest bend?",
+      "expected_passage": "gentle-chair",
+      "gbrain": [
+        "gentle-chair"
+      ],
+      "lexical": [
+        "gentle-chair",
+        "deep-chair",
+        "studio-edit"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "chair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.756
+    },
+    {
+      "question": "How wide is the Gentle writing chair?",
+      "expected_passage": "gentle-chair",
+      "gbrain": [
+        "gentle-chair"
+      ],
+      "lexical": [
+        "gentle-chair",
+        "studio-edit",
+        "deep-chair"
+      ],
+      "town_products": [
+        {
+          "product": "Movian Belaya writing desk \u2014 Oak",
+          "matched": [
+            "writing"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz"
+        },
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "chair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.749
+    },
+    {
+      "question": "How high is the Deep chair seat?",
+      "expected_passage": "deep-chair",
+      "gbrain": [
+        "deep-chair"
+      ],
+      "lexical": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "chair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.743
+    },
+    {
+      "question": "How many closed mesh parts does Deep have?",
+      "expected_passage": "deep-chair",
+      "gbrain": [
+        "deep-chair"
+      ],
+      "lexical": [
+        "deep-chair",
+        "gentle-chair",
+        "mixed-scene"
+      ],
+      "town_products": [],
+      "seconds": 0.734
+    },
+    {
+      "question": "How far does the Deep chair's back bend?",
+      "expected_passage": "deep-chair",
+      "gbrain": [
+        "deep-chair"
+      ],
+      "lexical": [
+        "deep-chair",
+        "gentle-chair",
+        "studio-edit"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "chair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.735
+    },
+    {
+      "question": "Which palette does Studio House revision 5 use?",
+      "expected_passage": "studio-books",
+      "gbrain": [],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-render"
+      ],
+      "town_products": [],
+      "seconds": 0.722
+    },
+    {
+      "question": "What finish does revision 6 show?",
+      "expected_passage": "studio-books",
+      "gbrain": [],
+      "lexical": [
+        "studio-edit",
+        "studio-identity",
+        "belaya-size"
+      ],
+      "town_products": [],
+      "seconds": 0.737
+    },
+    {
+      "question": "What identifies a published client book?",
+      "expected_passage": "studio-identity",
+      "gbrain": [
+        "studio-books",
+        "studio-identity"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-books",
+        "studio-render"
+      ],
+      "town_products": [],
+      "seconds": 0.756
+    },
+    {
+      "question": "Can another saved project use the same published book?",
+      "expected_passage": "studio-identity",
+      "gbrain": [
+        "studio-identity"
+      ],
+      "lexical": [
+        "studio-identity",
+        "studio-publications",
+        "belaya-containment"
+      ],
+      "town_products": [],
+      "seconds": 0.752
+    },
+    {
+      "question": "Which GPU rendered the salon daylight frame?",
+      "expected_passage": "studio-render",
+      "gbrain": [
+        "studio-render"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program",
+        "studio-books"
+      ],
+      "town_products": [],
+      "seconds": 0.736
+    },
+    {
+      "question": "What resolution was the revision 6 CPU proof?",
+      "expected_passage": "studio-render",
+      "gbrain": [],
+      "lexical": [
+        "studio-render",
+        "studio-identity",
+        "belaya-size"
+      ],
+      "town_products": [],
+      "seconds": 0.724
+    },
+    {
+      "question": "How large is the seed-42 Studio House lot?",
+      "expected_passage": "studio-program",
+      "gbrain": [
+        "studio-program"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-program"
+      ],
+      "town_products": [],
+      "seconds": 0.746
+    },
+    {
+      "question": "What furniture groups are in the formal salon?",
+      "expected_passage": "studio-program",
+      "gbrain": [
+        "studio-program"
+      ],
+      "lexical": [
+        "studio-render",
+        "studio-program"
+      ],
+      "town_products": [],
+      "seconds": 0.786
+    },
+    {
+      "question": "What moved when Studio House advanced to revision 6?",
+      "expected_passage": "studio-edit",
+      "gbrain": [],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-render"
+      ],
+      "town_products": [],
+      "seconds": 0.78
+    },
+    {
+      "question": "Which finishes changed when the bedroom chair moved?",
+      "expected_passage": "studio-edit",
+      "gbrain": [
+        "studio-edit"
+      ],
+      "lexical": [
+        "studio-edit",
+        "studio-program",
+        "gentle-chair"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "chair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.747
+    },
+    {
+      "question": "What glare in lux was measured at the Belaya monitor?",
+      "expected_passage": "-",
+      "gbrain": [],
+      "lexical": [
+        "belaya-size",
+        "mixed-scene",
+        "studio-program"
+      ],
+      "town_products": [],
+      "seconds": 0.721
+    },
+    {
+      "question": "Has the Deep chair passed a physical load test?",
+      "expected_passage": "-",
+      "gbrain": [
+        "deep-chair"
+      ],
+      "lexical": [
+        "deep-chair",
+        "studio-edit",
+        "gentle-chair"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "chair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.744
+    },
+    {
+      "question": "What is the verified retail price of the Charles armchair?",
+      "expected_passage": "-",
+      "gbrain": [
+        "charles-size"
+      ],
+      "lexical": [
+        "charles-size",
+        "mixed-scene",
+        "belaya-size"
+      ],
+      "town_products": [
+        {
+          "product": "Stone & Beam Charles armchair \u2014 Sod",
+          "matched": [
+            "armchair"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_7.json.gz"
+        }
+      ],
+      "seconds": 0.735
+    },
+    {
+      "question": "What is the acoustic insulation rating for Studio House?",
+      "expected_passage": "-",
+      "gbrain": [
+        "studio-render",
+        "studio-publications",
+        "studio-program"
+      ],
+      "lexical": [
+        "studio-books",
+        "studio-publications",
+        "studio-render"
+      ],
+      "town_products": [],
+      "seconds": 0.739
+    },
+    {
+      "question": "How long is the desk manufacturer's warranty?",
+      "expected_passage": "-",
+      "gbrain": [
+        "studio-program",
+        "studio-edit",
+        "belaya-size"
+      ],
+      "lexical": [
+        "belaya-size",
+        "studio-program",
+        "studio-edit"
+      ],
+      "town_products": [
+        {
+          "product": "Movian Belaya writing desk \u2014 Oak",
+          "matched": [
+            "desk",
+            "desk"
+          ],
+          "source": "https://amazon-berkeley-objects.s3.amazonaws.com/listings/metadata/listings_6.json.gz"
+        }
+      ],
+      "seconds": 0.737
+    },
+    {
+      "question": "What is the certified fire rating of the bedroom curtains?",
+      "expected_passage": "-",
+      "gbrain": [],
+      "lexical": [
+        "studio-edit",
+        "studio-program"
+      ],
+      "town_products": [],
+      "seconds": 0.731
+    }
+  ]
+}

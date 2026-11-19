@@ -20,24 +20,24 @@
       "after_sha256": "548aa9f82ffa7a38aa00d2cd458c5c119f830d213dba4b3da0588878137afd5b"
     },
     "frontend/realistic_viewer/src/room_viewer.js": {
-      "before_sha256": "f02138b362bc9c2807ed28837a430bca47db12130af4e4ced9139b26c7ec943d",
-      "after_sha256": "33136ed8b7bc04358d1e0af39b3cea0e2d3e46ae01e9e4d5bc23f109372d55c5"
+      "before_sha256": "8021955b69f68ca31411cbc574f40854c0ae20585b5ec3322ec1c612b3e3b789",
+      "after_sha256": "eb21582ec102cd2f693064751346fca6a532618bb3d3783f41c93e4bc3507a32"
     },
     "frontend/realistic_viewer/tests/room.test.js": {
       "before_sha256": "6f24b3de023ec69f79b6d7cb580b1cfb5a10fa307a81d3ed613a58db0f591b01",
       "after_sha256": "643ce0aec7d8ea4926638c446999e28b8da800df0c347e9810d66dfbb6338fef"
     },
     "pyproject.toml": {
-      "before_sha256": "8d3c90f7a7826f6b9bdcbf76bd2723e17bc13e48d4018fcd56a364e8d7d513ab",
-      "after_sha256": "379d95bdf520188f74a5acdee5800fbc61520fda321d20e55241653d434b8dc4"
+      "before_sha256": "0ddbcc9c60b02416b55310033b00dbee3d4c40f36f3c10708974d1c5c695d657",
+      "after_sha256": "180311f5336145fe84140889220f37f7f15f919f03a6dcb3758c80e2ddcd9ace"
     },
     "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
       "before_sha256": "cd06cfd0faa200f053a40fbe02b15590a3b6e3da085191b831dc012f7aec2e48",
       "after_sha256": "913b2aaf3835711c2776d8d869b1daf71be82614e00d25e2362a07d899fa729b"
     },
     "src/archimind/_viewer_assets/viewer.js": {
-      "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
-      "after_sha256": "418a23a334101c2a791ac4f6bddcf013d0c109ad67004c8df540042edcc3a707"
+      "before_sha256": "fec484212bbd30e20481f6776c578adde4f27dc5af915950b82cbb6d1b301a5d",
+      "after_sha256": "3a47841b6ee32034301af2d3a007ea8cace1c29642d5d4a676e829c2d1cfe23d"
     },
     "src/archimind/render/floorplan_2d.py": {
       "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",
@@ -144,5 +144,13 @@
     "codex": "codex-cli 0.159.2; `codex mcp add` was not run because the local ~/.codex/config.toml fails to parse (owner action). Authoring ran through the same MCP server via scripts/test_blender_operator.py --pieces, which drives execute_blender_code and get_objects_summary.",
     "windows_adjustments": "test_blender_operator.py isolates the add-on profile with BLENDER_USER_RESOURCES and replaces the upstream client's select() wait (Windows pipes) with a reader thread",
     "chair_round_trip": "passed (gentle and deep variants, .blend reopened in a second Blender process)"
+  },
+  "merge_main_20261119": {
+    "note": "Merged origin/main (bedroom collection, formal salon, room goals) into the style-pack branch. Entries listed here were rebased onto main's bedroom_collection pins; their after_sha256 is the merged content.",
+    "rebased_paths": [
+      "frontend/realistic_viewer/src/room_viewer.js",
+      "pyproject.toml",
+      "src/archimind/_viewer_assets/viewer.js"
+    ]
   }
 }

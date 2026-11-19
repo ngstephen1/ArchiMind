@@ -1,8 +1,6 @@
 # Optional Codex Design Advisor — C01
 
-Backend-only, disabled by default, for single-user local testing. The Streamlit
-application does not import or expose this adapter. Tasks 06A and the deterministic
-layout generator remain unchanged; there is no auto-application or agent workflow.
+The local Town launcher enables the advisor for a user-initiated design run. It uses the CLI’s saved login and reviews the first candidate’s bedroom. A launch with `ARCHIMIND_ENABLE_CODEX_ADVISOR=0` skips that step. The base adapter defaults to disabled outside this launcher. Hosted workers skip the CLI. Advice and failures appear in the Town event history; applying a layout still requires an explicit user selection.
 
 ## Python contract
 
@@ -106,5 +104,4 @@ python -m ruff format --check .
 python scripts/check_health.py
 ```
 
-The optional next integration step is C02: a Streamlit Design Advisor panel,
-subject to a separate scope and review. It is not implemented here.
+See the [Town design workflow](TOWN.md#follow-a-design-run) for the current UI and call budgets.

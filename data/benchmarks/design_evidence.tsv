@@ -1,0 +1,31 @@
+question	expected_passage
+What is the Belaya desk's published width and depth?	belaya-size
+What space does the planner reserve for Belaya?	belaya-size
+Why does the desk reservation exceed its published depth?	belaya-size
+Which oak writing desk is product B074L4976T?	belaya-size
+What are the Charles armchair published dimensions?	charles-size
+How much planning depth does the Charles armchair need?	charles-size
+Which finish is the Charles armchair variant?	charles-size
+Can Charles and Belaya both render natively together?	mixed-scene
+Why do mixed product scenes show placeholders?	mixed-scene
+What is the Gentle chair's backrest bend?	gentle-chair
+How wide is the Gentle writing chair?	gentle-chair
+How high is the Deep chair seat?	deep-chair
+How many closed mesh parts does Deep have?	deep-chair
+How far does the Deep chair's back bend?	deep-chair
+Which palette does Studio House revision 5 use?	studio-books
+What finish does revision 6 show?	studio-books
+What identifies a published client book?	studio-identity
+Can another saved project use the same published book?	studio-identity
+Which GPU rendered the salon daylight frame?	studio-render
+What resolution was the revision 6 CPU proof?	studio-render
+How large is the seed-42 Studio House lot?	studio-program
+What furniture groups are in the formal salon?	studio-program
+What moved when Studio House advanced to revision 6?	studio-edit
+Which finishes changed when the bedroom chair moved?	studio-edit
+What glare in lux was measured at the Belaya monitor?	-
+Has the Deep chair passed a physical load test?	-
+What is the verified retail price of the Charles armchair?	-
+What is the acoustic insulation rating for Studio House?	-
+How long is the desk manufacturer's warranty?	-
+What is the certified fire rating of the bedroom curtains?	-

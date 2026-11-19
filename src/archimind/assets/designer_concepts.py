@@ -14,7 +14,28 @@ CATEGORIES = frozenset(
 # The PR #21 designer-chair feature is bound to this concept and reservation.
 WRITING_CHAIR_ID = "oak-sage-writing-chair"
 WRITING_CHAIR_WDH_M = (0.48, 0.52, 0.83)
+CHAIR_SIZE = WRITING_CHAIR_WDH_M
+BEDROOM_SIZES = {
+    "upholstered-linen-bed": (1.6, 2.0, 0.6),
+    "oak-bedside-lamp": (0.48, 0.43, 1.06),
+}
 _PIECE_BOUND_TOLERANCE_M = 5e-4
+
+
+@dataclass(frozen=True)
+class DesignerConcept:
+    """A released bedroom-collection concept (registry group ``bedroom``)."""
+
+    concept_id: str
+    version: str
+    name: str
+    sha256: str
+    front_sha256: str
+    three_quarter_sha256: str
+    width_m: float
+    depth_m: float
+    height_m: float
+    bytes: int
 
 
 @dataclass(frozen=True)
@@ -48,6 +69,10 @@ def _dir():
     return files("archimind").joinpath("_viewer_assets")
 
 
+def _registry():
+    return json.loads(_dir().joinpath("designer_registry.json").read_bytes())
+
+
 def _valid(row):
     return bool(
         row.category in CATEGORIES
@@ -76,7 +101,7 @@ def approved_pieces(category: str | None = None) -> tuple[DesignerPiece, ...]:
     Schema 1 (key ``chairs``) is still read; its records are chairs.
     """
     try:
-        registry = json.loads(_dir().joinpath("designer_registry.json").read_bytes())
+        registry = _registry()
         if registry["schema_version"] == 1:
             rows = [{**row, "category": "chair"} for row in registry["chairs"]]
         elif registry["schema_version"] == 2:
@@ -108,6 +133,34 @@ def approved_chairs() -> tuple[DesignerPiece, ...]:
     )
 
 
+def approved_collection() -> tuple[DesignerConcept, ...]:
+    """Released bedroom-collection concepts (``bedroom`` group, schema 1 or 2)."""
+    try:
+        registry = _registry()
+        if registry["schema_version"] not in (1, 2):
+            return ()
+        records = tuple(DesignerConcept(**row) for row in registry["bedroom"])
+        seen = set()
+        for row in records:
+            if (
+                row.concept_id not in BEDROOM_SIZES
+                or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", row.version)
+                or any(
+                    not re.fullmatch("[0-9a-f]{64}", h)
+                    for h in (row.sha256, row.front_sha256, row.three_quarter_sha256)
+                )
+                or (row.width_m, row.depth_m, row.height_m)
+                != BEDROOM_SIZES[row.concept_id]
+                or not 0 < row.bytes <= inspection.MAX_GLB_BYTES
+                or (row.concept_id, row.version) in seen
+            ):
+                return ()
+            seen.add((row.concept_id, row.version))
+        return records
+    except (OSError, ValueError, KeyError, TypeError):
+        return ()
+
+
 def _asset(digest, suffix):
     if not re.fullmatch("[0-9a-f]{64}", digest):
         raise ValueError("Invalid designer asset digest")
@@ -120,16 +173,20 @@ def _asset(digest, suffix):
     return data
 
 
-def resolve_piece(concept_id, version, sha256) -> DesignerPiece:
-    for piece in approved_pieces():
+def _resolve(records, concept_id, version, sha256):
+    for record in records:
         if (concept_id, version, sha256) == (
-            piece.concept_id,
-            piece.version,
-            piece.sha256,
+            record.concept_id,
+            record.version,
+            record.sha256,
         ):
-            if len(_asset(piece.sha256, "glb")) == piece.bytes:
-                return piece
+            if len(_asset(record.sha256, "glb")) == record.bytes:
+                return record
     raise ValueError("Designer piece release unavailable")
+
+
+def resolve_piece(concept_id, version, sha256) -> DesignerPiece:
+    return _resolve(approved_pieces(), concept_id, version, sha256)
 
 
 def resolve_chair(concept_id, version, sha256) -> DesignerPiece:
@@ -140,6 +197,10 @@ def resolve_chair(concept_id, version, sha256) -> DesignerPiece:
     raise ValueError("Designer chair release unavailable")
 
 
+def resolve_collection(concept_id, version, sha256) -> DesignerConcept:
+    return _resolve(approved_collection(), concept_id, version, sha256)
+
+
 def preview_bytes(piece, view):
     digest = {"front": piece.front_sha256, "three-quarter": piece.three_quarter_sha256}[
         view
@@ -148,6 +209,10 @@ def preview_bytes(piece, view):
 
 
 def inspect_chair(data):
+    return inspect_concept(data, CHAIR_SIZE)
+
+
+def inspect_concept(data, dimensions):
     """Measure actual transformed vertices and qualify the material-only concept."""
     if not 0 < len(data) <= inspection.MAX_GLB_BYTES:
         raise ValueError("Designer asset byte limit")
@@ -158,9 +223,12 @@ def inspect_chair(data):
         doc, inspection._accessors(doc, views)
     )
     actual = (*bounds.min_xyz, *bounds.max_xyz)
-    expected = (-0.24, 0.0, -0.26, 0.24, 0.83, 0.26)
+    w, d, h = dimensions
+    expected = (-w / 2, 0.0, -d / 2, w / 2, h, d / 2)
     if any(abs(a - b) > 1e-6 for a, b in zip(actual, expected, strict=True)):
-        raise ValueError("Designer chair must fit its native floor-centred reservation")
+        raise ValueError(
+            "Designer geometry must fit its native floor-centred reservation"
+        )
     if not 0 < triangles <= inspection.MAX_ASSET_TRIANGLES:
         raise ValueError("Designer chair triangle limit")
     return {

@@ -1,0 +1,101 @@
+{
+  "revision": "d3e4dba315c80a529d729dcbdeb9fe6284552f1e",
+  "passages": [
+    {
+      "id": "belaya-size",
+      "title": "Belaya oak desk published dimensions and planning reservation",
+      "path": "docs/developer/FURNITURE_CATALOG_UI.md",
+      "first": 38,
+      "last": 38,
+      "source_sha256": "a5f39ab1538448b333d1a0726c7e6c0fd034697575b000652cb7add205562313"
+    },
+    {
+      "id": "belaya-containment",
+      "title": "Belaya desk mesh depth and published envelope containment",
+      "path": "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.md",
+      "first": 56,
+      "last": 69,
+      "source_sha256": "6c133d2b36bf609821f6e7aa10c29ed2ffa2cd2f4b83c1cc4c856935ecfd264a"
+    },
+    {
+      "id": "charles-size",
+      "title": "Charles armchair published dimensions and planning reservation",
+      "path": "docs/developer/FURNITURE_CATALOG_UI.md",
+      "first": 36,
+      "last": 36,
+      "source_sha256": "a5f39ab1538448b333d1a0726c7e6c0fd034697575b000652cb7add205562313"
+    },
+    {
+      "id": "mixed-scene",
+      "title": "Mixed Charles and Belaya mesh eligibility",
+      "path": "docs/developer/SELECTED_REALISTIC_LAYOUTS.md",
+      "first": 7,
+      "last": 7,
+      "source_sha256": "c8338cc8c4a996be4f1264b92e6959a17620e69ae75dd0cbb86c417b763de585"
+    },
+    {
+      "id": "gentle-chair",
+      "title": "Gentle writing chair CAD measurements in millimeters",
+      "path": "design/oak-sage-writing-chair/1.0.0/cad/cad-evidence.json",
+      "first": 13,
+      "last": 21,
+      "source_sha256": "8a3ae0385776c03cf87d73eb199b4f4d3623c1fbfa7479fcfaa556e81f232c46"
+    },
+    {
+      "id": "deep-chair",
+      "title": "Deep writing chair CAD measurements in millimeters",
+      "path": "design/oak-sage-writing-chair/1.1.0/cad/cad-evidence.json",
+      "first": 13,
+      "last": 21,
+      "source_sha256": "528ef0f6f3897bb97c881735b8857a1e5e6eed6c04a5b7e805edeb559e244fcb"
+    },
+    {
+      "id": "studio-program",
+      "title": "Studio House lot and furnished rooms",
+      "path": "docs/developer/STUDIO_HOME.md",
+      "first": 3,
+      "last": 3,
+      "source_sha256": "b4cd8bc9fff15a7dce11da28a2b1b985db5af34698229f5eb3696c33e802aeed"
+    },
+    {
+      "id": "studio-books",
+      "title": "Studio House published palettes and client books",
+      "path": "docs/developer/STUDIO_HOME.md",
+      "first": 9,
+      "last": 9,
+      "source_sha256": "b4cd8bc9fff15a7dce11da28a2b1b985db5af34698229f5eb3696c33e802aeed"
+    },
+    {
+      "id": "studio-identity",
+      "title": "Client book project and revision identity",
+      "path": "docs/developer/STUDIO_HOME.md",
+      "first": 13,
+      "last": 13,
+      "source_sha256": "b4cd8bc9fff15a7dce11da28a2b1b985db5af34698229f5eb3696c33e802aeed"
+    },
+    {
+      "id": "studio-render",
+      "title": "Studio House salon daylight and CPU render settings",
+      "path": "docs/developer/STUDIO_HOME.md",
+      "first": 17,
+      "last": 17,
+      "source_sha256": "b4cd8bc9fff15a7dce11da28a2b1b985db5af34698229f5eb3696c33e802aeed"
+    },
+    {
+      "id": "studio-edit",
+      "title": "Studio House bedroom chair and wall finish revision",
+      "path": "docs/developer/STUDIO_HOME.md",
+      "first": 41,
+      "last": 41,
+      "source_sha256": "b4cd8bc9fff15a7dce11da28a2b1b985db5af34698229f5eb3696c33e802aeed"
+    },
+    {
+      "id": "studio-publications",
+      "title": "Studio House released project revision and manifest identities",
+      "path": "frontend/realistic_viewer/town/studio_publications.json",
+      "first": 1,
+      "last": 18,
+      "source_sha256": "5e0974629a9e7aa10ba4e9ad22e249fde7fa1aa575c4d1772b0ef90c2d0a2d8e"
+    }
+  ]
+}

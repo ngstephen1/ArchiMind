@@ -1,0 +1,442 @@
+{
+  "project": "26bda387-7853-4fa9-99b7-13d6c1064de7",
+  "initial_home": {
+    "version": 1,
+    "width": 13.0,
+    "depth": 13.0,
+    "hall": 5.827,
+    "rooms": [
+      {
+        "origin": [
+          0,
+          0
+        ],
+        "asset_bindings": [
+          {
+            "furniture_id": "coffee-table",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          },
+          {
+            "furniture_id": "sofa",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          }
+        ],
+        "design": {
+          "room": {
+            "id": "living",
+            "name": "Living",
+            "width_m": 5.827,
+            "depth_m": 6.607,
+            "ceiling_height_m": 2.8,
+            "doors": [
+              {
+                "id": "living-door",
+                "wall": "east",
+                "offset_m": 2.7535,
+                "width_m": 1.1,
+                "height_m": 2.15
+              }
+            ],
+            "windows": [
+              {
+                "id": "living-window",
+                "wall": "west",
+                "offset_m": 2.6035000000000004,
+                "width_m": 1.4,
+                "height_m": 1.15,
+                "sill_height_m": 1.0
+              }
+            ]
+          },
+          "furniture": [
+            {
+              "id": "coffee-table",
+              "name": "Coffee Table",
+              "category": "table",
+              "x_m": 4.827,
+              "y_m": 6.067,
+              "width_m": 1.0,
+              "depth_m": 0.54,
+              "height_m": 0.42,
+              "rotation_deg": 0
+            },
+            {
+              "id": "sofa",
+              "name": "Sofa",
+              "category": "sofa",
+              "x_m": 3.827,
+              "y_m": 0.66,
+              "width_m": 2.0,
+              "depth_m": 0.85,
+              "height_m": 0.86,
+              "rotation_deg": 0
+            }
+          ],
+          "name": "Generated layout"
+        }
+      },
+      {
+        "origin": [
+          0,
+          6.607
+        ],
+        "asset_bindings": [
+          {
+            "furniture_id": "bedside-lamp",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          },
+          {
+            "furniture_id": "belaya",
+            "asset_id": "abo-b074l4976t-amazon-co-uk",
+            "render_version": "1.0.0",
+            "envelope_sha256": "f2b706c8111e5f9321d3d90856d914a60ab63aebdb0cf30dd4b8847f493723a5"
+          },
+          {
+            "furniture_id": "desk-chair",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          },
+          {
+            "furniture_id": "queen-bed",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          }
+        ],
+        "design": {
+          "room": {
+            "id": "bedroom",
+            "name": "Bedroom",
+            "width_m": 5.827,
+            "depth_m": 6.393,
+            "ceiling_height_m": 2.8,
+            "doors": [
+              {
+                "id": "bedroom-door",
+                "wall": "east",
+                "offset_m": 2.6464999999999996,
+                "width_m": 1.1,
+                "height_m": 2.15
+              }
+            ],
+            "windows": [
+              {
+                "id": "bedroom-window",
+                "wall": "west",
+                "offset_m": 2.4965,
+                "width_m": 1.4,
+                "height_m": 1.15,
+                "sill_height_m": 1.0
+              }
+            ]
+          },
+          "furniture": [
+            {
+              "id": "belaya",
+              "name": "Belaya writing desk",
+              "category": "desk",
+              "x_m": 3.77,
+              "y_m": 1.6,
+              "width_m": 1.6,
+              "depth_m": 0.8018731772899628,
+              "height_m": 0.7516312003135682,
+              "rotation_deg": 0
+            },
+            {
+              "id": "queen-bed",
+              "name": "Queen Bed",
+              "category": "bed",
+              "x_m": 0.0,
+              "y_m": 4.393,
+              "width_m": 1.6,
+              "depth_m": 2.0,
+              "height_m": 0.6,
+              "rotation_deg": 0
+            },
+            {
+              "id": "desk-chair",
+              "name": "Oak writing chair",
+              "category": "chair",
+              "x_m": 4.33,
+              "y_m": 1.02,
+              "width_m": 0.48,
+              "depth_m": 0.52,
+              "height_m": 0.83,
+              "rotation_deg": 0
+            },
+            {
+              "id": "bedside-lamp",
+              "name": "Nightstand with reading lamp",
+              "category": "table",
+              "x_m": 1.6400000000000001,
+              "y_m": 5.963,
+              "width_m": 0.48,
+              "depth_m": 0.43,
+              "height_m": 1.06,
+              "rotation_deg": 0
+            }
+          ],
+          "name": "Generated layout"
+        }
+      },
+      {
+        "origin": [
+          7.427,
+          0
+        ],
+        "asset_bindings": [
+          {
+            "furniture_id": "counter",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          },
+          {
+            "furniture_id": "dining-table",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          }
+        ],
+        "design": {
+          "room": {
+            "id": "kitchen-dining",
+            "name": "Kitchen-Dining",
+            "width_m": 5.573,
+            "depth_m": 4.271,
+            "ceiling_height_m": 2.8,
+            "doors": [
+              {
+                "id": "kitchen-dining-door",
+                "wall": "west",
+                "offset_m": 1.5855,
+                "width_m": 1.1,
+                "height_m": 2.15
+              }
+            ],
+            "windows": [
+              {
+                "id": "kitchen-dining-window",
+                "wall": "east",
+                "offset_m": 1.4355,
+                "width_m": 1.4,
+                "height_m": 1.15,
+                "sill_height_m": 1.0
+              }
+            ]
+          },
+          "furniture": [
+            {
+              "id": "counter",
+              "name": "Counter",
+              "category": "counter",
+              "x_m": 3.573,
+              "y_m": 0.85,
+              "width_m": 2.0,
+              "depth_m": 0.64,
+              "height_m": 0.92,
+              "rotation_deg": 0
+            },
+            {
+              "id": "dining-table",
+              "name": "Dining Table",
+              "category": "table",
+              "x_m": 0.0,
+              "y_m": 3.521,
+              "width_m": 1.3,
+              "depth_m": 0.75,
+              "height_m": 0.75,
+              "rotation_deg": 0
+            }
+          ],
+          "name": "Generated layout"
+        }
+      },
+      {
+        "origin": [
+          7.427,
+          4.271
+        ],
+        "asset_bindings": [
+          {
+            "furniture_id": "tub",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          },
+          {
+            "furniture_id": "vanity",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          }
+        ],
+        "design": {
+          "room": {
+            "id": "bathroom",
+            "name": "Bathroom",
+            "width_m": 5.573,
+            "depth_m": 3.579,
+            "ceiling_height_m": 2.8,
+            "doors": [
+              {
+                "id": "bathroom-door",
+                "wall": "west",
+                "offset_m": 1.2395,
+                "width_m": 1.1,
+                "height_m": 2.15
+              }
+            ],
+            "windows": [
+              {
+                "id": "bathroom-window",
+                "wall": "east",
+                "offset_m": 1.0895000000000001,
+                "width_m": 1.4,
+                "height_m": 1.15,
+                "sill_height_m": 1.0
+              }
+            ]
+          },
+          "furniture": [
+            {
+              "id": "tub",
+              "name": "Tub",
+              "category": "bath",
+              "x_m": 3.0,
+              "y_m": 1.99,
+              "width_m": 1.5,
+              "depth_m": 0.72,
+              "height_m": 0.55,
+              "rotation_deg": 0
+            },
+            {
+              "id": "vanity",
+              "name": "Vanity",
+              "category": "vanity",
+              "x_m": 2.43,
+              "y_m": 3.079,
+              "width_m": 0.85,
+              "depth_m": 0.5,
+              "height_m": 0.85,
+              "rotation_deg": 0
+            }
+          ],
+          "name": "Generated layout"
+        }
+      },
+      {
+        "origin": [
+          7.427,
+          7.85
+        ],
+        "asset_bindings": [
+          {
+            "furniture_id": "work-table",
+            "asset_id": null,
+            "render_version": null,
+            "envelope_sha256": null
+          }
+        ],
+        "design": {
+          "room": {
+            "id": "study",
+            "name": "Study",
+            "width_m": 5.573,
+            "depth_m": 5.15,
+            "ceiling_height_m": 2.8,
+            "doors": [
+              {
+                "id": "study-door",
+                "wall": "west",
+                "offset_m": 2.0250000000000004,
+                "width_m": 1.1,
+                "height_m": 2.15
+              }
+            ],
+            "windows": [
+              {
+                "id": "study-window",
+                "wall": "east",
+                "offset_m": 1.8750000000000002,
+                "width_m": 1.4,
+                "height_m": 1.15,
+                "sill_height_m": 1.0
+              }
+            ]
+          },
+          "furniture": [
+            {
+              "id": "work-table",
+              "name": "Work Table",
+              "category": "desk",
+              "x_m": 1.58,
+              "y_m": 0.0,
+              "width_m": 1.45,
+              "depth_m": 0.72,
+              "height_m": 0.76,
+              "rotation_deg": 0
+            }
+          ],
+          "name": "Generated layout"
+        }
+      }
+    ],
+    "palette": "oak",
+    "evidence": {
+      "reachable_rooms": 5,
+      "bedroom_center_from_front_m": 9.8,
+      "study_window_width_m": 1.4
+    },
+    "id": "e6bdf801d299be8f860c0f3ce412c14d9a03970ccbd106637634abffba2cd804"
+  },
+  "changes": [
+    {
+      "revision": 2,
+      "id": "9585f6e1e2f1cc4e019cd93ee0bb5f1d4520615857ce2e11eb8ae1dac45b2fec",
+      "binding": {
+        "concept_id": "oak-sage-writing-chair",
+        "version": "1.0.0",
+        "sha256": "54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81"
+      },
+      "collection": false
+    },
+    {
+      "revision": 3,
+      "id": "e47e0e25b822d13eb73f7df992aa28fa6d2d289aca037482b75da59d5d2ea799",
+      "binding": {
+        "concept_id": "oak-sage-writing-chair",
+        "version": "1.1.0",
+        "sha256": "609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258"
+      },
+      "collection": false
+    },
+    {
+      "revision": 4,
+      "id": "8355bf03c7ad2f4bcd64734dc95ce53004fb39479889e1fc211ce45c94729b99",
+      "binding": {
+        "concept_id": "oak-bedside-lamp",
+        "version": "1.0.0",
+        "sha256": "5d0044a1acf345f50fa80443c7f722bb2267960bf3a69cd581a310586e8c84d3"
+      },
+      "collection": true
+    },
+    {
+      "revision": 5,
+      "id": "05de28749d9e26f2b8dea666394903af1b37ef2a35704e35ef7adfd0d4759d08",
+      "binding": {
+        "concept_id": "upholstered-linen-bed",
+        "version": "1.0.0",
+        "sha256": "3f475788571c146b30a8e5e6a6c8eb33970622e789d66e37821f962e60ad175f"
+      },
+      "collection": true
+    }
+  ]
+}

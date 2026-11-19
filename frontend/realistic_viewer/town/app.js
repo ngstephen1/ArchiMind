@@ -1,3 +1,9 @@
+import { competingGoals } from "./tradeoff.js";
+import studioPublications from "./studio_publications.json";
+import {homeBoard} from "./home_board.js";
+import {roomElevation} from "./elevations.js";
+import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
+import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
 import { explanation } from "./explanation.js";
 import { createTown } from "./world.js";
@@ -35,13 +41,14 @@ world.bindSweep(el("sweep"));
 world.load(showcase);
 new MutationObserver(() => {
   el("assetStatus").hidden = el("world").dataset.desk !== "placeholder";
+  el("collectionStatus").hidden = el("world").dataset.collection !== "placeholder";
   el("chairStatus").hidden = el("world").dataset.chair !== "placeholder";
   const style = townStyleStatus(el("world").dataset);
   el("styleStatus").textContent = style;
   el("styleStatus").hidden = !style;
 }).observe(el("world"), {
   attributes: true,
-  attributeFilter: ["data-desk", "data-chair", "data-style-state", "data-style-failures", "data-style-furniture"],
+  attributeFilter: ["data-desk", "data-chair", "data-collection", "data-style-state", "data-style-failures", "data-style-furniture"],
 });
 const notify = (text) => (el("notice").textContent = text);
 async function api(path, body) {
@@ -227,60 +234,22 @@ bind("login", () => sign(false));
 bind("signup", () => sign(true));
 function draw() {
   const h = alternatives[selected];
-  floorPlan(h, el("plan"));
+  planOf(h, el("plan"));
   evidence(h);
 }
-function floorPlan(h, c) {
-  const ctx = c.getContext("2d");
-  const colors = planColors(h, PACK_MANIFESTS[h.style_pack?.id] || null);
-  ctx.clearRect(0, 0, c.width, c.height);
-  const s = Math.min(510 / h.width, 350 / h.depth),
-    ox = (c.width - h.width * s) / 2,
-    oy = c.height - 20;
-  ctx.fillStyle = colors.site;
-  ctx.fillRect(ox, oy - s * h.depth, s * h.width, s * h.depth);
-  for (const p of h.rooms) {
-    const r = p.design.room,
-      x = ox + s * p.origin[0],
-      y = oy - s * p.origin[1],
-      w = s * r.width_m,
-      d = s * r.depth_m;
-    ctx.fillStyle = colors.room;
-    ctx.fillRect(x + 1, y - d + 1, w - 2, d - 2);
-    ctx.strokeStyle = colors.wall;
-    ctx.strokeRect(x, y - d, w, d);
-    for (const f of p.design.furniture) {
-      ctx.fillStyle = colors.furniture;
-      const rect = [x + s * f.x_m, y - s * (f.y_m + f.depth_m), s * f.width_m, s * f.depth_m];
-      ctx.fillRect(...rect);
-      if (colors.furnitureStroke) {
-        ctx.strokeStyle = colors.furnitureStroke;
-        ctx.strokeRect(...rect);
-      }
-    }
-    for (const opening of [...r.windows, ...r.doors]) {
-      const xx = x + (opening.wall === "east" ? w : 0),
-        yy = y - s * opening.offset_m;
-      ctx.strokeStyle =
-        opening.sill_height_m === undefined ? colors.door : colors.window;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(xx, yy);
-      ctx.lineTo(xx, yy - s * opening.width_m);
-      ctx.stroke();
-      ctx.lineWidth = 1;
-    }
-    ctx.fillStyle = colors.label;
-    ctx.font = "14px sans-serif";
-    ctx.fillText(r.name, x + 6, y - d + 18);
-  }
-  ctx.fillText(h.width + " m", ox, oy + 16);
-  ctx.fillText(h.depth + " m", 2, oy - (h.depth * s) / 2);
+function planOf(h, c) {
+  floorPlan(h, c, planColors(h, PACK_MANIFESTS[h.style_pack?.id] || null));
 }
 function evidence(h) {
   const e = h.evidence;
   el("evidence").textContent =
     `${e.reachable_rooms} rooms reachable after furnishing · Bedroom center ${e.bedroom_center_from_front_m} m from front · Study window ${e.study_window_width_m} m wide. Distance and window size are proxies for privacy and daylight.`;
+  if (e.room_preferences?.length) {
+    const measures = e.room_preferences.map(g =>
+      `${g.room} ${g.relation === "near" ? "near" : "away from"} ${g.target}: ${g.center_distance_m.toFixed(2)} m`);
+    el("evidence").textContent += " Room-center distances in plan · " + measures.join(" · ") +
+      ". These preferences rank validated layouts. They do not measure walking routes or sound levels.";
+  }
   if (e.study_desk_window_center_distance_m) {
     const gap = e.study_desk_window_center_distance_m;
     el("evidence").textContent +=
@@ -318,6 +287,29 @@ function evidence(h) {
     b.setAttribute("aria-pressed", String(i === selected)),
   );
 }
+function showTradeoff() {
+  const goals = competingGoals(alternatives);
+  el("tradeoff").hidden = goals.length === 0;
+  const select = el("tradeoffGoal");
+  select.replaceChildren(new Option("Balance all preferences", ""));
+  el("recommendation").textContent = "";
+  select.onchange = null;
+  if (!goals.length) return;
+  for (const [index, goal] of goals.entries()) {
+    const verb = goal.relation === "near" ? "Bring closer together" : "Put farther apart";
+    select.add(new Option(`${verb} — ${goal.room} and ${goal.target}`, String(index)));
+  }
+  function recommend() {
+    const goal = select.value === "" ? null : goals[Number(select.value)];
+    selected = goal?.winner ?? 0;
+    el("recommendation").textContent = goal
+      ? `Prioritizing this goal ${selected ? "changes the recommendation from A to B" : "keeps A as the recommendation"}. Room centers: A ${goal.distances[0].toFixed(3)} m, B ${goal.distances[1].toFixed(3)} m.`
+      : "Layout A is recommended with all preferences weighted equally.";
+    draw();
+  }
+  select.onchange = recommend;
+  el("recommendation").textContent = "Layout A is recommended with all preferences weighted equally.";
+}
 function show() {
   el("alternatives").hidden = false;
   el("choices").replaceChildren();
@@ -331,6 +323,7 @@ function show() {
     el("choices").append(b);
   });
   selected = 0;
+  showTradeoff();
   draw();
 }
 bind("generate", async () => {
@@ -356,13 +349,15 @@ bind("generate", async () => {
       project,
       base: revision,
       message: el("message").value,
-      live: el("live").checked,
+      live: true,
+      agent_team: true,
       brief: {
         width: Number(el("width").value),
         depth: Number(el("depth").value),
         seed: 42 + revision,
         priority: el("priority").value,
         style: el("style").value,
+        formal_salon: el("formalSalon").checked,
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
         ),
@@ -386,9 +381,9 @@ function showWorkingPlan(event) {
         furniture: [],
       },
     }));
-    floorPlan({ ...h, rooms }, el("draftPlan"));
+    planOf({ ...h, rooms }, el("draftPlan"));
   } else if (event.task === "Furnished candidate") {
-    floorPlan(h, el("draftPlan"));
+    planOf(h, el("draftPlan"));
   } else return;
   el("draftFigure").hidden = false;
 }
@@ -441,7 +436,10 @@ async function watch(id) {
         if (result.status === "ready") {
           alternatives = result.result;
           show();
-          notify("Checks complete. Preview a layout before applying it.");
+          const missingCritique = history.some(e => e.task === "OpenAI · Review plan images" && e.state === "failed");
+          notify(missingCritique
+            ? "Spatial checks passed. AI visual review unavailable. Preview a layout before applying it."
+            : "Checks complete. Preview a layout before applying it.");
         } else notify(result.result || "Cancelled.");
         return;
       }
@@ -486,18 +484,18 @@ el("chairStudio").ontoggle = async () => {
   if (!el("chairStudio").open || chairPreview || releasedChairs.length) return;
   const epoch = ++chairEpoch;
   el("chairPicker").hidden = el("chairPreview").hidden = true;
-  el("chairNotice").textContent = "Checking released chairs…";
+  el("chairNotice").textContent = "Checking released furniture…";
   try {
-    const { chairs } = await api("/designer-chairs");
+    const [{ chairs }, { concepts }] = await Promise.all([api("/designer-chairs"),api("/bedroom-collection")]);
     if (epoch !== chairEpoch) return;
-    releasedChairs = chairs;
+    releasedChairs = [...chairs, ...concepts];
     el("chairChoice").replaceChildren(
-      ...chairs.map((c, i) => new Option(c.name + " · " + c.variant_label + " · " + c.version, String(i))),
+      ...releasedChairs.map((c, i) => new Option([c.name,c.variant_label,c.version].filter(Boolean).join(" · "), String(i))),
     );
-    el("chairPicker").hidden = el("chairPreview").hidden = !chairs.length;
-    el("chairNotice").textContent = chairs.length
-      ? "Preview the chair at its native size in this revision."
-      : "No designer chair has been released. The bedroom uses its procedural chair.";
+    el("chairPicker").hidden = el("chairPreview").hidden = !releasedChairs.length;
+    el("chairNotice").textContent = releasedChairs.length
+      ? "Preview a piece at its native size in this revision."
+      : "No released furniture is available.";
   } catch (e) {
     if (epoch === chairEpoch) el("chairNotice").textContent = e.message;
   }
@@ -515,20 +513,21 @@ bind("chairPreview", async () => {
   const epoch = chairEpoch;
   const { concept_id, version, sha256 } = releasedChairs[Number(el("chairChoice").value)];
   const request = { base: revision, binding: { concept_id, version, sha256 } };
-  const { home } = await api("/projects/" + project + "/designer-chair/preview", request);
+  const endpoint = concept_id === "oak-sage-writing-chair" ? "designer-chair" : "bedroom-collection";
+  const { home } = await api("/projects/" + project + "/" + endpoint + "/preview", request);
   if (epoch !== chairEpoch) return;
   if ((await world.load(home)) !== "verified") {
     if (epoch === chairEpoch) {
       discardChair();
-      el("chairNotice").textContent = "Chair preview unavailable. Your saved bedroom is still displayed.";
+      el("chairNotice").textContent = "Furniture preview unavailable. Your saved bedroom is still displayed.";
     }
     return;
   }
   if (epoch !== chairEpoch) return;
-  chairPreview = { ...request, preview_id: home.id };
+  chairPreview = {endpoint, request: { ...request, preview_id: home.id }};
   el("chairApply").hidden = el("chairDiscard").hidden = false;
   el("chairNotice").textContent = "Bedroom preview ready. Apply to save a new revision.";
-  el("revision").textContent = "Bedroom chair preview · Unsaved";
+  el("revision").textContent = "Bedroom furniture preview · Unsaved";
   world.visit();
   el("door").click();
   el("roomJump").value = "bedroom";
@@ -537,16 +536,65 @@ bind("chairPreview", async () => {
 });
 bind("chairApply", async () => {
   if (!chairPreview) return;
-  sync(await api("/projects/" + project + "/designer-chair/apply", chairPreview));
+  sync(await api("/projects/" + project + "/"+chairPreview.endpoint+"/apply", chairPreview.request));
   el("alternatives").hidden = true;
-  notify("Designer chair saved in revision " + revision + ".");
+  notify("Designer furniture saved in revision " + revision + ".");
 });
 
 let boardHome;
+let evidenceManifest;
+let exportUrl, homeUrl;
+
+function showExport(manifest, hash, studio, studioHash) {
+  if (exportUrl) URL.revokeObjectURL(exportUrl);
+  exportUrl = URL.createObjectURL(new Blob([manifestText(manifest)], {type:"application/json"}));
+  const manifestLink = node("a","Download bedroom manifest");
+  manifestLink.href = exportUrl;
+  manifestLink.download = "bedroom-r" + manifest.revision + "-" + hash.slice(0,12) + ".json";
+  if(homeUrl) URL.revokeObjectURL(homeUrl);
+  homeUrl=URL.createObjectURL(new Blob([manifestText(studio)],{type:"application/json"}));
+  const whole=node("a","Download whole-home scene manifest");
+  whole.href=homeUrl; whole.download="home-r"+revision+"-"+boardHome.id.slice(0,12)+".json";
+  el("boardExports").replaceChildren(manifestLink, node("p",""),whole);
+  const studioRelease = publicationFor(studio, studioHash, studioPublications);
+  if (studioRelease) {
+    const pdf = node("a", "Open the whole-home client book (PDF)");
+    pdf.href = studioRelease.pdf;
+    pdf.target = "_blank";
+    pdf.rel = "noopener";
+    const pack = node("a", "Download the editable scene, images and camera studies");
+    pack.href = studioRelease.url;
+    el("boardExports").append(node("p",""), pdf, node("p",""), pack);
+  }
+  const publication = publicationFor(manifest,hash);
+  if (publication) {
+    const link = node("a","Download the Blender scene and three finished stills");
+    link.href = publication.url;
+    el("boardExports").append(node("p",""),link);
+  } else if (!studioRelease) {
+    el("boardExports").append(node("p","Offline renders have not been published for this exact revision."));
+  }
+}
+
 const node = (tag, text) =>
   Object.assign(document.createElement(tag), { textContent: text });
+let boardGeneration = 0;
 el("present").onclick = async () => {
+  const generation = ++boardGeneration;
+  el("printBoard").disabled = true;
   boardHome = applied;
+  evidenceManifest = null;
+  el("boardExports").replaceChildren();
+  if (revision) {
+    try {
+      const manifest = bedroomManifest({project, revision, home: boardHome});
+      evidenceManifest = manifest;
+      const studio = homeBoard({project, revision, home: boardHome});
+      Promise.all([manifestDigest(manifest), manifestDigest(studio)]).then(([hash, studioHash]) => {
+        if (generation === boardGeneration) showExport(manifest, hash, studio, studioHash);
+      }).catch(() => { if (generation === boardGeneration) el("boardExports").textContent = "Revision export unavailable."; });
+    } catch { el("boardExports").textContent = "Revision export unavailable."; }
+  }
   const h = boardHome;
   el("boardSource").textContent =
     (revision ? "Saved revision " + revision : "Packaged showcase") +
@@ -557,7 +605,7 @@ el("present").onclick = async () => {
     " m · " +
     h.id.slice(0, 12);
   el("board").showModal();
-  floorPlan(h, el("boardPlan"));
+  planOf(h, el("boardPlan"));
   el("schedule").replaceChildren();
   el("swatches").replaceChildren();
   for (const [name, color] of [
@@ -595,40 +643,57 @@ el("present").onclick = async () => {
           (f.id === "desk-chair" && p.designer_chair
             ? p.designer_chair.name + (p.designer_chair.variant_label ? " · " + p.designer_chair.variant_label : "") + " · Designer concept v" + p.designer_chair.binding.version +
               " · Native " + p.designer_chair.dimensions_wdh_m.join(" × ") + " m · Reservation"
-            : f.name) +
+            : p.designer_collection?.[f.id]?.name || f.name) +
             " · " +
             [f.width_m, f.depth_m, f.height_m]
               .map((v) => v.toFixed(2))
               .join(" × ") +
-            " m (W × D × H)",
+            ` m (W × D × H) · Room position (${f.x_m.toFixed(2)}, ${f.y_m.toFixed(2)}) m`,
         ),
       );
   }
+  el("boardRoom").replaceChildren(...h.rooms.map(p=>new Option(p.design.room.name,p.design.room.id)));
+  el("boardRoom").value="bedroom";
+  await showRoom(h,"bedroom");
+};
+el("boardRoom").onchange=()=>showRoom(boardHome,el("boardRoom").value);
+let photoSerial=0;
+async function showRoom(h,id){
+  const generation=++photoSerial;
+  const part=h.rooms.find(p=>p.design.room.id===id);
+  el("elevations").replaceChildren(node("h3",part.design.room.name+" · schematic elevations"),roomElevation(part,"north"),roomElevation(part,"east"));
+  el("printBoard").disabled=true;
   el("whyAnswer").textContent = "";
-  el("photos").textContent = "Rendering bedroom views…";
+  el("photos").textContent = "Rendering "+part.design.room.name+" views…";
   try {
-    const { images, chair } = await world.bedroomViews(h);
+    const { images, views, chair, desk, collection } = await world.bedroomViews(h,id);
+    if (photoSerial !== generation || !el("board").open) return;
     el("photos").replaceChildren();
-    if (chair === "placeholder")
+    if (id==="bedroom" && desk === "placeholder") el("photos").append(node("p", "Belaya mesh unavailable. A placeholder marks its reservation."));
+    if (id==="bedroom" && collection === "placeholder") el("photos").append(node("p","Bedroom collection mesh unavailable. A procedural piece marks its reservation."));
+    if (id==="bedroom" && chair === "placeholder")
       el("photos").append(node("p", "Designer chair unavailable in these views. The procedural chair marks its reservation."));
     images.forEach((src, i) => {
       const fig = document.createElement("figure"),
         img = new Image();
       img.src = src;
-      img.alt = i ? "Bedroom from doorway" : "Bedroom overview";
-      fig.append(img, node("figcaption", img.alt + " · Eye height 1.57 m"));
+      img.alt = views[i].reason ? "Doorway overview" : views[i].label;
+      fig.append(img, node("figcaption", views[i].label + " · " + (views[i].reason || "Eye height 1.57 m")));
       el("photos").append(fig);
     });
   } catch {
+    if (photoSerial !== generation || !el("board").open) return;
     el("photos").textContent =
-      "Bedroom views could not be rendered on this device.";
+      "Room views could not be rendered on this device.";
+  } finally {
+    if (generation === photoSerial) el("printBoard").disabled = false;
   }
 };
-el("askWhy").onclick = () =>
-  (el("whyAnswer").textContent = explanation(
-    boardHome,
-    el("whyQuery").value.toLowerCase(),
-  ));
+el("askWhy").onclick = () => {
+  const answer = explanation(boardHome, el("whyQuery").value.toLowerCase(), evidenceManifest);
+  const source = evidenceManifest ? `Project ${evidenceManifest.project} · Revision ${evidenceManifest.revision}` : "Bedroom preview";
+  el("whyAnswer").textContent = `${source} · Bedroom · ${answer}`;
+};
 el("printBoard").onclick = () => window.print();
 
 // Chromium retains modal scroll position during printing. Print a normal-flow
@@ -643,7 +708,7 @@ window.addEventListener("beforeprint", () => {
   plan.src = el("boardPlan").toDataURL();
   plan.alt = "Dimensioned home plan";
   copy.querySelector("canvas").replaceWith(plan);
-  copy.querySelectorAll("button,input,label").forEach((n) => n.remove());
+  copy.querySelectorAll("button,input,label,#boardExports").forEach((n) => n.remove());
   while (copy.firstChild) sheet.appendChild(copy.firstChild);
   document.body.append(sheet);
 });

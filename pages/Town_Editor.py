@@ -113,6 +113,7 @@ with st.form("town_edit"):
     d = st.number_input(
         "Lot depth (m)", 9.0, 16.0, float(home["depth"]) if home else 13.0
     )
+    salon = st.checkbox("Include a formal salon and dining group")
     priority = st.selectbox("Priority", ["balanced", "quiet bedroom", "bright study"])
     finishes = ["oak", "sage", "terracotta"]
     palette = st.selectbox(
@@ -123,7 +124,9 @@ with st.form("town_edit"):
         [r["design"]["room"]["id"] for r in home["rooms"]] if home else [],
     )
     brief = st.text_area("Design brief (optional)")
-    live = st.checkbox("Authorize one live interpretation request")
+    st.caption(
+        "Generate sends the brief and floor plans to OpenAI for interpretation, styling and visual review (up to three calls). A configured local Codex CLI also reviews the bedroom."
+    )
     if st.form_submit_button("Generate alternatives", disabled=rev != snapshot["head"]):
         st.session_state["town_job:" + p] = call(
             "/jobs",
@@ -132,11 +135,13 @@ with st.form("town_edit"):
                 "project": p,
                 "base": rev,
                 "message": brief,
-                "live": live,
+                "live": True,
+                "agent_team": True,
                 "brief": {
                     "width": w,
                     "depth": d,
                     "priority": priority,
+                    "formal_salon": salon,
                     "palette": palette,
                     "locks": locks,
                     "seed": 42 + rev,
@@ -169,6 +174,11 @@ if j:
                         st.json(event["artifact"], expanded=False)
             if state == "running":
                 st.status(last["task"], state="running")
+        if feed["status"] == "ready" and any(
+            e["state"] == "failed" and e["task"] == "OpenAI · Review plan images"
+            for e in feed["events"]
+        ):
+            st.warning("Spatial checks passed. AI visual review unavailable.")
         plans = [
             e
             for e in feed["events"]

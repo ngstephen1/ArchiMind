@@ -40,6 +40,7 @@ def _migration_steps(root: Path, include_style_packs: bool) -> list[dict]:
         studio["bedroom_view"]["authorized_migrations"],
         studio["three_0_187"]["authorized_migrations"],
         studio["designer_chair"]["authorized_migrations"],
+        studio["bedroom_collection"]["authorized_migrations"],
     ]
     # Dependency manifest updates only ever touch pyproject.toml.
     for update in _load(root, "docs/data/DEPENDENCY_MANIFEST_MIGRATIONS.json"):

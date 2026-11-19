@@ -3,11 +3,36 @@
 </p>
 
 <p align="center">
-  <a href="https://www.python.org/"><img src="docs/assets/python.svg" alt="Python" height="36" /></a>
-  <a href="https://streamlit.io/"><img src="docs/assets/streamlit.svg" alt="Streamlit" height="36" /></a>
-  <a href="https://docs.pydantic.dev/"><img src="docs/assets/pydantic.svg" alt="Pydantic" height="36" /></a>
-  <a href="https://docs.pytest.org/"><img src="docs/assets/pytest.svg" alt="pytest" height="36" /></a>
-  <a href="https://docs.astral.sh/ruff/"><img src="docs/assets/ruff.svg" alt="Ruff" height="36" /></a>
+  <strong>Application and agents</strong><br />
+  <a href="https://www.python.org/"><img src="docs/assets/python.svg" alt="Python" height="32" /></a>
+  <a href="https://streamlit.io/"><img src="docs/assets/streamlit.svg" alt="Streamlit" height="32" /></a>
+  <a href="https://docs.pydantic.dev/"><img src="docs/assets/pydantic.svg" alt="Pydantic" height="32" /></a>
+  <a href="https://github.com/langchain-ai/langgraph"><img src="docs/assets/langgraph.svg" alt="LangGraph" height="32" /></a>
+  <a href="docs/developer/TOWN.md#follow-a-design-run"><img src="docs/assets/openai.svg" alt="OpenAI design interpretation, styling and visual review" height="32" /></a>
+</p>
+
+<p align="center">
+  <strong>Visualization and asset authoring</strong><br />
+  <a href="https://plotly.com/python/"><img src="docs/assets/plotly.svg" alt="Plotly" height="32" /></a>
+  <a href="https://threejs.org/"><img src="docs/assets/threejs.svg" alt="Three.js" height="32" /></a>
+  <a href="https://www.khronos.org/gltf/"><img src="docs/assets/gltf.svg" alt="glTF (GLB assets)" height="32" /></a>
+  <a href="docs/developer/DESIGNER_CHAIR_AUTHORING.md"><img src="docs/assets/blender.svg" alt="Blender" height="32" /></a>
+  <a href="docs/developer/DESIGNER_CHAIR_AUTHORING.md"><img src="docs/assets/mcp.svg" alt="Model Context Protocol for Blender authoring" height="32" /></a>
+  <a href="docs/developer/RHINO_CHAIR.md"><img src="docs/assets/rhino.svg" alt="Rhino 3DM (offline CAD exchange)" height="32" /></a>
+</p>
+
+<p align="center">
+  <strong>Town storage and hosting</strong><br />
+  <a href="https://sqlite.org/"><img src="docs/assets/sqlite.svg" alt="SQLite (local Town storage)" height="32" /></a>
+  <a href="https://www.postgresql.org/"><img src="docs/assets/postgresql.svg" alt="PostgreSQL (hosted Town storage)" height="32" /></a>
+  <a href="https://supabase.com/"><img src="docs/assets/supabase.svg" alt="Supabase (hosted authentication and database)" height="32" /></a>
+  <a href="docs/developer/TOWN.md"><img src="docs/assets/vercel.svg" alt="Vercel (static Town frontend)" height="32" /></a>
+</p>
+
+<p align="center">
+  <strong>Development checks</strong><br />
+  <a href="https://docs.pytest.org/"><img src="docs/assets/pytest.svg" alt="pytest" height="32" /></a>
+  <a href="https://docs.astral.sh/ruff/"><img src="docs/assets/ruff.svg" alt="Ruff" height="32" /></a>
 </p>
 
 <p align="center">
@@ -133,11 +158,11 @@ generated design.
 
 ### 01 · Create the environment
 
-Use **Python 3.11+**. The local environment was configured with **CPython 3.11.13**
+From the directory containing your clone, use **Python 3.11+**. The local environment was configured with **CPython 3.11.13**
 using `/opt/homebrew/bin/python3.11`.
 
 ```bash
-cd /Users/macbook/Hack/ArchiMind
+cd ArchiMind
 python3.11 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e ".[dev]"
@@ -146,14 +171,37 @@ python -m pip install -e ".[dev]"
 Create `.venv` once. For an existing environment, activate it and reinstall after
 dependency changes. The editable `src/` package imports without setting `PYTHONPATH`.
 
-### 02 · Open the application
+### 02 · Run locally
 
-```bash
-python -m streamlit run app.py
+Run these commands from the repository root. Choose the experience you want, or use separate terminals to run them together. Press **Ctrl-C** in a launcher's terminal to stop it.
+
+| Experience | Launch command | Where to go |
+| --- | --- | --- |
+| Room layouts and offline 3D Studio | `.venv/bin/python -m streamlit run app.py --server.port 8501` | [Main app](http://127.0.0.1:8501) or [3D Studio](http://127.0.0.1:8501/?workspace=studio). In Studio, choose **Load example furnishing plan** and **Build 3D room**. |
+| Live Bedroom Chat | `.venv/bin/python scripts/run_chat.py --port 8502` | [Chat app](http://127.0.0.1:8502). Select **Chat bedroom**, submit measurements, choose furniture, then **Prepare → Review → Generate Layouts**. |
+| Live 3D Studio | `.venv/bin/python scripts/run_studio.py --port 8503` | [Studio](http://127.0.0.1:8503/?workspace=studio). Review the proposed furnishing plan before building it. |
+
+The two live launchers read `OPENAI_API_KEY` from the server environment or the ignored root `.env` file. The offline example and the default Town walkthrough work without a key.
+
+**Town, design worker and home editor.** With Node 20+ and the Python environment above, install the Town dependencies once and start all three components with one launcher:
+
+```sh
+npm ci --prefix frontend/realistic_viewer
+.venv/bin/python -m pip install -r services/town/requirements.txt
+.venv/bin/python scripts/run_town.py
 ```
 
-Open the printed Local URL, normally **http://localhost:8501**. Stop with
-`Control-C`.
+On later launches, run only the last command. Open [Town](http://127.0.0.1:8790), select **Design a home**, and try `bright study and sage finishes`. Compare A/B, preview one, then **Apply to my home** to inspect that saved revision in the [editor](http://127.0.0.1:8791). If the launcher reports an occupied port, check the running API with `curl -fsS http://127.0.0.1:8790/health` and the editor with `curl -fsS http://127.0.0.1:8791/_stcore/health`. [Town controls and deployment guide](docs/developer/TOWN.md)
+
+**Open the finished bedroom.** With the same Town dependencies, run `.venv/bin/python scripts/run_bedroom_showcase.py` instead of the Town launcher. Follow the printed link to open revision 5, walk through it, and select **Design presentation** for the plan, furniture schedule, three views and matching Blender download. This launcher uses a temporary database for your edits. [Showcase and downloads](docs/developer/BEDROOM_PRESENTATION.md)
+
+**Tour the six-room Studio House.** Run `.venv/bin/python scripts/run_studio_home.py` with the Town dependencies above. Open the printed revision link and choose **Design presentation**. The room selector switches between the formal salon, bedroom, living room, kitchen–dining room, study and bathroom. The guide also covers the printable client book, editable Blender scene and saved chair-and-finish edit. [Studio House guide](docs/developer/STUDIO_HOME.md)
+
+#### Architecture diagram
+
+Follow the brief through Town’s five worker roles or the room workspaces to validation and rendering. The lower panel documents the designer-chair authoring branch at `524f3c9`. Its Blender and portable Rhino CAD work belongs to [PR #21](https://github.com/ngstephen1/ArchiMind/pull/21). Live Rhino MCP verification is pending in this snapshot.
+
+[![ArchiMind design runtime, services, and 3D authoring architecture](docs/images/ArchiMind_Architecture.png)](docs/images/ArchiMind_Architecture.svg)
 
 ### 03 · Verify the foundation
 
@@ -1012,6 +1060,7 @@ claim. Task 05B exposes these same results in Streamlit alongside the Task 03 pr
 | Spatial geometry | Shapely 2.2.0 | Zero-rotation furniture containment and overlap checks |
 | Backend orchestration | LangGraph 1.2.18 | Bounded default workflow and optional post-critic recommendation |
 | Optional model adapters | OpenAI SDK 3.40.0 | Separately gated requirements, layout advice, design critique and standalone style planning; mock-verified |
+| Town persistence | SQLite locally, PostgreSQL in hosted mode | Saved projects, revisions and worker jobs |
 | Testing | pytest 9.1.1 | Smoke, model, renderer, and preview integration tests |
 | Code quality | Ruff 0.17.3 | Linting and formatting |
 | Packaging | build 1.6.1 + setuptools | Wheel and source distributions |
@@ -1026,7 +1075,6 @@ future tools are not added to project requirements prematurely.
 | :--- | :--- |
 | Further agent reasoning | Existing LangGraph + OpenAI backend |
 | 3D export | Trimesh |
-| Local persistence | SQLite |
 
 ## Quality checks
 
@@ -1324,19 +1372,13 @@ and verification record.
 Later phases remain proposed work. This prototype does not provide CAD/BIM outputs,
 construction guidance, or building-code/accessibility certification.
 
+## Town AI design team
+
+**Design a home → Generate** runs two OpenAI agents in parallel for the brief and styling. Once Python validates the candidate layouts, OpenAI reviews their floor-plan images. Animated cards identify the engine, task and recorded results. The local worker can ask Codex CLI for a bedroom placement critique using its own login. See the [Town guide](docs/developer/TOWN.md#follow-a-design-run) for setup, budgets and rendering a concept illustration from a saved revision.
+
 ## Configuration and project boundaries
 
-The optional [Codex Design Advisor backend](docs/developer/CODEX_ADVISOR.md) is
-implemented separately as C01. It is disabled by default
-(`ARCHIMIND_ENABLE_CODEX_ADVISOR=0`), requires explicit per-call live-usage opt-in,
-and is limited to local single-user testing. It returns unvalidated suggestions;
-there is no advisor UI or automatic placement application.
-
-`.env.example` documents default-off API settings. Normal Streamlit startup does
-not load environment files automatically; the explicit local `run_chat.py` and
-`run_studio.py` launchers can load the ignored `.env`. Authorized adapters read
-`OPENAI_API_KEY` server-side after their gates pass. The default app needs no key,
-and no key is sent to the browser. Codex CLI authentication is separate.
+The [Codex Design Advisor](docs/developer/CODEX_ADVISOR.md) provides local single-user placement suggestions through the Town launcher. Town uses the server-side OpenAI key for its design team. The local Town, Chat and Studio launchers read it from the environment or ignored `.env`. Codex CLI uses its own login. Browsing and viewing saved layouts require no model request.
 
 Local virtual environments, secrets, caches, databases, generated renders, and
 temporary outputs are excluded from Git.

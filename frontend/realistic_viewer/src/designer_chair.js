@@ -42,10 +42,32 @@ export function chairRecord(registry, binding) {
 }
 
 export async function loadDesignerChair(binding, baseUrl) {
-  check(binding?.concept_id === 'oak-sage-writing-chair' && /^[0-9a-f]{64}$/.test(binding.sha256));
+  check(binding?.concept_id === 'oak-sage-writing-chair');
+  return loadReleased(binding, baseUrl, 'chairs', [0.48,0.52,0.83]);
+}
+
+export async function loadBedroomConcept(binding, baseUrl) {
+  const sizes = new Map([['upholstered-linen-bed',[1.6,2,0.6]], ['oak-bedside-lamp',[0.48,0.43,1.06]]]);
+  const dimensions = sizes.get(binding?.concept_id);
+  check(dimensions);
+  return loadReleased(binding, baseUrl, 'bedroom', dimensions);
+}
+
+async function loadReleased(binding, baseUrl, group, [w,d,h]) {
+  check(/^[0-9a-f]{64}$/.test(binding.sha256));
   const registryBytes = await boundedBytes(await fetch(new URL('designer_registry.json', baseUrl)), 256 * 1024);
   const registry = JSON.parse(new TextDecoder().decode(registryBytes));
-  const r = chairRecord(registry, binding);
+  let r;
+  if (group === 'chairs') {
+    r = chairRecord(registry, binding);
+  } else {
+    // The bedroom collection keeps its own registry group in schema 1 and 2.
+    check([1, 2].includes(registry.schema_version) && Array.isArray(registry[group]));
+    const matches = registry[group].filter(row => row.concept_id === binding.concept_id && row.version === binding.version);
+    r = matches[0];
+    check(matches.length === 1 && r.sha256 === binding.sha256 && Number.isInteger(r.bytes) &&
+      r.bytes > 0 && r.bytes <= 15 * 1024 * 1024 && r.width_m === w && r.depth_m === d && r.height_m === h);
+  }
   const bytes = await boundedBytes(await fetch(new URL('designer-' + r.sha256 + '.glb', baseUrl)), r.bytes);
   check(bytes.length === r.bytes);
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
