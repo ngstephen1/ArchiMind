@@ -1,5 +1,6 @@
 """Real offline source/wheel builds and isolated installed-resource verification."""
 
+import hashlib
 import json
 import os
 import subprocess
@@ -101,19 +102,31 @@ def test_catalog_in_source_wheel_and_isolated_install(tmp_path):
         for name in preserved:
             assert archive.read(name) == (ROOT / "src" / name).read_bytes()
         pack_prefix = "archimind/_viewer_assets/packs/assets/"
+        registry_path = "archimind/_viewer_assets/designer_registry.json"
+        assert (
+            archive.read(registry_path) == (ROOT / "src" / registry_path).read_bytes()
+        )
+        registry = json.loads(archive.read(registry_path))
+        designers = {}
+        for row in registry["pieces"] + registry["bedroom"]:
+            digest = row["sha256"]
+            path = f"archimind/_viewer_assets/designer-{digest}.glb"
+            assert hashlib.sha256(archive.read(path)).hexdigest() == digest
+            designers[path] = digest
         assert {
-            Path(n).name
+            n
             for n in archive.namelist()
             if n.endswith(".glb") and not n.startswith(pack_prefix)
-        } == {
-            "SheenChair.glb",
-            "CharlesArmchair.glb",
-            "BelayaDesk.glb",
+        } == set(designers) | {
+            f"archimind/_viewer_assets/furniture/{name}.glb"
+            for name in ("SheenChair", "CharlesArmchair", "BelayaDesk")
+        }
+        assert {
             "designer-54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81.glb",
             "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
             "designer-5d0044a1acf345f50fa80443c7f722bb2267960bf3a69cd581a310586e8c84d3.glb",
             "designer-3f475788571c146b30a8e5e6a6c8eb33970622e789d66e37821f962e60ad175f.glb",
-        }
+        } <= {Path(n).name for n in designers}
         # Style-pack files are content-addressed and governed by packs/releases.json.
         releases = json.loads(
             (ROOT / "src/archimind/_viewer_assets/packs/releases.json").read_text(
