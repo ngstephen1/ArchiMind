@@ -19,6 +19,15 @@ from archimind.studio.workflow import (
     propose_room,
     scene_payload,
 )
+from archimind.style_packs import load_pack
+
+STYLE_ORDER = (
+    "scandinavian",
+    "modern_classic",
+    "industrial_loft",
+    "japandi",
+    "mid_century",
+)
 
 DRAFT = "studio_draft"
 BUILD = "studio_build"
@@ -200,6 +209,13 @@ def render_studio():
     seed = st.number_input(
         "Layout seed", min_value=0, max_value=2**32 - 1, value=42, key="studio_seed"
     )
+    style = st.selectbox(
+        "Style",
+        STYLE_ORDER,
+        format_func=lambda s: load_pack(s).name,
+        key="studio_style",
+        help="Surfaces, furniture models, decor and lighting come from this style pack.",
+    )
     room, problem = None, None
     try:
         room = room_from_editor(width, depth, height, doors, windows)
@@ -294,6 +310,7 @@ def render_studio():
                         allow_live=allow,
                         designer_chair=chair_binding,
                         designer_collection=collection,
+                        style=style,
                     )
             except StudioError as e:
                 st.error(str(e))
@@ -351,7 +368,10 @@ def render_studio():
         f"{label} · Validation: {candidate.validation.status} · Comparison score: {candidate.score.total:g} · {result.attempts_used} search attempts. Rotation is 0°; no building-code or functional suitability certification."
     )
     st.plotly_chart(
-        render_floorplan(candidate.design),
+        render_floorplan(
+            candidate.design,
+            plan_theme=load_pack(built.style).plan_theme if built.style else None,
+        ),
         width="stretch",
         theme=None,
         key="studio_floorplan",

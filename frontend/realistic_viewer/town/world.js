@@ -15,9 +15,16 @@ import {
   productSceneAdmission,
 } from "../src/product_assets.js";
 import { fitBedroomChair } from "./designer_chair.js";
+import { townSurfaceSource, LEGACY_WALL_COLORS, dressWhenCurrent, dressTownSurfaces, interiorLook } from "./style_source.js";
+import { loadStylePack, kelvinToColor } from "../src/style_pack.js";
+import { isSoftwareRenderer, browserTier, createComposer } from "../src/render_quality.js";
 import { loadDesignerChair, loadBedroomConcept } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
+import { buildDressing } from "../src/dressing.js";
+import { createPlanSweep } from "../src/plan_sweep.js";
+import { dressFurniture, furnitureFallbackText } from "../src/pack_furniture.js";
+import { FLOOR_SLAB, dressingOrigin } from "./floor.js";
 
 export function createTown(canvas, status, action) {
   const renderer = new T.WebGLRenderer({
@@ -40,6 +47,7 @@ export function createTown(canvas, status, action) {
   scene.environmentIntensity = 0.35;
   env.dispose();
   pm.dispose();
+  const townLook = { environment: map.texture, intensity: 0.35, exposure: renderer.toneMappingExposure };
   scene.add(new T.HemisphereLight(0xfff3de, 0x9a9780, 1.45));
   const sun = new T.DirectionalLight(0xffe3b5, 2.7);
   sun.position.set(-24, 38, 24);
@@ -399,6 +407,143 @@ export function createTown(canvas, status, action) {
     deskReady = Promise.resolve(),
     collectionReady = Promise.resolve("procedural"),
     chairReady = Promise.resolve("procedural");
+  // Style packs: only homes with `style_pack` are dressed; the exterior keeps its look.
+  let tierOverride = null,
+    styleGen = 0,
+    packLook = null,
+    stylePending = Promise.resolve(),
+    composer = null,
+    qualityButton = null;
+  const softwareRenderer = isSoftwareRenderer(renderer);
+  const tier = () => browserTier(tierOverride, softwareRenderer);
+  function releasePackLook() {
+    if (!packLook) return;
+    const look = packLook;
+    packLook = null;
+    look.undo();
+    look.lights.forEach((l) => l.removeFromParent());
+    look.environment?.dispose();
+    look.pack.dispose();
+    composer?.dispose();
+    composer = null;
+  }
+  function updateQuality() {
+    if (!qualityButton) return;
+    qualityButton.hidden = townSurfaceSource(home).kind !== "pack";
+    qualityButton.textContent = "Quality: " + (tier() === "high" ? "High" : "Low");
+  }
+  function dressInterior(pack, packTier) {
+    const lighting = pack.manifest.lighting || {};
+    const undoSurfaces = dressTownSurfaces(interior, pack);
+    const seams = [];
+    interior.traverse((o) => {
+      if (o.userData.legacySeam && o.visible) {
+        o.visible = false;
+        seams.push(o);
+      }
+    });
+    let environment = null;
+    if (pack.environment) {
+      const pmrem = new T.PMREMGenerator(renderer);
+      pack.environment.mapping = T.EquirectangularReflectionMapping;
+      environment = pmrem.fromEquirectangular(pack.environment);
+      pmrem.dispose();
+    }
+    const fill = lighting.fill || {};
+    const lights = [new T.HemisphereLight(fill.sky_color || "#eef2f7", fill.ground_color || "#b9ab96", fill.intensity ?? 0.5)];
+    const warm = kelvinToColor(lighting.sun?.kelvin ?? 5600);
+    for (const part of home.rooms) {
+      const r = part.design.room,
+        light = new T.PointLight(warm, 6 * (lighting.sun?.intensity ?? 2), Math.max(r.width_m, r.depth_m) * 1.6, 2);
+      light.position.set(part.origin[0] + r.width_m / 2, 2.45, -part.origin[1] - r.depth_m / 2);
+      lights.push(light);
+    }
+    interior.add(...lights);
+    const decor = [],
+      ready = [],
+      furnitureFailed = [];
+    let live = true;
+    for (const part of home.rooms) {
+      if (!Array.isArray(part.style?.dressing)) continue;
+      const holder = new T.Group();
+      holder.position.set(...dressingOrigin(part));
+      interior.add(holder);
+      const dressing = buildDressing(holder, part.style.dressing, pack, packTier);
+      decor.push({ holder, handle: dressing });
+      ready.push(dressing.ready);
+      if (Array.isArray(part.style.bindings)) {
+        const furniture = dressFurniture({
+          bindings: part.style.bindings.filter((b) => b.furniture_id !== "belaya"),
+          furniture: part.design.furniture,
+          pack,
+          objects: roomFurniture.get(part.design.room.id) || new Map(),
+          parent: holder,
+        });
+        decor.push({ holder, handle: { dispose: furniture.undo } });
+        ready.push(
+          furniture.ready.then(({ failed }) =>
+            furnitureFailed.push(...part.design.furniture.filter((f) => failed.includes(f.id))),
+          ),
+        );
+      }
+    }
+    // Name pack furniture that fell back to the procedural piece, while this look is live.
+    const allReady = Promise.all(ready).then(() => {
+      if (!live) return;
+      const text = furnitureFallbackText(
+        furnitureFailed.map((f) => f.id),
+        furnitureFailed,
+      );
+      if (text) canvas.dataset.styleFurniture = text;
+      else delete canvas.dataset.styleFurniture;
+    });
+    packLook = {
+      pack,
+      lights,
+      environment,
+      intensity: lighting.environment_intensity ?? 0.6,
+      exposure: lighting.exposure ?? 1,
+      ready: allReady,
+      undo: () => {
+        live = false;
+        delete canvas.dataset.styleFurniture;
+        decor.forEach(({ holder, handle }) => {
+          handle.dispose();
+          holder.removeFromParent();
+        });
+        undoSurfaces();
+        seams.forEach((o) => (o.visible = true));
+      },
+    };
+    composer = createComposer(renderer, scene, camera, packTier);
+    composer.setSize(canvas.clientWidth, canvas.clientHeight);
+    canvas.dataset.styleFailures = pack.failures.join(",");
+  }
+  function requestPack(epoch) {
+    const source = townSurfaceSource(home);
+    if (source.kind !== "pack") return;
+    const mine = ++styleGen,
+      packTier = tier(),
+      current = () => generation === epoch && styleGen === mine;
+    canvas.dataset.stylePack = source.ref.id + "@" + source.ref.version;
+    canvas.dataset.styleState = "loading";
+    canvas.dataset.tier = packTier;
+    const surfaceRoles = new Set();
+    interior.traverse((o) => { if (o.isMesh && o.userData.surface) surfaceRoles.add(o.userData.surface); });
+    stylePending = dressWhenCurrent(
+      loadStylePack({ baseUrl: new URL("./assets/", document.baseURI).href, ref: source.ref, tier: packTier, surfaceRoles, isCurrent: current }),
+      current,
+      (pack) => {
+        // Restyles swap materials: return the sweep to Room first.
+        sweep?.set(1);
+        if (sweepInput) sweepInput.value = "100";
+        releasePackLook();
+        dressInterior(pack, packTier);
+      },
+    ).then((state) => {
+      if (state !== "superseded") canvas.dataset.styleState = state;
+    });
+  }
   const roomJump = document.getElementById("roomJump");
   const photoControls = document.getElementById("photoControls");
   const photoView = document.getElementById("photoView");
@@ -591,11 +736,22 @@ export function createTown(canvas, status, action) {
       m.bumpScale = woven ? 0.0018 : 0.0024;
     }
   }
+  let sweep = null,
+    sweepInput = null;
+  const roomFurniture = new Map();
   const surfaces = bedroomSurfaces(renderer, mats);
   function load(h) {
     walkView();
     generation++;
     const epoch = generation;
+    // Dispose the sweep first so the pack look is released from real materials.
+    sweep?.dispose();
+    sweep = null;
+    if (sweepInput) sweepInput.value = "100";
+    releasePackLook();
+    delete canvas.dataset.stylePack;
+    delete canvas.dataset.styleState;
+    delete canvas.dataset.styleFailures;
     const selectedLoads = [];
     canvas.dataset.collection = "procedural";
     function replaceCollection(binding, fallback, item, onVerified) {
@@ -615,6 +771,7 @@ export function createTown(canvas, status, action) {
     chairReady = Promise.resolve("procedural");
     deskReady = Promise.resolve();
     clear(interior);
+    roomFurniture.clear();
     clear(hero);
     indoor.length = 0;
     heroObstacles.length = 0;
@@ -687,7 +844,7 @@ export function createTown(canvas, status, action) {
         );
       }
     batch(hero);
-    block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf");
+    block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf").userData.surface = "ceiling";
     delete canvas.dataset.desk;
     const bindings = h.rooms.flatMap((p) => p.asset_bindings || []);
     const admitted =
@@ -712,11 +869,7 @@ export function createTown(canvas, status, action) {
       block(interior, doorX, 2.61, -z, 0.34, 0.17, 0.34, "#e1cc98");
     }
 
-    const wallColor = {
-      oak: "#e5d6bc",
-      sage: "#bac6ad",
-      terracotta: "#d8ab91",
-    }[h.palette];
+    const wallColor = LEGACY_WALL_COLORS[h.palette];
     for (const part of h.rooms) {
       const [ox, oy] = part.origin,
         r = part.design.room,
@@ -748,6 +901,7 @@ export function createTown(canvas, status, action) {
           Math.abs(a[1] - b[1]) || 0.1,
           wallColor,
         );
+        wall.userData.surface = "wall";
         if (q.bottom === 0) {
           block(
             group,
@@ -758,7 +912,7 @@ export function createTown(canvas, status, action) {
             0.13,
             wall.scale.z + 0.022,
             "#eadfcb",
-          );
+          ).userData.surface = "trim";
         }
         if (q.bottom < 1.7 && q.top > 0.25)
           indoor.push([
@@ -771,14 +925,15 @@ export function createTown(canvas, status, action) {
       const flooring = block(
         group,
         r.width_m / 2,
-        0.008,
+        FLOOR_SLAB.centerY,
         -r.depth_m / 2,
         r.width_m,
-        0.014,
+        FLOOR_SLAB.height,
         r.depth_m,
         r.id === "bathroom" ? "#b4b8b1" : "#ba9a70",
       );
       if (r.id === "bedroom") flooring.material = oak;
+      flooring.userData.surface = r.id === "bathroom" ? "tile" : "floor";
       for (let row = 0; r.id !== "bedroom" && row < r.depth_m / 0.25; row++) {
         const z = row * 0.25;
         block(
@@ -790,10 +945,10 @@ export function createTown(canvas, status, action) {
           0.003,
           0.006,
           "#a78c6f",
-        );
+        ).userData.legacySeam = true;
         for (let x = 0.4 + (row % 3) * 0.53; x < r.width_m; x += 1.75) {
           if (z + 0.25 < r.depth_m)
-            block(group, x, 0.016, -z - 0.125, 0.006, 0.003, 0.25, "#a78c6f");
+            block(group, x, 0.016, -z - 0.125, 0.006, 0.003, 0.25, "#a78c6f").userData.legacySeam = true;
         }
       }
       for (const win of r.windows)
@@ -821,7 +976,10 @@ export function createTown(canvas, status, action) {
         if(rounded)obj.scale.set(w,h,d);
       }
       salonDetails(part).forEach(studioPiece);
+      const tagged = new Map();
+      roomFurniture.set(part.design.room.id, tagged);
       for (const f of part.design.furniture) {
+        const before = group.children.length;
         const x = f.x_m + f.width_m / 2,
           z = -f.y_m - f.depth_m / 2,
           w = f.width_m,
@@ -1046,9 +1204,17 @@ export function createTown(canvas, status, action) {
           block(group, x, t * 0.47, z, w, t * 0.94, d, "#a48c73");
           block(group, x, t * 0.97, z, w, t * 0.06, d, "#e1dbcc");
         }
+        tagged.set(f.id, group.children.slice(before));
       }
       // Batch only stable meshes; native desk loading may replace its stand-in later.
-      if (!part.designer_collection && !part.designer_chair && !part.design.furniture.some((f) => f.id === "belaya")) batch(group);
+      // Pack homes stay unbatched so pack models can replace individual pieces.
+      if (
+        !part.designer_collection &&
+        !part.designer_chair &&
+        !part.design.furniture.some((f) => f.id === "belaya") &&
+        townSurfaceSource(h).kind !== "pack"
+      )
+        batch(group);
     }
     for (const part of h.rooms) {
       const room = part.design.room,
@@ -1077,6 +1243,8 @@ export function createTown(canvas, status, action) {
       );
     if (inside) enter(true);
     refresh();
+    updateQuality();
+    requestPack(epoch);
     collectionReady = Promise.all(selectedLoads).then(states => {
       const result = states.length ? (states.every(s => s === "verified") ? "verified" : "placeholder") : "procedural";
       if (epoch === generation) canvas.dataset.collection = result;
@@ -1162,6 +1330,7 @@ export function createTown(canvas, status, action) {
     camera.updateProjectionMatrix();
     if (preset) selectPhoto();
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+    composer?.setSize(canvas.clientWidth, canvas.clientHeight);
   }).observe(canvas);
   let before = performance.now();
   renderer.setAnimationLoop((now) => {
@@ -1242,11 +1411,38 @@ export function createTown(canvas, status, action) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
     }
-    scene.environment = (inside && surfaces.environment) || map.texture;
-    renderer.render(scene, camera);
+    // Inside a pack home, its environment, exposure and (high tier) AO apply.
+    const look = inside && packLook;
+    const lit = interiorLook(look, {
+      ...townLook,
+      environment: (inside && surfaces.environment) || map.texture,
+    });
+    scene.environment = lit.environment;
+    scene.environmentIntensity = lit.intensity;
+    renderer.toneMappingExposure = lit.exposure;
+    if (look && composer) composer.render();
+    else renderer.render(scene, camera);
   });
   return {
     load,
+    // Plan ↔ Room over the home's interior only; a pure view change.
+    bindSweep(input) {
+      sweepInput = input;
+      input.value = "100";
+      input.oninput = () => {
+        sweep ||= createPlanSweep({ renderer, root: interior });
+        sweep.set(Number(input.value) / 100);
+      };
+    },
+    bindQuality(button) {
+      qualityButton = button;
+      button.onclick = () => {
+        tierOverride = tier() === "high" ? "low" : "high";
+        updateQuality();
+        requestPack(generation);
+      };
+      updateQuality();
+    },
     async bedroomViews(snapshot, roomId = "bedroom") {
       const original = home, originalPreset = photoView.value;
       const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
@@ -1256,6 +1452,9 @@ export function createTown(canvas, status, action) {
         await deskReady;
         const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
         await surfaces.ready;
+        // A pack home is photographed dressed: wait for its pack, decor and furniture.
+        await stylePending;
+        await packLook?.ready;
         if (epoch !== generation) throw Error("Presentation source changed.");
         const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
         const views = bedroomCameras(part);
@@ -1263,10 +1462,19 @@ export function createTown(canvas, status, action) {
         const size = renderer.getSize(new T.Vector2());
         const ratio = renderer.getPixelRatio();
         const oldEnv = scene.environment;
+        const oldIntensity = scene.environmentIntensity,
+          oldExposure = renderer.toneMappingExposure;
         try {
           hero.visible = avatar.visible = false;
           street.visible = interior.visible = true;
-          scene.environment = surfaces.environment || oldEnv;
+          // A pack home is photographed with its own environment and exposure.
+          const lit = interiorLook(packLook, {
+            ...townLook,
+            environment: surfaces.environment || oldEnv,
+          });
+          scene.environment = lit.environment;
+          scene.environmentIntensity = lit.intensity;
+          renderer.toneMappingExposure = lit.exposure;
           renderer.setPixelRatio(1);
           renderer.setSize(1280, 720, false);
           const images = views.map((view) => {
@@ -1282,6 +1490,8 @@ export function createTown(canvas, status, action) {
           renderer.setSize(size.x,size.y,false);
           [hero, street, interior, avatar].forEach((o,i) => {o.visible = visible[i];});
           scene.environment = oldEnv;
+          scene.environmentIntensity = oldIntensity;
+          renderer.toneMappingExposure = oldExposure;
         }
       } finally {
         if (epoch === generation && original !== snapshot) {

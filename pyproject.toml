@@ -33,7 +33,7 @@ include-package-data = false
 testpaths = ["tests"]
 
 [tool.setuptools.package-data]
-archimind = ["pyproject.toml", "assets/*.json", "_viewer_assets/*", "_viewer_assets/furniture/*"]
+archimind = ["pyproject.toml", "assets/*.json", "_viewer_assets/*", "_viewer_assets/furniture/*", "_viewer_assets/packs/*", "_viewer_assets/packs/assets/*"]
 
 [tool.ruff]
 target-version = "py311"

@@ -27,8 +27,13 @@ export function instanceMetrics(object,f,kind){
   return {id:f.id,category:f.category,kind,canonical:{x_m:f.x_m,y_m:f.y_m,width_m:f.width_m,depth_m:f.depth_m,height_m:f.height_m},min:bounds.min.toArray(),max:bounds.max.toArray(),scale:object.userData.scale??1,meshes,triangles,volume:canonicalVolume(f)};
 }
 
-export function quadGeometry(quads){
-  const positions=[],indices=[];
-  for(const points of quads){const offset=positions.length/3;positions.push(...points.flatMap(toThree));indices.push(offset,offset+1,offset+2,offset,offset+2,offset+3);}
-  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();return geometry;
+export function quadGeometry(quads,uvFor=null){
+  const positions=[],indices=[],uvs=[];
+  for(const points of quads){const offset=positions.length/3;positions.push(...points.flatMap(toThree));if(uvFor)uvs.push(...points.flatMap(uvFor));indices.push(offset,offset+1,offset+2,offset,offset+2,offset+3);}
+  const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));if(uvFor)geometry.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));geometry.setIndex(indices);geometry.computeVertexNormals();return geometry;
+}
+// UV 0..1 across a whole wall (along it, then up), so a tiled pack surface repeats span/tiling times.
+export function wallUV(room,wall){
+  const along=['north','south'].includes(wall);
+  return ([x,y,z])=>[along?x/room.width_m:y/room.depth_m,z/room.ceiling_height_m];
 }

@@ -1,12 +1,14 @@
 import { build } from "esbuild";
+import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { copyFile, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { copyFile, cp, mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
+import { existsSync } from "node:fs";
 const src = new URL("./", import.meta.url),
   out = new URL("../../../dist/town/", src);
 await mkdir(new URL("assets/", out), { recursive: true });
 await build({
-  entryPoints: [new URL("app.js", src).pathname],
-  outfile: new URL("town.js", out).pathname,
+  entryPoints: [fileURLToPath(new URL("app.js", src))],
+  outfile: fileURLToPath(new URL("town.js", out)),
   bundle: true,
   format: "esm",
   minify: true,
@@ -37,10 +39,14 @@ const assets = new URL("../../../src/archimind/_viewer_assets/", src);
 // Only publish content-addressed artifacts referenced by the release registry.
 const registryBytes = await readFile(new URL("designer_registry.json", assets));
 const registry = JSON.parse(registryBytes);
-if (registry.schema_version !== 1 || !Array.isArray(registry.chairs))
-  throw Error("Invalid designer chair release registry.");
+const releases =
+  registry.schema_version === 2 ? registry.pieces
+  : registry.schema_version === 1 ? registry.chairs
+  : null;
+if (!Array.isArray(releases))
+  throw Error("Invalid designer piece release registry.");
 const designerAssets = new Set();
-for (const chair of [...registry.chairs, ...(registry.bedroom || [])]) {
+for (const chair of [...releases, ...(registry.bedroom || [])]) {
   for (const [hash, ext] of [
     [chair.sha256, "glb"],
     [chair.front_sha256, "png"],
@@ -76,6 +82,10 @@ await copyFile(
   new URL("../node_modules/three/LICENSE", src),
   new URL("assets/THREE-LICENSE.txt", out),
 );
+// Style packs load lazily per pack from assets/packs/ (content-addressed files).
+const packsSrc = new URL("packs/", assets);
+if (existsSync(packsSrc))
+  await cp(packsSrc, new URL("assets/packs/", out), { recursive: true });
 const local = process.env.TOWN_MODE === "local";
 await writeFile(
   new URL("config.json", out),

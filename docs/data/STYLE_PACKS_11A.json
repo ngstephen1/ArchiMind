@@ -1,0 +1,174 @@
+{
+  "task": "11A photoreal style packs",
+  "plan": "docs/superpowers/plans/2026-11-17-photoreal-style-packs.md",
+  "authorization": {
+    "by": "owner",
+    "date": "2026-11-17",
+    "scope": "docs/superpowers/specs/2026-11-17-photoreal-style-packs-design.md"
+  },
+  "authorized_migrations": {
+    "frontend/realistic_viewer/build.mjs": {
+      "before_sha256": "13726b0b7570643fe2214fd7dbfe0b1cd787f0954396d648f67a551f57d95458",
+      "after_sha256": "986f625cab5c4e2167853c1a563b01ad93dc134590ddf36191cd831de0040d0c"
+    },
+    "frontend/realistic_viewer/package.json": {
+      "before_sha256": "ca97aaf6ff9b6ff0a0645ddccafdc7f88466c21243cdf80d8d62f4352a623e48",
+      "after_sha256": "bc5776dc531d0d55c16520c58d243ea8207395b44547ccc945e6b20267a7aa5e"
+    },
+    "frontend/realistic_viewer/src/room_objects.js": {
+      "before_sha256": "13701603aa1c3b08c7a8409aa9fd0bf057c4a1123d9e6161f54341823ca87153",
+      "after_sha256": "548aa9f82ffa7a38aa00d2cd458c5c119f830d213dba4b3da0588878137afd5b"
+    },
+    "frontend/realistic_viewer/src/room_viewer.js": {
+      "before_sha256": "8021955b69f68ca31411cbc574f40854c0ae20585b5ec3322ec1c612b3e3b789",
+      "after_sha256": "eb21582ec102cd2f693064751346fca6a532618bb3d3783f41c93e4bc3507a32"
+    },
+    "frontend/realistic_viewer/tests/room.test.js": {
+      "before_sha256": "6f24b3de023ec69f79b6d7cb580b1cfb5a10fa307a81d3ed613a58db0f591b01",
+      "after_sha256": "643ce0aec7d8ea4926638c446999e28b8da800df0c347e9810d66dfbb6338fef"
+    },
+    "pyproject.toml": {
+      "before_sha256": "0ddbcc9c60b02416b55310033b00dbee3d4c40f36f3c10708974d1c5c695d657",
+      "after_sha256": "180311f5336145fe84140889220f37f7f15f919f03a6dcb3758c80e2ddcd9ace"
+    },
+    "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
+      "before_sha256": "cd06cfd0faa200f053a40fbe02b15590a3b6e3da085191b831dc012f7aec2e48",
+      "after_sha256": "913b2aaf3835711c2776d8d869b1daf71be82614e00d25e2362a07d899fa729b"
+    },
+    "src/archimind/_viewer_assets/viewer.js": {
+      "before_sha256": "fec484212bbd30e20481f6776c578adde4f27dc5af915950b82cbb6d1b301a5d",
+      "after_sha256": "3a47841b6ee32034301af2d3a007ea8cace1c29642d5d4a676e829c2d1cfe23d"
+    },
+    "src/archimind/render/floorplan_2d.py": {
+      "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",
+      "after_sha256": "5373acf686af9834f6f8b6b289b512330f39df9653dcc92904aca183f839f960"
+    }
+  },
+  "acceptance": {
+    "date": "2026-11-18",
+    "environment": "Windows 11, Chrome, maximised window; 1440x1000 and 390x844 via same-origin iframes (the window could not be resized)",
+    "town_per_pack": {
+      "styles": [
+        "modern_classic",
+        "industrial_loft",
+        "scandinavian",
+        "japandi",
+        "mid_century"
+      ],
+      "captures": "docs/images/style-packs/<style>/{plan,walkthrough}-{desktop,narrow}.png",
+      "style_kept_through": [
+        "layout A/B preview",
+        "apply",
+        "replay recorded work",
+        "reload"
+      ],
+      "offline_briefs": [
+        "bright study in industrial loft",
+        "quiet bedroom in japandi",
+        "bright study in mid-century",
+        "quiet bedroom in modern classic",
+        "bright study in scandinavian"
+      ]
+    },
+    "studio_per_pack": {
+      "captures": "docs/images/style-packs/<style>/studio-desktop.png and surfaces/<style>-{high,low}.png",
+      "narrow": "not captured"
+    },
+    "legacy": {
+      "method": "main and branch Town builds rendering the same pre-11A showcase in identical 1440x1000 iframes (legacy-before/ was captured at a different viewport)",
+      "pixel_difference_percent": {
+        "room_views": 0.02,
+        "with_footer": 0.51
+      },
+      "difference_source": "new Plan/Room footer control and mouse cursor",
+      "packs_requests": 0,
+      "captures": "docs/images/style-packs/legacy-after/"
+    },
+    "faults": {
+      "texture_404": "floor falls back, named in status",
+      "texture_hash_mismatch": "wall falls back, named in status",
+      "model_missing": "procedural sofa kept, status names 'Fallback furniture: Sofa'",
+      "layout_preserved": true,
+      "unknown_style_brief": "offline clarification, saved home unchanged"
+    },
+    "performance": {
+      "measured": false,
+      "reason": "Chrome window throttled by the OS during automation: requestAnimationFrame ran at about 3.5 Hz on the top-level document and 1 Hz in the iframe, so no meaningful FPS could be recorded",
+      "owner_action": "measure a 20 s walk at high (desktop) and low (390x844) tier with the window in front"
+    },
+    "suites": {
+      "npm_test": "172 passed",
+      "npm_run_check": "passed",
+      "town_build": "passed",
+      "pytest": "2405 passed, 3 skipped, 16 failed, 55 errors; every failure is Windows-environment only (os.killpg, WinError 1314 symlink privilege, 32767-character environment limit, subprocess _overlapped import) in files this branch does not change",
+      "deselected_windows_baseline": [
+        "tests/test_realistic_viewer.py::test_symlink_escape_is_rejected",
+        "tests/test_asset_catalog_packaging.py::test_catalog_in_source_wheel_and_isolated_install"
+      ]
+    },
+    "budgets_mb": {
+      "modern_classic": 17.0,
+      "industrial_loft": 24.4,
+      "scandinavian": 16.2,
+      "japandi": 21.6,
+      "mid_century": 21.3,
+      "all_packs_high": 100.6,
+      "caps": {
+        "per_pack": 25,
+        "total": 120
+      }
+    },
+    "pending": [
+      "frame-rate measurement",
+      "register the Blender MCP with Codex once ~/.codex/config.toml parses",
+      "push and pull request (owner approval)"
+    ],
+    "designer_pieces": {
+      "authored": 21,
+      "operator_run": "local-operator:2026-11-18",
+      "recipe": "scripts/author_designer_piece.py (authoring schema 2): numeric profiles, CC0 wood and linen/velvet maps from the pack store, normalised to the reservation",
+      "review": "front and three-quarter previews reviewed; redone before release: two beds over 0.6 m, a plain Japandi desk, and a houndstooth 'wool_boucle' scan that read as plaid (dropped; linen weave used instead)",
+      "previews": "docs/images/style-packs/pieces/<style>.jpg",
+      "viewer": "pack bindings and dressing items with designer:<id>@<version> load designer-<sha256>.glb from the designer registry, verified by size and SHA-256; Town showcase (scandinavian) renders the oak bed, linen sofa and layered pendant with no fallback"
+    }
+  },
+  "operator_environment": {
+    "date": "2026-11-18",
+    "blender": "5.3.0 (hash 02f0899d78e3, built 2026-11-10), C:/Program Files/Blender Foundation/Blender 5.3",
+    "blender_mcp": {
+      "release": "v1.0.3",
+      "commit": "2cea8d566dde07fbac28a61d698909d69724e853",
+      "addon_zip_sha256": "a7a9da816192502e5a0a202a396444e266b47d8fc4f74ad4698048bd43040707",
+      "server": "blender-mcp 1.0.3 (mcp 1.30.0) in a dedicated venv: <operator>/Scripts/blender-mcp.exe"
+    },
+    "codex": "codex-cli 0.159.2; `codex mcp add` was not run because the local ~/.codex/config.toml fails to parse (owner action). Authoring ran through the same MCP server via scripts/test_blender_operator.py --pieces, which drives execute_blender_code and get_objects_summary.",
+    "windows_adjustments": "test_blender_operator.py isolates the add-on profile with BLENDER_USER_RESOURCES and replaces the upstream client's select() wait (Windows pipes) with a reader thread",
+    "chair_round_trip": "passed (gentle and deep variants, .blend reopened in a second Blender process)"
+  },
+  "merge_main_20261119": {
+    "note": "Merged origin/main (bedroom collection, formal salon, room goals) into the style-pack branch. Entries listed here were rebased onto main's bedroom_collection pins; their after_sha256 is the merged content.",
+    "rebased_paths": [
+      "frontend/realistic_viewer/src/room_viewer.js",
+      "pyproject.toml",
+      "src/archimind/_viewer_assets/viewer.js"
+    ]
+  },
+  "merge_review_migrations": {
+    "frontend/realistic_viewer/src/room_viewer.js": {
+      "before_sha256": "eb21582ec102cd2f693064751346fca6a532618bb3d3783f41c93e4bc3507a32",
+      "after_sha256": "824ffd9dcccb9182f328cb4f4d181df92298b076f03a44ebcbb1d6f31d81bca4"
+    },
+    "src/archimind/_viewer_assets/viewer.js": {
+      "before_sha256": "3a47841b6ee32034301af2d3a007ea8cace1c29642d5d4a676e829c2d1cfe23d",
+      "after_sha256": "640acab0628af46d65679a05cdd6b039cb9b4462de9d96cd445c3727dee2fd62"
+    },
+    "frontend/realistic_viewer/src/scene_lifecycle.js": {
+      "before_sha256": "01080157022b75303dbc4fddb8696daad1f6c20734a4e006c3964a52a9e441a3",
+      "after_sha256": "3d3d6f873267208e0730239c8f1c8cdd4fffdcd3ef2c70888c652a1fd62efb27"
+    },
+    "frontend/realistic_viewer/tests/lifecycle.test.js": {
+      "before_sha256": "b1bb3736f5fc2127078a6a5e849a6e4b2f8df697c3861b611b8009244df89f98",
+      "after_sha256": "8864a4fe4ca3145066d727c080b82741dc494aa6922648fe1a815b5df1765dfd"
+    }
+  }
+}

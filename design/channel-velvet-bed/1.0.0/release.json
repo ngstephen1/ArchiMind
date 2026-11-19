@@ -1,0 +1,139 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "channel-velvet-bed",
+    "version": "1.0.0",
+    "name": "Channel-tufted velvet bed",
+    "category": "bed",
+    "dimensions_wdh_m": [
+      1.6,
+      2.0,
+      0.6
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Brass bun foot LF",
+        "Brass bun foot LB",
+        "Brass bun foot RF",
+        "Brass bun foot RB",
+        "Upholstered base",
+        "Headboard back",
+        "Channel 1",
+        "Channel 2",
+        "Channel 3",
+        "Channel 4",
+        "Channel 5",
+        "Channel 6",
+        "Channel 7",
+        "Channel 8",
+        "Mattress",
+        "Duvet",
+        "Turned-down sheet",
+        "Folded throw",
+        "Pillow 1",
+        "Pillow 2"
+      ],
+      "finishes": {
+        "Brass": {
+          "kind": "plain",
+          "color": "C7A15A",
+          "roughness": 0.28,
+          "metallic": 1.0
+        },
+        "Moss velvet": {
+          "kind": "fabric",
+          "asset": "polyhaven:velour_velvet",
+          "tint": "56684A",
+          "tile": 0.35
+        },
+        "Slate velvet": {
+          "kind": "fabric",
+          "asset": "polyhaven:velour_velvet",
+          "tint": "5F6B78",
+          "tile": 0.35
+        },
+        "White linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "ECE7DD",
+          "tile": 0.28
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ],
+        "polyhaven:velour_velvet": [
+          "027755aad811d8e1c1ac9533ed4f02790a7405210bbf6d2ff434cb3a0e2a284b.webp",
+          "113b17ae1d2f559b9fb903a29008326ed12fe589bb6c88a69b377982fe3b683e.webp",
+          "c5eba42c30908d84bdb6d7a2b4973d201dee1de2c858e6f44cbc4a621c0ea40e.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "03b3fe958cf253c488ff354b5a1b93a6690e9aea835bd98a62ce081c9792b3d1",
+      "piece.glb": "ea95089e54e4109519f85d6fa38abafcc5e8c1cd518a9ff69d1da20e03e25333",
+      "front.png": "47495b9fd5af11e5e73c7c14faeed6df665137bb75369e0409aeea5928af3792",
+      "three-quarter.png": "b79e342158d707be2bdaf35ee310ec28df0443c0d418f438c758e61d2fc68366"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.800000011920929,
+        0.0,
+        -1.0
+      ],
+      [
+        0.800000011920929,
+        0.6000000238418579,
+        1.0000001192092896
+      ]
+    ],
+    "mesh_instances": 20,
+    "triangles": 67420,
+    "materials": 4,
+    "textures": 9,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 25165816
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept bed."
+}

@@ -5,3 +5,5 @@ src/archimind/_viewer_assets/furniture/CC0-1.0.txt -whitespace
 # Hash-pinned data must keep identical bytes on every OS (Windows autocrlf broke the catalog).
 * text=auto eol=lf
 *.glb binary
+*.hdr binary
+*.webp binary

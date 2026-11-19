@@ -28,6 +28,19 @@ async function boundedBytes(response, limit) {
   return bytes;
 }
 
+// Registry schema 1 lists `chairs`; schema 2 lists `pieces` with a category.
+export function chairRecord(registry, binding) {
+  const rows = registry?.schema_version === 1 && Array.isArray(registry.chairs) ? registry.chairs
+    : registry?.schema_version === 2 && Array.isArray(registry.pieces) ? registry.pieces.filter(r => r?.category === 'chair')
+    : null;
+  check(rows);
+  const matches = rows.filter(r => r.concept_id === binding.concept_id && r.version === binding.version);
+  const r = matches[0];
+  check(matches.length === 1 && r.sha256 === binding.sha256 && Number.isInteger(r.bytes) &&
+    r.bytes > 0 && r.bytes <= 15 * 1024 * 1024 && r.width_m === 0.48 && r.depth_m === 0.52 && r.height_m === 0.83);
+  return r;
+}
+
 export async function loadDesignerChair(binding, baseUrl) {
   check(binding?.concept_id === 'oak-sage-writing-chair');
   return loadReleased(binding, baseUrl, 'chairs', [0.48,0.52,0.83]);
@@ -44,11 +57,17 @@ async function loadReleased(binding, baseUrl, group, [w,d,h]) {
   check(/^[0-9a-f]{64}$/.test(binding.sha256));
   const registryBytes = await boundedBytes(await fetch(new URL('designer_registry.json', baseUrl)), 256 * 1024);
   const registry = JSON.parse(new TextDecoder().decode(registryBytes));
-  check(registry.schema_version === 1 && Array.isArray(registry[group]));
-  const matches = registry[group].filter(r => r.concept_id === binding.concept_id && r.version === binding.version);
-  const r = matches[0];
-  check(matches.length === 1 && r.sha256 === binding.sha256 && Number.isInteger(r.bytes) &&
-    r.bytes > 0 && r.bytes <= 15 * 1024 * 1024 && r.width_m === w && r.depth_m === d && r.height_m === h);
+  let r;
+  if (group === 'chairs') {
+    r = chairRecord(registry, binding);
+  } else {
+    // The bedroom collection keeps its own registry group in schema 1 and 2.
+    check([1, 2].includes(registry.schema_version) && Array.isArray(registry[group]));
+    const matches = registry[group].filter(row => row.concept_id === binding.concept_id && row.version === binding.version);
+    r = matches[0];
+    check(matches.length === 1 && r.sha256 === binding.sha256 && Number.isInteger(r.bytes) &&
+      r.bytes > 0 && r.bytes <= 15 * 1024 * 1024 && r.width_m === w && r.depth_m === d && r.height_m === h);
+  }
   const bytes = await boundedBytes(await fetch(new URL('designer-' + r.sha256 + '.glb', baseUrl)), r.bytes);
   check(bytes.length === r.bytes);
   const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));

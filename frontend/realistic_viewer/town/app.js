@@ -7,6 +7,18 @@ import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
 import { explanation } from "./explanation.js";
 import { createTown } from "./world.js";
+import { homeStyle, STYLE_NAMES } from "./style_names.js";
+import { planColors } from "./plan_colors.js";
+import { townStyleStatus } from "./style_source.js";
+import modernClassic from "../../../src/archimind/_viewer_assets/packs/modern_classic.json";
+import industrialLoft from "../../../src/archimind/_viewer_assets/packs/industrial_loft.json";
+import scandinavian from "../../../src/archimind/_viewer_assets/packs/scandinavian.json";
+import japandi from "../../../src/archimind/_viewer_assets/packs/japandi.json";
+import midCentury from "../../../src/archimind/_viewer_assets/packs/mid_century.json";
+// Plan themes ship in the bundle so the 2D plan never waits on a fetch.
+const PACK_MANIFESTS = Object.fromEntries(
+  [modernClassic, industrialLoft, scandinavian, japandi, midCentury].map((m) => [m.id, m]),
+);
 import showcase from "./showcase.json";
 const el = (id) => document.getElementById(id);
 const cfg = await fetch("./config.json").then((r) => r.json());
@@ -24,12 +36,20 @@ let project = url.searchParams.get("project"),
   releasedChairs = [];
 const token = () => sessionStorage.getItem("town-session") || "";
 const world = createTown(el("world"), el("place"), el("door"));
+world.bindQuality(el("quality"));
+world.bindSweep(el("sweep"));
 world.load(showcase);
 new MutationObserver(() => {
   el("assetStatus").hidden = el("world").dataset.desk !== "placeholder";
   el("collectionStatus").hidden = el("world").dataset.collection !== "placeholder";
   el("chairStatus").hidden = el("world").dataset.chair !== "placeholder";
-}).observe(el("world"), { attributes: true, attributeFilter: ["data-desk", "data-chair", "data-collection"] });
+  const style = townStyleStatus(el("world").dataset);
+  el("styleStatus").textContent = style;
+  el("styleStatus").hidden = !style;
+}).observe(el("world"), {
+  attributes: true,
+  attributeFilter: ["data-desk", "data-chair", "data-collection", "data-style-state", "data-style-failures", "data-style-furniture"],
+});
 const notify = (text) => (el("notice").textContent = text);
 async function api(path, body) {
   const r = await fetch(cfg.api + path, {
@@ -108,7 +128,7 @@ function sync(data) {
   world.load(applied);
   el("width").value = applied.width;
   el("depth").value = applied.depth;
-  el("palette").value = applied.palette;
+  el("style").value = homeStyle(applied);
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
   url.searchParams.set("project", project);
@@ -214,8 +234,11 @@ bind("login", () => sign(false));
 bind("signup", () => sign(true));
 function draw() {
   const h = alternatives[selected];
-  floorPlan(h, el("plan"));
+  planOf(h, el("plan"));
   evidence(h);
+}
+function planOf(h, c) {
+  floorPlan(h, c, planColors(h, PACK_MANIFESTS[h.style_pack?.id] || null));
 }
 function evidence(h) {
   const e = h.evidence;
@@ -256,8 +279,8 @@ function evidence(h) {
       (changed.length
         ? changed.join(", ") + " changed."
         : "room geometry and furniture retained.") +
-      " Finish: " +
-      h.palette +
+      " Style: " +
+      STYLE_NAMES[homeStyle(h)] +
       ".";
   }
   Array.from(el("choices").children).forEach((b, i) =>
@@ -333,8 +356,8 @@ bind("generate", async () => {
         depth: Number(el("depth").value),
         seed: 42 + revision,
         priority: el("priority").value,
+        style: el("style").value,
         formal_salon: el("formalSalon").checked,
-        palette: el("palette").value,
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
         ),
@@ -358,9 +381,9 @@ function showWorkingPlan(event) {
         furniture: [],
       },
     }));
-    floorPlan({ ...h, rooms }, el("draftPlan"));
+    planOf({ ...h, rooms }, el("draftPlan"));
   } else if (event.task === "Furnished candidate") {
-    floorPlan(h, el("draftPlan"));
+    planOf(h, el("draftPlan"));
   } else return;
   el("draftFigure").hidden = false;
 }
@@ -582,7 +605,7 @@ el("present").onclick = async () => {
     " m · " +
     h.id.slice(0, 12);
   el("board").showModal();
-  floorPlan(h, el("boardPlan"));
+  planOf(h, el("boardPlan"));
   el("schedule").replaceChildren();
   el("swatches").replaceChildren();
   for (const [name, color] of [

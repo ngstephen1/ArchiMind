@@ -1,0 +1,1241 @@
+{
+ "data": [
+  {
+   "fill": "toself",
+   "fillcolor": "#D7EBE5",
+   "hoverinfo": "text",
+   "hoveron": "fills+points",
+   "hovertemplate": "<b>Queen bed</b><br>ID: queen-bed<br>Category: bed<br>Lower-left: (0.4, 1.4) m<br>Size: 1.6 \u00d7 2 m<br>Height: 0.6 m<br>Rotation: 0\u00b0<extra></extra>",
+   "ids": [
+    "queen-bed",
+    "queen-bed",
+    "queen-bed",
+    "queen-bed",
+    "queen-bed"
+   ],
+   "line": {
+    "color": "#4A8C80",
+    "width": 1.5
+   },
+   "meta": {
+    "category": "bed",
+    "id": "queen-bed",
+    "kind": "furniture",
+    "name": "Queen bed"
+   },
+   "mode": "lines",
+   "name": "Queen bed",
+   "showlegend": false,
+   "text": "<b>Queen bed</b><br>ID: queen-bed<br>Category: bed<br>Lower-left: (0.4, 1.4) m<br>Size: 1.6 \u00d7 2 m<br>Height: 0.6 m<br>Rotation: 0\u00b0",
+   "type": "scatter",
+   "x": [
+    0.4,
+    2.0,
+    2.0,
+    0.4,
+    0.4
+   ],
+   "y": [
+    1.4,
+    1.4,
+    3.4,
+    3.4,
+    1.4
+   ]
+  },
+  {
+   "hoverinfo": "skip",
+   "meta": {
+    "id": "queen-bed",
+    "kind": "furniture_label"
+   },
+   "mode": "text",
+   "showlegend": false,
+   "text": [
+    "Queen bed"
+   ],
+   "textfont": {
+    "color": "#263B48",
+    "size": 12
+   },
+   "type": "scatter",
+   "x": [
+    1.2000000000000002
+   ],
+   "y": [
+    2.4
+   ]
+  },
+  {
+   "fill": "toself",
+   "fillcolor": "#E0E8F3",
+   "hoverinfo": "text",
+   "hoveron": "fills+points",
+   "hovertemplate": "<b>Desk</b><br>ID: desk<br>Category: desk<br>Lower-left: (3.2, 3.2) m<br>Size: 1.2 \u00d7 0.6 m<br>Height: 0.75 m<br>Rotation: 0\u00b0<extra></extra>",
+   "ids": [
+    "desk",
+    "desk",
+    "desk",
+    "desk",
+    "desk"
+   ],
+   "line": {
+    "color": "#627FA5",
+    "width": 1.5
+   },
+   "meta": {
+    "category": "desk",
+    "id": "desk",
+    "kind": "furniture",
+    "name": "Desk"
+   },
+   "mode": "lines",
+   "name": "Desk",
+   "showlegend": false,
+   "text": "<b>Desk</b><br>ID: desk<br>Category: desk<br>Lower-left: (3.2, 3.2) m<br>Size: 1.2 \u00d7 0.6 m<br>Height: 0.75 m<br>Rotation: 0\u00b0",
+   "type": "scatter",
+   "x": [
+    3.2,
+    4.4,
+    4.4,
+    3.2,
+    3.2
+   ],
+   "y": [
+    3.2,
+    3.2,
+    3.8000000000000003,
+    3.8000000000000003,
+    3.2
+   ]
+  },
+  {
+   "hoverinfo": "skip",
+   "meta": {
+    "id": "desk",
+    "kind": "furniture_label"
+   },
+   "mode": "text",
+   "showlegend": false,
+   "text": [
+    "Desk"
+   ],
+   "textfont": {
+    "color": "#263B48",
+    "size": 12
+   },
+   "type": "scatter",
+   "x": [
+    3.8000000000000003
+   ],
+   "y": [
+    3.5
+   ]
+  },
+  {
+   "fill": "toself",
+   "fillcolor": "#EEE3D2",
+   "hoverinfo": "text",
+   "hoveron": "fills+points",
+   "hovertemplate": "<b>Wardrobe</b><br>ID: wardrobe<br>Category: storage<br>Lower-left: (3.4, 0.4) m<br>Size: 1.5 \u00d7 0.6 m<br>Height: 2 m<br>Rotation: 0\u00b0<extra></extra>",
+   "ids": [
+    "wardrobe",
+    "wardrobe",
+    "wardrobe",
+    "wardrobe",
+    "wardrobe"
+   ],
+   "line": {
+    "color": "#A88A60",
+    "width": 1.5
+   },
+   "meta": {
+    "category": "storage",
+    "id": "wardrobe",
+    "kind": "furniture",
+    "name": "Wardrobe"
+   },
+   "mode": "lines",
+   "name": "Wardrobe",
+   "showlegend": false,
+   "text": "<b>Wardrobe</b><br>ID: wardrobe<br>Category: storage<br>Lower-left: (3.4, 0.4) m<br>Size: 1.5 \u00d7 0.6 m<br>Height: 2 m<br>Rotation: 0\u00b0",
+   "type": "scatter",
+   "x": [
+    3.4,
+    4.9,
+    4.9,
+    3.4,
+    3.4
+   ],
+   "y": [
+    0.4,
+    0.4,
+    1.0,
+    1.0,
+    0.4
+   ]
+  },
+  {
+   "hoverinfo": "skip",
+   "meta": {
+    "id": "wardrobe",
+    "kind": "furniture_label"
+   },
+   "mode": "text",
+   "showlegend": false,
+   "text": [
+    "Wardrobe"
+   ],
+   "textfont": {
+    "color": "#263B48",
+    "size": 12
+   },
+   "type": "scatter",
+   "x": [
+    4.15
+   ],
+   "y": [
+    0.7
+   ]
+  },
+  {
+   "hoverinfo": "skip",
+   "legendgroup": "walls",
+   "line": {
+    "color": "#263B48",
+    "width": 5
+   },
+   "meta": {
+    "kind": "wall",
+    "wall": "south"
+   },
+   "mode": "lines",
+   "name": "Wall",
+   "showlegend": true,
+   "type": "scatter",
+   "x": [
+    0.0,
+    0.6,
+    null,
+    1.45,
+    5.0,
+    null
+   ],
+   "y": [
+    0.0,
+    0.0,
+    null,
+    0.0,
+    0.0,
+    null
+   ]
+  },
+  {
+   "hoverinfo": "skip",
+   "legendgroup": "walls",
+   "line": {
+    "color": "#263B48",
+    "width": 5
+   },
+   "meta": {
+    "kind": "wall",
+    "wall": "east"
+   },
+   "mode": "lines",
+   "name": "Wall",
+   "showlegend": false,
+   "type": "scatter",
+   "x": [
+    5.0,
+    5.0,
+    null
+   ],
+   "y": [
+    0.0,
+    4.0,
+    null
+   ]
+  },
+  {
+   "hoverinfo": "skip",
+   "legendgroup": "walls",
+   "line": {
+    "color": "#263B48",
+    "width": 5
+   },
+   "meta": {
+    "kind": "wall",
+    "wall": "north"
+   },
+   "mode": "lines",
+   "name": "Wall",
+   "showlegend": false,
+   "type": "scatter",
+   "x": [
+    0.0,
+    2.7,
+    null,
+    4.2,
+    5.0,
+    null
+   ],
+   "y": [
+    4.0,
+    4.0,
+    null,
+    4.0,
+    4.0,
+    null
+   ]
+  },
+  {
+   "hoverinfo": "skip",
+   "legendgroup": "walls",
+   "line": {
+    "color": "#263B48",
+    "width": 5
+   },
+   "meta": {
+    "kind": "wall",
+    "wall": "west"
+   },
+   "mode": "lines",
+   "name": "Wall",
+   "showlegend": false,
+   "type": "scatter",
+   "x": [
+    0.0,
+    0.0,
+    null
+   ],
+   "y": [
+    0.0,
+    4.0,
+    null
+   ]
+  },
+  {
+   "hovertemplate": "<b>Door: south-door</b><br>Wall: south<br>Offset: 0.6 m<br>Width: 0.85 m<br>Height: 2.1 m<extra></extra>",
+   "legendgroup": "door",
+   "line": {
+    "color": "#A8793C",
+    "dash": "dot",
+    "width": 4
+   },
+   "marker": {
+    "color": "#A8793C",
+    "size": 6
+   },
+   "meta": {
+    "id": "south-door",
+    "kind": "door",
+    "wall": "south"
+   },
+   "mode": "lines+markers",
+   "name": "Door",
+   "showlegend": true,
+   "type": "scatter",
+   "x": [
+    0.6,
+    1.45
+   ],
+   "y": [
+    0.0,
+    0.0
+   ]
+  },
+  {
+   "hovertemplate": "<b>Window: north-window</b><br>Wall: north<br>Offset: 2.7 m<br>Width: 1.5 m<br>Height: 1.2 m<extra></extra>",
+   "legendgroup": "window",
+   "line": {
+    "color": "#237CB8",
+    "dash": "solid",
+    "width": 4
+   },
+   "marker": {
+    "color": "#237CB8",
+    "size": 6
+   },
+   "meta": {
+    "id": "north-window",
+    "kind": "window",
+    "wall": "north"
+   },
+   "mode": "lines+markers",
+   "name": "Window",
+   "showlegend": true,
+   "type": "scatter",
+   "x": [
+    2.7,
+    4.2
+   ],
+   "y": [
+    4.0,
+    4.0
+   ]
+  }
+ ],
+ "layout": {
+  "annotations": [
+   {
+    "font": {
+     "color": "#A8793C",
+     "size": 11
+    },
+    "showarrow": false,
+    "text": "Door",
+    "x": 1.025,
+    "xshift": 0,
+    "y": 0.0,
+    "yshift": -20
+   },
+   {
+    "font": {
+     "color": "#237CB8",
+     "size": 11
+    },
+    "showarrow": false,
+    "text": "Window",
+    "x": 3.45,
+    "xshift": 0,
+    "y": 4.0,
+    "yshift": 20
+   }
+  ],
+  "dragmode": "pan",
+  "font": {
+   "color": "#263B48",
+   "size": 12
+  },
+  "height": 560,
+  "hovermode": "closest",
+  "legend": {
+   "orientation": "h",
+   "x": 0,
+   "y": 1.01,
+   "yanchor": "bottom"
+  },
+  "margin": {
+   "b": 64,
+   "l": 64,
+   "r": 36,
+   "t": 88
+  },
+  "meta": {
+   "origin": "southwest",
+   "room_id": "bedroom",
+   "units": "m"
+  },
+  "paper_bgcolor": "#FFFFFF",
+  "plot_bgcolor": "#FFFFFF",
+  "shapes": [
+   {
+    "fillcolor": "#F8FAFB",
+    "layer": "below",
+    "line": {
+     "width": 0
+    },
+    "name": "Room footprint",
+    "type": "rect",
+    "x0": 0,
+    "x1": 5.0,
+    "y0": 0,
+    "y1": 4.0
+   }
+  ],
+  "template": {
+   "data": {
+    "bar": [
+     {
+      "error_x": {
+       "color": "#2a3f5f"
+      },
+      "error_y": {
+       "color": "#2a3f5f"
+      },
+      "marker": {
+       "line": {
+        "color": "white",
+        "width": 0.5
+       },
+       "pattern": {
+        "fillmode": "overlay",
+        "size": 10,
+        "solidity": 0.2
+       }
+      },
+      "type": "bar"
+     }
+    ],
+    "barpolar": [
+     {
+      "marker": {
+       "line": {
+        "color": "white",
+        "width": 0.5
+       },
+       "pattern": {
+        "fillmode": "overlay",
+        "size": 10,
+        "solidity": 0.2
+       }
+      },
+      "type": "barpolar"
+     }
+    ],
+    "carpet": [
+     {
+      "aaxis": {
+       "endlinecolor": "#2a3f5f",
+       "gridcolor": "#C8D4E3",
+       "linecolor": "#C8D4E3",
+       "minorgridcolor": "#C8D4E3",
+       "startlinecolor": "#2a3f5f"
+      },
+      "baxis": {
+       "endlinecolor": "#2a3f5f",
+       "gridcolor": "#C8D4E3",
+       "linecolor": "#C8D4E3",
+       "minorgridcolor": "#C8D4E3",
+       "startlinecolor": "#2a3f5f"
+      },
+      "type": "carpet"
+     }
+    ],
+    "choropleth": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "type": "choropleth"
+     }
+    ],
+    "contour": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "colorscale": [
+       [
+        0.0,
+        "#0d0887"
+       ],
+       [
+        0.1111111111111111,
+        "#46039f"
+       ],
+       [
+        0.2222222222222222,
+        "#7201a8"
+       ],
+       [
+        0.3333333333333333,
+        "#9c179e"
+       ],
+       [
+        0.4444444444444444,
+        "#bd3786"
+       ],
+       [
+        0.5555555555555556,
+        "#d8576b"
+       ],
+       [
+        0.6666666666666666,
+        "#ed7953"
+       ],
+       [
+        0.7777777777777778,
+        "#fb9f3a"
+       ],
+       [
+        0.8888888888888888,
+        "#fdca26"
+       ],
+       [
+        1.0,
+        "#f0f921"
+       ]
+      ],
+      "type": "contour"
+     }
+    ],
+    "contourcarpet": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "type": "contourcarpet"
+     }
+    ],
+    "heatmap": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "colorscale": [
+       [
+        0.0,
+        "#0d0887"
+       ],
+       [
+        0.1111111111111111,
+        "#46039f"
+       ],
+       [
+        0.2222222222222222,
+        "#7201a8"
+       ],
+       [
+        0.3333333333333333,
+        "#9c179e"
+       ],
+       [
+        0.4444444444444444,
+        "#bd3786"
+       ],
+       [
+        0.5555555555555556,
+        "#d8576b"
+       ],
+       [
+        0.6666666666666666,
+        "#ed7953"
+       ],
+       [
+        0.7777777777777778,
+        "#fb9f3a"
+       ],
+       [
+        0.8888888888888888,
+        "#fdca26"
+       ],
+       [
+        1.0,
+        "#f0f921"
+       ]
+      ],
+      "type": "heatmap"
+     }
+    ],
+    "histogram": [
+     {
+      "marker": {
+       "pattern": {
+        "fillmode": "overlay",
+        "size": 10,
+        "solidity": 0.2
+       }
+      },
+      "type": "histogram"
+     }
+    ],
+    "histogram2d": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "colorscale": [
+       [
+        0.0,
+        "#0d0887"
+       ],
+       [
+        0.1111111111111111,
+        "#46039f"
+       ],
+       [
+        0.2222222222222222,
+        "#7201a8"
+       ],
+       [
+        0.3333333333333333,
+        "#9c179e"
+       ],
+       [
+        0.4444444444444444,
+        "#bd3786"
+       ],
+       [
+        0.5555555555555556,
+        "#d8576b"
+       ],
+       [
+        0.6666666666666666,
+        "#ed7953"
+       ],
+       [
+        0.7777777777777778,
+        "#fb9f3a"
+       ],
+       [
+        0.8888888888888888,
+        "#fdca26"
+       ],
+       [
+        1.0,
+        "#f0f921"
+       ]
+      ],
+      "type": "histogram2d"
+     }
+    ],
+    "histogram2dcontour": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "colorscale": [
+       [
+        0.0,
+        "#0d0887"
+       ],
+       [
+        0.1111111111111111,
+        "#46039f"
+       ],
+       [
+        0.2222222222222222,
+        "#7201a8"
+       ],
+       [
+        0.3333333333333333,
+        "#9c179e"
+       ],
+       [
+        0.4444444444444444,
+        "#bd3786"
+       ],
+       [
+        0.5555555555555556,
+        "#d8576b"
+       ],
+       [
+        0.6666666666666666,
+        "#ed7953"
+       ],
+       [
+        0.7777777777777778,
+        "#fb9f3a"
+       ],
+       [
+        0.8888888888888888,
+        "#fdca26"
+       ],
+       [
+        1.0,
+        "#f0f921"
+       ]
+      ],
+      "type": "histogram2dcontour"
+     }
+    ],
+    "mesh3d": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "type": "mesh3d"
+     }
+    ],
+    "parcoords": [
+     {
+      "line": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "parcoords"
+     }
+    ],
+    "pie": [
+     {
+      "automargin": true,
+      "type": "pie"
+     }
+    ],
+    "scatter": [
+     {
+      "fillpattern": {
+       "fillmode": "overlay",
+       "size": 10,
+       "solidity": 0.2
+      },
+      "type": "scatter"
+     }
+    ],
+    "scatter3d": [
+     {
+      "line": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scatter3d"
+     }
+    ],
+    "scattercarpet": [
+     {
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scattercarpet"
+     }
+    ],
+    "scattergeo": [
+     {
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scattergeo"
+     }
+    ],
+    "scattergl": [
+     {
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scattergl"
+     }
+    ],
+    "scattermap": [
+     {
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scattermap"
+     }
+    ],
+    "scatterpolar": [
+     {
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scatterpolar"
+     }
+    ],
+    "scatterpolargl": [
+     {
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scatterpolargl"
+     }
+    ],
+    "scatterternary": [
+     {
+      "marker": {
+       "colorbar": {
+        "outlinewidth": 0,
+        "ticks": ""
+       }
+      },
+      "type": "scatterternary"
+     }
+    ],
+    "surface": [
+     {
+      "colorbar": {
+       "outlinewidth": 0,
+       "ticks": ""
+      },
+      "colorscale": [
+       [
+        0.0,
+        "#0d0887"
+       ],
+       [
+        0.1111111111111111,
+        "#46039f"
+       ],
+       [
+        0.2222222222222222,
+        "#7201a8"
+       ],
+       [
+        0.3333333333333333,
+        "#9c179e"
+       ],
+       [
+        0.4444444444444444,
+        "#bd3786"
+       ],
+       [
+        0.5555555555555556,
+        "#d8576b"
+       ],
+       [
+        0.6666666666666666,
+        "#ed7953"
+       ],
+       [
+        0.7777777777777778,
+        "#fb9f3a"
+       ],
+       [
+        0.8888888888888888,
+        "#fdca26"
+       ],
+       [
+        1.0,
+        "#f0f921"
+       ]
+      ],
+      "type": "surface"
+     }
+    ],
+    "table": [
+     {
+      "cells": {
+       "fill": {
+        "color": "#EBF0F8"
+       },
+       "line": {
+        "color": "white"
+       }
+      },
+      "header": {
+       "fill": {
+        "color": "#C8D4E3"
+       },
+       "line": {
+        "color": "white"
+       }
+      },
+      "type": "table"
+     }
+    ]
+   },
+   "layout": {
+    "annotationdefaults": {
+     "arrowcolor": "#2a3f5f",
+     "arrowhead": 0,
+     "arrowwidth": 1
+    },
+    "autotypenumbers": "strict",
+    "coloraxis": {
+     "colorbar": {
+      "outlinewidth": 0,
+      "ticks": ""
+     }
+    },
+    "colorscale": {
+     "diverging": [
+      [
+       0,
+       "#8e0152"
+      ],
+      [
+       0.1,
+       "#c51b7d"
+      ],
+      [
+       0.2,
+       "#de77ae"
+      ],
+      [
+       0.3,
+       "#f1b6da"
+      ],
+      [
+       0.4,
+       "#fde0ef"
+      ],
+      [
+       0.5,
+       "#f7f7f7"
+      ],
+      [
+       0.6,
+       "#e6f5d0"
+      ],
+      [
+       0.7,
+       "#b8e186"
+      ],
+      [
+       0.8,
+       "#7fbc41"
+      ],
+      [
+       0.9,
+       "#4d9221"
+      ],
+      [
+       1,
+       "#276419"
+      ]
+     ],
+     "sequential": [
+      [
+       0.0,
+       "#0d0887"
+      ],
+      [
+       0.1111111111111111,
+       "#46039f"
+      ],
+      [
+       0.2222222222222222,
+       "#7201a8"
+      ],
+      [
+       0.3333333333333333,
+       "#9c179e"
+      ],
+      [
+       0.4444444444444444,
+       "#bd3786"
+      ],
+      [
+       0.5555555555555556,
+       "#d8576b"
+      ],
+      [
+       0.6666666666666666,
+       "#ed7953"
+      ],
+      [
+       0.7777777777777778,
+       "#fb9f3a"
+      ],
+      [
+       0.8888888888888888,
+       "#fdca26"
+      ],
+      [
+       1.0,
+       "#f0f921"
+      ]
+     ],
+     "sequentialminus": [
+      [
+       0.0,
+       "#0d0887"
+      ],
+      [
+       0.1111111111111111,
+       "#46039f"
+      ],
+      [
+       0.2222222222222222,
+       "#7201a8"
+      ],
+      [
+       0.3333333333333333,
+       "#9c179e"
+      ],
+      [
+       0.4444444444444444,
+       "#bd3786"
+      ],
+      [
+       0.5555555555555556,
+       "#d8576b"
+      ],
+      [
+       0.6666666666666666,
+       "#ed7953"
+      ],
+      [
+       0.7777777777777778,
+       "#fb9f3a"
+      ],
+      [
+       0.8888888888888888,
+       "#fdca26"
+      ],
+      [
+       1.0,
+       "#f0f921"
+      ]
+     ]
+    },
+    "colorway": [
+     "#636efa",
+     "#EF553B",
+     "#00cc96",
+     "#ab63fa",
+     "#FFA15A",
+     "#19d3f3",
+     "#FF6692",
+     "#B6E880",
+     "#FF97FF",
+     "#FECB52"
+    ],
+    "font": {
+     "color": "#2a3f5f"
+    },
+    "geo": {
+     "bgcolor": "white",
+     "lakecolor": "white",
+     "landcolor": "white",
+     "showlakes": true,
+     "showland": true,
+     "subunitcolor": "#C8D4E3"
+    },
+    "hoverlabel": {
+     "align": "left"
+    },
+    "hovermode": "closest",
+    "paper_bgcolor": "white",
+    "plot_bgcolor": "white",
+    "polar": {
+     "angularaxis": {
+      "gridcolor": "#EBF0F8",
+      "linecolor": "#EBF0F8",
+      "ticks": ""
+     },
+     "bgcolor": "white",
+     "radialaxis": {
+      "gridcolor": "#EBF0F8",
+      "linecolor": "#EBF0F8",
+      "ticks": ""
+     }
+    },
+    "scene": {
+     "xaxis": {
+      "backgroundcolor": "white",
+      "gridcolor": "#DFE8F3",
+      "gridwidth": 2,
+      "linecolor": "#EBF0F8",
+      "showbackground": true,
+      "ticks": "",
+      "zerolinecolor": "#EBF0F8"
+     },
+     "yaxis": {
+      "backgroundcolor": "white",
+      "gridcolor": "#DFE8F3",
+      "gridwidth": 2,
+      "linecolor": "#EBF0F8",
+      "showbackground": true,
+      "ticks": "",
+      "zerolinecolor": "#EBF0F8"
+     },
+     "zaxis": {
+      "backgroundcolor": "white",
+      "gridcolor": "#DFE8F3",
+      "gridwidth": 2,
+      "linecolor": "#EBF0F8",
+      "showbackground": true,
+      "ticks": "",
+      "zerolinecolor": "#EBF0F8"
+     }
+    },
+    "shapedefaults": {
+     "line": {
+      "color": "#2a3f5f"
+     }
+    },
+    "ternary": {
+     "aaxis": {
+      "gridcolor": "#DFE8F3",
+      "linecolor": "#A2B1C6",
+      "ticks": ""
+     },
+     "baxis": {
+      "gridcolor": "#DFE8F3",
+      "linecolor": "#A2B1C6",
+      "ticks": ""
+     },
+     "bgcolor": "white",
+     "caxis": {
+      "gridcolor": "#DFE8F3",
+      "linecolor": "#A2B1C6",
+      "ticks": ""
+     }
+    },
+    "title": {
+     "x": 0.05
+    },
+    "xaxis": {
+     "automargin": true,
+     "gridcolor": "#EBF0F8",
+     "linecolor": "#EBF0F8",
+     "ticks": "",
+     "title": {
+      "standoff": 15
+     },
+     "zerolinecolor": "#EBF0F8",
+     "zerolinewidth": 2
+    },
+    "yaxis": {
+     "automargin": true,
+     "gridcolor": "#EBF0F8",
+     "linecolor": "#EBF0F8",
+     "ticks": "",
+     "title": {
+      "standoff": 15
+     },
+     "zerolinecolor": "#EBF0F8",
+     "zerolinewidth": 2
+    }
+   }
+  },
+  "title": {
+   "text": "Sample bedroom",
+   "x": 0.02
+  },
+  "xaxis": {
+   "constrain": "domain",
+   "fixedrange": false,
+   "gridcolor": "#E9EDF1",
+   "range": [
+    -0.6,
+    5.6
+   ],
+   "title": {
+    "text": "X (m) \u00b7 East \u2192"
+   },
+   "zeroline": false
+  },
+  "yaxis": {
+   "constrain": "domain",
+   "fixedrange": false,
+   "gridcolor": "#E9EDF1",
+   "range": [
+    -0.6,
+    4.6
+   ],
+   "scaleanchor": "x",
+   "scaleratio": 1,
+   "title": {
+    "text": "Y (m) \u00b7 North \u2191"
+   },
+   "zeroline": false
+  }
+ }
+}

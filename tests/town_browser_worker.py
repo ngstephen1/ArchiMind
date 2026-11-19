@@ -11,7 +11,7 @@ def response(schema, content, **kwargs):
     if schema is NewHomeInterpretation:
         return schema(
             priority="balanced",
-            palette="oak",
+            style="scandinavian",
             clarification="",
             unsupported=[],
         )

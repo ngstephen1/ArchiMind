@@ -11,7 +11,8 @@ function snapshot(dispose){
   const vector=v=>Array.isArray(v)&&v.length===3&&v.every(x=>Number.isFinite(x)&&Math.abs(x)<10000);
   if(!value||!vector(value.position)||!vector(value.target))return null;
   return {position:[...value.position],target:[...value.target],userCamera:value.userCamera===true,
-    front:value.front===true,outlines:value.outlines===true};
+    front:value.front===true,outlines:value.outlines===true,
+    ...(['high','low'].includes(value.tier)?{tier:value.tier}:{})};
 }
 export function createSceneManager(mount){
   const entries=new WeakMap();

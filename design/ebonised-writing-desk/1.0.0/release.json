@@ -1,0 +1,105 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "ebonised-writing-desk",
+    "version": "1.0.0",
+    "name": "Ebonised writing desk with brass",
+    "category": "desk",
+    "dimensions_wdh_m": [
+      1.4,
+      0.7,
+      0.75
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Ebonised top",
+        "Brass edge band",
+        "Apron",
+        "Drawer panel 1",
+        "Brass knob 1",
+        "Drawer panel 2",
+        "Brass knob 2",
+        "Turned leg LF",
+        "Brass cup LF",
+        "Turned leg LB",
+        "Brass cup LB",
+        "Turned leg RF",
+        "Brass cup RF",
+        "Turned leg RB",
+        "Brass cup RB"
+      ],
+      "finishes": {
+        "Brass": {
+          "kind": "plain",
+          "color": "C7A15A",
+          "roughness": 0.28,
+          "metallic": 1.0
+        },
+        "Ebonised oak": {
+          "kind": "wood",
+          "asset": "polyhaven:dark_wood",
+          "tint": "7A6A62",
+          "tile": 0.8
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:dark_wood": [
+          "2ae252b1276cb6e592ae54b97eea73c3a101952e0d3cebb6753301636e873188.webp",
+          "ab84c017729044df0084008fca4db6bae93a4876f9bc8f7f1660383e13dddfd4.webp",
+          "bdec29a80144a4cd6759dbbc41cd9cdffd23db5d74db74b86b6f988d2156247e.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "da3cfe18bbe43ffb076301d320b5a268c57a477352be4e8e6cce5b32e8ee4cff",
+      "piece.glb": "2438230b09ebc8b5f1be00ac1c9ac052c0dda376b3bf7adf160053e3d5f20efa",
+      "front.png": "9725ecc0bf66254e4c346b68081051d6b6feee142da7981ecc1fccc4e6aa3d55",
+      "three-quarter.png": "59d91e14e0c660dba53a9000307b438978b9b4dd08e7b7996c141501787a0669"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.699999988079071,
+        0.0,
+        -0.3499999940395355
+      ],
+      [
+        0.699999988079071,
+        0.75,
+        0.3499999940395355
+      ]
+    ],
+    "mesh_instances": 15,
+    "triangles": 2940,
+    "materials": 2,
+    "textures": 3,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 16777212
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept desk."
+}

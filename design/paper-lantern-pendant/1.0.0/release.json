@@ -1,0 +1,136 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "paper-lantern-pendant",
+    "version": "1.0.0",
+    "name": "Washi paper lantern",
+    "category": "lamp",
+    "dimensions_wdh_m": [
+      0.45,
+      0.45,
+      0.7
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Ceiling canopy",
+        "Washi globe",
+        "Bamboo rib 1",
+        "Bamboo rib 2",
+        "Bamboo rib 3",
+        "Bamboo rib 4",
+        "Bamboo rib 5",
+        "Bamboo rib 6",
+        "Bamboo rib 7",
+        "Bamboo rib 8",
+        "Bamboo rib 9",
+        "Bamboo rib 10",
+        "Bamboo rib 11",
+        "Bottom ring",
+        "Top ring",
+        "Cord"
+      ],
+      "finishes": {
+        "Ash": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "FFFFFF",
+          "tile": 0.9
+        },
+        "Charcoal linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "56534F",
+          "tile": 0.28
+        },
+        "Pale oak": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "F2DCC0",
+          "tile": 0.9
+        },
+        "Washi paper": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "F2ECDF",
+          "tile": 0.18,
+          "emission": "5E4E38"
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:ash_veneer": [
+          "16da5f57eb4fd40cab07183fc856fdeb8feafa826b16b14ce69ef28f9d55a367.webp",
+          "25fb5f540bac2ea47cad6fe6df0f58f3aee547e40a498f643400796588164a08.webp",
+          "840143418677f4955c66f5c2af533fb5d340624ff7491021a1f9c8bb8de047c5.webp"
+        ],
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        0.98414,
+        0.98414,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "d0fc4757240b87b510d7c53192482697b0a4d3363999315d812b5fc5a3a0307d",
+      "piece.glb": "c9d1a3d5064cc3e624000b502dc308941f0406e7080ba1af03a8486936be391e",
+      "front.png": "c9d6a5d7213138826d4cdddbc9e5bfaa1bfc574839e2347f5182058ea37c86ba",
+      "three-quarter.png": "d56eceaaeebb1ef74fde45e298636226a73eb3ff951a7f428ddb4a0ad23cd473"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.22499999403953552,
+        0.0,
+        -0.22499999403953552
+      ],
+      [
+        0.22499999403953552,
+        0.699999988079071,
+        0.22499999403953552
+      ]
+    ],
+    "mesh_instances": 16,
+    "triangles": 7920,
+    "materials": 4,
+    "textures": 12,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 29360120
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept lamp."
+}

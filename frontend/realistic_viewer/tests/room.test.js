@@ -131,3 +131,55 @@ test('cleanup aborts the last pending load and disposes a late decoded model onc
   handle.release();handle.release();await disposed;
   assert.equal(signal.aborted,true);assert.equal(disposals,1);
 });
+
+// --- Style packs (Task 4) ---
+import {splitStyle,createRoomStyle,tiledSurface} from '../src/room_style.js';
+const styled=()=>({...copy(data),style:{style_pack:{id:'scandinavian',version:'1.0.0'},bindings:[],dressing:[],skipped:[]}});
+const deferred=()=>{let resolve,reject;const promise=new Promise((a,b)=>{resolve=a;reject=b;});return {promise,resolve,reject};};
+const fakePack=(extra={})=>({id:'scandinavian',version:'1.0.0',failures:[],unreleased:[],disposed:0,dispose(){this.disposed++;},...extra});
+test('room viewer without style keeps legacy lighting',async()=>{
+  const {scene,style}=splitStyle(copy(data));
+  assert.equal(style,null);assert.deepEqual(scene,data);
+  let loads=0;const control=createRoomStyle({style,tier:'high',loadPack:async()=>{loads++;},apply:()=>assert.fail('legacy room must not be dressed')});
+  assert.equal(control.legacy,true);await control.start();assert.equal(loads,0);
+});
+test('scene with style strips it before geometry validation and rejects malformed styles',()=>{
+  const {scene,style}=splitStyle(styled());
+  assert.equal(scene.style,undefined);validateScene(scene);
+  assert.deepEqual(style.style_pack,{id:'scandinavian',version:'1.0.0'});
+  for(const bad of [{style_pack:{id:'gothic',version:'1.0.0'}},{style_pack:{id:'japandi'}},{style_pack:{id:'japandi',version:'1'},bindings:'x'},'japandi'])
+    assert.throws(()=>splitStyle({...copy(data),style:bad}));
+});
+test('room viewer with style loads pack and applies surfaces',async()=>{
+  const root={dataset:{}},applied=[];const pack=fakePack({failures:['floor']});
+  const control=createRoomStyle({style:splitStyle(styled()).style,tier:'low',root,loadPack:async({ref,tier,isCurrent})=>{assert.deepEqual(ref,{id:'scandinavian',version:'1.0.0'});assert.equal(tier,'low');assert.ok(isCurrent());return pack;},apply:(p,t)=>applied.push([p,t])});
+  await control.start();
+  assert.equal(root.dataset.stylePack,'scandinavian@1.0.0');assert.equal(root.dataset.tier,'low');
+  assert.deepEqual(applied,[[pack,'low']]);assert.equal(control.statusText(),'Style: scandinavian 1.0.0 · Fallback materials: floor');
+});
+test('quality toggle switches composer and records tier; late loads are superseded',async()=>{
+  const root={dataset:{}},applied=[],first=deferred(),second=deferred();const loads=[first,second];const packs=[fakePack(),fakePack()];
+  const control=createRoomStyle({style:splitStyle(styled()).style,tier:'high',root,loadPack:({isCurrent})=>{const d=loads.shift();return d.promise.then(()=>isCurrent()?packs.shift():'superseded');},apply:(p,t)=>applied.push(t)});
+  const a=control.start();const b=control.setTier('low');
+  assert.equal(control.tier,'low');assert.equal(root.dataset.tier,'low');
+  first.resolve();second.resolve();await Promise.all([a,b]);
+  assert.deepEqual(applied,['low']);assert.equal(control.captureTier(),'low');
+  control.dispose();assert.equal(root.dataset.stylePack,'scandinavian@1.0.0');
+});
+test('a pack that cannot load leaves the legacy look and says so',async()=>{
+  const root={dataset:{}};const control=createRoomStyle({style:splitStyle(styled()).style,tier:'high',root,loadPack:async()=>{throw Error('Style pack unavailable');},apply:()=>assert.fail()});
+  await control.start();assert.equal(root.dataset.styleState,'unavailable');assert.match(control.statusText(),/Style pack unavailable/);
+});
+test('dispose frees the applied pack and ignores later loads',async()=>{
+  const pack=fakePack(),d=deferred();let undone=0;
+  const control=createRoomStyle({style:splitStyle(styled()).style,tier:'high',root:{dataset:{}},loadPack:()=>d.promise.then(()=>pack),apply:()=>()=>undone++});
+  const started=control.start();control.dispose();d.resolve();await started;assert.equal(pack.disposed,1);assert.equal(undone,0);
+  const p2=fakePack();const c2=createRoomStyle({style:splitStyle(styled()).style,tier:'high',root:{dataset:{}},loadPack:async()=>p2,apply:()=>()=>undone++});
+  await c2.start();c2.dispose();assert.equal(p2.disposed,1);assert.equal(undone,1);
+});
+test('tiled surface repeats textures by metres and leaves the pack material untouched',()=>{
+  const map=new THREE.Texture();const base=new THREE.MeshStandardMaterial({map});base.userData.tiling_m=2;
+  const tiled=tiledSurface(base,5,4);
+  assert.notEqual(tiled,base);assert.notEqual(tiled.map,map);assert.deepEqual(tiled.map.repeat.toArray(),[2.5,2]);assert.deepEqual(map.repeat.toArray(),[1,1]);
+  const plain=new THREE.MeshStandardMaterial({color:'#ffffff'});plain.userData.tiling_m=1;assert.equal(tiledSurface(plain,3,3).map,null);
+});

@@ -1,0 +1,202 @@
+{
+  "id": "modern_classic",
+  "version": "1.0.0",
+  "name": "Modern classic",
+  "aliases": [
+    "modern classic",
+    "classic",
+    "parisian",
+    "elegant",
+    "haussmann",
+    "neoclassical"
+  ],
+  "surfaces": {
+    "floor": {
+      "asset_id": "polyhaven:herringbone_parquet",
+      "tiling_m": 1.6,
+      "fallback_color": "#6b4a33",
+      "tint": "#8c6c55"
+    },
+    "wall": {
+      "asset_id": "polyhaven:painted_plaster_wall",
+      "tiling_m": 2.4,
+      "fallback_color": "#dcdcd6",
+      "tint": "#e3e3df"
+    },
+    "ceiling": {
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 2.4,
+      "fallback_color": "#f4f3ef",
+      "tint": null
+    },
+    "trim": {
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 1.0,
+      "fallback_color": "#f7f6f2",
+      "tint": "#fbfaf6"
+    },
+    "door": {
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 1.0,
+      "fallback_color": "#ecebe6",
+      "tint": "#f1f0eb"
+    },
+    "window_frame": {
+      "asset_id": "polyhaven:white_stucco",
+      "tiling_m": 1.0,
+      "fallback_color": "#f4f3ef",
+      "tint": "#fbfaf6"
+    },
+    "worktop": {
+      "asset_id": "polyhaven:marble_01",
+      "tiling_m": 1.4,
+      "fallback_color": "#e8e4dd",
+      "tint": null
+    },
+    "tile": {
+      "asset_id": "polyhaven:marble_01",
+      "tiling_m": 1.0,
+      "fallback_color": "#e2ddd5",
+      "tint": null
+    },
+    "metal": {
+      "asset_id": "ambientcg:Metal009",
+      "tiling_m": 1.0,
+      "fallback_color": "#b08d57",
+      "tint": "#d4ad6e"
+    }
+  },
+  "furniture": {
+    "lamp": [
+      {
+        "asset_id": "polyhaven:desk_lamp_arm_01",
+        "width_m": 0.202,
+        "depth_m": 0.614,
+        "height_m": 0.893
+      }
+    ],
+    "armchair": [
+      {
+        "asset_id": "polyhaven:GreenChair_01",
+        "width_m": 0.673,
+        "depth_m": 0.664,
+        "height_m": 1.059
+      },
+      {
+        "asset_id": "polyhaven:ArmChair_01",
+        "width_m": 0.848,
+        "depth_m": 0.766,
+        "height_m": 1.065
+      }
+    ],
+    "sofa": [
+      {
+        "asset_id": "polyhaven:Sofa_01",
+        "width_m": 1.571,
+        "depth_m": 0.658,
+        "height_m": 0.797
+      }
+    ],
+    "table": [
+      {
+        "asset_id": "polyhaven:round_wooden_table_01",
+        "width_m": 1.399,
+        "depth_m": 1.399,
+        "height_m": 1.005
+      },
+      {
+        "asset_id": "polyhaven:side_table_tall_01",
+        "width_m": 0.384,
+        "depth_m": 0.384,
+        "height_m": 0.761
+      }
+    ],
+    "storage": [
+      {
+        "asset_id": "designer:classic-bookcase@1.0.0",
+        "width_m": 0.8,
+        "depth_m": 0.4,
+        "height_m": 1.8
+      },
+      {
+        "asset_id": "polyhaven:ClassicNightstand_01",
+        "width_m": 0.568,
+        "depth_m": 0.424,
+        "height_m": 0.7
+      }
+    ],
+    "chair": [
+      {
+        "asset_id": "polyhaven:dining_chair_02",
+        "width_m": 0.434,
+        "depth_m": 0.576,
+        "height_m": 0.973
+      }
+    ],
+    "bed": [
+      {
+        "asset_id": "designer:channel-velvet-bed@1.0.0",
+        "width_m": 1.6,
+        "depth_m": 2.0,
+        "height_m": 0.6
+      }
+    ],
+    "desk": [
+      {
+        "asset_id": "designer:ebonised-writing-desk@1.0.0",
+        "width_m": 1.4,
+        "depth_m": 0.7,
+        "height_m": 0.75
+      }
+    ]
+  },
+  "decor": {
+    "rug": null,
+    "art": null,
+    "curtain": null,
+    "pendant": "designer:globe-cluster-pendant@1.0.0",
+    "plant": null,
+    "floor_lamp": null,
+    "mouldings": true,
+    "accents": []
+  },
+  "lighting": {
+    "environment_asset_id": "polyhaven:lebombo",
+    "environment_intensity": 0.75,
+    "exposure": 1.05,
+    "sun": {
+      "direction": [
+        0.55,
+        0.7,
+        0.45
+      ],
+      "intensity": 2.2,
+      "kelvin": 5600
+    },
+    "fill": {
+      "sky_color": "#eef1f5",
+      "ground_color": "#8d7663",
+      "intensity": 0.55
+    }
+  },
+  "plan_theme": {
+    "wall_fill": "#2f2f33",
+    "wall_stroke": "#1d1d20",
+    "floor_fill": "#f3efe8",
+    "furniture_fill": "#d9d2c5",
+    "furniture_stroke": "#5a4a3a",
+    "label_color": "#2f2f33",
+    "door_color": "#b08d57",
+    "window_color": "#6f8fa6"
+  },
+  "quality": {
+    "high": {
+      "texture_px": 2048,
+      "decor_density": 1.0
+    },
+    "low": {
+      "texture_px": 1024,
+      "decor_density": 0.5
+    }
+  }
+}

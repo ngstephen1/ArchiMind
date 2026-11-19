@@ -11,13 +11,15 @@ export function openingEndpoints(room, opening) {
   }
 }
 
-export function floorPlan(h, c) {
+import { LEGACY_PLAN_COLORS } from "./plan_colors.js";
+
+export function floorPlan(h, c, colors = LEGACY_PLAN_COLORS) {
   const ctx = c.getContext("2d");
   ctx.clearRect(0, 0, c.width, c.height);
   const s = Math.min(510 / h.width, 350 / h.depth),
     ox = (c.width - h.width * s) / 2,
     oy = c.height - 20;
-  ctx.fillStyle = "#e2d3af";
+  ctx.fillStyle = colors.site;
   ctx.fillRect(ox, oy - s * h.depth, s * h.width, s * h.depth);
   for (const p of h.rooms) {
     const r = p.design.room,
@@ -25,23 +27,23 @@ export function floorPlan(h, c) {
       y = oy - s * p.origin[1],
       w = s * r.width_m,
       d = s * r.depth_m;
-    ctx.fillStyle = "#f9f6ec";
+    ctx.fillStyle = colors.room;
     ctx.fillRect(x + 1, y - d + 1, w - 2, d - 2);
-    ctx.strokeStyle = "#46584a";
+    ctx.strokeStyle = colors.wall;
     ctx.strokeRect(x, y - d, w, d);
     for (const f of p.design.furniture) {
-      ctx.fillStyle = "#b5bfac";
-      ctx.fillRect(
-        x + s * f.x_m,
-        y - s * (f.y_m + f.depth_m),
-        s * f.width_m,
-        s * f.depth_m,
-      );
+      ctx.fillStyle = colors.furniture;
+      const rect = [x + s * f.x_m, y - s * (f.y_m + f.depth_m), s * f.width_m, s * f.depth_m];
+      ctx.fillRect(...rect);
+      if (colors.furnitureStroke) {
+        ctx.strokeStyle = colors.furnitureStroke;
+        ctx.strokeRect(...rect);
+      }
     }
     for (const opening of [...r.windows, ...r.doors]) {
       const [[x1, y1], [x2, y2]] = openingEndpoints(r, opening);
       ctx.strokeStyle =
-        opening.sill_height_m === undefined ? "#dfb855" : "#609aab";
+        opening.sill_height_m === undefined ? colors.door : colors.window;
       ctx.lineWidth = 3;
       ctx.beginPath();
       ctx.moveTo(x + s * x1, y - s * y1);
@@ -49,7 +51,7 @@ export function floorPlan(h, c) {
       ctx.stroke();
       ctx.lineWidth = 1;
     }
-    ctx.fillStyle = "#233e35";
+    ctx.fillStyle = colors.label;
     ctx.font = "14px sans-serif";
     ctx.fillText(r.name, x + 6, y - d + 18, w - 12);
     ctx.font = "12px sans-serif";

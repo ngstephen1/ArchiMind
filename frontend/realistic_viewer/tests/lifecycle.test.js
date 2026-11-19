@@ -4,7 +4,7 @@ import {createSceneManager,selectedSceneOwner} from '../src/scene_lifecycle.js';
 import {createAssetPool} from '../src/asset_pool.js';
 const scene=(id='a',width=5)=>({schema_version:3,design:{room:{id:'room',width_m:width},furniture:[{id}]},asset_bindings:[],unavailable_assets:[]});
 function fixture(){
- const log=[],view={position:[1,2,3],target:[2,0,-2],userCamera:true,front:false,outlines:true};
+ const log=[],view={position:[1,2,3],target:[2,0,-2],userCamera:true,front:false,outlines:true,tier:"low"};
  const update=createSceneManager((host,data,options)=>{
    const id=data.design?.furniture[0].id??'legacy';log.push({event:'mount',host,id,options});let live=true;
    const dispose=()=>{if(live){live=false;log.push({event:'dispose',id});}};

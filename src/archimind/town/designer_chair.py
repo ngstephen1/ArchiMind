@@ -8,7 +8,7 @@ from archimind.assets.designer_concepts import (
 )
 
 from . import service as db
-from .design import digest, validate_home
+from .design import apply_style, digest, validate_home
 
 
 def chair_options(*, collection=False):
@@ -88,6 +88,9 @@ def chair_change(q, owner, project, data, *, apply, collection=False):
         bedroom.setdefault("designer_collection", {})[slot] = record
     else:
         bedroom["designer_chair"] = record
+    if home.get("style_pack"):
+        # Re-dress so no pack model is bound to the chosen chair's reservation.
+        apply_style(home, home["style_pack"]["id"])
     validate_home(home)
     del home["id"]
     home["id"] = digest(home)

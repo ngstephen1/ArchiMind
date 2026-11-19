@@ -1,0 +1,50 @@
+Style pack assets: CC0 1.0 sources (Poly Haven, ambientCG). One line per released asset.
+ambientcg:Metal009 — Metal 009 by ambientCG, CC0 1.0 (public domain dedication), https://ambientcg.com/view?id=Metal009
+ambientcg:Metal027 — Metal 027 by ambientCG, CC0 1.0 (public domain dedication), https://ambientcg.com/view?id=Metal027
+polyhaven:ArmChair_01 — Arm Chair 01 by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/ArmChair_01
+polyhaven:ClassicNightstand_01 — Classic Nightstand 01 by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/ClassicNightstand_01
+polyhaven:GreenChair_01 — Green Chair 01 by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/GreenChair_01
+polyhaven:SchoolDesk_01 — School Desk 01 by Ethan Place, CC0 1.0 (public domain dedication), https://polyhaven.com/a/SchoolDesk_01
+polyhaven:Sofa_01 — Sofa 01 by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/Sofa_01
+polyhaven:american_walnut_veneer — American Walnut Veneer by Jenelle van Heerden, CC0 1.0 (public domain dedication), https://polyhaven.com/a/american_walnut_veneer
+polyhaven:ash_veneer — Ash Veneer by Jenelle van Heerden, CC0 1.0 (public domain dedication), https://polyhaven.com/a/ash_veneer
+polyhaven:beige_wall_001 — Beige Wall 001 by Dimitrios Savva, Rico Cilliers, CC0 1.0 (public domain dedication), https://polyhaven.com/a/beige_wall_001
+polyhaven:chinese_armchair — Chinese Armchair by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/chinese_armchair
+polyhaven:chinese_stool — Chinese Stool by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/chinese_stool
+polyhaven:chinese_tea_table — Chinese Tea Table by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/chinese_tea_table
+polyhaven:concrete_floor_02 — Concrete Floor 02 by Rob Tuytel, CC0 1.0 (public domain dedication), https://polyhaven.com/a/concrete_floor_02
+polyhaven:dark_wood — Dark Wood by Dario Barresi, Dimitrios Savva, Rico Cilliers, CC0 1.0 (public domain dedication), https://polyhaven.com/a/dark_wood
+polyhaven:desk_lamp_arm_01 — Desk Lamp Arm 01 by Kuutti Siitonen, Yann Kervran, CC0 1.0 (public domain dedication), https://polyhaven.com/a/desk_lamp_arm_01
+polyhaven:dining_chair_02 — Dining Chair 02 by James Ray Cock, CC0 1.0 (public domain dedication), https://polyhaven.com/a/dining_chair_02
+polyhaven:folding_wooden_stool — Folding Wooden Stool by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/folding_wooden_stool
+polyhaven:grey_plaster — Grey Plaster by Rob Tuytel, CC0 1.0 (public domain dedication), https://polyhaven.com/a/grey_plaster
+polyhaven:herringbone_parquet — Herringbone Parquet by Jenelle van Heerden, Sergej Majboroda, CC0 1.0 (public domain dedication), https://polyhaven.com/a/herringbone_parquet
+polyhaven:hinoki_planks — Hinoki Planks by Charlotte Baglioni, CC0 1.0 (public domain dedication), https://polyhaven.com/a/hinoki_planks
+polyhaven:industrial_coffee_table — Industrial Coffee Table by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/industrial_coffee_table
+polyhaven:industrial_workshop_foundry — Industrial Workshop Foundry by Dimitrios Savva, Jarod Guest, CC0 1.0 (public domain dedication), https://polyhaven.com/a/industrial_workshop_foundry
+polyhaven:kiara_interior — Kiara Interior by Greg Zaal, CC0 1.0 (public domain dedication), https://polyhaven.com/a/kiara_interior
+polyhaven:lebombo — Lebombo by Greg Zaal, CC0 1.0 (public domain dedication), https://polyhaven.com/a/lebombo
+polyhaven:long_white_tiles — Long White Tiles by Jenelle van Heerden, Sergej Majboroda, CC0 1.0 (public domain dedication), https://polyhaven.com/a/long_white_tiles
+polyhaven:lythwood_room — Lythwood Room by Greg Zaal, CC0 1.0 (public domain dedication), https://polyhaven.com/a/lythwood_room
+polyhaven:marble_01 — Marble 01 by Rob Tuytel, CC0 1.0 (public domain dedication), https://polyhaven.com/a/marble_01
+polyhaven:metal_office_desk — Metal Office Desk by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/metal_office_desk
+polyhaven:metal_stool_02 — Metal Stool 02 by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/metal_stool_02
+polyhaven:mid_century_lounge_chair — Mid Century Lounge Chair by Kuutti Siitonen, CC0 1.0 (public domain dedication), https://polyhaven.com/a/mid_century_lounge_chair
+polyhaven:modern_arm_chair_01 — Modern Arm Chair 01 by Vibrant Nordic, CC0 1.0 (public domain dedication), https://polyhaven.com/a/modern_arm_chair_01
+polyhaven:modern_coffee_table_01 — Modern Coffee Table 01 by Amin, CC0 1.0 (public domain dedication), https://polyhaven.com/a/modern_coffee_table_01
+polyhaven:oak_wood_planks — Oak Wood Planks by Dimitrios Savva, CC0 1.0 (public domain dedication), https://polyhaven.com/a/oak_wood_planks
+polyhaven:painted_plaster_wall — Painted Plaster Wall by Amal Kumar, CC0 1.0 (public domain dedication), https://polyhaven.com/a/painted_plaster_wall
+polyhaven:plank_flooring_04 — Plank Flooring 04 by Dimitrios Savva, CC0 1.0 (public domain dedication), https://polyhaven.com/a/plank_flooring_04
+polyhaven:rough_linen — Rough Linen by Rico Cilliers, colormass, CC0 1.0 (public domain dedication), https://polyhaven.com/a/rough_linen
+polyhaven:round_wooden_table_01 — Round Wooden Table 01 by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/round_wooden_table_01
+polyhaven:side_table_01 — Side Table 01 by James Ray Cock, CC0 1.0 (public domain dedication), https://polyhaven.com/a/side_table_01
+polyhaven:side_table_tall_01 — Side Table Tall 01 by James Ray Cock, CC0 1.0 (public domain dedication), https://polyhaven.com/a/side_table_tall_01
+polyhaven:small_wooden_table_01 — Small Wooden Table 01 by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/small_wooden_table_01
+polyhaven:sofa_02 — Sofa 02 by Kirill Sannikov, CC0 1.0 (public domain dedication), https://polyhaven.com/a/sofa_02
+polyhaven:steel_frame_shelves_03 — Steel Frame Shelves 03 by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/steel_frame_shelves_03
+polyhaven:studio_small_09 — Studio Small 09 by Sergej Majboroda, CC0 1.0 (public domain dedication), https://polyhaven.com/a/studio_small_09
+polyhaven:terrazzo_tiles — Terrazzo Tiles by Amal Kumar, CC0 1.0 (public domain dedication), https://polyhaven.com/a/terrazzo_tiles
+polyhaven:velour_velvet — Velour Velvet by Rico Cilliers, colormass, CC0 1.0 (public domain dedication), https://polyhaven.com/a/velour_velvet
+polyhaven:vintage_wooden_drawer_01 — Vintage Wooden Drawer 01 by James Ray Cock, CC0 1.0 (public domain dedication), https://polyhaven.com/a/vintage_wooden_drawer_01
+polyhaven:white_stucco — White Stucco by Amal Kumar, CC0 1.0 (public domain dedication), https://polyhaven.com/a/white_stucco
+polyhaven:whitewashed_brick — Whitewashed Brick by Charlotte Baglioni, CC0 1.0 (public domain dedication), https://polyhaven.com/a/whitewashed_brick

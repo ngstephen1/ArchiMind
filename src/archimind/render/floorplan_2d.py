@@ -33,7 +33,7 @@ def _wall_point(room: Room, wall: Wall, offset: float) -> tuple[float, float]:
     return 0.0, offset
 
 
-def _add_walls(figure: go.Figure, room: Room) -> None:
+def _add_walls(figure: go.Figure, room: Room, ink: str = _INK) -> None:
     """Draw wall strokes between openings, leaving the opening spans clear."""
     for wall in ("south", "east", "north", "west"):
         length = room.width_m if wall in ("north", "south") else room.depth_m
@@ -57,7 +57,7 @@ def _add_walls(figure: go.Figure, room: Room) -> None:
                 x=x,
                 y=y,
                 mode="lines",
-                line={"color": _INK, "width": 5},
+                line={"color": ink, "width": 5},
                 name="Wall",
                 legendgroup="walls",
                 showlegend=wall == "south",
@@ -67,13 +67,16 @@ def _add_walls(figure: go.Figure, room: Room) -> None:
         )
 
 
-def render_floorplan(design: RoomDesign) -> go.Figure:
+def render_floorplan(design: RoomDesign, plan_theme=None) -> go.Figure:
     """Render an existing design without modifying it or checking spatial validity.
 
     Existing model instances are schema-revalidated to catch nested edits.
     Nonzero furniture rotations raise ValueError rather than displaying an
     inaccurate footprint. Axes include out-of-room furniture so it is not hidden.
+    ``plan_theme`` (a style pack's PlanTheme or its dict) recolours the plan;
+    None keeps today's colours exactly. Geometry and labels never change.
     """
+    theme = plan_theme.model_dump() if hasattr(plan_theme, "model_dump") else plan_theme
     design = RoomDesign.model_validate(design)
     rotated = [
         f"{item.id} ({item.rotation_deg} degrees)"
@@ -95,7 +98,7 @@ def render_floorplan(design: RoomDesign) -> go.Figure:
         y0=0,
         x1=room.width_m,
         y1=room.depth_m,
-        fillcolor="#F8FAFB",
+        fillcolor=theme["floor_fill"] if theme else "#F8FAFB",
         line={"width": 0},
         layer="below",
     )
@@ -106,7 +109,11 @@ def render_floorplan(design: RoomDesign) -> go.Figure:
         right, top = item.x_m + item.width_m, item.y_m + item.depth_m
         min_x, max_x = min(min_x, item.x_m), max(max_x, right)
         min_y, max_y = min(min_y, item.y_m), max(max_y, top)
-        fill, border = _PALETTE[index % len(_PALETTE)]
+        fill, border = (
+            (theme["furniture_fill"], theme["furniture_stroke"])
+            if theme
+            else _PALETTE[index % len(_PALETTE)]
+        )
         hover = (
             f"<b>{escape(item.name)}</b><br>"
             f"ID: {escape(item.id)}<br>Category: {escape(item.category)}<br>"
@@ -144,17 +151,17 @@ def render_floorplan(design: RoomDesign) -> go.Figure:
                 y=[item.y_m + item.depth_m / 2],
                 mode="text",
                 text=[escape(item.name)],
-                textfont={"size": 12, "color": _INK},
+                textfont={"size": 12, "color": theme["label_color"] if theme else _INK},
                 hoverinfo="skip",
                 showlegend=False,
                 meta={"kind": "furniture_label", "id": item.id},
             )
         )
 
-    _add_walls(figure, room)
+    _add_walls(figure, room, theme["wall_fill"] if theme else _INK)
     for kind, openings, color in (
-        ("door", room.doors, _DOOR),
-        ("window", room.windows, _WINDOW),
+        ("door", room.doors, theme["door_color"] if theme else _DOOR),
+        ("window", room.windows, theme["window_color"] if theme else _WINDOW),
     ):
         for index, opening in enumerate(openings):
             first = _wall_point(room, opening.wall, opening.offset_m)

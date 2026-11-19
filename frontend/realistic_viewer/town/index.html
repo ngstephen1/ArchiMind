@@ -52,10 +52,16 @@
     </main>
     <footer>
       <button id="present">Design presentation</button>
+      <button id="quality" hidden>Quality: High</button>
+      <label id="sweepControl"
+        >Plan <input id="sweep" type="range" min="0" max="100" value="100" aria-label="Plan to room view" /> Room</label
+      >
       <span id="revision">Studio House · Showcase</span
       ><span id="assetStatus" role="status" hidden
         >Desk shown as a placeholder</span
-      ><span id="collectionStatus" role="status" hidden>Bedroom collection mesh unavailable · showing procedural furniture</span><span id="chairStatus" role="status" hidden>Designer chair unavailable · showing the procedural chair</span
+      ><span id="collectionStatus" role="status" hidden>Bedroom collection mesh unavailable · showing procedural furniture</span
+      ><span id="chairStatus" role="status" hidden>Designer chair unavailable · showing the procedural chair</span
+      ><span id="styleStatus" role="status" hidden></span
       ><a href="./assets/BELAYA_ATTRIBUTION.txt">Belaya desk credits</a
       ><a href="./assets/bedroom-sources.json">Bedroom material credits</a><a id="editor">Streamlit editor ↗</a>
     </footer>
@@ -112,10 +118,12 @@
             <option>bright study</option>
           </select></label
         ><label
-          >Finishes<select id="palette">
-            <option>oak</option>
-            <option>sage</option>
-            <option>terracotta</option>
+          >Style<select id="style">
+            <option value="scandinavian">Scandinavian</option>
+            <option value="modern_classic">Modern classic</option>
+            <option value="industrial_loft">Industrial loft</option>
+            <option value="japandi">Japandi</option>
+            <option value="mid_century">Mid-century</option>
           </select></label
         >
       </div>

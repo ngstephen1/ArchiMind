@@ -1,0 +1,188 @@
+{
+  "id": "industrial_loft",
+  "version": "1.0.0",
+  "name": "Industrial loft",
+  "aliases": [
+    "industrial loft",
+    "industrial",
+    "loft",
+    "new york loft",
+    "warehouse",
+    "brooklyn loft"
+  ],
+  "surfaces": {
+    "floor": {
+      "asset_id": "polyhaven:concrete_floor_02",
+      "tiling_m": 2.5,
+      "fallback_color": "#8f8c88",
+      "tint": null
+    },
+    "wall": {
+      "asset_id": "polyhaven:whitewashed_brick",
+      "tiling_m": 1.8,
+      "fallback_color": "#e9e6e1",
+      "tint": null
+    },
+    "ceiling": {
+      "asset_id": "polyhaven:grey_plaster",
+      "tiling_m": 2.5,
+      "fallback_color": "#c9c6c1",
+      "tint": null
+    },
+    "trim": {
+      "asset_id": "ambientcg:Metal027",
+      "tiling_m": 1.0,
+      "fallback_color": "#2b2b2b",
+      "tint": null
+    },
+    "door": {
+      "asset_id": "ambientcg:Metal027",
+      "tiling_m": 1.0,
+      "fallback_color": "#2f2f2f",
+      "tint": null
+    },
+    "window_frame": {
+      "asset_id": "ambientcg:Metal027",
+      "tiling_m": 1.0,
+      "fallback_color": "#1f1f1f",
+      "tint": null
+    },
+    "worktop": {
+      "asset_id": "polyhaven:concrete_floor_02",
+      "tiling_m": 1.5,
+      "fallback_color": "#9a9792",
+      "tint": null
+    },
+    "tile": {
+      "asset_id": "polyhaven:long_white_tiles",
+      "tiling_m": 0.9,
+      "fallback_color": "#ecebe7",
+      "tint": null
+    },
+    "metal": {
+      "asset_id": "ambientcg:Metal027",
+      "tiling_m": 1.0,
+      "fallback_color": "#262626",
+      "tint": null
+    }
+  },
+  "furniture": {
+    "lamp": [
+      {
+        "asset_id": "polyhaven:desk_lamp_arm_01",
+        "width_m": 0.202,
+        "depth_m": 0.614,
+        "height_m": 0.893
+      }
+    ],
+    "table": [
+      {
+        "asset_id": "polyhaven:industrial_coffee_table",
+        "width_m": 0.778,
+        "depth_m": 0.758,
+        "height_m": 0.638
+      },
+      {
+        "asset_id": "polyhaven:metal_stool_02",
+        "width_m": 0.448,
+        "depth_m": 0.473,
+        "height_m": 0.458
+      }
+    ],
+    "desk": [
+      {
+        "asset_id": "polyhaven:metal_office_desk",
+        "width_m": 2.0,
+        "depth_m": 0.947,
+        "height_m": 0.788
+      }
+    ],
+    "chair": [
+      {
+        "asset_id": "polyhaven:dining_chair_02",
+        "width_m": 0.434,
+        "depth_m": 0.576,
+        "height_m": 0.973
+      },
+      {
+        "asset_id": "polyhaven:metal_stool_02",
+        "width_m": 0.448,
+        "depth_m": 0.473,
+        "height_m": 0.458
+      }
+    ],
+    "storage": [
+      {
+        "asset_id": "polyhaven:steel_frame_shelves_03",
+        "width_m": 2.351,
+        "depth_m": 0.721,
+        "height_m": 2.312
+      }
+    ],
+    "sofa": [
+      {
+        "asset_id": "polyhaven:sofa_02",
+        "width_m": 1.807,
+        "depth_m": 0.818,
+        "height_m": 0.709
+      }
+    ],
+    "bed": [
+      {
+        "asset_id": "designer:steel-loft-bed@1.0.0",
+        "width_m": 1.6,
+        "depth_m": 2.0,
+        "height_m": 0.6
+      }
+    ]
+  },
+  "decor": {
+    "rug": null,
+    "art": null,
+    "curtain": null,
+    "pendant": "designer:steel-dome-pendant@1.0.0",
+    "plant": null,
+    "floor_lamp": null,
+    "mouldings": false,
+    "accents": []
+  },
+  "lighting": {
+    "environment_asset_id": "polyhaven:industrial_workshop_foundry",
+    "environment_intensity": 0.85,
+    "exposure": 1.1,
+    "sun": {
+      "direction": [
+        0.3,
+        0.8,
+        0.5
+      ],
+      "intensity": 2.6,
+      "kelvin": 6500
+    },
+    "fill": {
+      "sky_color": "#e6edf3",
+      "ground_color": "#6d6a66",
+      "intensity": 0.6
+    }
+  },
+  "plan_theme": {
+    "wall_fill": "#1f1f1f",
+    "wall_stroke": "#0f0f0f",
+    "floor_fill": "#e7e5e1",
+    "furniture_fill": "#c9c6c0",
+    "furniture_stroke": "#2b2b2b",
+    "label_color": "#1f1f1f",
+    "door_color": "#7a6a55",
+    "window_color": "#5d7f95"
+  },
+  "quality": {
+    "high": {
+      "texture_px": 2048,
+      "decor_density": 1.0
+    },
+    "low": {
+      "texture_px": 1024,
+      "decor_density": 0.5
+    }
+  }
+}

@@ -29,6 +29,8 @@ from archimind.studio.contracts import (
     digest,
 )
 from archimind.studio.fixtures import example_plan, example_recipe
+from archimind.style_packs import StyleId, load_pack
+from archimind.style_packs.scene import asset_hashes, style_payload
 
 
 def propose_room(
@@ -224,6 +226,11 @@ class StudioBuild(Frozen):
     result_json: str
     seed: int = Field(ge=0, le=2**32 - 1)
     model_calls: int = Field(ge=0, le=8)
+    # Snapshots built before style packs carry neither field and render as before.
+    style: StyleId | None = Field(default=None, exclude_if=lambda v: v is None)
+    style_assets: dict[str, tuple[str, ...]] | None = Field(
+        default=None, exclude_if=lambda v: v is None
+    )
 
     def result(self):
         return LayoutGenerationResult.model_validate_json(self.result_json)
@@ -265,7 +272,16 @@ class StudioBuild(Frozen):
                 f.category != "chair" or f.rotation_deg != 0 for f in chairs
             ):
                 raise ValueError("Inconsistent designer chair binding")
+        if (self.style is None) != (self.style_assets is None):
+            raise ValueError("A styled snapshot lists its bound asset hashes")
         return self
+
+
+def _studio_style(design, pack, seed, chair, collection):
+    reserved = {f"studio:{binding.concept_id}" for binding in collection}
+    if chair is not None:
+        reserved.add(DESIGNER_CHAIR_SLOT)
+    return style_payload(design, pack, seed, designer_ids=reserved)
 
 
 def build_room(
@@ -276,6 +292,7 @@ def build_room(
     client_factory=None,
     designer_chair: ChairBinding | None = None,
     designer_collection: tuple[ChairBinding, ...] = (),
+    style: StyleId | None = None,
 ) -> StudioBuild:
     draft = StudioDraft.model_validate_json(draft.model_dump_json())
     config = (
@@ -344,6 +361,16 @@ def build_room(
                         f.cancel()
                     raise
             calls = len(recipes)
+    style_assets = None
+    if style is not None:
+        pack = load_pack(style)
+        style_assets = asset_hashes(
+            b["asset_id"]
+            for c in result.candidates
+            for b in _studio_style(
+                c.design, pack, seed, designer_chair, designer_collection
+            )["bindings"]
+        )
     return StudioBuild(
         draft=draft,
         designer_chair=designer_chair,
@@ -352,6 +379,8 @@ def build_room(
         result_json=result.model_dump_json(),
         seed=seed,
         model_calls=calls,
+        style=style,
+        style_assets=style_assets,
     )
 
 
@@ -393,6 +422,14 @@ def scene_payload(build: StudioBuild, candidate) -> dict:
         payload["designer_collection"] = [
             b.model_dump(mode="json") for b in build.designer_collection
         ]
+    if build.style is not None:
+        payload["style"] = _studio_style(
+            candidate.design,
+            load_pack(build.style),
+            build.seed,
+            build.designer_chair,
+            build.designer_collection,
+        )
     if len(json.dumps(payload).encode()) > 262144:
         raise StudioError("The complete scene exceeds the recipe byte budget.")
     return payload

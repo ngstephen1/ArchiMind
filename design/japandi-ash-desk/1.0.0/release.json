@@ -1,0 +1,136 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "japandi-ash-desk",
+    "version": "1.0.0",
+    "name": "Japandi ash desk",
+    "category": "desk",
+    "dimensions_wdh_m": [
+      1.4,
+      0.7,
+      0.75
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Ash top",
+        "Shadow-gap apron",
+        "Post LF",
+        "Post LB",
+        "Foot runner L",
+        "Upper rail L",
+        "Shelf bearer L",
+        "Post RF",
+        "Post RB",
+        "Foot runner R",
+        "Upper rail R",
+        "Shelf bearer R",
+        "Shelf slat 1",
+        "Shelf slat 2",
+        "Shelf slat 3",
+        "Shelf slat 4",
+        "Shelf slat 5",
+        "Shelf slat 6",
+        "Shelf slat 7",
+        "Shelf slat 8",
+        "Shelf slat 9",
+        "Drawer front",
+        "Finger pull"
+      ],
+      "finishes": {
+        "Ash": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "FFFFFF",
+          "tile": 0.9
+        },
+        "Ebonised oak": {
+          "kind": "wood",
+          "asset": "polyhaven:dark_wood",
+          "tint": "7A6A62",
+          "tile": 0.8
+        },
+        "Smoked oak": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "A88A6C",
+          "tile": 0.9
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:ash_veneer": [
+          "16da5f57eb4fd40cab07183fc856fdeb8feafa826b16b14ce69ef28f9d55a367.webp",
+          "25fb5f540bac2ea47cad6fe6df0f58f3aee547e40a498f643400796588164a08.webp",
+          "840143418677f4955c66f5c2af533fb5d340624ff7491021a1f9c8bb8de047c5.webp"
+        ],
+        "polyhaven:dark_wood": [
+          "2ae252b1276cb6e592ae54b97eea73c3a101952e0d3cebb6753301636e873188.webp",
+          "ab84c017729044df0084008fca4db6bae93a4876f9bc8f7f1660383e13dddfd4.webp",
+          "bdec29a80144a4cd6759dbbc41cd9cdffd23db5d74db74b86b6f988d2156247e.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "2ae11cb0dfc1fbce867b65e2ac5e97355ac0ee2cbf9c7ef1f3de22fb738a242e",
+      "piece.glb": "7dd29a6496e955257da8ba70f6886e263e695b6ab0295f8ebd831bd2335c729f",
+      "front.png": "33237aaa4a01608cc46afd0ca1d2f9cde3b2a13aa48def1cc3653af7862cf783",
+      "three-quarter.png": "fdc91d3504f6f0752d3a826866885c590e57e64d4bb1ea4596c3b50701ce8bc0"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.699999988079071,
+        0.0,
+        -0.3499999940395355
+      ],
+      [
+        0.699999988079071,
+        0.75,
+        0.3499999940395355
+      ]
+    ],
+    "mesh_instances": 23,
+    "triangles": 4148,
+    "materials": 3,
+    "textures": 9,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 33554424
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept desk."
+}

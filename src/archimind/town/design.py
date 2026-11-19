@@ -8,7 +8,7 @@ import random
 import re
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 from shapely.geometry import Point, box
 from shapely.ops import unary_union
 
@@ -17,6 +17,17 @@ from archimind.assets.render_assets import BELAYA_ID
 from archimind.assets.selection import build_render_bindings
 from archimind.geometry import generate_layout_candidates, validate_accessibility
 from archimind.models import Door, Furniture, Room, RoomDesign, Window
+from archimind.style_packs import (
+    DEFAULT_STYLE,
+    LEGACY_PALETTE_TO_STYLE,
+    STYLE_CLARIFICATION,
+    STYLE_TO_LEGACY_PALETTE,
+    StyleId,
+    load_pack,
+    resolve_style_phrase,
+    styles_mentioned,
+)
+from archimind.style_packs.scene import style_payload
 
 Kind = Literal["salon", "bedroom", "study", "living", "kitchen-dining", "bathroom"]
 PROGRAM = ["bedroom", "study", "living", "kitchen-dining", "bathroom"]
@@ -74,13 +85,76 @@ class Brief(BaseModel):
     priority: Literal[
         "balanced", "quiet bedroom", "bright study", "quiet bedroom and bright study"
     ] = "balanced"
+    style: StyleId = DEFAULT_STYLE
     room_goals: list[RoomGoal] = Field(default_factory=list, max_length=4)
     formal_salon: bool = False
-    palette: Literal["oak", "sage", "terracotta"] = "oak"
     seed: int = Field(default=42, ge=0, le=1000000)
     shift_bedroom_chair: bool = False
     closer_study_desk: bool = False
     locks: list[Kind] = Field(default_factory=list, max_length=6)
+
+    @model_validator(mode="before")
+    @classmethod
+    def _legacy_palette(cls, data):
+        # Stored briefs and older clients send a finish palette; map it to a style.
+        if isinstance(data, dict) and "palette" in data:
+            data = dict(data)
+            palette = data.pop("palette")
+            if palette not in LEGACY_PALETTE_TO_STYLE:
+                raise ValueError("palette must be oak, sage or terracotta")
+            data.setdefault("style", LEGACY_PALETTE_TO_STYLE[palette])
+        return data
+
+
+def apply_style(home, style):
+    """Record the home's pack, the palette older readers understand, and dress
+    every room (locked ones included) from that pack."""
+    pack = load_pack(style)
+    home["style_pack"] = {"id": style, "version": pack.version}
+    home["palette"] = STYLE_TO_LEGACY_PALETTE[style]
+    for part in home["rooms"]:
+        design = RoomDesign.model_validate(part["design"])
+        # Seeded by the room itself so a re-dress of unchanged geometry is stable.
+        seed = int(hashlib.sha256(design.room.id.encode()).hexdigest()[:8], 16)
+        # A user-chosen designer chair keeps its reservation.
+        designer = {"desk-chair"} if part.get("designer_chair") else set()
+        designer |= set(part.get("designer_collection", {}))
+        designer.add("belaya")  # Town renders this reserved product or its fallback.
+        part["style"] = style_payload(design, pack, seed, designer_ids=designer)
+    return home
+
+
+_STYLE_MARKERS = r"(?: (?:style|styled|look|finishes|finish|interiors?|vibe|feel))+"
+
+
+def style_clause(clause):
+    """The style a single clause asks for, or None if it is not about style.
+
+    Raises the style clarification when the clause names two styles or an
+    unknown one ("gothic style").
+    """
+    clause = " ".join(clause.lower().strip().rstrip(".!").split())
+    if clause == "warm finishes":
+        clause = "oak finishes"
+    core = re.sub(
+        r"^(?:(?:please )?make (?:it|the home|everything) |go |use |(?:a|an|the) )+",
+        "",
+        clause,
+    )
+    marked = bool(re.search(_STYLE_MARKERS + "$", core))
+    core = re.sub(_STYLE_MARKERS + "$", "", core)
+    if core in LEGACY_PALETTE_TO_STYLE:
+        return LEGACY_PALETTE_TO_STYLE[core]
+    if style := resolve_style_phrase(core):
+        return style
+    mentioned = styles_mentioned(clause) | {
+        LEGACY_PALETTE_TO_STYLE[w]
+        for w in clause.split()
+        if w in LEGACY_PALETTE_TO_STYLE
+    }
+    if mentioned or marked or clause.startswith("make it "):
+        raise ValueError(STYLE_CLARIFICATION)
+    return None
 
 
 def interpret_offline(brief, text):
@@ -100,7 +174,7 @@ def interpret_offline(brief, text):
     message = re.sub(
         r"^(?:please )?(?:design|create) (?:a )?(?:five-room home with )?", "", message
     )
-    for clause in re.split(r"\s+(?:and|with)\s+|[;,]", message):
+    for clause in re.split(r"\s+(?:and|with|in)\s+|[;,]", message):
         clause = " ".join(clause.split())
         clause = re.sub(r"^(?:a|an) ", "", clause)
         if clause == "quiet study":
@@ -141,24 +215,22 @@ def interpret_offline(brief, text):
         if clause == "writing desk":
             # Every generated bedroom includes the qualified Belaya.
             continue
-        if clause == "warm finishes":
-            clause = "oak finishes"
         if clause in priorities:
             key, value = "priority", priorities[clause]
-        elif match := re.fullmatch(
-            r"(?:use )?(oak|sage|terracotta)(?: finishes)?", clause
-        ):
-            key, value = "palette", match[1]
         elif match := re.fullmatch(
             r"keep (?:the )?(bedroom|living|study|kitchen-dining|bathroom)(?: where it is)?",
             clause,
         ):
             values["locks"] = sorted(set(values["locks"]) | {match[1]})
             continue
+        elif style := style_clause(clause):
+            key, value = "style", style
         else:
             raise ValueError(
-                "Offline briefs support ‘quiet bedroom’, ‘bright study’, ‘quiet study’, ‘study away from living’, ‘bathroom near bedroom’, a finish, or ‘keep the bedroom’. Revise the request or explicitly enable live interpretation."
+                "Offline briefs support ‘quiet bedroom’, ‘bright study’, ‘quiet study’, ‘study away from living’, ‘bathroom near bedroom’, a finish, a style, or ‘keep the bedroom’. Revise the request or explicitly enable live interpretation."
             )
+        if key == "style" and updates.get(key, value) != value:
+            raise ValueError(STYLE_CLARIFICATION)
         if key in updates and updates[key] != value:
             if key == "priority" and {updates[key], value} == {
                 "quiet bedroom",
@@ -331,7 +403,7 @@ def revise_bedroom_chair(brief, previous):
             validate_home(home)
         except ValueError:
             continue
-        home["palette"] = brief.palette
+        apply_style(home, brief.style)
         home["evidence"]["chair_move_m"] = {
             "from_x": before,
             "to_x": x,
@@ -390,7 +462,7 @@ def revise_study_desk(brief, previous):
             validate_home(home)
         except ValueError:
             continue
-        home["palette"] = brief.palette
+        apply_style(home, brief.style)
         home["evidence"]["study_desk_window_center_distance_m"] = {
             "before": before,
             "after": after,
@@ -589,8 +661,8 @@ def generate(brief, previous=None, *, on_progress=None):
             depth=brief.depth,
             hall=hall,
             rooms=rooms,
-            palette=brief.palette,
         )
+        apply_style(home, brief.style)
         if len(rooms) != len(PROGRAM) + int(salon):
             continue
         try:

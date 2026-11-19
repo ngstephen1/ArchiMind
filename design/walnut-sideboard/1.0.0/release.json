@@ -1,0 +1,133 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "walnut-sideboard",
+    "version": "1.0.0",
+    "name": "Mid-century walnut sideboard",
+    "category": "storage",
+    "dimensions_wdh_m": [
+      1.6,
+      0.45,
+      0.75
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Tapered leg LF",
+        "Tapered leg LB",
+        "Tapered leg RF",
+        "Tapered leg RB",
+        "Carcass",
+        "Door 1",
+        "Door groove 1.1",
+        "Door groove 1.2",
+        "Door groove 1.3",
+        "Door groove 1.4",
+        "Door groove 1.5",
+        "Door groove 1.6",
+        "Brass pull 1",
+        "Door 2",
+        "Door groove 2.1",
+        "Door groove 2.2",
+        "Door groove 2.3",
+        "Door groove 2.4",
+        "Door groove 2.5",
+        "Door groove 2.6",
+        "Brass pull 2",
+        "Door 3",
+        "Door groove 3.1",
+        "Door groove 3.2",
+        "Door groove 3.3",
+        "Door groove 3.4",
+        "Door groove 3.5",
+        "Door groove 3.6",
+        "Brass pull 3",
+        "Door 4",
+        "Door groove 4.1",
+        "Door groove 4.2",
+        "Door groove 4.3",
+        "Door groove 4.4",
+        "Door groove 4.5",
+        "Door groove 4.6",
+        "Brass pull 4"
+      ],
+      "finishes": {
+        "Brass": {
+          "kind": "plain",
+          "color": "C7A15A",
+          "roughness": 0.28,
+          "metallic": 1.0
+        },
+        "Ebonised oak": {
+          "kind": "wood",
+          "asset": "polyhaven:dark_wood",
+          "tint": "7A6A62",
+          "tile": 0.8
+        },
+        "Walnut": {
+          "kind": "wood",
+          "asset": "polyhaven:dark_wood",
+          "tint": "F4E4D8",
+          "tile": 0.8
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:dark_wood": [
+          "2ae252b1276cb6e592ae54b97eea73c3a101952e0d3cebb6753301636e873188.webp",
+          "ab84c017729044df0084008fca4db6bae93a4876f9bc8f7f1660383e13dddfd4.webp",
+          "bdec29a80144a4cd6759dbbc41cd9cdffd23db5d74db74b86b6f988d2156247e.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        0.99617
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "2462b2983de786f9ba546e5eaf129a9ecbb3aea02c3f4dd7e525792f176b4ff6",
+      "piece.glb": "af6fa874d617598f915e7296cac69bc16f10b3fba9825a528684b11ff7f49c9d",
+      "front.png": "26d28d0f7c7e8991d6d2b43eaf44f5c894647318674415ec58edcd7ebe9aced0",
+      "three-quarter.png": "0a5f9a9ef5f149e192e80341247819717271038d0d9059b062217a1a47234327"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.800000011920929,
+        0.0,
+        -0.22499999403953552
+      ],
+      [
+        0.800000011920929,
+        0.75,
+        0.22499999403953552
+      ]
+    ],
+    "mesh_instances": 37,
+    "triangles": 2236,
+    "materials": 3,
+    "textures": 6,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 16777212
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept storage."
+}

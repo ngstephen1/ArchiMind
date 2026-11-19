@@ -23,7 +23,9 @@ def test_offline_review_build_and_ab_never_make_provider_calls(monkeypatch):
     handoff = []
     real_floor = studio.render_floorplan
     monkeypatch.setattr(
-        studio, "render_floorplan", lambda d: (handoff.append(d), real_floor(d))[1]
+        studio,
+        "render_floorplan",
+        lambda d, **kw: (handoff.append(d), real_floor(d, **kw))[1],
     )
     # Components are opaque to AppTest; geometry is verified in JS/browser tests.
     scenes = []
@@ -163,3 +165,37 @@ def test_explicit_chair_selection_preview_build_and_frozen_ab(monkeypatch):
         app.session_state[studio.BUILD] == built
         and scenes[-1]["designer_chair"]["sha256"] == chair.sha256
     )
+
+
+def test_studio_style_select_defaults_to_scandinavian(monkeypatch):
+    monkeypatch.delenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", raising=False)
+    scenes = []
+    monkeypatch.setattr(
+        studio, "_component", lambda: lambda **kw: scenes.append(kw["data"])
+    )
+    themes = []
+    real_floor = studio.render_floorplan
+    monkeypatch.setattr(
+        studio,
+        "render_floorplan",
+        lambda d, **kw: (themes.append(kw.get("plan_theme")), real_floor(d, **kw))[1],
+    )
+    app = AppTest.from_string(APP, default_timeout=30).run()
+    select = app.selectbox(key="studio_style")
+    assert select.value == "scandinavian"
+    assert select.options == [
+        "Scandinavian",
+        "Modern classic",
+        "Industrial loft",
+        "Japandi",
+        "Mid-century",
+    ]
+    app.button(key="studio_example").click().run()
+    app.selectbox(key="studio_style").set_value("japandi").run()
+    app.button(key="studio_build_button").click().run()
+    assert not app.exception
+    assert app.session_state[studio.BUILD].style == "japandi"
+    assert scenes[-1]["style"]["style_pack"]["id"] == "japandi"
+    from archimind.style_packs import load_pack
+
+    assert themes[-1] == load_pack("japandi").plan_theme

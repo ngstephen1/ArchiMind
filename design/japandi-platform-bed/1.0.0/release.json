@@ -1,0 +1,148 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "japandi-platform-bed",
+    "version": "1.0.0",
+    "name": "Japandi low platform bed",
+    "category": "bed",
+    "dimensions_wdh_m": [
+      1.6,
+      2.0,
+      0.6
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Recessed plinth",
+        "Ash platform deck",
+        "Headboard rail",
+        "Headboard cap",
+        "Slat 1",
+        "Slat 2",
+        "Slat 3",
+        "Slat 4",
+        "Slat 5",
+        "Slat 6",
+        "Slat 7",
+        "Slat 8",
+        "Slat 9",
+        "Slat 10",
+        "Slat 11",
+        "Slat 12",
+        "Slat 13",
+        "Mattress",
+        "Duvet",
+        "Turned-down sheet",
+        "Folded throw",
+        "Pillow 1",
+        "Pillow 2"
+      ],
+      "finishes": {
+        "Ash": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "FFFFFF",
+          "tile": 0.9
+        },
+        "Charcoal linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "56534F",
+          "tile": 0.28
+        },
+        "Oatmeal linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "CFC3AE",
+          "tile": 0.28
+        },
+        "Smoked oak": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "A88A6C",
+          "tile": 0.9
+        },
+        "White linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "ECE7DD",
+          "tile": 0.28
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:ash_veneer": [
+          "16da5f57eb4fd40cab07183fc856fdeb8feafa826b16b14ce69ef28f9d55a367.webp",
+          "25fb5f540bac2ea47cad6fe6df0f58f3aee547e40a498f643400796588164a08.webp",
+          "840143418677f4955c66f5c2af533fb5d340624ff7491021a1f9c8bb8de047c5.webp"
+        ],
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "d7fd2e5a27c79c3c6dffd8bd2fee112d09f2f5ec1eb0a5a23d4e3f9b98cf3598",
+      "piece.glb": "d2b73828d229cb34ce523136959eeda2a9b13ae72a8aa9025323550f045261e7",
+      "front.png": "8864a0ac1558fc0c7464336c245f969ecf2d333c7e8f08f1375af5346415d32b",
+      "three-quarter.png": "8b499c2e7232e0827a1014dc06ff29c25c8c602297e9d3e23d54522d11624536"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.800000011920929,
+        0.0,
+        -1.0
+      ],
+      [
+        0.800000011920929,
+        0.6000000238418579,
+        1.0
+      ]
+    ],
+    "mesh_instances": 23,
+    "triangles": 26524,
+    "materials": 5,
+    "textures": 15,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 29360120
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept bed."
+}

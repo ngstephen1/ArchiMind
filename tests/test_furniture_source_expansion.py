@@ -10,6 +10,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 import pytest
+from pin_chain import expected_pins
 from retrieval_helpers import offline  # noqa: F401
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -491,105 +492,7 @@ def test_production_and_frozen_artifacts_and_historical_report_are_preserved():
     assert pins["verified_count"] == len(pins["baseline_files"]) == 142
     # 08F1's receipt remains historical. Later explicitly authorized code migrations
     # must bind both its old hash and the exact new bytes; all other pins stay strict.
-    migrations = parse(
-        (ROOT / "docs/data/FURNITURE_CATALOG_ADMISSION_08F2.json").read_text()
-    )["authorized_migrations"]
-    assert set(migrations) <= pins["baseline_files"].keys()
-    continuation = parse(
-        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
-    )["r1"]["authorized_migrations"]
-    r2 = (
-        parse((ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text())
-        .get("r2", {})
-        .get("authorized_migrations", {})
-    )
-    delivery = parse(
-        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
-    )["delivery_20261101"]["authorized_migrations"]
-    ci_compatibility = parse(
-        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
-    )["ci_compatibility_20261101"]["authorized_migrations"]
-    r3c = json.loads(
-        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
-    )["r3c"]["final2"]["authorized_migrations"]
-    delivery_followup = json.loads(
-        (ROOT / "docs/data/ASSET_QUALIFICATION_BELAYA_08F3A.json").read_text()
-    )["r3c"]["delivery_followup"]["authorized_migrations"]
-    chat = json.loads((ROOT / "docs/data/CHAT_BEDROOM_09A.json").read_text())[
-        "authorized_migrations"
-    ]
-    chat_resume = (
-        json.loads((ROOT / "docs/data/CHAT_BEDROOM_09A.json").read_text())
-        .get("resume3", {})
-        .get("authorized_migrations", {})
-    )
-    design_agent = json.loads(
-        (ROOT / "docs/data/DESIGN_AGENT_SINGLE.json").read_text()
-    )["authorized_migrations"]
-    studio_receipt = json.loads((ROOT / "docs/data/3D_STUDIO_10A.json").read_text())
-    studio = studio_receipt["authorized_migrations"]
-    studio_review = studio_receipt["merge_review"]["authorized_migrations"]
-    bedroom_view = studio_receipt["bedroom_view"]["authorized_migrations"]
-    viewer_update = studio_receipt["three_0_187"]["authorized_migrations"]
-    designer_chair = studio_receipt["designer_chair"]["authorized_migrations"]
-    collection = studio_receipt["bedroom_collection"]["authorized_migrations"]
-    dependency_updates = json.loads(
-        (ROOT / "docs/data/DEPENDENCY_MANIFEST_MIGRATIONS.json").read_text()
-    )
-    for path, expected in pins["baseline_files"].items():
-        if path in migrations:
-            assert migrations[path]["before_sha256"] == expected
-            expected = migrations[path]["after_sha256"]
-        if path in continuation:
-            assert continuation[path]["before_sha256"] == expected
-            expected = continuation[path]["after_sha256"]
-        if path in r2:
-            assert r2[path]["before_sha256"] == expected
-            expected = r2[path]["after_sha256"]
-        if path in delivery:
-            assert delivery[path]["before_sha256"] == expected
-            expected = delivery[path]["after_sha256"]
-        if path in ci_compatibility:
-            assert ci_compatibility[path]["before_sha256"] == expected
-            expected = ci_compatibility[path]["after_sha256"]
-        if path in r3c:
-            assert r3c[path]["before_sha256"] == expected
-            expected = r3c[path]["after_sha256"]
-        if path in delivery_followup:
-            assert delivery_followup[path]["before_sha256"] == expected
-            expected = delivery_followup[path]["after_sha256"]
-        if path in chat:
-            assert chat[path]["before_sha256"] == expected
-            expected = chat[path]["after_sha256"]
-        if path in chat_resume:
-            assert chat_resume[path]["before_sha256"] == expected
-            expected = chat_resume[path]["after_sha256"]
-        if path in design_agent:
-            assert design_agent[path]["before_sha256"] == expected
-            expected = design_agent[path]["after_sha256"]
-        if path in studio:
-            assert studio[path]["before_sha256"] == expected
-            expected = studio[path]["after_sha256"]
-        if path in studio_review:
-            assert studio_review[path]["before_sha256"] == expected
-            expected = studio_review[path]["after_sha256"]
-        if path in bedroom_view:
-            assert bedroom_view[path]["before_sha256"] == expected
-            expected = bedroom_view[path]["after_sha256"]
-        if path in viewer_update:
-            assert viewer_update[path]["before_sha256"] == expected
-            expected = viewer_update[path]["after_sha256"]
-        if path in designer_chair:
-            assert designer_chair[path]["before_sha256"] == expected
-            expected = designer_chair[path]["after_sha256"]
-        if path in collection:
-            assert collection[path]["before_sha256"] == expected
-            expected = collection[path]["after_sha256"]
-        if path == "pyproject.toml":
-            for update in dependency_updates:
-                assert set(update) == {"pyproject.toml"}
-                assert update[path]["before_sha256"] == expected
-                expected = update[path]["after_sha256"]
+    for path, expected in expected_pins(ROOT).items():
         file = (ROOT / path).resolve()
         assert file.is_relative_to(ROOT) and not path.startswith(
             (".agents/", ".claude/")

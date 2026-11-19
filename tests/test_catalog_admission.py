@@ -482,6 +482,11 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
     dependency_updates = json.loads(
         (ROOT / "docs/data/DEPENDENCY_MANIFEST_MIGRATIONS.json").read_text()
     )
+    style_receipt = json.loads(
+        (ROOT / "docs/data/STYLE_PACKS_11A.json").read_text(encoding="utf-8")
+    )
+    style_packs = style_receipt["authorized_migrations"]
+    review = style_receipt["merge_review_migrations"]
     for name, expected in receipt["frozen_files"].items():
         if name in migrations:
             assert migrations[name]["before_sha256"] == expected
@@ -530,6 +535,13 @@ def test_admission_receipt_pins_frozen_research_and_original_asset_bytes():
                 assert set(update) == {"pyproject.toml"}
                 assert update[name]["before_sha256"] == expected
                 expected = update[name]["after_sha256"]
+        # 11A style packs migrate after every earlier receipt.
+        if name in style_packs:
+            assert style_packs[name]["before_sha256"] == expected
+            expected = style_packs[name]["after_sha256"]
+        if name in review:
+            assert review[name]["before_sha256"] == expected
+            expected = review[name]["after_sha256"]
         assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == expected, name
     catalog_bytes = (ROOT / "src/archimind/assets/furniture_catalog.json").read_bytes()
     assert hashlib.sha256(catalog_bytes).hexdigest() == receipt["catalog"]["sha256"]

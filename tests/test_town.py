@@ -139,7 +139,7 @@ def test_owner_and_budget(local, monkeypatch):
         seen.append(prompt)
         return schema(
             priority="balanced",
-            palette="oak",
+            style="scandinavian",
             clarification="Which room needs daylight?",
             unsupported=[],
         )
@@ -164,9 +164,9 @@ def test_compound_offline_brief_preserves_unsupported_constraints():
     brief = interpret_offline(
         Brief(), "Bright study and sage finishes; keep the bedroom."
     )
-    assert (brief.priority, brief.palette, brief.locks) == (
+    assert (brief.priority, brief.style, brief.locks) == (
         "bright study",
-        "sage",
+        "japandi",
         ["bedroom"],
     )
     with pytest.raises(ValueError, match="Offline briefs"):
@@ -178,7 +178,7 @@ def test_compound_offline_brief_preserves_unsupported_constraints():
     home = generate(combined)[0]
     assert home["evidence"]["study_window_width_m"] == 2.5
     assert home["evidence"]["bedroom_center_from_front_m"] > combined.depth / 2
-    with pytest.raises(ValueError, match="one finish"):
+    with pytest.raises(ValueError, match="Choose one style"):
         interpret_offline(Brief(), "oak and terracotta")
 
 
@@ -299,7 +299,18 @@ def test_designer_chair_preview_apply_fallback_and_undo(local, monkeypatch):
     }
     assert home["id"] == digest({k: v for k, v in home.items() if k != "id"})
     original = copy.deepcopy(home)
-    next(r for r in original["rooms"] if "designer_chair" in r).pop("designer_chair")
+    chosen = next(r for r in original["rooms"] if "designer_chair" in r)
+    chosen.pop("designer_chair")
+    # The chosen chair's reservation keeps it: no pack model is bound there.
+    assert {
+        "furniture_id": "desk-chair",
+        "asset_id": None,
+        "reason": "designer",
+    } in chosen["style"]["bindings"]
+    old_bedroom = next(
+        r for r in old["rooms"] if r["design"]["room"]["id"] == "bedroom"
+    )
+    chosen["style"]["bindings"] = old_bedroom["style"]["bindings"]
     assert original | {"id": old["id"]} == old
     assert local.get(f"/api/projects/{p}").json()["home"] == old
     for key, value in (
@@ -423,7 +434,7 @@ def test_design_team_reviews_real_candidates_and_reserves_three_calls(
             assert {"lock_rooms", "lock_furniture"}.isdisjoint(schema.model_fields)
             return schema(
                 priority="quiet bedroom",
-                palette="sage",
+                style="japandi",
                 clarification="",
                 unsupported=[],
             )
@@ -584,7 +595,7 @@ def test_controls_only_team_uses_controls_when_styling_unavailable(local, monkey
             raise service.provider.StudioError("Stylist unavailable.")
         assert schema is design_review.VisualReview
         assert '"priority": "bright study"' in content[0]["text"]
-        assert '"palette": "sage"' in content[0]["text"]
+        assert '"style": "japandi"' in content[0]["text"]
         assert '"style": null' in content[0]["text"]
         return schema(
             observation="Window visible.",

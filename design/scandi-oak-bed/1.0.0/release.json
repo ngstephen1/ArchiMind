@@ -1,0 +1,135 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "scandi-oak-bed",
+    "version": "1.0.0",
+    "name": "Scandinavian oak bed with upholstered headboard",
+    "category": "bed",
+    "dimensions_wdh_m": [
+      1.6,
+      2.0,
+      0.6
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Leg LF",
+        "Leg LB",
+        "Leg RF",
+        "Leg RB",
+        "Left rail",
+        "Right rail",
+        "Foot rail",
+        "Slatted base",
+        "Headboard frame",
+        "Upholstered headboard",
+        "Mattress",
+        "Duvet",
+        "Turned-down sheet",
+        "Folded throw",
+        "Pillow 1",
+        "Pillow 2"
+      ],
+      "finishes": {
+        "Ivory weave": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "E4DED3",
+          "tile": 0.2
+        },
+        "Pale oak": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "F2DCC0",
+          "tile": 0.9
+        },
+        "Sage linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "98A48C",
+          "tile": 0.28
+        },
+        "White linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "ECE7DD",
+          "tile": 0.28
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:ash_veneer": [
+          "16da5f57eb4fd40cab07183fc856fdeb8feafa826b16b14ce69ef28f9d55a367.webp",
+          "25fb5f540bac2ea47cad6fe6df0f58f3aee547e40a498f643400796588164a08.webp",
+          "840143418677f4955c66f5c2af533fb5d340624ff7491021a1f9c8bb8de047c5.webp"
+        ],
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "e008b1a152e03ff7ab641c16fbd60a9a3b0aaaf9fed6dc66904fad918bb86607",
+      "piece.glb": "731090b0c59b973d17c10856b0ad480d5111e359301b1bf7c6c9feb034266907",
+      "front.png": "2c2bab898749b92e918b765ba5ec249c94516e36f5862b23a4ad9c33ab7e7755",
+      "three-quarter.png": "65bd893e36e28252f2331bf54f141996de43595713a614ccb03505b6aa1d11fb"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.800000011920929,
+        0.0,
+        -1.0
+      ],
+      [
+        0.800000011920929,
+        0.6000000238418579,
+        1.0
+      ]
+    ],
+    "mesh_instances": 16,
+    "triangles": 29948,
+    "materials": 4,
+    "textures": 12,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 29360120
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept bed."
+}

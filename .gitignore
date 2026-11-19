@@ -58,3 +58,9 @@ htmlcov/
 
 # Real dataset downloads (third-party licenses; never commit)
 /data/p1/
+
+# Local agent workspaces and reference material (never commit)
+.superpowers/
+docs/superpowers/
+/ref/
+/refs/

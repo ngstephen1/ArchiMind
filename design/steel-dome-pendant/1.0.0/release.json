@@ -1,0 +1,81 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "steel-dome-pendant",
+    "version": "1.0.0",
+    "name": "Black steel dome pendant",
+    "category": "lamp",
+    "dimensions_wdh_m": [
+      0.45,
+      0.45,
+      0.7
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Ceiling canopy",
+        "Cord",
+        "Steel dome",
+        "Enamel reflector",
+        "Bulb"
+      ],
+      "finishes": {
+        "Black steel": {
+          "kind": "plain",
+          "color": "232323",
+          "roughness": 0.42,
+          "metallic": 1.0
+        },
+        "Warm bulb": {
+          "kind": "plain",
+          "color": "FFF4E0",
+          "roughness": 0.4,
+          "emission": "FFE2B0"
+        },
+        "White lacquer": {
+          "kind": "plain",
+          "color": "EFECE6",
+          "roughness": 0.32
+        }
+      },
+      "cc0_texture_sources": {},
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "0d08b96368c3f98569735c7809f590ab9a00fe92a80d41fd6d9a1966a9d3b3be",
+      "piece.glb": "403609de15ba9836b0fc940ada0f2f1aa94cea7c807938b8584daf394d8e1069",
+      "front.png": "bd771efd5489a83541dff9d0f0a8ce0c23854a7d847cfa5a87cf4d72c654d1ac",
+      "three-quarter.png": "8f25ad57657ab40c8899a8bc52320cf0436ab24c73489bd06c64f45bd7b198f6"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.22499999403953552,
+        0.0,
+        -0.22499999403953552
+      ],
+      [
+        0.22499999403953552,
+        0.699999988079071,
+        0.22499999403953552
+      ]
+    ],
+    "mesh_instances": 5,
+    "triangles": 2878,
+    "materials": 3,
+    "textures": 0,
+    "images_px": [],
+    "estimated_texture_bytes": 0
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept lamp."
+}
