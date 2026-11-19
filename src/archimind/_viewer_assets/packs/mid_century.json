@@ -104,6 +104,12 @@
     ],
     "storage": [
       {
+        "asset_id": "designer:walnut-sideboard@1.0.0",
+        "width_m": 1.6,
+        "depth_m": 0.45,
+        "height_m": 0.75
+      },
+      {
         "asset_id": "polyhaven:vintage_wooden_drawer_01",
         "width_m": 1.715,
         "depth_m": 1.007,
@@ -117,15 +123,39 @@
         "depth_m": 0.987,
         "height_m": 1.023
       }
+    ],
+    "bed": [
+      {
+        "asset_id": "designer:walnut-tapered-bed@1.0.0",
+        "width_m": 1.6,
+        "depth_m": 2.0,
+        "height_m": 0.6
+      }
+    ],
+    "sofa": [
+      {
+        "asset_id": "designer:mid-century-sofa@1.0.0",
+        "width_m": 1.95,
+        "depth_m": 0.84,
+        "height_m": 0.8
+      }
+    ],
+    "desk": [
+      {
+        "asset_id": "designer:walnut-writing-desk@1.0.0",
+        "width_m": 1.4,
+        "depth_m": 0.7,
+        "height_m": 0.75
+      }
     ]
   },
   "decor": {
     "rug": null,
     "art": null,
     "curtain": null,
-    "pendant": null,
+    "pendant": "designer:brass-bell-pendant@1.0.0",
     "plant": null,
-    "floor_lamp": null,
+    "floor_lamp": "designer:walnut-tripod-lamp@1.0.0",
     "mouldings": false,
     "accents": []
   },

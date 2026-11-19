@@ -18,7 +18,9 @@ The November 5 milestone below is historical context for the existing chatbot.
 CC0 surfaces, HDR lighting, measured CC0 furniture models, decor, plan themes, a
 Quality toggle and a Plan ↔ Room sweep in Studio and Town. Homes saved before the
 feature render as before (0.51% pixel difference against `main`, all in the new
-footer control). Blender signature pieces and frame-rate acceptance are pending.
+footer control). 21 original Blender signature pieces (beds, sofas, desks,
+storage, pendants, a tripod lamp) are released across the packs; frame-rate
+acceptance is pending.
 See [Style packs](STYLE_PACKS.md) and the [receipt](../data/STYLE_PACKS_11A.json).
 
 **Current milestone: Task 09A live conversation-to-layout acceptance passed;

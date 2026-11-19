@@ -133,8 +133,8 @@
           },
           {
             "furniture_id": "queen-bed",
-            "asset_id": null,
-            "reason": "procedural_fallback"
+            "asset_id": "designer:scandi-oak-bed@1.0.0",
+            "reason": "designer"
           }
         ],
         "dressing": [
@@ -180,7 +180,7 @@
           {
             "id": "pendant",
             "kind": "pendant",
-            "asset_id": null,
+            "asset_id": "designer:layered-pendant@1.0.0",
             "x_m": 4.802,
             "y_m": 1.305,
             "z_m": 2.1,
@@ -305,8 +305,8 @@
           },
           {
             "furniture_id": "sofa",
-            "asset_id": null,
-            "reason": "procedural_fallback"
+            "asset_id": "designer:scandi-linen-sofa@1.0.0",
+            "reason": "designer"
           }
         ],
         "dressing": [
@@ -352,7 +352,7 @@
           {
             "id": "pendant",
             "kind": "pendant",
-            "asset_id": null,
+            "asset_id": "designer:layered-pendant@1.0.0",
             "x_m": 4.575,
             "y_m": 1.725,
             "z_m": 2.1,
@@ -524,7 +524,7 @@
           {
             "id": "pendant",
             "kind": "pendant",
-            "asset_id": null,
+            "asset_id": "designer:layered-pendant@1.0.0",
             "x_m": 0.425,
             "y_m": 3.671,
             "z_m": 2.1,
@@ -683,7 +683,7 @@
           {
             "id": "pendant",
             "kind": "pendant",
-            "asset_id": null,
+            "asset_id": "designer:layered-pendant@1.0.0",
             "x_m": 2.5615,
             "y_m": 1.5645,
             "z_m": 2.1,
@@ -810,7 +810,7 @@
           {
             "id": "pendant",
             "kind": "pendant",
-            "asset_id": null,
+            "asset_id": "designer:layered-pendant@1.0.0",
             "x_m": 2.5615,
             "y_m": 2.35,
             "z_m": 2.1,
@@ -863,5 +863,5 @@
     "bedroom_center_from_front_m": 3.3,
     "study_window_width_m": 1.4
   },
-  "id": "b7b7fcd845c84ed53f31d4739350b56b545d812d01c5e828ae487491a6e34c24"
+  "id": "5ff73d248ec7c7afd83593a73faeab09abc8e41921beab0caf190fc71d65a2e7"
 }

@@ -1,0 +1,75 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "brass-bell-pendant",
+    "version": "1.0.0",
+    "name": "Brass bell pendant",
+    "category": "lamp",
+    "dimensions_wdh_m": [
+      0.45,
+      0.45,
+      0.7
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Ceiling canopy",
+        "Brass rod",
+        "Brass bell",
+        "Opal diffuser"
+      ],
+      "finishes": {
+        "Brass": {
+          "kind": "plain",
+          "color": "C7A15A",
+          "roughness": 0.28,
+          "metallic": 1.0
+        },
+        "Opal glass": {
+          "kind": "plain",
+          "color": "F6F1E8",
+          "roughness": 0.2,
+          "emission": "8C7A62"
+        }
+      },
+      "cc0_texture_sources": {},
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "85442432c15cb728e5299b87a18bf60592dfab117aca58b08006da07218802dc",
+      "piece.glb": "4b875572376fe0507f73a6a3588dc2691b5b40ea662d7494caa1c658439627ee",
+      "front.png": "a0c9768b4aee83b9655011a3784192812b76086cf2ff9b420970e42bb7f42796",
+      "three-quarter.png": "201269eebdaf3264161a0d27a2a43c8c3b6f9296edf870e49e6551949f2ee5d9"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.22499999403953552,
+        0.0,
+        -0.22499999403953552
+      ],
+      [
+        0.22499999403953552,
+        0.699999988079071,
+        0.22499999403953552
+      ]
+    ],
+    "mesh_instances": 4,
+    "triangles": 1920,
+    "materials": 2,
+    "textures": 0,
+    "images_px": [],
+    "estimated_texture_bytes": 0
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept lamp."
+}

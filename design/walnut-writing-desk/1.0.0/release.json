@@ -1,0 +1,104 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "walnut-writing-desk",
+    "version": "1.0.0",
+    "name": "Mid-century walnut writing desk",
+    "category": "desk",
+    "dimensions_wdh_m": [
+      1.4,
+      0.7,
+      0.75
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Walnut top",
+        "Drawer case",
+        "Drawer front 1",
+        "Brass pull 1",
+        "Drawer front 2",
+        "Brass pull 2",
+        "Tapered leg LF",
+        "Brass ferrule LF",
+        "Tapered leg LB",
+        "Brass ferrule LB",
+        "Tapered leg RF",
+        "Brass ferrule RF",
+        "Tapered leg RB",
+        "Brass ferrule RB"
+      ],
+      "finishes": {
+        "Brass": {
+          "kind": "plain",
+          "color": "C7A15A",
+          "roughness": 0.28,
+          "metallic": 1.0
+        },
+        "Walnut": {
+          "kind": "wood",
+          "asset": "polyhaven:dark_wood",
+          "tint": "F4E4D8",
+          "tile": 0.8
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:dark_wood": [
+          "2ae252b1276cb6e592ae54b97eea73c3a101952e0d3cebb6753301636e873188.webp",
+          "ab84c017729044df0084008fca4db6bae93a4876f9bc8f7f1660383e13dddfd4.webp",
+          "bdec29a80144a4cd6759dbbc41cd9cdffd23db5d74db74b86b6f988d2156247e.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        0.99859
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "a4860219fcfc29ab883f7d64f1a01284b20fa56758f3bb612f94a33789e1bf9c",
+      "piece.glb": "b31a3070e2b5270f536d8c05295cd6904778269766410464cc57a625447d6ec4",
+      "front.png": "53cae0d238b3386e2d0afb32628e032713d870b6c020c935afc184f2584e49b0",
+      "three-quarter.png": "40c32923ff270c562ea021165ae8b673ad190b74bb41d7400f52e4de7848575d"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.699999988079071,
+        0.0,
+        -0.3499999940395355
+      ],
+      [
+        0.699999988079071,
+        0.75,
+        0.3499999940395355
+      ]
+    ],
+    "mesh_instances": 14,
+    "triangles": 1704,
+    "materials": 2,
+    "textures": 3,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 16777212
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept desk."
+}

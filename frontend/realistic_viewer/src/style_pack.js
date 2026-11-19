@@ -173,10 +173,30 @@ export async function loadStylePack({baseUrl, ref, tier, fetchBytes = defaultFet
   };
   if (!isCurrent()) { dispose(); return 'superseded'; }
 
+  // Blender-authored designer pieces live beside the pack store, listed in the
+  // designer registry (`designer-<sha256>.glb`); they are verified the same way.
+  let registry = null;
+  async function designerBytes(assetId) {
+    const match = /^designer:([a-z0-9]+(?:-[a-z0-9]+)*)@([0-9]+\.[0-9]+\.[0-9]+)$/.exec(assetId);
+    if (!match) throw new Error('Invalid designer piece');
+    registry ??= fetchBytes(url('designer_registry.json')).then(b => JSON.parse(new TextDecoder().decode(b)));
+    const doc = await registry;
+    const piece = (doc?.schema_version === 2 && Array.isArray(doc.pieces) ? doc.pieces : [])
+      .find(p => p?.concept_id === match[1] && p.version === match[2]);
+    if (!piece || !/^[0-9a-f]{64}$/.test(piece.sha256) || !Number.isInteger(piece.bytes)) throw new Error('Designer piece not released');
+    const bytes = await fetchBytes(url(`designer-${piece.sha256}.glb`));
+    if (bytes.length !== piece.bytes || await sha256Hex(bytes) !== piece.sha256) throw new Error('Integrity check failed');
+    return bytes;
+  }
+
   const models = new Map();
   async function model(assetId) {
     const release = releases.get(assetId);
     try {
+      if (assetId?.startsWith?.('designer:')) {
+        if (!models.has(assetId)) models.set(assetId, designerBytes(assetId).then(parseModel).then(root => { templates.push(root); return root; }));
+        return (await models.get(assetId)).clone(true);
+      }
       if (!release || release.kind !== 'model') throw new Error('Model not released');
       if (!models.has(assetId)) models.set(assetId, verifiedBytes(pickFile(release, 'model', tier)).then(parseModel).then(root => { templates.push(root); return root; }));
       return (await models.get(assetId)).clone(true);

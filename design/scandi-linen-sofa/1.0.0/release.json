@@ -1,0 +1,125 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "scandi-linen-sofa",
+    "version": "1.0.0",
+    "name": "Scandinavian linen sofa",
+    "category": "sofa",
+    "dimensions_wdh_m": [
+      1.95,
+      0.84,
+      0.8
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Oak leg LF",
+        "Oak leg LB",
+        "Oak leg RF",
+        "Oak leg RB",
+        "Upholstered base",
+        "Upholstered back",
+        "Rounded arm L",
+        "Rounded arm R",
+        "Seat cushion 1",
+        "Back cushion 1",
+        "Seat cushion 2",
+        "Back cushion 2"
+      ],
+      "finishes": {
+        "Dove weave": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "B9B4AC",
+          "tile": 0.2
+        },
+        "Ivory weave": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "E4DED3",
+          "tile": 0.2
+        },
+        "Pale oak": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "F2DCC0",
+          "tile": 0.9
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:ash_veneer": [
+          "16da5f57eb4fd40cab07183fc856fdeb8feafa826b16b14ce69ef28f9d55a367.webp",
+          "25fb5f540bac2ea47cad6fe6df0f58f3aee547e40a498f643400796588164a08.webp",
+          "840143418677f4955c66f5c2af533fb5d340624ff7491021a1f9c8bb8de047c5.webp"
+        ],
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0002
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "6519df41a702f0c1fa98ffc016bd877158f8e426d3340298161cb714cfca5139",
+      "piece.glb": "075b186445d70a0cf904b595a8bd94115624095414d93c037bc761defeb43181",
+      "front.png": "693e5efc4d1b1fe0fa294cb011394b81e7c4cec98d27f23e531fdc7aea713b32",
+      "three-quarter.png": "56c8e8efc78b153a069781728d9fdb1f601f1449b477d0e2384411a9f98688e0"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.9750000238418579,
+        0.0,
+        -0.41999998688697815
+      ],
+      [
+        0.9750000238418579,
+        0.7999999523162842,
+        0.41999998688697815
+      ]
+    ],
+    "mesh_instances": 12,
+    "triangles": 33088,
+    "materials": 3,
+    "textures": 9,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 29360120
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept sofa."
+}

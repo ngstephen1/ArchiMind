@@ -1071,6 +1071,42 @@
     ]
   },
   {
+    "asset_id": "polyhaven:rough_linen",
+    "kind": "material",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/rough_linen",
+    "upstream_checksum": "md5:663db789fb075462b685c1f740e58930,3350269a2e9c472aa406bd3cc1eaf2c8,a380b24cc43cff88c39510305ebf0020",
+    "files": [
+      {
+        "role": "diffuse",
+        "tier": "both",
+        "sha256": "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9",
+        "ext": "webp",
+        "bytes": 252582,
+        "width_px": 1024,
+        "height_px": 1024
+      },
+      {
+        "role": "normal",
+        "tier": "both",
+        "sha256": "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593",
+        "ext": "webp",
+        "bytes": 248834,
+        "width_px": 1024,
+        "height_px": 1024
+      },
+      {
+        "role": "roughness",
+        "tier": "both",
+        "sha256": "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67",
+        "ext": "webp",
+        "bytes": 462216,
+        "width_px": 1024,
+        "height_px": 1024
+      }
+    ]
+  },
+  {
     "asset_id": "polyhaven:round_wooden_table_01",
     "kind": "model",
     "license": "CC0-1.0",
@@ -1236,6 +1272,42 @@
         "sha256": "8f1d277292d533d8660771c25af7f3fa15a0d7bda4b309b951acbdc3fd26214f",
         "ext": "webp",
         "bytes": 38774,
+        "width_px": 1024,
+        "height_px": 1024
+      }
+    ]
+  },
+  {
+    "asset_id": "polyhaven:velour_velvet",
+    "kind": "material",
+    "license": "CC0-1.0",
+    "source_url": "https://polyhaven.com/a/velour_velvet",
+    "upstream_checksum": "md5:fa3a7ef3606bf7591b8f8577992e7228,41009a399cb4d45e44636a515cd4c8c8,fac679bf7a69501a7402d832667fbc06",
+    "files": [
+      {
+        "role": "diffuse",
+        "tier": "both",
+        "sha256": "c5eba42c30908d84bdb6d7a2b4973d201dee1de2c858e6f44cbc4a621c0ea40e",
+        "ext": "webp",
+        "bytes": 172136,
+        "width_px": 1024,
+        "height_px": 1024
+      },
+      {
+        "role": "normal",
+        "tier": "both",
+        "sha256": "027755aad811d8e1c1ac9533ed4f02790a7405210bbf6d2ff434cb3a0e2a284b",
+        "ext": "webp",
+        "bytes": 91622,
+        "width_px": 1024,
+        "height_px": 1024
+      },
+      {
+        "role": "roughness",
+        "tier": "both",
+        "sha256": "113b17ae1d2f559b9fb903a29008326ed12fe589bb6c88a69b377982fe3b683e",
+        "ext": "webp",
+        "bytes": 400226,
         "width_px": 1024,
         "height_px": 1024
       }

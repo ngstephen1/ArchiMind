@@ -49,9 +49,12 @@ Each pack lists furniture choices per category with measured width, depth and
 height. A reservation uses the first choice that fits inside it **and** fills at
 least half its footprint and height, so a small piece never stands in for a large
 one. Kitchen counters, vanities and baths are always procedural. Models are
-floor-centred on their reservation and never scaled. Pieces with no fitting CC0
-model (beds, desks, dining and coffee tables, and some sofas) stay procedural
-until the Blender signature pieces are released.
+floor-centred on their reservation and never scaled. Beds, most desks and sofas,
+some storage, and every pack's pendant (plus the mid-century tripod lamp) are
+original Blender pieces (`designer:<concept>@<version>`). Viewers load them from
+`designer_registry.json` as `designer-<sha256>.glb`, verified by size and hash;
+a failed piece keeps its procedural stand-in and is named in the status line.
+Dining and coffee tables without a fitting CC0 model stay procedural.
 
 ## Releasing assets
 
@@ -75,10 +78,24 @@ before adding it to a pack's `furniture` list.
 
 ## Operator setup for designer pieces
 
-Blender-authored pieces need Blender 5.1 with the Blender MCP add-on registered
-for Codex, then `scripts/release_designer_piece.py`. This is installed outside
-the repository and needs the owner's go-ahead; until then, packs use CC0 models
-and procedural furniture.
+Pieces are built by `scripts/author_designer_piece.py` from numeric profiles,
+with wood grain and fabric weave taken from CC0 maps already in the pack store.
+Set up Blender 5.1+ and the pinned Blender MCP (v1.0.3) as in
+[Designer chair authoring](DESIGNER_CHAIR_AUTHORING.md), then author every piece
+through the MCP server and release the reviewed candidates:
+
+```sh
+export BLENDER_BIN=<blender> BLENDER_MCP=<operator>/bin/blender-mcp
+.venv/bin/python scripts/test_blender_operator.py <operator>/blender_mcp <new-dir> --pieces all
+.venv/bin/python scripts/release_designer_piece.py <new-dir>/<concept>   --operator-run local-operator:<date> --category bed --wdh 1.6 2.0 0.6 --approve-reviewed-previews
+```
+
+The runner clears the Blender session before each piece and reopens each
+`piece.blend` in a second Blender process. It also writes the `operator.json`
+receipt that the release script checks. Review `front.png` and
+`three-quarter.png` before releasing. Releases are immutable per version. The
+previews for each pack are in `docs/images/style-packs/pieces/`, and the
+operator versions are in the receipt's `operator_environment`.
 
 ## Verification
 

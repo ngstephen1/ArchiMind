@@ -113,6 +113,12 @@
     ],
     "storage": [
       {
+        "asset_id": "designer:classic-bookcase@1.0.0",
+        "width_m": 0.8,
+        "depth_m": 0.4,
+        "height_m": 1.8
+      },
+      {
         "asset_id": "polyhaven:ClassicNightstand_01",
         "width_m": 0.568,
         "depth_m": 0.424,
@@ -126,13 +132,29 @@
         "depth_m": 0.576,
         "height_m": 0.973
       }
+    ],
+    "bed": [
+      {
+        "asset_id": "designer:channel-velvet-bed@1.0.0",
+        "width_m": 1.6,
+        "depth_m": 2.0,
+        "height_m": 0.6
+      }
+    ],
+    "desk": [
+      {
+        "asset_id": "designer:ebonised-writing-desk@1.0.0",
+        "width_m": 1.4,
+        "depth_m": 0.7,
+        "height_m": 0.75
+      }
     ]
   },
   "decor": {
     "rug": null,
     "art": null,
     "curtain": null,
-    "pendant": null,
+    "pendant": "designer:globe-cluster-pendant@1.0.0",
     "plant": null,
     "floor_lamp": null,
     "mouldings": true,

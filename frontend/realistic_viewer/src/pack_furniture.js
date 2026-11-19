@@ -28,7 +28,9 @@ export function dressFurniture({ bindings, furniture, pack, objects, parent }) {
   const placed = [], failed = [], added = [], hidden = [];
   let undone = false;
   const jobs = bindings
-    .filter(b => b.reason === 'pack' && b.asset_id && byId.has(b.furniture_id))
+    // A pack's own designer piece carries its asset_id; a designer slot the user
+    // chose (asset_id null) is drawn by the designer-chair path instead.
+    .filter(b => (b.reason === 'pack' || b.reason === 'designer') && b.asset_id && byId.has(b.furniture_id))
     .map(async b => {
       let model = null;
       try { model = await pack.model(b.asset_id); } catch { model = null; }

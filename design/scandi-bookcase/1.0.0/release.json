@@ -1,0 +1,102 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "scandi-bookcase",
+    "version": "1.0.0",
+    "name": "Scandinavian bookcase",
+    "category": "storage",
+    "dimensions_wdh_m": [
+      0.8,
+      0.4,
+      1.8
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Left side",
+        "Right side",
+        "Back panel",
+        "Plinth",
+        "Shelf 1",
+        "Shelf 2",
+        "Shelf 3",
+        "Shelf 4",
+        "Top",
+        "Door 1",
+        "Oak knob 1",
+        "Door 2",
+        "Oak knob 2"
+      ],
+      "finishes": {
+        "Pale oak": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "F2DCC0",
+          "tile": 0.9
+        },
+        "White lacquer": {
+          "kind": "plain",
+          "color": "EFECE6",
+          "roughness": 0.32
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:ash_veneer": [
+          "16da5f57eb4fd40cab07183fc856fdeb8feafa826b16b14ce69ef28f9d55a367.webp",
+          "25fb5f540bac2ea47cad6fe6df0f58f3aee547e40a498f643400796588164a08.webp",
+          "840143418677f4955c66f5c2af533fb5d340624ff7491021a1f9c8bb8de047c5.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.0
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "62edea635de7ad243284a8cd216fc60437aec5cdef544b6ca7fa41cae62048f9",
+      "piece.glb": "b41fda8fa5fdd2e9ffd9cc62c580b0a6c9944808ac925af1bf7ae081f9f128d3",
+      "front.png": "b747eb87ea60044ba6b643cfb28ec473c368137697736cc26d0924f5625dc446",
+      "three-quarter.png": "54236226b7cea9d900259c5a665b03790fd73eff167cbede26a1f417bd3f2ec8"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.4000000059604645,
+        0.0,
+        -0.20000000298023224
+      ],
+      [
+        0.4000000059604645,
+        1.7999999523162842,
+        0.20000000298023224
+      ]
+    ],
+    "mesh_instances": 13,
+    "triangles": 2372,
+    "materials": 2,
+    "textures": 3,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 16777212
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept storage."
+}

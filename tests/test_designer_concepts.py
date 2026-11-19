@@ -144,7 +144,8 @@ def test_packaged_registry_is_v2_and_keeps_chair_releases():
         concepts._dir().joinpath("designer_registry.json").read_bytes()
     )
     assert registry["schema_version"] == 2 and "chairs" not in registry
-    assert {p["category"] for p in registry["pieces"]} == {"chair"}
+    categories = {p["category"] for p in registry["pieces"]}
+    assert "chair" in categories and categories <= concepts.CATEGORIES
     piece = concepts.approved_pieces("chair")[1]
     assert (
         concepts.resolve_piece(piece.concept_id, piece.version, piece.sha256) == piece

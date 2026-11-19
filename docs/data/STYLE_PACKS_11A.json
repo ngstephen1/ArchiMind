@@ -33,11 +33,11 @@
     },
     "src/archimind/_viewer_assets/THIRD_PARTY_NOTICES.txt": {
       "before_sha256": "cd06cfd0faa200f053a40fbe02b15590a3b6e3da085191b831dc012f7aec2e48",
-      "after_sha256": "d9875a41ae0bd4625fda2e4d88ab77736bb14a214e7be6257eaa984c5aef9a22"
+      "after_sha256": "913b2aaf3835711c2776d8d869b1daf71be82614e00d25e2362a07d899fa729b"
     },
     "src/archimind/_viewer_assets/viewer.js": {
       "before_sha256": "3da2ac1a4aa592229855689d6be763c1cf2653d699ef9a7e8f7813988ff27db5",
-      "after_sha256": "776bb890129f514f86fad085872a3425e234e498488abb2f17e3a84480bce3bc"
+      "after_sha256": "418a23a334101c2a791ac4f6bddcf013d0c109ad67004c8df540042edcc3a707"
     },
     "src/archimind/render/floorplan_2d.py": {
       "before_sha256": "d76c840f2f1c18cf1d72db2534e662a5317787f862ab22df7a8e0e7a61aeaccc",
@@ -107,21 +107,42 @@
       ]
     },
     "budgets_mb": {
-      "modern_classic": 12.6,
-      "industrial_loft": 22.5,
-      "scandinavian": 13.0,
-      "japandi": 16.4,
-      "mid_century": 17.9,
-      "all_assets_on_disk": 60.3,
+      "modern_classic": 17.0,
+      "industrial_loft": 24.4,
+      "scandinavian": 16.2,
+      "japandi": 21.6,
+      "mid_century": 21.3,
+      "all_packs_high": 100.6,
       "caps": {
         "per_pack": 25,
         "total": 120
       }
     },
     "pending": [
-      "Blender 5.1 + MCP operator setup (Task 11) and Blender signature pieces (Task 12 steps 2-3)",
       "frame-rate measurement",
+      "register the Blender MCP with Codex once ~/.codex/config.toml parses",
       "push and pull request (owner approval)"
-    ]
+    ],
+    "designer_pieces": {
+      "authored": 21,
+      "operator_run": "local-operator:2026-11-18",
+      "recipe": "scripts/author_designer_piece.py (authoring schema 2): numeric profiles, CC0 wood and linen/velvet maps from the pack store, normalised to the reservation",
+      "review": "front and three-quarter previews reviewed; redone before release: two beds over 0.6 m, a plain Japandi desk, and a houndstooth 'wool_boucle' scan that read as plaid (dropped; linen weave used instead)",
+      "previews": "docs/images/style-packs/pieces/<style>.jpg",
+      "viewer": "pack bindings and dressing items with designer:<id>@<version> load designer-<sha256>.glb from the designer registry, verified by size and SHA-256; Town showcase (scandinavian) renders the oak bed, linen sofa and layered pendant with no fallback"
+    }
+  },
+  "operator_environment": {
+    "date": "2026-11-18",
+    "blender": "5.3.0 (hash 02f0899d78e3, built 2026-11-10), C:/Program Files/Blender Foundation/Blender 5.3",
+    "blender_mcp": {
+      "release": "v1.0.3",
+      "commit": "2cea8d566dde07fbac28a61d698909d69724e853",
+      "addon_zip_sha256": "a7a9da816192502e5a0a202a396444e266b47d8fc4f74ad4698048bd43040707",
+      "server": "blender-mcp 1.0.3 (mcp 1.30.0) in a dedicated venv: <operator>/Scripts/blender-mcp.exe"
+    },
+    "codex": "codex-cli 0.159.2; `codex mcp add` was not run because the local ~/.codex/config.toml fails to parse (owner action). Authoring ran through the same MCP server via scripts/test_blender_operator.py --pieces, which drives execute_blender_code and get_objects_summary.",
+    "windows_adjustments": "test_blender_operator.py isolates the add-on profile with BLENDER_USER_RESOURCES and replaces the upstream client's select() wait (Windows pipes) with a reader thread",
+    "chair_round_trip": "passed (gentle and deep variants, .blend reopened in a second Blender process)"
   }
 }

@@ -1,0 +1,127 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "walnut-tripod-lamp",
+    "version": "1.0.0",
+    "name": "Walnut tripod floor lamp",
+    "category": "lamp",
+    "dimensions_wdh_m": [
+      0.4,
+      0.4,
+      1.6
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Walnut leg 1",
+        "Walnut leg 2",
+        "Walnut leg 3",
+        "Brass hub",
+        "Brass stem",
+        "Bulb",
+        "Drum shade",
+        "Shade rim"
+      ],
+      "finishes": {
+        "Brass": {
+          "kind": "plain",
+          "color": "C7A15A",
+          "roughness": 0.28,
+          "metallic": 1.0
+        },
+        "Mustard wool": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "C99A3A",
+          "tile": 0.22
+        },
+        "Walnut": {
+          "kind": "wood",
+          "asset": "polyhaven:dark_wood",
+          "tint": "F4E4D8",
+          "tile": 0.8
+        },
+        "Warm bulb": {
+          "kind": "plain",
+          "color": "FFF4E0",
+          "roughness": 0.4,
+          "emission": "FFE2B0"
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:dark_wood": [
+          "2ae252b1276cb6e592ae54b97eea73c3a101952e0d3cebb6753301636e873188.webp",
+          "ab84c017729044df0084008fca4db6bae93a4876f9bc8f7f1660383e13dddfd4.webp",
+          "bdec29a80144a4cd6759dbbc41cd9cdffd23db5d74db74b86b6f988d2156247e.webp"
+        ],
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        0.999
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "e4d8d225ec3079f03ed096da9bcce6eeb60877c73f07a345945d8125bac4c943",
+      "piece.glb": "98b3b85e26bcc284e01bad4fa8f8b3247750273b807cfd5f55a0149d5c26de87",
+      "front.png": "35f1a7a3f44319b11c414ccf5e83c52d2302a7e1b8343f24c53abba70e35e185",
+      "three-quarter.png": "949826af330462070676cd1a3717fcf7f2190cc71bd8bd148547455a1848696d"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.20000000298023224,
+        0.0,
+        -0.20000000298023224
+      ],
+      [
+        0.20000000298023224,
+        1.5999999046325684,
+        0.20000000298023224
+      ]
+    ],
+    "mesh_instances": 8,
+    "triangles": 2104,
+    "materials": 4,
+    "textures": 6,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 29360120
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept lamp."
+}

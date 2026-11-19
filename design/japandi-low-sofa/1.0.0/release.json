@@ -1,0 +1,121 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "japandi-low-sofa",
+    "version": "1.0.0",
+    "name": "Japandi low sofa",
+    "category": "sofa",
+    "dimensions_wdh_m": [
+      1.95,
+      0.84,
+      0.72
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Ash leg LF",
+        "Ash leg LB",
+        "Ash leg RF",
+        "Ash leg RB",
+        "Ash seat frame",
+        "Back panel",
+        "Ash arm L",
+        "Ash arm R",
+        "Seat cushion 1",
+        "Back cushion 1",
+        "Seat cushion 2",
+        "Back cushion 2",
+        "Seat cushion 3",
+        "Back cushion 3"
+      ],
+      "finishes": {
+        "Ash": {
+          "kind": "wood",
+          "asset": "polyhaven:ash_veneer",
+          "tint": "FFFFFF",
+          "tile": 0.9
+        },
+        "Oatmeal linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "CFC3AE",
+          "tile": 0.28
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:ash_veneer": [
+          "16da5f57eb4fd40cab07183fc856fdeb8feafa826b16b14ce69ef28f9d55a367.webp",
+          "25fb5f540bac2ea47cad6fe6df0f58f3aee547e40a498f643400796588164a08.webp",
+          "840143418677f4955c66f5c2af533fb5d340624ff7491021a1f9c8bb8de047c5.webp"
+        ],
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        1.00028
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "1a7d5e9f4d0defb074e0713a94bd80ea12c5a39f356b5cd060fcc73aa0f7307c",
+      "piece.glb": "33d6e62b0cecf171231e7ced8eebf2dd3a0eded33c792cdc17dbc8615fb59e93",
+      "front.png": "1bf83c252ae1eaa69af13da9216180e0458867fa9e641e96188dfe6f8a4decf4",
+      "three-quarter.png": "0dcc850d1464d42cfc7e48cf4c9882edf987428ea2d174fa35ee0071bf9b5560"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.9750000238418579,
+        0.0,
+        -0.41999998688697815
+      ],
+      [
+        0.9750000238418579,
+        0.7200000286102295,
+        0.41999998688697815
+      ]
+    ],
+    "mesh_instances": 14,
+    "triangles": 25504,
+    "materials": 2,
+    "textures": 6,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 29360120
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept sofa."
+}

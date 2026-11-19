@@ -60,3 +60,19 @@ test("the status names furniture whose pack model failed, by its display name", 
   assert.equal(furnitureFallbackText(["t", "sofa"], furniture), "Fallback furniture: Coffee table, Sofa");
   assert.equal(furnitureFallbackText([], furniture), "");
 });
+
+test("a pack's designer piece is dressed like a pack model; a user-chosen designer slot is left alone", async () => {
+  const parent = new T.Group();
+  const objects = new Map([["bed", [new T.Mesh()]], ["chair", [new T.Mesh()]]]);
+  const furniture = [{ ...sofa, id: "bed" }, { ...sofa, id: "chair" }];
+  const bindings = [
+    { furniture_id: "bed", asset_id: "designer:japandi-platform-bed@1.0.0", reason: "designer" },
+    { furniture_id: "chair", asset_id: null, reason: "designer" },
+  ];
+  const asked = [];
+  const pack = { model: async (id) => { asked.push(id); return model(); } };
+  const handle = dressFurniture({ bindings, furniture, pack, objects, parent });
+  assert.deepEqual(await handle.ready, { placed: ["bed"], failed: [] });
+  assert.deepEqual(asked, ["designer:japandi-platform-bed@1.0.0"]);
+  assert.equal(objects.get("chair")[0].visible, true);
+});

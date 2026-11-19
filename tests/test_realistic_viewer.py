@@ -35,9 +35,18 @@ def test_asset_provenance_file_and_model_license():
         "SheenChair.glb",
         "CharlesArmchair.glb",
         "BelayaDesk.glb",
+        # Designer pieces are content-addressed and governed by designer_registry.json.
+        *(
+            f"designer-{p['sha256']}.glb"
+            for p in json.loads(
+                (viewer.ASSET_DIR / "designer_registry.json").read_text(encoding="utf-8")
+            )["pieces"]
+        ),
+    }
+    assert {
         "designer-54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81.glb",
         "designer-609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258.glb",
-    }
+    } <= {p.name for p in viewer.ASSET_DIR.glob("designer-*.glb")}
 
 
 def test_glb_contains_actual_geometry_pbr_materials_and_embedded_images():

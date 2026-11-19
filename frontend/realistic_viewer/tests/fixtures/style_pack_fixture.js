@@ -44,9 +44,16 @@ export function buildFixture() {
       sun: {direction: [0.4, 0.8, 0.3], intensity: 2, kelvin: 6200}, fill: {sky_color: '#eef2f7', ground_color: '#b9ab96', intensity: 0.6}},
     plan_theme: {}, quality: {},
   };
+  const bed = blob('designer/test-bed', 140);
+  const designerGlb = `designer-${sha(bed)}.glb`;
+  files.set(designerGlb, bed);
+  files.set('designer_registry.json', new Uint8Array(Buffer.from(JSON.stringify({schema_version: 2, pieces: [
+    {concept_id: 'test-bed', version: '1.0.0', name: 'Test bed', category: 'bed', sha256: sha(bed), front_sha256: sha(bed),
+      three_quarter_sha256: sha(bed), width_m: 1.6, depth_m: 2, height_m: 0.6, bytes: bed.length},
+  ]}))));
   files.set('packs/scandinavian.json', new Uint8Array(Buffer.from(JSON.stringify(manifest))));
   files.set('packs/releases.json', new Uint8Array(Buffer.from(JSON.stringify(releases))));
-  return {files, manifest, releases};
+  return {files, manifest, releases, designerGlb};
 }
 
 // fetchBytes(url) -> Uint8Array; throws on 404. `mutate(path, bytes)` lets a test corrupt a file.

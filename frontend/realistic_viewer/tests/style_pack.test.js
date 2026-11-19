@@ -149,3 +149,17 @@ test('pack models may read their own embedded images but never an external URL',
   for (const url of ['https://example.com/t.jpg', 'textures/wood.jpg', '/packs/x.webp'])
     assert.throws(() => embeddedResourceOnly(url), /External model resource/);
 });
+
+test('designer pieces load lazily from the designer registry, verified by size and hash', async () => {
+  const fixture = buildFixture();
+  const log = [];
+  const pack = await load(fixture, {log});
+  assert.ok(!log.includes('designer_registry.json'));
+  assert.ok(await pack.model('designer:test-bed@1.0.0') instanceof THREE.Object3D);
+  assert.ok(log.includes(fixture.designerGlb));
+  const broken = await load(fixture, {mutate: (p, b) => p === fixture.designerGlb ? b.map(x => x ^ 1) : b});
+  assert.equal(await broken.model('designer:test-bed@1.0.0'), null);
+  assert.equal(await broken.model('designer:test-bed@9.9.9'), null);
+  assert.equal(await broken.model('designer:../evil@1.0.0'), null);
+  assert.deepEqual(broken.failures, ['designer:test-bed@1.0.0', 'designer:test-bed@9.9.9', 'designer:../evil@1.0.0']);
+});

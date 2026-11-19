@@ -35,6 +35,7 @@ polyhaven:modern_coffee_table_01 — Modern Coffee Table 01 by Amin, CC0 1.0 (pu
 polyhaven:oak_wood_planks — Oak Wood Planks by Dimitrios Savva, CC0 1.0 (public domain dedication), https://polyhaven.com/a/oak_wood_planks
 polyhaven:painted_plaster_wall — Painted Plaster Wall by Amal Kumar, CC0 1.0 (public domain dedication), https://polyhaven.com/a/painted_plaster_wall
 polyhaven:plank_flooring_04 — Plank Flooring 04 by Dimitrios Savva, CC0 1.0 (public domain dedication), https://polyhaven.com/a/plank_flooring_04
+polyhaven:rough_linen — Rough Linen by Rico Cilliers, colormass, CC0 1.0 (public domain dedication), https://polyhaven.com/a/rough_linen
 polyhaven:round_wooden_table_01 — Round Wooden Table 01 by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/round_wooden_table_01
 polyhaven:side_table_01 — Side Table 01 by James Ray Cock, CC0 1.0 (public domain dedication), https://polyhaven.com/a/side_table_01
 polyhaven:side_table_tall_01 — Side Table Tall 01 by James Ray Cock, CC0 1.0 (public domain dedication), https://polyhaven.com/a/side_table_tall_01
@@ -43,6 +44,7 @@ polyhaven:sofa_02 — Sofa 02 by Kirill Sannikov, CC0 1.0 (public domain dedicat
 polyhaven:steel_frame_shelves_03 — Steel Frame Shelves 03 by Ulan Cabanilla, CC0 1.0 (public domain dedication), https://polyhaven.com/a/steel_frame_shelves_03
 polyhaven:studio_small_09 — Studio Small 09 by Sergej Majboroda, CC0 1.0 (public domain dedication), https://polyhaven.com/a/studio_small_09
 polyhaven:terrazzo_tiles — Terrazzo Tiles by Amal Kumar, CC0 1.0 (public domain dedication), https://polyhaven.com/a/terrazzo_tiles
+polyhaven:velour_velvet — Velour Velvet by Rico Cilliers, colormass, CC0 1.0 (public domain dedication), https://polyhaven.com/a/velour_velvet
 polyhaven:vintage_wooden_drawer_01 — Vintage Wooden Drawer 01 by James Ray Cock, CC0 1.0 (public domain dedication), https://polyhaven.com/a/vintage_wooden_drawer_01
 polyhaven:white_stucco — White Stucco by Amal Kumar, CC0 1.0 (public domain dedication), https://polyhaven.com/a/white_stucco
 polyhaven:whitewashed_brick — Whitewashed Brick by Charlotte Baglioni, CC0 1.0 (public domain dedication), https://polyhaven.com/a/whitewashed_brick

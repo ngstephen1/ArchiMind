@@ -1,0 +1,142 @@
+{
+  "authoring": {
+    "schema_version": 2,
+    "concept_id": "steel-loft-bed",
+    "version": "1.0.0",
+    "name": "Steel loft bed with reclaimed oak",
+    "category": "bed",
+    "dimensions_wdh_m": [
+      1.6,
+      2.0,
+      0.6
+    ],
+    "blender_version": "5.3.0",
+    "attribution": "Original ArchiMind geometry, proportions, finishes and studio lighting, modelled from numeric profiles in Blender. Texture detail is derived from CC0-1.0 Poly Haven maps released in the ArchiMind style-pack store; no external meshes.",
+    "inputs": {
+      "author_script_sha256": "543fdfca71a5dd101e910e59d73af29539e473b8e7350a3e9035490638714047",
+      "parts": [
+        "Steel post LF",
+        "Steel post LB",
+        "Steel post RF",
+        "Steel post RB",
+        "Left rail",
+        "Right rail",
+        "Foot rail",
+        "Head rail 1",
+        "Head rail 2",
+        "Reclaimed oak headboard",
+        "Base deck",
+        "Mattress",
+        "Duvet",
+        "Turned-down sheet",
+        "Folded throw",
+        "Pillow 1",
+        "Pillow 2"
+      ],
+      "finishes": {
+        "Black steel": {
+          "kind": "plain",
+          "color": "232323",
+          "roughness": 0.42,
+          "metallic": 1.0
+        },
+        "Charcoal linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "56534F",
+          "tile": 0.28
+        },
+        "Clay linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "B9876A",
+          "tile": 0.28
+        },
+        "Reclaimed oak": {
+          "kind": "wood",
+          "asset": "polyhaven:oak_wood_planks",
+          "tint": "D8C8B4",
+          "tile": 1.6
+        },
+        "Stone linen": {
+          "kind": "fabric",
+          "asset": "polyhaven:rough_linen",
+          "tint": "8E8A84",
+          "tile": 0.28
+        }
+      },
+      "cc0_texture_sources": {
+        "polyhaven:oak_wood_planks": [
+          "2afe68e238773160a7458f40b293c0165e8095b733a92348a75a01aba4734750.webp",
+          "2fdb00ce8f570d789ddd268caed53cf72309c0dc735fc8c9fe659872dcb10e64.webp",
+          "aab72f81cbc7237bae60502fe5b48f7bea98646cbb0218ea90d2b75b824aa4f8.webp"
+        ],
+        "polyhaven:rough_linen": [
+          "32c080b946291aef0a554b3079baff6a2efa1caf4f5854e2dc4d9cabbc14c0b9.webp",
+          "6a4d18dedfc34c679f266280474434cc200c4ebce0e8e86b6fe8639ec1d6ba67.webp",
+          "f4f74043f1e002ac6f46843a196f289203bdbef78bcb43f53c236d3794875593.webp"
+        ]
+      },
+      "normalising_scale_xyz": [
+        1.0,
+        1.0,
+        0.96792
+      ],
+      "blender_axes": "X width, -Y front, Z up",
+      "glb_axes": "X width, +Z front, Y up"
+    },
+    "sha256": {
+      "piece.blend": "811df84bec4451889fe5f185e4392a682eae46713dedc10e2f3684ae48123013",
+      "piece.glb": "4a8dbadb58de11efbe67b9d46eeaa380160c3bd1cb1c35b87f53809f9635987f",
+      "front.png": "0a16304376d1c526500ba94f0365515bd620d1caf6d4f152e1620f8d90c34ca6",
+      "three-quarter.png": "1f289566e3d72390bf0a052bc0443b891995691a2b19a824337cabe81508ce34"
+    }
+  },
+  "inspection": {
+    "bounds_xyz": [
+      [
+        -0.800000011920929,
+        0.0,
+        -1.0
+      ],
+      [
+        0.800000011920929,
+        0.5999999642372131,
+        1.0
+      ]
+    ],
+    "mesh_instances": 17,
+    "triangles": 25396,
+    "materials": 5,
+    "textures": 12,
+    "images_px": [
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        1024,
+        1024
+      ],
+      [
+        512,
+        512
+      ],
+      [
+        1024,
+        1024
+      ]
+    ],
+    "estimated_texture_bytes": 29360120
+  },
+  "operator_run": "local-operator:2026-11-18",
+  "review": "Front and three-quarter images reviewed; approved as a concept bed."
+}
