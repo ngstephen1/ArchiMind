@@ -15,7 +15,7 @@ from publish_studio_board import book
 def print_page(chrome, source, output, profile):
     subprocess.run(
         [
-            str(Path(chrome).resolve()),
+            chrome,
             "--headless",
             "--disable-gpu",
             "--disable-extensions",

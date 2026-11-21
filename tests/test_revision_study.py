@@ -108,7 +108,10 @@ def test_printed_receipt_and_both_appendix_pages(tmp_path):
 
     from PIL import Image
 
-    chrome = shutil.which("google-chrome") or shutil.which("chromium")
+    chrome = next(
+        (browser for browser in ("google-chrome", "chromium") if shutil.which(browser)),
+        None,
+    )
     if not chrome or not shutil.which("pdfunite") or not shutil.which("pdftotext"):
         pytest.skip("PDF integration uses headless Chrome and Poppler.")
     folders = [
