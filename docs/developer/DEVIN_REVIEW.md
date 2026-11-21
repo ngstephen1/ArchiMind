@@ -12,7 +12,7 @@ python scripts/check_devin_review.py 123
 
 ## Repository settings
 
-The `Devin review before main merge` ruleset is recorded in [.github/rulesets/main-devin-review.json](../../.github/rulesets/main-devin-review.json). Repository admins can create it with the following command when setting up a fresh repository. Update an existing ruleset by ID instead of creating a duplicate.
+The `Devin review before main merge` ruleset is recorded in [.github/rulesets/main-devin-review.json](../../.github/rulesets/main-devin-review.json). For a fresh repository, install the Devin.ai Integration and enable **Post CI check** in Devin Review settings. Confirm a test PR receives the `Devin Review` status from that integration, then create the ruleset with the following command. Update an existing ruleset by ID instead of creating a duplicate.
 
 ```sh
 gh api --method POST repos/ngstephen1/ArchiMind/rulesets \

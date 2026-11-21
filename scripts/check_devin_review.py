@@ -4,7 +4,7 @@ import argparse
 import json
 import subprocess
 
-DEVIN = "devin-ai-integration[bot]"
+DEVIN = "devin-ai-integration"
 STATUS = "Devin Review"
 THREADS = """
 query($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
@@ -15,7 +15,7 @@ query($owner: String!, $name: String!, $number: Int!, $endCursor: String) {
         pageInfo { hasNextPage endCursor }
         nodes {
           isResolved
-          comments(first: 1) { nodes { author { login } url path } }
+          comments(first: 1) { nodes { author { __typename login } url path } }
         }
       }
     }
@@ -59,9 +59,9 @@ def preflight(repository, number):
                 "--slurp",
                 "-f",
                 f"query={THREADS}",
-                "-F",
+                "-f",
                 f"owner={owner}",
-                "-F",
+                "-f",
                 f"name={name}",
                 "-F",
                 f"number={number}",
@@ -89,8 +89,12 @@ def preflight(repository, number):
         if thread["isResolved"]:
             continue
         for first in thread["comments"]["nodes"]:
-            author = (first["author"] or {}).get("login")
-            reviewer = "Devin" if author == DEVIN else "Other reviewer"
+            author = first["author"] or {}
+            reviewer = (
+                "Devin"
+                if author.get("__typename") == "Bot" and author.get("login") == DEVIN
+                else "Other reviewer"
+            )
             print(f"{reviewer} · {first['path']} · {first['url']}")
     if state != "SUCCESS" or any(not thread["isResolved"] for thread in threads):
         return 1
