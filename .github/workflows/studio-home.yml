@@ -21,6 +21,7 @@ on:
       - scripts/*studio_home.py
       - scripts/publish_studio_board.py
       - scripts/render_saved_bedroom.py
+      - scripts/render_town_templates.py
       - .github/workflows/studio-home.yml
       - src/archimind/town/design.py
       - frontend/realistic_viewer/town/bedroom_cameras.js
@@ -86,14 +87,14 @@ jobs:
           CAMERA_SOURCE: ${{ inputs.camera_source }}
         run: |
           [[ "$PROOF_RUN" =~ ^[0-9]+$ ]]
-          test "$(gh run view "$PROOF_RUN" --json conclusion,workflowName --jq '[.conclusion,.workflowName]|join("/")')" = "success/Studio home proof"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PROOF_RUN" --jq '[.conclusion,.path]|join(" ")')" = "success .github/workflows/studio-home.yml"
           gh run download "$PROOF_RUN" --name studio-home-proof --dir "$RUNNER_TEMP/accepted"
           if [ -n "$CAMERA_SOURCE" ]; then
             python scripts/stage_studio_manifest.py "$CAMERA_SOURCE" "$RUNNER_TEMP/camera.json"
           else
             cp "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json"
           fi
-          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views"
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: inputs.approved_proof_run
         with:

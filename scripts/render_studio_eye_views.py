@@ -49,10 +49,18 @@ def render(proof, manifest, camera_manifest, output):
     scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
+    poses = [
+        next(c for c in frame["cameras"] if c["id"] == name)
+        for name in ("doorway", "desk")
+    ]
+    if all(poses[0][key] == poses[1][key] for key in ("eye", "target", "fov")):
+        raise ValueError(
+            "Desk view fell back to the doorway. Two distinct eye-level views are required."
+        )
     output.mkdir(exist_ok=False)
     shots = []
-    for name in ("doorway", "desk"):
-        pose = next(c for c in frame["cameras"] if c["id"] == name)
+    for pose in poses:
+        name = pose["id"]
         scene.camera = camera(pose, "Comparison " + name)
         path = output / f"bedroom-{name}.png"
         scene.render.filepath = str(path.resolve())
