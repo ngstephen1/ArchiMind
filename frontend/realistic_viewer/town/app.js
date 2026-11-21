@@ -594,11 +594,11 @@ el("jumpDownloads").onclick = () => {
 };
 let boardGeneration = 0;
 el("present").onclick = async () => {
+  el("jumpDownloads").hidden = true;
   const generation = ++boardGeneration;
   el("printBoard").disabled = true;
   boardHome = applied;
   evidenceManifest = null;
-  el("jumpDownloads").hidden = true;
   el("boardExports").replaceChildren();
   if (revision) {
     try {
