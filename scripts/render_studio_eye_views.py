@@ -58,6 +58,16 @@ def render(proof, manifest, camera_manifest, output):
             "Desk view fell back to the doorway. Two distinct eye-level views are required."
         )
     output.mkdir(exist_ok=False)
+    notices = (
+        "BELAYA_ATTRIBUTION.txt",
+        "ABO_LICENSE_CC_BY_4.0.txt",
+        "surface-sources.json",
+    )
+    for name in notices:
+        data = (proof / name).read_bytes()
+        if hashlib.sha256(data).hexdigest() != receipt["files"][name]:
+            raise ValueError("Source notice differs from the accepted proof: " + name)
+        (output / name).write_bytes(data)
     shots = []
     for pose in poses:
         name = pose["id"]
@@ -82,6 +92,7 @@ def render(proof, manifest, camera_manifest, output):
                 "max_samples": 96,
                 "threshold": 0.010,
                 "resolution": [1920, 1080],
+                "source_notices": {name: receipt["files"][name] for name in notices},
                 "shots": shots,
             },
             indent=2,
