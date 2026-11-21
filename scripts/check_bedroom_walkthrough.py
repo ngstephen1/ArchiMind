@@ -31,6 +31,14 @@ def check(url: str, output: Path):
 
         page.locator("#design").click()
         page.locator("#chairStudio summary").click()
+        page.locator("#chairPullout").click()
+        page.wait_for_function(
+            "document.querySelector('#world').dataset.chair === 'procedural' && "
+            "!document.querySelector('#panel').open"
+        )
+        page.locator("#design").click()
+        page.locator("#chairDiscard").click()
+        assert "Revision 1" in page.locator("#revision").text_content()
         page.locator("#chairChoice").select_option("1")
         page.locator("#chairPreview").click()
         page.wait_for_function(
@@ -65,7 +73,21 @@ def check(url: str, output: Path):
         assert canvas.evaluate("element => element === document.activeElement")
         assert initial == page.screenshot(clip=clip), "Walking view was not restored"
 
+        # A rejected replacement leaves both the selected camera and accepted preview usable.
+        page.locator("#photoView").select_option("desk")
         page.locator("#design").click()
+        rejected_route = "**/chair-pullout/preview"
+        page.route(
+            rejected_route,
+            lambda route: route.fulfill(
+                status=400, json={"error": "The chair move is obstructed."}
+            ),
+        )
+        page.locator("#chairPullout").click()
+        page.get_by_text("The chair move is obstructed.", exact=True).wait_for()
+        assert canvas.get_attribute("data-camera") == "desk"
+        assert page.locator("#chairApply").is_visible()
+        page.unroute(rejected_route)
         page.locator("#chairApply").click()
         page.get_by_text(
             "Designer furniture saved in revision 2.", exact=True
@@ -86,6 +108,27 @@ def check(url: str, output: Path):
         page.locator("#present").click()
         page.wait_for_function("document.querySelectorAll('#photos img').length === 3")
         assert "revision 4" in page.locator("#boardSource").inner_text()
+        revision_reads = []
+        page.on(
+            "request",
+            lambda req: (
+                revision_reads.append(req.url)
+                if "/api/projects/" in req.url and "?revision=" in req.url
+                else None
+            ),
+        )
+        page.locator("#whyQuery").fill("Can I move the chair under the desk?")
+        page.locator("#askWhy").click()
+        assert "clear width between supports" in page.locator("#whyAnswer").inner_text()
+        assert revision_reads == []
+        page.locator("#whyQuery").fill("What changed when I moved the chair?")
+        with page.expect_response(lambda r: r.url.endswith("?revision=3")) as response:
+            page.locator("#askWhy").click()
+        assert response.value.ok
+        page.wait_for_function(
+            "document.querySelector('#whyAnswer').textContent.includes('Displacement:')"
+        )
+        assert len(revision_reads) == 1
         for image, name, label in zip(
             page.locator("#photos img").all(),
             ("doorway", "desk", "bedside"),

@@ -59,10 +59,14 @@ def handle(request, data):
         if (
             len(path) == 4
             and path[0] == "projects"
-            and path[2] in {"designer-chair", "bedroom-collection"}
+            and path[2] in {"designer-chair", "bedroom-collection", "chair-pullout"}
             and path[3] in {"preview", "apply"}
             and request.method == "POST"
         ):
+            if path[2] == "chair-pullout":
+                return designer_chair.chair_pullout(
+                    q, owner, path[1], data, apply=path[3] == "apply"
+                )
             return designer_chair.chair_change(
                 q,
                 owner,
