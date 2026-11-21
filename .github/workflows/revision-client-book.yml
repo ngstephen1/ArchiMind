@@ -1,0 +1,63 @@
+name: Print a reviewed revision book
+on:
+  workflow_dispatch:
+    inputs:
+      before_run:
+        description: Successful original Studio Home proof run
+        required: true
+      after_run:
+        description: Successful edited Studio Home proof run
+        required: true
+      before_eye_run:
+        description: Optional approved before photography run (supply both)
+      after_eye_run:
+        description: Optional approved after photography run (supply both)
+permissions:
+  contents: read
+  actions: read
+jobs:
+  book:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Verify and download the selected Blender runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BEFORE: ${{ inputs.before_run }}
+          AFTER: ${{ inputs.after_run }}
+          OLD_PHOTOS: ${{ inputs.before_eye_run }}
+          NEW_PHOTOS: ${{ inputs.after_eye_run }}
+        run: |
+          set -euo pipefail
+          workflow=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/studio-home.yml" --jq '.id')
+          fetch() {
+            local run="$1" name="$2" directory="$3"
+            [[ "$run" =~ ^[0-9]+$ ]]
+            test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run" --jq '[.workflow_id|tostring]+[.conclusion]|join(" ")')" = "$workflow success"
+            gh run download "$run" -n "$name" -D "$RUNNER_TEMP/$directory"
+          }
+          fetch "$BEFORE" studio-home-proof before
+          fetch "$AFTER" studio-home-proof after
+          if [[ -n "$OLD_PHOTOS" || -n "$NEW_PHOTOS" ]]; then
+            fetch "$OLD_PHOTOS" studio-eye-views old-photos
+            fetch "$NEW_PHOTOS" studio-eye-views new-photos
+          fi
+      - name: Print the portfolio and revision comparison
+        run: |
+          set -euo pipefail
+          options=()
+          if [[ -d "$RUNNER_TEMP/old-photos" ]]; then
+            options+=(--eye-views "$RUNNER_TEMP/old-photos" "$RUNNER_TEMP/new-photos")
+          fi
+          command -v pdfunite || { sudo apt-get update -qq && sudo apt-get install -y poppler-utils; }
+          python scripts/print_revision_book.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" \
+            "$RUNNER_TEMP/output/Client-Book.pdf" "${options[@]}"
+          pdftoppm -scale-to 600 -jpeg "$RUNNER_TEMP/output/Client-Book.pdf" "$RUNNER_TEMP/output/sheet"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: revision-client-book
+          path: ${{ runner.temp }}/output
+          if-no-files-found: error
