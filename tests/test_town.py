@@ -682,3 +682,37 @@ def test_pullout_rejects_obstructed_move(local, obstacle_kind):
         == 400
     )
     assert local.get(f"/api/projects/{p}").json()["revision"] == 1
+
+
+def test_local_extra_jobs_are_date_limited_and_bounded(local, monkeypatch):
+    from datetime import UTC, datetime
+
+    p = service.create("local-designer")["project"]
+    monkeypatch.setenv("OPENAI_API_KEY", "mock")
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "9")
+    monkeypatch.setenv("TOWN_CALL_RESERVE_MICROUSD", "10")
+    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "90")
+
+    def team():
+        return job(p, message="A study", live=True, agent_team=True)
+
+    for _ in range(3):
+        j = local.post("/api/jobs", json=team()).json()["job"]
+        assert local.post("/api/jobs/" + j + "/cancel", json={}).status_code == 200
+    for date in ("", "2001-01-01"):
+        monkeypatch.setenv("TOWN_EXTRA_TEAM_JOBS_DATE", date)
+        assert local.post("/api/jobs", json=team()).status_code == 429
+    monkeypatch.setenv(
+        "TOWN_EXTRA_TEAM_JOBS_DATE", datetime.now(UTC).date().isoformat()
+    )
+    assert local.post("/api/jobs", json=job(p)).status_code == 429
+    for _ in range(2):
+        req = team()
+        j = local.post("/api/jobs", json=req).json()["job"]
+        assert local.post("/api/jobs", json=req).json()["job"] == j
+        assert local.post("/api/jobs/" + j + "/cancel", json={}).status_code == 200
+    assert local.post("/api/jobs", json=team()).status_code == 429
+    req = service.Request.model_validate(team())
+    monkeypatch.setenv("DATABASE_URL", "unused")
+    assert service.local_extra_team_jobs(req, datetime.now(UTC).timestamp()) == 0

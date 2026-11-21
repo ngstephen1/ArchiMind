@@ -1,5 +1,6 @@
 """Start the local API, durable design worker and static town on loopback."""
 
+import argparse
 import errno
 import os
 import socket
@@ -17,7 +18,20 @@ Path(os.environ["TOWN_DB"]).parent.mkdir(parents=True, exist_ok=True)
 os.environ["TOWN_STATIC"] = str(ROOT / "dist/town")
 
 if __name__ == "__main__":
+    from datetime import date
+
     from archimind.town.service import initialize
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--extra-team-jobs-on",
+        type=date.fromisoformat,
+        metavar="YYYY-MM-DD",
+        help="Allow up to two extra local team jobs (six call reservations) for this UTC date.",
+    )
+    extra_date = parser.parse_args().extra_team_jobs_on
+    if extra_date is not None:
+        os.environ["TOWN_EXTRA_TEAM_JOBS_DATE"] = extra_date.isoformat()
 
     # Check both endpoints before starting children or building the site.
     town_port = int(os.getenv("TOWN_PORT", "8790"))

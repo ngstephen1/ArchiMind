@@ -6,6 +6,7 @@ import sqlite3
 import time
 import uuid
 from contextlib import contextmanager
+from datetime import UTC, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -117,6 +118,22 @@ class Request(BaseModel):
     agent_team: bool = False
 
 
+def local_extra_team_jobs(req, now):
+    """Permit two additional team submissions on one explicitly selected UTC day."""
+    return (
+        2
+        if (
+            req.agent_team
+            and req.live
+            and os.getenv("TOWN_MODE") == "local"
+            and not os.getenv("DATABASE_URL")
+            and os.getenv("TOWN_EXTRA_TEAM_JOBS_DATE")
+            == datetime.fromtimestamp(now, UTC).date().isoformat()
+        )
+        else 0
+    )
+
+
 def enqueue(owner, req):
     p, j = str(req.project), str(req.id)
     with transaction() as q:
@@ -155,13 +172,14 @@ def enqueue(owner, req):
         ).fetchone():
             raise Problem("One design is already in progress.", 409)
         day = now - now % 86400
+        extra = local_extra_team_jobs(req, now)
         if (
             q(
                 "SELECT count(*) FROM jobs WHERE owner=? AND created>=?", (owner, day)
             ).fetchone()[0]
-            >= 3
+            >= 3 + extra
         ):
-            raise Problem("Daily limit of three design jobs reached.", 429)
+            raise Problem("Daily design job limit reached.", 429)
         # Reserve three calls for team jobs and one for legacy interpretation.
         if req.live:
             used = q(
@@ -172,6 +190,9 @@ def enqueue(owner, req):
             cap = int(os.getenv("TOWN_DAILY_MODEL_CALLS", "0"))
             reserve = int(os.getenv("TOWN_CALL_RESERVE_MICROUSD", "0"))
             budget = int(os.getenv("TOWN_DAILY_MICROUSD", "0"))
+            if cap > 0 and budget > 0:
+                cap += 3 * extra
+                budget += 3 * extra * reserve
             total = used + (3 if req.agent_team else 1)
             if total > cap or reserve <= 0 or total * reserve > budget:
                 raise Problem("The operator's daily AI allowance is exhausted.", 429)

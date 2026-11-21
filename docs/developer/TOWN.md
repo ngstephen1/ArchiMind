@@ -45,6 +45,9 @@ The town ships the pinned desk and attribution with its static bundle. Keep the 
 
 The API reserves one of three daily design jobs per owner. Duplicate request IDs return the existing job for identical input. Queued and in-flight work can be cancelled. A failed or expired job leaves the applied home available. Town and the editor submit an AI team job on **Generate**. A job reserves three OpenAI calls before admission, including jobs that later fail or need clarification. Legacy API callers can still submit an offline job or a one-call interpretation job. The local launcher reads the server key from the environment or ignored `.env` and defaults to nine reserved calls per UTC day. The hosted API needs the studio flag and positive `TOWN_DAILY_MODEL_CALLS`, `TOWN_DAILY_MICROUSD` and `TOWN_CALL_RESERVE_MICROUSD`. The worker needs the studio flag and `OPENAI_API_KEY`. The monetary settings are operator estimates. Codex uses its own account and its usage is separate. Walking, previews, switching layouts and reopening projects require none.
 
+For an approved local live demonstration after the normal quota is used, run the launcher with `--extra-team-jobs-on YYYY-MM-DD` against the same `TOWN_DB`. Use the authorized UTC date. It adds two team-job slots and six model-call reservations to that day's existing ledger. With launcher defaults the additional estimated reservation is $0.60. Failed jobs still use reservations. Hosted mode and other dates retain the standard limit. Buy-in for actual provider usage is a separate operator decision.
+
+
 ## Verification
 
 ```sh
