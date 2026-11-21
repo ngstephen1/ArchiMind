@@ -74,7 +74,7 @@ gh workflow run studio-home.yml -f fresh_home=true \
 
 Open the resulting `studio-home-proof` artifact. Compare the receipt’s manifest digest, revision and home ID to the Town export, then inspect the doorway and desk views. Known procedural bedroom templates retain their recognizable shapes and materials. The receipt identifies procedural templates, unrecognized reservation boxes, and native mesh hashes separately.
 
-After accepting the CPU proof, render two 1920 × 1080 images from its packed Blender file. For a comparison between revisions, give both runs the **same** camera-source commit and path, referencing either revision of the same project and bedroom shell. Leave out `camera_source` to use the current revision’s cameras.
+After accepting the CPU proof, render two 1920 × 1080 images from its packed Blender file. For a comparison between revisions, give both runs the **same** camera-source commit and path, referencing either revision of the same project and bedroom shell. Use a source with distinct doorway and desk views. A desk camera that fell back to the doorway needs another saved camera source with the same shell. Leave out `camera_source` to use the current revision’s cameras.
 
 ```sh
 gh workflow run studio-home.yml -f fresh_home=true \

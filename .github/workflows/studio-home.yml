@@ -87,7 +87,8 @@ jobs:
           CAMERA_SOURCE: ${{ inputs.camera_source }}
         run: |
           [[ "$PROOF_RUN" =~ ^[0-9]+$ ]]
-          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PROOF_RUN" --jq '[.conclusion,.path]|join(" ")')" = "success .github/workflows/studio-home.yml"
+          workflow_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/studio-home.yml" --jq .id)"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PROOF_RUN" --jq '[.conclusion,(.workflow_id|tostring)]|join(" ")')" = "success $workflow_id"
           gh run download "$PROOF_RUN" --name studio-home-proof --dir "$RUNNER_TEMP/accepted"
           if [ -n "$CAMERA_SOURCE" ]; then
             python scripts/stage_studio_manifest.py "$CAMERA_SOURCE" "$RUNNER_TEMP/camera.json"
