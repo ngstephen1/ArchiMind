@@ -12,6 +12,7 @@ import bpy
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_studio_home import camera  # noqa: E402
 from stage_studio_manifest import proof_has_saved_style  # noqa: E402
+from studio_photography import attach_textile_detail, daylight_exposure  # noqa: E402
 
 
 def sha(path):
@@ -111,7 +112,7 @@ def render(
     for lamp in daylight:
         lamp.color = daylight_color
     diffuse_windows = transmitted_daylight(board, scene) if styled else []
-    scene.view_settings.exposure = 0.80 if styled else 0.0
+    fabrics = attach_textile_detail() if styled else []
     poses = [
         next(c for c in frame["cameras"] if c["id"] == name)
         for name in ("doorway", "desk")
@@ -144,12 +145,17 @@ def render(
             scene.camera, projection = architectural_camera(pose)
         else:
             scene.camera, projection = camera(pose, "Comparison " + name), None
+        room = next(
+            part["room"] for part in board["rooms"] if part["room"]["id"] == room_id
+        )
+        scene.view_settings.exposure = daylight_exposure(room) if styled else 0.0
         path = output / f"{room_id}-{name}.png"
         scene.render.filepath = str(path.resolve())
         bpy.ops.render.render(write_still=True)
         shots.append(
             {
                 "room": room_id,
+                "exposure_ev": scene.view_settings.exposure,
                 "view": name,
                 "camera": pose,
                 "architectural_projection": projection,
@@ -174,7 +180,7 @@ def render(
                 "resolution": [1920, 1080],
                 "view_transform": scene.view_settings.view_transform,
                 "view_look": scene.view_settings.look,
-                "exposure_ev": scene.view_settings.exposure,
+                "textile_relief_materials": fabrics,
                 "transmitted_window_emitters": diffuse_windows,
                 "packed_file_image_count": len(file_images),
                 "daylight_rgb": daylight_color,

@@ -16,6 +16,7 @@ from mathutils import Vector
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import render_saved_bedroom as bedroom  # noqa: E402
 from render_saved_style import dress_scene  # noqa: E402
+from studio_photography import attach_textile_detail, daylight_exposure  # noqa: E402
 
 
 def translate_new(before, origin):
@@ -368,6 +369,7 @@ def render(args):
     )
     if style:
         dress_scene(style, board, bedroom, out)
+        fabrics = attach_textile_detail()
     scene["board_sha256"] = hashlib.sha256(source).hexdigest()
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.adaptive_threshold = 0.025 if args.proof else 0.012
@@ -399,8 +401,13 @@ def render(args):
     gray_studies(scene, board, out)
     benchmark = sample_benchmark(scene, out) if not args.proof else None
 
+    rooms = {r["room"]["id"]: r["room"] for r in board["rooms"]}
+    exposures = {}
     for room, name in views:
         scene.camera = bpy.data.objects[name]
+        if style:
+            scene.view_settings.exposure = daylight_exposure(rooms[room])
+            exposures[name] = scene.view_settings.exposure
         save_view(scene, out, name, not args.proof)
     if cloth_name:
         scene.camera = bpy.data.objects["bedroom-bedside"]
@@ -408,6 +415,8 @@ def render(args):
         cloth.hide_render = True
         save_view(scene, out, "bedroom-bedside-before", not args.proof)
         cloth.hide_render = False
+    if style:
+        scene.view_settings.exposure = exposures[hero]
     lighting_studies(scene, out, hero, not args.proof)
     (out / "receipt.json").write_text(
         json.dumps(
@@ -420,6 +429,8 @@ def render(args):
                 ),
                 "devices": devices or ["CPU"],
                 "samples": scene.cycles.samples,
+                "daylight_exposure_ev": exposures,
+                "textile_relief_materials": fabrics if style else [],
                 "benchmark": benchmark,
                 "size": [scene.render.resolution_x, scene.render.resolution_y],
                 "files": {p.name: bedroom.sha(p) for p in out.iterdir() if p.is_file()},
