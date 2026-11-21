@@ -86,6 +86,27 @@ def check(url: str, output: Path):
         page.locator("#present").click()
         page.wait_for_function("document.querySelectorAll('#photos img').length === 3")
         assert "revision 4" in page.locator("#boardSource").inner_text()
+        revision_reads = []
+        page.on(
+            "request",
+            lambda req: (
+                revision_reads.append(req.url)
+                if "/api/projects/" in req.url and "?revision=" in req.url
+                else None
+            ),
+        )
+        page.locator("#whyQuery").fill("Can I move the chair under the desk?")
+        page.locator("#askWhy").click()
+        assert "clear width between supports" in page.locator("#whyAnswer").inner_text()
+        assert revision_reads == []
+        page.locator("#whyQuery").fill("What changed when I moved the chair?")
+        with page.expect_response(lambda r: r.url.endswith("?revision=3")) as response:
+            page.locator("#askWhy").click()
+        assert response.value.ok
+        page.wait_for_function(
+            "document.querySelector('#whyAnswer').textContent.includes('Displacement:')"
+        )
+        assert len(revision_reads) == 1
         for image, name, label in zip(
             page.locator("#photos img").all(),
             ("doorway", "desk", "bedside"),
