@@ -69,7 +69,7 @@ def demo_shell(room):
     )
 
 
-def build(boards, scene, photos, out):
+def build(boards, scene, photos, book, out):
     before = verified(boards / "before.json", R1)
     after = verified(boards / "manifest.json", R2)
     verified(scene / "manifest.json", R2)
@@ -142,10 +142,21 @@ def build(boards, scene, photos, out):
         copy(native, "native/home.blend")
         copy(scene / "receipt.json", "native/receipt.json")
         copy(photos / "eye-view-receipt.json", "presentation/eye-view-receipt.json")
+        qa_path = book / "support/book-qa.json"
+        qa = json.loads(qa_path.read_bytes())
+        if (qa["home_id"], qa["revision"]) != (board["home_id"], board["revision"]):
+            raise ValueError("The client book belongs to a different design.")
+        if len(qa["inspection"]) != 16 or not any(
+            s["sha256"] == BOOK and s["pages"] == 10 for s in qa["input_sources"]
+        ):
+            raise ValueError(
+                "Expected the inspected 16-page book with its ten-page room portfolio."
+            )
         copy(
-            verified(photos / "Studio-House-Presentation.pdf", BOOK),
-            "presentation/Studio-House-Presentation.pdf",
+            verified(book / "Studio-House-Client-Book.pdf", qa["book_sha256"]),
+            "presentation/Studio-House-Client-Book.pdf",
         )
+        copy(qa_path, "presentation/book-qa.json")
         shots = {s["file"]: s["sha256"] for s in eyes["shots"]}
         for name in ("bedroom-desk.png", "bedroom-doorway.png", "salon-overview.png"):
             copy(verified(photos / name, shots[name]), "presentation/" + name)
@@ -197,5 +208,8 @@ if __name__ == "__main__":
         type=Path,
         default=ROOT / "output/designer-handoff/Studio-House-Designer-Handoff.zip",
     )
+    parser.add_argument(
+        "--book", type=Path, default=ROOT / "output/designer-inputs/book"
+    )
     args = parser.parse_args()
-    build(args.boards, args.scene, args.photos, args.output)
+    build(args.boards, args.scene, args.photos, args.book, args.output)

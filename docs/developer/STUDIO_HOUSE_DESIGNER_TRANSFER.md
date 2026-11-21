@@ -6,7 +6,7 @@
 
 | Open | What to check |
 |---|---|
-| `presentation/Studio-House-Presentation.pdf` | Whole-home concept. The separate doorway, desk and salon PNGs show three CPU Cycles renders at 1920 × 1080. |
+| `presentation/Studio-House-Client-Book.pdf` | 16 landscape pages. Start with the A/B plans, axonometric and palette. The six-room portfolio is followed by a camera-matched chair comparison and desk evidence. The separate doorway, desk and salon PNGs show three CPU Cycles renders at 1920 × 1080. |
 | `drawings/r2/bedroom-plan.svg`, elevations and section | Review furniture reservations and openings. Each sheet can be edited in a vector editor. Use labeled dimensions. |
 | `drawings/bedroom-concept-shell.dxf` | Import in metres. The associated JSON gives the source and field checks. This shell is derived from Town's geometry. |
 | `native/home.blend` | Open the editable proof scene. The final eye-view run used the camera and lighting settings recorded in the presentation receipt. |
@@ -26,4 +26,4 @@ For an actual home, survey the finished faces, ceiling, diagonals, fixed service
 
 ## File integrity and rebuild
 
-Unzip into one directory and run `shasum -a 256 -c SHA256SUMS.txt` there. For a repository rebuild, place the unmodified conference proof release under `output/designer-inputs/scene` and the HD eye-view release under `output/designer-inputs/photos`. Run `.venv/bin/python scripts/package_designer_demo.py` from the repository. The script checks both saved board hashes, the native model against its render receipts, the three image hashes, source notices and the presentation PDF before replacing the ZIP.
+Unzip into one directory and run `shasum -a 256 -c SHA256SUMS.txt` there. For a repository rebuild, place the unmodified conference proof release under `output/designer-inputs/scene` and the HD eye-view release under `output/designer-inputs/photos`. Place the issued client book and its `support/book-qa.json` in `output/designer-inputs/book`. Run `.venv/bin/python scripts/package_designer_demo.py` from the repository. The script checks both saved board hashes, the native model against its render receipts, the three image hashes, source notices and the presentation PDF before replacing the ZIP.
