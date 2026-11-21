@@ -127,7 +127,12 @@ def chair_pullout(q, owner, project, data, *, apply):
         raise db.Problem("The chair must be on one side of the writing desk.")
     chair["y_m"] = end
     if home.get("style_pack"):
+        saved_styles = [part.get("style") for part in home["rooms"]]
         apply_style(home, home["style_pack"]["id"])
+        if saved_styles != [part.get("style") for part in home["rooms"]]:
+            raise db.Problem(
+                "This move would also change the saved room dressing. Discard the edit or choose another layout."
+            )
     home["evidence"]["chair_move_m"] = {
         "from_x": chair["x_m"],
         "to_x": chair["x_m"],

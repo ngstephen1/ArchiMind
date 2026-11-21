@@ -31,6 +31,14 @@ def check(url: str, output: Path):
 
         page.locator("#design").click()
         page.locator("#chairStudio summary").click()
+        page.locator("#chairPullout").click()
+        page.wait_for_function(
+            "document.querySelector('#world').dataset.chair === 'procedural' && "
+            "!document.querySelector('#panel').open"
+        )
+        page.locator("#design").click()
+        page.locator("#chairDiscard").click()
+        assert "Revision 1" in page.locator("#revision").text_content()
         page.locator("#chairChoice").select_option("1")
         page.locator("#chairPreview").click()
         page.wait_for_function(

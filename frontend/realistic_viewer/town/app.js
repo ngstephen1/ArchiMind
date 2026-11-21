@@ -542,9 +542,10 @@ async function previewBedroomEdit(endpoint, request) {
 }
 bind("chairApply", async () => {
   if (!chairPreview) return;
+  const editingPosition = chairPreview.endpoint === "chair-pullout";
   sync(await api("/projects/" + project + "/"+chairPreview.endpoint+"/apply", chairPreview.request));
   el("alternatives").hidden = true;
-  notify("Bedroom edit saved in revision " + revision + ".");
+  notify((editingPosition ? "Chair position" : "Designer furniture") + " saved in revision " + revision + ".");
 });
 
 let boardHome;
