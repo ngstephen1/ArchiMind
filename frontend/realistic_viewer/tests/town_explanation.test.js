@@ -58,3 +58,22 @@ test("synthetic chair edit changes the measured gap independently of window and 
   assert.equal(answer("window"), previous[1]);
   assert.equal(answer("oak"), previous[2]);
 });
+
+test("chair movement compares consecutive revisions of the same project", () => {
+  const {home, bedroom, manifest} = selected();
+  const previous = {project: manifest.project, revision: manifest.revision, home: structuredClone(home)};
+  bedroom.furniture.find(f => f.id === "desk-chair").x_m += 0.2;
+  manifest.revision++;
+  manifest.home_id = home.id = "synthetic-edited-home";
+  const ask = prior => explanation(home,"What changed when I moved the chair?",manifest,prior);
+  assert.match(ask(previous), /Displacement: 0.200 m.*0.060 m before and 0.060 m after/);
+  assert.match(ask({...previous, project:"other"}), /needs this saved revision/);
+  assert.match(ask(null), /needs this saved revision/);
+});
+
+test("a generic desk question with two desks needs a room", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  assert.match(explanation(home, "Why put the desk near the window?"), /Which desk.*bedroom.*study/);
+  assert.match(explanation(home, "Why put the bedroom desk near the window?"), /Belaya.*nearest window/);
+  assert.match(explanation(home, "How far is the study desk from its window?"), /study writing-suite footprint and window study-window/);
+});

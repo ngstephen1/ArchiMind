@@ -5,7 +5,7 @@ import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
-import { explanation } from "./explanation.js";
+import { asksChairChange, explanation } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
@@ -584,6 +584,7 @@ el("present").onclick = async () => {
   el("printBoard").disabled = true;
   boardHome = applied;
   evidenceManifest = null;
+  el("whyAnswer").textContent = "";
   el("boardExports").replaceChildren();
   if (revision) {
     try {
@@ -689,10 +690,21 @@ async function showRoom(h,id){
     if (generation === photoSerial) el("printBoard").disabled = false;
   }
 };
-el("askWhy").onclick = () => {
-  const answer = explanation(boardHome, el("whyQuery").value.toLowerCase(), evidenceManifest);
+let questionSerial = 0;
+el("askWhy").onclick = async () => {
+  const serial = ++questionSerial, generation = boardGeneration;
+  const question = el("whyQuery").value, manifest = evidenceManifest;
+  let previous = null;
+  if (asksChairChange(question) && manifest?.revision > 1) {
+    el("whyAnswer").textContent = "Checking the previous saved revision…";
+    try {
+      previous = await api("/projects/" + encodeURIComponent(manifest.project) + "?revision=" + (manifest.revision - 1));
+    } catch { /* The explanation identifies the missing revision. */ }
+  }
+  if (serial !== questionSerial || generation !== boardGeneration) return;
+  const answer = explanation(boardHome, question, manifest, previous);
   const source = evidenceManifest ? `Project ${evidenceManifest.project} · Revision ${evidenceManifest.revision}` : "Bedroom preview";
-  el("whyAnswer").textContent = `${source} · Bedroom · ${answer}`;
+  el("whyAnswer").textContent = `${source} · ${answer}`;
 };
 el("printBoard").onclick = () => window.print();
 
