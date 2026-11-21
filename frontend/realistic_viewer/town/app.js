@@ -509,11 +509,15 @@ function discardChair() {
 el("chairChoice").onchange = discardChair;
 bind("chairDiscard", discardChair);
 bind("chairPreview", async () => {
-  resetChairPreview();
-  const epoch = chairEpoch;
   const { concept_id, version, sha256 } = releasedChairs[Number(el("chairChoice").value)];
   const request = { base: revision, binding: { concept_id, version, sha256 } };
   const endpoint = concept_id === "oak-sage-writing-chair" ? "designer-chair" : "bedroom-collection";
+  await previewBedroomEdit(endpoint, request);
+});
+bind("chairPullout", () => previewBedroomEdit("chair-pullout", {base: revision}));
+async function previewBedroomEdit(endpoint, request) {
+  resetChairPreview();
+  const epoch = chairEpoch;
   const { home } = await api("/projects/" + project + "/" + endpoint + "/preview", request);
   if (epoch !== chairEpoch) return;
   if ((await world.load(home)) !== "verified") {
@@ -533,12 +537,12 @@ bind("chairPreview", async () => {
   el("roomJump").value = "bedroom";
   el("roomJump").onchange();
   el("panel").close();
-});
+}
 bind("chairApply", async () => {
   if (!chairPreview) return;
   sync(await api("/projects/" + project + "/"+chairPreview.endpoint+"/apply", chairPreview.request));
   el("alternatives").hidden = true;
-  notify("Designer furniture saved in revision " + revision + ".");
+  notify("Bedroom edit saved in revision " + revision + ".");
 });
 
 let boardHome;

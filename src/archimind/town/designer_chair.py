@@ -91,11 +91,63 @@ def chair_change(q, owner, project, data, *, apply, collection=False):
     if home.get("style_pack"):
         # Re-dress so no pack model is bound to the chosen chair's reservation.
         apply_style(home, home["style_pack"]["id"])
+    return finish_preview(q, owner, project, base, home, data, apply)
+
+
+def chair_pullout(q, owner, project, data, *, apply):
+    """Preview a measured pull away from the writing desk on the current home."""
+    head = db.project(q, owner, project)
+    base = data.get("base")
+    keys = {"base", "preview_id"} if apply else {"base"}
+    if set(data) != keys or type(base) is not int or base < 1:
+        raise db.Problem("Choose a saved bedroom revision to move its chair.")
+    if base != head:
+        raise db.Problem("A newer revision exists. Reopen the current design.", 409)
+    home = db.revision(q, project, base)
+    bedroom = next(
+        (p for p in home["rooms"] if p["design"]["room"]["id"] == "bedroom"), None
+    )
+    items = {f["id"]: f for f in bedroom["design"]["furniture"]} if bedroom else {}
+    chair, desk = items.get("desk-chair"), items.get("belaya")
+    if not chair or not desk or chair["rotation_deg"] or desk["rotation_deg"]:
+        raise db.Problem(
+            "This edit requires the bedroom writing chair and its unrotated desk."
+        )
+    overlaps_width = max(chair["x_m"], desk["x_m"]) < min(
+        chair["x_m"] + chair["width_m"], desk["x_m"] + desk["width_m"]
+    )
+    start = chair["y_m"]
+    if not overlaps_width:
+        raise db.Problem("The chair must face the writing desk to preview this move.")
+    if start >= desk["y_m"] + desk["depth_m"]:
+        end = start + 0.30
+    elif start + chair["depth_m"] <= desk["y_m"]:
+        end = start - 0.30
+    else:
+        raise db.Problem("The chair must be on one side of the writing desk.")
+    chair["y_m"] = end
+    if home.get("style_pack"):
+        apply_style(home, home["style_pack"]["id"])
+    home["evidence"]["chair_move_m"] = {
+        "from_x": chair["x_m"],
+        "to_x": chair["x_m"],
+        "from_y": start,
+        "to_y": end,
+    }
+    try:
+        return finish_preview(q, owner, project, base, home, data, apply)
+    except ValueError as exc:
+        raise db.Problem(
+            "There is insufficient validated space for a 30 cm chair move."
+        ) from exc
+
+
+def finish_preview(q, owner, project, base, home, data, apply):
     validate_home(home)
     del home["id"]
     home["id"] = digest(home)
     if apply:
         if data["preview_id"] != home["id"]:
-            raise db.Problem("Preview this concept on the current revision first.", 409)
+            raise db.Problem("Preview this edit on the current revision first.", 409)
         return db.apply(q, owner, project, base, home)
     return {"project": project, "base": base, "home": home}
