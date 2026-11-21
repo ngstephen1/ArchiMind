@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 import sys
 from pathlib import Path
 
@@ -14,6 +15,47 @@ from render_studio_home import camera  # noqa: E402
 
 def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def transmitted_daylight(board, scene):
+    """Place a diffused daylight source immediately inside each saved window covering."""
+    directions = {"west": (1, 0), "east": (-1, 0), "south": (0, 1), "north": (0, -1)}
+    emitters = []
+    for part in board["rooms"]:
+        for opening in part["room"]["windows"]:
+            source = bpy.data.objects.get("Daylight through " + opening["id"])
+            if source is None or source.type != "LIGHT":
+                raise ValueError("Missing daylight source for " + opening["id"])
+            inset = directions[opening["wall"]]
+            lamp = source.copy()
+            lamp.data = source.data.copy()
+            lamp.name = "Diffuse daylight at " + opening["id"]
+            lamp.data.name = lamp.name
+            scene.collection.objects.link(lamp)
+            # The proof's exterior light stays 0.18 m outside. This area models
+            # transmitted daylight on the room-facing side of the thick drape proxy.
+            lamp.location.x += 0.40 * inset[0]
+            lamp.location.y += 0.40 * inset[1]
+            lamp.data.energy *= 0.42
+            emitters.append(
+                {
+                    "window": opening["id"],
+                    "position": list(lamp.location),
+                    "power_W": lamp.data.energy,
+                }
+            )
+    return emitters
+
+
+def architectural_camera(pose):
+    """Keep the salon's eye and azimuth, with level verticals and optical lens shift."""
+    eye, target = pose["eye"], pose["target"]
+    horizontal = math.hypot(target[0] - eye[0], target[2] - eye[2])
+    slope = (target[1] - eye[1]) / horizontal
+    level_target = [target[0], eye[1], target[2]]
+    obj = camera({**pose, "target": level_target}, "Salon architectural perspective")
+    obj.data.shift_y = slope / (2 * math.tan(math.radians(pose["fov"]) / 2))
+    return obj, {"level_target": level_target, "shift_y": obj.data.shift_y}
 
 
 def render(
@@ -56,6 +98,11 @@ def render(
     scene = bpy.context.scene
     if scene["board_sha256"] != source_sha:
         raise ValueError("Reopened blend identifies another room revision.")
+    file_images = [
+        image for image in bpy.data.images if image.source == "FILE" and image.users
+    ]
+    if any(not image.packed_file for image in file_images):
+        raise ValueError("The accepted scene has an unpacked external image")
     scene.cycles.device = "CPU"
     scene.cycles.samples = 96
     scene.cycles.adaptive_threshold = 0.010
@@ -64,7 +111,7 @@ def render(
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     # A neutral daylight key separates pale bedding from the warm plaster.
-    # Keep emitter transforms, intensities, object positions and camera pose fixed.
+    # Grading and transmitted window light are shared identically across revisions.
     scene.view_settings.view_transform = "AgX"
     scene.view_settings.look = "AgX - Medium High Contrast"
     daylight_color = (1.0, 0.955, 0.91)
@@ -73,6 +120,8 @@ def render(
     ]
     for lamp in daylight:
         lamp.color = daylight_color
+    diffuse_windows = transmitted_daylight(board, scene) if expected_snapshot else []
+    scene.view_settings.exposure = 0.80 if expected_snapshot else 0.0
     poses = [
         next(c for c in frame["cameras"] if c["id"] == name)
         for name in ("doorway", "desk")
@@ -101,7 +150,10 @@ def render(
         photo_sources.append(("salon", salon["cameras"][0], source_sha))
     for room_id, pose, pose_source in photo_sources:
         name = pose["id"]
-        scene.camera = camera(pose, "Comparison " + name)
+        if room_id == "salon":
+            scene.camera, projection = architectural_camera(pose)
+        else:
+            scene.camera, projection = camera(pose, "Comparison " + name), None
         path = output / f"{room_id}-{name}.png"
         scene.render.filepath = str(path.resolve())
         bpy.ops.render.render(write_still=True)
@@ -110,6 +162,7 @@ def render(
                 "room": room_id,
                 "view": name,
                 "camera": pose,
+                "architectural_projection": projection,
                 "camera_manifest_sha256": pose_source,
                 "file": path.name,
                 "sha256": sha(path),
@@ -131,6 +184,9 @@ def render(
                 "resolution": [1920, 1080],
                 "view_transform": scene.view_settings.view_transform,
                 "view_look": scene.view_settings.look,
+                "exposure_ev": scene.view_settings.exposure,
+                "transmitted_window_emitters": diffuse_windows,
+                "packed_file_image_count": len(file_images),
                 "daylight_rgb": daylight_color,
                 "daylight_emitters": sorted(lamp.name for lamp in daylight),
                 "source_notices": {name: receipt["files"][name] for name in notices},
