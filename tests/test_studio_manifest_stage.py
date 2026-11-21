@@ -70,3 +70,37 @@ def test_saved_style_content_must_still_match_home_id():
     home["rooms"][0]["style"]["dressing"].append({"kind": "rug"})
     with pytest.raises(ValueError, match="home ID"):
         module.verify_snapshot(json.dumps({"home": home}).encode())
+
+
+def test_legacy_proof_can_only_request_the_legacy_render(tmp_path):
+    proof = {"files": {}}
+    assert module.proof_has_saved_style(tmp_path, proof) is False
+    with pytest.raises(ValueError, match="no verified saved style"):
+        module.proof_has_saved_style(tmp_path, proof, tmp_path / "requested.json")
+    (tmp_path / "saved-style-receipt.json").write_text("{}")
+    with pytest.raises(ValueError, match="no verified saved style"):
+        module.proof_has_saved_style(tmp_path, proof)
+
+
+def test_styled_proof_keeps_its_lighting_with_and_without_the_source(tmp_path):
+    source = tmp_path / "snapshot.json"
+    source.write_text("saved source")
+    style_path = tmp_path / "saved-style-receipt.json"
+    identity = {"home_id": "a" * 64, "revision": 2, "manifest_sha256": "b" * 64}
+    style = {
+        **identity,
+        "snapshot_sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
+    }
+    style_path.write_text(json.dumps(style))
+    files = {style_path.name: hashlib.sha256(style_path.read_bytes()).hexdigest()}
+    proof = {**identity, "files": files}
+    assert module.proof_has_saved_style(tmp_path, proof) is True
+    assert module.proof_has_saved_style(tmp_path, proof, source) is True
+    source.write_text("other snapshot")
+    with pytest.raises(ValueError, match="another style snapshot"):
+        module.proof_has_saved_style(tmp_path, proof, source)
+    with pytest.raises(ValueError, match="another proof"):
+        module.proof_has_saved_style(tmp_path, {**proof, "revision": 3})
+    style_path.write_text("{}")
+    with pytest.raises(ValueError, match="receipt digest"):
+        module.proof_has_saved_style(tmp_path, proof)

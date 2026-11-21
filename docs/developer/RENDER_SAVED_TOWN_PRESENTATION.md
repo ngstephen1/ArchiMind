@@ -26,4 +26,6 @@ Supply `snapshot_source` alongside `manifest_source` to render the saved pack fu
 
 The export resolves high-tier assets with Town’s pack loader. It uses Town’s actual furniture and dressing functions to capture native model transforms and procedural geometry for all rooms. The Blender receipt lists resolved slots and file digests per room. Floors, tile, walls, ceilings and trim use released pack textures. Cycles renders with window-aligned lights and the pack environment. The offline renderer has its own light transport, board cameras and tone mapping.
 
+A later photography run inherits the lighting and exposure from the approved proof’s hash-verified style receipt. Supplying the original snapshot again also checks its SHA-256.
+
 For the final R2 presentation, pass `-f salon_cover=true` with the accepted proof run ID. The resulting `studio-eye-views` artifact includes the finished ten-page PDF when the source contains six rooms, its bedroom eye-level PNGs, the optional salon PNG, the render receipt and credit files. The plan identifies the saved pack and illustrates its authenticated surface textures. The edition with matched bedroom cameras is labeled on the bedroom sheet.

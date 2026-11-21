@@ -19,6 +19,33 @@ def verify_snapshot(data):
         raise ValueError("Saved home contents do not match the Town home ID")
 
 
+def proof_has_saved_style(proof, receipt, expected_snapshot=None):
+    """Inherit a proof's verified lighting workflow, with an optional source pin."""
+    filename = "saved-style-receipt.json"
+    path = proof / filename
+    digest = receipt["files"].get(filename)
+    if digest is None:
+        if expected_snapshot is not None or path.exists():
+            raise ValueError("The approved proof contains no verified saved style")
+        return False
+    data = path.read_bytes()
+    if hashlib.sha256(data).hexdigest() != digest:
+        raise ValueError("Invalid saved style receipt digest")
+    style = json.loads(data)
+    keys = ("manifest_sha256", "revision", "home_id")
+    if any(style[key] != receipt[key] for key in keys):
+        raise ValueError("Saved style receipt identifies another proof")
+    if not re.fullmatch(r"[0-9a-f]{64}", style["snapshot_sha256"]):
+        raise ValueError("Invalid source snapshot digest")
+    if expected_snapshot is not None:
+        supplied = hashlib.sha256(expected_snapshot.read_bytes()).hexdigest()
+        if style["snapshot_sha256"] != supplied:
+            raise ValueError(
+                "The approved proof was rendered from another style snapshot"
+            )
+    return True
+
+
 def stage(source, output, *, snapshot=False):
     commit, _, path = source.partition(":")
     name = PurePosixPath(path)

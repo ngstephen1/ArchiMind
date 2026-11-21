@@ -11,6 +11,7 @@ import bpy
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_studio_home import camera  # noqa: E402
+from stage_studio_manifest import proof_has_saved_style  # noqa: E402
 
 
 def sha(path):
@@ -76,18 +77,7 @@ def render(
         raise ValueError(
             "The approved proof or comparison project does not match the selected manifest."
         )
-    if expected_snapshot:
-        name = "saved-style-receipt.json"
-        if name not in receipt["files"] or sha(proof / name) != receipt["files"][name]:
-            raise ValueError("The approved proof contains no verified saved style")
-        saved_style = json.loads((proof / name).read_bytes())
-        if (
-            saved_style["snapshot_sha256"] != sha(expected_snapshot)
-            or saved_style["manifest_sha256"] != source_sha
-        ):
-            raise ValueError(
-                "The approved proof was rendered from another style snapshot"
-            )
+    styled = proof_has_saved_style(proof, receipt, expected_snapshot)
     bedroom = next(p for p in board["rooms"] if p["room"]["id"] == "bedroom")
     frame = next(p for p in framing["rooms"] if p["room"]["id"] == "bedroom")
     if (bedroom["origin"], bedroom["room"]) != (frame["origin"], frame["room"]):
@@ -120,8 +110,8 @@ def render(
     ]
     for lamp in daylight:
         lamp.color = daylight_color
-    diffuse_windows = transmitted_daylight(board, scene) if expected_snapshot else []
-    scene.view_settings.exposure = 0.80 if expected_snapshot else 0.0
+    diffuse_windows = transmitted_daylight(board, scene) if styled else []
+    scene.view_settings.exposure = 0.80 if styled else 0.0
     poses = [
         next(c for c in frame["cameras"] if c["id"] == name)
         for name in ("doorway", "desk")
@@ -136,7 +126,7 @@ def render(
         "ABO_LICENSE_CC_BY_4.0.txt",
         "surface-sources.json",
     )
-    if "saved-style-receipt.json" in receipt["files"]:
+    if styled:
         notices += ("saved-style-receipt.json",)
     for name in notices:
         data = (proof / name).read_bytes()
