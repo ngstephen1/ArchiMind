@@ -27,3 +27,6 @@ For an actual home, survey the finished faces, ceiling, diagonals, fixed service
 ## File integrity and rebuild
 
 Unzip into one directory and run `shasum -a 256 -c SHA256SUMS.txt` there. For a repository rebuild, place the unmodified conference proof release under `output/designer-inputs/scene` and the HD eye-view release under `output/designer-inputs/photos`. Place the issued client book and its `support/book-qa.json` in `output/designer-inputs/book`. Run `.venv/bin/python scripts/package_designer_demo.py` from the repository. The script checks both saved board hashes, the native model against its render receipts, the three image hashes, source notices and the presentation PDF before replacing the ZIP.
+
+
+The general revision-book printer generates a twelve-page proof or presentation for a six-room home. The Studio House conference package uses a separately inspected sixteen-page edition with a cover, layout comparison, axonometric, material sheet, the ten-page room portfolio, chair study and client questions. Its assembly receipt under `support/book-qa.json` identifies each PDF input, the two source manifests, the edited render receipt, the supplied portfolio digest, and all sixteen inspected pages. Preserve that receipt with the client book before rebuilding the transfer ZIP.

@@ -69,6 +69,28 @@ def demo_shell(room):
     )
 
 
+def check_book_sources(qa, board, scene, photos):
+    portfolio = sha(photos / "Studio-House-Presentation.pdf")
+    if len(qa["inspection"]) != 16 or not any(
+        s["sha256"] == portfolio and s["pages"] == 10 for s in qa["input_sources"]
+    ):
+        raise ValueError(
+            "Expected the inspected book with its supplied ten-page room portfolio."
+        )
+    if "source_receipt_sha256" in qa:
+        if (
+            qa["source_receipt_sha256"] != sha(scene / "receipt.json")
+            or qa["project"] != board["project"]
+            or [r["manifest_sha256"] for r in qa["revisions"]] != [R1, R2]
+            or qa["portfolio_sha256"] != portfolio
+        ):
+            raise ValueError(
+                "Book sources differ from the supplied two-revision handoff."
+            )
+    elif portfolio != BOOK:
+        raise ValueError("An updated portfolio requires a revision-bound book receipt.")
+
+
 def build(boards, scene, photos, book, out):
     before = verified(boards / "before.json", R1)
     after = verified(boards / "manifest.json", R2)
@@ -148,12 +170,7 @@ def build(boards, scene, photos, book, out):
         qa = json.loads(qa_path.read_bytes())
         if (qa["home_id"], qa["revision"]) != (board["home_id"], board["revision"]):
             raise ValueError("The client book belongs to a different design.")
-        if len(qa["inspection"]) != 16 or not any(
-            s["sha256"] == BOOK and s["pages"] == 10 for s in qa["input_sources"]
-        ):
-            raise ValueError(
-                "Expected the inspected 16-page book with its ten-page room portfolio."
-            )
+        check_book_sources(qa, board, scene, photos)
         copy(
             verified(book / "Studio-House-Client-Book.pdf", qa["book_sha256"]),
             "presentation/Studio-House-Client-Book.pdf",
