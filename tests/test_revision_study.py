@@ -76,3 +76,26 @@ def test_room_move_changes_home_coordinate_but_preserves_desk_gap():
         1.25
     )
     assert before["chair_desk_gap_m"] == after["chair_desk_gap_m"]
+
+
+def test_updated_transfer_rejects_another_project_or_portfolio(tmp_path):
+    from hashlib import sha256
+
+    api = runpy.run_path(str(ROOT / "scripts/package_designer_demo.py"))
+    (tmp_path / "receipt.json").write_bytes(b"proof")
+    (tmp_path / "Studio-House-Presentation.pdf").write_bytes(b"portfolio")
+    portfolio = sha256(b"portfolio").hexdigest()
+    qa = dict(
+        inspection=[{}] * 16,
+        input_sources=[dict(pages=10, sha256=portfolio)],
+        source_receipt_sha256=sha256(b"proof").hexdigest(),
+        project="first",
+        revisions=[dict(manifest_sha256=api["R1"]), dict(manifest_sha256=api["R2"])],
+        portfolio_sha256=portfolio,
+    )
+    api["check_book_sources"](qa, {"project": "first"}, tmp_path, tmp_path)
+    with pytest.raises(ValueError, match="Book sources differ"):
+        api["check_book_sources"](qa, {"project": "second"}, tmp_path, tmp_path)
+    del qa["source_receipt_sha256"]
+    with pytest.raises(ValueError, match="requires a revision-bound"):
+        api["check_book_sources"](qa, {"project": "first"}, tmp_path, tmp_path)
