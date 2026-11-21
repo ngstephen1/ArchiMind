@@ -16,3 +16,16 @@ The browser applied Layout A as revision 1 and used **Preview pulling chair out 
 The standard Town answer panel identified the revision, chair and desk. Their footprint gap grew from 0.060 to 0.360 m. The bedroom desk remained 4.46 m from the west window midpoint measured center to center. The Belaya catalog variant is Oak. Verifying under-desk fit still requires the underside height and clear width between desk supports. The saved record supplies no evidence of glare or placement rationale. [Revision 1 answers](chat-r1.json) · [Revision 2 answers](chat-r2.json).
 
 The six existing scenarios reran through the real spatial validator with deterministic provider outputs. All six passed, as did the eighteen JavaScript evidence tests. This browser run exercised two real briefs and eight evidence answers. External reviewers can inspect the receipts independently of the private development database.
+
+## Reopen and verify both projects
+
+The portable replay contains two projects, four saved revisions, and zero jobs or events. An ordinary-browser repeat on all four revisions reproduced the four answers on each and captured three bedroom views each. The fresh project's [before](doorway-r1.jpg) and [after](doorway-r2.jpg) views share the same doorway camera. Its desk preset reframes the subject after the chair moves.
+
+A release operator with access to the original Town database can build the sanitized edition using the shared export command. Supply a new output filename.
+
+```sh
+.venv/bin/python scripts/export_town_replay.py "$TOWN_DB" Conference-Town.sqlite3 docs/data/conference-sprint docs/data/conference-live-final
+ARCHIMIND_ENABLE_OPENAI_STUDIO=0 TOWN_DB="$PWD/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
+```
+
+Use the Town link printed by the launcher and append `?project=c9339e4f-a57a-4328-95dc-40dc36dd5b89&revision=2`. Set the revision to 1 for the earlier chair position. Visitor playback can run with live generation disabled. The [four exported board digests](replayed-manifests.json) reproduce the actual browser exports from the source DB. The distributed SQLite SHA-256 is `a2fc081830eae29e325cfe0189ba545b6d5b37557e7df2a7961946e27db010ea`.
