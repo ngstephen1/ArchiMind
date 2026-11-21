@@ -5,7 +5,7 @@ import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
-import { explanation } from "./explanation.js";
+import { asksChairChange, explanation } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
@@ -33,6 +33,7 @@ let project = url.searchParams.get("project"),
   selected = 0,
   chairPreview = null,
   chairEpoch = 0,
+  loadingChairScene = false,
   releasedChairs = [];
 const token = () => sessionStorage.getItem("town-session") || "";
 const world = createTown(el("world"), el("place"), el("door"));
@@ -92,6 +93,7 @@ function links() {
 }
 function resetChairPreview() {
   chairEpoch++;
+  loadingChairScene = false;
   chairPreview = null;
   el("chairApply").hidden = el("chairDiscard").hidden = true;
 }
@@ -482,22 +484,22 @@ bind("undo", async () => {
 
 el("chairStudio").ontoggle = async () => {
   if (!el("chairStudio").open || chairPreview || releasedChairs.length) return;
-  const epoch = ++chairEpoch;
+  const savedHome = applied;
   el("chairPicker").hidden = el("chairPreview").hidden = true;
   el("chairNotice").textContent = "Checking released furniture…";
   try {
     const [{ chairs }, { concepts }] = await Promise.all([api("/designer-chairs"),api("/bedroom-collection")]);
-    if (epoch !== chairEpoch) return;
+    if (savedHome !== applied) return;
     releasedChairs = [...chairs, ...concepts];
     el("chairChoice").replaceChildren(
       ...releasedChairs.map((c, i) => new Option([c.name,c.variant_label,c.version].filter(Boolean).join(" · "), String(i))),
     );
     el("chairPicker").hidden = el("chairPreview").hidden = !releasedChairs.length;
-    el("chairNotice").textContent = releasedChairs.length
+    if (!chairPreview) el("chairNotice").textContent = releasedChairs.length
       ? "Preview a piece at its native size in this revision."
       : "No released furniture is available.";
   } catch (e) {
-    if (epoch === chairEpoch) el("chairNotice").textContent = e.message;
+    if (savedHome === applied && !chairPreview) el("chairNotice").textContent = e.message;
   }
 };
 function discardChair() {
@@ -509,14 +511,32 @@ function discardChair() {
 el("chairChoice").onchange = discardChair;
 bind("chairDiscard", discardChair);
 bind("chairPreview", async () => {
-  resetChairPreview();
-  const epoch = chairEpoch;
   const { concept_id, version, sha256 } = releasedChairs[Number(el("chairChoice").value)];
   const request = { base: revision, binding: { concept_id, version, sha256 } };
   const endpoint = concept_id === "oak-sage-writing-chair" ? "designer-chair" : "bedroom-collection";
-  const { home } = await api("/projects/" + project + "/" + endpoint + "/preview", request);
-  if (epoch !== chairEpoch) return;
-  if ((await world.load(home)) !== "verified") {
+  await previewBedroomEdit(endpoint, request);
+});
+bind("chairPullout", () => previewBedroomEdit("chair-pullout", {base: revision}));
+async function previewBedroomEdit(endpoint, request) {
+  const epoch = ++chairEpoch;
+  let home, status;
+  try {
+    ({home} = await api("/projects/" + project + "/" + endpoint + "/preview", request));
+    if (epoch !== chairEpoch) return;
+    loadingChairScene = true;
+    chairPreview = null;
+    el("chairApply").hidden = el("chairDiscard").hidden = true;
+    status = await world.load(home);
+  } catch (error) {
+    if (epoch === chairEpoch) {
+      // A refused request leaves the current room, camera and accepted preview intact.
+      if (loadingChairScene) discardChair();
+      throw error;
+    }
+    return;
+  }
+  const proceduralMove = endpoint === "chair-pullout" && status === "procedural";
+  if (status !== "verified" && !proceduralMove) {
     if (epoch === chairEpoch) {
       discardChair();
       el("chairNotice").textContent = "Furniture preview unavailable. Your saved bedroom is still displayed.";
@@ -524,6 +544,7 @@ bind("chairPreview", async () => {
     return;
   }
   if (epoch !== chairEpoch) return;
+  loadingChairScene = false;
   chairPreview = {endpoint, request: { ...request, preview_id: home.id }};
   el("chairApply").hidden = el("chairDiscard").hidden = false;
   el("chairNotice").textContent = "Bedroom preview ready. Apply to save a new revision.";
@@ -533,12 +554,13 @@ bind("chairPreview", async () => {
   el("roomJump").value = "bedroom";
   el("roomJump").onchange();
   el("panel").close();
-});
+}
 bind("chairApply", async () => {
   if (!chairPreview) return;
+  const editingPosition = chairPreview.endpoint === "chair-pullout";
   sync(await api("/projects/" + project + "/"+chairPreview.endpoint+"/apply", chairPreview.request));
   el("alternatives").hidden = true;
-  notify("Designer furniture saved in revision " + revision + ".");
+  notify((editingPosition ? "Chair position" : "Designer furniture") + " saved in revision " + revision + ".");
 });
 
 let boardHome;
@@ -584,6 +606,7 @@ el("present").onclick = async () => {
   el("printBoard").disabled = true;
   boardHome = applied;
   evidenceManifest = null;
+  el("whyAnswer").textContent = "";
   el("boardExports").replaceChildren();
   if (revision) {
     try {
@@ -689,10 +712,21 @@ async function showRoom(h,id){
     if (generation === photoSerial) el("printBoard").disabled = false;
   }
 };
-el("askWhy").onclick = () => {
-  const answer = explanation(boardHome, el("whyQuery").value.toLowerCase(), evidenceManifest);
+let questionSerial = 0;
+el("askWhy").onclick = async () => {
+  const serial = ++questionSerial, generation = boardGeneration;
+  const question = el("whyQuery").value, manifest = evidenceManifest;
+  let previous = null;
+  if (asksChairChange(question) && manifest?.revision > 1) {
+    el("whyAnswer").textContent = "Checking the previous saved revision…";
+    try {
+      previous = await api("/projects/" + encodeURIComponent(manifest.project) + "?revision=" + (manifest.revision - 1));
+    } catch { /* The explanation identifies the missing revision. */ }
+  }
+  if (serial !== questionSerial || generation !== boardGeneration) return;
+  const answer = explanation(boardHome, question, manifest, previous);
   const source = evidenceManifest ? `Project ${evidenceManifest.project} · Revision ${evidenceManifest.revision}` : "Bedroom preview";
-  el("whyAnswer").textContent = `${source} · Bedroom · ${answer}`;
+  el("whyAnswer").textContent = `${source} · ${answer}`;
 };
 el("printBoard").onclick = () => window.print();
 
