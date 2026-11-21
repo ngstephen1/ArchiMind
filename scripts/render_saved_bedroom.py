@@ -424,7 +424,15 @@ def load_furniture(item, registry, materials):
     return digest
 
 
-def render(manifest_path, output, originals, inspect_only=False, *, include_hall=True):
+def render(
+    manifest_path,
+    output,
+    originals,
+    inspect_only=False,
+    *,
+    include_hall=True,
+    style_slots=(),
+):
     manifest_bytes = manifest_path.read_bytes()
     manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
     manifest = json.loads(manifest_bytes)
@@ -496,7 +504,14 @@ def render(manifest_path, output, originals, inspect_only=False, *, include_hall
         for key in ("chairs", "bedroom")
         for a in registry_data.get(key, [])
     }
-    used = {f["id"]: load_furniture(f, registry, m) for f in manifest["furniture"]}
+    used = {
+        f["id"]: (
+            "saved style pack"
+            if f["id"] in style_slots
+            else load_furniture(f, registry, m)
+        )
+        for f in manifest["furniture"]
+    }
     scene["bedroom_representations_json"] = json.dumps(used, sort_keys=True)
     for mat in bpy.data.materials:
         name = mat.name.split(".")[0]
@@ -506,7 +521,7 @@ def render(manifest_path, output, originals, inspect_only=False, *, include_hall
             texture(mat, images["linen-weave-512.jpg"], 0.30, tint=True)
             texture(mat, images["linen-normal-256.jpg"], 0.30, normal=True)
     for f in manifest["furniture"]:
-        if f["id"] == "queen-bed":
+        if f["id"] == "queen-bed" and f["id"] not in style_slots:
             x, y = f["footprint_xy_m"]
             w, d, _ = f["reservation_wdh_m"]
             x0, x1 = max(0.06, x - 0.58), min(room["width_m"] - 0.06, x + w + 0.58)

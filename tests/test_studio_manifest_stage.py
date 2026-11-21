@@ -1,6 +1,8 @@
 """The render workflow accepts only exact, bounded exports from its repository."""
 
+import hashlib
 import importlib.util
+import json
 from pathlib import Path
 from unittest.mock import Mock
 
@@ -57,3 +59,14 @@ def test_export_bounds_fail_before_reading_blob(tmp_path, monkeypatch, size):
         module.stage("a" * 40 + ":docs/data/export.json", out)
     read.assert_called_once()
     assert not out.exists()
+
+
+def test_saved_style_content_must_still_match_home_id():
+    home = {"rooms": [{"style": {"dressing": []}}], "width": 15.0}
+    home["id"] = hashlib.sha256(
+        json.dumps(home, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    module.verify_snapshot(json.dumps({"home": home}).encode())
+    home["rooms"][0]["style"]["dressing"].append({"kind": "rug"})
+    with pytest.raises(ValueError, match="home ID"):
+        module.verify_snapshot(json.dumps({"home": home}).encode())

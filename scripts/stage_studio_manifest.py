@@ -2,12 +2,24 @@
 
 import argparse
 import hashlib
+import json
 import re
 import subprocess
 from pathlib import Path, PurePosixPath
 
 
-def stage(source, output):
+def verify_snapshot(data):
+    # Match archimind.town.design.digest without loading the Town service or its SDKs.
+    home = json.loads(data)["home"].copy()
+    expected = home.pop("id")
+    canonical = json.dumps(
+        home, sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
+    if hashlib.sha256(canonical).hexdigest() != expected:
+        raise ValueError("Saved home contents do not match the Town home ID")
+
+
+def stage(source, output, *, snapshot=False):
     commit, _, path = source.partition(":")
     name = PurePosixPath(path)
     if not (
@@ -26,6 +38,8 @@ def stage(source, output):
     if not 0 < size <= 4 * 1024 * 1024:
         raise ValueError("Expected a nonempty manifest at most 4 MiB")
     data = subprocess.check_output(["git", "cat-file", "blob", spec])
+    if snapshot:
+        verify_snapshot(data)
     output.write_bytes(data)
     print(
         f"Staged {source} ({len(data)} bytes), SHA-256 {hashlib.sha256(data).hexdigest()}"
@@ -36,5 +50,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source")
     parser.add_argument("output", type=Path)
+    parser.add_argument("--snapshot", action="store_true")
     args = parser.parse_args()
-    stage(args.source, args.output)
+    stage(args.source, args.output, snapshot=args.snapshot)

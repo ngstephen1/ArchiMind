@@ -73,6 +73,8 @@ def render(proof, manifest, camera_manifest, output):
         "ABO_LICENSE_CC_BY_4.0.txt",
         "surface-sources.json",
     )
+    if "saved-style-receipt.json" in receipt["files"]:
+        notices += ("saved-style-receipt.json",)
     for name in notices:
         data = (proof / name).read_bytes()
         if hashlib.sha256(data).hexdigest() != receipt["files"][name]:
