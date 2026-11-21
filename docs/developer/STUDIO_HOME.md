@@ -62,3 +62,25 @@ The proof uses 960 × 540 images with 16 maximum Cycles samples. For 3840 × 216
 - The spatial validator checks accessible furnished rooms, connection through the hall, windows on exterior walls and complete partition coverage. The salon has a validated 0° or 90° seating assembly. An internal quarter turn swaps both physical extents and all part placements. The dining group retains at least 0.5 m for chair withdrawal inside its own reserved bounds. These are presentation checks. Construction, egress certification and product procurement require separate evidence.
 - The five Town worker roles show executed events. They interpret a brief, look up eligible evidence, propose layouts, check geometry and prepare presentation choices. The rendering step has its own offline camera and lighting studies. Its grayscale contrast statistic measures light distribution and makes no judgment about the artistic merit of a room.
 - Elevations show projected furniture reservations. Finishes are design palette samples. A/B layouts, daylight comparisons, historical bedroom releases, saved material choices and optional live model interpretation have separate purposes. The offline studio requires no API key.
+
+## Render a saved conference revision
+
+Export the whole-home manifest from Town and record its SHA-256. The Studio home proof workflow can read an export from `docs/data/` at an exact public commit in this repository. Replace `MANIFEST_COMMIT` below with that full commit SHA and `MANIFEST_PATH` with the export path.
+
+```sh
+gh workflow run studio-home.yml -f fresh_home=true \
+  -f "manifest_source=$MANIFEST_COMMIT:$MANIFEST_PATH"
+```
+
+Open the resulting `studio-home-proof` artifact. Compare the receipt’s manifest digest, revision and home ID to the Town export, then inspect the doorway and desk views. Known procedural bedroom templates retain their recognizable shapes and materials. The receipt identifies procedural templates, unrecognized reservation boxes, and native mesh hashes separately.
+
+After accepting the CPU proof, render two 1920 × 1080 images from its packed Blender file. For a comparison between revisions, give both runs the **same** camera-source commit and path, referencing either revision of the same project and bedroom shell. Leave out `camera_source` to use the current revision’s cameras.
+
+```sh
+gh workflow run studio-home.yml -f fresh_home=true \
+  -f "manifest_source=$MANIFEST_COMMIT:$MANIFEST_PATH" \
+  -f "approved_proof_run=$ACCEPTED_RUN_ID" \
+  -f "camera_source=$CAMERA_COMMIT:$CAMERA_MANIFEST_PATH"
+```
+
+The `studio-eye-views` artifact includes the two PNGs and each camera’s eye, target, field of view, manifest hash, proof-scene hash and image hash. Inspect the daylight and oak grain at native resolution.
