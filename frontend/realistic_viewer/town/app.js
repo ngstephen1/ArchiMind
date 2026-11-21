@@ -1,5 +1,6 @@
 import { competingGoals } from "./tradeoff.js";
-import studioPublications from "./studio_publications.json";
+import studioShowcasePublications from "./studio_publications.json";
+import conferencePublications from "./conference_publications.json";
 import {homeBoard} from "./home_board.js";
 import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
@@ -562,7 +563,7 @@ function showExport(manifest, hash, studio, studioHash) {
   const whole=node("a","Download whole-home scene manifest");
   whole.href=homeUrl; whole.download="home-r"+revision+"-"+boardHome.id.slice(0,12)+".json";
   el("boardExports").replaceChildren(manifestLink, node("p",""),whole);
-  const studioRelease = publicationFor(studio, studioHash, studioPublications);
+  const studioRelease = publicationFor(studio, studioHash, [...studioShowcasePublications, ...conferencePublications]);
   if (studioRelease) {
     const pdf = node("a", "Open the whole-home client book (PDF)");
     pdf.id = "studioBookLink";

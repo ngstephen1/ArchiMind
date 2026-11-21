@@ -14,13 +14,5 @@
     "manifest_sha256": "13f1b86dc42464a137528ccbd97c5ea53d01e10d19842dfdad681746c7c523bc",
     "pdf": "https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6.pdf",
     "url": "https://github.com/ngstephen1/ArchiMind/releases/download/studio-house-r5-r6-preview/Studio-House-r6-proof.zip"
-  },
-  {
-    "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
-    "revision": 2,
-    "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
-    "manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
-    "pdf": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Studio-House-Client-Book.pdf",
-    "url": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Studio-House-R2-Scene.zip"
   }
 ]
