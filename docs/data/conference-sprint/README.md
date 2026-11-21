@@ -23,9 +23,10 @@ Both exports came from **Client presentation → Download whole-home scene manif
 | `belaya` footprint origin (x, y) | (3.160, 0.000) | (3.160, 0.000) |
 | Edge-to-edge chair-to-desk gap | 0.060 m | 0.360 m |
 | `bedroom-window` on the west wall | Offset 1.753 m, width 1.400 m | Offset 1.753 m, width 1.400 m |
-| Nearest plan distance from the desk footprint to the window segment | 3.300 m | 3.300 m |
+| Chatbot measurement from desk footprint center to window midpoint in plan | 4.460 m | 4.460 m |
+| Additional nearest plan distance from the desk footprint to the window segment | 3.300 m | 3.300 m |
 
-The saved home objects differ in exactly three fields: the chair’s y coordinate, the home ID, and the new chair-move evidence. The chair-to-desk measurement is the shortest distance between their axis-aligned footprints. The desk and chair overlap on x. Subtract the northern edge of the desk from the southern edge of the chair on y. The window distance uses the shortest 2D distance to the opening segment. Desk underside clearance, glare, daylight performance and measured acoustics remain unknown.
+The saved home objects differ in exactly three fields: the chair’s y coordinate, the home ID, and the new chair-move evidence. The chair-to-desk measurement is the shortest distance between their axis-aligned footprints. The desk and chair overlap on x. Subtract the northern edge of the desk from the southern edge of the chair on y. For the ordinary chatbot answer, measure from the desk center (3.960, 0.401) m to the window midpoint (0.000, 2.453) m in plan. Their distance is 4.460 m. A separate measurement between the nearest desk edge and the opening segment gives 3.300 m. Both remain constant. Desk underside clearance, glare, daylight performance and measured acoustics remain unknown.
 
 The browser exported all four original JPEGs. Both [revision 1](doorway-r1.jpg) and [revision 2](doorway-r2.jpg) doorway views have identical eye, aim and field of view. The comparison sheet adds the same unscaled crop from each doorway view. The separate desk presets reframe the subjects automatically. Their views of [revision 1](desk-r1.jpg) and [revision 2](desk-r2.jpg) have different camera positions.
 
