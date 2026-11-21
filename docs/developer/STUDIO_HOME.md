@@ -83,4 +83,4 @@ gh workflow run studio-home.yml -f fresh_home=true \
   -f "camera_source=$CAMERA_COMMIT:$CAMERA_MANIFEST_PATH"
 ```
 
-The `studio-eye-views` artifact includes the two PNGs and each camera’s eye, target, field of view, manifest hash, proof-scene hash and image hash. Inspect the daylight and oak grain at native resolution.
+The `studio-eye-views` artifact includes the two PNGs and each camera’s eye, target, field of view, manifest hash, proof-scene hash and image hash. The eye-level pass applies the same neutral daylight color and AgX medium-high contrast to each revision. Emitter positions and intensities are inherited from the proof. Inspect the daylight and oak grain at native resolution.

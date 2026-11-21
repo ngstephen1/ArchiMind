@@ -1,4 +1,4 @@
-"""Render two unaltered eye-level compositions from an accepted whole-home CPU proof."""
+"""Render two camera-locked eye-level compositions from an accepted whole-home CPU proof."""
 
 import argparse
 import hashlib
@@ -49,6 +49,16 @@ def render(proof, manifest, camera_manifest, output):
     scene.render.resolution_x, scene.render.resolution_y = 1920, 1080
     scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
+    # A neutral daylight key separates pale bedding from the warm plaster.
+    # Keep emitter transforms, intensities, object positions and camera pose fixed.
+    scene.view_settings.view_transform = "AgX"
+    scene.view_settings.look = "AgX - Medium High Contrast"
+    daylight_color = (1.0, 0.955, 0.91)
+    daylight = [
+        lamp for lamp in bpy.data.lights if lamp.name.startswith("Daylight through ")
+    ]
+    for lamp in daylight:
+        lamp.color = daylight_color
     poses = [
         next(c for c in frame["cameras"] if c["id"] == name)
         for name in ("doorway", "desk")
@@ -92,6 +102,10 @@ def render(proof, manifest, camera_manifest, output):
                 "max_samples": 96,
                 "threshold": 0.010,
                 "resolution": [1920, 1080],
+                "view_transform": scene.view_settings.view_transform,
+                "view_look": scene.view_settings.look,
+                "daylight_rgb": daylight_color,
+                "daylight_emitters": sorted(lamp.name for lamp in daylight),
                 "source_notices": {name: receipt["files"][name] for name in notices},
                 "shots": shots,
             },
