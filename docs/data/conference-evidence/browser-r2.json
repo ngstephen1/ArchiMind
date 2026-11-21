@@ -41,10 +41,36 @@
       "case": "study",
       "question": "Which window is closest to the study desk?",
       "expected_evidence": [
-        "study-window",
-        "writing-suite"
+        "4.19 m",
+        "writing-suite tabletop and window study-window"
       ],
-      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 2 \u00b7 Writing Suite is 4.01 m from the nearest window center on the east wall, measured center to center in plan. Source: study writing-suite footprint and window study-window. This measures proximity. Placement intent and screen glare have not been established."
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 2 \u00b7 Writing Suite is 4.19 m from the nearest window center on the east wall, measured center to center in plan. Source: study writing-suite tabletop and window study-window. This measures proximity. Placement intent and screen glare have not been established."
+    },
+    {
+      "case": "name",
+      "question": "How far is the Writing Suite from its window?",
+      "expected_evidence": [
+        "4.19 m",
+        "writing-suite tabletop and window study-window"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 2 \u00b7 Writing Suite is 4.19 m from the nearest window center on the east wall, measured center to center in plan. Source: study writing-suite tabletop and window study-window. This measures proximity. Placement intent and screen glare have not been established."
+    },
+    {
+      "case": "move-fit",
+      "question": "Can I move the chair under the desk?",
+      "expected_evidence": [
+        "clear width between supports",
+        "floor-to-underside"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 2 \u00b7 The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.36 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints."
+    },
+    {
+      "case": "study-fit",
+      "question": "Can the study chair fit under the desk?",
+      "expected_evidence": [
+        "clearances are unavailable for this study"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 2 \u00b7 Study chair fit requires a measured chair width and height, the desk's clear width between supports and its floor-to-underside height. These clearances are unavailable for this study."
     },
     {
       "case": "oak",

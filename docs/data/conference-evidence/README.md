@@ -21,7 +21,7 @@ The saved bedroom chair moved 0.300 m away from its desk. The answer panel repor
 
 The footprint measurement does not establish clearance for knees or chair arms. The window measurement supports a proximity statement. The record contains no screen-glare measurement or reason for the desk placement. The catalog variant identifies a finish label and does not certify solid-oak construction.
 
-The browser exercised the ordinary Town UI built from `3ac65d7e984f92ba6b2d0d4469a8397e29076f0a` against the saved project in SQLite. Six questions on each revision matched the independently calculated values or the expected missing evidence. The only API calls made by the page were one GET on revision 1 and two GETs on revision 2, including its preceding revision. These are agent-operated browser observations. [Revision 1 transcript](browser-r1.json) · [Revision 2 transcript](browser-r2.json)
+The browser exercised the ordinary Town UI built from `d1e211f6270e874135ac9477f3dc5fcb5b927100` against the saved project in SQLite. Nine questions on each revision matched the independently calculated values or the expected missing evidence. The named Writing Suite question used its rendered tabletop center, checked independently against the exported part coordinates. The only API calls made by the page were one GET on revision 1 and two GETs on revision 2, including its preceding revision. These are agent-operated browser observations. [Revision 1 transcript](browser-r1.json) · [Revision 2 transcript](browser-r2.json)
 
 ## Six design scenarios
 
