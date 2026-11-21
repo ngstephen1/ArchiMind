@@ -7,6 +7,9 @@ from archimind.assets.designer_concepts import (
     resolve_collection,
 )
 
+from archimind.geometry import validate_accessibility
+from archimind.models import Furniture, RoomDesign
+
 from . import service as db
 from .design import apply_style, digest, validate_home
 
@@ -126,12 +129,24 @@ def chair_pullout(q, owner, project, data, *, apply):
     else:
         raise db.Problem("The chair must be on one side of the writing desk.")
     chair["y_m"] = end
-    if home.get("style_pack"):
-        saved_styles = [part.get("style") for part in home["rooms"]]
-        apply_style(home, home["style_pack"]["id"])
-        if saved_styles != [part.get("style") for part in home["rooms"]]:
+    # Use the floor objects already saved with this room, including vintage packs.
+    # Rugs and wall/ceiling treatments do not reserve walking space.
+    floor_decor = [
+        Furniture(
+            id="decor:" + d["id"],
+            name=d["kind"],
+            category="decor",
+            **{k: d[k] for k in ("x_m", "y_m", "width_m", "depth_m", "height_m")},
+        )
+        for d in bedroom.get("style", {}).get("dressing", [])
+        if d["kind"] in {"plant", "floor_lamp", "accent"}
+    ]
+    if floor_decor:
+        room = RoomDesign.model_validate(bedroom["design"])
+        dressed = room.model_copy(update={"furniture": [*room.furniture, *floor_decor]})
+        if validate_accessibility(dressed).status != "passed":
             raise db.Problem(
-                "This move would also change the saved room dressing. Discard the edit or choose another layout."
+                "The saved floor furnishings leave insufficient room for this chair move."
             )
     home["evidence"]["chair_move_m"] = {
         "from_x": chair["x_m"],

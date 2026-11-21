@@ -482,22 +482,22 @@ bind("undo", async () => {
 
 el("chairStudio").ontoggle = async () => {
   if (!el("chairStudio").open || chairPreview || releasedChairs.length) return;
-  const epoch = ++chairEpoch;
+  const savedHome = applied;
   el("chairPicker").hidden = el("chairPreview").hidden = true;
   el("chairNotice").textContent = "Checking released furniture…";
   try {
     const [{ chairs }, { concepts }] = await Promise.all([api("/designer-chairs"),api("/bedroom-collection")]);
-    if (epoch !== chairEpoch) return;
+    if (savedHome !== applied) return;
     releasedChairs = [...chairs, ...concepts];
     el("chairChoice").replaceChildren(
       ...releasedChairs.map((c, i) => new Option([c.name,c.variant_label,c.version].filter(Boolean).join(" · "), String(i))),
     );
     el("chairPicker").hidden = el("chairPreview").hidden = !releasedChairs.length;
-    el("chairNotice").textContent = releasedChairs.length
+    if (!chairPreview) el("chairNotice").textContent = releasedChairs.length
       ? "Preview a piece at its native size in this revision."
       : "No released furniture is available.";
   } catch (e) {
-    if (epoch === chairEpoch) el("chairNotice").textContent = e.message;
+    if (savedHome === applied && !chairPreview) el("chairNotice").textContent = e.message;
   }
 };
 function discardChair() {
@@ -518,9 +518,18 @@ bind("chairPullout", () => previewBedroomEdit("chair-pullout", {base: revision})
 async function previewBedroomEdit(endpoint, request) {
   resetChairPreview();
   const epoch = chairEpoch;
-  const { home } = await api("/projects/" + project + "/" + endpoint + "/preview", request);
-  if (epoch !== chairEpoch) return;
-  const status = await world.load(home);
+  let home, status;
+  try {
+    ({home} = await api("/projects/" + project + "/" + endpoint + "/preview", request));
+    if (epoch !== chairEpoch) return;
+    status = await world.load(home);
+  } catch (error) {
+    if (epoch === chairEpoch) {
+      discardChair();
+      throw error;
+    }
+    return;
+  }
   const proceduralMove = endpoint === "chair-pullout" && status === "procedural";
   if (status !== "verified" && !proceduralMove) {
     if (epoch === chairEpoch) {
