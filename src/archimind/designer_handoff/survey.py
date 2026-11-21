@@ -92,6 +92,7 @@ class Survey(SurveyRecord):
     height_source: Text | None = None
     openings: list[Opening] = Field(default_factory=list)
     fixtures: list[Fixture] = Field(default_factory=list)
+    fixture_inventory_source: Text | None = None
     checks: list[CheckMeasure] = Field(default_factory=list)
     field_checks: list[Text] = Field(default_factory=list)
 
@@ -107,6 +108,22 @@ class Survey(SurveyRecord):
 
     def verification_items(self) -> list[str]:
         items = list(self.field_checks)
+        if not any(
+            len(self.vertices_m) == 3
+            or abs(m.start - m.end) not in (1, len(self.vertices_m) - 1)
+            for m in self.checks
+        ):
+            items.append("Record an independent check dimension across the room.")
+        if not self.openings:
+            items.append(
+                "Confirm the opening inventory and record measured jamb positions."
+            )
+        if not self.fixtures and self.fixture_inventory_source is None:
+            items.append("Confirm the inventory of fixed services and obstructions.")
+        if self.source_kind == "archival":
+            items.append(
+                "Verify archival measurements and current site conditions in the field."
+            )
         if self.height_m is None:
             items.append("Measure finished floor-to-ceiling height on site.")
         for measure in self.checks:
@@ -141,6 +158,8 @@ class Survey(SurveyRecord):
             raise ValueError("Duplicate opening or fixture ID.")
         references = {e.source for e in [*elements, *self.checks]}
         references.add(self.geometry_source)
+        if self.fixture_inventory_source:
+            references.add(self.fixture_inventory_source)
         if self.height_source:
             references.add(self.height_source)
         if missing := references - source_ids:
@@ -276,18 +295,6 @@ def export_intake(source: Path, destination: Path) -> None:
     payload = source.read_bytes()
     survey = Survey.model_validate_json(payload)
     items = survey.verification_items()
-    if not survey.checks:
-        items.append("Record an independent check between two nonadjacent corners.")
-    if not survey.openings:
-        items.append(
-            "Confirm the opening inventory and record measured jamb positions."
-        )
-    if not survey.fixtures:
-        items.append("Confirm the inventory of fixed services and obstructions.")
-    if survey.source_kind == "archival":
-        items.append(
-            "Verify archival measurements and current site conditions in the field."
-        )
     report = {
         "source_kind": survey.source_kind,
         "intake_sha256": hashlib.sha256(payload).hexdigest(),

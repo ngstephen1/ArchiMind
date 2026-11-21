@@ -67,6 +67,16 @@ def test_viewing_east_mirrors_south_origin_offset(board, tmp_path):
             "vertices_m": [(0, 0), (w, 0), (w, d), (0, d)],
             "height_m": room["ceiling_height_m"],
             "geometry_source": "test",
+            "fixture_inventory_source": "test",
+            "checks": [
+                {
+                    "start": 0,
+                    "end": 2,
+                    "length_m": (w * w + d * d) ** 0.5,
+                    "tolerance_m": 0.001,
+                    "source": "test",
+                }
+            ],
             "sources": [{"id": "test", "description": "Synthetic test measurements"}],
             "openings": [
                 {
@@ -93,6 +103,14 @@ def test_viewing_east_mirrors_south_origin_offset(board, tmp_path):
     )
     with pytest.raises(ValueError, match="required"):
         write_drawings(board, tmp_path, provenance="survey-linked")
+    for missing in ({"checks": []}, {"fixture_inventory_source": None}):
+        with pytest.raises(ValueError, match="Resolve field checks"):
+            write_drawings(
+                board,
+                tmp_path,
+                provenance="survey-linked",
+                survey=survey.model_copy(update=missing),
+            )
     _, elevation, _ = write_drawings(
         board, tmp_path, provenance="survey-linked", survey=survey
     )
