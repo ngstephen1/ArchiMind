@@ -18,7 +18,7 @@ gh workflow run studio-home.yml -f fresh_home=true \
   -f "camera_source=$CAMERA_COMMIT:$CAMERA_MANIFEST_PATH"
 ```
 
-The `studio-eye-views` artifact includes the two PNGs and each camera’s eye, target, field of view, manifest hash, proof-scene hash and image hash. The eye-level pass applies the same neutral daylight color and AgX medium-high contrast to each revision. The saved-style edition models transmitted daylight on the inside of each window curtain, then applies +0.80 EV exposure to lift the oak and upholstered surfaces. The receipt records the window IDs and powers. The two bedroom camera poses are frozen. The optional salon photograph keeps its saved eye and azimuth and uses lens shift for straight verticals. The renderer also verifies that all in-use external images are packed inside the editable scene. Inspect the daylight and oak grain at native resolution.
+The `studio-eye-views` artifact includes the two PNGs and each camera’s eye, target, field of view, manifest hash, proof-scene hash and image hash. The eye-level pass applies the same neutral daylight color and AgX medium-high contrast to each revision. The saved-style edition models transmitted daylight on the inside of each window curtain, and meters exposure from the ratio of room glazing to floor area. The receipt records the window IDs, powers and exposure in EV for each image. The two bedroom camera poses are frozen. The optional salon photograph keeps its saved eye and azimuth and uses lens shift for straight verticals. The renderer also verifies that all in-use external images are packed inside the editable scene. Inspect the daylight and oak grain at native resolution.
 
 ### Use the saved Town style in the book
 
@@ -26,6 +26,6 @@ Supply `snapshot_source` alongside `manifest_source` to render the saved pack fu
 
 The export resolves high-tier assets with Town’s pack loader. It uses Town’s actual furniture and dressing functions to capture native model transforms and procedural geometry for all rooms. The Blender receipt lists resolved slots and file digests per room. Floors, tile, walls, ceilings and trim use released pack textures. Cycles renders with window-aligned lights and the pack environment. The offline renderer has its own light transport, board cameras and tone mapping.
 
-A later photography run inherits the lighting and exposure from the approved proof’s hash-verified style receipt. Supplying the original snapshot again also checks its SHA-256.
+The packed proof scene retains the room lights and materials. Its camera exposures are recorded separately in the proof receipt. Apply the corresponding value in Blender to reproduce an individual proof view. The photography pass reopens this checked scene, applies its own daylight treatment and records the exposure for each shot. Supplying the original snapshot again also checks its SHA-256.
 
 For the final R2 presentation, pass `-f salon_cover=true` with the accepted proof run ID. The resulting `studio-eye-views` artifact includes the finished ten-page PDF when the source contains six rooms, its bedroom eye-level PNGs, the optional salon PNG, the render receipt and credit files. The plan identifies the saved pack and illustrates its authenticated surface textures. The edition with matched bedroom cameras is labeled on the bedroom sheet.

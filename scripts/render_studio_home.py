@@ -244,6 +244,7 @@ def render(args):
             True,
             include_hall=False,
             style_slots=slots.get("bedroom", set()),
+            pleated_curtains=style is None,
         )
     scene = bpy.context.scene
     for obj in list(bpy.data.objects):
@@ -411,6 +412,9 @@ def render(args):
         save_view(scene, out, name, not args.proof)
     if cloth_name:
         scene.camera = bpy.data.objects["bedroom-bedside"]
+        if style:
+            scene.view_settings.exposure = exposures["bedroom-bedside"]
+            exposures["bedroom-bedside-before"] = scene.view_settings.exposure
         cloth = bpy.data.objects[cloth_name]
         cloth.hide_render = True
         save_view(scene, out, "bedroom-bedside-before", not args.proof)

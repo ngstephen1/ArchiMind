@@ -402,6 +402,9 @@ def load_furniture(item, registry, materials):
     anchor.location = center + Vector(source["translation_m"])
     anchor.rotation_euler.z = math.radians(item["rotation_deg"])
     anchor["source_sha256"] = digest
+    if source["kind"] == "concept":
+        for mesh in meshes:
+            mesh["saved_town_slot"] = "bedroom/furniture/" + item["id"]
     bpy.context.view_layer.update()
     vertices = [obj.matrix_world @ Vector(v) for obj in meshes for v in obj.bound_box]
     if not vertices:
@@ -433,6 +436,7 @@ def render(
     *,
     include_hall=True,
     style_slots=(),
+    pleated_curtains=True,
 ):
     manifest_bytes = manifest_path.read_bytes()
     manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
@@ -501,7 +505,7 @@ def render(
     scene.world.node_tree.links.new(env.outputs["Color"], bg.inputs["Color"])
     bg.inputs["Strength"].default_value = 0.8
     room = manifest["room"]
-    architecture(room, m)
+    architecture(room, m, pleated_curtains=pleated_curtains)
     if include_hall:
         hall_context(manifest["hall_context"], room, m)
     registry_data = json.loads((ASSETS / "designer_registry.json").read_text())
