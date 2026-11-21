@@ -114,7 +114,9 @@ def build(boards, scene, photos, book, out):
             "desk-r1.jpg",
             "desk-r2.jpg",
         ):
-            copy(boards / name, "revisions/" + name)
+            # The tracked photographic and job evidence belongs to this exact edition.
+            reference = ROOT / "docs/data/conference-sprint" / name
+            copy(verified(boards / name, sha(reference)), "revisions/" + name)
         for record in (old, board):
             write_drawings(
                 record,

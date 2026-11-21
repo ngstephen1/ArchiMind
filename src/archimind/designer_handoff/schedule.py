@@ -246,7 +246,7 @@ def write_schedule(
         for desk in (f for f in placed.values() if f["category"] == "desk"):
             pair = chair["id"], desk["id"]
             ids = " / ".join(pair)
-            if all(f.get("rotation_deg") == 0 for f in (chair, desk)):
+            if all(f.get("rotation_deg", 0) == 0 for f in (chair, desk)):
                 gaps = [
                     max(
                         0,

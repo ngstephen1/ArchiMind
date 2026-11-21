@@ -360,7 +360,11 @@ def _check_survey(room, survey: Survey) -> None:
     design_openings = [(op, "door", 0.0) for op in room.doors] + [
         (op, "window", op.sill_height_m) for op in room.windows
     ]
-    if set(openings) != {op.id for op, _, _ in design_openings}:
+    if (
+        len(openings) != len(survey.openings)
+        or len(openings) != len(design_openings)
+        or set(openings) != {op.id for op, _, _ in design_openings}
+    ):
         raise ValueError("Survey opening IDs differ from the selected room.")
     for op, kind, sill in design_openings:
         observed = openings[op.id]
