@@ -28,11 +28,13 @@ function deskWindow(room, desk, tabletop = null) {
 export function asksChairChange(question) {
   const q = question.toLowerCase();
   if (!/\bchair\b/.test(q) || /\bstudy\b/.test(q)) return false;
-  const comparison = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
-  const revisions = /\b(revisions|previous revision|last revision|before and after)\b/.test(q);
-  if (comparison && revisions) return true;
-  if (/\b(fit|fits|slide|slides|tuck|tucks|under|if|hypothetical)\b/.test(q)) return false;
-  return revisions || /\b(changed|moved|displacement)\b/.test(q) || /\bdid\b.*\bmove\b/.test(q);
+  const comparative = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
+  const timeline = /\b(revisions?|before|after|previously|now|earlier)\b/.test(q);
+  if (comparative && timeline) return true;
+  if (/\bif\b/.test(q)) return false;
+  if (/\bdid\b.*\b(move|shift|change)\b/.test(q)) return true;
+  if (/\b(fit|fits|slide|slides|tuck|tucks|under)\b/.test(q)) return false;
+  return /\b(revisions|previous revision|changed|moved|displacement)\b/.test(q);
 }
 
 function chairChange(home, manifest, previous) {

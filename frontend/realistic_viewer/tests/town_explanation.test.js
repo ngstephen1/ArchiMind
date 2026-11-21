@@ -67,6 +67,11 @@ test("chair movement compares consecutive revisions of the same project", () => 
   manifest.home_id = home.id = "synthetic-edited-home";
   const ask = prior => explanation(home,"What changed when I moved the chair?",manifest,prior);
   assert.match(ask(previous), /Displacement: 0.200 m.*0.060 m before and 0.060 m after/);
+  for (const q of ["Compare where the chair was before with where it is now.",
+                   "Did the chair move farther under the desk or away from it?",
+                   "Could you compare the bedroom chair across revisions?"]) {
+    assert.match(explanation(home, q, manifest, previous), /Displacement: 0.200 m/);
+  }
   assert.match(ask({...previous, project:"other"}), /needs this saved revision/);
   assert.match(ask(null), /needs this saved revision/);
 });
@@ -108,4 +113,18 @@ test("revision comparisons distinguish a polite request from a fit question", ()
   assert.equal(asksChairChange("How does the chair position change between revisions?"), true);
   const {home, manifest} = selected();
   assert.match(explanation(home, "Will the bedroom chair tuck in when I am done studying?", manifest), /0.48 m wide/);
+});
+
+
+test("conference study answer matches the saved tabletop-to-east-window distance", () => {
+  const board = JSON.parse(readFileSync(new URL("../../../docs/data/conference-sprint/before.json", import.meta.url)));
+  const home = {id: board.home_id, rooms: board.rooms.map(design => ({design}))};
+  const study = board.rooms.find(p => p.room.id === "study");
+  const suite = study.furniture.find(f => f.id === "writing-suite");
+  const [x, y] = suite.parts.find(p => p.name === "Tabletop").xyz;
+  const [w] = study.room.windows;
+  assert.equal(w.wall, "east");
+  const distance = Math.hypot(study.room.width_m - x, w.offset_m + w.width_m / 2 - y).toFixed(2);
+  assert.equal(distance, "4.19");
+  assert.ok(explanation(home, "How far is the Writing Suite from its window?").includes(distance + " m"));
 });
