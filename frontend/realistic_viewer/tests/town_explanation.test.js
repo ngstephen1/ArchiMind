@@ -81,7 +81,7 @@ test("a generic desk question with two desks needs a room", () => {
 
 test("forward-looking chair fit asks for measurements without fetching history", () => {
   const {home, manifest} = selected();
-  for (const question of ["Can I move the chair under the desk?", "Would the chair fit if I moved it?"]) {
+  for (const question of ["Can I move the chair under the desk?", "Would the chair fit if I moved it?", "Will the chair I picked earlier fit under the desk?"]) {
     assert.equal(asksChairChange(question), false);
     assert.match(explanation(home, question, manifest), /clear width between supports/);
   }
@@ -100,4 +100,12 @@ test("study answers resolve the displayed name and use the writing suite tableto
   assert.ok(answer.includes(distance + " m"));
   assert.match(answer, /study writing-suite tabletop and window study-test-opening/);
   assert.match(explanation(home, "Can the study chair fit under the desk?"), /clearances are unavailable for this study/);
+});
+
+
+test("revision comparisons distinguish a polite request from a fit question", () => {
+  assert.equal(asksChairChange("Could you compare the bedroom chair across revisions?"), true);
+  assert.equal(asksChairChange("How does the chair position change between revisions?"), true);
+  const {home, manifest} = selected();
+  assert.match(explanation(home, "Will the bedroom chair tuck in when I am done studying?", manifest), /0.48 m wide/);
 });

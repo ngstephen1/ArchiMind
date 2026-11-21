@@ -26,9 +26,13 @@ function deskWindow(room, desk, tabletop = null) {
 }
 
 export function asksChairChange(question) {
-  return /\bchair\b/i.test(question) && !/\bstudy\b/i.test(question) &&
-    (/\b(changed|moved|previous|earlier|before and after|compare|compared)\b/i.test(question) || /\bdid\b.*\bmove\b/i.test(question)) &&
-    !/\b(if|could|would|should)\b/i.test(question);
+  const q = question.toLowerCase();
+  if (!/\bchair\b/.test(q) || /\bstudy\b/.test(q)) return false;
+  const comparison = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
+  const revisions = /\b(revisions|previous revision|last revision|before and after)\b/.test(q);
+  if (comparison && revisions) return true;
+  if (/\b(fit|fits|slide|slides|tuck|tucks|under|if|hypothetical)\b/.test(q)) return false;
+  return revisions || /\b(changed|moved|displacement)\b/.test(q) || /\bdid\b.*\bmove\b/.test(q);
 }
 
 function chairChange(home, manifest, previous) {
@@ -78,7 +82,7 @@ export function explanation(home, question, manifest = null, previous = null) {
   const namedStudyDesk = studyDesks.find(f =>
     [f.name, f.id].some(label => label && normalized.includes(label.toLowerCase().replaceAll("-", " ")))
   );
-  if (/study/.test(q) || namedStudyDesk) {
+  if (/\bstudy\b/.test(q) || namedStudyDesk) {
     if (!study) return "This revision has no recorded study.";
     if (/chair|knee|slide under/.test(q))
       return "Study chair fit requires a measured chair width and height, the desk's clear width between supports and its floor-to-underside height. These clearances are unavailable for this study.";
