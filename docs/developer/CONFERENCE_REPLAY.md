@@ -12,7 +12,20 @@ conference_dir=$(mktemp -d)
 TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
 ```
 
-Open [the edited home](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2). Visit the bedroom, then choose **Design presentation**. The visitor can see the plan, switch rooms, inspect the furniture schedule, open the client book or ask a question. Open [the earlier revision](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=1) in another tab. If using a different Town port, change the port in both links.
+Open [the edited home](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2). Click **Visit saved home**, then **Enter house**. Select **Bedroom** from **Visit a room**, then choose **Design presentation**. The visitor can see the plan, switch rooms, inspect the furniture schedule, open the client book or ask a question. Open [the earlier revision](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=1) in another tab. If using a different Town port, change the port in both links.
+
+## Open both conference projects
+
+After installing the checkout with the live conference evidence, give the builder both sources. The original and fresh projects follow the same seed and chair edit and have distinct project and manifest identities.
+
+```bash
+conference_dir=$(mktemp -d)
+.venv/bin/python scripts/reopen_conference_home.py "$conference_dir/Conference-Town.sqlite3" \
+  --example docs/data/conference-sprint --example docs/data/conference-live-final
+ARCHIMIND_ENABLE_OPENAI_STUDIO=0 TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
+```
+
+Open [the fresh revision 2](http://127.0.0.1:8790/?project=c9339e4f-a57a-4328-95dc-40dc36dd5b89&revision=2), enter the bedroom and choose **Design presentation**. Revision 2 links its own client book and source scene. Use revision 1 for the comparison.
 
 ## Follow one edit
 

@@ -6,5 +6,13 @@
     "manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
     "pdf": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Studio-House-Client-Book.pdf",
     "url": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Studio-House-R2-Scene.zip"
+  },
+  {
+    "project": "c9339e4f-a57a-4328-95dc-40dc36dd5b89",
+    "revision": 2,
+    "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+    "manifest_sha256": "f02b4ea3bf609253ae0b320a6a4059286f3a69bef58816476570f7038fd36118",
+    "pdf": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Fresh-Home-Client-Book.pdf",
+    "url": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Fresh-Home-R2-Scene.zip"
   }
 ]
