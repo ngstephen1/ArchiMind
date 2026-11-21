@@ -29,3 +29,5 @@ ARCHIMIND_ENABLE_OPENAI_STUDIO=0 TOWN_DB="$PWD/Conference-Town.sqlite3" .venv/bi
 ```
 
 Use the Town link printed by the launcher and append `?project=c9339e4f-a57a-4328-95dc-40dc36dd5b89&revision=2`. Set the revision to 1 for the earlier chair position. Visitor playback can run with live generation disabled. The [four exported board digests](replayed-manifests.json) reproduce the actual browser exports from the source DB. The distributed SQLite SHA-256 is `a2fc081830eae29e325cfe0189ba545b6d5b37557e7df2a7961946e27db010ea`.
+
+The [sanitized original ledger](ledger.json) records all five submissions on the UTC day, including the three that preceded the extra grant. It distinguishes the 15 reserved calls from actual provider billing.

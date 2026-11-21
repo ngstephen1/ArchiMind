@@ -1,0 +1,51 @@
+{
+  "ledger_date_utc": "2026-11-21",
+  "source": "original local Town SQLite jobs table; owner and request contents omitted",
+  "jobs": [
+    {
+      "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+      "job": "afdd3c0b-874b-47d9-97a5-96a491741aee",
+      "submitted_utc": "2026-11-21T05:20:33+00:00",
+      "status": "failed",
+      "call_reservations": 3
+    },
+    {
+      "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+      "job": "c050cb74-84b4-4c23-9b1b-e83c1d745986",
+      "submitted_utc": "2026-11-21T05:20:47+00:00",
+      "status": "failed",
+      "call_reservations": 3
+    },
+    {
+      "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+      "job": "c71bfb95-0020-4605-a504-c813df66faf2",
+      "submitted_utc": "2026-11-21T05:21:32+00:00",
+      "status": "ready",
+      "call_reservations": 3
+    },
+    {
+      "project": "c9339e4f-a57a-4328-95dc-40dc36dd5b89",
+      "job": "160556cb-ce4a-47aa-969d-7ddf095f4723",
+      "submitted_utc": "2026-11-21T07:00:05+00:00",
+      "status": "failed",
+      "call_reservations": 3
+    },
+    {
+      "project": "c9339e4f-a57a-4328-95dc-40dc36dd5b89",
+      "job": "b8d6a82f-aff0-45be-8bbb-33b4c83056c5",
+      "submitted_utc": "2026-11-21T07:00:17+00:00",
+      "status": "ready",
+      "call_reservations": 3
+    }
+  ],
+  "before_fresh_run": {
+    "jobs": 3,
+    "reserved_calls": 9
+  },
+  "after_fresh_run": {
+    "jobs": 5,
+    "reserved_calls": 15
+  },
+  "reserve_per_call_microusd": 100000,
+  "provider_billing": "Actual charges unavailable in Town ledger."
+}

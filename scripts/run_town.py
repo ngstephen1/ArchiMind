@@ -30,6 +30,7 @@ if __name__ == "__main__":
         help="Allow up to two extra local team jobs (six call reservations) for this UTC date.",
     )
     extra_date = parser.parse_args().extra_team_jobs_on
+    os.environ.pop("TOWN_EXTRA_TEAM_JOBS_DATE", None)
     if extra_date is not None:
         os.environ["TOWN_EXTRA_TEAM_JOBS_DATE"] = extra_date.isoformat()
 

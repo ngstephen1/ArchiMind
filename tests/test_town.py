@@ -707,6 +707,14 @@ def test_local_extra_jobs_are_date_limited_and_bounded(local, monkeypatch):
         "TOWN_EXTRA_TEAM_JOBS_DATE", datetime.now(UTC).date().isoformat()
     )
     assert local.post("/api/jobs", json=job(p)).status_code == 429
+    for calls, micro in [("5", "90"), ("9", "50"), ("0", "90"), ("9", "0")]:
+        monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", calls)
+        monkeypatch.setenv("TOWN_DAILY_MICROUSD", micro)
+        rejected = local.post("/api/jobs", json=team())
+        assert rejected.status_code == 429
+        assert "allowance" in rejected.json()["error"]
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "9")
+    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "90")
     for _ in range(2):
         req = team()
         j = local.post("/api/jobs", json=req).json()["job"]
