@@ -6,12 +6,31 @@ on:
         description: Render the fresh-home acceptance manifest only
         type: boolean
         default: false
+      manifest_source:
+        description: Optional pinned 40-hex-commit:docs/data/file.json from this repository (fresh_home only)
+        type: string
+      snapshot_source:
+        description: Optional pinned original Town snapshot for high-tier furniture and dressing
+        type: string
+      approved_proof_run:
+        description: Accepted fresh-home proof run ID for a two-view 1080p render
+        type: string
+      salon_cover:
+        description: Also render the saved salon camera for the final client cover
+        type: boolean
+        default: false
+      camera_source:
+        description: Optional pinned camera manifest for a matched comparison (same project and shell)
+        type: string
   push:
     branches: [feat/whole-home-client-studio]
     paths:
       - scripts/*studio_home.py
       - scripts/publish_studio_board.py
       - scripts/render_saved_bedroom.py
+      - scripts/render_town_templates.py
+      - scripts/render_saved_style.py
+      - frontend/realistic_viewer/town/export-saved-style.mjs
       - .github/workflows/studio-home.yml
       - src/archimind/town/design.py
       - frontend/realistic_viewer/town/bedroom_cameras.js
@@ -20,11 +39,21 @@ on:
       - frontend/realistic_viewer/town/home_board.js
 permissions:
   contents: read
+  actions: read
 jobs:
   render:
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
+      - name: Check conference render inputs
+        if: inputs.approved_proof_run || inputs.manifest_source || inputs.camera_source || inputs.snapshot_source
+        env:
+          FRESH: ${{ inputs.fresh_home }}
+          PROOF_RUN: ${{ inputs.approved_proof_run }}
+          CAMERA: ${{ inputs.camera_source }}
+        run: |
+          test "$FRESH" = true
+          if [ -n "$CAMERA" ]; then test -n "$PROOF_RUN"; fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
@@ -44,7 +73,25 @@ jobs:
           node-version: "20"
       - name: Stage the fresh-home manifest
         if: inputs.fresh_home
-        run: cp docs/data/fresh-home/before.json "$RUNNER_TEMP/manifest.json"
+        env:
+          MANIFEST_SOURCE: ${{ inputs.manifest_source }}
+        run: |
+          if [ -n "$MANIFEST_SOURCE" ]; then
+            python scripts/stage_studio_manifest.py "$MANIFEST_SOURCE" "$RUNNER_TEMP/manifest.json"
+          else
+            cp docs/data/fresh-home/before.json "$RUNNER_TEMP/manifest.json"
+          fi
+      - name: Resolve high-tier style placements from the exact saved Town snapshot
+        if: inputs.snapshot_source
+        env:
+          SNAPSHOT_SOURCE: ${{ inputs.snapshot_source }}
+          APPROVED_PROOF: ${{ inputs.approved_proof_run }}
+        run: |
+          python scripts/stage_studio_manifest.py "$SNAPSHOT_SOURCE" "$RUNNER_TEMP/snapshot.json" --snapshot
+          if [ -z "$APPROVED_PROOF" ]; then
+            npm ci --prefix frontend/realistic_viewer --ignore-scripts
+            node frontend/realistic_viewer/town/export-saved-style.mjs "$RUNNER_TEMP/snapshot.json" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/saved-style.json"
+          fi
       - name: Replay applied studio home and export the scene
         if: ${{ !inputs.fresh_home }}
         run: |
@@ -52,15 +99,50 @@ jobs:
           npm ci --prefix frontend/realistic_viewer --ignore-scripts
           python scripts/run_studio_home.py --export "$RUNNER_TEMP/saved.json"
           node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/saved.json" "$RUNNER_TEMP/manifest.json"
-      - name: Reopen the editable scene and render every room
+      - name: Reopen an accepted proof for matched 1080p eye-level images
+        if: inputs.approved_proof_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROOF_RUN: ${{ inputs.approved_proof_run }}
+          CAMERA_SOURCE: ${{ inputs.camera_source }}
+          SALON_COVER: ${{ inputs.salon_cover }}
         run: |
-          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/proof" --proof
+          [[ "$PROOF_RUN" =~ ^[0-9]+$ ]]
+          workflow_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/studio-home.yml" --jq .id)"
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$PROOF_RUN" --jq '[.conclusion,(.workflow_id|tostring)]|join(" ")')" = "success $workflow_id"
+          gh run download "$PROOF_RUN" --name studio-home-proof --dir "$RUNNER_TEMP/accepted"
+          if [ -n "$CAMERA_SOURCE" ]; then
+            python scripts/stage_studio_manifest.py "$CAMERA_SOURCE" "$RUNNER_TEMP/camera.json"
+          else
+            cp "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json"
+          fi
+          options=()
+          if [ "$SALON_COVER" = true ]; then options+=(--salon-cover); fi
+          if [ -f "$RUNNER_TEMP/snapshot.json" ]; then options+=(--expected-snapshot "$RUNNER_TEMP/snapshot.json"); fi
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views" "${options[@]}"
+          python scripts/publish_studio_board.py "$RUNNER_TEMP/accepted" --eye-views "$RUNNER_TEMP/eye-views"
+          google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf" "file://$RUNNER_TEMP/accepted/index.html"
+          test -s "$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: inputs.approved_proof_run
+        with:
+          name: studio-eye-views
+          path: ${{ runner.temp }}/eye-views
+          if-no-files-found: error
+      - name: Reopen the editable scene and render every room
+        if: ${{ !inputs.approved_proof_run }}
+        run: |
+          options=()
+          if [ -f "$RUNNER_TEMP/saved-style.json" ]; then options+=(--saved-style "$RUNNER_TEMP/saved-style.json"); fi
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/proof" --proof "${options[@]}"
       - name: Make the revision-bound client book and print to PDF
+        if: ${{ !inputs.approved_proof_run }}
         run: |
           python scripts/publish_studio_board.py "$RUNNER_TEMP/proof"
           google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/proof/Studio-House.pdf" "file://$RUNNER_TEMP/proof/index.html"
           test -s "$RUNNER_TEMP/proof/Studio-House.pdf"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ !inputs.approved_proof_run }}
         with:
           name: studio-home-proof
           path: ${{ runner.temp }}/proof

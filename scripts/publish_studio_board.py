@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import html
 import json
+import re
 from pathlib import Path
 
 
@@ -100,7 +101,7 @@ def elevations(part):
     return "".join(result)
 
 
-def book(directory):
+def book(directory, eye_views=None):
     receipt = json.loads((directory / "receipt.json").read_bytes())
     for name, expected in receipt["files"].items():
         if (
@@ -115,35 +116,110 @@ def book(directory):
     ) != (receipt["home_id"], receipt["revision"]):
         raise ValueError("Manifest identity mismatch")
 
-    def img(name):
+    replacements = {}
+    replacement_cameras = {}
+    if eye_views:
+        evidence = json.loads((eye_views / "eye-view-receipt.json").read_bytes())
+        if (
+            evidence["manifest_sha256"] != receipt["manifest_sha256"]
+            or evidence["proof_blend_sha256"] != receipt["files"]["home.blend"]
+        ):
+            raise ValueError("Eye views identify a different source proof")
+        for shot in evidence["shots"]:
+            name = shot["file"]
+            if (
+                Path(name).name != name
+                or name not in receipt["files"]
+                or not name.endswith(".png")
+            ):
+                raise ValueError("Unexpected eye-view filename")
+            data = (eye_views / name).read_bytes()
+            if hashlib.sha256(data).hexdigest() != shot["sha256"]:
+                raise ValueError(
+                    "Eye-view PNG differs from its signed-off render receipt"
+                )
+            replacements[name] = "presentation-" + name
+            replacement_cameras[name] = shot["camera"]
+            (directory / replacements[name]).write_bytes(data)
+    style = (
+        json.loads((directory / "saved-style-receipt.json").read_bytes())
+        if "saved-style-receipt.json" in receipt["files"]
+        else None
+    )
+
+    def img(name, *, original=False):
         filename = name + ".png"
         if filename not in receipt["files"]:
             raise ValueError("Missing render: " + filename)
-        return f'<img src="{esc(filename)}" alt="{esc(name.replace("-", " "))}">'
+        path = filename if original else replacements.get(filename, filename)
+        return f'<img src="{esc(path)}" alt="{esc(name.replace("-", " "))}">'
+
+    def caption(room_id, view):
+        key = f"{room_id}-{view['id']}.png"
+        used = replacement_cameras.get(key, view)
+        text = used.get("reason") or used["label"]
+        if key in replacements and room_id == "bedroom":
+            text += " · 1080p, comparison camera"
+        if key in replacements and room_id == "salon":
+            text += " · 1080p, architectural perspective"
+        return esc(text)
 
     pages = []
     featured = next(
         (r for r in board["rooms"] if r["room"]["id"] == "salon"), board["rooms"][0]
     )
     hero = featured["room"]["id"] + "-" + featured["cameras"][0]["id"]
+    palette = (
+        (style["style_pack"]["id"] + " style pack")
+        if style
+        else (board["palette"] + " palette")
+    )
     pages.append(
         "<h1>The Studio House</h1>"
         + img(hero)
-        + f"<p>Whole-home interior study · {board['width']} × {board['depth']} m · {esc(board['palette'].title())} palette</p>"
+        + f"<p>Whole-home interior study · {board['width']} × {board['depth']} m · {esc(palette.title())}</p>"
     )
+    finish_rows = "".join(
+        f'<p><i style="background:{esc(col)}"></i>{esc(label.title())}</p>'
+        for label, col in board["finishes"].items()
+    )
+    if style:
+        finish_rows = ""
+        surfaces = (
+            Path(__file__).resolve().parents[1]
+            / "src/archimind/_viewer_assets/packs/assets"
+        )
+        for role, row in style["surfaces"].items():
+            digest = row["files"]["diffuse"]
+            if not re.fullmatch(r"[0-9a-f]{64}", digest):
+                raise ValueError("Invalid surface swatch digest")
+            asset = next(
+                (
+                    f
+                    for f in surfaces.glob(digest + ".*")
+                    if f.suffix in {".webp", ".jpg", ".png"}
+                ),
+                None,
+            )
+            if not asset or hashlib.sha256(asset.read_bytes()).hexdigest() != digest:
+                raise ValueError("Released surface swatch unavailable")
+            filename = "swatch-" + asset.name
+            (directory / filename).write_bytes(asset.read_bytes())
+            label = row["asset_id"].split(":")[-1].replace("_", " ").title()
+            finish_rows += f'<p><img class="swatch" src="{esc(filename)}" alt=""><b>{esc(role.title())}</b> · {esc(label)}</p>'
+        finish_rows += "<p>Furniture and dressing follow the saved high-quality Town style. The furniture schedule gives reserved dimensions and floor positions.</p>"
+    credits = '<p><small>Belaya model © Amazon.com. <a href="https://amazon-berkeley-objects.s3.amazonaws.com/index.html">Amazon Berkeley Objects</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Scene assembly and rendering by ArchiMind. <a href="https://polyhaven.com/license">Poly Haven</a> surfaces and lighting · CC0. Full notices accompany the source book.</small></p>'
     pages.append(
         "<h2>Plan &amp; finishes</h2><div class='grid'><div>"
         + drawing(board)
         + "</div><div><p>North is up. Blue marks windows and ochre marks doors. Dimensions are in metres.</p>"
-        + "".join(
-            f'<p><i style="background:{esc(col)}"></i>{esc(label.title())}</p>'
-            for label, col in board["finishes"].items()
-        )
+        + finish_rows
         + "</div></div>"
+        + credits
     )
     pages.append(
         '<h2>From drawing to daylight</h2><div class="compare">'
-        + img(hero)
+        + img(hero, original=True)
         + '<div class="ink">'
         + img(hero + "-drawing")
         + "</div></div><label>Drawing coverage <input type=\"range\" value=\"50\" oninput=\"document.querySelector('.ink').style.clipPath='inset(0 '+(100-this.value)+'% 0 0)'\"></label>"
@@ -162,7 +238,7 @@ def book(directory):
                 "<figure>"
                 + img(r["id"] + "-" + v["id"])
                 + "<figcaption>"
-                + esc(v.get("reason") or v["label"])
+                + caption(r["id"], v)
                 + "</figcaption></figure>"
                 for v in views[:2]
             )
@@ -173,6 +249,13 @@ def book(directory):
             + "</table>"
         )
     css = """*{box-sizing:border-box}body{margin:auto;max-width:1120px;color:#24382f;background:#eeeae1;font:16px/1.4 system-ui}section{padding:3.5%;background:#faf8f2;margin:15px 0}h1,h2{font:normal 2.8em/1.1 Georgia;margin:.25em 0 .5em}img,svg{width:100%;display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}figure{margin:0}figcaption,footer{font-size:.85em}footer{margin-top:1em;border-top:1px solid #b8ac97;padding-top:.6em}table{border-collapse:collapse;width:100%;margin-top:1em}td,th{text-align:left;border-bottom:1px solid #ccc;padding:.2em}i{width:2em;height:1em;display:inline-block;margin-right:.6em}.compare{position:relative}.ink{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}@media(max-width:650px){.grid{grid-template-columns:1fr}}@page{size:A3 landscape;margin:12mm}@media print{body{max-width:none;font-size:11pt;background:white}section{margin:0;padding:0;break-after:page}section:last-child{break-after:auto}section>img,.compare{width:82%}.grid{grid-template-columns:1fr 1fr}.grid svg{max-height:32vh}label{display:none}*{print-color-adjust:exact}}"""
+    css += ".swatch{width:6.2em;height:2em;object-fit:cover;display:inline-block;vertical-align:middle;margin-right:.75em}"
+    css += """@media print {
+    .client-book section {min-height:269mm;position:relative;padding:1mm 2mm 11mm}
+    .client-book footer {position:absolute;bottom:1mm;left:2mm;right:2mm}
+    .client-book section>img,.client-book .compare {width:94%;max-width:354mm}
+    .client-book .grid svg[aria-label="Dimensioned home plan"] {height:181mm;max-height:181mm}
+    }"""
     if "camera-studies.json" in receipt["files"]:
         studies = json.loads((directory / "camera-studies.json").read_text())
         panels = "".join(
@@ -202,7 +285,7 @@ def book(directory):
     (directory / "index.html").write_text(
         '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Studio House</title><style>'
         + css
-        + "</style>"
+        + '</style><body class="client-book">'
         + "".join(
             "<section>"
             + p
@@ -211,11 +294,13 @@ def book(directory):
             + f" · {i + 1} / {len(pages)}</footer></section>"
             for i, p in enumerate(pages)
         )
-        + "</html>"
+        + "</body></html>"
     )
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("directory", type=Path)
-    book(parser.parse_args().directory)
+    parser.add_argument("--eye-views", type=Path)
+    args = parser.parse_args()
+    book(args.directory, args.eye_views)

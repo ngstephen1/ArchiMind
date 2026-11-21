@@ -15,6 +15,7 @@ from mathutils import Vector
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import render_saved_bedroom as bedroom  # noqa: E402
+from render_saved_style import dress_scene  # noqa: E402
 
 
 def translate_new(before, origin):
@@ -213,6 +214,16 @@ def render(args):
         for k in ("project", "revision", "home_id", "palette")
     ):
         raise ValueError("Expected one applied whole-home revision")
+    style = json.loads(args.saved_style.read_bytes()) if args.saved_style else None
+    if style and (
+        (style["home_id"], style["revision"], style["project"])
+        != (board["home_id"], board["revision"], board["project"])
+        or style["manifest_sha256"] != hashlib.sha256(source).hexdigest()
+    ):
+        raise ValueError("Style data belongs to a different exported revision")
+    slots = (
+        {part["id"]: set(part["placed"]) for part in style["rooms"]} if style else {}
+    )
     out = args.output.resolve()
     out.mkdir(parents=True, exist_ok=False)
     (out / "manifest.json").write_bytes(source)
@@ -225,7 +236,14 @@ def render(args):
         tmp = Path(tmp)
         path = tmp / "manifest.json"
         path.write_text(json.dumps(board["bedroom"]))
-        bedroom.render(path, tmp / "base", args.originals, True, include_hall=False)
+        bedroom.render(
+            path,
+            tmp / "base",
+            args.originals,
+            True,
+            include_hall=False,
+            style_slots=slots.get("bedroom", set()),
+        )
     scene = bpy.context.scene
     for obj in list(bpy.data.objects):
         if obj.type == "CAMERA":
@@ -303,10 +321,12 @@ def render(args):
             seam.thickness = 0.003
         if room["id"] != "bedroom":
             before = set(bpy.data.objects)
-            bedroom.architecture(room, mats)
+            bedroom.architecture(room, mats, pleated_curtains=style is None)
             for piece in part["details"]:
                 studio_piece(piece, finishes)
             for item in part["furniture"]:
+                if item["id"] in slots.get(room["id"], set()):
+                    continue
                 for piece in item["parts"]:
                     studio_piece(piece, finishes)
                 if not item["parts"]:
@@ -346,6 +366,8 @@ def render(args):
     bedroom.box(
         "Hall end", (board["hall"] + 0.8, depth, 1.4), (1.6, 0.1, 2.8), mats["plaster"]
     )
+    if style:
+        dress_scene(style, board, bedroom, out)
     scene["board_sha256"] = hashlib.sha256(source).hexdigest()
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.adaptive_threshold = 0.025 if args.proof else 0.012
@@ -393,6 +415,9 @@ def render(args):
                 "home_id": board["home_id"],
                 "revision": board["revision"],
                 "manifest_sha256": scene["board_sha256"],
+                "bedroom_representations": json.loads(
+                    scene["bedroom_representations_json"]
+                ),
                 "devices": devices or ["CPU"],
                 "samples": scene.cycles.samples,
                 "benchmark": benchmark,
@@ -409,6 +434,11 @@ if __name__ == "__main__":
     p.add_argument("manifest", type=Path)
     p.add_argument("output", type=Path)
     p.add_argument("--originals", type=Path, default=Path("output/surface-originals"))
+    p.add_argument(
+        "--saved-style",
+        type=Path,
+        help="Verified high-tier overlay from export-saved-style.mjs",
+    )
     p.add_argument("--gpu", action="store_true")
     p.add_argument("--proof", action="store_true")
     render(p.parse_args(sys.argv[sys.argv.index("--") + 1 :]))
