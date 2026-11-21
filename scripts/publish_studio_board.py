@@ -281,7 +281,10 @@ def book(directory, eye_views=None):
             '<a href="studies.html" class="online">Open the camera and coverlet studies</a>'
         )
         css += "@media print{.online{display:none}}"
-    footer = f"Revision {board['revision']} · {esc(board['home_id'][:12])} · Interior design presentation"
+    footer = (
+        f"Project {esc(board['project'])} · Revision {board['revision']} · "
+        f"Home {esc(board['home_id'][:12])} · Interior design presentation"
+    )
     (directory / "index.html").write_text(
         '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Studio House</title><style>'
         + css

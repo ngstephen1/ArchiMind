@@ -65,7 +65,7 @@ def print_book(before, after, eyes, destination, chrome):
         )
         pages = [page.strip() for page in text.split("\f") if page.strip()]
         if len(pages) != len(board["rooms"]) + 6 or any(
-            board["project"] not in p for p in pages[-2:]
+            board["project"] not in p for p in pages
         ):
             raise ValueError(
                 "Unexpected pagination or project in the printed comparison."
