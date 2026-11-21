@@ -682,3 +682,131 @@ def test_pullout_rejects_obstructed_move(local, obstacle_kind):
         == 400
     )
     assert local.get(f"/api/projects/{p}").json()["revision"] == 1
+
+
+def test_local_extra_jobs_are_date_limited_and_bounded(local, monkeypatch):
+    from datetime import UTC, datetime
+
+    p = service.create("local-designer")["project"]
+    monkeypatch.setenv("OPENAI_API_KEY", "mock")
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "9")
+    monkeypatch.setenv("TOWN_CALL_RESERVE_MICROUSD", "10")
+    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "90")
+
+    def team():
+        return job(p, message="A study", live=True, agent_team=True)
+
+    for _ in range(3):
+        j = local.post("/api/jobs", json=team()).json()["job"]
+        assert local.post("/api/jobs/" + j + "/cancel", json={}).status_code == 200
+    for date in ("", "2001-01-01"):
+        monkeypatch.setenv("TOWN_EXTRA_TEAM_JOBS_DATE", date)
+        assert local.post("/api/jobs", json=team()).status_code == 429
+    monkeypatch.setenv(
+        "TOWN_EXTRA_TEAM_JOBS_DATE", datetime.now(UTC).date().isoformat()
+    )
+    assert local.post("/api/jobs", json=job(p)).status_code == 429
+    for calls, micro in [("5", "90"), ("9", "50"), ("0", "90"), ("9", "0")]:
+        monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", calls)
+        monkeypatch.setenv("TOWN_DAILY_MICROUSD", micro)
+        rejected = local.post("/api/jobs", json=team())
+        assert rejected.status_code == 429
+        assert "allowance" in rejected.json()["error"]
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "9")
+    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "90")
+    for _ in range(2):
+        req = team()
+        j = local.post("/api/jobs", json=req).json()["job"]
+        assert local.post("/api/jobs", json=req).json()["job"] == j
+        assert local.post("/api/jobs/" + j + "/cancel", json={}).status_code == 200
+    assert local.post("/api/jobs", json=team()).status_code == 429
+    req = service.Request.model_validate(team())
+    monkeypatch.setenv("DATABASE_URL", "unused")
+    assert service.local_extra_team_jobs(req, datetime.now(UTC).timestamp()) == 0
+
+
+@pytest.mark.parametrize("explicit", [True, False])
+def test_launcher_requires_date_flag(tmp_path, monkeypatch, explicit):
+    import errno
+    import os
+    import runpy
+    import socket
+    import sys
+
+    script = Path(__file__).resolve().parents[1] / "scripts/run_town.py"
+    for key in ("TOWN_MODE", "TOWN_STATIC", "DATABASE_URL"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("TOWN_PORT", "8790")
+    monkeypatch.setenv("TOWN_EDITOR_PORT", "8791")
+    monkeypatch.setenv("TOWN_DB", str(tmp_path / "unused.sqlite3"))
+    monkeypatch.setenv("TOWN_EXTRA_TEAM_JOBS_DATE", "2026-11-20")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(script)] + (["--extra-team-jobs-on", "2026-11-21"] if explicit else []),
+    )
+
+    def occupied(_socket, _address):
+        raise OSError(errno.EADDRINUSE, "Test stops before launching the server")
+
+    monkeypatch.setattr(socket.socket, "bind", occupied)
+    with pytest.raises(SystemExit, match="already in use"):
+        runpy.run_path(str(script), run_name="__main__")
+    assert os.getenv("TOWN_EXTRA_TEAM_JOBS_DATE") == (
+        "2026-11-21" if explicit else None
+    )
+
+
+def test_compound_conference_failure_offers_actionable_review(local, monkeypatch):
+    p = service.create("local-designer")["project"]
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    monkeypatch.setenv("OPENAI_API_KEY", "mock")
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "3")
+    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "30")
+    monkeypatch.setenv("TOWN_CALL_RESERVE_MICROUSD", "10")
+    monkeypatch.setattr(
+        service.provider, "configuration", lambda consent: ("mock", "mock")
+    )
+    calls = []
+
+    def unresolved(schema, prompt, **kwargs):
+        calls.append(prompt)
+        return schema(
+            priority="balanced",
+            style="scandinavian",
+            formal_salon=True,
+            clarification="Can four total seats work?",
+            unsupported=["six dining seats"],
+        )
+
+    def styling(_request):
+        calls.append("initial style direction")
+        return {"status": "success"}
+
+    from archimind.town import design_review
+
+    monkeypatch.setattr(design_review, "direction", styling)
+    monkeypatch.setattr(service.provider, "request", unresolved)
+    request = job(
+        p,
+        message="A formal salon for two hosts and four dinner guests, a quiet study. Explain the placements.",
+        live=True,
+        agent_team=True,
+    )
+    j = local.post("/api/jobs", json=request).json()["job"]
+    assert service.work_once()
+    result = local.get("/api/jobs/" + j).json()
+    assert result["status"] == "failed"
+    for expected in (
+        "Can four total seats work?",
+        "six dining seats",
+        "four dining seats in total",
+        "Compare alternatives shows the recorded room-center distances",
+        "Ask about the saved design",
+        "edit the brief",
+    ):
+        assert expected in result["result"]
+    assert local.get("/api/projects/" + p).json()["revision"] == 0
+    assert len(calls) == 2 and calls.count("initial style direction") == 1
+    assert not service.work_once()

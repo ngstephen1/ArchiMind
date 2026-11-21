@@ -1,0 +1,8 @@
+{
+  "prompt": "Design a home for two people who work from home and host four guests for dinner. Include a formal salon as well as the living room. Give the study a quiet location, and explain which placement decisions you can support from the floor plan.",
+  "job": {
+    "job": "160556cb-ce4a-47aa-969d-7ddf095f4723"
+  },
+  "status": "failed",
+  "result": "Unsupported requirements: The request asks to explain placement decisions; only a structured interpretation can be returned here, not a narrative floor-plan explanation., The request mentions hosting four guests; the salon supports four dining seats, so no larger dining promise is added."
+}

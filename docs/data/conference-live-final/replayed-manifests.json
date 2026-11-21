@@ -1,0 +1,26 @@
+[
+  {
+    "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+    "revision": 1,
+    "home_id": "7672311c0dd5a54aa3196d1b17f9800b14de60d4dab2e52f146d8503b81d6a6a",
+    "manifest_sha256": "2f50b4194433484014d91df723601c9dbe7f93b914f44bbbc1fe1aa1fa03fb42"
+  },
+  {
+    "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+    "revision": 2,
+    "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+    "manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2"
+  },
+  {
+    "project": "c9339e4f-a57a-4328-95dc-40dc36dd5b89",
+    "revision": 1,
+    "home_id": "7672311c0dd5a54aa3196d1b17f9800b14de60d4dab2e52f146d8503b81d6a6a",
+    "manifest_sha256": "fdd06c258b4756298c546f23d501aeb677ceb1be8bbd2f7106f100c5263d889a"
+  },
+  {
+    "project": "c9339e4f-a57a-4328-95dc-40dc36dd5b89",
+    "revision": 2,
+    "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+    "manifest_sha256": "f02b4ea3bf609253ae0b320a6a4059286f3a69bef58816476570f7038fd36118"
+  }
+]
