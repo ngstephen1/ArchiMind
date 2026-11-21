@@ -99,3 +99,48 @@ def test_updated_transfer_rejects_another_project_or_portfolio(tmp_path):
     del qa["source_receipt_sha256"]
     with pytest.raises(ValueError, match="requires a revision-bound"):
         api["check_book_sources"](qa, {"project": "first"}, tmp_path, tmp_path)
+
+
+def test_printed_receipt_and_both_appendix_pages(tmp_path):
+    import shutil
+    import subprocess
+    import sys
+
+    from PIL import Image
+
+    chrome = shutil.which("google-chrome") or shutil.which("chromium")
+    if not chrome or not shutil.which("pdfunite") or not shutil.which("pdftotext"):
+        pytest.skip("PDF integration uses headless Chrome and Poppler.")
+    folders = [
+        proof(tmp_path / "before", "before.json"),
+        proof(tmp_path / "after", "manifest.json"),
+    ]
+    for folder in folders:
+        b, p = MODULE["load_revision"](folder)
+        names = {
+            r["room"]["id"] + "-" + c["id"] for r in b["rooms"] for c in r["cameras"]
+        }
+        names.update(["salon-overview-drawing", "salon-overview-evening"])
+        for name in names:
+            path = folder / (name + ".png")
+            Image.new("RGB", (160, 90), (89, 112, 91)).save(path)
+            p["files"][path.name] = MODULE["digest"](path)
+        (folder / "receipt.json").write_text(json.dumps(p))
+    output = tmp_path / "book.pdf"
+    subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/print_revision_book.py"),
+            *map(str, folders),
+            str(output),
+            "--chrome",
+            chrome,
+        ],
+        check=True,
+        timeout=200,
+    )
+    result = json.loads(output.with_suffix(".json").read_bytes())
+    assert result["page_count"] == 12 and result["book_sha256"] == MODULE["digest"](
+        output
+    )
+    assert result["displacement_m"] == pytest.approx(0.3)

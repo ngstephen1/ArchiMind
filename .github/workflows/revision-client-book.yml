@@ -40,7 +40,11 @@ jobs:
             gh run download "$run" -n "$name" -D "$RUNNER_TEMP/$directory"
           }
           fetch "$BEFORE" studio-home-proof before
-          fetch "$AFTER" studio-home-proof after
+          if [[ "$BEFORE" == "$AFTER" ]]; then
+            fetch "$AFTER" studio-home-edited-proof after
+          else
+            fetch "$AFTER" studio-home-proof after
+          fi
           if [[ -n "$OLD_PHOTOS" || -n "$NEW_PHOTOS" ]]; then
             fetch "$OLD_PHOTOS" studio-eye-views old-photos
             fetch "$NEW_PHOTOS" studio-eye-views new-photos

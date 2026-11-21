@@ -105,7 +105,7 @@ def matched_frames(boards, receipts, directories, eyes):
                 (shot,) = [
                     s
                     for s in hd["shots"]
-                    if s["room"] == "bedroom" and s["view"] == view
+                    if s.get("room", "bedroom") == "bedroom" and s["view"] == view
                 ]
                 if shot["file"] != filename:
                     raise ValueError("Unexpected camera filename.")

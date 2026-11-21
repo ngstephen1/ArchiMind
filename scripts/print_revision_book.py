@@ -20,6 +20,7 @@ def print_page(chrome, source, output, profile):
             "--disable-gpu",
             "--disable-extensions",
             "--disable-background-networking",
+            "--disable-dev-shm-usage",
             "--disk-cache-size=1048576",
             f"--user-data-dir={profile}",
             "--no-pdf-header-footer",
@@ -28,7 +29,7 @@ def print_page(chrome, source, output, profile):
         ],
         capture_output=True,
         check=True,
-        timeout=120,
+        timeout=180,
     )
 
 
