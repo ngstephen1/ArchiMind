@@ -393,6 +393,9 @@ def render(args):
                 "home_id": board["home_id"],
                 "revision": board["revision"],
                 "manifest_sha256": scene["board_sha256"],
+                "bedroom_representations": json.loads(
+                    scene["bedroom_representations_json"]
+                ),
                 "devices": devices or ["CPU"],
                 "samples": scene.cycles.samples,
                 "benchmark": benchmark,

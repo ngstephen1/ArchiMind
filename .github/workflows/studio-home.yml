@@ -35,6 +35,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
+      - name: Check conference render inputs
+        if: inputs.approved_proof_run || inputs.manifest_source || inputs.camera_source
+        env:
+          FRESH: ${{ inputs.fresh_home }}
+          PROOF_RUN: ${{ inputs.approved_proof_run }}
+          CAMERA: ${{ inputs.camera_source }}
+        run: |
+          test "$FRESH" = true
+          if [ -n "$CAMERA" ]; then test -n "$PROOF_RUN"; fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false

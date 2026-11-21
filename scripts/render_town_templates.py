@@ -45,7 +45,7 @@ def town_template(item, materials, box):
     elif kind == "desk-chair":
         for x in (-0.396, 0.396):
             for y in (-0.385, 0.385):
-                part("Leg", "oak", (x, y, 0.252), (0.0896, 0.0827, 0.506), 0.004)
+                part("Leg", "oak", (x, y, 0.253), (0.0896, 0.0827, 0.506), 0.004)
         part("Seat", "sage", (0, 0, 0.530), (1, 1, 0.0964), 0.016)
         side = -1 if item["rotation_deg"] == 180 else 1
         part("Back", "oak", (0, side * 0.442, 0.778), (1, 0.0923, 0.434), 0.014)

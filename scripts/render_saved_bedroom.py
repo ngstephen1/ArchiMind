@@ -497,6 +497,7 @@ def render(manifest_path, output, originals, inspect_only=False, *, include_hall
         for a in registry_data.get(key, [])
     }
     used = {f["id"]: load_furniture(f, registry, m) for f in manifest["furniture"]}
+    scene["bedroom_representations_json"] = json.dumps(used, sort_keys=True)
     for mat in bpy.data.materials:
         name = mat.name.split(".")[0]
         if name == "Oiled oak":
