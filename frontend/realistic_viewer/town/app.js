@@ -520,7 +520,9 @@ async function previewBedroomEdit(endpoint, request) {
   const epoch = chairEpoch;
   const { home } = await api("/projects/" + project + "/" + endpoint + "/preview", request);
   if (epoch !== chairEpoch) return;
-  if ((await world.load(home)) !== "verified") {
+  const status = await world.load(home);
+  const proceduralMove = endpoint === "chair-pullout" && status === "procedural";
+  if (status !== "verified" && !proceduralMove) {
     if (epoch === chairEpoch) {
       discardChair();
       el("chairNotice").textContent = "Furniture preview unavailable. Your saved bedroom is still displayed.";
