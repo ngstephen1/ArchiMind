@@ -25,9 +25,11 @@ Open [the edited home](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5a
 | Why put the bedroom desk near the window? | The desk and the west window are 4.46 m apart, center to center in plan. The room records contain no glare measurement or intent explaining that position. A question about an unspecified desk requires choosing the bedroom or study. |
 | Which pieces have an oak finish? | The Belaya desk has a catalog variant labeled Oak. That field does not establish wood species or solid-wood construction. |
 
+The evidence control answers documented questions about the saved design. Live brief interpretation happens during generation.
+
 Compare the chair footprints on the A3 detail sheet and the fixed-camera desk views. Town's automatic desk camera changes composition when the chair moves. The matched Blender views hold the eye, target and field of view constant across revisions.
 
-[Release files and checksums](https://github.com/ngstephen1/ArchiMind/releases/tag/conference-home-r2) · [Paired manifest exports](../data/conference-sprint/) · [Live acceptance record](https://github.com/ngstephen1/ArchiMind/issues/38)
+[Render a saved Town presentation](RENDER_SAVED_TOWN_PRESENTATION.md) · [Release files and checksums](https://github.com/ngstephen1/ArchiMind/releases/tag/conference-home-r2) · [Paired manifest exports](../data/conference-sprint/) · [Live acceptance record](https://github.com/ngstephen1/ArchiMind/issues/38)
 
 ## What the recordings show
 
