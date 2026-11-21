@@ -2,11 +2,11 @@
 
 import re
 
-import bpy
-
 
 def attach_textile_detail():
     """Add cloth nap and woven relief to untextured authored fabrics in metre space."""
+    import bpy
+
     treated = set()
     for obj in bpy.context.scene.objects:
         if obj.type != "MESH" or "/furniture/" not in obj.get("saved_town_slot", ""):
