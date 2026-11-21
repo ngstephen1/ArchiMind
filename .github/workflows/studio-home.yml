@@ -6,6 +6,15 @@ on:
         description: Render the fresh-home acceptance manifest only
         type: boolean
         default: false
+      manifest_source:
+        description: Optional pinned 40-hex-commit:docs/data/file.json from this repository (fresh_home only)
+        type: string
+      approved_proof_run:
+        description: Accepted fresh-home proof run ID for a two-view 1080p render
+        type: string
+      camera_source:
+        description: Optional pinned camera manifest for a matched comparison (same project and shell)
+        type: string
   push:
     branches: [feat/whole-home-client-studio]
     paths:
@@ -20,6 +29,7 @@ on:
       - frontend/realistic_viewer/town/home_board.js
 permissions:
   contents: read
+  actions: read
 jobs:
   render:
     runs-on: ubuntu-24.04
@@ -44,7 +54,14 @@ jobs:
           node-version: "20"
       - name: Stage the fresh-home manifest
         if: inputs.fresh_home
-        run: cp docs/data/fresh-home/before.json "$RUNNER_TEMP/manifest.json"
+        env:
+          MANIFEST_SOURCE: ${{ inputs.manifest_source }}
+        run: |
+          if [ -n "$MANIFEST_SOURCE" ]; then
+            python scripts/stage_studio_manifest.py "$MANIFEST_SOURCE" "$RUNNER_TEMP/manifest.json"
+          else
+            cp docs/data/fresh-home/before.json "$RUNNER_TEMP/manifest.json"
+          fi
       - name: Replay applied studio home and export the scene
         if: ${{ !inputs.fresh_home }}
         run: |
@@ -52,15 +69,40 @@ jobs:
           npm ci --prefix frontend/realistic_viewer --ignore-scripts
           python scripts/run_studio_home.py --export "$RUNNER_TEMP/saved.json"
           node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/saved.json" "$RUNNER_TEMP/manifest.json"
+      - name: Reopen an accepted proof for matched 1080p eye-level images
+        if: inputs.approved_proof_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PROOF_RUN: ${{ inputs.approved_proof_run }}
+          CAMERA_SOURCE: ${{ inputs.camera_source }}
+        run: |
+          [[ "$PROOF_RUN" =~ ^[0-9]+$ ]]
+          test "$(gh run view "$PROOF_RUN" --json conclusion,workflowName --jq '[.conclusion,.workflowName]|join("/")')" = "success/Studio home proof"
+          gh run download "$PROOF_RUN" --name studio-home-proof --dir "$RUNNER_TEMP/accepted"
+          if [ -n "$CAMERA_SOURCE" ]; then
+            python scripts/stage_studio_manifest.py "$CAMERA_SOURCE" "$RUNNER_TEMP/camera.json"
+          else
+            cp "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json"
+          fi
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: inputs.approved_proof_run
+        with:
+          name: studio-eye-views
+          path: ${{ runner.temp }}/eye-views
+          if-no-files-found: error
       - name: Reopen the editable scene and render every room
+        if: ${{ !inputs.approved_proof_run }}
         run: |
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/proof" --proof
       - name: Make the revision-bound client book and print to PDF
+        if: ${{ !inputs.approved_proof_run }}
         run: |
           python scripts/publish_studio_board.py "$RUNNER_TEMP/proof"
           google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/proof/Studio-House.pdf" "file://$RUNNER_TEMP/proof/index.html"
           test -s "$RUNNER_TEMP/proof/Studio-House.pdf"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: ${{ !inputs.approved_proof_run }}
         with:
           name: studio-home-proof
           path: ${{ runner.temp }}/proof

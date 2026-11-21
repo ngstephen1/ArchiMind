@@ -10,6 +10,9 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from render_town_templates import town_template  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "src/archimind/_viewer_assets"
 SURFACES = ROOT / "frontend/realistic_viewer/town/materials"
@@ -360,6 +363,8 @@ def load_furniture(item, registry, materials):
     center = Vector(item["center_floor_xyz_m"])
     source = item["source"]
     if not source:
+        if town_template(item, materials, box):
+            return "procedural Town template"
         box(
             "Procedural reservation · " + item["name"],
             center + Vector((0, 0, h / 2)),
