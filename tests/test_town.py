@@ -724,3 +724,33 @@ def test_local_extra_jobs_are_date_limited_and_bounded(local, monkeypatch):
     req = service.Request.model_validate(team())
     monkeypatch.setenv("DATABASE_URL", "unused")
     assert service.local_extra_team_jobs(req, datetime.now(UTC).timestamp()) == 0
+
+
+@pytest.mark.parametrize("explicit", [True, False])
+def test_launcher_requires_date_flag(tmp_path, monkeypatch, explicit):
+    import errno
+    import os
+    import runpy
+    import socket
+    import sys
+
+    script = Path(__file__).resolve().parents[1] / "scripts/run_town.py"
+    for key in ("TOWN_MODE", "TOWN_STATIC", "DATABASE_URL"):
+        monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("TOWN_DB", str(tmp_path / "unused.sqlite3"))
+    monkeypatch.setenv("TOWN_EXTRA_TEAM_JOBS_DATE", "2026-11-20")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [str(script)] + (["--extra-team-jobs-on", "2026-11-21"] if explicit else []),
+    )
+
+    def occupied(_socket, _address):
+        raise OSError(errno.EADDRINUSE, "Test stops before launching the server")
+
+    monkeypatch.setattr(socket.socket, "bind", occupied)
+    with pytest.raises(SystemExit, match="already in use"):
+        runpy.run_path(str(script), run_name="__main__")
+    assert os.getenv("TOWN_EXTRA_TEAM_JOBS_DATE") == (
+        "2026-11-21" if explicit else None
+    )
