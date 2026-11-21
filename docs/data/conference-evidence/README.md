@@ -6,7 +6,7 @@ The saved bedroom chair moved 0.300 m away from its desk. The answer panel repor
 
 ## Reopen the two revisions
 
-1. Use the Town database containing project `cfe87682-1ed5-4ddf-9bec-5aa9e6795872`. The project link requires that database. Manifests and the two browser receipts allow independent verification of the measurements.
+1. Use the Town database containing project `cfe87682-1ed5-4ddf-9bec-5aa9e6795872`. The project link requires that database. The original [revision 1 manifest](https://github.com/ngstephen1/ArchiMind/blob/ccf9ab12f6b6d908c27f7628079aea5829c91b5a/docs/data/conference-sprint/before.json) and [revision 2 manifest](https://github.com/ngstephen1/ArchiMind/blob/ccf9ab12f6b6d908c27f7628079aea5829c91b5a/docs/data/conference-sprint/manifest.json) allow independent verification without the database.
 2. Run `.venv/bin/python scripts/run_town.py` from the repository root. Open the local Town URL printed by the launcher, adding `?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2`.
 3. Open **Design presentation**. Scroll to **Ask about the saved design**, enter “What changed when I moved the chair?” and choose **Explain**. Revision 1 can be reopened by changing the final URL parameter to `1`.
 4. Ask “Will this chair slide under the desk?”, “Why is the bedroom desk near this window?” and “Which pieces have an oak finish?” Ask the window question without specifying a room to see the app distinguish the bedroom and study desks.
