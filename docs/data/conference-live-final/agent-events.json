@@ -1,0 +1,322 @@
+[
+  {
+    "job": "160556cb-ce4a-47aa-969d-7ddf095f4723",
+    "message": "Design a home for two people who work from home and host four guests for dinner. Include a formal salon as well as the living room. Give the study a quiet location, and explain which placement decisions you can support from the floor plan.",
+    "events": [
+      {
+        "seq": 1,
+        "time": 1795244407.180907,
+        "agent": "A",
+        "state": "running",
+        "task": "OpenAI \u00b7 Interpret brief"
+      },
+      {
+        "seq": 2,
+        "time": 1795244407.191861,
+        "agent": "B",
+        "state": "running",
+        "task": "Find eligible evidence"
+      },
+      {
+        "seq": 3,
+        "time": 1795244407.204135,
+        "agent": "E",
+        "state": "running",
+        "task": "OpenAI \u00b7 Generate styling direction"
+      },
+      {
+        "seq": 4,
+        "time": 1795244407.234699,
+        "agent": "C",
+        "state": "running",
+        "task": "Inspect lot and partitions"
+      },
+      {
+        "seq": 5,
+        "time": 1795244407.253015,
+        "agent": "C",
+        "state": "completed",
+        "task": "Inspect lot and partitions"
+      },
+      {
+        "seq": 6,
+        "time": 1795244407.3192818,
+        "agent": "D",
+        "state": "running",
+        "task": "Check starting geometry"
+      },
+      {
+        "seq": 7,
+        "time": 1795244407.438216,
+        "agent": "B",
+        "state": "completed",
+        "task": "Find eligible evidence"
+      },
+      {
+        "seq": 8,
+        "time": 1795244407.521312,
+        "agent": "D",
+        "state": "completed",
+        "task": "Check starting geometry"
+      },
+      {
+        "seq": 9,
+        "time": 1795244415.832416,
+        "agent": "E",
+        "state": "completed",
+        "task": "OpenAI \u00b7 Generate styling direction"
+      },
+      {
+        "seq": 10,
+        "time": 1795244415.898059,
+        "agent": "A",
+        "state": "failed",
+        "task": "OpenAI \u00b7 Interpret brief"
+      }
+    ]
+  },
+  {
+    "job": "b8d6a82f-aff0-45be-8bbb-33b4c83056c5",
+    "message": "A formal salon and a study far from the living room.",
+    "events": [
+      {
+        "seq": 1,
+        "time": 1795244418.839803,
+        "agent": "D",
+        "state": "running",
+        "task": "Check starting geometry"
+      },
+      {
+        "seq": 2,
+        "time": 1795244418.8878012,
+        "agent": "D",
+        "state": "completed",
+        "task": "Check starting geometry"
+      },
+      {
+        "seq": 3,
+        "time": 1795244418.913384,
+        "agent": "E",
+        "state": "running",
+        "task": "OpenAI \u00b7 Generate styling direction"
+      },
+      {
+        "seq": 4,
+        "time": 1795244418.926241,
+        "agent": "B",
+        "state": "running",
+        "task": "Find eligible evidence"
+      },
+      {
+        "seq": 5,
+        "time": 1795244418.948909,
+        "agent": "C",
+        "state": "running",
+        "task": "Inspect lot and partitions"
+      },
+      {
+        "seq": 6,
+        "time": 1795244418.9664,
+        "agent": "A",
+        "state": "running",
+        "task": "OpenAI \u00b7 Interpret brief"
+      },
+      {
+        "seq": 7,
+        "time": 1795244419.048054,
+        "agent": "B",
+        "state": "completed",
+        "task": "Find eligible evidence"
+      },
+      {
+        "seq": 8,
+        "time": 1795244419.0751722,
+        "agent": "C",
+        "state": "completed",
+        "task": "Inspect lot and partitions"
+      },
+      {
+        "seq": 9,
+        "time": 1795244420.3672209,
+        "agent": "A",
+        "state": "completed",
+        "task": "OpenAI \u00b7 Interpret brief"
+      },
+      {
+        "seq": 10,
+        "time": 1795244421.6034718,
+        "agent": "E",
+        "state": "completed",
+        "task": "OpenAI \u00b7 Generate styling direction"
+      },
+      {
+        "seq": 11,
+        "time": 1795244421.614777,
+        "agent": "E",
+        "state": "completed",
+        "task": "Resolved style"
+      },
+      {
+        "seq": 12,
+        "time": 1795244421.62764,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 13,
+        "time": 1795244426.296,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 14,
+        "time": 1795244429.977987,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 15,
+        "time": 1795244439.9779131,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 16,
+        "time": 1795244444.742146,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 17,
+        "time": 1795244452.2317069,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 18,
+        "time": 1795244461.395722,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 19,
+        "time": 1795244468.203679,
+        "agent": "C",
+        "state": "running",
+        "task": "Proposed partitions"
+      },
+      {
+        "seq": 20,
+        "time": 1795244476.5488799,
+        "agent": "C",
+        "state": "running",
+        "task": "Compared room placements"
+      },
+      {
+        "seq": 21,
+        "time": 1795244476.5664,
+        "agent": "C",
+        "state": "running",
+        "task": "Furnished candidate"
+      },
+      {
+        "seq": 22,
+        "time": 1795244476.629241,
+        "agent": "C",
+        "state": "running",
+        "task": "Furnished candidate"
+      },
+      {
+        "seq": 23,
+        "time": 1795244476.7003672,
+        "agent": "C",
+        "state": "completed",
+        "task": "Furnishing complete"
+      },
+      {
+        "seq": 24,
+        "time": 1795244476.722968,
+        "agent": "D",
+        "state": "running",
+        "task": "Validate candidate 7672311c"
+      },
+      {
+        "seq": 25,
+        "time": 1795244476.796701,
+        "agent": "D",
+        "state": "running",
+        "task": "Validate candidate fb7eac52"
+      },
+      {
+        "seq": 26,
+        "time": 1795244476.9854798,
+        "agent": "E",
+        "state": "completed",
+        "task": "Compose client views"
+      },
+      {
+        "seq": 27,
+        "time": 1795244477.278166,
+        "agent": "E",
+        "state": "completed",
+        "task": "Compose client views"
+      },
+      {
+        "seq": 28,
+        "time": 1795244477.369177,
+        "agent": "D",
+        "state": "completed",
+        "task": "Validate candidate 7672311c"
+      },
+      {
+        "seq": 29,
+        "time": 1795244477.6302888,
+        "agent": "D",
+        "state": "completed",
+        "task": "Validate candidate fb7eac52"
+      },
+      {
+        "seq": 30,
+        "time": 1795244477.708189,
+        "agent": "D",
+        "state": "running",
+        "task": "OpenAI \u00b7 Review plan images"
+      },
+      {
+        "seq": 31,
+        "time": 1795244477.776337,
+        "agent": "E",
+        "state": "running",
+        "task": "Codex CLI \u00b7 Review bedroom placement"
+      },
+      {
+        "seq": 32,
+        "time": 1795244484.175925,
+        "agent": "E",
+        "state": "failed",
+        "task": "Codex CLI \u00b7 Review bedroom placement"
+      },
+      {
+        "seq": 33,
+        "time": 1795244485.556192,
+        "agent": "D",
+        "state": "completed",
+        "task": "OpenAI \u00b7 Review plan images"
+      },
+      {
+        "seq": 34,
+        "time": 1795244485.624991,
+        "agent": "E",
+        "state": "completed",
+        "task": "Prepare presentation"
+      }
+    ]
+  }
+]
