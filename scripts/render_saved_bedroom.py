@@ -469,6 +469,11 @@ def render(
             ),
         ]
     }
+    if inspect_only and not include_hall:
+        # The whole-home pass reopens this scene and reuses the palette in other rooms.
+        # A saved pack can replace all bedroom uses of a particular base material.
+        for material in m.values():
+            material.use_fake_user = True
     rows = json.loads((SURFACES / "bedroom-sources.json").read_text())
     images = {}
     surface_hashes = {}
