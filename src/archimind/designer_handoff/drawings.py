@@ -1,8 +1,11 @@
 """Plot the selected rectangular bedroom from a Town board, in room-local metres."""
 
+import hashlib
+from math import isclose
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+from archimind.designer_handoff.survey import Survey
 from archimind.models import Furniture, RoomDesign
 
 INK, MUTED, PAPER = "#203d36", "#526b60", "#faf8f2"
@@ -325,11 +328,80 @@ def _section(board, provenance, design):
     return svg
 
 
-def write_drawings(board: dict, destination: Path, *, provenance: str) -> list[Path]:
-    """Write three editable SVGs. The caller establishes the link to the survey."""
+def _check_survey(room, survey: Survey) -> None:
+    """Compare the measured room in its local SW, east/north coordinate system."""
+    if (
+        survey.source_kind != "measured"
+        or survey.fixtures
+        or survey.verification_items()
+    ):
+        raise ValueError(
+            "Resolve field checks and unmodelled fixtures before linking a measured room."
+        )
+    width, depth = room.width_m, room.depth_m
+    corners = [(0, 0), (width, 0), (width, depth), (0, depth)]
+
+    def equal(a, b):
+        return isclose(a, b, rel_tol=0, abs_tol=1e-9)
+
+    if (
+        len(survey.vertices_m) != 4
+        or any(
+            not equal(x, y)
+            for observed, expected in zip(survey.vertices_m, corners)
+            for x, y in zip(observed, expected)
+        )
+        or not equal(survey.height_m, room.ceiling_height_m)
+    ):
+        raise ValueError(
+            "Survey boundary or ceiling differs from the selected rectangular room."
+        )
+    openings = {op.id: op for op in survey.openings}
+    design_openings = [(op, "door", 0.0) for op in room.doors] + [
+        (op, "window", op.sill_height_m) for op in room.windows
+    ]
+    if set(openings) != {op.id for op, _, _ in design_openings}:
+        raise ValueError("Survey opening IDs differ from the selected room.")
+    for op, kind, sill in design_openings:
+        observed = openings[op.id]
+        wall = ("south", "east", "north", "west").index(op.wall)
+        offset = op.offset_m
+        if wall in (2, 3):
+            offset = (width if wall == 2 else depth) - offset - op.width_m
+        if (
+            observed.wall != wall
+            or observed.kind != kind
+            or any(
+                not equal(x, y)
+                for x, y in zip(
+                    (
+                        observed.offset_m,
+                        observed.width_m,
+                        observed.height_m,
+                        observed.sill_m,
+                    ),
+                    (offset, op.width_m, op.height_m, sill),
+                )
+            )
+        ):
+            raise ValueError(f"Survey evidence differs at opening {op.id}.")
+
+
+def write_drawings(
+    board: dict, destination: Path, *, provenance: str, survey: Survey | None = None
+) -> list[Path]:
+    """Write editable SVGs with explicit, checked geometry provenance."""
     if provenance not in ("demonstration", "survey-linked"):
         raise ValueError("Specify demonstration or survey-linked drawing provenance")
     design = _room_design(board)
+    if provenance == "survey-linked":
+        if survey is None:
+            raise ValueError(
+                "A measured survey is required for survey-linked drawings."
+            )
+        _check_survey(design.room, survey)
+    elif survey is not None:
+        raise ValueError("Select survey-linked provenance when supplying a survey.")
     sheets = [
         ("bedroom-plan.svg", _plan(board, provenance, design)),
         ("bedroom-elevations.svg", _elevations(board, provenance, design)),
@@ -338,6 +410,11 @@ def write_drawings(board: dict, destination: Path, *, provenance: str) -> list[P
     destination = Path(destination)
     destination.mkdir(parents=True, exist_ok=True)
     for name, sheet in sheets:
+        if survey is not None:
+            sheet.set(
+                "data-survey-sha256",
+                hashlib.sha256(survey.model_dump_json().encode()).hexdigest(),
+            )
         ET.ElementTree(sheet).write(
             destination / name, encoding="utf-8", xml_declaration=True
         )

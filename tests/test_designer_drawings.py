@@ -7,6 +7,7 @@ from xml.etree import ElementTree as ET
 import pytest
 
 from archimind.designer_handoff.drawings import write_drawings
+from archimind.designer_handoff.survey import Survey
 
 
 @pytest.fixture
@@ -58,7 +59,47 @@ def test_viewing_east_mirrors_south_origin_offset(board, tmp_path):
     room = bedroom(board)["room"]
     door = room["doors"][0]
     door["offset_m"] = 0.2
-    _, elevation, _ = write_drawings(board, tmp_path, provenance="survey-linked")
+    w, d = room["width_m"], room["depth_m"]
+    window = room["windows"][0]
+    survey = Survey.model_validate(
+        {
+            "source_kind": "measured",
+            "vertices_m": [(0, 0), (w, 0), (w, d), (0, d)],
+            "height_m": room["ceiling_height_m"],
+            "geometry_source": "test",
+            "sources": [{"id": "test", "description": "Synthetic test measurements"}],
+            "openings": [
+                {
+                    **door,
+                    "kind": "door",
+                    "wall": 1,
+                    "sill_m": 0,
+                    "source": "test",
+                    "hinge": "end",
+                    "swing": "inward",
+                },
+                {
+                    "id": window["id"],
+                    "kind": "window",
+                    "wall": 3,
+                    "sill_m": window["sill_height_m"],
+                    "height_m": window["height_m"],
+                    "width_m": window["width_m"],
+                    "source": "test",
+                    "offset_m": d - window["offset_m"] - window["width_m"],
+                },
+            ],
+        }
+    )
+    with pytest.raises(ValueError, match="required"):
+        write_drawings(board, tmp_path, provenance="survey-linked")
+    _, elevation, _ = write_drawings(
+        board, tmp_path, provenance="survey-linked", survey=survey
+    )
+    door["offset_m"] += 0.01
+    with pytest.raises(ValueError, match="opening bedroom-door"):
+        write_drawings(board, tmp_path, provenance="survey-linked", survey=survey)
+    door["offset_m"] -= 0.01
     root = ET.parse(elevation)
     rect = root.find(".//*[@data-opening='bedroom-door']")
     assert rect is not None
