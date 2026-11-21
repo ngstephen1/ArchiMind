@@ -761,8 +761,9 @@ def test_launcher_requires_date_flag(tmp_path, monkeypatch, explicit):
 def test_compound_conference_failure_offers_actionable_review(local, monkeypatch):
     p = service.create("local-designer")["project"]
     monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
-    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "1")
-    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "10")
+    monkeypatch.setenv("OPENAI_API_KEY", "mock")
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "3")
+    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "30")
     monkeypatch.setenv("TOWN_CALL_RESERVE_MICROUSD", "10")
     monkeypatch.setattr(
         service.provider, "configuration", lambda consent: ("mock", "mock")
@@ -779,11 +780,19 @@ def test_compound_conference_failure_offers_actionable_review(local, monkeypatch
             unsupported=["six dining seats"],
         )
 
+    def styling(_request):
+        calls.append("initial style direction")
+        return {"status": "success"}
+
+    from archimind.town import design_review
+
+    monkeypatch.setattr(design_review, "direction", styling)
     monkeypatch.setattr(service.provider, "request", unresolved)
     request = job(
         p,
         message="A formal salon for two hosts and four dinner guests, a quiet study. Explain the placements.",
         live=True,
+        agent_team=True,
     )
     j = local.post("/api/jobs", json=request).json()["job"]
     assert service.work_once()
@@ -793,11 +802,11 @@ def test_compound_conference_failure_offers_actionable_review(local, monkeypatch
         "Can four total seats work?",
         "six dining seats",
         "four dining seats in total",
-        "room-center distances",
+        "Compare alternatives shows the recorded room-center distances",
         "Ask about the saved design",
         "edit the brief",
     ):
         assert expected in result["result"]
     assert local.get("/api/projects/" + p).json()["revision"] == 0
-    assert len(calls) == 1
+    assert len(calls) == 2 and calls.count("initial style direction") == 1
     assert not service.work_once()

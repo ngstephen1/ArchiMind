@@ -263,12 +263,12 @@ def clarification_guidance(req, parsed):
     }:
         options.append(
             "For the study, you can request greater separation from the living room. "
-            "Town compares room-center distances; acoustic privacy needs further evidence."
+            "Compare alternatives shows the recorded room-center distances. Acoustic privacy needs further evidence."
         )
     if words & {"why", "explain", "rationale"}:
         options.append(
-            "For placement explanations, apply a reviewed layout, open Design presentation, "
-            "then use Ask about the saved design to see measurements and any recorded rationale."
+            "For furniture questions, apply a reviewed layout, open Design presentation, "
+            "then use Ask about the saved design for desk-to-window distances, chair fit or saved chair moves."
         )
     if options:
         options.append(
