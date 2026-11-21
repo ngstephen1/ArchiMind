@@ -144,3 +144,37 @@ def test_printed_receipt_and_both_appendix_pages(tmp_path):
         output
     )
     assert result["displacement_m"] == pytest.approx(0.3)
+
+
+def test_matched_hd_receipts_without_room_field(tmp_path):
+    one = proof(tmp_path / "r1", "before.json")
+    two = proof(tmp_path / "r2", "manifest.json")
+    boards, receipts = zip(*(MODULE["load_revision"](folder) for folder in (one, two)))
+    eyes = (tmp_path / "eye1", tmp_path / "eye2")
+    for folder, board, receipt in zip(eyes, boards, receipts, strict=True):
+        folder.mkdir()
+        shots = []
+        for view in ("desk", "doorway"):
+            image = folder / f"bedroom-{view}.png"
+            image.write_bytes(view.encode())
+            shots.append(
+                dict(
+                    view=view,
+                    file=image.name,
+                    sha256=MODULE["digest"](image),
+                    camera={"eye": [1, 2, 3]},
+                )
+            )
+        receipt["files"]["home.blend"] = "scene digest"
+        eye_receipt = dict(
+            home_id=board["home_id"],
+            revision=board["revision"],
+            manifest_sha256=receipt["manifest_sha256"],
+            camera_manifest_sha256=receipts[0]["manifest_sha256"],
+            proof_blend_sha256=receipt["files"]["home.blend"],
+            shots=shots,
+        )
+        (folder / "eye-view-receipt.json").write_text(json.dumps(eye_receipt))
+    assert (
+        len(MODULE["matched_frames"](boards, receipts, (one, two), eyes)["desk"]) == 2
+    )
