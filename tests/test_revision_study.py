@@ -61,3 +61,18 @@ def test_same_design_in_a_different_project_rejected(tmp_path):
     receipt.write_text(json.dumps(doc))
     with pytest.raises(ValueError, match="same project"):
         MODULE["build"]((one, two), (None, None), tmp_path / "study.html")
+
+
+def test_room_move_changes_home_coordinate_but_preserves_desk_gap():
+    board = json.loads(
+        (ROOT / "docs/data/conference-sprint/manifest.json").read_bytes()
+    )
+    bedroom = next(p for p in board["rooms"] if p["room"]["id"] == "bedroom")
+    before = MODULE["measurements"](board)
+    bedroom["origin"][0] += 1.25
+    after = MODULE["measurements"](board)
+    assert before["chair_xy_m"] == after["chair_xy_m"]
+    assert after["chair_home_xy_m"][0] - before["chair_home_xy_m"][0] == pytest.approx(
+        1.25
+    )
+    assert before["chair_desk_gap_m"] == after["chair_desk_gap_m"]

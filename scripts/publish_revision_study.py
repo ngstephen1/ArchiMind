@@ -66,6 +66,10 @@ def measurements(board):
     centre = (desk["x_m"] + desk["width_m"] / 2, desk["y_m"] + desk["depth_m"] / 2)
     return {
         "chair_xy_m": [chair["x_m"], chair["y_m"]],
+        "chair_home_xy_m": [
+            parts[0]["origin"][0] + chair["x_m"],
+            parts[0]["origin"][1] + chair["y_m"],
+        ],
         "chair_desk_gap_m": gap,
         "desk_center_to_window_midpoint_m": math.dist(centre, midpoint),
         "window_wall": wall,
@@ -129,7 +133,7 @@ def build(directories, eyes, dest):
         raise ValueError("Supply consecutive revisions of the same project.")
     rows = [measurements(board) for board in boards]
     frames = matched_frames(boards, receipts, directories, eyes)
-    displacement = math.dist(rows[0]["chair_xy_m"], rows[1]["chair_xy_m"])
+    displacement = math.dist(rows[0]["chair_home_xy_m"], rows[1]["chair_home_xy_m"])
     pages = []
     for view, pair in frames.items():
         figures = []
@@ -143,7 +147,7 @@ def build(directories, eyes, dest):
         <h1>{"The bedroom approach" if view == "doorway" else "At the writing desk"}</h1>
         <p>{"Fixed camera across both revisions." if same else "Independently framed cameras. Use the plan dimensions to compare positions."}
         &emsp; Blender Cycles · {"HD photography" if eyes[0] else "CPU proof"}</p>
-        <main>{"".join(figures)}</main><article><div><h2>{displacement * 1000:.0f} mm</h2>Writing-chair displacement in plan</div>
+        <main>{"".join(figures)}</main><article><div><h2>{displacement * 1000:.0f} mm</h2>Writing-chair displacement on the whole-home plan</div>
         <div><h2>{rows[1]["desk_center_to_window_midpoint_m"]:.3f} m</h2>Desk center to {escape(rows[1]["window_wall"])} window midpoint in the edited room</div></article>
         <p>Chair and desk clearances above use their floor footprints. Confirm passage between desk supports,
         floor-to-apron height and seated pullback before specifying the pair. Window distance alone does not establish glare performance.</p>
