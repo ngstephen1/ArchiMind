@@ -1,0 +1,74 @@
+{
+  "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+  "revision": 1,
+  "home_id": "7672311c0dd5a54aa3196d1b17f9800b14de60d4dab2e52f146d8503b81d6a6a",
+  "manifest_sha256": "2f50b4194433484014d91df723601c9dbe7f93b914f44bbbc1fe1aa1fa03fb42",
+  "answers": [
+    {
+      "case": "fit",
+      "question": "Will this chair slide under the desk?",
+      "expected_evidence": [
+        "0.06 m",
+        "clear width between supports",
+        "floor-to-underside",
+        "desk-chair",
+        "belaya"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 1 \u00b7 The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.06 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints."
+    },
+    {
+      "case": "ambiguous",
+      "question": "Why is the desk near this window?",
+      "expected_evidence": [
+        "Which desk",
+        "bedroom",
+        "study"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 1 \u00b7 Which desk do you mean? Recorded desks occur in bedroom and study."
+    },
+    {
+      "case": "daylight",
+      "question": "Why is the bedroom desk near this window?",
+      "expected_evidence": [
+        "4.46 m",
+        "bedroom-window",
+        "glare have not been established",
+        "belaya"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 1 \u00b7 Belaya is 4.46 m from the nearest window center on the west wall, measured center to center in plan. Source: bedroom belaya footprint and window bedroom-window. This measures proximity. Placement intent and screen glare have not been established."
+    },
+    {
+      "case": "study",
+      "question": "Which window is closest to the study desk?",
+      "expected_evidence": [
+        "study-window",
+        "writing-suite"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 1 \u00b7 Writing Suite is 4.01 m from the nearest window center on the east wall, measured center to center in plan. Source: study writing-suite footprint and window study-window. This measures proximity. Placement intent and screen glare have not been established."
+    },
+    {
+      "case": "oak",
+      "question": "Which pieces have an oak finish?",
+      "expected_evidence": [
+        "variant_label = Oak",
+        "belaya",
+        "abo-b074l4976t-amazon-co-uk"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 1 \u00b7 Selected bedroom pieces with catalog oak evidence: Belaya writing desk (belaya), catalog abo-b074l4976t-amazon-co-uk, variant_label = Oak. The home also uses an authored oak palette. A variant label does not establish solid-oak construction."
+    },
+    {
+      "case": "change",
+      "question": "What changed when I moved the chair?",
+      "expected_evidence": [
+        "needs this saved revision and the preceding revision"
+      ],
+      "answer": "Project cfe87682-1ed5-4ddf-9bec-5aa9e6795872 \u00b7 Revision 1 \u00b7 A chair comparison needs this saved revision and the preceding revision of the same project."
+    }
+  ],
+  "api_requests": [
+    [
+      "GET",
+      "projects/cfe87682-1ed5-4ddf-9bec-5aa9e6795872?revision=1"
+    ]
+  ]
+}

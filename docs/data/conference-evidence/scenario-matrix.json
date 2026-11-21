@@ -1,0 +1,83 @@
+{
+  "source_code": "3ac65d7e984f92ba6b2d0d4469a8397e29076f0a",
+  "environment": "Mocked OpenAI structured outputs. Town interpreted each output, generated candidates and validated geometry using its actual Python coordinator. Searches remained offline. These tests did not apply an alternative.",
+  "scenarios": [
+    {
+      "case": "hosting",
+      "prompt": "We host dinners. Include a formal salon close to the kitchen.",
+      "expected": "Return two valid alternatives and rank the smaller kitchen\u2013salon center distance first.",
+      "observed": {
+        "candidate_ids": [
+          "c2261268bfcae7ebed8c49c1034b835aeb0520478cfb01ca5ca280f9d4b4aacd",
+          "6458f4e7c0bef5bd845cf942c80c3db3ea4a5fbf3df187e9141efae487fe688c"
+        ],
+        "room_center_distances_m": [
+          8.305,
+          8.334
+        ]
+      },
+      "revision_effect": "No persistent writes. The input snapshot was verified unchanged."
+    },
+    {
+      "case": "remote",
+      "prompt": "I work from home. Put the study away from the living room.",
+      "expected": "Return two valid alternatives and rank the larger study\u2013living center distance first.",
+      "observed": {
+        "candidate_ids": [
+          "8256b9b5f023255616c42619fd24e9494db5bb427789a5f1563e30c8214c858e",
+          "e9107c783db90a76f5fa674c8ced47ad9e484f330e75b931db75a25edfaa2bcc"
+        ],
+        "room_center_distances_m": [
+          12.846,
+          12.5
+        ]
+      },
+      "revision_effect": "No persistent writes. The input snapshot was verified unchanged."
+    },
+    {
+      "case": "lock",
+      "prompt": "Keep the bedroom where it is.",
+      "expected": "Keep bedroom opening, furniture, dimensions and origin in each new alternative.",
+      "observed": {
+        "candidate_ids": [
+          "052ab4e72c4371bb25fb5c54659839bc11457318688d59f1298cb528a983f1a9",
+          "a139f37e1f6479fd38860bf1abf2227cafd5b115010d6efb85a960f7b695d038"
+        ],
+        "locked_bedroom_geometry_sha256": "663e3f7a894f4c8d9b232737e013b631e983470c2bb9fb1213e732f84be8b5cb"
+      },
+      "revision_effect": "No persistent writes. The input snapshot was verified unchanged."
+    },
+    {
+      "case": "style",
+      "prompt": "Make it Japandi.",
+      "expected": "Update the style of all rooms without moving their geometry or mutating the starting home.",
+      "observed": {
+        "candidate_ids": [
+          "3c9054308922fbdb90d49ea136ef22e2d28a19469275864ef8ea67aef116a99a"
+        ],
+        "restyled_rooms": 6
+      },
+      "revision_effect": "No persistent writes. The input snapshot was verified unchanged."
+    },
+    {
+      "case": "ambiguous",
+      "prompt": "Keep the desk in place.",
+      "expected": "Ask which desk or room before changing any placement.",
+      "observed": {
+        "message": "Clarify which room contains the furniture to lock.",
+        "candidates": 0
+      },
+      "revision_effect": "No persistent writes. The input snapshot was verified unchanged."
+    },
+    {
+      "case": "unsupported",
+      "prompt": "This home must have a second storey.",
+      "expected": "Decline the mandatory second storey and preserve the starting revision.",
+      "observed": {
+        "message": "Unsupported requirements: second storey",
+        "candidates": 0
+      },
+      "revision_effect": "No persistent writes. The input snapshot was verified unchanged."
+    }
+  ]
+}
