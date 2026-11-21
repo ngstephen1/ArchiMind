@@ -75,5 +75,5 @@ test("a generic desk question with two desks needs a room", () => {
   const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
   assert.match(explanation(home, "Why put the desk near the window?"), /Which desk.*bedroom.*study/);
   assert.match(explanation(home, "Why put the bedroom desk near the window?"), /Belaya.*nearest window/);
-  assert.match(explanation(home, "How far is the study desk from its window?"), /study writing-suite footprint and window study-window/);
+  assert.match(explanation(home, "How far is the study desk from its window?"), /study work-table footprint and window study-window/);
 });
