@@ -754,3 +754,48 @@ def test_launcher_requires_date_flag(tmp_path, monkeypatch, explicit):
     assert os.getenv("TOWN_EXTRA_TEAM_JOBS_DATE") == (
         "2026-11-21" if explicit else None
     )
+
+
+def test_compound_conference_failure_offers_actionable_review(local, monkeypatch):
+    p = service.create("local-designer")["project"]
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "1")
+    monkeypatch.setenv("TOWN_DAILY_MICROUSD", "10")
+    monkeypatch.setenv("TOWN_CALL_RESERVE_MICROUSD", "10")
+    monkeypatch.setattr(
+        service.provider, "configuration", lambda consent: ("mock", "mock")
+    )
+    calls = []
+
+    def unresolved(schema, prompt, **kwargs):
+        calls.append(prompt)
+        return schema(
+            priority="balanced",
+            style="scandinavian",
+            formal_salon=True,
+            clarification="Can four total seats work?",
+            unsupported=["six dining seats"],
+        )
+
+    monkeypatch.setattr(service.provider, "request", unresolved)
+    request = job(
+        p,
+        message="A formal salon for two hosts and four dinner guests, a quiet study. Explain the placements.",
+        live=True,
+    )
+    j = local.post("/api/jobs", json=request).json()["job"]
+    assert service.work_once()
+    result = local.get("/api/jobs/" + j).json()
+    assert result["status"] == "failed"
+    for expected in (
+        "Can four total seats work?",
+        "six dining seats",
+        "four dining seats in total",
+        "room-center distances",
+        "Ask about the saved design",
+        "edit the brief",
+    ):
+        assert expected in result["result"]
+    assert local.get("/api/projects/" + p).json()["revision"] == 0
+    assert len(calls) == 1
+    assert not service.work_once()

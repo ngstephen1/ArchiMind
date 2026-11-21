@@ -32,3 +32,7 @@ TOWN_SOURCE="${TOWN_DB:-$PWD/output/conference-sprint/home/town.sqlite3}"
 Use the Town link printed by the launcher and append `?project=c9339e4f-a57a-4328-95dc-40dc36dd5b89&revision=2`. Set the revision to 1 for the earlier chair position. Visitor playback can run with live generation disabled. The [four exported board digests](replayed-manifests.json) reproduce the actual browser exports from the source DB. The distributed SQLite SHA-256 is `a2fc081830eae29e325cfe0189ba545b6d5b37557e7df2a7961946e27db010ea`.
 
 The [sanitized original ledger](ledger.json) records all five submissions on the UTC day, including the three that preceded the extra grant. It distinguishes the 15 reserved calls from actual provider billing.
+
+## Clarifying the original request
+
+The original rejection is preserved in the first job receipt. The updated worker appends local guidance to subsequent unresolved briefs. For hosting, it explains four total dining places and asks the user to retain a larger seating requirement if it is mandatory. For a quiet study, it explains the supported relative room-center separation. For placement questions, it directs the user to the saved design's evidence panel after explicit application. It keeps the interpretation failure visible. A regression exercised the worker and HTTP result with a mocked clarification and an unsupported six-seat request. The job produced no layout, retained revision zero and made one mocked interpretation call without a retry.

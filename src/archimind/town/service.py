@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import sqlite3
 import time
 import uuid
@@ -229,6 +230,53 @@ def expire_jobs(q, now):
     )
 
 
+class BriefClarification(Problem):
+    """Keep the bounded provider response and application guidance distinct."""
+
+    def __init__(self, req, parsed):
+        reasons = []
+        if parsed.clarification:
+            reasons.append(parsed.clarification)
+        if parsed.unsupported:
+            reasons.append("Unsupported requirements: " + ", ".join(parsed.unsupported))
+        super().__init__(" ".join(reasons))
+        self.guidance = clarification_guidance(req, parsed)
+
+
+def clarification_guidance(req, parsed):
+    words = set(re.findall(r"[a-z]+", req.message.lower()))
+    options = []
+    if words & {"dinner", "dining", "guests", "seats", "seating"} and (
+        req.brief.formal_salon or parsed.formal_salon or "salon" in words
+    ):
+        options.append(
+            "The formal salon includes four dining seats in total. "
+            "Count hosts and guests together. If everyone must sit together, keep that requirement open. "
+            "If four places work for you, say so in the brief."
+        )
+    if "study" in words and words & {
+        "quiet",
+        "quieter",
+        "separate",
+        "separation",
+        "far",
+    }:
+        options.append(
+            "For the study, you can request greater separation from the living room. "
+            "Town compares room-center distances; acoustic privacy needs further evidence."
+        )
+    if words & {"why", "explain", "rationale"}:
+        options.append(
+            "For placement explanations, apply a reviewed layout, open Design presentation, "
+            "then use Ask about the saved design to see measurements and any recorded rationale."
+        )
+    if options:
+        options.append(
+            "Review the requirements and edit the brief before submitting another design job."
+        )
+    return " ".join(options)
+
+
 def interpret(req, previous):
     brief = req.brief
     if req.agent_team and not req.message.strip():
@@ -256,10 +304,7 @@ def interpret(req, previous):
             deadline=time.monotonic() + 30,
         )
         if parsed.unsupported or parsed.clarification:
-            raise Problem(
-                parsed.clarification
-                or "Unsupported requirements: " + ", ".join(parsed.unsupported)
-            )
+            raise BriefClarification(req, parsed)
         locks = set(brief.locks)
         if isinstance(parsed, Interpretation):
             locks.update(parsed.lock_rooms)
@@ -345,6 +390,8 @@ def work_once():
         status = "ready"
     except (ValueError, Problem, provider.StudioError) as exc:
         result = str(exc)[:600]
+        if isinstance(exc, BriefClarification) and exc.guidance:
+            result += "\n\n" + exc.guidance
         status = "failed"
     except Exception:
         result = "Design service unavailable. Your applied home is preserved."
