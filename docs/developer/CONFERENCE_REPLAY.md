@@ -4,13 +4,11 @@ Open the six-room home that Town generated from a live brief on a 15 × 16 m lot
 
 ## Open the saved home
 
-Complete the Town setup in the [README](../../README.md#quick-start). From the repository root, run the following commands in the same terminal. The download contains only the two saved design snapshots. A fresh temporary directory gives each rehearsal its own writable copy. Opening a saved design and asking the measured questions use zero provider calls.
+Complete the Town setup in the [README](../../README.md#quick-start). From the repository root, run the following commands in the same terminal. The offline replay builds its database from the two saved snapshots included in this checkout. It validates each home and checks both exported manifests against the recorded bytes. A fresh temporary directory gives each rehearsal its own writable copy. Opening a saved design and asking the measured questions use zero provider calls.
 
 ```bash
 conference_dir=$(mktemp -d)
-curl -fL --retry 2 \
-  https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Conference-Town.sqlite3 \
-  -o "$conference_dir/Conference-Town.sqlite3"
+.venv/bin/python scripts/reopen_conference_home.py "$conference_dir/Conference-Town.sqlite3"
 TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
 ```
 
