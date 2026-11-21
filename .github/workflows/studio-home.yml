@@ -85,10 +85,13 @@ jobs:
         if: inputs.snapshot_source
         env:
           SNAPSHOT_SOURCE: ${{ inputs.snapshot_source }}
+          APPROVED_PROOF: ${{ inputs.approved_proof_run }}
         run: |
           python scripts/stage_studio_manifest.py "$SNAPSHOT_SOURCE" "$RUNNER_TEMP/snapshot.json" --snapshot
-          npm ci --prefix frontend/realistic_viewer --ignore-scripts
-          node frontend/realistic_viewer/town/export-saved-style.mjs "$RUNNER_TEMP/snapshot.json" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/saved-style.json"
+          if [ -z "$APPROVED_PROOF" ]; then
+            npm ci --prefix frontend/realistic_viewer --ignore-scripts
+            node frontend/realistic_viewer/town/export-saved-style.mjs "$RUNNER_TEMP/snapshot.json" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/saved-style.json"
+          fi
       - name: Replay applied studio home and export the scene
         if: ${{ !inputs.fresh_home }}
         run: |
@@ -115,6 +118,7 @@ jobs:
           fi
           options=()
           if [ "$SALON_COVER" = true ]; then options+=(--salon-cover); fi
+          if [ -f "$RUNNER_TEMP/snapshot.json" ]; then options+=(--expected-snapshot "$RUNNER_TEMP/snapshot.json"); fi
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views" "${options[@]}"
           python scripts/publish_studio_board.py "$RUNNER_TEMP/accepted" --eye-views "$RUNNER_TEMP/eye-views"
           google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf" "file://$RUNNER_TEMP/accepted/index.html"

@@ -143,6 +143,8 @@ def decor_shape(shape, label, base, palette):
     key = tuple(
         shape[k] for k in ("color", "roughness", "metalness", "emission", "strength")
     )
+    sheer = shape["group"].startswith("decor/curtain:")
+    key += (sheer,)
     if key not in palette:
         mat = base.surface(
             "Town decor · " + shape["color"], shape["color"], shape["roughness"]
@@ -151,6 +153,19 @@ def decor_shape(shape, label, base, palette):
         shader.inputs["Metallic"].default_value = shape["metalness"]
         shader.inputs["Emission Color"].default_value = base.rgb(shape["emission"])
         shader.inputs["Emission Strength"].default_value = shape["strength"]
+        if sheer:
+            # Town's rectangular drape is a proxy. Transmit daylight through its
+            # fabric in Cycles while keeping the exact exported shape and transform.
+            tree = mat.node_tree
+            fabric = tree.nodes.new("ShaderNodeBsdfTranslucent")
+            fabric.inputs["Color"].default_value = base.rgb(shape["color"])
+            mix = tree.nodes.new("ShaderNodeMixShader")
+            mix.inputs[0].default_value = 0.8
+            tree.links.new(shader.outputs[0], mix.inputs[1])
+            tree.links.new(fabric.outputs[0], mix.inputs[2])
+            tree.links.new(
+                mix.outputs[0], tree.nodes.get("Material Output").inputs["Surface"]
+            )
         palette[key] = mat
     mesh.materials.append(palette[key])
 
@@ -254,7 +269,7 @@ def dress_scene(plan, board, base, out):
             "license": env["license"],
             "sha256": env_file["sha256"],
         },
-        "rendering_scope": "High-tier Town furniture placements and saved dressing. Floor, tile, wall, ceiling and trim use release textures. Cycles uses physical window emitters, a shared sun and its own exposure. Browser AO, postprocessing and interactive cutaways are outside the offline render.",
+        "rendering_scope": "High-tier Town furniture placements and saved dressing. Floor, tile, wall, ceiling and trim use release textures. Cycles uses physical window emitters, a shared sun and its own exposure. Drapes retain the exact saved proxy and use thin translucent cloth for window light. Browser AO, postprocessing and interactive cutaways are outside the offline render.",
     }
     (out / "saved-style-receipt.json").write_text(json.dumps(summary, indent=2))
     return summary

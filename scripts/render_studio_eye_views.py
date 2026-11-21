@@ -16,7 +16,9 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def render(proof, manifest, camera_manifest, output, salon_cover=False):
+def render(
+    proof, manifest, camera_manifest, output, salon_cover=False, expected_snapshot=None
+):
     receipt = json.loads((proof / "receipt.json").read_bytes())
     source_sha = sha(manifest)
     board = json.loads(manifest.read_bytes())
@@ -32,6 +34,18 @@ def render(proof, manifest, camera_manifest, output, salon_cover=False):
         raise ValueError(
             "The approved proof or comparison project does not match the selected manifest."
         )
+    if expected_snapshot:
+        name = "saved-style-receipt.json"
+        if name not in receipt["files"] or sha(proof / name) != receipt["files"][name]:
+            raise ValueError("The approved proof contains no verified saved style")
+        saved_style = json.loads((proof / name).read_bytes())
+        if (
+            saved_style["snapshot_sha256"] != sha(expected_snapshot)
+            or saved_style["manifest_sha256"] != source_sha
+        ):
+            raise ValueError(
+                "The approved proof was rendered from another style snapshot"
+            )
     bedroom = next(p for p in board["rooms"] if p["room"]["id"] == "bedroom")
     frame = next(p for p in framing["rooms"] if p["room"]["id"] == "bedroom")
     if (bedroom["origin"], bedroom["room"]) != (frame["origin"], frame["room"]):
@@ -132,5 +146,13 @@ if __name__ == "__main__":
     for key in ("proof", "manifest", "camera_manifest", "output"):
         p.add_argument(key, type=Path)
     p.add_argument("--salon-cover", action="store_true")
+    p.add_argument("--expected-snapshot", type=Path)
     a = p.parse_args(sys.argv[sys.argv.index("--") + 1 :])
-    render(a.proof, a.manifest, a.camera_manifest, a.output, a.salon_cover)
+    render(
+        a.proof,
+        a.manifest,
+        a.camera_manifest,
+        a.output,
+        a.salon_cover,
+        a.expected_snapshot,
+    )
