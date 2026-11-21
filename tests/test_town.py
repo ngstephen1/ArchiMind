@@ -737,6 +737,8 @@ def test_launcher_requires_date_flag(tmp_path, monkeypatch, explicit):
     script = Path(__file__).resolve().parents[1] / "scripts/run_town.py"
     for key in ("TOWN_MODE", "TOWN_STATIC", "DATABASE_URL"):
         monkeypatch.delenv(key, raising=False)
+    monkeypatch.setenv("TOWN_PORT", "8790")
+    monkeypatch.setenv("TOWN_EDITOR_PORT", "8791")
     monkeypatch.setenv("TOWN_DB", str(tmp_path / "unused.sqlite3"))
     monkeypatch.setenv("TOWN_EXTRA_TEAM_JOBS_DATE", "2026-11-20")
     monkeypatch.setattr(
