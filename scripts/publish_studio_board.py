@@ -147,11 +147,12 @@ def book(directory, eye_views=None):
         else None
     )
 
-    def img(name):
+    def img(name, *, original=False):
         filename = name + ".png"
         if filename not in receipt["files"]:
             raise ValueError("Missing render: " + filename)
-        return f'<img src="{esc(replacements.get(filename, filename))}" alt="{esc(name.replace("-", " "))}">'
+        path = filename if original else replacements.get(filename, filename)
+        return f'<img src="{esc(path)}" alt="{esc(name.replace("-", " "))}">'
 
     def caption(room_id, view):
         key = f"{room_id}-{view['id']}.png"
@@ -159,6 +160,8 @@ def book(directory, eye_views=None):
         text = used.get("reason") or used["label"]
         if key in replacements and room_id == "bedroom":
             text += " · 1080p, comparison camera"
+        if key in replacements and room_id == "salon":
+            text += " · 1080p, architectural perspective"
         return esc(text)
 
     pages = []
@@ -216,7 +219,7 @@ def book(directory, eye_views=None):
     )
     pages.append(
         '<h2>From drawing to daylight</h2><div class="compare">'
-        + img(hero)
+        + img(hero, original=True)
         + '<div class="ink">'
         + img(hero + "-drawing")
         + "</div></div><label>Drawing coverage <input type=\"range\" value=\"50\" oninput=\"document.querySelector('.ink').style.clipPath='inset(0 '+(100-this.value)+'% 0 0)'\"></label>"
@@ -247,6 +250,12 @@ def book(directory, eye_views=None):
         )
     css = """*{box-sizing:border-box}body{margin:auto;max-width:1120px;color:#24382f;background:#eeeae1;font:16px/1.4 system-ui}section{padding:3.5%;background:#faf8f2;margin:15px 0}h1,h2{font:normal 2.8em/1.1 Georgia;margin:.25em 0 .5em}img,svg{width:100%;display:block}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}figure{margin:0}figcaption,footer{font-size:.85em}footer{margin-top:1em;border-top:1px solid #b8ac97;padding-top:.6em}table{border-collapse:collapse;width:100%;margin-top:1em}td,th{text-align:left;border-bottom:1px solid #ccc;padding:.2em}i{width:2em;height:1em;display:inline-block;margin-right:.6em}.compare{position:relative}.ink{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}@media(max-width:650px){.grid{grid-template-columns:1fr}}@page{size:A3 landscape;margin:12mm}@media print{body{max-width:none;font-size:11pt;background:white}section{margin:0;padding:0;break-after:page}section:last-child{break-after:auto}section>img,.compare{width:82%}.grid{grid-template-columns:1fr 1fr}.grid svg{max-height:32vh}label{display:none}*{print-color-adjust:exact}}"""
     css += ".swatch{width:6.2em;height:2em;object-fit:cover;display:inline-block;vertical-align:middle;margin-right:.75em}"
+    css += """@media print {
+    .client-book section {min-height:269mm;position:relative;padding:1mm 2mm 11mm}
+    .client-book footer {position:absolute;bottom:1mm;left:2mm;right:2mm}
+    .client-book section>img,.client-book .compare {width:94%;max-width:354mm}
+    .client-book .grid svg[aria-label="Dimensioned home plan"] {height:181mm;max-height:181mm}
+    }"""
     if "camera-studies.json" in receipt["files"]:
         studies = json.loads((directory / "camera-studies.json").read_text())
         panels = "".join(
@@ -276,7 +285,7 @@ def book(directory, eye_views=None):
     (directory / "index.html").write_text(
         '<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Studio House</title><style>'
         + css
-        + "</style>"
+        + '</style><body class="client-book">'
         + "".join(
             "<section>"
             + p
@@ -285,7 +294,7 @@ def book(directory, eye_views=None):
             + f" · {i + 1} / {len(pages)}</footer></section>"
             for i, p in enumerate(pages)
         )
-        + "</html>"
+        + "</body></html>"
     )
 
 
