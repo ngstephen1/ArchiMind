@@ -7,21 +7,21 @@ Open the six-room home that Town generated from a live brief on a 15 × 16 m lot
 Complete the Town setup in the [README](../../README.md#quick-start). From the repository root, run the following commands in the same terminal. The offline replay builds its database from the two saved snapshots included in this checkout. It validates each home and checks both exported manifests against the recorded bytes. A fresh temporary directory gives each rehearsal its own writable copy. Opening a saved design and asking the measured questions use zero provider calls.
 
 ```bash
-conference_dir=$(mktemp -d)
-.venv/bin/python scripts/reopen_conference_home.py "$conference_dir/Conference-Town.sqlite3"
-TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
+conference_dir=$(mktemp -d) &&
+.venv/bin/python scripts/reopen_conference_home.py "$conference_dir/Conference-Town.sqlite3" &&
+ARCHIMIND_ENABLE_OPENAI_STUDIO=0 TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
 ```
 
-Open [the edited home](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2). Click **Visit saved home**, then **Enter house**. Select **Bedroom** from **Visit a room**, then choose **Design presentation**. The visitor can see the plan, switch rooms, inspect the furniture schedule, open the client book or ask a question. Open [the earlier revision](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=1) in another tab. If using a different Town port, change the port in both links.
+Open [the edited home](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2). Click **Visit saved home**, then **Enter house**. Select **Bedroom** from **Visit a room**, then choose **Design presentation**. The visitor can see the plan, switch rooms, inspect the furniture schedule, open the client book or ask a question. Open [the earlier revision](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=1) in another tab. If using a different Town port, change the port in both links. The launch runs only after the export check succeeds.
 
 ## Open both conference projects
 
 After installing the checkout with the live conference evidence, give the builder both sources. The original and fresh projects follow the same seed and chair edit and have distinct project and manifest identities.
 
 ```bash
-conference_dir=$(mktemp -d)
+conference_dir=$(mktemp -d) &&
 .venv/bin/python scripts/reopen_conference_home.py "$conference_dir/Conference-Town.sqlite3" \
-  --example docs/data/conference-sprint --example docs/data/conference-live-final
+  --example docs/data/conference-sprint --example docs/data/conference-live-final &&
 ARCHIMIND_ENABLE_OPENAI_STUDIO=0 TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
 ```
 
@@ -44,6 +44,6 @@ Compare the chair footprints on the A3 detail sheet and the fixed-camera desk vi
 
 ## What the recordings show
 
-The live interpretation needed two clarifications before returning two validated alternatives. The optional Codex CLI review reported a process error. The OpenAI visual review returned a result. When a fourth design job reached the daily limit, the user-directed chair edit went through Town's preview, validation and apply workflow. Reopening the release database replays the saved geometry. The original provider jobs and their ledger remain outside this portable database.
+The original live interpretation needed two clarifications before returning two validated alternatives. The optional Codex CLI review reported a process error. The OpenAI visual review returned a result. In the original run, when a fourth design job reached the daily limit, the user-directed chair edit went through Town's preview, validation and apply workflow. Reopening the release database replays the saved geometry. The original provider jobs and their ledger remain outside this portable database.
 
 The landscape infographic introduces the project. The existing narrated video shows an earlier five-room design and a separate six-room Studio House at revision 5. The November 21 home and its chair move are documented in the release book and the paired exports.
