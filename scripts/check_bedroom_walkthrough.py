@@ -73,7 +73,21 @@ def check(url: str, output: Path):
         assert canvas.evaluate("element => element === document.activeElement")
         assert initial == page.screenshot(clip=clip), "Walking view was not restored"
 
+        # A rejected replacement leaves both the selected camera and accepted preview usable.
+        page.locator("#photoView").select_option("desk")
         page.locator("#design").click()
+        rejected_route = "**/chair-pullout/preview"
+        page.route(
+            rejected_route,
+            lambda route: route.fulfill(
+                status=400, json={"error": "The chair move is obstructed."}
+            ),
+        )
+        page.locator("#chairPullout").click()
+        page.get_by_text("The chair move is obstructed.", exact=True).wait_for()
+        assert canvas.get_attribute("data-camera") == "desk"
+        assert page.locator("#chairApply").is_visible()
+        page.unroute(rejected_route)
         page.locator("#chairApply").click()
         page.get_by_text(
             "Designer furniture saved in revision 2.", exact=True

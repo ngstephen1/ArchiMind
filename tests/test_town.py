@@ -657,7 +657,8 @@ def test_pullout_is_a_validated_preview_of_the_saved_revision(local):
     )
 
 
-def test_pullout_rejects_obstructed_move(local):
+@pytest.mark.parametrize("obstacle_kind", ["furniture", "plant"])
+def test_pullout_rejects_obstructed_move(local, obstacle_kind):
     p = service.create("local-designer")["project"]
     home = json.loads(SHOWCASE.read_text())
     part = next(r for r in home["rooms"] if r["design"]["room"]["id"] == "bedroom")
@@ -666,7 +667,12 @@ def test_pullout_rejects_obstructed_move(local):
     direction = 1 if chair["y_m"] > desk["y_m"] else -1
     obstacle = dict(chair, id="side-table", category="table", depth_m=0.05)
     obstacle["y_m"] += chair["depth_m"] + 0.1 if direction == 1 else -0.15
-    part["design"]["furniture"].append(obstacle)
+    if obstacle_kind == "furniture":
+        part["design"]["furniture"].append(obstacle)
+    else:
+        part.setdefault("style", {}).setdefault("dressing", []).append(
+            {**obstacle, "id": "saved-potted-plant", "kind": "plant"}
+        )
     with service.transaction() as q:
         service.apply(q, "local-designer", p, 0, home)
     assert (

@@ -33,6 +33,7 @@ let project = url.searchParams.get("project"),
   selected = 0,
   chairPreview = null,
   chairEpoch = 0,
+  loadingChairScene = false,
   releasedChairs = [];
 const token = () => sessionStorage.getItem("town-session") || "";
 const world = createTown(el("world"), el("place"), el("door"));
@@ -92,6 +93,7 @@ function links() {
 }
 function resetChairPreview() {
   chairEpoch++;
+  loadingChairScene = false;
   chairPreview = null;
   el("chairApply").hidden = el("chairDiscard").hidden = true;
 }
@@ -516,16 +518,19 @@ bind("chairPreview", async () => {
 });
 bind("chairPullout", () => previewBedroomEdit("chair-pullout", {base: revision}));
 async function previewBedroomEdit(endpoint, request) {
-  resetChairPreview();
-  const epoch = chairEpoch;
+  const epoch = ++chairEpoch;
   let home, status;
   try {
     ({home} = await api("/projects/" + project + "/" + endpoint + "/preview", request));
     if (epoch !== chairEpoch) return;
+    loadingChairScene = true;
+    chairPreview = null;
+    el("chairApply").hidden = el("chairDiscard").hidden = true;
     status = await world.load(home);
   } catch (error) {
     if (epoch === chairEpoch) {
-      discardChair();
+      // A refused request leaves the current room, camera and accepted preview intact.
+      if (loadingChairScene) discardChair();
       throw error;
     }
     return;
@@ -539,6 +544,7 @@ async function previewBedroomEdit(endpoint, request) {
     return;
   }
   if (epoch !== chairEpoch) return;
+  loadingChairScene = false;
   chairPreview = {endpoint, request: { ...request, preview_id: home.id }};
   el("chairApply").hidden = el("chairDiscard").hidden = false;
   el("chairNotice").textContent = "Bedroom preview ready. Apply to save a new revision.";
