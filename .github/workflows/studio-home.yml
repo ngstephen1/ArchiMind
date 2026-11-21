@@ -15,6 +15,10 @@ on:
       approved_proof_run:
         description: Accepted fresh-home proof run ID for a two-view 1080p render
         type: string
+      salon_cover:
+        description: Also render the saved salon camera for the final client cover
+        type: boolean
+        default: false
       camera_source:
         description: Optional pinned camera manifest for a matched comparison (same project and shell)
         type: string
@@ -98,6 +102,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           PROOF_RUN: ${{ inputs.approved_proof_run }}
           CAMERA_SOURCE: ${{ inputs.camera_source }}
+          SALON_COVER: ${{ inputs.salon_cover }}
         run: |
           [[ "$PROOF_RUN" =~ ^[0-9]+$ ]]
           workflow_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/studio-home.yml" --jq .id)"
@@ -108,7 +113,12 @@ jobs:
           else
             cp "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json"
           fi
-          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views"
+          options=()
+          if [ "$SALON_COVER" = true ]; then options+=(--salon-cover); fi
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views" "${options[@]}"
+          python scripts/publish_studio_board.py "$RUNNER_TEMP/accepted" --eye-views "$RUNNER_TEMP/eye-views"
+          google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf" "file://$RUNNER_TEMP/accepted/index.html"
+          test -s "$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: inputs.approved_proof_run
         with:

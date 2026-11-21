@@ -16,7 +16,7 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def render(proof, manifest, camera_manifest, output):
+def render(proof, manifest, camera_manifest, output, salon_cover=False):
     receipt = json.loads((proof / "receipt.json").read_bytes())
     source_sha = sha(manifest)
     board = json.loads(manifest.read_bytes())
@@ -81,14 +81,25 @@ def render(proof, manifest, camera_manifest, output):
             raise ValueError("Source notice differs from the accepted proof: " + name)
         (output / name).write_bytes(data)
     shots = []
-    for pose in poses:
+    photo_sources = [("bedroom", pose, sha(camera_manifest)) for pose in poses]
+    if salon_cover:
+        salon = next(r for r in board["rooms"] if r["room"]["id"] == "salon")
+        photo_sources.append(("salon", salon["cameras"][0], source_sha))
+    for room_id, pose, pose_source in photo_sources:
         name = pose["id"]
         scene.camera = camera(pose, "Comparison " + name)
-        path = output / f"bedroom-{name}.png"
+        path = output / f"{room_id}-{name}.png"
         scene.render.filepath = str(path.resolve())
         bpy.ops.render.render(write_still=True)
         shots.append(
-            {"view": name, "camera": pose, "file": path.name, "sha256": sha(path)}
+            {
+                "room": room_id,
+                "view": name,
+                "camera": pose,
+                "camera_manifest_sha256": pose_source,
+                "file": path.name,
+                "sha256": sha(path),
+            }
         )
     (output / "eye-view-receipt.json").write_text(
         json.dumps(
@@ -120,5 +131,6 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__)
     for key in ("proof", "manifest", "camera_manifest", "output"):
         p.add_argument(key, type=Path)
+    p.add_argument("--salon-cover", action="store_true")
     a = p.parse_args(sys.argv[sys.argv.index("--") + 1 :])
-    render(a.proof, a.manifest, a.camera_manifest, a.output)
+    render(a.proof, a.manifest, a.camera_manifest, a.output, a.salon_cover)
