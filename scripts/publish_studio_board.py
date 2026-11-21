@@ -117,6 +117,7 @@ def book(directory, eye_views=None):
         raise ValueError("Manifest identity mismatch")
 
     replacements = {}
+    replacement_cameras = {}
     if eye_views:
         evidence = json.loads((eye_views / "eye-view-receipt.json").read_bytes())
         if (
@@ -138,6 +139,7 @@ def book(directory, eye_views=None):
                     "Eye-view PNG differs from its signed-off render receipt"
                 )
             replacements[name] = "presentation-" + name
+            replacement_cameras[name] = shot["camera"]
             (directory / replacements[name]).write_bytes(data)
     style = (
         json.loads((directory / "saved-style-receipt.json").read_bytes())
@@ -150,6 +152,14 @@ def book(directory, eye_views=None):
         if filename not in receipt["files"]:
             raise ValueError("Missing render: " + filename)
         return f'<img src="{esc(replacements.get(filename, filename))}" alt="{esc(name.replace("-", " "))}">'
+
+    def caption(room_id, view):
+        key = f"{room_id}-{view['id']}.png"
+        used = replacement_cameras.get(key, view)
+        text = used.get("reason") or used["label"]
+        if key in replacements and room_id == "bedroom":
+            text += " · 1080p, comparison camera"
+        return esc(text)
 
     pages = []
     featured = next(
@@ -225,12 +235,7 @@ def book(directory, eye_views=None):
                 "<figure>"
                 + img(r["id"] + "-" + v["id"])
                 + "<figcaption>"
-                + esc(v.get("reason") or v["label"])
-                + (
-                    " · 1080p, comparison camera"
-                    if r["id"] == "bedroom" and f"bedroom-{v['id']}.png" in replacements
-                    else ""
-                )
+                + caption(r["id"], v)
                 + "</figcaption></figure>"
                 for v in views[:2]
             )

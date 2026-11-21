@@ -188,7 +188,7 @@ def hall_context(hall, bedroom, materials):
         )
 
 
-def architecture(room, materials):
+def architecture(room, materials, *, pleated_curtains=True):
     w, d, h = room["width_m"], room["depth_m"], room["ceiling_height_m"]
     box(
         "Ceiling", (w / 2, d / 2, h + 0.05), (w + 0.2, d + 0.2, 0.1), materials["ivory"]
@@ -307,37 +307,38 @@ def architecture(room, materials):
                     0,
                     materials["ivory"],
                 )
-            upper = min(sill + high + 0.16, h - 0.12)
-            segment(
-                "Curtain rail",
-                x - 0.14,
-                x + span + 0.14,
-                upper,
-                upper + 0.025,
-                0.028,
-                0.11,
-                materials["brass"],
-            )
-            # Folded fabric hangs from the actual window with guaranteed room clearance.
-            for center in (max(0.2, x), min(length - 0.2, x + span)):
-                verts = [
-                    point(
-                        center + (i / 40 - 0.5) * min(span * 0.23, 0.38),
-                        z,
-                        0.13 + 0.043 * math.cos(i * math.pi / 4),
-                    )
-                    for z in (0.10, upper)
-                    for i in range(41)
-                ]
-                geom = bpy.data.meshes.new("Pleated linen")
-                geom.from_pydata(
-                    verts, [], [(i, i + 1, i + 42, i + 41) for i in range(40)]
+            if pleated_curtains:
+                upper = min(sill + high + 0.16, h - 0.12)
+                segment(
+                    "Curtain rail",
+                    x - 0.14,
+                    x + span + 0.14,
+                    upper,
+                    upper + 0.025,
+                    0.028,
+                    0.11,
+                    materials["brass"],
                 )
-                panel = bpy.data.objects.new("Window linen panel", geom)
-                bpy.context.collection.objects.link(panel)
-                geom.materials.append(materials["linen"])
-                for poly in geom.polygons:
-                    poly.use_smooth = True
+                # Folded fabric hangs from the actual window with guaranteed room clearance.
+                for center in (max(0.2, x), min(length - 0.2, x + span)):
+                    verts = [
+                        point(
+                            center + (i / 40 - 0.5) * min(span * 0.23, 0.38),
+                            z,
+                            0.13 + 0.043 * math.cos(i * math.pi / 4),
+                        )
+                        for z in (0.10, upper)
+                        for i in range(41)
+                    ]
+                    geom = bpy.data.meshes.new("Pleated linen")
+                    geom.from_pydata(
+                        verts, [], [(i, i + 1, i + 42, i + 41) for i in range(40)]
+                    )
+                    panel = bpy.data.objects.new("Window linen panel", geom)
+                    bpy.context.collection.objects.link(panel)
+                    geom.materials.append(materials["linen"])
+                    for poly in geom.polygons:
+                        poly.use_smooth = True
             light(
                 "Daylight through " + win["id"],
                 point(mid, sill + high * 0.6, -0.18),

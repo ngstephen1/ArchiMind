@@ -321,7 +321,7 @@ def render(args):
             seam.thickness = 0.003
         if room["id"] != "bedroom":
             before = set(bpy.data.objects)
-            bedroom.architecture(room, mats)
+            bedroom.architecture(room, mats, pleated_curtains=style is None)
             for piece in part["details"]:
                 studio_piece(piece, finishes)
             for item in part["furniture"]:
