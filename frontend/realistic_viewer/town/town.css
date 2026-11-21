@@ -253,6 +253,12 @@ button[aria-pressed="true"] {
 #board {
   width: min(800px, 95vw);
 }
+.board-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
 #board canvas,
 #photos img {
   width: 100%;

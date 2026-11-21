@@ -95,6 +95,10 @@ function resetChairPreview() {
   chairPreview = null;
   el("chairApply").hidden = el("chairDiscard").hidden = true;
 }
+function loadSavedHome() {
+  world.load(applied);
+  el("tour").textContent = revision ? "Visit saved home" : "Visit showcase";
+}
 function sync(data) {
   resetChairPreview();
   releasedChairs = [];
@@ -125,7 +129,7 @@ function sync(data) {
   applied = data.home || showcase;
   el("chairStudio").hidden = revision === 0 || (data.head !== undefined && data.head !== revision);
   el("chairStudio").open = false;
-  world.load(applied);
+  loadSavedHome();
   el("width").value = applied.width;
   el("depth").value = applied.depth;
   el("style").value = homeStyle(applied);
@@ -333,7 +337,7 @@ bind("generate", async () => {
   if (!local && !token()) throw Error("Sign in to generate.");
   el("generate").disabled = true;
   el("alternatives").hidden = true;
-  world.load(applied);
+  loadSavedHome();
   el("revision").textContent = revision
     ? "Studio House · Revision " + revision
     : "Studio House · Showcase";
@@ -461,6 +465,7 @@ bind("visit", () => {
   resetChairPreview();
   el("revision").textContent =
     "Preview · Layout " + String.fromCharCode(65 + selected) + " · Unapplied";
+  el("tour").textContent = "Visit preview";
   world.load(alternatives[selected]);
   world.visit();
   el("door").click();
@@ -502,7 +507,7 @@ el("chairStudio").ontoggle = async () => {
 };
 function discardChair() {
   resetChairPreview();
-  world.load(applied);
+  loadSavedHome();
   el("revision").textContent = "Studio House · Revision " + revision;
   el("chairNotice").textContent = "Showing your saved bedroom.";
 }
@@ -525,6 +530,7 @@ bind("chairPreview", async () => {
   }
   if (epoch !== chairEpoch) return;
   chairPreview = {endpoint, request: { ...request, preview_id: home.id }};
+  el("tour").textContent = "Visit preview";
   el("chairApply").hidden = el("chairDiscard").hidden = false;
   el("chairNotice").textContent = "Bedroom preview ready. Apply to save a new revision.";
   el("revision").textContent = "Bedroom furniture preview · Unsaved";
@@ -559,6 +565,7 @@ function showExport(manifest, hash, studio, studioHash) {
   const studioRelease = publicationFor(studio, studioHash, studioPublications);
   if (studioRelease) {
     const pdf = node("a", "Open the whole-home client book (PDF)");
+    pdf.id = "studioBookLink";
     pdf.href = studioRelease.pdf;
     pdf.target = "_blank";
     pdf.rel = "noopener";
@@ -566,6 +573,8 @@ function showExport(manifest, hash, studio, studioHash) {
     pack.href = studioRelease.url;
     el("boardExports").append(node("p",""), pdf, node("p",""), pack);
   }
+  el("jumpDownloads").textContent = studioRelease ? "Jump to client book" : "Jump to downloads";
+  el("jumpDownloads").hidden = false;
   const publication = publicationFor(manifest,hash);
   if (publication) {
     const link = node("a","Download the Blender scene and three finished stills");
@@ -578,12 +587,18 @@ function showExport(manifest, hash, studio, studioHash) {
 
 const node = (tag, text) =>
   Object.assign(document.createElement(tag), { textContent: text });
+el("jumpQuestion").onclick = () => el("whyQuery").focus();
+el("jumpDownloads").onclick = () => {
+  const target = el("studioBookLink") || el("boardExports").querySelector("a");
+  target?.focus();
+};
 let boardGeneration = 0;
 el("present").onclick = async () => {
   const generation = ++boardGeneration;
   el("printBoard").disabled = true;
   boardHome = applied;
   evidenceManifest = null;
+  el("jumpDownloads").hidden = true;
   el("boardExports").replaceChildren();
   if (revision) {
     try {
