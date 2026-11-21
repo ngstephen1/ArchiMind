@@ -191,8 +191,13 @@ def dress_scene(plan, board, base, out):
         )
         for a in registry
     }
+    required_models = {m["sha256"] for room in plan["rooms"] for m in room["models"]}
     for asset, release in releases.items():
-        if release["kind"] == "model" and (f := tier_file(release, "model")):
+        if (
+            release["kind"] == "model"
+            and (f := tier_file(release, "model"))
+            and f["sha256"] in required_models
+        ):
             models[f["sha256"]] = (pack_file(root, f), f["bytes"], asset)
     surfaces = {}
     materials = {
