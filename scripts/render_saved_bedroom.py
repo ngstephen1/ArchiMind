@@ -10,6 +10,9 @@ from pathlib import Path
 import bpy
 from mathutils import Vector
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from render_town_templates import town_template  # noqa: E402
+
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "src/archimind/_viewer_assets"
 SURFACES = ROOT / "frontend/realistic_viewer/town/materials"
@@ -185,7 +188,7 @@ def hall_context(hall, bedroom, materials):
         )
 
 
-def architecture(room, materials):
+def architecture(room, materials, *, pleated_curtains=True):
     w, d, h = room["width_m"], room["depth_m"], room["ceiling_height_m"]
     box(
         "Ceiling", (w / 2, d / 2, h + 0.05), (w + 0.2, d + 0.2, 0.1), materials["ivory"]
@@ -304,37 +307,38 @@ def architecture(room, materials):
                     0,
                     materials["ivory"],
                 )
-            upper = min(sill + high + 0.16, h - 0.12)
-            segment(
-                "Curtain rail",
-                x - 0.14,
-                x + span + 0.14,
-                upper,
-                upper + 0.025,
-                0.028,
-                0.11,
-                materials["brass"],
-            )
-            # Folded fabric hangs from the actual window with guaranteed room clearance.
-            for center in (max(0.2, x), min(length - 0.2, x + span)):
-                verts = [
-                    point(
-                        center + (i / 40 - 0.5) * min(span * 0.23, 0.38),
-                        z,
-                        0.13 + 0.043 * math.cos(i * math.pi / 4),
-                    )
-                    for z in (0.10, upper)
-                    for i in range(41)
-                ]
-                geom = bpy.data.meshes.new("Pleated linen")
-                geom.from_pydata(
-                    verts, [], [(i, i + 1, i + 42, i + 41) for i in range(40)]
+            if pleated_curtains:
+                upper = min(sill + high + 0.16, h - 0.12)
+                segment(
+                    "Curtain rail",
+                    x - 0.14,
+                    x + span + 0.14,
+                    upper,
+                    upper + 0.025,
+                    0.028,
+                    0.11,
+                    materials["brass"],
                 )
-                panel = bpy.data.objects.new("Window linen panel", geom)
-                bpy.context.collection.objects.link(panel)
-                geom.materials.append(materials["linen"])
-                for poly in geom.polygons:
-                    poly.use_smooth = True
+                # Folded fabric hangs from the actual window with guaranteed room clearance.
+                for center in (max(0.2, x), min(length - 0.2, x + span)):
+                    verts = [
+                        point(
+                            center + (i / 40 - 0.5) * min(span * 0.23, 0.38),
+                            z,
+                            0.13 + 0.043 * math.cos(i * math.pi / 4),
+                        )
+                        for z in (0.10, upper)
+                        for i in range(41)
+                    ]
+                    geom = bpy.data.meshes.new("Pleated linen")
+                    geom.from_pydata(
+                        verts, [], [(i, i + 1, i + 42, i + 41) for i in range(40)]
+                    )
+                    panel = bpy.data.objects.new("Window linen panel", geom)
+                    bpy.context.collection.objects.link(panel)
+                    geom.materials.append(materials["linen"])
+                    for poly in geom.polygons:
+                        poly.use_smooth = True
             light(
                 "Daylight through " + win["id"],
                 point(mid, sill + high * 0.6, -0.18),
@@ -360,6 +364,8 @@ def load_furniture(item, registry, materials):
     center = Vector(item["center_floor_xyz_m"])
     source = item["source"]
     if not source:
+        if town_template(item, materials, box):
+            return "procedural Town template"
         box(
             "Procedural reservation · " + item["name"],
             center + Vector((0, 0, h / 2)),
@@ -419,7 +425,15 @@ def load_furniture(item, registry, materials):
     return digest
 
 
-def render(manifest_path, output, originals, inspect_only=False, *, include_hall=True):
+def render(
+    manifest_path,
+    output,
+    originals,
+    inspect_only=False,
+    *,
+    include_hall=True,
+    style_slots=(),
+):
     manifest_bytes = manifest_path.read_bytes()
     manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
     manifest = json.loads(manifest_bytes)
@@ -456,6 +470,11 @@ def render(manifest_path, output, originals, inspect_only=False, *, include_hall
             ),
         ]
     }
+    if inspect_only and not include_hall:
+        # The whole-home pass reopens this scene and reuses the palette in other rooms.
+        # A saved pack can replace all bedroom uses of a particular base material.
+        for material in m.values():
+            material.use_fake_user = True
     rows = json.loads((SURFACES / "bedroom-sources.json").read_text())
     images = {}
     surface_hashes = {}
@@ -491,7 +510,15 @@ def render(manifest_path, output, originals, inspect_only=False, *, include_hall
         for key in ("chairs", "bedroom")
         for a in registry_data.get(key, [])
     }
-    used = {f["id"]: load_furniture(f, registry, m) for f in manifest["furniture"]}
+    used = {
+        f["id"]: (
+            "saved style pack"
+            if f["id"] in style_slots
+            else load_furniture(f, registry, m)
+        )
+        for f in manifest["furniture"]
+    }
+    scene["bedroom_representations_json"] = json.dumps(used, sort_keys=True)
     for mat in bpy.data.materials:
         name = mat.name.split(".")[0]
         if name == "Oiled oak":
@@ -500,7 +527,7 @@ def render(manifest_path, output, originals, inspect_only=False, *, include_hall
             texture(mat, images["linen-weave-512.jpg"], 0.30, tint=True)
             texture(mat, images["linen-normal-256.jpg"], 0.30, normal=True)
     for f in manifest["furniture"]:
-        if f["id"] == "queen-bed":
+        if f["id"] == "queen-bed" and f["id"] not in style_slots:
             x, y = f["footprint_xy_m"]
             w, d, _ = f["reservation_wdh_m"]
             x0, x1 = max(0.06, x - 0.58), min(room["width_m"] - 0.06, x + w + 0.58)
