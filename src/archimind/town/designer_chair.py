@@ -6,7 +6,6 @@ from archimind.assets.designer_concepts import (
     resolve_chair,
     resolve_collection,
 )
-
 from archimind.geometry import validate_accessibility
 from archimind.models import Furniture, RoomDesign
 
