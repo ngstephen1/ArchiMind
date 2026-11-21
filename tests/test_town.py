@@ -611,3 +611,74 @@ def test_controls_only_team_uses_controls_when_styling_unavailable(local, monkey
     assert homes and all(home["palette"] == "sage" for home in homes)
     assert schemas == [design_review.Direction, design_review.VisualReview]
     assert any(agent == "E" and state == "failed" for agent, state, *_ in events)
+
+
+def test_pullout_is_a_validated_preview_of_the_saved_revision(local):
+    p = service.create("local-designer")["project"]
+    home = json.loads(SHOWCASE.read_text())
+    with service.transaction() as q:
+        service.apply(q, "local-designer", p, 0, home)
+    url = f"/api/projects/{p}/chair-pullout"
+    preview = local.post(url + "/preview", json={"base": 1})
+    assert preview.status_code == 200, preview.text
+    moved = preview.json()["home"]
+    validate_home(moved)
+    assert local.get(f"/api/projects/{p}").json()["home"] == home
+    for old, new in zip(home["rooms"], moved["rooms"], strict=True):
+        if old["design"]["room"]["id"] != "bedroom":
+            assert old == new
+            continue
+        for a, b in zip(
+            old["design"]["furniture"], new["design"]["furniture"], strict=True
+        ):
+            if a["id"] == "desk-chair":
+                assert abs(b["y_m"] - a["y_m"]) == pytest.approx(0.30)
+                assert a | {"y_m": b["y_m"]} == b
+            else:
+                assert a == b
+    assert local.post(url + "/preview", json={"base": True}).status_code == 400
+    assert local.post(url + "/preview", json={"base": 1, "y_m": 500}).status_code == 400
+    other = service.create("other-owner")["project"]
+    assert (
+        local.post(
+            f"/api/projects/{other}/chair-pullout/preview", json={"base": 1}
+        ).status_code
+        == 404
+    )
+    assert (
+        local.post(url + "/apply", json={"base": 1, "preview_id": "stale"}).status_code
+        == 409
+    )
+    data = {"base": 1, "preview_id": moved["id"]}
+    assert local.post(url + "/apply", json=data).json()["home"] == moved
+    assert local.post(url + "/apply", json=data).status_code == 409
+    assert (
+        local.post(f"/api/projects/{p}/undo", json={"base": 2}).json()["home"] == home
+    )
+
+
+@pytest.mark.parametrize("obstacle_kind", ["furniture", "plant"])
+def test_pullout_rejects_obstructed_move(local, obstacle_kind):
+    p = service.create("local-designer")["project"]
+    home = json.loads(SHOWCASE.read_text())
+    part = next(r for r in home["rooms"] if r["design"]["room"]["id"] == "bedroom")
+    chair = next(f for f in part["design"]["furniture"] if f["id"] == "desk-chair")
+    desk = next(f for f in part["design"]["furniture"] if f["id"] == "belaya")
+    direction = 1 if chair["y_m"] > desk["y_m"] else -1
+    obstacle = dict(chair, id="side-table", category="table", depth_m=0.05)
+    obstacle["y_m"] += chair["depth_m"] + 0.1 if direction == 1 else -0.15
+    if obstacle_kind == "furniture":
+        part["design"]["furniture"].append(obstacle)
+    else:
+        part.setdefault("style", {}).setdefault("dressing", []).append(
+            {**obstacle, "id": "saved-potted-plant", "kind": "plant"}
+        )
+    with service.transaction() as q:
+        service.apply(q, "local-designer", p, 0, home)
+    assert (
+        local.post(
+            f"/api/projects/{p}/chair-pullout/preview", json={"base": 1}
+        ).status_code
+        == 400
+    )
+    assert local.get(f"/api/projects/{p}").json()["revision"] == 1
