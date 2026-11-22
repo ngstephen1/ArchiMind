@@ -116,6 +116,8 @@ def test_saved_constraints_are_inherited_only_when_omitted():
         "900 mm circulation",
         "90 cm wide passage",
         "passages at least 90 cm wide",
+        "Keep the passage at least 90 cm",
+        "90 cm clear route",
     ],
 )
 def test_passage_with_leading_decimal_or_unit_and_local_seats(phrase):
@@ -166,6 +168,47 @@ def test_single_table_and_room_specific_seating_remain_hard_requirements():
         service.interpret(request, None)
     assert "requested 6 places there" in str(exc.value)
     assert "6 dining places at one table" in exc.value.reviewed["requirements"]
+
+
+@pytest.mark.parametrize(
+    "brief_text, seats",
+    [
+        ("Design a home with room for two residents and four dinner guests.", 6),
+        ("Leave room for two desks.", 0),
+        ("Seat four people at one table and two at the other.", 0),
+        ("Do not seat everyone at one table.", 0),
+    ],
+)
+def test_occupancy_and_split_requests_do_not_conflict(brief_text, seats):
+    brief, questions = requirement_controls(Brief(split_dining=True), brief_text, None)
+    assert not questions
+    assert brief.split_dining and brief.dining_seats == seats
+
+
+def test_single_table_capacity_request_is_preserved(monkeypatch):
+    def answer(schema, *args, **kwargs):
+        return schema(
+            priority="balanced",
+            style="scandinavian",
+            formal_salon=True,
+            unsupported=[],
+            clarification="",
+        )
+
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("mock", "mock"))
+    monkeypatch.setattr(service.provider, "request", answer)
+    request = SimpleNamespace(
+        brief=Brief(compare_tradeoffs=True),
+        agent_team=True,
+        live=True,
+        message="Include a formal salon. Six seats at one table.",
+    )
+    with pytest.raises(
+        service.BriefClarification,
+        match="6 dining places are still required at one table",
+    ) as exc:
+        service.interpret(request, None)
+    assert "Can your party dine at two tables" not in str(exc.value)
 
 
 def test_conflicting_control_needs_confirmation():

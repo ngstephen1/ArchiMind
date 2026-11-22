@@ -18,6 +18,7 @@ from archimind.town.agents import coordinate
 from archimind.town.brief_review import (
     REVIEW_FIELDS,
     provider_brief,
+    requests_single_table,
     requirement_controls,
     review_summary,
 )
@@ -377,7 +378,12 @@ def interpret(req, previous):
                 not brief.formal_salon
                 or brief.dining_seats > (8 if brief.split_dining else 4)
             ):
-                if (
+                if brief.dining_seats > 4 and requests_single_table(req.message):
+                    question = (
+                        f"All {brief.dining_seats} dining places are still required at one table. "
+                        "The largest modeled table has four places. Revise the single-table brief to proceed."
+                    )
+                elif (
                     4 < brief.dining_seats <= 8
                     and brief.formal_salon
                     and not brief.split_dining

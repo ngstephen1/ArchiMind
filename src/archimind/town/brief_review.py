@@ -25,27 +25,39 @@ COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")\b"
 
 MEASUREMENT = r"(?<![\d.])(\d+(?:\.\d+)?|\.\d+)\s*(mm|cm|m)\b"
 PASSAGE = r"(?:passages?|walkways?|circulation)\b"
-ROUTE = r"routes?\b"
+PATH = r"(?:passages?|walkways?|routes?|circulation)\b"
+MINIMUM = r"(?:of|at least|min(?:imum)?)\s+"
 WIDTH_PATTERNS = (
     MEASUREMENT + r"\s+(?:(?:clear|wide)\s+){0,2}" + PASSAGE,
-    MEASUREMENT + r"\s+(?:clear\s+)?wide\s+(?:clear\s+)?" + ROUTE,
-    r"(?:"
-    + PASSAGE
-    + "|"
-    + ROUTE
-    + r")\s+width\s+"
-    + r"(?:(?:of|at least|min(?:imum)?)\s+)?"
-    + MEASUREMENT,
-    r"(?:"
-    + PASSAGE
-    + "|"
-    + ROUTE
-    + r")\s+"
-    + r"(?:(?:of|at least|min(?:imum)?)\s+)?"
+    MEASUREMENT + r"\s+(?:clear|wide)\s+routes?\b",
+    PATH + r"\s+width\s+(?:" + MINIMUM + r")?" + MEASUREMENT,
+    PATH + r"\s+(?:" + MINIMUM + r")?" + MEASUREMENT + r"\s+wide\b",
+    PASSAGE
+    + r"\s+(?:at least|min(?:imum)?)\s+"
     + MEASUREMENT
-    + r"\s+wide\b",
+    + r"(?!\s+(?:long|in length|or shorter)\b)",
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
+
+
+def requests_single_table(message):
+    for clause in re.split(r"[.!?;\n]", message.lower()):
+        table = re.search(
+            r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
+        )
+        if not table or re.search(
+            r"\b(?:other|another|second|separate|split)\b", clause[table.end() :]
+        ):
+            continue
+        prefix = clause[: table.start()].strip()
+        if re.search(r"\b(?:not|never|instead of)\b", prefix):
+            continue
+        if re.search(
+            r"\b(?:all|everyone|party|seats?|places?|seating|dine|sit|seated|together)\b",
+            prefix,
+        ):
+            return True
+    return False
 
 
 def requirement_controls(brief, message, previous):
@@ -74,7 +86,7 @@ def requirement_controls(brief, message, previous):
         re.finditer(
             COUNT
             + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
-            + r"|\b(?:dining\s+)?(?:seating|room) for\s+"
+            + r"|\b(?:seating|dining room) for\s+"
             + COUNT,
             text,
         )
@@ -95,9 +107,7 @@ def requirement_controls(brief, message, previous):
                 )
         elif not re.match(r"\s+(?:per|for each)\b", text[match.end() :]):
             totals.add(value)
-    if re.search(
-        r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", text
-    ):
+    if requests_single_table(text):
         if split and "split_dining" in explicit:
             questions.append(
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
