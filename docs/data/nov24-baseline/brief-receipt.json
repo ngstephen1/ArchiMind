@@ -1,0 +1,351 @@
+{
+  "runtime_baseline": "c7e33364d2b148293b62ae26ad59375bdb1eb9ce",
+  "fixtures_sha256": "b807f9fe012965f590f19e9e60d1232181d3aea811ed87d204cb9b9ff68adb95",
+  "test_sha256": "5c31805ff700a1a517f492856a7188d6aa6131d64ecfa8e35b54a82f43d4c87d",
+  "python": "3.11.13",
+  "machine": "Darwin arm64",
+  "command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider -o junit_family=xunit1 -rxX --tb=short --junitxml=/tmp/archimind-nov24-briefs.xml tests/test_town_nov24_baseline.py",
+  "provider_mode": "typed fixture",
+  "external_provider_calls": 0,
+  "passed_cases": 10,
+  "known_gap_cases": 2,
+  "observations": [
+    {
+      "case": "compact",
+      "outcome": "supported",
+      "candidates": [
+        {
+          "candidate_sha256": "d51c982551622fc136e1701237554ab0517256b296acdc6ff01de442d3d76b1b",
+          "room_count": 5,
+          "lot_wd_m": [
+            12.0,
+            13.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {}
+        },
+        {
+          "candidate_sha256": "ccaad9deadaae02ffacb16e09f2e727224a314d5a82a6d61fca7d5e25176c1a6",
+          "room_count": 5,
+          "lot_wd_m": [
+            12.0,
+            13.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {}
+        }
+      ],
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 702,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "supported",
+      "verdict": "passed"
+    },
+    {
+      "case": "hosting",
+      "outcome": "supported",
+      "candidates": [
+        {
+          "candidate_sha256": "b1e3a5c91742fc5207d8e4db5b44592eddb2b2a9b24c62511b69900a27a923ad",
+          "room_count": 6,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {
+            "salon": 4,
+            "kitchen-dining": 4
+          },
+          "room_center_distance_m": 8.305
+        },
+        {
+          "candidate_sha256": "032593beb62cf26cb455940d92e5214ae5150af69693c1b24a5b1dd05664f9eb",
+          "room_count": 6,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {
+            "salon": 4,
+            "kitchen-dining": 4
+          },
+          "room_center_distance_m": 9.685
+        }
+      ],
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 800,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "supported",
+      "verdict": "passed"
+    },
+    {
+      "case": "separation",
+      "outcome": "supported",
+      "candidates": [
+        {
+          "candidate_sha256": "67777457ffea6421604e6570b160ea92be3cd1138b0195bea1947bf67cdb277e",
+          "room_count": 5,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {},
+          "room_center_distance_m": 12.846
+        },
+        {
+          "candidate_sha256": "db18c96a7dce20e48cc48da7a8138f7bac0d8ffac992c65f7c9991c8df579eac",
+          "room_count": 5,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {},
+          "room_center_distance_m": 8.405
+        }
+      ],
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 679,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "supported",
+      "verdict": "passed"
+    },
+    {
+      "case": "split-dining",
+      "outcome": "supported",
+      "candidates": [
+        {
+          "candidate_sha256": "5bcb61037489af2ecf9a0ed6e8ab98aa4031b5c27b4e2e946ad264d59fc5cc2b",
+          "room_count": 6,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {
+            "salon": 4,
+            "kitchen-dining": 4
+          },
+          "room_center_distance_m": 13.462
+        },
+        {
+          "candidate_sha256": "88b090d3da3bc254f0e4526987c23784a4a1f0f1d7782c7c8584930f476c0bdd",
+          "room_count": 6,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {
+            "salon": 4,
+            "kitchen-dining": 4
+          },
+          "room_center_distance_m": 10.025
+        }
+      ],
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 806,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "supported",
+      "verdict": "passed"
+    },
+    {
+      "case": "single-table",
+      "outcome": "unexpected_generation",
+      "candidate_sha256": [
+        "f3e04c5dbef0b815bd718c9cb8d2139af103cad72af1ccb10db727a4035faa10",
+        "534cc55eb874694f6f986cc4d15317c7ed3419ef70b9ecafcc5dde0b92a447f8"
+      ],
+      "expected_dining_seats": 6,
+      "applied_dining_seats": 0,
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 790,
+      "expected_outcome": "clarification",
+      "verdict": "baseline_gap",
+      "gap": "Seat six people at a single table can lose the six-seat requirement."
+    },
+    {
+      "case": "passage-conversion",
+      "outcome": "supported",
+      "candidates": [
+        {
+          "candidate_sha256": "07efb2cd95b78ac0b5489690178721e1084d0d372d129c5278c63f230372e547",
+          "room_count": 5,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.65,
+          "dining_places": {}
+        },
+        {
+          "candidate_sha256": "1a147a30450bbac5e1ba4ef32cff5f06e10ebec2b2298fb6c56f60b16a92aa43",
+          "room_count": 5,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.65,
+          "dining_places": {}
+        }
+      ],
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 623,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "supported",
+      "verdict": "passed"
+    },
+    {
+      "case": "width-conflict",
+      "outcome": "clarification",
+      "candidates": [],
+      "message": "Confirm one modeled passage width in both the brief and controls.",
+      "reviewed": {
+        "requirements": [
+          "Lot 15 × 16 m",
+          "0.6 m modeled passage"
+        ],
+        "preferences": [
+          "scandinavian"
+        ],
+        "presentation_requests": [],
+        "questions": [
+          "Confirm one modeled passage width in both the brief and controls."
+        ],
+        "unsupported": []
+      },
+      "interpreter_fixture_calls": 0,
+      "elapsed_ms": 0,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "clarification",
+      "verdict": "passed"
+    },
+    {
+      "case": "local-clearance",
+      "outcome": "abstention",
+      "candidates": [],
+      "message": "Unsupported requirements: 90 cm local sofa-to-wall clearance",
+      "reviewed": {
+        "requirements": [
+          "Lot 15 × 16 m",
+          "0.6 m modeled passage"
+        ],
+        "preferences": [
+          "scandinavian"
+        ],
+        "presentation_requests": [],
+        "questions": [],
+        "unsupported": [
+          "90 cm local sofa-to-wall clearance"
+        ]
+      },
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 0,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "abstention",
+      "verdict": "passed"
+    },
+    {
+      "case": "locked-bedroom",
+      "outcome": "supported",
+      "candidates": [
+        {
+          "candidate_sha256": "62058ccb7f973cb4f72ce8f93aef239959f650929ab9807ce11f3a31f4cb93b7",
+          "room_count": 6,
+          "lot_wd_m": [
+            15.0,
+            16.0
+          ],
+          "passage_m": 0.6,
+          "dining_places": {
+            "salon": 4,
+            "kitchen-dining": 4
+          },
+          "locked_placement_sha256": "d8d42173ed1b67cf87b09b2a2c4d2b597d185948e01580f13189b350fb237cac"
+        }
+      ],
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 330,
+      "input_sha256_before": "c9d129444a8e683069aed4a9978f8189686fa9512eb5b7c27ceb94fa71998f93",
+      "input_sha256_after": "681d24c4cd004198456ab7ba1ff9de551c405621bceb433ae89e2ac8de7af304",
+      "changed_locked_fields": [
+        "style"
+      ],
+      "expected_outcome": "supported",
+      "verdict": "baseline_gap",
+      "gap": "Locked geometry is preserved, but generation mutates the input room's presentation metadata."
+    },
+    {
+      "case": "ambiguous-desk",
+      "outcome": "clarification",
+      "candidates": [],
+      "message": "Clarify which room contains the furniture to lock.",
+      "reviewed": null,
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 0,
+      "input_sha256_before": "c9d129444a8e683069aed4a9978f8189686fa9512eb5b7c27ceb94fa71998f93",
+      "input_sha256_after": "c9d129444a8e683069aed4a9978f8189686fa9512eb5b7c27ceb94fa71998f93",
+      "changed_locked_fields": [],
+      "expected_outcome": "clarification",
+      "verdict": "passed"
+    },
+    {
+      "case": "second-storey",
+      "outcome": "abstention",
+      "candidates": [],
+      "message": "Unsupported requirements: second storey",
+      "reviewed": {
+        "requirements": [
+          "Lot 15 × 16 m",
+          "0.6 m modeled passage"
+        ],
+        "preferences": [
+          "scandinavian"
+        ],
+        "presentation_requests": [],
+        "questions": [],
+        "unsupported": [
+          "second storey"
+        ]
+      },
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 0,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "abstention",
+      "verdict": "passed"
+    },
+    {
+      "case": "tight-lot-exhausted",
+      "outcome": "abstention",
+      "candidates": [],
+      "message": "Search exhausted without a connected furnished home.",
+      "reviewed": null,
+      "interpreter_fixture_calls": 1,
+      "elapsed_ms": 802,
+      "input_sha256_before": null,
+      "input_sha256_after": null,
+      "changed_locked_fields": [],
+      "expected_outcome": "abstention",
+      "verdict": "passed"
+    }
+  ]
+}
