@@ -24,9 +24,9 @@ COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")"
 
 
 MEASUREMENT = r"(?<![\d.])(\d+(?:\.\d+)?|\.\d+)\s*(mm|cm|m)\b"
-PASSAGE = r"(?:passage|walkway|route|circulation)\b"
+PASSAGE = r"(?:passage|walkway|route|circulation)s?\b"
 WIDTH_PATTERNS = (
-    MEASUREMENT + r"\s+(?:clear\s+)?" + PASSAGE,
+    MEASUREMENT + r"\s+(?:(?:clear|wide)\s+)*" + PASSAGE,
     PASSAGE + r"\s+(?:width\s+)?(?:(?:of|at least|min(?:imum)?)\s+)?" + MEASUREMENT,
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
@@ -59,7 +59,7 @@ def requirement_controls(brief, message, previous):
         for match in re.finditer(
             COUNT
             + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
-            + r"(?!\s+(?:in|at|per|for each)\b)",
+            + r"(?!\s+(?:per|for each|(?:in|at)(?!\s+(?:total|one table|a single table)\b))\b)",
             text,
         )
     }

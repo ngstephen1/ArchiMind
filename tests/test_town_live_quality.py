@@ -110,7 +110,13 @@ def test_saved_constraints_are_inherited_only_when_omitted():
 
 @pytest.mark.parametrize(
     "phrase",
-    [".9 m clear passage", "passage at least 90 cm wide", "900 mm circulation"],
+    [
+        ".9 m clear passage",
+        "passage at least 90 cm wide",
+        "900 mm circulation",
+        "90 cm wide passage",
+        "passages at least 90 cm wide",
+    ],
 )
 def test_passage_with_leading_decimal_or_unit_and_local_seats(phrase):
     brief, questions = requirement_controls(
@@ -120,6 +126,21 @@ def test_passage_with_leading_decimal_or_unit_and_local_seats(phrase):
     )
     assert not questions
     assert (brief.dining_seats, brief.passage_m) == (6, 0.9)
+
+
+@pytest.mark.parametrize(
+    ("phrase", "seats"),
+    [
+        ("Six seats in total.", 6),
+        ("Six places at one table.", 6),
+        ("Four seats in salon and two seats in kitchen.", 0),
+        ("Four places per table.", 0),
+    ],
+)
+def test_total_seats_differ_from_per_room_counts(phrase, seats):
+    brief, questions = requirement_controls(Brief(), phrase, None)
+    assert not questions
+    assert brief.dining_seats == seats
 
 
 def test_conflicting_control_needs_confirmation():
