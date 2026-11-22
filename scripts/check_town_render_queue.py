@@ -18,6 +18,7 @@ from archimind.town.design import digest, validate_home
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURES = ROOT / "docs/data/live-quality-proof"
 OWNER = "local-designer"
+BLENDER_PHASE = "Rendering the Cycles proof"
 
 
 def seed():
@@ -93,10 +94,10 @@ def check(url, output):
             response = result.value
             assert response.ok
             admitted = response.json()
-            assert admitted["state"] in {"queued", "running"}, admitted
+            assert admitted["state"] == "queued", admitted
             observe(admitted["state"], revision=revision, phase=admitted["phase"])
 
-        def wait_capture(revision, expected, timeout=1200):
+        def wait_capture(revision, expected, *, phase=None, timeout=1800):
             deadline = time.monotonic() + timeout
             previous = None
             while time.monotonic() < deadline:
@@ -105,8 +106,10 @@ def check(url, output):
                 if current != previous:
                     observe(current[0], revision=revision, phase=current[1])
                     previous = current
-                if current[0] == expected:
+                if current[0] == expected and (phase is None or current[1] == phase):
                     return proof
+                if expected == "running":
+                    assert current[0] != "ready", "Blender completed before overlap"
                 assert current[0] != "failed", proof
                 time.sleep(2)
             raise TimeoutError(f"Revision {revision} did not reach {expected}")
@@ -123,30 +126,38 @@ def check(url, output):
         observe("failed", revision=1, obstacle="isolated cache path was a file")
         cache.unlink()
         queue(1)
-        wait_capture(1, "running", timeout=30)
+        wait_capture(1, "running", phase=BLENDER_PHASE, timeout=150)
         page.get_by_role("button", name="Close presentation").click()
         page.locator("#tour").click()
         page.locator("#door").click()
         page.locator("#roomJump").select_option("bedroom")
-        assert state(1)["proof"]["state"] == "running"
+        expect(page.locator("#roomJump")).to_have_value("bedroom")
+        assert state(1)["proof"] == {"state": "running", "phase": BLENDER_PHASE}
         page.screenshot(path=output / "walk-during-proof.png")
-        observe("walkthrough-during-render", revision=1)
+        assert state(1)["proof"] == {"state": "running", "phase": BLENDER_PHASE}
+        observe("walkthrough-during-render", revision=1, phase=BLENDER_PHASE)
+        page.locator("#present").click()
+        expect(page.locator("#boardSource")).to_contain_text("Saved revision 1")
 
         for revision in (1, 2):
             if revision == 2:
                 open_board(2)
                 assert state(2)["proof"]["state"] == "idle"
                 assert state(1)["proof"] == proofs["1"]
-                assert not page.request.get(
-                    f"{endpoint}/proof/manifest.json?revision=2"
-                ).ok
+                assert (
+                    page.request.get(
+                        f"{endpoint}/proof/manifest.json?revision=2"
+                    ).status
+                    == 404
+                )
+                observe("revision-isolated-before-render", revision=2, stage="proof")
                 queue(2)
             proof = wait_capture(revision, "ready")
             proofs[str(revision)] = proof
-            open_board(revision)
             expect(page.locator("#renderDownloads")).to_contain_text(
-                "Proof · bedroom-doorway.png"
+                "Proof · bedroom-doorway.png", timeout=25000
             )
+            observe("ready-links-without-reload", revision=revision)
             expect(page.locator("#renderProof")).to_be_disabled()
             page.locator("#renderPanel").screenshot(
                 path=output / f"proof-ready-r{revision}.png"
@@ -176,9 +187,7 @@ def check(url, output):
             assert reused.ok and reused.json() == proof
             assert cache_logs == {p: p.read_bytes() for p in cache.glob("*/proof.log")}
             assert len(cache_logs) == revision
-            for index, (_, data) in enumerate(sorted(cache_logs.items()), 1):
-                (output / f"worker-proof-{index}.log").write_bytes(data)
-            assert all(b"Blender" in log for log in cache_logs.values())
+            assert all(b"Blender 5.1.2" in log for log in cache_logs.values())
             observe("cache-reused", revision=revision, files=proof["files"])
         assert (
             proofs["1"]["files"]["manifest.json"]

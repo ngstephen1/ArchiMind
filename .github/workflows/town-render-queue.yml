@@ -4,6 +4,14 @@ on:
     paths:
       - .github/workflows/town-render-queue.yml
       - scripts/check_town_render_queue.py
+      - scripts/render_studio*.py
+      - scripts/studio_*.py
+      - src/archimind/town/**
+      - frontend/realistic_viewer/town/**
+      - frontend/realistic_viewer/package*.json
+      - docs/data/live-quality-proof/live-*.json
+      - services/town/requirements.txt
+      - pyproject.toml
   workflow_dispatch:
 
 permissions:
@@ -11,12 +19,13 @@ permissions:
 
 concurrency:
   group: town-render-queue-${{ github.ref }}
-  cancel-in-progress: true
+  # Let an in-flight proof finish so the runner can publish its diagnostics.
+  cancel-in-progress: false
 
 jobs:
   render-queue:
     runs-on: ubuntu-24.04
-    timeout-minutes: 50
+    timeout-minutes: 70
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -56,6 +65,15 @@ jobs:
           trap 'kill "$api" 2>/dev/null || true' EXIT
           curl --retry 10 --retry-delay 1 --retry-connrefused -fsS http://127.0.0.1:8790/health
           python scripts/check_town_render_queue.py --output "$output"
+      - name: Preserve Blender logs
+        if: always()
+        run: |
+          cache="$RUNNER_TEMP/town-queue/town-renders"
+          if test -d "$cache"; then
+            mkdir -p "$RUNNER_TEMP/town-queue-evidence/worker-logs"
+            cd "$cache"
+            find . -name proof.log -type f -exec cp --parents {} "$RUNNER_TEMP/town-queue-evidence/worker-logs/" \;
+          fi
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
         with:
