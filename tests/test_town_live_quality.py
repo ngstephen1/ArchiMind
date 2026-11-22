@@ -118,6 +118,7 @@ def test_saved_constraints_are_inherited_only_when_omitted():
         "passages at least 90 cm wide",
         "Keep the passage at least 90 cm",
         "90 cm clear route",
+        "90 cm wide clear route",
     ],
 )
 def test_passage_with_leading_decimal_or_unit_and_local_seats(phrase):
@@ -147,7 +148,9 @@ def test_total_seats_differ_from_per_room_counts(phrase, seats):
 
 def test_route_length_does_not_override_clear_passage_width():
     brief, questions = requirement_controls(
-        Brief(), "I prefer routes 8 m or shorter, with a 90 cm clear passage.", None
+        Brief(),
+        "I prefer routes 8 m or shorter, with a 90 cm clear passage. Place the passage at least 1.2 m from the bedroom.",
+        None,
     )
     assert brief.passage_m == 0.9
     assert not questions
@@ -175,7 +178,8 @@ def test_single_table_and_room_specific_seating_remain_hard_requirements():
     [
         ("Design a home with room for two residents and four dinner guests.", 6),
         ("Leave room for two desks.", 0),
-        ("Seat four people at one table and two at the other.", 0),
+        ("Seat four people at one table and two at the other.", 6),
+        ("Include a formal salon with room for six diners.", 6),
         ("Do not seat everyone at one table.", 0),
     ],
 )

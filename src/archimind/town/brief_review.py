@@ -29,13 +29,13 @@ PATH = r"(?:passages?|walkways?|routes?|circulation)\b"
 MINIMUM = r"(?:of|at least|min(?:imum)?)\s+"
 WIDTH_PATTERNS = (
     MEASUREMENT + r"\s+(?:(?:clear|wide)\s+){0,2}" + PASSAGE,
-    MEASUREMENT + r"\s+(?:clear|wide)\s+routes?\b",
+    MEASUREMENT + r"\s+(?:clear\s+(?:wide\s+)?|wide\s+(?:clear\s+)?)routes?\b",
     PATH + r"\s+width\s+(?:" + MINIMUM + r")?" + MEASUREMENT,
     PATH + r"\s+(?:" + MINIMUM + r")?" + MEASUREMENT + r"\s+wide\b",
     PASSAGE
     + r"\s+(?:at least|min(?:imum)?)\s+"
     + MEASUREMENT
-    + r"(?!\s+(?:long|in length|or shorter)\b)",
+    + r"(?!\s+(?:long|in length|or shorter|(?:away\s+)?from|between|past)\b)",
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 
@@ -87,14 +87,17 @@ def requirement_controls(brief, message, previous):
             COUNT
             + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
             + r"|\b(?:seating|dining room) for\s+"
-            + COUNT,
+            + COUNT
+            + r"|\broom for\s+"
+            + COUNT
+            + r"\s+diners?\b",
             text,
         )
     )
     totals = set()
     questions = []
     for match in seat_phrases:
-        value = count(match[1] or match[2])
+        value = count(next(group for group in match.groups() if group is not None))
         location = re.match(
             r"\s+(?:in|at)\s+(?:the\s+)?(formal salon|salon|kitchen(?:[- ]dining)?)\b",
             text[match.end() :],
@@ -107,6 +110,21 @@ def requirement_controls(brief, message, previous):
                 )
         elif not re.match(r"\s+(?:per|for each)\b", text[match.end() :]):
             totals.add(value)
+    split_counts = re.search(
+        COUNT
+        + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) one table"
+        + r"\s+and\s+"
+        + COUNT
+        + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) (?:the )?(?:other|second)(?: table)?\b",
+        text,
+    )
+    if split_counts:
+        per_table = [count(value) for value in split_counts.groups()]
+        totals.add(sum(per_table))
+        if max(per_table) > 4:
+            questions.append(
+                "Each modeled table has four places. Revise the requested split."
+            )
     if requests_single_table(text):
         if split and "split_dining" in explicit:
             questions.append(
