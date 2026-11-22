@@ -9,7 +9,7 @@ import re
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from shapely.geometry import Point, box
+from shapely.geometry import LineString, Point, box
 from shapely.ops import unary_union
 
 from archimind.assets import furniture_from_planning_envelope
@@ -88,6 +88,10 @@ class Brief(BaseModel):
     style: StyleId = DEFAULT_STYLE
     room_goals: list[RoomGoal] = Field(default_factory=list, max_length=4)
     formal_salon: bool = False
+    compare_tradeoffs: bool = False
+    dining_seats: int = Field(default=0, ge=0, le=100)
+    split_dining: bool = False
+    passage_m: float = Field(default=0.6, ge=0.6, le=2)
     seed: int = Field(default=42, ge=0, le=1000000)
     shift_bedroom_chair: bool = False
     closer_study_desk: bool = False
@@ -121,6 +125,10 @@ def apply_style(home, style):
         designer |= set(part.get("designer_collection", {}))
         designer.add("belaya")  # Town renders this reserved product or its fallback.
         part["style"] = style_payload(design, pack, seed, designer_ids=designer)
+        if home.get("presentation_detail") and design.room.id in ("salon", "bedroom"):
+            for item in part["style"]["dressing"]:
+                if item["kind"] in ("plant", "curtain"):
+                    item["refined"] = True
     return home
 
 
@@ -257,13 +265,16 @@ def opening(wall, offset, name):
     return Door(id=name, wall=wall, offset_m=offset, width_m=1.1, height_m=2.15)
 
 
-def validate_home(home):
+def validate_home(home, *, passage_m=None, measure=False):
     """Verify coverage, portal pairing and connectivity in furnished free space."""
+    recorded = home.get("evidence", {}).get("comparison", {}).get("passage_m", 0.6)
+    passage_m = max(recorded, passage_m if passage_m is not None else 0.6)
     width, depth = home["width"], home["depth"]
     hall = home["hall"]
     areas = [box(hall, 0, hall + 1.6, depth)]
     solids = []
-    targets = []
+    targets = {}
+    openings = {}
     kinds = []
     for part in home["rooms"]:
         d = RoomDesign.model_validate(part["design"])
@@ -323,7 +334,13 @@ def validate_home(home):
             solids.append(
                 box(x + f.x_m, y + f.y_m, x + f.x_m + f.width_m, y + f.y_m + f.depth_m)
             )
-        targets.append(Point(seam + (0.7 if west else -0.7), low + door.width_m / 2))
+        if home.get("presentation_detail"):
+            for row in part.get("style", {}).get("dressing", []):
+                if row["kind"] in {"plant", "floor_lamp", "accent"}:
+                    px, py = x + row["x_m"], y + row["y_m"]
+                    solids.append(box(px, py, px + row["width_m"], py + row["depth_m"]))
+        targets[r.id] = (seam + (0.7 if west else -0.7), low + door.width_m / 2)
+        openings[r.id] = door.width_m
     shell = box(0, 0, width, depth)
     coverage = unary_union(areas)
     if (
@@ -332,11 +349,55 @@ def validate_home(home):
         or sum(a.area for a in areas) - coverage.area > 1e-5
     ):
         raise ValueError("Room partitions must tile the lot.")
-    free = shell.buffer(-0.3).difference(unary_union(solids).buffer(0.3))
-    entry = Point(hall + 0.8, 0.4)
+    radius = passage_m / 2
+    free = shell.buffer(-radius).difference(unary_union(solids).buffer(radius))
+    entry = Point(hall + 0.8, max(0.4, radius + 0.001))
     regions = getattr(free, "geoms", [free])
-    if not any(g.covers(entry) and all(g.covers(t) for t in targets) for g in regions):
-        raise ValueError("Entrance cannot reach every furnished room.")
+    if not any(
+        g.covers(entry) and all(g.covers(Point(t)) for t in targets.values())
+        for g in regions
+    ):
+        raise ValueError(
+            f"Entrance cannot reach every furnished room at {passage_m:g} m passage width."
+        )
+    if measure:
+        routes = []
+        for a, b in (
+            ("study", "living"),
+            ("kitchen-dining", "salon"),
+            ("bedroom", "bathroom"),
+        ):
+            if a not in targets or b not in targets:
+                continue
+            first, last = targets[a], targets[b]
+            route = LineString(
+                (first, (hall + 0.8, first[1]), (hall + 0.8, last[1]), last)
+            )
+            if free.covers(route):
+                routes.append(dict(room=a, target=b, distance_m=round(route.length, 3)))
+        seats = {
+            part["design"]["room"]["id"]: 4
+            for part in home["rooms"]
+            if any(
+                f["id"] in ("salon-dining", "breakfast-suite")
+                for f in part["design"]["furniture"]
+            )
+        }
+        return dict(
+            routes=routes,
+            modeled_openings_m=openings,
+            dining_places=seats,
+            passage_m=passage_m,
+        )
+    return None
+
+
+def refresh_geometry_evidence(home):
+    """Recheck carried constraints and refresh measurements after an edit."""
+    comparison = home["evidence"].get("comparison")
+    measurements = validate_home(home, measure=comparison is not None)
+    if comparison is not None:
+        comparison.update(measurements)
 
 
 def dress_bedroom(design):
@@ -400,10 +461,11 @@ def revise_bedroom_chair(brief, previous):
             continue
         chair["x_m"] = x
         try:
-            validate_home(home)
+            validate_home(home, passage_m=brief.passage_m)
         except ValueError:
             continue
         apply_style(home, brief.style)
+        refresh_geometry_evidence(home)
         home["evidence"]["chair_move_m"] = {
             "from_x": before,
             "to_x": x,
@@ -459,10 +521,11 @@ def revise_study_desk(brief, previous):
             break
         desk.update(x_m=x, y_m=y)
         try:
-            validate_home(home)
+            validate_home(home, passage_m=brief.passage_m)
         except ValueError:
             continue
         apply_style(home, brief.style)
+        refresh_geometry_evidence(home)
         home["evidence"]["study_desk_window_center_distance_m"] = {
             "before": before,
             "after": after,
@@ -497,6 +560,15 @@ def generate(brief, previous=None, *, on_progress=None):
             raise ValueError(
                 "Add the salon in a separate layout revision before moving furniture."
             )
+        carried = (previous or {}).get("evidence", {}).get("comparison", {})
+        if (
+            brief.dining_seats != carried.get("required_dining_seats", 0)
+            or brief.split_dining != carried.get("split_dining", False)
+            or brief.passage_m != carried.get("passage_m", 0.6)
+        ):
+            raise ValueError(
+                "Confirm new seating or circulation requirements in a separate design run before moving furniture."
+            )
         home = (
             revise_bedroom_chair if brief.shift_bedroom_chair else revise_study_desk
         )(brief, previous)
@@ -520,8 +592,24 @@ def generate(brief, previous=None, *, on_progress=None):
         and not any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
     ):
         raise ValueError("Adding a salon requires repartitioning. Unlock rooms first.")
+    if brief.dining_seats and (
+        not salon or brief.dining_seats > (8 if brief.split_dining else 4)
+    ):
+        raise ValueError(
+            "Dining requires up to four places at one table, or up to eight across the two dining rooms after explicit confirmation. Review the seating requirement."
+        )
     if not salon and any("salon" in pair for pair in pairs):
         raise ValueError("Include a formal salon before requesting its placement.")
+    previous_comparison = (previous or {}).get("evidence", {}).get("comparison")
+    presentation_detail = brief.compare_tradeoffs or (previous or {}).get(
+        "presentation_detail"
+    )
+    measure = (
+        brief.compare_tradeoffs
+        or previous_comparison is not None
+        or brief.dining_seats > 0
+        or brief.passage_m != 0.6
+    )
     candidates = []
     for attempt in range(8):
         rng = random.Random(brief.seed + 7919 * attempt)
@@ -661,12 +749,17 @@ def generate(brief, previous=None, *, on_progress=None):
             depth=brief.depth,
             hall=hall,
             rooms=rooms,
+            **(
+                {"presentation_detail": "bedroom-salon-v1"}
+                if presentation_detail
+                else {}
+            ),
         )
         apply_style(home, brief.style)
         if len(rooms) != len(PROGRAM) + int(salon):
             continue
         try:
-            validate_home(home)
+            measures = validate_home(home, passage_m=brief.passage_m, measure=measure)
         except ValueError:
             continue
         bedroom = next(p for p in rooms if p["design"]["room"]["id"] == "bedroom")
@@ -678,6 +771,10 @@ def generate(brief, previous=None, *, on_progress=None):
                 p for p in rooms if p["design"]["room"]["id"] == "study"
             )["design"]["room"]["windows"][0]["width_m"],
         }
+        if measures:
+            home["evidence"]["comparison"] = measures
+            measures["required_dining_seats"] = brief.dining_seats
+            measures["split_dining"] = brief.split_dining
         if salon:
             home["evidence"]["salon"] = {
                 "dining_places": 4,
@@ -705,9 +802,9 @@ def generate(brief, previous=None, *, on_progress=None):
         home["id"] = digest(home)
         if home not in candidates:
             candidates.append(home)
-            if on_progress and not pairs:
+            if on_progress and not pairs and not brief.compare_tradeoffs:
                 on_progress("Furnished candidate", home)
-        if not pairs and len(candidates) == 2:
+        if not pairs and not brief.compare_tradeoffs and len(candidates) == 2:
             break
     if not candidates:
         if salon:
@@ -717,17 +814,22 @@ def generate(brief, previous=None, *, on_progress=None):
         raise ValueError("Search exhausted without a connected furnished home.")
     if "quiet bedroom" in brief.priority:
         candidates.sort(key=lambda c: -c["evidence"]["bedroom_center_from_front_m"])
-    if pairs:
+    if pairs or brief.compare_tradeoffs:
 
         def cost(candidate):
             return sum(
                 row["center_distance_m"] * (1 if row["relation"] == "near" else -1)
-                for row in candidate["evidence"]["room_preferences"]
+                for row in candidate["evidence"].get("room_preferences", [])
             )
 
         evaluated = len(candidates)
         candidates.sort(key=cost)
-        candidates = candidates[:2]
+        if brief.compare_tradeoffs:
+            primary = candidates[0]
+            alternate = choose_tradeoff(primary, candidates[1:])
+            candidates = [primary, alternate] if alternate else [primary]
+        else:
+            candidates = candidates[:2]
         if on_progress:
             on_progress(
                 "Compared room placements",
@@ -740,3 +842,36 @@ def generate(brief, previous=None, *, on_progress=None):
             for candidate in candidates:
                 on_progress("Furnished candidate", candidate)
     return candidates
+
+
+def choose_tradeoff(primary, peers):
+    """Prefer a reversed route trade-off, then a measurable difference in routes."""
+
+    def routes(home):
+        return {
+            (r["room"], r["target"]): r["distance_m"]
+            for r in home["evidence"]["comparison"]["routes"]
+        }
+
+    baseline = routes(primary)
+    winner, strongest = None, (False, 0.0)
+    for other in peers:
+        distances = routes(other)
+        common = baseline.keys() & distances.keys()
+        deltas = [distances[key] - baseline[key] for key in sorted(common)]
+        # Longer study separation and shorter service/night routes are alternative
+        # preferences rather than global requirements.
+        gains = [
+            distances[key] - baseline[key]
+            if key == ("study", "living")
+            else baseline[key] - distances[key]
+            for key in sorted(common)
+        ]
+        contrast = (
+            any(x >= 0.5 for x in gains) and any(x <= -0.5 for x in gains),
+            max((abs(x) for x in deltas), default=0.0),
+        )
+        if contrast[1] >= 0.5 and contrast > strongest:
+            winner, strongest = other, contrast
+    # Locked shells have fixed routes, but furniture preview remains available.
+    return winner

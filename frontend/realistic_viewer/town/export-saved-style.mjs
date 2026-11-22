@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { buildDressing } from "../src/dressing.js";
+import { buildTownDressing } from "./dressing_detail.js";
 import { dressFurniture } from "../src/pack_furniture.js";
 import { loadStylePack } from "../src/style_pack.js";
 import { manifestText } from "./bedroom_manifest.js";
@@ -85,7 +85,7 @@ for (const part of snapshot.home.rooms) {
     throw Error("Room pack differs from the saved home.");
   const holder = new THREE.Group();
   holder.position.set(...dressingOrigin(part));
-  const dressing = buildDressing(holder, part.style.dressing, pack, "high");
+  const dressing = buildTownDressing(holder, part.style.dressing, pack, "high");
   if ((await dressing.ready).length)
     throw Error("Saved dressing failed to resolve.");
   const tagged = new Map();

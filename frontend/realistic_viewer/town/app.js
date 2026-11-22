@@ -6,7 +6,7 @@ import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
-import { asksChairChange, explanation } from "./explanation.js";
+import { asksChairChange, explanation, isSavedDesignQuestion } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
@@ -30,6 +30,7 @@ let project = url.searchParams.get("project"),
   revision = 0,
   applied = showcase,
   job = null,
+  reviewedMessage = "",
   alternatives = [],
   selected = 0,
   chairPreview = null,
@@ -136,6 +137,11 @@ function sync(data) {
   el("width").value = applied.width;
   el("depth").value = applied.depth;
   el("style").value = homeStyle(applied);
+  el("formalSalon").checked = applied.rooms.some(part => part.design.room.id === "salon");
+  const requirements = applied.evidence?.comparison;
+  el("diningSeats").value = requirements?.required_dining_seats ?? 0;
+  el("splitDining").checked = requirements?.split_dining ?? false;
+  el("passage").value = requirements?.passage_m ?? 0.6;
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
   url.searchParams.set("project", project);
@@ -243,6 +249,7 @@ function draw() {
   const h = alternatives[selected];
   planOf(h, el("plan"));
   evidence(h);
+  showComparison();
 }
 function planOf(h, c) {
   floorPlan(h, c, planColors(h, PACK_MANIFESTS[h.style_pack?.id] || null));
@@ -294,6 +301,50 @@ function evidence(h) {
     b.setAttribute("aria-pressed", String(i === selected)),
   );
 }
+function showComparison() {
+  const area = el("comparisonMeasures");
+  area.replaceChildren();
+  for (const [index, home] of alternatives.entries()) {
+    const measure = home.evidence.comparison;
+    if (!measure) continue;
+    area.append(node("h4", "Layout " + String.fromCharCode(65 + index)));
+    const list = node("ul", "");
+    for (const route of measure.routes)
+      list.append(node("li", `${route.room} to ${route.target} via hall · ${route.distance_m.toFixed(2)} m`));
+    for (const [room, count] of Object.entries(measure.dining_places))
+      list.append(node("li", `${room} · ${count} seats at one table`));
+    const opening = Math.min(...Object.values(measure.modeled_openings_m));
+    list.append(node("li", `Narrowest modeled doorway ${opening.toFixed(2)} m · checked passage ${measure.passage_m.toFixed(2)} m`));
+    area.append(list);
+  }
+  if (area.children.length)
+    area.append(node("p", "Routes run between points inside the doorways. Check clear opening and door hardware on site."));
+  const items = node("details", "");
+  items.append(node("summary", "Selected furniture reservations"));
+  const list = node("ul", "");
+  for (const { design } of alternatives[selected].rooms)
+    for (const f of design.furniture)
+      list.append(node("li", `${design.room.name} · ${f.name} · ${f.width_m.toFixed(2)} × ${f.depth_m.toFixed(2)} m`));
+  items.append(list);
+  area.append(items);
+}
+function showBrief(summary) {
+  const panel = el("reviewBrief");
+  panel.hidden = false;
+  panel.replaceChildren(node("h3", "Review the design brief"));
+  for (const [title, values] of [
+    ["Requirements", summary.requirements], ["Preferences", summary.preferences],
+    ["Presentation requests", summary.presentation_requests || []],
+    ["Questions", summary.questions], ["Unsupported requirements", summary.unsupported],
+  ]) {
+    if (!values.length) continue;
+    panel.append(node("h4", title));
+    const list = node("ul", "");
+    values.forEach(value => list.append(node("li", value)));
+    panel.append(list);
+  }
+}
+
 function showTradeoff() {
   const goals = competingGoals(alternatives);
   el("tradeoff").hidden = goals.length === 0;
@@ -334,6 +385,14 @@ function show() {
   draw();
 }
 bind("generate", async () => {
+  const question = el("message").value.trim();
+  if (revision && isSavedDesignQuestion(question)) {
+    el("panel").close();
+    await askSavedDesign(question);
+    return;
+  }
+  if (!el("diningSeats").reportValidity() || !el("passage").reportValidity()) return;
+  el("reviewBrief").hidden = true;
   resetChairPreview();
   if (!local && !cfg.supabase)
     throw Error("Public tour only. Design service is not configured.");
@@ -365,6 +424,10 @@ bind("generate", async () => {
         priority: el("priority").value,
         style: el("style").value,
         formal_salon: el("formalSalon").checked,
+        compare_tradeoffs: true,
+        ...(revision || Number(el("diningSeats").value) > 0 ? { dining_seats: Number(el("diningSeats").value) } : {}),
+        split_dining: el("splitDining").checked,
+        ...(revision || Number(el("passage").value) !== 0.6 ? { passage_m: Number(el("passage").value) } : {}),
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
         ),
@@ -435,13 +498,17 @@ async function watch(id) {
       history.push(...feed.events);
       el("runPrompt").textContent = feed.message || "Measured design brief";
       timeline(el("agentCards"), history, feed.status);
-      feed.events.forEach(showWorkingPlan);
+      for (const event of feed.events) {
+        if (event.task === "Reviewable brief") showBrief(event.artifact);
+        showWorkingPlan(event);
+      }
       if (["ready", "failed", "cancelled"].includes(feed.status)) {
         const result = await api("/jobs/" + id);
         if (job !== id) return;
         enableReplay(history, feed.status);
         if (result.status === "ready") {
           alternatives = result.result;
+          reviewedMessage = feed.message;
           show();
           const missingCritique = history.some(e => e.task === "OpenAI · Review plan images" && e.state === "failed");
           notify(missingCritique
@@ -475,13 +542,20 @@ bind("visit", () => {
   el("panel").close();
 });
 bind("apply", async () => {
+  const followup = reviewedMessage.match(/\b(why|explain)\b[^.!?]*/i)?.[0];
   sync(await api("/jobs/" + job + "/apply", { index: selected }));
   el("alternatives").hidden = true;
   notify("Applied revision " + revision + ".");
   world.visit();
   el("door").click();
   el("panel").close();
+  if (followup) await askSavedDesign(followup);
 });
+async function askSavedDesign(question) {
+  await el("present").onclick();
+  el("whyQuery").value = question;
+  await el("askWhy").onclick();
+}
 bind("undo", async () => {
   sync(await api("/projects/" + project + "/undo", { base: revision }));
   el("alternatives").hidden = true;
@@ -615,6 +689,63 @@ el("jumpDownloads").onclick = () => {
   const target = el("studioBookLink") || el("boardExports").querySelector("a");
   target?.focus();
 };
+let renderWatch = 0;
+function renderEndpoint() {
+  return "/projects/" + encodeURIComponent(project) + "/render";
+}
+function watchRender() {
+  const epoch = ++renderWatch;
+  const panel = el("renderPanel");
+  panel.hidden = !local || !revision;
+  if (panel.hidden) return;
+  const endpoint = renderEndpoint();
+  const query = "?revision=" + revision;
+  const statusText = el("renderStatus");
+  el("renderDownloads").replaceChildren();
+  el("renderHD").hidden = true;
+  el("renderProof").disabled = false;
+  statusText.textContent = "Checking the local rendering service.";
+  async function poll() {
+    try {
+      const values = await api(endpoint + query);
+      if (epoch !== renderWatch || !el("board").open) return;
+      const { proof, hd } = values;
+      el("renderProof").disabled = ["queued", "running", "ready"].includes(proof.state);
+      el("renderHD").hidden = proof.state !== "ready";
+      el("renderHD").disabled = ["queued", "running", "ready", "blocked"].includes(hd.state);
+      statusText.textContent = hd.phase || proof.phase || "Ready to queue a proof.";
+      el("renderDownloads").replaceChildren();
+      for (const stage of ["proof", "hd"]) {
+        for (const name of Object.keys(values[stage].files || {})) {
+          const link = node("a", `${stage === "proof" ? "Proof" : "HD"} · ${name}`);
+          link.href = cfg.api + endpoint + "/" + stage + "/" + encodeURIComponent(name) + query;
+          link.download = name;
+          el("renderDownloads").append(link, document.createElement("br"));
+        }
+      }
+      if ([proof.state, hd.state].some(s => ["queued", "running"].includes(s))) setTimeout(poll, 1600);
+    } catch (error) {
+      if (epoch !== renderWatch || !el("board").open) return;
+      statusText.textContent = error.message;
+      el("renderProof").disabled = true;
+    }
+  }
+  for (const [id, stage] of [["renderProof", "proof"], ["renderHD", "hd"]]) {
+    el(id).onclick = async () => {
+      try {
+        el(id).disabled = true;
+        await api(endpoint + query, { stage });
+        if (epoch === renderWatch) await poll();
+      } catch (error) {
+        if (epoch === renderWatch) {
+          statusText.textContent = error.message;
+          el(id).disabled = false;
+        }
+      }
+    };
+  }
+  void poll();
+}
 let boardGeneration = 0;
 el("present").onclick = async () => {
   el("jumpDownloads").hidden = true;
@@ -644,6 +775,7 @@ el("present").onclick = async () => {
     " m · " +
     h.id.slice(0, 12);
   el("board").showModal();
+  watchRender();
   planOf(h, el("boardPlan"));
   el("schedule").replaceChildren();
   el("swatches").replaceChildren();

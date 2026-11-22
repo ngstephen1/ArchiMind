@@ -16,7 +16,15 @@ from archimind.studio.contracts import StudioError
 from archimind.style_packs import LEGACY_PALETTE_TO_STYLE, all_packs, load_pack
 
 from . import design_review
-from .design import PROGRAM, apply_style, digest, generate, style_clause, validate_home
+from .design import (
+    PROGRAM,
+    apply_style,
+    digest,
+    generate,
+    refresh_geometry_evidence,
+    style_clause,
+    validate_home,
+)
 
 ROLES = {
     "A": "Brief and constraints",
@@ -172,6 +180,15 @@ def coordinate(req, previous, interpret, emit):
             and not brief.room_goals
             and brief.priority == "balanced"
             and not brief.closer_study_desk
+            and not brief.shift_bedroom_chair
+            and brief.dining_seats
+            == previous["evidence"]
+            .get("comparison", {})
+            .get("required_dining_seats", 0)
+            and brief.passage_m
+            == previous["evidence"].get("comparison", {}).get("passage_m", 0.6)
+            and brief.split_dining
+            == previous["evidence"].get("comparison", {}).get("split_dining", False)
             and (
                 not brief.formal_salon
                 or any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
@@ -180,6 +197,7 @@ def coordinate(req, previous, interpret, emit):
         if style_only:
             home = copy.deepcopy(previous)
             apply_style(home, brief.style)
+            refresh_geometry_evidence(home)
             home.pop("id")
             home["id"] = digest(home)
             emit("C", "skipped", "Style edit preserves geometry", {})

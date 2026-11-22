@@ -21,7 +21,7 @@ import { isSoftwareRenderer, browserTier, createComposer } from "../src/render_q
 import { loadDesignerChair, loadBedroomConcept } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
-import { buildDressing } from "../src/dressing.js";
+import { buildTownDressing } from "./dressing_detail.js";
 import { createPlanSweep } from "../src/plan_sweep.js";
 import { dressFurniture, furnitureFallbackText } from "../src/pack_furniture.js";
 import { FLOOR_SLAB, dressingOrigin } from "./floor.js";
@@ -468,7 +468,7 @@ export function createTown(canvas, status, action) {
       const holder = new T.Group();
       holder.position.set(...dressingOrigin(part));
       interior.add(holder);
-      const dressing = buildDressing(holder, part.style.dressing, pack, packTier);
+      const dressing = buildTownDressing(holder, part.style.dressing, pack, packTier);
       decor.push({ holder, handle: dressing });
       ready.push(dressing.ready);
       if (Array.isArray(part.style.bindings)) {
@@ -992,6 +992,7 @@ export function createTown(canvas, status, action) {
           continue;
         }
         if (f.id === "queen-bed") {
+          if (!h.presentation_detail || !part.style?.dressing?.some(item => item.kind === "rug")) {
           const left = Math.max(0.06, f.x_m - 0.58),
             right = Math.min(r.width_m - 0.06, f.x_m + w + 0.58);
           const front = Math.max(0.06, f.y_m - 0.55),
@@ -1018,6 +1019,7 @@ export function createTown(canvas, status, action) {
               0.032,
               "#795d4b",
             );
+          }
           const fallback = queenBed(f);
           group.add(fallback);
           replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f, () => {

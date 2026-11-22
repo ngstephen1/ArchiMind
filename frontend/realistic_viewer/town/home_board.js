@@ -21,6 +21,7 @@ export function homeBoard(snapshot) {
     depth: snapshot.home.depth,
     hall: snapshot.home.hall,
     finishes: studioFinishes,
+    ...(snapshot.home.presentation_detail ? { presentation_detail: snapshot.home.presentation_detail } : {}),
     bedroom,
     rooms: snapshot.home.rooms.map((part) => {
       const { room, furniture } = part.design;

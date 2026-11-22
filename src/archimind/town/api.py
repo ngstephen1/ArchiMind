@@ -12,11 +12,11 @@ from pydantic import ValidationError
 from starlette.applications import Starlette
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from starlette.responses import JSONResponse
+from starlette.responses import FileResponse, JSONResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
-from . import designer_chair
+from . import designer_chair, render_queue
 from . import service as db
 
 
@@ -55,6 +55,26 @@ def handle(request, data):
         return db.create(owner)
     if path == ["jobs"] and request.method == "POST":
         return db.enqueue(owner, db.Request.model_validate(data))
+    if len(path) >= 3 and path[0] == "projects" and path[2] == "render":
+        blender = render_queue.configuration()
+        if blender is None:
+            raise db.Problem("Configure a local Blender renderer.", 503)
+        p = path[1]
+        n = int(request.query_params.get("revision", "0"))
+        if n <= 0:
+            raise db.Problem("Select an applied revision.")
+        with db.transaction() as q:
+            db.project(q, owner, p)
+            home = db.revision(q, p, n)
+        snapshot = {"project": p, "revision": n, "home": home}
+        if len(path) == 3 and request.method == "GET":
+            return render_queue.describe(snapshot, blender)
+        if len(path) == 3 and request.method == "POST":
+            return render_queue.request(snapshot, blender, data.get("stage"))
+        if len(path) == 5 and request.method == "GET":
+            asset = render_queue.asset(snapshot, blender, path[3], path[4])
+            return FileResponse(asset, filename=asset.name)
+        raise db.Problem("Render action unavailable.", 404)
     with db.transaction() as q:
         if (
             len(path) == 4
@@ -172,7 +192,8 @@ async def api(request: Request):
         data = json.loads(body) if body else {}
         if not isinstance(data, dict):
             raise ValueError
-        return JSONResponse(await asyncio.to_thread(handle, request, data))
+        result = await asyncio.to_thread(handle, request, data)
+        return result if isinstance(result, Response) else JSONResponse(result)
     except db.Problem as exc:
         return JSONResponse({"error": str(exc)}, status_code=exc.status)
     except (KeyError, ValueError, ValidationError, TypeError):

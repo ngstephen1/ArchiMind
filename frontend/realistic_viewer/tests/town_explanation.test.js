@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {readFileSync} from "node:fs";
-import {asksChairChange, explanation} from "../town/explanation.js";
+import {asksChairChange, explanation, isSavedDesignQuestion} from "../town/explanation.js";
 
 test("placement answers use revision geometry, including older inventories",()=>{
  const h=JSON.parse(readFileSync(new URL("../town/showcase.json",import.meta.url)));
@@ -127,4 +127,17 @@ test("conference study answer matches the saved tabletop-to-east-window distance
   const distance = Math.hypot(study.room.width_m - x, w.offset_m + w.width_m / 2 - y).toFixed(2);
   assert.equal(distance, "4.19");
   assert.ok(explanation(home, "How far is the Writing Suite from its window?").includes(distance + " m"));
+});
+
+test("a standalone why question stays on the saved revision", () => {
+  assert.equal(isSavedDesignQuestion("Why did you put the desk there?"), true);
+  assert.equal(isSavedDesignQuestion("Why is it there? Then redesign the salon."), false);
+  assert.equal(isSavedDesignQuestion("WhyNot move the chair?"), false);
+});
+
+test("saved comparison evidence preserves a specific daylight question", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  home.evidence.comparison = {routes: [], dining_places: {}, passage_m: 0.6};
+  assert.match(explanation(home, "Explain daylight in the study"), /nearest window center/);
+  assert.match(explanation(home, "Explain the placements"), /modeled passage check/);
 });

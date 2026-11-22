@@ -170,6 +170,20 @@ def save_view(scene, out, name, linear_master):
         scene.render.image_settings.file_format = "PNG"
 
 
+def window_backdrop(world):
+    """Give the visible openings a neutral daylight backdrop, separate from illumination."""
+    tree = world.node_tree
+    sky = tree.nodes.new("ShaderNodeBackground")
+    sky.name = "Window backdrop"
+    sky.inputs["Color"].default_value = (0.28, 0.36, 0.48, 1)
+    view = tree.nodes.new("ShaderNodeLightPath")
+    result = tree.nodes.new("ShaderNodeMixShader")
+    tree.links.new(view.outputs["Is Camera Ray"], result.inputs[0])
+    tree.links.new(tree.nodes.get("Background").outputs[0], result.inputs[1])
+    tree.links.new(sky.outputs[0], result.inputs[2])
+    tree.links.new(result.outputs[0], tree.nodes.get("World Output").inputs["Surface"])
+
+
 def lighting_studies(scene, out, hero, linear_master):
     scene.camera = bpy.data.objects[hero]
     scene.render.use_freestyle = True
@@ -199,6 +213,8 @@ def lighting_studies(scene, out, hero, linear_master):
     scene.world.node_tree.nodes.get("Background").inputs[
         "Strength"
     ].default_value = 0.035
+    if sky := scene.world.node_tree.nodes.get("Window backdrop"):
+        sky.inputs["Strength"].default_value = 0.08
     for lamp in bpy.data.lights:
         if lamp.type == "SUN":
             lamp.energy = 0
@@ -371,6 +387,8 @@ def render(args):
     if style:
         dress_scene(style, board, bedroom, out)
         fabrics = attach_textile_detail()
+        if board.get("presentation_detail"):
+            window_backdrop(scene.world)
     scene["board_sha256"] = hashlib.sha256(source).hexdigest()
     scene.cycles.use_adaptive_sampling = True
     scene.cycles.adaptive_threshold = 0.025 if args.proof else 0.012
@@ -399,7 +417,8 @@ def render(args):
     scene = bpy.context.scene
     assert scene["board_sha256"] == hashlib.sha256(source).hexdigest()
 
-    gray_studies(scene, board, out)
+    if not args.quick_proof:
+        gray_studies(scene, board, out)
     benchmark = sample_benchmark(scene, out) if not args.proof else None
 
     rooms = {r["room"]["id"]: r["room"] for r in board["rooms"]}
@@ -456,4 +475,12 @@ if __name__ == "__main__":
     )
     p.add_argument("--gpu", action="store_true")
     p.add_argument("--proof", action="store_true")
-    render(p.parse_args(sys.argv[sys.argv.index("--") + 1 :]))
+    p.add_argument(
+        "--quick-proof",
+        action="store_true",
+        help="Render the saved camera views without the exploratory gray studies.",
+    )
+
+    args = p.parse_args(sys.argv[sys.argv.index("--") + 1 :])
+    args.proof = args.proof or args.quick_proof
+    render(args)

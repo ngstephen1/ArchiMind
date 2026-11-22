@@ -307,6 +307,17 @@ def architecture(room, materials, *, pleated_curtains=True):
                     0,
                     materials["ivory"],
                 )
+            for elevation in (sill - 0.016, sill + high - 0.018):
+                segment(
+                    "Window horizontal rail",
+                    x,
+                    x + span,
+                    elevation,
+                    elevation + 0.037,
+                    0.08,
+                    0,
+                    materials["ivory"],
+                )
             if pleated_curtains:
                 upper = min(sill + high + 0.16, h - 0.12)
                 segment(

@@ -111,7 +111,11 @@ def render(
     ]
     for lamp in daylight:
         lamp.color = daylight_color
-    diffuse_windows = transmitted_daylight(board, scene) if styled else []
+    diffuse_windows = (
+        transmitted_daylight(board, scene)
+        if styled and not board.get("presentation_detail")
+        else []
+    )
     fabrics = attach_textile_detail() if styled else []
     poses = [
         next(c for c in frame["cameras"] if c["id"] == name)
