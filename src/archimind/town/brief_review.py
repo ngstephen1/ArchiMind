@@ -43,7 +43,9 @@ REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 def _affirmative_clauses(message):
     """Keep supported affirmative clauses ahead of an explicit negation."""
     clauses = re.split(
-        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:not|never|no)\b)", message.lower()
+        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:and\s+)?"
+        r"(?:not|never|no|keep|add|use|place|put|include|maintain|reserve|leave|allow|ensure|provide|make|seating)\b)",
+        message.lower(),
     )
     negative = r"\b(?:not(?!\s+only\b)|never|don['’]t|no need|instead of)\b"
     return [
@@ -118,7 +120,7 @@ def requirement_controls(brief, message, previous):
                 "Each modeled table has four places. Revise the requested split."
             )
 
-    shared = r"\s+(?:to be )?(?:split|shared|divided) (?:between|across)\b"
+    shared = r"\s*,?\s+(?:to be )?(?:split|shared|divided) (?:between|across)\b"
     requested_split = bool(per_table) or bool(re.search(r"\bsplit dining\b", dining))
 
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
@@ -141,10 +143,10 @@ def requirement_controls(brief, message, previous):
         location = re.match(r"\s+(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b", tail)
         if shared_seats:
             requested_split = True
-            arrangement = tail[shared_seats.end() :].split(".", 1)[0]
+            arrangement = re.split(r"[,.;]", tail[shared_seats.end() :], maxsplit=1)[0]
             names_both_rooms = bool(
                 re.search(r"\bsalon\b", arrangement)
-                and re.search(r"\bkitchen[- ]dining\b", arrangement)
+                and re.search(r"\bkitchen(?:[- ]dining)?\b", arrangement)
             )
             if not names_both_rooms:
                 location = re.search(

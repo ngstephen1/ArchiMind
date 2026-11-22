@@ -190,6 +190,9 @@ def test_single_table_and_room_specific_seating_remain_hard_requirements():
         ("Four seats at one table, and four seats at the other.", 8),
         ("Not only seating for six but also a quiet study.", 6),
         ("Keep the floor plan divided between quiet and social areas.", 0),
+        ("Don't move the sofa, provide seating for six.", 6),
+        ("Six seats split across two tables, and add lighting in the salon.", 6),
+        ("Seating for six split between the salon and the kitchen.", 6),
         (
             "Formal salon with seating for six split between the salon and kitchen-dining room.",
             6,
@@ -231,6 +234,23 @@ def test_route_length_and_declined_local_width_do_not_block_general_width():
     )
     assert not questions
     assert brief.passage_m == 0.8
+
+
+def test_negative_clause_does_not_erase_a_following_passage_request():
+    brief, questions = requirement_controls(
+        Brief(), "Don't move the sofa, keep a 90 cm clear passage.", None
+    )
+    assert not questions and brief.passage_m == 0.9
+
+
+def test_comma_before_shared_seating_still_requires_confirming_split():
+    brief, questions = requirement_controls(
+        Brief(),
+        "Seating for four, split between the salon and kitchen-dining room.",
+        None,
+    )
+    assert brief.dining_seats == 4 and not brief.split_dining
+    assert any("Confirm separate dining tables" in item for item in questions)
 
 
 def test_specific_clearance_cannot_be_claimed_by_general_route_check():
