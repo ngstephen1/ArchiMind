@@ -6,7 +6,7 @@ import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
-import { asksChairChange, explanation } from "./explanation.js";
+import { asksChairChange, explanation, isSavedDesignQuestion } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
@@ -333,6 +333,7 @@ function showBrief(summary) {
   panel.replaceChildren(node("h3", "Review the design brief"));
   for (const [title, values] of [
     ["Requirements", summary.requirements], ["Preferences", summary.preferences],
+    ["Presentation requests", summary.presentation_requests || []],
     ["Questions", summary.questions], ["Unsupported requirements", summary.unsupported],
   ]) {
     if (!values.length) continue;
@@ -384,7 +385,7 @@ function show() {
 }
 bind("generate", async () => {
   const question = el("message").value.trim();
-  if (revision && /^why/i.test(question) && !/(then|also|redesign|change)/i.test(question)) {
+  if (revision && isSavedDesignQuestion(question)) {
     el("panel").close();
     await askSavedDesign(question);
     return;
@@ -423,9 +424,9 @@ bind("generate", async () => {
         style: el("style").value,
         formal_salon: el("formalSalon").checked,
         compare_tradeoffs: true,
-        dining_seats: Number(el("diningSeats").value),
+        ...(revision || Number(el("diningSeats").value) > 0 ? { dining_seats: Number(el("diningSeats").value) } : {}),
         split_dining: el("splitDining").checked,
-        passage_m: Number(el("passage").value),
+        ...(revision || Number(el("passage").value) !== 0.6 ? { passage_m: Number(el("passage").value) } : {}),
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
         ),
@@ -710,7 +711,7 @@ function watchRender() {
       const { proof, hd } = values;
       el("renderProof").disabled = ["queued", "running", "ready"].includes(proof.state);
       el("renderHD").hidden = proof.state !== "ready";
-      el("renderHD").disabled = ["queued", "running", "ready"].includes(hd.state);
+      el("renderHD").disabled = ["queued", "running", "ready", "blocked"].includes(hd.state);
       statusText.textContent = hd.phase || proof.phase || "Ready to queue a proof.";
       el("renderDownloads").replaceChildren();
       for (const stage of ["proof", "hd"]) {

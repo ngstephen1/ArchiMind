@@ -564,7 +564,7 @@ def generate(brief, previous=None, *, on_progress=None):
         if (
             brief.dining_seats != carried.get("required_dining_seats", 0)
             or brief.split_dining != carried.get("split_dining", False)
-            or brief.passage_m > carried.get("passage_m", 0.6)
+            or brief.passage_m != carried.get("passage_m", 0.6)
         ):
             raise ValueError(
                 "Confirm new seating or circulation requirements in a separate design run before moving furniture."
@@ -600,6 +600,16 @@ def generate(brief, previous=None, *, on_progress=None):
         )
     if not salon and any("salon" in pair for pair in pairs):
         raise ValueError("Include a formal salon before requesting its placement.")
+    previous_comparison = (previous or {}).get("evidence", {}).get("comparison")
+    presentation_detail = brief.compare_tradeoffs or (previous or {}).get(
+        "presentation_detail"
+    )
+    measure = (
+        brief.compare_tradeoffs
+        or previous_comparison is not None
+        or brief.dining_seats > 0
+        or brief.passage_m != 0.6
+    )
     candidates = []
     for attempt in range(8):
         rng = random.Random(brief.seed + 7919 * attempt)
@@ -741,7 +751,7 @@ def generate(brief, previous=None, *, on_progress=None):
             rooms=rooms,
             **(
                 {"presentation_detail": "bedroom-salon-v1"}
-                if brief.compare_tradeoffs
+                if presentation_detail
                 else {}
             ),
         )
@@ -749,9 +759,7 @@ def generate(brief, previous=None, *, on_progress=None):
         if len(rooms) != len(PROGRAM) + int(salon):
             continue
         try:
-            measures = validate_home(
-                home, passage_m=brief.passage_m, measure=brief.compare_tradeoffs
-            )
+            measures = validate_home(home, passage_m=brief.passage_m, measure=measure)
         except ValueError:
             continue
         bedroom = next(p for p in rooms if p["design"]["room"]["id"] == "bedroom")
@@ -765,9 +773,8 @@ def generate(brief, previous=None, *, on_progress=None):
         }
         if measures:
             home["evidence"]["comparison"] = measures
-            if brief.dining_seats:
-                measures["required_dining_seats"] = brief.dining_seats
-                measures["split_dining"] = brief.split_dining
+            measures["required_dining_seats"] = brief.dining_seats
+            measures["split_dining"] = brief.split_dining
         if salon:
             home["evidence"]["salon"] = {
                 "dining_places": 4,

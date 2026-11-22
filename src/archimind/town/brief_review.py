@@ -23,47 +23,99 @@ NUMBERS = {
 COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")"
 
 
+MEASUREMENT = r"(?<![\d.])(\d+(?:\.\d+)?|\.\d+)\s*(mm|cm|m)\b"
+PASSAGE = r"(?:passage|walkway|route|circulation)\b"
+WIDTH_PATTERNS = (
+    MEASUREMENT + r"\s+(?:clear\s+)?" + PASSAGE,
+    PASSAGE + r"\s+(?:width\s+)?(?:(?:of|at least|min(?:imum)?)\s+)?" + MEASUREMENT,
+)
+REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
+
+
 def requirement_controls(brief, message, previous):
+    """Return normalized controls and any conflicts that need user confirmation."""
     evidence = (previous or {}).get("evidence", {}).get("comparison", {})
-    seats = brief.dining_seats or evidence.get("required_dining_seats", 0)
-    split = brief.split_dining or evidence.get("split_dining", False)
-    passage = max(brief.passage_m, evidence.get("passage_m", 0.6))
+    explicit = brief.model_fields_set
+    seats = (
+        brief.dining_seats
+        if "dining_seats" in explicit
+        else evidence.get("required_dining_seats", 0)
+    )
+    split = (
+        brief.split_dining
+        if "split_dining" in explicit
+        else evidence.get("split_dining", False)
+    )
+    passage = (
+        brief.passage_m if "passage_m" in explicit else evidence.get("passage_m", 0.6)
+    )
 
     def count(value):
         return int(value) if value.isdecimal() else NUMBERS[value]
 
     text = message.lower()
-    explicit = re.search(
-        COUNT + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b", text
-    )
+    totals = {
+        count(match[1])
+        for match in re.finditer(
+            COUNT
+            + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
+            + r"(?!\s+(?:in|at|per|for each)\b)",
+            text,
+        )
+    }
     guests = re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", text)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", text)
-    if explicit:
-        seats = count(explicit[1])
-    elif guests and residents:
-        seats = count(guests[1]) + count(residents[1])
-    elif guests:
-        seats = max(seats, count(guests[1]))
-    widths = re.findall(
-        r"(\d+(?:\.\d+)?)\s*(m|cm|mm)\b\s*(?:clear\s+)?(?:passage|walkway|route|circulation)\b",
-        text,
-    )
-    for value, unit in widths:
-        passage = max(passage, float(value) / {"m": 1, "cm": 100, "mm": 1000}[unit])
+    if guests and residents:
+        totals.add(count(guests[1]) + count(residents[1]))
+    elif guests and not totals:
+        totals.add(max(seats, count(guests[1])))
+    questions = []
+    if len(totals) > 1 or (
+        totals and "dining_seats" in explicit and seats not in totals
+    ):
+        questions.append(
+            "Confirm one total number of dining places in both the brief and controls."
+        )
+    elif totals:
+        seats = totals.pop()
+
+    widths = {
+        float(value) / {"m": 1, "cm": 100, "mm": 1000}[unit]
+        for pattern in WIDTH_PATTERNS
+        for value, unit in re.findall(pattern, text)
+    }
+    if any(not 0.6 <= value <= 2 for value in widths):
+        questions.append("Choose a modeled passage width between 0.6 and 2 m.")
+    elif len(widths) > 1 or (
+        widths and "passage_m" in explicit and passage not in widths
+    ):
+        questions.append(
+            "Confirm one modeled passage width in both the brief and controls."
+        )
+    elif widths:
+        passage = widths.pop()
+    if seats > 100:
+        questions.append(
+            "Choose a supported dining requirement of at most eight places."
+        )
     return brief.model_copy(
         update={
             "dining_seats": seats,
             "split_dining": split,
             "passage_m": passage,
             "formal_salon": brief.formal_salon
+            or any(
+                room["design"]["room"]["id"] == "salon"
+                for room in (previous or {}).get("rooms", ())
+            )
             or bool(
                 re.search(r"\b(?:include|add|use) (?:a |the )?formal salon\b", text)
             ),
         }
-    )
+    ), questions
 
 
-def review_summary(brief, *, questions=(), unsupported=()):
+def review_summary(brief, *, message="", questions=(), unsupported=()):
     requirements = [
         f"Lot {brief.width:g} × {brief.depth:g} m",
         f"{brief.passage_m:g} m modeled passage",
@@ -84,6 +136,12 @@ def review_summary(brief, *, questions=(), unsupported=()):
     return {
         "requirements": requirements,
         "preferences": preferences,
+        "presentation_requests": [
+            match.group(0).strip()
+            for match in re.finditer(
+                r"\b(?:why|explain)\b[^.!?]*", message, re.IGNORECASE
+            )
+        ],
         "questions": [q for q in questions if q],
         "unsupported": list(unsupported),
     }

@@ -25,6 +25,11 @@ function deskWindow(room, desk, tabletop = null) {
     (tabletop ? " tabletop and window " : " footprint and window ") + opening.id + ". This measures proximity. Placement intent and screen glare have not been established.";
 }
 
+export function isSavedDesignQuestion(question) {
+  return /^why\b/i.test(question.trim()) &&
+    !/\b(?:then|also|redesign|change)\b/i.test(question);
+}
+
 export function asksChairChange(question) {
   const q = question.toLowerCase();
   if (!/\bchair\b/.test(q) || /\bstudy\b/.test(q)) return false;

@@ -187,6 +187,8 @@ def coordinate(req, previous, interpret, emit):
             .get("required_dining_seats", 0)
             and brief.passage_m
             == previous["evidence"].get("comparison", {}).get("passage_m", 0.6)
+            and brief.split_dining
+            == previous["evidence"].get("comparison", {}).get("split_dining", False)
             and (
                 not brief.formal_salon
                 or any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])

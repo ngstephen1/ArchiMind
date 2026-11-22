@@ -5,6 +5,7 @@ from types import SimpleNamespace
 import pytest
 
 from archimind.town import render_queue, service
+from archimind.town.brief_review import requirement_controls
 from archimind.town.design import Brief, RoomGoal, generate, validate_home
 
 
@@ -64,6 +65,77 @@ def test_six_seats_preserved_and_explanation_routed(monkeypatch):
         )
 
 
+def test_saved_constraints_are_inherited_only_when_omitted():
+    previous = generate(
+        Brief(
+            width=15,
+            depth=16,
+            formal_salon=True,
+            compare_tradeoffs=True,
+            dining_seats=6,
+            split_dining=True,
+            passage_m=0.65,
+        )
+    )[0]
+    assert not Brief().compare_tradeoffs
+    request = SimpleNamespace(
+        brief=Brief(width=15, depth=16), agent_team=True, live=False, message=""
+    )
+    inherited = service.interpret(request, previous)
+    assert (inherited.dining_seats, inherited.split_dining, inherited.passage_m) == (
+        6,
+        True,
+        0.65,
+    )
+    regenerated = generate(inherited, previous)[0]
+    comparison = regenerated["evidence"]["comparison"]
+    assert (
+        comparison["required_dining_seats"],
+        comparison["split_dining"],
+        comparison["passage_m"],
+    ) == (6, True, 0.65)
+    assert regenerated["presentation_detail"] == previous["presentation_detail"]
+
+    request.brief = Brief(
+        width=15, depth=16, dining_seats=0, split_dining=False, passage_m=0.6
+    )
+    changed = service.interpret(request, previous)
+    comparison = generate(changed, previous)[0]["evidence"]["comparison"]
+    assert (
+        comparison["required_dining_seats"],
+        comparison["split_dining"],
+        comparison["passage_m"],
+    ) == (0, False, 0.6)
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    [".9 m clear passage", "passage at least 90 cm wide", "900 mm circulation"],
+)
+def test_passage_with_leading_decimal_or_unit_and_local_seats(phrase):
+    brief, questions = requirement_controls(
+        Brief(),
+        f"Two residents and four dinner guests. Four seats in the salon. {phrase}.",
+        None,
+    )
+    assert not questions
+    assert (brief.dining_seats, brief.passage_m) == (6, 0.9)
+
+
+def test_conflicting_control_needs_confirmation():
+    request = SimpleNamespace(
+        brief=Brief(compare_tradeoffs=True, passage_m=0.6),
+        agent_team=True,
+        live=False,
+        message="Passage at least 90 cm wide. Explain the placements.",
+    )
+    with pytest.raises(
+        service.BriefClarification, match="Confirm one modeled passage width"
+    ) as exc:
+        service.interpret(request, None)
+    assert exc.value.reviewed["presentation_requests"] == ["Explain the placements"]
+
+
 def test_hard_constraints_and_locked_room():
     with pytest.raises(ValueError, match="exhausted"):
         generate(Brief(width=9, depth=9, compare_tradeoffs=True, passage_m=1.4))
@@ -88,7 +160,8 @@ def test_hard_constraints_and_locked_room():
     assert room(next_home)["design"] == room(original)["design"]
 
 
-def test_approval_cache_and_tamper_recovery(tmp_path, monkeypatch):
+@pytest.mark.parametrize("distinct", [True, False])
+def test_approval_cache_and_tamper_recovery(tmp_path, monkeypatch, distinct):
     monkeypatch.setenv("TOWN_DB", str(tmp_path / "town.sqlite3"))
     monkeypatch.setattr(render_queue, "_jobs", {})
     blender = tmp_path / "blender"
@@ -102,6 +175,31 @@ def test_approval_cache_and_tamper_recovery(tmp_path, monkeypatch):
                 output.mkdir()
                 for name in render_queue.ASSETS["proof"]:
                     (output / name).write_text(name)
+                (output / "manifest.json").write_text(
+                    json.dumps(
+                        {
+                            "rooms": [
+                                {
+                                    "room": {"id": "bedroom"},
+                                    "cameras": [
+                                        {
+                                            "id": "doorway",
+                                            "eye": [1, 2, 3],
+                                            "target": [4, 5, 6],
+                                            "fov": 45,
+                                        },
+                                        {
+                                            "id": "desk",
+                                            "eye": [2 if distinct else 1, 2, 3],
+                                            "target": [4, 5, 6],
+                                            "fov": 45,
+                                        },
+                                    ],
+                                }
+                            ]
+                        }
+                    )
+                )
             else:
                 output = render_queue.Path(argv[-1])
                 output.mkdir()
@@ -125,8 +223,16 @@ def test_approval_cache_and_tamper_recovery(tmp_path, monkeypatch):
     assert wait("proof") == "ready"
     assert render_queue.request(snapshot, blender, "proof")["state"] == "ready"
     asset = render_queue.asset(snapshot, blender, "proof", "home.blend")
-    render_queue.request(snapshot, blender, "hd")
-    assert wait("hd") == "ready"
+    asset.write_bytes(b"corrupt")
+    assert render_queue.describe(snapshot, blender)["proof"]["state"] == "idle"
+    asset.write_text("home.blend")
+    if distinct:
+        render_queue.request(snapshot, blender, "hd")
+        assert wait("hd") == "ready"
+    else:
+        assert render_queue.describe(snapshot, blender)["hd"]["state"] == "blocked"
+        with pytest.raises(service.Problem, match="distinct doorway and desk"):
+            render_queue.request(snapshot, blender, "hd")
     assert (
         render_queue.describe({**snapshot, "revision": 2}, blender)["proof"]["state"]
         == "idle"

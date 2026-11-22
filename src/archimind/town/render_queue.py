@@ -76,17 +76,40 @@ def _file_hash(path):
         return hashlib.file_digest(stream, "sha256").hexdigest()
 
 
+def _required(stage):
+    return set(ASSETS[stage]) - ({"salon-overview.png"} if stage == "hd" else set())
+
+
 def _completed(directory, stage):
     try:
         result = json.loads((directory / "town-render.json").read_bytes())
-        if not result["files"] or not all(
+        if not _required(stage) <= result["files"].keys() or not all(
             name in ASSETS[stage] and _file_hash(directory / name) == digest
             for name, digest in result["files"].items()
         ):
             return None
         return {"state": "ready", "phase": "Completed", **result}
-    except (OSError, ValueError, KeyError, TypeError):
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return None
+
+
+def _hd_block(proof):
+    try:
+        manifest = json.loads((proof / "manifest.json").read_bytes())
+        bedroom = next(
+            room for room in manifest["rooms"] if room["room"]["id"] == "bedroom"
+        )
+        cameras = {camera["id"]: camera for camera in bedroom["cameras"]}
+        if any(
+            cameras["doorway"][key] != cameras["desk"][key]
+            for key in ("eye", "target", "fov")
+        ):
+            return None
+    except (OSError, ValueError, KeyError, TypeError, StopIteration):
+        pass
+    return (
+        "HD needs distinct doorway and desk camera views. The proof remains available."
+    )
 
 
 def _status(key, stage, directory):
@@ -94,20 +117,35 @@ def _status(key, stage, directory):
         job = _jobs.get((key, stage))
     if job and job["state"] in {"queued", "running"}:
         return job
-    return _completed(directory / stage, stage) or job or {"state": "idle"}
+    completed = _completed(directory / stage, stage)
+    return completed or (job if job and job["state"] == "failed" else {"state": "idle"})
 
 
 def describe(snapshot, blender):
     directory = _paths(snapshot, blender)
-    return {stage: _status(directory.name, stage, directory) for stage in ASSETS}
+    stages = {stage: _status(directory.name, stage, directory) for stage in ASSETS}
+    if stages["proof"]["state"] == "ready" and stages["hd"]["state"] in {
+        "idle",
+        "failed",
+    }:
+        reason = _hd_block(directory / "proof")
+        if reason:
+            stages["hd"] = {"state": "blocked", "phase": reason}
+    return stages
 
 
 def request(snapshot, blender, stage):
     if stage not in ASSETS:
         raise service.Problem("Choose proof or HD.")
     directory = _paths(snapshot, blender)
-    if stage == "hd" and not _completed(directory / "proof", "proof"):
-        raise service.Problem("Finish and inspect the proof before requesting HD.", 409)
+    if stage == "hd":
+        if not _completed(directory / "proof", "proof"):
+            raise service.Problem(
+                "Finish and inspect the proof before requesting HD.", 409
+            )
+        reason = _hd_block(directory / "proof")
+        if reason:
+            raise service.Problem(reason, 409)
     existing = _completed(directory / stage, stage)
     if existing:
         return existing
@@ -276,10 +314,7 @@ def _run(key, snapshot, blender, stage, directory):
                 for name in ASSETS[stage]
                 if (out / name).is_file()
             }
-            required = set(ASSETS[stage]) - (
-                {"salon-overview.png"} if stage == "hd" else set()
-            )
-            if required - files.keys():
+            if _required(stage) - files.keys():
                 raise ValueError("Required render outputs missing.")
             if _paths(snapshot, blender) != directory:
                 raise ValueError("Renderer settings changed during the job.")

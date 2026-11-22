@@ -21,7 +21,7 @@ import { isSoftwareRenderer, browserTier, createComposer } from "../src/render_q
 import { loadDesignerChair, loadBedroomConcept } from "../src/designer_chair.js";
 import { queenBed } from "../src/bedroom_finishes.js";
 import { wallQuads } from "../src/room_geometry.js";
-import { buildDressing } from "../src/dressing.js";
+import { buildTownDressing } from "./dressing_detail.js";
 import { createPlanSweep } from "../src/plan_sweep.js";
 import { dressFurniture, furnitureFallbackText } from "../src/pack_furniture.js";
 import { FLOOR_SLAB, dressingOrigin } from "./floor.js";
@@ -468,7 +468,7 @@ export function createTown(canvas, status, action) {
       const holder = new T.Group();
       holder.position.set(...dressingOrigin(part));
       interior.add(holder);
-      const dressing = buildDressing(holder, part.style.dressing, pack, packTier);
+      const dressing = buildTownDressing(holder, part.style.dressing, pack, packTier);
       decor.push({ holder, handle: dressing });
       ready.push(dressing.ready);
       if (Array.isArray(part.style.bindings)) {
