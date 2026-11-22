@@ -131,7 +131,7 @@ def check(url, output):
         page.locator("#tour").click()
         page.locator("#door").click()
         page.locator("#roomJump").select_option("bedroom")
-        expect(page.locator("#roomJump")).to_have_value("bedroom")
+        expect(page.locator("#place")).to_have_text("Bedroom")
         assert state(1)["proof"] == {"state": "running", "phase": BLENDER_PHASE}
         page.screenshot(path=output / "walk-during-proof.png")
         assert state(1)["proof"] == {"state": "running", "phase": BLENDER_PHASE}
