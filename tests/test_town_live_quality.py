@@ -186,6 +186,13 @@ def test_single_table_and_room_specific_seating_remain_hard_requirements():
         ("Design a home with room for two residents and four dinner guests.", 6),
         ("Leave room for two desks.", 0),
         ("Seat four people at one table and two at the other.", 6),
+        ("Four seats at one table and four seats at the other.", 8),
+        (
+            "Formal salon with seating for six split between the salon and kitchen-dining room.",
+            6,
+        ),
+        ("Three at each table, not five at one table and one at the other.", 6),
+        ("Three at each table. Don't need room for eight diners.", 6),
         ("Make room for six diners.", 6),
         ("Do not seat everyone at one table.", 0),
     ],
@@ -194,6 +201,21 @@ def test_occupancy_and_split_requests_do_not_conflict(brief_text, seats):
     brief, questions = requirement_controls(Brief(split_dining=True), brief_text, None)
     assert not questions
     assert brief.split_dining and brief.dining_seats == seats
+
+
+def test_two_table_request_needs_explicit_confirmation():
+    brief, questions = requirement_controls(
+        Brief(), "Seat two at one table and two at the other.", None
+    )
+    assert brief.dining_seats == 4 and not brief.split_dining
+    assert any("Confirm separate dining tables" in item for item in questions)
+
+
+def test_specific_clearance_cannot_be_claimed_by_general_route_check():
+    _, questions = requirement_controls(
+        Brief(), "Keep the passage at least 90 cm between the sofa and wall.", None
+    )
+    assert any("90 cm clearance between specific objects" in item for item in questions)
 
 
 def test_one_room_seating_does_not_become_split_dining():
