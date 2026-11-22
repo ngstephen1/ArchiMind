@@ -1,0 +1,64 @@
+name: Town render queue with Blender
+on:
+  pull_request:
+    paths:
+      - .github/workflows/town-render-queue.yml
+      - scripts/check_town_render_queue.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: town-render-queue-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  render-queue:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+        with:
+          node-version: "20"
+      - name: Prepare Town, Chromium driver and pinned Blender
+        run: |
+          python -m pip install -e . -r services/town/requirements.txt playwright==1.56.0
+          npm ci --prefix frontend/realistic_viewer --ignore-scripts
+          TOWN_MODE=local node frontend/realistic_viewer/town/build.mjs
+
+          name=blender-5.1.2-linux-x64.tar.xz
+          cd "$RUNNER_TEMP"
+          curl -fsSL --retry 2 "https://download.blender.org/release/Blender5.1/$name" -o blender.tar.xz ||
+            curl -fsSL --retry 2 "https://ftp.halifax.rwth-aachen.de/blender/release/Blender5.1/$name" -o blender.tar.xz
+          echo 'aaccb355f50183979b698bcce7467103a76261b5fa59f4972295842662a285fb  blender.tar.xz' | sha256sum -c
+          tar xf blender.tar.xz
+      - name: Run the ordinary Town UI and verify proof, retry and cache
+        env:
+          TOWN_MODE: local
+          TOWN_STATIC: ${{ github.workspace }}/dist/town
+          TOWN_DB: ${{ runner.temp }}/town-queue/acceptance.sqlite3
+          TOWN_BLENDER_BIN: ${{ runner.temp }}/blender-5.1.2-linux-x64/blender
+          ARCHIMIND_ENABLE_OPENAI_STUDIO: "0"
+          ARCHIMIND_ENABLE_CODEX_ADVISOR: "0"
+        run: |
+          output="$RUNNER_TEMP/town-queue-evidence"
+          mkdir -p "$output" "$(dirname "$TOWN_DB")"
+          "$TOWN_BLENDER_BIN" --version > "$output/blender-version.txt"
+          python -m uvicorn archimind.town.api:app --host 127.0.0.1 --port 8790 > "$output/town.log" 2>&1 &
+          api=$!
+          trap 'kill "$api" 2>/dev/null || true' EXIT
+          curl --retry 10 --retry-delay 1 --retry-connrefused -fsS http://127.0.0.1:8790/health
+          python scripts/check_town_render_queue.py --output "$output"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
+        with:
+          name: town-real-render-queue-evidence
+          path: ${{ runner.temp }}/town-queue-evidence
+          if-no-files-found: warn
