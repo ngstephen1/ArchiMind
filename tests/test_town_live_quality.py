@@ -14,7 +14,9 @@ def test_six_seats_preserved_and_explanation_routed(monkeypatch):
         facts = json.loads(prompt)
         assert "dining_seats" not in facts["controls"]
         assert "compare_tradeoffs" not in facts["controls"]
-        assert facts["request"] == "Place the study far from the living room"
+        assert (
+            facts["request"].rstrip(".") == "Place the study far from the living room"
+        )
         return schema(
             priority="balanced",
             style="scandinavian",
@@ -41,7 +43,12 @@ def test_six_seats_preserved_and_explanation_routed(monkeypatch):
         "6 dining places at one table" in clarification.value.reviewed["requirements"]
     )
 
-    request.brief = brief.model_copy(update={"split_dining": True})
+    request.brief = brief.model_copy(update={"dining_seats": 6, "split_dining": True})
+    request.message = (
+        "Use two four-seat tables in the formal salon and kitchen-dining room "
+        "for two residents and four dinner guests. "
+        "Place the study far from the living room. Explain the placements."
+    )
     confirmed = service.interpret(request, None)
     a, b = generate(confirmed)
     measures = [candidate["evidence"]["comparison"] for candidate in (a, b)]

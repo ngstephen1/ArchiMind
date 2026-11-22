@@ -86,8 +86,11 @@ def requirement_controls(brief, message, previous):
         re.finditer(
             COUNT
             + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
-            + r"|\b(?:seating|dining room) for\s+"
+            + r"|\bseating for\s+"
             + COUNT
+            + r"|\bdining room for\s+"
+            + COUNT
+            + r"(?=\s*[,.;!?]|\s*$)"
             + r"|\broom for\s+"
             + COUNT
             + r"\s+diners?\b",
