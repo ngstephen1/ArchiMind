@@ -10,7 +10,7 @@ from archimind.geometry import validate_accessibility
 from archimind.models import Furniture, RoomDesign
 
 from . import service as db
-from .design import apply_style, digest, validate_home
+from .design import apply_style, digest, refresh_geometry_evidence
 
 
 def chair_options(*, collection=False):
@@ -162,7 +162,7 @@ def chair_pullout(q, owner, project, data, *, apply):
 
 
 def finish_preview(q, owner, project, base, home, data, apply):
-    validate_home(home)
+    refresh_geometry_evidence(home)
     del home["id"]
     home["id"] = digest(home)
     if apply:

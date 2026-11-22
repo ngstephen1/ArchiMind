@@ -63,6 +63,15 @@ export function explanation(home, question, manifest = null, previous = null) {
   const desk = get("belaya"), bed = get("queen-bed");
   const q = question.toLowerCase();
   if (asksChairChange(q)) return chairChange(home, manifest, previous);
+  const comparison = home.evidence?.comparison;
+  if (comparison && /\b(why|explain|layout|route|seating)\b/.test(q) &&
+      !/\b(desk|window|rug|chair|lamp|oak)\b/.test(q)) {
+    const routes = comparison.routes.map(r => `${r.room} to ${r.target} via hall ${r.distance_m.toFixed(2)} m`);
+    const seats = Object.entries(comparison.dining_places).map(([room, count]) => `${room} ${count} places at one table`);
+    return [routes.length ? "Measured routes between room entrances · " + routes.join(", ") + "." : "",
+      seats.length ? "Modeled dining · " + seats.join(", ") + "." : "",
+      `The layout passed the ${comparison.passage_m.toFixed(2)} m modeled passage check. These measurements describe the plan. Acoustic privacy, glare and clear opening hardware need separate evidence.`].filter(Boolean).join(" ");
+  }
   if (/\boak\b/.test(q)) {
     if (!manifest || manifest.home_id !== home.id)
       return "The verified bedroom manifest is unavailable for this design.";
@@ -103,6 +112,10 @@ export function explanation(home, question, manifest = null, previous = null) {
     if (rooms.length > 1) return "Which desk do you mean? Recorded desks occur in " + rooms.map(p => p.design.room.id).join(" and ") + ".";
   }
   if (/rug/.test(q) && bed) {
+    const rug = bedroom.style?.dressing?.find(item => item.kind === "rug");
+    if (home.presentation_detail && rug) {
+      return `The saved bedroom rug measures ${rug.width_m.toFixed(2)} × ${rug.depth_m.toFixed(2)} m. Its position was checked against the doorway zone. Use those dimensions to shortlist stock sizes and verify rug thickness and door operation on site.`;
+    }
     const width = Math.min(room.width_m - .06, bed.x_m + bed.width_m + .58) - Math.max(.06, bed.x_m - .58);
     return "The rug spans " + width.toFixed(2) + " m across the bed. Its nominal side extension is 0.58 m, clipped to leave 0.06 m at the walls.";
   }

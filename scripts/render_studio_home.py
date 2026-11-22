@@ -399,7 +399,8 @@ def render(args):
     scene = bpy.context.scene
     assert scene["board_sha256"] == hashlib.sha256(source).hexdigest()
 
-    gray_studies(scene, board, out)
+    if not args.quick_proof:
+        gray_studies(scene, board, out)
     benchmark = sample_benchmark(scene, out) if not args.proof else None
 
     rooms = {r["room"]["id"]: r["room"] for r in board["rooms"]}
@@ -456,4 +457,12 @@ if __name__ == "__main__":
     )
     p.add_argument("--gpu", action="store_true")
     p.add_argument("--proof", action="store_true")
-    render(p.parse_args(sys.argv[sys.argv.index("--") + 1 :]))
+    p.add_argument(
+        "--quick-proof",
+        action="store_true",
+        help="Render the saved camera views without the exploratory gray studies.",
+    )
+
+    args = p.parse_args(sys.argv[sys.argv.index("--") + 1 :])
+    args.proof = args.proof or args.quick_proof
+    render(args)

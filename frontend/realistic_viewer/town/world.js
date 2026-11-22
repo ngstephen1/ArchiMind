@@ -992,6 +992,7 @@ export function createTown(canvas, status, action) {
           continue;
         }
         if (f.id === "queen-bed") {
+          if (!h.presentation_detail || !part.style?.dressing?.some(item => item.kind === "rug")) {
           const left = Math.max(0.06, f.x_m - 0.58),
             right = Math.min(r.width_m - 0.06, f.x_m + w + 0.58);
           const front = Math.max(0.06, f.y_m - 0.55),
@@ -1018,6 +1019,7 @@ export function createTown(canvas, status, action) {
               0.032,
               "#795d4b",
             );
+          }
           const fallback = queenBed(f);
           group.add(fallback);
           replaceCollection(part.designer_collection?.[f.id]?.binding, fallback, f, () => {
