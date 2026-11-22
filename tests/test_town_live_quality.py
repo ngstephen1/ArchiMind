@@ -187,6 +187,9 @@ def test_single_table_and_room_specific_seating_remain_hard_requirements():
         ("Leave room for two desks.", 0),
         ("Seat four people at one table and two at the other.", 6),
         ("Four seats at one table and four seats at the other.", 8),
+        ("Four seats at one table, and four seats at the other.", 8),
+        ("Not only seating for six but also a quiet study.", 6),
+        ("Keep the floor plan divided between quiet and social areas.", 0),
         (
             "Formal salon with seating for six split between the salon and kitchen-dining room.",
             6,
@@ -209,6 +212,25 @@ def test_two_table_request_needs_explicit_confirmation():
     )
     assert brief.dining_seats == 4 and not brief.split_dining
     assert any("Confirm separate dining tables" in item for item in questions)
+
+
+def test_local_split_cannot_move_one_rooms_second_table_to_another_room():
+    _, questions = requirement_controls(
+        Brief(split_dining=True),
+        "Request six seats split across two tables in the salon.",
+        None,
+    )
+    assert any("salon has one modeled table" in item for item in questions)
+
+
+def test_route_length_and_declined_local_width_do_not_block_general_width():
+    brief, questions = requirement_controls(
+        Brief(),
+        "Prefer a route of 8 m between the kitchen and salon. No 90 cm passage is needed between the sofa and wall. Use an 80 cm clear passage.",
+        None,
+    )
+    assert not questions
+    assert brief.passage_m == 0.8
 
 
 def test_specific_clearance_cannot_be_claimed_by_general_route_check():

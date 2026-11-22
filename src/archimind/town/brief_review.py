@@ -40,17 +40,20 @@ WIDTH_PATTERNS = (
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 
 
-def _affirmative_dining_clauses(message):
+def _affirmative_clauses(message):
     """Keep supported affirmative clauses ahead of an explicit negation."""
-    clauses = re.split(r"[,;.!?\n]|\bbut\b", message.lower())
+    clauses = re.split(
+        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:not|never|no)\b)", message.lower()
+    )
+    negative = r"\b(?:not(?!\s+only\b)|never|don['’]t|no need|instead of)\b"
     return [
-        re.split(r"\b(?:not|never|don['’]t|do not|no need|instead of)\b", clause, 1)[0]
+        re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, 1)[0]
         for clause in clauses
     ]
 
 
 def requests_single_table(message):
-    for clause in _affirmative_dining_clauses(message):
+    for clause in _affirmative_clauses(message):
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
         )
@@ -89,14 +92,14 @@ def requirement_controls(brief, message, previous):
         return int(value) if value.isdecimal() else NUMBERS[value]
 
     text = message.lower()
-    dining = ". ".join(_affirmative_dining_clauses(message))
+    dining = ". ".join(_affirmative_clauses(message))
     totals = set()
     questions = []
     per_table = []
     count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
     split_counts = re.search(
         count_at
-        + r"one table\s+and\s+"
+        + r"one table\s*,?\s+and\s+"
         + count_at
         + r"(?:the )?(?:other|second)(?: table)?\b",
         dining,
@@ -116,13 +119,7 @@ def requirement_controls(brief, message, previous):
             )
 
     shared = r"\s+(?:to be )?(?:split|shared|divided) (?:between|across)\b"
-    requested_split = bool(per_table) or bool(
-        re.search(r"\b(?:split|shared|divided) (?:dining|between|across)\b", dining)
-    )
-    if requested_split and not split:
-        questions.append(
-            "Confirm separate dining tables in the brief controls, or revise the seating arrangement."
-        )
+    requested_split = bool(per_table) or bool(re.search(r"\bsplit dining\b", dining))
 
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
     for match in re.finditer(
@@ -140,19 +137,39 @@ def requirement_controls(brief, message, previous):
     ):
         value = count(next(group for group in match.groups() if group is not None))
         tail = dining[match.end() :]
+        shared_seats = re.match(shared, tail)
         location = re.match(r"\s+(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b", tail)
-        if not location and not re.match(shared, tail):
+        if shared_seats:
+            requested_split = True
+            arrangement = tail[shared_seats.end() :].split(".", 1)[0]
+            names_both_rooms = bool(
+                re.search(r"\bsalon\b", arrangement)
+                and re.search(r"\bkitchen[- ]dining\b", arrangement)
+            )
+            if not names_both_rooms:
+                location = re.search(
+                    r"\bin\s+(?:the\s+)?" + dining_room + r"\b", arrangement
+                )
+        if not location and not shared_seats:
             location = re.search(
                 r"\b" + dining_room + r"\s+with\s+$", dining[: match.start()]
             )
         if location:
-            if value > 4:
+            if shared_seats:
+                questions.append(
+                    f"The {location[1]} has one modeled table. Confirm a different location for the second table."
+                )
+            elif value > 4:
                 questions.append(
                     f"The {location[1]} has four modeled places. "
                     f"Confirm how to accommodate the requested {value} places there."
                 )
         elif not re.match(r"\s+(?:per|for each)\b", tail):
             totals.add(value)
+    if requested_split and not split:
+        questions.append(
+            "Confirm separate dining tables in the brief controls, or revise the seating arrangement."
+        )
     if requests_single_table(text):
         if split and "split_dining" in explicit:
             questions.append(
@@ -174,12 +191,13 @@ def requirement_controls(brief, message, previous):
     elif totals:
         seats = totals.pop()
 
+    circulation = ". ".join(_affirmative_clauses(message))
     if fixed := re.search(
-        PATH
-        + r"\s+(?:of|at least|width|of at least)\s+"
+        PASSAGE
+        + r"\s+(?:width\s+)?(?:of |at least |of at least )?"
         + MEASUREMENT
         + r"(?:\s+wide)?\s+between\b",
-        text,
+        circulation,
     ):
         questions.append(
             f"The requested {fixed[1]} {fixed[2]} clearance between specific objects "
@@ -188,7 +206,7 @@ def requirement_controls(brief, message, previous):
     widths = {
         float(value) / {"m": 1, "cm": 100, "mm": 1000}[unit]
         for pattern in WIDTH_PATTERNS
-        for value, unit in re.findall(pattern, text)
+        for value, unit in re.findall(pattern, circulation)
     }
     if any(not 0.6 <= value <= 2 for value in widths):
         questions.append("Choose a modeled passage width between 0.6 and 2 m.")
