@@ -179,7 +179,7 @@ def test_single_table_and_room_specific_seating_remain_hard_requirements():
         ("Design a home with room for two residents and four dinner guests.", 6),
         ("Leave room for two desks.", 0),
         ("Seat four people at one table and two at the other.", 6),
-        ("Include a formal salon with room for six diners.", 6),
+        ("Make room for six diners.", 6),
         ("Do not seat everyone at one table.", 0),
     ],
 )
@@ -187,6 +187,17 @@ def test_occupancy_and_split_requests_do_not_conflict(brief_text, seats):
     brief, questions = requirement_controls(Brief(split_dining=True), brief_text, None)
     assert not questions
     assert brief.split_dining and brief.dining_seats == seats
+
+
+def test_one_room_seating_does_not_become_split_dining():
+    request = SimpleNamespace(
+        brief=Brief(compare_tradeoffs=True, split_dining=True),
+        agent_team=True,
+        live=True,
+        message="Include a formal salon with room for six diners.",
+    )
+    with pytest.raises(service.BriefClarification, match="requested 6 places there"):
+        service.interpret(request, None)
 
 
 def test_single_table_capacity_request_is_preserved(monkeypatch):

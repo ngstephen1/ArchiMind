@@ -96,12 +96,13 @@ def requirement_controls(brief, message, previous):
     )
     totals = set()
     questions = []
+    dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
     for match in seat_phrases:
         value = count(next(group for group in match.groups() if group is not None))
         location = re.match(
-            r"\s+(?:in|at)\s+(?:the\s+)?(formal salon|salon|kitchen(?:[- ]dining)?)\b",
+            r"\s+(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b",
             text[match.end() :],
-        )
+        ) or re.search(r"\b" + dining_room + r"\s+with\s+$", text[: match.start()])
         if location:
             if value > 4:
                 questions.append(
