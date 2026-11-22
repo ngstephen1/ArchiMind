@@ -24,10 +24,26 @@ COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")\b"
 
 
 MEASUREMENT = r"(?<![\d.])(\d+(?:\.\d+)?|\.\d+)\s*(mm|cm|m)\b"
-PASSAGE = r"(?:passage|walkway|route|circulation)s?\b"
+PASSAGE = r"(?:passages?|walkways?|circulation)\b"
+ROUTE = r"routes?\b"
 WIDTH_PATTERNS = (
-    MEASUREMENT + r"\s+(?:(?:clear|wide)\s+)*" + PASSAGE,
-    PASSAGE + r"\s+(?:width\s+)?(?:(?:of|at least|min(?:imum)?)\s+)?" + MEASUREMENT,
+    MEASUREMENT + r"\s+(?:(?:clear|wide)\s+){0,2}" + PASSAGE,
+    MEASUREMENT + r"\s+(?:clear\s+)?wide\s+(?:clear\s+)?" + ROUTE,
+    r"(?:"
+    + PASSAGE
+    + "|"
+    + ROUTE
+    + r")\s+width\s+"
+    + r"(?:(?:of|at least|min(?:imum)?)\s+)?"
+    + MEASUREMENT,
+    r"(?:"
+    + PASSAGE
+    + "|"
+    + ROUTE
+    + r")\s+"
+    + r"(?:(?:of|at least|min(?:imum)?)\s+)?"
+    + MEASUREMENT
+    + r"\s+wide\b",
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 

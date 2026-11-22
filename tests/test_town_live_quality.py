@@ -143,6 +143,14 @@ def test_total_seats_differ_from_per_room_counts(phrase, seats):
     assert brief.dining_seats == seats
 
 
+def test_route_length_does_not_override_clear_passage_width():
+    brief, questions = requirement_controls(
+        Brief(), "I prefer routes 8 m or shorter, with a 90 cm clear passage.", None
+    )
+    assert brief.passage_m == 0.9
+    assert not questions
+
+
 def test_single_table_and_room_specific_seating_remain_hard_requirements():
     brief, questions = requirement_controls(
         Brief(), "Six dining seats at one table.", None
