@@ -134,3 +134,10 @@ test("a standalone why question stays on the saved revision", () => {
   assert.equal(isSavedDesignQuestion("Why is it there? Then redesign the salon."), false);
   assert.equal(isSavedDesignQuestion("WhyNot move the chair?"), false);
 });
+
+test("saved comparison evidence preserves a specific daylight question", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  home.evidence.comparison = {routes: [], dining_places: {}, passage_m: 0.6};
+  assert.match(explanation(home, "Explain daylight in the study"), /nearest window center/);
+  assert.match(explanation(home, "Explain the placements"), /modeled passage check/);
+});

@@ -88,7 +88,21 @@ def _completed(directory, stage):
             for name, digest in result["files"].items()
         ):
             return None
-        return {"state": "ready", "phase": "Completed", **result}
+        if stage == "proof":
+            receipt = json.loads((directory / "receipt.json").read_bytes())
+            if not {"home.blend", "manifest.json"} <= receipt[
+                "files"
+            ].keys() or not all(
+                name == Path(name).name and _file_hash(directory / name) == digest
+                for name, digest in receipt["files"].items()
+            ):
+                return None
+        return {
+            "state": "ready",
+            "phase": "Completed",
+            "files": result["files"],
+            "seconds": result["seconds"],
+        }
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return None
 
@@ -320,6 +334,8 @@ def _run(key, snapshot, blender, stage, directory):
                 raise ValueError("Renderer settings changed during the job.")
             result = {"seconds": round(time.monotonic() - start, 1), "files": files}
             (out / "town-render.json").write_text(json.dumps(result))
+            if not _completed(out, stage):
+                raise ValueError("Render evidence did not verify.")
             target = directory / stage
             if target.exists():
                 shutil.rmtree(target)

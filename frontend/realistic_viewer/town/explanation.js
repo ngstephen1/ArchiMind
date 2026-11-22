@@ -70,7 +70,7 @@ export function explanation(home, question, manifest = null, previous = null) {
   if (asksChairChange(q)) return chairChange(home, manifest, previous);
   const comparison = home.evidence?.comparison;
   if (comparison && /\b(why|explain|layout|route|seating)\b/.test(q) &&
-      !/\b(desk|window|rug|chair|lamp|oak)\b/.test(q)) {
+      !/\b(desk|window|rug|chair|lamp|oak|daylight|glare)\b/.test(q)) {
     const routes = comparison.routes.map(r => `${r.room} to ${r.target} via hall ${r.distance_m.toFixed(2)} m`);
     const seats = Object.entries(comparison.dining_places).map(([room, count]) => `${room} ${count} places at one table`);
     return [routes.length ? "Measured routes between room entrances · " + routes.join(", ") + "." : "",

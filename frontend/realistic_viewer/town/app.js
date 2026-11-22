@@ -137,6 +137,7 @@ function sync(data) {
   el("width").value = applied.width;
   el("depth").value = applied.depth;
   el("style").value = homeStyle(applied);
+  el("formalSalon").checked = applied.rooms.some(part => part.design.room.id === "salon");
   const requirements = applied.evidence?.comparison;
   el("diningSeats").value = requirements?.required_dining_seats ?? 0;
   el("splitDining").checked = requirements?.split_dining ?? false;

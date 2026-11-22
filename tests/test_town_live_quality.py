@@ -200,6 +200,21 @@ def test_approval_cache_and_tamper_recovery(tmp_path, monkeypatch, distinct):
                         }
                     )
                 )
+                (output / "saved-style-receipt.json").write_text("style")
+                (output / "receipt.json").write_text(
+                    json.dumps(
+                        {
+                            "files": {
+                                name: render_queue._file_hash(output / name)
+                                for name in (
+                                    "manifest.json",
+                                    "home.blend",
+                                    "saved-style-receipt.json",
+                                )
+                            }
+                        }
+                    )
+                )
             else:
                 output = render_queue.Path(argv[-1])
                 output.mkdir()
@@ -226,6 +241,12 @@ def test_approval_cache_and_tamper_recovery(tmp_path, monkeypatch, distinct):
     asset.write_bytes(b"corrupt")
     assert render_queue.describe(snapshot, blender)["proof"]["state"] == "idle"
     asset.write_text("home.blend")
+    style_receipt = asset.with_name("saved-style-receipt.json")
+    style_receipt.unlink()
+    assert render_queue.describe(snapshot, blender)["proof"]["state"] == "idle"
+    with pytest.raises(service.Problem, match="inspect the proof"):
+        render_queue.request(snapshot, blender, "hd")
+    style_receipt.write_text("style")
     if distinct:
         render_queue.request(snapshot, blender, "hd")
         assert wait("hd") == "ready"

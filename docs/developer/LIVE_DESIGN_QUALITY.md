@@ -20,3 +20,9 @@ On Linux, set `TOWN_BLENDER_BIN` to the installed `blender` executable. Open **D
 The local queue renders one task at a time. It reports actual pipeline phases and stores completed jobs next to the Town database under `town-renders/`. Repeated requests for the same snapshot and renderer settings reuse verified files. Failed jobs can be retried. If the desk view falls back to the doorway camera, the proof stays available and Town explains why HD is blocked. Keep the launcher running until the render finishes.
 
 For a CPU/GPU comparison, use the identical saved snapshot, manifest, style export and camera. Run the whole-home renderer with `--quick-proof` on CPU and with `--quick-proof --gpu` on a Blender host with OptiX. Compare wall-clock time, device names and the same rendered crop at the same resolution and samples. Record GPU memory on the host and calculate cost per accepted image from the actual runner charges.
+
+## Verified example
+
+The synthetic 15 × 16 m brief with seed 42 completed live interpretation, styling and visual plan review in three OpenAI calls. Layout A placed the study 13.46 m from the living room in plan, center to center. Layout B reduced the modeled kitchen-dining-to-salon route from 12.87 m to 7.99 m. Both layouts retained the six-place requirement and modeled four places at each of the two accepted tables.
+
+In the browser, Layout A was applied as revision 1. Moving the bedroom chair outward 0.300 m created revision 2. The saved-design answer reported the nearest footprint gap to the Belaya desk changing from 0.060 m to 0.360 m. The [revision-bound sample files](../data/live-quality-proof/README.md) reproduce the saved design for offline rendering.
