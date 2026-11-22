@@ -42,10 +42,15 @@ REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 
 def _affirmative_clauses(message):
     """Keep supported affirmative clauses ahead of an explicit negation."""
+    message = re.sub(
+        r"\b(?:don['’]t|do not|never)\b[^.;!?\n]*,\s*or\b[^.;!?\n]*",
+        "",
+        message.lower(),
+    )
     clauses = re.split(
         r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:and\s+)?"
         r"(?:not|never|no|keep|add|use|place|put|include|maintain|reserve|leave|allow|ensure|provide|make|seating)\b)",
-        message.lower(),
+        message,
     )
     negative = r"\b(?:not(?!\s+only\b)|never|don['’]t|no need|instead of)\b"
     return [
@@ -143,15 +148,26 @@ def requirement_controls(brief, message, previous):
         location = re.match(r"\s+(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b", tail)
         if shared_seats:
             requested_split = True
-            arrangement = re.split(r"[,.;]", tail[shared_seats.end() :], maxsplit=1)[0]
-            names_both_rooms = bool(
-                re.search(r"\bsalon\b", arrangement)
-                and re.search(r"\bkitchen(?:[- ]dining)?\b", arrangement)
+            arrangement = tail[shared_seats.end() :].split(".", 1)[0]
+            named_places = list(
+                re.finditer(r"\bin\s+(?:the\s+)?" + dining_room + r"\b", arrangement)
             )
-            if not names_both_rooms:
-                location = re.search(
-                    r"\bin\s+(?:the\s+)?" + dining_room + r"\b", arrangement
-                )
+            named_pair = re.match(
+                r"\s*(?:the\s+)?"
+                + dining_room
+                + r"\s*,?\s+and\s+(?:the\s+)?"
+                + dining_room
+                + r"\b",
+                arrangement,
+            )
+            room_names = [place[1] for place in named_places]
+            if named_pair:
+                room_names.extend(named_pair.groups())
+            names_both_rooms = any("salon" in name for name in room_names) and any(
+                "kitchen" in name for name in room_names
+            )
+            if named_places and not names_both_rooms:
+                location = named_places[0]
         if not location and not shared_seats:
             location = re.search(
                 r"\b" + dining_room + r"\s+with\s+$", dining[: match.start()]

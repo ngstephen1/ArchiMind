@@ -191,6 +191,12 @@ def test_single_table_and_room_specific_seating_remain_hard_requirements():
         ("Not only seating for six but also a quiet study.", 6),
         ("Keep the floor plan divided between quiet and social areas.", 0),
         ("Don't move the sofa, provide seating for six.", 6),
+        ("Do not move the sofa, add seating for six, or widen the passage.", 0),
+        (
+            "Six seats split across two tables, one in the salon and one in the kitchen.",
+            6,
+        ),
+        ("Seating for four, split between the salon and the kitchen.", 4),
         ("Six seats split across two tables, and add lighting in the salon.", 6),
         ("Seating for six split between the salon and the kitchen.", 6),
         (
@@ -217,10 +223,18 @@ def test_two_table_request_needs_explicit_confirmation():
     assert any("Confirm separate dining tables" in item for item in questions)
 
 
-def test_local_split_cannot_move_one_rooms_second_table_to_another_room():
+@pytest.mark.parametrize(
+    "arrangement",
+    [
+        "across two tables in the salon",
+        "across two tables, both in the salon",
+        "across two tables in the salon near the kitchen entrance",
+    ],
+)
+def test_local_split_cannot_move_one_rooms_second_table_to_another_room(arrangement):
     _, questions = requirement_controls(
         Brief(split_dining=True),
-        "Request six seats split across two tables in the salon.",
+        f"Request six seats split {arrangement}.",
         None,
     )
     assert any("salon has one modeled table" in item for item in questions)
