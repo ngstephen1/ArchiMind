@@ -143,6 +143,23 @@ def test_total_seats_differ_from_per_room_counts(phrase, seats):
     assert brief.dining_seats == seats
 
 
+def test_single_table_and_room_specific_seating_remain_hard_requirements():
+    brief, questions = requirement_controls(
+        Brief(), "Six dining seats at one table.", None
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining and not questions
+    request = SimpleNamespace(
+        brief=Brief(compare_tradeoffs=True, split_dining=True),
+        agent_team=True,
+        live=True,
+        message="Seating for six at a single table, with six seats in the formal salon.",
+    )
+    with pytest.raises(service.BriefClarification, match="one dining table") as exc:
+        service.interpret(request, None)
+    assert "requested 6 places there" in str(exc.value)
+    assert "6 dining places at one table" in exc.value.reviewed["requirements"]
+
+
 def test_conflicting_control_needs_confirmation():
     request = SimpleNamespace(
         brief=Brief(compare_tradeoffs=True, passage_m=0.6),

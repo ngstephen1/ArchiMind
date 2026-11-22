@@ -20,7 +20,7 @@ NUMBERS = {
         )
     )
 }
-COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")"
+COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")\b"
 
 
 MEASUREMENT = r"(?<![\d.])(\d+(?:\.\d+)?|\.\d+)\s*(mm|cm|m)\b"
@@ -54,22 +54,45 @@ def requirement_controls(brief, message, previous):
         return int(value) if value.isdecimal() else NUMBERS[value]
 
     text = message.lower()
-    totals = {
-        count(match[1])
-        for match in re.finditer(
+    seat_phrases = list(
+        re.finditer(
             COUNT
             + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
-            + r"(?!\s+(?:per|for each|(?:in|at)(?!\s+(?:total|one table|a single table)\b))\b)",
+            + r"|\b(?:dining\s+)?(?:seating|room) for\s+"
+            + COUNT,
             text,
         )
-    }
+    )
+    totals = set()
+    questions = []
+    for match in seat_phrases:
+        value = count(match[1] or match[2])
+        location = re.match(
+            r"\s+(?:in|at)\s+(?:the\s+)?(formal salon|salon|kitchen(?:[- ]dining)?)\b",
+            text[match.end() :],
+        )
+        if location:
+            if value > 4:
+                questions.append(
+                    f"The {location[1]} has four modeled places. "
+                    f"Confirm how to accommodate the requested {value} places there."
+                )
+        elif not re.match(r"\s+(?:per|for each)\b", text[match.end() :]):
+            totals.add(value)
+    if re.search(
+        r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", text
+    ):
+        if split and "split_dining" in explicit:
+            questions.append(
+                "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
+            )
+        split = False
     guests = re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", text)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", text)
     if guests and residents:
         totals.add(count(guests[1]) + count(residents[1]))
     elif guests and not totals:
         totals.add(max(seats, count(guests[1])))
-    questions = []
     if len(totals) > 1 or (
         totals and "dining_seats" in explicit and seats not in totals
     ):
