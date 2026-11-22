@@ -212,6 +212,13 @@ def test_nov24_brief(case, saved_home, monkeypatch, record_property):
             if before_room.get(key) != after_room.get(key)
         )
         assert changed_fields == ["style"]
+        restored = copy.deepcopy(previous)
+        restored_room = room(restored, "bedroom")
+        if "style" in before_room:
+            restored_room["style"] = before_room["style"]
+        else:
+            restored_room.pop("style")
+        assert restored == before
     record_property(
         "observation",
         json.dumps(

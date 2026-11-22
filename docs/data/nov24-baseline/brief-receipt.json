@@ -1,7 +1,7 @@
 {
   "runtime_baseline": "c7e33364d2b148293b62ae26ad59375bdb1eb9ce",
   "fixtures_sha256": "b807f9fe012965f590f19e9e60d1232181d3aea811ed87d204cb9b9ff68adb95",
-  "test_sha256": "5c31805ff700a1a517f492856a7188d6aa6131d64ecfa8e35b54a82f43d4c87d",
+  "test_sha256": "1fd3795e41828b2891eefdb8482631c8eb215370d92b38d0c1edc5eaafbd9783",
   "python": "3.11.13",
   "machine": "Darwin arm64",
   "command": "PYTHONPATH=src PYTHONDONTWRITEBYTECODE=1 python -m pytest -q -p no:cacheprovider -o junit_family=xunit1 -rxX --tb=short --junitxml=/tmp/archimind-nov24-briefs.xml tests/test_town_nov24_baseline.py",
@@ -36,12 +36,12 @@
         }
       ],
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 702,
+      "elapsed_ms": 524,
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "supported",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "supported"
     },
     {
       "case": "hosting",
@@ -77,12 +77,12 @@
         }
       ],
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 800,
+      "elapsed_ms": 548,
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "supported",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "supported"
     },
     {
       "case": "separation",
@@ -112,12 +112,12 @@
         }
       ],
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 679,
+      "elapsed_ms": 455,
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "supported",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "supported"
     },
     {
       "case": "split-dining",
@@ -153,12 +153,12 @@
         }
       ],
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 806,
+      "elapsed_ms": 564,
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "supported",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "supported"
     },
     {
       "case": "single-table",
@@ -170,10 +170,10 @@
       "expected_dining_seats": 6,
       "applied_dining_seats": 0,
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 790,
-      "expected_outcome": "clarification",
+      "elapsed_ms": 546,
       "verdict": "baseline_gap",
-      "gap": "Seat six people at a single table can lose the six-seat requirement."
+      "gap": "Seat six people at a single table can lose the six-seat requirement.",
+      "expected_outcome": "clarification"
     },
     {
       "case": "passage-conversion",
@@ -201,12 +201,12 @@
         }
       ],
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 623,
+      "elapsed_ms": 443,
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "supported",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "supported"
     },
     {
       "case": "width-conflict",
@@ -232,8 +232,8 @@
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "clarification",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "clarification"
     },
     {
       "case": "local-clearance",
@@ -259,8 +259,8 @@
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "abstention",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "abstention"
     },
     {
       "case": "locked-bedroom",
@@ -282,14 +282,14 @@
         }
       ],
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 330,
+      "elapsed_ms": 252,
       "input_sha256_before": "c9d129444a8e683069aed4a9978f8189686fa9512eb5b7c27ceb94fa71998f93",
       "input_sha256_after": "681d24c4cd004198456ab7ba1ff9de551c405621bceb433ae89e2ac8de7af304",
       "changed_locked_fields": [
         "style"
       ],
-      "expected_outcome": "supported",
       "verdict": "baseline_gap",
+      "expected_outcome": "supported",
       "gap": "Locked geometry is preserved, but generation mutates the input room's presentation metadata."
     },
     {
@@ -303,8 +303,8 @@
       "input_sha256_before": "c9d129444a8e683069aed4a9978f8189686fa9512eb5b7c27ceb94fa71998f93",
       "input_sha256_after": "c9d129444a8e683069aed4a9978f8189686fa9512eb5b7c27ceb94fa71998f93",
       "changed_locked_fields": [],
-      "expected_outcome": "clarification",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "clarification"
     },
     {
       "case": "second-storey",
@@ -330,8 +330,8 @@
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "abstention",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "abstention"
     },
     {
       "case": "tight-lot-exhausted",
@@ -340,12 +340,12 @@
       "message": "Search exhausted without a connected furnished home.",
       "reviewed": null,
       "interpreter_fixture_calls": 1,
-      "elapsed_ms": 802,
+      "elapsed_ms": 446,
       "input_sha256_before": null,
       "input_sha256_after": null,
       "changed_locked_fields": [],
-      "expected_outcome": "abstention",
-      "verdict": "passed"
+      "verdict": "passed",
+      "expected_outcome": "abstention"
     }
   ]
 }

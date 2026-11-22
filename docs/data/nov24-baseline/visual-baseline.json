@@ -74,7 +74,11 @@
           1336,
           744
         ],
-        "subject": "Window frame and pleats, bedding edge and rug return"
+        "subject": "Window frame and pleats, bedding edge and rug return",
+        "output_size_px": [
+          588,
+          560
+        ]
       }
     },
     {
@@ -110,7 +114,11 @@
           1480,
           1014
         ],
-        "subject": "Belaya oak, chair textile, contact shadows and floor gap"
+        "subject": "Belaya oak, chair textile, contact shadows and floor gap",
+        "output_size_px": [
+          850,
+          572
+        ]
       }
     },
     {
@@ -153,11 +161,30 @@
           1815,
           948
         ],
-        "subject": "Window highlights, both groups and circulation between them"
+        "subject": "Window highlights, both groups and circulation between them",
+        "output_size_px": [
+          850,
+          483
+        ]
       }
     }
   ],
   "baseline_commit": "c7e33364d2b148293b62ae26ad59375bdb1eb9ce",
   "blender_scene_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44993303088",
-  "full_resolution_render_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44994306268"
+  "full_resolution_render_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44994306268",
+  "crop_preparation": {
+    "color_mode": "RGB",
+    "fit_within_px": [
+      850,
+      700
+    ],
+    "upscale": false,
+    "resample": "Lanczos",
+    "output": {
+      "format": "JPEG",
+      "quality": 91,
+      "optimize": true,
+      "subsampling": 0
+    }
+  }
 }

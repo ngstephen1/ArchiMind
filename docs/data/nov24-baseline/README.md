@@ -63,7 +63,7 @@ The 45-second threshold is the review target chosen for this baseline. Report fi
 | [Bedroom desk](crops/bedroom-desk.jpg) | Belaya finish, sage upholstery, floor shadow and the chair pullout. | Keep contact at the chair legs and desk panels. Improve textile detail and preserve the visible approach. |
 | [Salon overview](crops/salon-overview.jpg) | Landscape frame, window light, conversation seating, dining group and passage between them. | Recover pleat and jamb detail, improve upholstery seams and add texture to the seating rug. Keep the four dining seats and visible route. |
 
-Each JPEG is a crop of its verified PNG, identified by pixel bounds and hash in the receipt. Use the same crop on the next full-resolution render without moving the camera. View the full frames for context before scoring. The field `architectural_projection` records the salon's level target and vertical shift. The two bedroom shots have no such shift.
+Each JPEG is a crop of its verified PNG, identified by pixel bounds and hash in the receipt. Apply the same native pixel bounds and the recorded Lanczos fit within 850 × 700 px without upscaling. Match the individual JPEG dimensions before comparing detail. Keep the camera fixed. View the full frames for context before scoring. The field `architectural_projection` records the salon's level target and vertical shift. The two bedroom shots have no such shift.
 
 ### Visual scoring
 
