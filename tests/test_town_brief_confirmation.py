@@ -570,3 +570,27 @@ def test_declined_standalone_salon_is_not_a_requirement_or_source():
     } in review_summary(
         Brief(formal_salon=True), message=phrase, controls={"formal_salon"}
     )["sources"]
+
+
+def test_salon_question_followed_by_no_does_not_add_a_room():
+    phrase = "Formal salon? No, keep the five standard rooms."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and not brief.formal_salon
+    assert {
+        "requirement": "Formal salon",
+        "origin": "controls",
+        "statement": None,
+    } in review_summary(
+        Brief(formal_salon=True), message=phrase, controls={"formal_salon"}
+    )["sources"]
+
+
+def test_salon_shorthand_before_seating_is_quoted():
+    phrase = "Formal salon; four seats in the salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+    assert {
+        "requirement": "Formal salon",
+        "origin": "brief",
+        "statement": "Formal salon;",
+    } in review_summary(brief, message=phrase)["sources"]

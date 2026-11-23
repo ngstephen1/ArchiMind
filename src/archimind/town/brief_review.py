@@ -60,7 +60,7 @@ OFFSITE_MEAL = (
 )
 DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
 SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
-SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!?]?"
+SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
 
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
@@ -105,10 +105,13 @@ def _affirmative_clauses(message):
 def _requests_salon(message):
     # Keep qualifications on a bare noun phrase. Trimming “not needed” would
     # flip a declined room into an affirmative request.
-    return any(
-        re.fullmatch(SALON_ONLY, sentence.strip().lower())
-        for sentence in re.split(r"(?<=[.!?;])\s+|\n+", message)
-    ) or any(
+    sentences = re.split(r"(?<=[.!?])\s+|(?<=;)\s*|\n+", message.lower())
+    bare_request = any(
+        re.fullmatch(SALON_ONLY, sentence.strip())
+        and not re.match(r"\s*(?:no|not|never|skip)\b", following)
+        for sentence, following in zip(sentences, sentences[1:] + [""], strict=True)
+    )
+    return bare_request or any(
         re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(message)
     )
 
@@ -605,7 +608,9 @@ def review_summary(
             "formal_salon",
             inherited="salon" in saved_rooms,
             interpreted=True,
-            accepts=_requests_salon,
+            accepts=lambda sentence: (
+                _requests_salon(message) and _requests_salon(sentence)
+            ),
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
