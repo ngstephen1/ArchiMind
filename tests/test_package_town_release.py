@@ -152,6 +152,10 @@ def test_build_writes_verified_zip_and_refuses_to_replace_it(
             "manifest_sha256": digest(data),
             "files": {"manifest.json": digest(data), "home.blend": digest(native)},
         }
+        if salon_camera == "doorway":
+            finish = f"procedural materials for revision {revision}".encode()
+            (folder / api["FINISH_NOTICE"]).write_bytes(finish)
+            proof["files"][api["FINISH_NOTICE"]] = digest(finish)
         (folder / "receipt.json").write_text(json.dumps(proof))
         boards.append(board)
         proofs.append(proof)
@@ -217,6 +221,13 @@ def test_build_writes_verified_zip_and_refuses_to_replace_it(
     )
     api["build"](*arguments)
     with zipfile.ZipFile(destination) as archive:
+        if salon_camera == "doorway":
+            for revision in (1, 2):
+                notice = f"sources/r{revision}-{api['FINISH_NOTICE']}"
+                assert (
+                    archive.read(notice)
+                    == f"procedural materials for revision {revision}".encode()
+                )
         assert set(archive.namelist()) >= {
             "START-HERE.md",
             "revisions/r1-manifest.json",
