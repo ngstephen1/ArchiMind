@@ -37,7 +37,19 @@ WIDTH_PATTERNS = (
     + MEASUREMENT
     + r"(?!\s+(?:long|in length|or shorter|(?:away\s+)?from|between|past)\b)",
 )
+PARTY = r"\s+(?:people|persons|guests|diners)\b"
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
+ROOMS = (
+    r"(bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon)"
+)
+# A verb acting on a specific door or window, e.g. "keep the bedroom window" or
+# "add a second door". Spatial words end the object, so "keep the bedroom near
+# the door" and "move the desk closer to its window" are not opening requests.
+OPENING_REQUEST = (
+    r"\b(keep|preserve|move|relocate|shift|add|remove|block|widen|enlarge)\s+"
+    r"((?:(?!(?:near|away|from|to|by|next|close|closer|beside|facing|towards?|with"
+    r"|and|or|in|on|at)\b)[\w-]+\s+){0,3}?)(doors?|doorways?|windows?|openings?)\b"
+)
 
 
 def _affirmative_clauses(message):
@@ -54,7 +66,7 @@ def _affirmative_clauses(message):
     )
     negative = r"\b(?:not(?!\s+only\b)|never|don['’]t|no need|instead of)\b"
     return [
-        re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, 1)[0]
+        re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, maxsplit=1)[0]
         for clause in clauses
     ]
 
@@ -70,7 +82,8 @@ def requests_single_table(message):
             continue
         prefix = clause[: table.start()].strip()
         if re.search(
-            r"\b(?:all|everyone|party|seats?|places?|seating|dine|sit|seated|together)\b",
+            r"\b(?:all|everyone|party|seats?|places?|seating|dine|sit|seated|together"
+            r"|people|persons|guests|diners)\b",
             prefix,
         ):
             return True
@@ -139,7 +152,14 @@ def requirement_controls(brief, message, previous):
         + r"(?=\s*[,.;!?]|\s*$)"
         + r"|\broom for\s+"
         + COUNT
-        + r"\s+diners?\b",
+        + r"\s+diners?\b"
+        + r"|\bseat(?:ing)?\s+"
+        + COUNT
+        + PARTY
+        + r"|"
+        + COUNT
+        + PARTY
+        + r"\s+(?=(?:at|around) (?:one|a single|the same) (?:dining )?table\b)",
         dining,
     ):
         value = count(next(group for group in match.groups() if group is not None))
@@ -257,26 +277,147 @@ def requirement_controls(brief, message, previous):
     ), questions
 
 
-def review_summary(brief, *, message="", questions=(), unsupported=()):
-    requirements = [
+def _room_id(name):
+    word = name.split()[0]
+    return "kitchen-dining" if word.startswith("kitchen") else word
+
+
+def opening_questions(message, locks):
+    """Ask before generation when the brief needs one specific door or window.
+
+    Town generates door and window positions. A lock keeps a saved room's
+    openings, so keeping the openings of a locked room is already satisfied.
+    """
+    questions = []
+    for clause in _affirmative_clauses(message):
+        for match in re.finditer(OPENING_REQUEST, clause):
+            verb, words, noun = match.groups()
+            room = re.search(r"\b" + ROOMS + r"\b", clause)
+            room_id = _room_id(room[1]) if room else None
+            if verb in {"keep", "preserve"} and room_id in locks:
+                continue
+            requested = f"{verb} {words}{noun}".strip()
+            questions.append(
+                f"Town places doors and windows itself and cannot guarantee a request to "
+                f"{requested} for a specific door or window. Lock the room on a saved "
+                "revision to keep its openings, or revise the brief."
+            )
+    return questions
+
+
+def _statement(message, pattern):
+    """Return the user's sentence that states a requirement, if one does."""
+    for sentence in re.split(r"(?<=[.!?;])\s+|\n+", message.strip()):
+        if sentence and re.search(pattern, sentence, re.IGNORECASE):
+            return sentence.strip()
+    return None
+
+
+def _source(requirement, message, pattern, field, controls, carried, inherited):
+    if pattern and (statement := _statement(message, pattern)):
+        return dict(requirement=requirement, origin="brief", statement=statement)
+    if field in controls:
+        origin = "controls"
+    elif inherited:
+        origin = "saved revision"
+    elif carried:
+        origin = "interpreted"
+    else:
+        origin = "default"
+    return dict(requirement=requirement, origin=origin, statement=None)
+
+
+def review_summary(
+    brief,
+    *,
+    message="",
+    questions=(),
+    unsupported=(),
+    previous=None,
+    controls=frozenset(),
+):
+    """Summarize the brief for confirmation before any layout is generated.
+
+    Each requirement records where it came from: the user's own sentence, the
+    brief controls, the saved revision, the interpreter, or a Town default.
+    """
+    comparison = (previous or {}).get("evidence", {}).get("comparison", {})
+    saved_rooms = {r["design"]["room"]["id"] for r in (previous or {}).get("rooms", ())}
+    requirements, sources = [], []
+
+    def require(text, pattern, field, *, inherited=False, interpreted=False):
+        requirements.append(text)
+        sources.append(
+            _source(text, message, pattern, field, controls, interpreted, inherited)
+        )
+
+    require(
         f"Lot {brief.width:g} × {brief.depth:g} m",
+        r"\d+(?:\.\d+)?\s*(?:m|metres?|meters?)?\s*(?:by|x|×)\s*\d",
+        "width",
+        inherited=bool(previous),
+    )
+    passage_inherited = "passage_m" in comparison and brief.passage_m == comparison.get(
+        "passage_m"
+    )
+    require(
         f"{brief.passage_m:g} m modeled passage",
-    ]
+        "|".join(WIDTH_PATTERNS),
+        "passage_m",
+        inherited=passage_inherited,
+    )
     if brief.formal_salon:
-        requirements.append("Formal salon")
+        require(
+            "Formal salon",
+            r"\bsalon\b",
+            "formal_salon",
+            inherited="salon" in saved_rooms,
+            interpreted=True,
+        )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
-        requirements.append(f"{brief.dining_seats} dining places {arrangement}")
+        require(
+            f"{brief.dining_seats} dining places {arrangement}",
+            r"\b(?:seats?|seating|places|tables?|guests|diners|dinner)\b",
+            "dining_seats",
+            inherited=brief.dining_seats == comparison.get("required_dining_seats"),
+        )
     if brief.locks:
-        requirements.append("Keep " + ", ".join(brief.locks))
+        require(
+            "Keep " + ", ".join(brief.locks),
+            r"\b(?:keep|lock|preserve)\b",
+            "locks",
+            interpreted=True,
+        )
+    assumptions = []
+    if sources[1]["origin"] == "default":
+        assumptions.append(
+            "0.6 m modeled passage is Town's default because no width was stated."
+        )
+    assumptions.append(
+        "Doors and windows are modeled by Town. Confirm existing openings, "
+        "clearances and dimensions with a site survey."
+    )
+    if brief.locks:
+        assumptions.append(
+            "Locked rooms keep their saved placement, openings and furniture."
+        )
     preferences = [
         f"{goal.room} {goal.relation} {goal.target}" for goal in brief.room_goals
     ]
     if brief.priority != "balanced":
         preferences.append(brief.priority)
     preferences.append(brief.style.replace("_", " "))
+    questions = [q for q in questions if q]
     return {
+        "status": "unsupported"
+        if unsupported
+        else "needs confirmation"
+        if questions
+        else "confirmed",
         "requirements": requirements,
+        "sources": sources,
+        "assumptions": assumptions,
         "preferences": preferences,
         "presentation_requests": [
             match.group(0).strip()
@@ -284,7 +425,7 @@ def review_summary(brief, *, message="", questions=(), unsupported=()):
                 r"\b(?:why|explain)\b[^.!?]*", message, re.IGNORECASE
             )
         ],
-        "questions": [q for q in questions if q],
+        "questions": questions,
         "unsupported": list(unsupported),
     }
 

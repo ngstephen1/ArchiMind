@@ -159,27 +159,7 @@ def test_nov24_brief(case, saved_home, monkeypatch, record_property):
         except (service.Problem, ValueError) as exc:
             error = exc
         elapsed_ms = round((time.perf_counter() - start) * 1000)
-        if error is None:
-            assert case["case"] == "single-table"
-            assert homes and len(calls) == 1 and prepared.dining_seats == 0
-            for home in homes:
-                validate_home(home)
-                assert home["evidence"]["comparison"]["required_dining_seats"] == 0
-            record_property(
-                "observation",
-                json.dumps(
-                    {
-                        "case": case["case"],
-                        "outcome": "unexpected_generation",
-                        "candidate_sha256": [home["id"] for home in homes],
-                        "expected_dining_seats": 6,
-                        "applied_dining_seats": prepared.dining_seats,
-                        "interpreter_fixture_calls": len(calls),
-                        "elapsed_ms": elapsed_ms,
-                    }
-                ),
-            )
-            raise KnownBaselineGap(case["known_gap"])
+        assert error is not None, f"{case['case']} generated {len(homes)} candidates"
         assert expected["message"].lower() in str(error).lower()
         reviewed = (
             error.reviewed if isinstance(error, service.BriefClarification) else None
