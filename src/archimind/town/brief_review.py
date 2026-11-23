@@ -50,7 +50,7 @@ FIXED_PASSAGE = (
     + r"|"
     + MEASUREMENT
     + r"\s+routes?\s+between\b[^.;!?\n]*"
-    + r"\b(?:measured\s+)?across\s+(?:the\s+)?(?:open\s+)?gap\b"
+    + r"\bmeasured\s+across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
 PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
@@ -71,7 +71,10 @@ OFFSITE_MEAL = (
     r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine)(?:\s+together)?)"
     r"\s+(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
 )
-SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
+SALON_ACTION = (
+    r"\b(?:include|add|use|with) (?:a |the )?(?:(?:separate|dedicated|additional) )?"
+    r"formal salon\b"
+)
 SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
 FIVE_STANDARD_ROOMS = r"\b(?:keep|use) (?:the )?five standard rooms\b"
 SALON_DECLINE = (
@@ -242,18 +245,23 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     text = ". ".join(clauses)
     dining = ". ".join(_dining_clauses(clauses))
     program, _ = salon_choice(message)
-    existing_salon = brief.formal_salon or any(
+    saved_salon = any(
         part["design"]["room"]["id"] == "salon"
         for part in (previous or {}).get("rooms", ())
     )
-    salon = existing_salon or program is True
+    salon = brief.formal_salon or saved_salon or program is True
     totals = set()
     questions = []
-    if brief.compare_tradeoffs and existing_salon and program is False:
-        questions.append(
-            "The controls or saved revision include a formal salon. Confirm the five-room "
-            "program in a new brief, or keep the formal salon."
-        )
+    if brief.compare_tradeoffs and program is False:
+        if saved_salon:
+            questions.append(
+                "This saved project includes the formal salon. Start a new project for "
+                "a five-room plan, or keep the salon in this revision."
+            )
+        elif brief.formal_salon:
+            questions.append(
+                "Confirm the five-room program by clearing the formal salon control."
+            )
     per_table = []
     count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
     split_counts = re.search(

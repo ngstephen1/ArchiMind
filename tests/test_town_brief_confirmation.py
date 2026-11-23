@@ -878,7 +878,8 @@ def test_newline_after_negation_preserves_dining_evidence():
 
 def test_route_length_between_rooms_does_not_block_a_valid_width():
     text = (
-        "Prefer an 8 m route between the kitchen and salon. Use an 80 cm clear passage."
+        "Prefer an 8 m route between the kitchen and salon that runs across the open gap. "
+        "Use an 80 cm clear passage."
     )
     brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
     assert not questions and brief.passage_m == 0.8
@@ -941,3 +942,17 @@ def test_combined_seating_quote_preserves_a_semicolon_without_spaces():
         "origin": "brief",
         "statement": text,
     } in review_summary(brief, message=text)["sources"]
+
+
+def test_a_later_explicit_salon_request_overrides_the_five_room_default(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(service.provider, "request", live_answer(formal_salon=True))
+    text = "Keep the five standard rooms. Actually, add a separate formal salon."
+    request = review_request(text, live=True, width=15, depth=16)
+    assert service.interpret(request, None).formal_salon
+
+
+def test_saved_salon_removal_identifies_the_new_project_path(saved_home):
+    request = review_request("Keep the five standard rooms.", width=15, depth=16)
+    with pytest.raises(service.BriefClarification, match="Start a new project"):
+        service.interpret(request, saved_home)
