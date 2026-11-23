@@ -1,0 +1,107 @@
+{
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+  "revision": 2,
+  "floor_obstacles": [
+    {
+      "id": "decor:plant",
+      "name": "plant",
+      "category": "decor",
+      "x_m": 0.05,
+      "y_m": 0.05,
+      "width_m": 0.45,
+      "depth_m": 0.45,
+      "height_m": 1.1,
+      "rotation_deg": 0
+    },
+    {
+      "id": "decor:floor_lamp",
+      "name": "floor_lamp",
+      "category": "decor",
+      "x_m": 6.142,
+      "y_m": 5.063,
+      "width_m": 0.4,
+      "depth_m": 0.4,
+      "height_m": 1.6,
+      "rotation_deg": 0
+    }
+  ],
+  "desk_id": "belaya",
+  "chair_id": "desk-chair",
+  "model": {
+    "tuck_m": 0.15,
+    "pullout_from_occupied_m": 0.3,
+    "occupied_basis": "Saved chair footprint as an occupied-position proxy. Body reach was not measured.",
+    "rear_gap_basis": "Straight gap from the chair back across its width; room circulation is checked separately."
+  },
+  "field_record": null,
+  "physical_findings": [
+    "Measure the desk's clear width, underside height and usable knee depth.",
+    "Measure chair width, depth and top of arms. Key each value to the field record."
+  ],
+  "states": [
+    {
+      "state": "tucked-in",
+      "chair": {
+        "id": "desk-chair",
+        "name": "Oak writing chair",
+        "category": "chair",
+        "x_m": 0.56,
+        "y_m": 4.341126822710038,
+        "width_m": 0.48,
+        "depth_m": 0.52,
+        "height_m": 0.83,
+        "rotation_deg": 0
+      },
+      "rear_gap_m": 4.341,
+      "min_passage_m": 0.6,
+      "modeled_room_circulation": "passed",
+      "modeled_layout_checks": "passed",
+      "modeled_failures": [],
+      "modeled_rear_gap": "passed",
+      "physical_tuck": "awaiting verification"
+    },
+    {
+      "state": "occupied",
+      "chair": {
+        "id": "desk-chair",
+        "name": "Oak writing chair",
+        "category": "chair",
+        "x_m": 0.56,
+        "y_m": 3.8311268227100372,
+        "width_m": 0.48,
+        "depth_m": 0.52,
+        "height_m": 0.83,
+        "rotation_deg": 0
+      },
+      "rear_gap_m": 3.831,
+      "min_passage_m": 0.6,
+      "modeled_room_circulation": "passed",
+      "modeled_layout_checks": "passed",
+      "modeled_failures": [],
+      "modeled_rear_gap": "passed",
+      "physical_tuck": "not applicable"
+    },
+    {
+      "state": "pulled-back",
+      "chair": {
+        "id": "desk-chair",
+        "name": "Oak writing chair",
+        "category": "chair",
+        "x_m": 0.56,
+        "y_m": 3.5311268227100374,
+        "width_m": 0.48,
+        "depth_m": 0.52,
+        "height_m": 0.83,
+        "rotation_deg": 0
+      },
+      "rear_gap_m": 3.531,
+      "min_passage_m": 0.6,
+      "modeled_room_circulation": "passed",
+      "modeled_layout_checks": "passed",
+      "modeled_failures": [],
+      "modeled_rear_gap": "passed",
+      "physical_tuck": "not applicable"
+    }
+  ]
+}

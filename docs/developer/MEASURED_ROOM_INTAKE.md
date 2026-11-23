@@ -47,6 +47,18 @@ Give the field record a date and the bedroom project ID. Add a source ID beside 
 
 Use the current field record for the bedroom project. Keep the whole-home demonstration under its own project ID. The Zane Street archive supplies an angled-bay observation and nominal room dimensions. Its current condition, exact perimeter and ceiling height still need field evidence.
 
+### Chair operating study
+
+Export the exact saved project revision as a Town API snapshot. Generate the dimensioned operating study and its JSON receipt.
+
+```sh
+python -m archimind.designer_handoff.chair_study snapshot-r2.json --output output/chair-study-r2
+```
+
+Use `--passage-m` to set the required modeled passage. The study tests the saved chair pose, a 150 mm tuck and a 300 mm pullback from the saved pose. It checks the full room circulation and also reports the straight gap behind the chair across its width. The saved footprint stands in for an occupied chair. Check body clearance and arm movement in the field.
+
+Supply `--field-record chair-measurements.json` to evaluate physical tuck. The record identifies `project`, `revision`, `home_id`, `desk_id` and `chair_id`, plus the ISO date `recorded_on` and the field note reference `source`. Record `clear_width_m`, `clear_height_m`, `clear_depth_m`, `opening_offset_from_desk_west_m`, `chair_width_m`, `chair_depth_m` and `chair_arm_height_m`. Keep the original measurements with the project. The report leaves physical fit pending when the record is absent or its dimensions conflict with the modeled reservations.
+
 Save the JSON as `room-survey.json`. From the installed ArchiMind environment run:
 
 ```sh
