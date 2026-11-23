@@ -29,7 +29,7 @@ def verified(path, expected):
     return path
 
 
-def demo_shell(room):
+def demo_shell(room, *, description="Saved Studio House bedroom concept, revision 2."):
     w, d = room["width_m"], room["depth_m"]
     openings = []
     for kind in ("door", "window"):
@@ -57,7 +57,7 @@ def demo_shell(room):
         sources=[
             dict(
                 id="board",
-                description="Saved Studio House bedroom concept, revision 2.",
+                description=description,
             )
         ],
         geometry_source="board",
