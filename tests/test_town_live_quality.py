@@ -58,13 +58,20 @@ def test_six_seats_preserved_and_explanation_routed(monkeypatch):
         and m["split_dining"]
         for m in measures
     )
-    distances = [
-        {(r["room"], r["target"]): r["distance_m"] for r in m["routes"]}
-        for m in measures
+    remeasured = [
+        validate_home(candidate, passage_m=confirmed.passage_m, measure=True)
+        for candidate in (a, b)
     ]
-    assert abs(distances[0]["study", "living"] - distances[1]["study", "living"]) >= 0.5
+    for reported, actual in zip(measures, remeasured, strict=True):
+        assert {key: reported[key] for key in actual} == actual
+    first, second = [
+        {(row["room"], row["target"]): row["distance_m"] for row in result["routes"]}
+        for result in remeasured
+    ]
+    # The option with more study/living separation carries a longer kitchen/salon walk.
+    assert first["study", "living"] - second["study", "living"] >= 0.5
+    assert first["kitchen-dining", "salon"] - second["kitchen-dining", "salon"] >= 0.5
     for candidate in (a, b):
-        validate_home(candidate)
         assert any(
             item.get("refined")
             for p in candidate["rooms"]
