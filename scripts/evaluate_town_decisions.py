@@ -75,6 +75,21 @@ def reviewed_payload_profile(cases):
             )
         ):
             return None
+        requirements = proposed["requirements"]
+        sources = proposed["sources"]
+        if (
+            not requirements
+            or not proposed["assumptions"]
+            or len(sources) != len(requirements)
+            or any(
+                not isinstance(source, dict)
+                or source.get("requirement") != requirement
+                or source.get("origin")
+                not in {"brief", "control", "default", "inherited", "interpreted"}
+                for source, requirement in zip(sources, requirements, strict=True)
+            )
+        ):
+            return None
     return decisions.APP_PAYLOAD_PROFILE
 
 
