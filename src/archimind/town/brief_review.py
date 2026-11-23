@@ -40,10 +40,15 @@ WIDTH_PATTERNS = (
     + r"(?!\s+(?:long|in length|or shorter|(?:away\s+)?from|between|past)\b)",
 )
 FIXED_PASSAGE = (
-    PASSAGE
+    r"(?:"
+    + MEASUREMENT
+    + r"\s+(?:(?:clear|wide)\s+){0,2}"
+    + PATH
+    + r"|"
+    + PASSAGE
     + r"\s+(?:width\s+)?(?:of |at least |of at least )?"
     + MEASUREMENT
-    + r"(?:\s+wide)?\s+between\b"
+    + r")(?:\s+wide)?\s+between\b"
 )
 PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
@@ -106,7 +111,7 @@ COORDINATED_OPENING = re.compile(
 )
 
 
-def _affirmative_clauses(message):
+def _affirmative_clauses(message, *, retain_dining_context=False):
     """Keep supported affirmative clauses ahead of an explicit negation."""
     message = re.sub(
         r"\b(?:don['’]t|do not|never)\b[^.;!?\n]*,\s*or\b[^.;!?\n]*",
@@ -118,8 +123,23 @@ def _affirmative_clauses(message):
         "need",
         message,
     )
+
+    def replace_rationale(match):
+        reason = match[0]
+        if (
+            retain_dining_context
+            and re.search(r"\b(?:dine|eat) together\b", reason)
+            and not re.search(OFFSITE_MEAL, reason)
+            and not re.search(r"\b(?:not|never|don['’]t|won['’]t|cannot)\b", reason)
+        ):
+            return " dine together "
+        return " "
+
+    message = re.sub(
+        r"\b(?:because|otherwise)\b[^;.!?,\n]*", replace_rationale, message
+    )
     clauses = re.split(
-        r"[;!?\n]|\.(?!\d)|\b(?:but|because|otherwise)\b|,(?=\s*(?:(?:and|so)\s+)?"
+        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:(?:and|so)\s+)?"
         r"(?:not|never|no|keep|add|use|place|put|include|maintain|reserve|leave|allow|ensure|provide|make|seating)\b)",
         message,
     )
@@ -140,19 +160,36 @@ def _salon_statement(message):
     sentences = re.split(SALON_SEGMENT_BREAK, message)
     following_sentences = sentences[1:] + [""]
     continuations = [*sentences, "", ""][2:]
+    statement = None
+    conditional_correction = False
     for sentence, following, continuation in zip(
         sentences, following_sentences, continuations, strict=True
     ):
         wrapped_condition = not following.rstrip().endswith(
             (".", "?", "!", ";")
         ) and re.match(CONDITIONAL_CONTINUATION, continuation.lower())
-        if re.match(SALON_DECLINE, following.lower()) and not wrapped_condition:
-            continue
+        if re.match(SALON_DECLINE, sentence.lower()) and not conditional_correction:
+            statement = None
+        conditional_correction = bool(wrapped_condition)
         if re.fullmatch(SALON_ONLY, sentence.strip().lower()) or any(
             re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(sentence)
         ):
-            return sentence.strip()
-    return None
+            statement = sentence.strip()
+    return statement
+
+
+def _dining_clauses(clauses):
+    for clause in clauses:
+        if offsite := re.search(OFFSITE_MEAL, clause):
+            home_request = re.search(
+                r"\b(?:so|and)\s+(?:(?:we|i)\s+)?(?:need|want|require|add|provide)\b",
+                clause[offsite.end() :],
+            )
+            if not home_request:
+                continue
+            clause = clause[offsite.end() + home_request.end() :]
+        if re.search(DINING_CONTEXT, clause):
+            yield clause
 
 
 def requests_single_table(message):
@@ -207,9 +244,13 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
     dining = ". ".join(
-        clause
-        for clause in clauses
-        if re.search(DINING_CONTEXT, clause) and not re.search(OFFSITE_MEAL, clause)
+        _dining_clauses(_affirmative_clauses(message, retain_dining_context=True))
+    )
+    salon_seating = any(
+        not re.match(r"\s*(?:if|unless|when|provided)\b", sentence.lower())
+        and re.search(r"\bformal salon\b", clause)
+        for sentence in re.split(STATEMENT_BREAK, message)
+        for clause in _dining_clauses(_affirmative_clauses(sentence))
     )
     salon = (
         brief.formal_salon
@@ -258,26 +299,6 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
         dining,
     )
-    if kitchen_table and brief.compare_tradeoffs:
-        amount = next(
-            (
-                total
-                for (start, stop), total in parties
-                if start <= kitchen_table.start() < stop
-            ),
-            count(kitchen_table[1]),
-        )
-        if amount > 4:
-            questions.append(
-                f"The kitchen-dining room has four modeled places. "
-                f"Confirm how to accommodate the requested {amount} places there."
-            )
-        elif not salon:
-            questions.append(
-                f"The brief requests {amount} dining places in the kitchen-dining room. "
-                "The five-room program has no modeled dining table there. "
-                "Confirm the six-room program or revise the seating requirement."
-            )
     counted = set()
     room_minima = {}
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
@@ -390,9 +411,29 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         totals.add(count(guests[1]) + count(residents[1]))
     elif guests and not totals:
         totals.add(max(seats, count(guests[1])))
+    if "salon" in room_minima and salon_seating:
+        salon = True
+    if kitchen_table and brief.compare_tradeoffs:
+        amount = next(
+            (
+                total
+                for (start, stop), total in parties
+                if start <= kitchen_table.start() < stop
+            ),
+            count(kitchen_table[1]),
+        )
+        if amount > 4:
+            questions.append(
+                f"The kitchen-dining room has four modeled places. "
+                f"Confirm how to accommodate the requested {amount} places there."
+            )
+        elif not salon:
+            questions.append(
+                f"The brief requests {amount} dining places in the kitchen-dining room. "
+                "The five-room program has no modeled dining table there. "
+                "Confirm the six-room program or revise the seating requirement."
+            )
     if room_minima:
-        if "salon" in room_minima and re.search(r"\bformal salon\b", dining):
-            salon = True
         for room, counts in room_minima.items():
             if len(counts) > 1:
                 questions.append(
@@ -432,8 +473,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
 
     circulation = text if evaluate_passage else ""
     if fixed := re.search(FIXED_PASSAGE, circulation):
+        measurement = re.search(MEASUREMENT, fixed[0])
+        assert measurement is not None
         questions.append(
-            f"The requested {fixed[1]} {fixed[2]} clearance between specific objects "
+            f"The requested {measurement[1]} {measurement[2]} clearance between specific objects "
             "needs a separate geometry check. Confirm a general circulation width or revise the brief."
         )
     widths = _widths(circulation)
@@ -496,7 +539,16 @@ def opening_questions(message, locks):
             verb, words, noun = match.groups()
             objects = [(match, words, noun)]
             end = match.end()
-            while continuation := COORDINATED_OPENING.match(clause, end):
+            while True:
+                qualifier = re.match(
+                    r"\s+(?:in|of|for|on|to)\s+(?:the\s+)?" + ROOMS + r"\b",
+                    clause[end:],
+                )
+                if qualifier:
+                    end += qualifier.end()
+                continuation = COORDINATED_OPENING.match(clause, end)
+                if not continuation:
+                    break
                 words, noun = continuation.groups()
                 objects.append((continuation, words, noun))
                 end = continuation.end()
@@ -579,18 +631,10 @@ def _dining_quote(brief, message):
     )
     if single:
         return single
-    # A total can be supported by two distinct room allocations.
-    statements = [
-        sentence.strip()
-        for sentence in re.split(STATEMENT_BREAK, message.strip())
-        if any(
-            re.search(DINING_CONTEXT, clause) and not re.search(OFFSITE_MEAL, clause)
-            for clause in _affirmative_clauses(sentence)
-        )
-    ]
-    combined = " ".join(statements)
-    if len(statements) > 1 and _dining_statement_matches(brief, combined):
-        return combined
+    # Preserve the submitted line breaks and punctuation in multi-room evidence.
+    message = message.strip()
+    if _dining_statement_matches(brief, message):
+        return message
     return None
 
 

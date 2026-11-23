@@ -390,3 +390,7 @@ def test_historical_reduced_cases_cannot_qualify_runtime_payloads(monkeypatch):
         }
     ]
     assert api["reviewed_payload_profile"](current) == decisions.APP_PAYLOAD_PROFILE
+    for field in ("sources", "assumptions"):
+        reduced = current[0]["input"]["proposed_brief"] | {field: []}
+        altered = [{"input": current[0]["input"] | {"proposed_brief": reduced}}]
+        assert api["reviewed_payload_profile"](altered) is None
