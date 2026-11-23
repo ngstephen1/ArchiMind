@@ -33,6 +33,16 @@ PULLOUT_M = 0.30
 TOLERANCE_M = 1e-9
 
 
+class ObservedChairOperation(BaseModel):
+    """On-site widths at the narrowest passage in the three observed positions."""
+
+    model_config = ConfigDict(extra="forbid")
+    tucked_in_m: Offset
+    occupied_m: Offset
+    pulled_back_m: Offset
+    pullback_m: Offset
+
+
 class ChairFieldRecord(BaseModel):
     """Physical measurements keyed to one saved project, revision and pair."""
 
@@ -51,6 +61,7 @@ class ChairFieldRecord(BaseModel):
     chair_width_m: Length
     chair_depth_m: Length
     chair_arm_height_m: Length
+    observed_operation: ObservedChairOperation | None = None
 
 
 def _front_side(chair: Furniture, desk: Furniture) -> int:
@@ -227,7 +238,7 @@ def chair_study(
                 "physical_tuck": fit if key == "tucked-in" else "not applicable",
             }
         )
-    return {
+    output = {
         "project": board["project"],
         "home_id": board["home_id"],
         "revision": board["revision"],
@@ -240,21 +251,44 @@ def chair_study(
             "occupied_basis": "Saved chair footprint as an occupied-position proxy. Body reach was not measured.",
             "rear_gap_basis": "Straight gap from the chair back across its width; room circulation is checked separately.",
         },
-        "field_record": record.model_dump(mode="json") if record is not None else None,
+        "field_record": (
+            record.model_dump(mode="json", exclude_none=True)
+            if record is not None
+            else None
+        ),
         "physical_findings": findings,
         "states": rows,
     }
+    if record and record.observed_operation:
+        observed = record.observed_operation
+        widths_m = (observed.tucked_in_m, observed.occupied_m, observed.pulled_back_m)
+        output["observed_operation"] = {
+            "pullback_m": observed.pullback_m,
+            "passages": {
+                row["state"]: {
+                    "width_m": width,
+                    "target_m": passage_m,
+                    "status": "meets target"
+                    if width + TOLERANCE_M >= passage_m
+                    else "below target",
+                }
+                for row, width in zip(rows, widths_m, strict=True)
+            },
+        }
+    return output
 
 
 def draw_study(board, report):
     design = _room_design(board)
     room = design.room
+    observed = report.get("observed_operation")
     # A measured furniture record can still be attached to a demonstration room.
     svg = _sheet(
         board,
         "demonstration",
         "Desk and chair operating study",
         402,
+        h=815 if observed else 760,
         source_label="Saved Town geometry",
     )
     scale = min(320 / room.width_m, 245 / room.depth_m)
@@ -348,6 +382,16 @@ def draw_study(board, report):
     _text(svg, 40, 631, report["model"]["rear_gap_basis"], 14)
     for index, finding in enumerate(report["physical_findings"]):
         _text(svg, 40, 654 + 20 * index, finding, 14, INK)
+    if observed:
+        _text(svg, 40, 718, f"Observed pullback · {observed['pullback_m']:.3f} m", 14)
+        for index, (state, check) in enumerate(observed["passages"].items()):
+            _text(
+                svg,
+                40 + index * 380,
+                742,
+                f"{state.title()} · {check['width_m']:.3f} m · {check['status']}",
+                14,
+            )
     return ET.tostring(svg, encoding="unicode")
 
 
