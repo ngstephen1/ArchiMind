@@ -85,7 +85,7 @@ def reviewed_payload_profile(cases):
                 not isinstance(source, dict)
                 or source.get("requirement") != requirement
                 or source.get("origin")
-                not in {"brief", "control", "default", "inherited", "interpreted"}
+                not in {"brief", "controls", "default", "saved revision", "interpreted"}
                 for source, requirement in zip(sources, requirements, strict=True)
             )
         ):
