@@ -1,0 +1,231 @@
+{
+  "commit": "ed74e0d239ba260dcd32aeb0a610a1da3e38c66d",
+  "runs": {
+    "45131718875": 14799251036,
+    "45131718940": 14798449281
+  },
+  "eye_receipts": [
+    {
+      "home_id": "d49a87b77fe4f85e9012ef7d391262189aefca508b805b2ecd702d666b79c67a",
+      "revision": 1,
+      "manifest_sha256": "81acf4e5cf41a289b1d37104bce62b3e3f2a6592a77aeeab5899669685f8a139",
+      "camera_manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+      "proof_blend_sha256": "805b7008fad0a893adbebc0a2c0e0ffc311daa5051e8d1a2aefe6486270a36bc",
+      "blender_version": "5.1.2",
+      "engine": "CYCLES",
+      "device": "CPU",
+      "max_samples": 96,
+      "threshold": 0.01,
+      "resolution": [
+        1920,
+        1080
+      ],
+      "view_transform": "AgX",
+      "view_look": "AgX - Medium High Contrast",
+      "textile_relief_materials": [
+        "Sage upholstery.001",
+        "Upholstery piping.001"
+      ],
+      "transmitted_window_emitters": [],
+      "packed_file_image_count": 40,
+      "daylight_rgb": [
+        1.0,
+        0.955,
+        0.91
+      ],
+      "daylight_emitters": [
+        "Daylight through bathroom-window",
+        "Daylight through bedroom-window",
+        "Daylight through kitchen-dining-window",
+        "Daylight through living-window",
+        "Daylight through salon-window",
+        "Daylight through study-window"
+      ],
+      "source_notices": {
+        "BELAYA_ATTRIBUTION.txt": "d98f0345b88863f862a360065e5cb92a0497675d47afd6cf6cd36436ce4469d8",
+        "ABO_LICENSE_CC_BY_4.0.txt": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+        "surface-sources.json": "63b070d004bdf50531f3e19d14bcbfa87ad241ace84b9d42a5f66fc4e83e7bce",
+        "saved-style-receipt.json": "4590bb029a40e45bea7f7796abf5131128fe9975e2419e5cc140df87ce602f4f"
+      },
+      "shots": [
+        {
+          "room": "bedroom",
+          "exposure_ev": 0.6569827198982239,
+          "view": "doorway",
+          "camera": {
+            "eye": [
+              5.851999999999999,
+              1.57,
+              -13.5935
+            ],
+            "fov": 69,
+            "id": "doorway",
+            "label": "Doorway",
+            "reason": null,
+            "target": [
+              2.7686,
+              0.58,
+              -11.896650000000001
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+          "file": "bedroom-doorway.png",
+          "sha256": "73c8e6385f57959e7f596b042d16d0ff455d8a02ba1e7af18a5be3b6128728ed"
+        },
+        {
+          "room": "bedroom",
+          "exposure_ev": 0.6569827198982239,
+          "view": "desk",
+          "camera": {
+            "eye": [
+              2.14,
+              1.57,
+              -13.317
+            ],
+            "fov": 58,
+            "id": "desk",
+            "label": "Desk and chair",
+            "reason": null,
+            "target": [
+              0.8,
+              0.5535709201097488,
+              -15.088595117032527
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+          "file": "bedroom-desk.png",
+          "sha256": "21bcccaf5d9fd538659747a1e57bd3ebc6c0dfe00ad62f3a90bb3c6da63a1d65"
+        }
+      ]
+    },
+    {
+      "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+      "revision": 2,
+      "manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+      "camera_manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+      "proof_blend_sha256": "4df70b0f149b4de40a5586b9829545924beb122db4db5334b0ec967b66d7e518",
+      "blender_version": "5.1.2",
+      "engine": "CYCLES",
+      "device": "CPU",
+      "max_samples": 96,
+      "threshold": 0.01,
+      "resolution": [
+        1920,
+        1080
+      ],
+      "view_transform": "AgX",
+      "view_look": "AgX - Medium High Contrast",
+      "textile_relief_materials": [
+        "Sage upholstery.001",
+        "Upholstery piping.001"
+      ],
+      "transmitted_window_emitters": [],
+      "packed_file_image_count": 40,
+      "daylight_rgb": [
+        1.0,
+        0.955,
+        0.91
+      ],
+      "daylight_emitters": [
+        "Daylight through bathroom-window",
+        "Daylight through bedroom-window",
+        "Daylight through kitchen-dining-window",
+        "Daylight through living-window",
+        "Daylight through salon-window",
+        "Daylight through study-window"
+      ],
+      "source_notices": {
+        "BELAYA_ATTRIBUTION.txt": "d98f0345b88863f862a360065e5cb92a0497675d47afd6cf6cd36436ce4469d8",
+        "ABO_LICENSE_CC_BY_4.0.txt": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+        "surface-sources.json": "63b070d004bdf50531f3e19d14bcbfa87ad241ace84b9d42a5f66fc4e83e7bce",
+        "saved-style-receipt.json": "0499cf3c5fa370127c96034616906538690d1e14ff70c3eee011fb1935162e0f"
+      },
+      "shots": [
+        {
+          "room": "bedroom",
+          "exposure_ev": 0.6569827198982239,
+          "view": "doorway",
+          "camera": {
+            "eye": [
+              5.851999999999999,
+              1.57,
+              -13.5935
+            ],
+            "fov": 69,
+            "id": "doorway",
+            "label": "Doorway",
+            "reason": null,
+            "target": [
+              2.7686,
+              0.58,
+              -11.896650000000001
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+          "file": "bedroom-doorway.png",
+          "sha256": "002d9da59c8c027ef111454d7764877d4fd16e7d6d0ab023bd2973334564a3fd"
+        },
+        {
+          "room": "bedroom",
+          "exposure_ev": 0.6569827198982239,
+          "view": "desk",
+          "camera": {
+            "eye": [
+              2.14,
+              1.57,
+              -13.317
+            ],
+            "fov": 58,
+            "id": "desk",
+            "label": "Desk and chair",
+            "reason": null,
+            "target": [
+              0.8,
+              0.5535709201097488,
+              -15.088595117032527
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+          "file": "bedroom-desk.png",
+          "sha256": "e42b776dc27aa42c8ca2844d4caa13e06e403b50ad2cec769807fe433530fad6"
+        },
+        {
+          "room": "salon",
+          "exposure_ev": -0.4186650216579437,
+          "view": "doorway",
+          "camera": {
+            "eye": [
+              5.851999999999999,
+              1.57,
+              -2.491
+            ],
+            "fov": 69,
+            "id": "doorway",
+            "label": "Doorway",
+            "reason": null,
+            "target": [
+              3.296,
+              0.91,
+              -2.491
+            ]
+          },
+          "architectural_projection": {
+            "level_target": [
+              3.296,
+              1.57,
+              -2.491
+            ],
+            "shift_y": -0.18785327672958374
+          },
+          "camera_manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+          "file": "salon-doorway.png",
+          "sha256": "c6d14beec36a7d3de8c223c64fb7f76a685fe3e87f4acbc0a0423b3c28f73105"
+        }
+      ]
+    }
+  ]
+}
