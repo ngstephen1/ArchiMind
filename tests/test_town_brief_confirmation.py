@@ -402,3 +402,15 @@ def test_supported_split_quote_survives_separate_passage_problem():
         item["statement"] == sentence and item["origin"] == "brief"
         for item in reviewed["sources"]
     )
+
+
+def test_lot_and_locks_are_not_credited_to_unrelated_requirements():
+    reviewed = review_summary(
+        Brief(locks=["bedroom"]),
+        message="Make the lot 12 by 14 m. Keep the passage at least 65 cm wide.",
+        controls={"width", "locks"},
+    )
+    evidence = {item["requirement"]: item for item in reviewed["sources"]}
+    assert evidence["Lot 13 × 13 m"]["origin"] == "controls"
+    assert evidence["Keep bedroom"]["origin"] == "controls"
+    assert evidence["Keep bedroom"]["statement"] is None

@@ -126,10 +126,11 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     def count(value):
         return int(value) if value.isdecimal() else NUMBERS[value]
 
-    text = ". ".join(_affirmative_clauses(message))
+    clauses = _affirmative_clauses(message)
+    text = ". ".join(clauses)
     dining = ". ".join(
         clause
-        for clause in text.split(". ")
+        for clause in clauses
         if re.search(
             r"\b(?:seats?|seating|dining|dine|diners?|dinner|tables?)\b", clause
         )
@@ -436,6 +437,34 @@ def _dining_statement_matches(brief, sentence):
     )
 
 
+LOT_SIZE = (
+    r"\b(\d+(?:\.\d+)?)\s*(?:m|metres?|meters?)?\s*(?:by|x|×)\s*"
+    r"(\d+(?:\.\d+)?)\b"
+)
+
+
+def _lot_statement_matches(brief, sentence):
+    return any(
+        re.search(r"\blot\b", clause)
+        and any(
+            (float(width), float(depth)) == (brief.width, brief.depth)
+            for width, depth in re.findall(LOT_SIZE, clause)
+        )
+        for clause in _affirmative_clauses(sentence)
+    )
+
+
+def _lock_statement_matches(brief, sentence):
+    requested = {
+        _room_id(name)
+        for clause in _affirmative_clauses(sentence)
+        for name in re.findall(
+            r"\b(?:keep|lock|preserve)\s+(?:the\s+)?" + ROOMS + r"\b", clause
+        )
+    }
+    return requested == set(brief.locks)
+
+
 def review_summary(
     brief,
     *,
@@ -472,9 +501,10 @@ def review_summary(
 
     require(
         f"Lot {brief.width:g} × {brief.depth:g} m",
-        r"\d+(?:\.\d+)?\s*(?:m|metres?|meters?)?\s*(?:by|x|×)\s*\d",
+        LOT_SIZE,
         "width",
         inherited=bool(previous),
+        accepts=lambda sentence: _lot_statement_matches(brief, sentence),
     )
     passage_inherited = "passage_m" in comparison and brief.passage_m == comparison.get(
         "passage_m"
@@ -511,6 +541,7 @@ def review_summary(
             r"\b(?:keep|lock|preserve)\b",
             "locks",
             interpreted=True,
+            accepts=lambda sentence: _lock_statement_matches(brief, sentence),
         )
     assumptions = []
     if sources[1]["origin"] == "default":
