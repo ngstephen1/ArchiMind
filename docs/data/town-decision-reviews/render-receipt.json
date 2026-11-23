@@ -1,0 +1,325 @@
+{
+  "rubric": "town-render-visual-v1",
+  "model": "gpt-6-luna",
+  "revision": 2,
+  "home_id": "6c5dac99245c8796ddf5bf6d04ff997242b9d92703826d670c688addcb0d9869",
+  "source_receipt_sha256": "779e37fec310fedc6974e9cae1691e708186d7f7390ca1abbebaf8439849c46a",
+  "mode": "offline_artifact_qa",
+  "runtime_authority": false,
+  "shots": [
+    {
+      "shot": "bedroom-doorway.png",
+      "room": "bedroom",
+      "view": "doorway",
+      "source_sha256": "b487a311a734dc315e27addf96939a4b60a12f45291dea52f3572d8a42d3237b",
+      "camera": {
+        "eye": [
+          5.6579999999999995,
+          1.57,
+          -8.892
+        ],
+        "fov": 69,
+        "id": "doorway",
+        "label": "Doorway",
+        "reason": null,
+        "target": [
+          1.0399,
+          0.58,
+          -7.2343
+        ]
+      },
+      "scores": [
+        {
+          "variant": "source",
+          "submitted_sha256": "183d3333c63585b8ceeba31f6319d0c305fbc9b30740e17cbb6ba0bfadb55d1d",
+          "review": {
+            "rubric": "town-render-visual-v1",
+            "model": "gpt-6-luna",
+            "status": "checked",
+            "reason": null,
+            "answers": {
+              "window_detail": {
+                "score": 1.94,
+                "confidence": 0.91,
+                "distribution": {
+                  "0": 0.01,
+                  "1": 0.04,
+                  "2": 0.95
+                }
+              },
+              "grounding": {
+                "score": 1.62,
+                "confidence": 0.43,
+                "distribution": {
+                  "0": 0.01,
+                  "1": 0.36,
+                  "2": 0.63
+                }
+              },
+              "materials": {
+                "score": 1.14,
+                "confidence": 0.67,
+                "distribution": {
+                  "0": 0.04,
+                  "1": 0.78,
+                  "2": 0.18
+                }
+              }
+            },
+            "input_tokens": 1609,
+            "elapsed_ms": 1281
+          }
+        },
+        {
+          "variant": "synthetic_control",
+          "submitted_sha256": "069b750ae4f62a38b88e556033ce9b96abce707a07862c465ae768d8984f466a",
+          "review": {
+            "rubric": "town-render-visual-v1",
+            "model": "gpt-6-luna",
+            "status": "checked",
+            "reason": null,
+            "answers": {
+              "window_detail": {
+                "score": 0.03,
+                "confidence": 0.96,
+                "distribution": {
+                  "0": 0.97,
+                  "1": 0.03,
+                  "2": 0.0
+                }
+              },
+              "grounding": {
+                "score": 0.03,
+                "confidence": 0.96,
+                "distribution": {
+                  "0": 0.97,
+                  "1": 0.03,
+                  "2": 0.0
+                }
+              },
+              "materials": {
+                "score": 0.02,
+                "confidence": 0.97,
+                "distribution": {
+                  "0": 0.98,
+                  "1": 0.02,
+                  "2": 0.0
+                }
+              }
+            },
+            "input_tokens": 1609,
+            "elapsed_ms": 341
+          }
+        }
+      ],
+      "source_minus_control": {
+        "window_detail": 1.91,
+        "grounding": 1.59,
+        "materials": 1.12
+      }
+    },
+    {
+      "shot": "bedroom-desk.png",
+      "room": "bedroom",
+      "view": "desk",
+      "source_sha256": "8fed572937e5cc2ff0aa602c645c4d6c00cb10cd9895b3fe0151ace5e32b36b7",
+      "camera": {
+        "eye": [
+          5.360000000000002,
+          1.57,
+          -8.689
+        ],
+        "fov": 58,
+        "id": "desk",
+        "label": "Desk and chair",
+        "reason": null,
+        "target": [
+          3.96,
+          0.5535709201097488,
+          -7.000404882967473
+        ]
+      },
+      "scores": [
+        {
+          "variant": "source",
+          "submitted_sha256": "4abe9fa318a5b010d5c7e7f11d86f7928c8ba5282387d1ccfb08dff95e7f9d10",
+          "review": {
+            "rubric": "town-render-visual-v1",
+            "model": "gpt-6-luna",
+            "status": "checked",
+            "reason": null,
+            "answers": {
+              "grounding": {
+                "score": 1.98,
+                "confidence": 0.97,
+                "distribution": {
+                  "0": 0.0,
+                  "1": 0.02,
+                  "2": 0.98
+                }
+              },
+              "materials": {
+                "score": 1.98,
+                "confidence": 0.97,
+                "distribution": {
+                  "0": 0.0,
+                  "1": 0.02,
+                  "2": 0.98
+                }
+              }
+            },
+            "input_tokens": 1468,
+            "elapsed_ms": 450
+          }
+        },
+        {
+          "variant": "synthetic_control",
+          "submitted_sha256": "cf73292555bd7bf7ecd2a8282b37fd105011b8146130fa48a9db2af43d35470f",
+          "review": {
+            "rubric": "town-render-visual-v1",
+            "model": "gpt-6-luna",
+            "status": "checked",
+            "reason": null,
+            "answers": {
+              "grounding": {
+                "score": 0.02,
+                "confidence": 0.97,
+                "distribution": {
+                  "0": 0.98,
+                  "1": 0.02,
+                  "2": 0.0
+                }
+              },
+              "materials": {
+                "score": 0.02,
+                "confidence": 0.97,
+                "distribution": {
+                  "0": 0.98,
+                  "1": 0.02,
+                  "2": 0.0
+                }
+              }
+            },
+            "input_tokens": 1468,
+            "elapsed_ms": 488
+          }
+        }
+      ],
+      "source_minus_control": {
+        "grounding": 1.96,
+        "materials": 1.96
+      }
+    },
+    {
+      "shot": "salon-overview.png",
+      "room": "salon",
+      "view": "overview",
+      "source_sha256": "2f4f173c08b0b56451cfba606cadf8284cba0c013091ef2f48ca8b04a722ab10",
+      "camera": {
+        "eye": [
+          6.1579999999999995,
+          1.44,
+          -5.849
+        ],
+        "fov": 52,
+        "id": "overview",
+        "label": "Salon and dining",
+        "reason": null,
+        "target": [
+          2.1038,
+          1.08,
+          -3.3251600000000003
+        ]
+      },
+      "scores": [
+        {
+          "variant": "source",
+          "submitted_sha256": "bca463ad91d8a9ba03665e595f500413d2784cdaf0b286c12fef59b456fc1cde",
+          "review": {
+            "rubric": "town-render-visual-v1",
+            "model": "gpt-6-luna",
+            "status": "checked",
+            "reason": null,
+            "answers": {
+              "window_detail": {
+                "score": 1.87,
+                "confidence": 0.81,
+                "distribution": {
+                  "0": 0.03,
+                  "1": 0.07,
+                  "2": 0.9
+                }
+              },
+              "grounding": {
+                "score": 1.58,
+                "confidence": 0.37,
+                "distribution": {
+                  "0": 0.01,
+                  "1": 0.4,
+                  "2": 0.59
+                }
+              },
+              "materials": {
+                "score": 1.03,
+                "confidence": 0.48,
+                "distribution": {
+                  "0": 0.16,
+                  "1": 0.65,
+                  "2": 0.19
+                }
+              }
+            },
+            "input_tokens": 1609,
+            "elapsed_ms": 427
+          }
+        },
+        {
+          "variant": "synthetic_control",
+          "submitted_sha256": "d22f3bc4b535fcfcbf73b1f9d8a8bc57be9094b960a483e4d1f30e120379d76b",
+          "review": {
+            "rubric": "town-render-visual-v1",
+            "model": "gpt-6-luna",
+            "status": "checked",
+            "reason": null,
+            "answers": {
+              "window_detail": {
+                "score": 0.01,
+                "confidence": 0.99,
+                "distribution": {
+                  "0": 0.99,
+                  "1": 0.01,
+                  "2": 0.0
+                }
+              },
+              "grounding": {
+                "score": 0.01,
+                "confidence": 0.99,
+                "distribution": {
+                  "0": 0.99,
+                  "1": 0.01,
+                  "2": 0.0
+                }
+              },
+              "materials": {
+                "score": 0.0,
+                "confidence": 1.0,
+                "distribution": {
+                  "0": 1.0,
+                  "1": 0.0,
+                  "2": 0.0
+                }
+              }
+            },
+            "input_tokens": 1609,
+            "elapsed_ms": 674
+          }
+        }
+      ],
+      "source_minus_control": {
+        "window_detail": 1.86,
+        "grounding": 1.57,
+        "materials": 1.03
+      }
+    }
+  ]
+}

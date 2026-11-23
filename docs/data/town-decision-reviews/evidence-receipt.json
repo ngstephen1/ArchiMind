@@ -1,0 +1,335 @@
+{
+  "model": "gpt-6-luna",
+  "rubric": "town-answer-evidence-v1",
+  "corpus_sha256": "bd4541b05151686b8033b34707356adee1996e6311e576c87ca46497b361618e",
+  "evidence_sha256": "61d404713135f4f4071393048eced100bd3f566f5172a2bd7b764be840e7cfcb",
+  "threshold": 0.3,
+  "diagnostic_threshold": 0.8,
+  "heldout_passed": true,
+  "development_metrics": {
+    "0.3": {
+      "count": 16,
+      "correct": 13,
+      "accepted": 16,
+      "p95_ms": 304,
+      "complete": true,
+      "recognition": 0.8125,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.4": {
+      "count": 16,
+      "correct": 13,
+      "accepted": 15,
+      "p95_ms": 304,
+      "complete": true,
+      "recognition": 0.8125,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.5": {
+      "count": 16,
+      "correct": 13,
+      "accepted": 15,
+      "p95_ms": 304,
+      "complete": true,
+      "recognition": 0.8125,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.6": {
+      "count": 16,
+      "correct": 13,
+      "accepted": 15,
+      "p95_ms": 304,
+      "complete": true,
+      "recognition": 0.8125,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.7": {
+      "count": 16,
+      "correct": 13,
+      "accepted": 14,
+      "p95_ms": 304,
+      "complete": true,
+      "recognition": 0.8125,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.8": {
+      "count": 16,
+      "correct": 13,
+      "accepted": 14,
+      "p95_ms": 304,
+      "complete": true,
+      "recognition": 0.8125,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.9": {
+      "count": 16,
+      "correct": 12,
+      "accepted": 12,
+      "p95_ms": 304,
+      "complete": true,
+      "recognition": 0.75,
+      "false_supported": [],
+      "passed": false
+    }
+  },
+  "holdout_metrics": {
+    "count": 8,
+    "correct": 8,
+    "accepted": 8,
+    "p95_ms": 269,
+    "complete": true,
+    "recognition": 1.0,
+    "false_supported": [],
+    "passed": true
+  },
+  "development": [
+    {
+      "case": "claim-01",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.94,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 254,
+      "input_tokens": 554
+    },
+    {
+      "case": "claim-02",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.93,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 169,
+      "input_tokens": 555
+    },
+    {
+      "case": "claim-03",
+      "expected": "supported",
+      "label": "missing_evidence",
+      "confidence": 0.69,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 173,
+      "input_tokens": 556
+    },
+    {
+      "case": "claim-04",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.89,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 171,
+      "input_tokens": 547
+    },
+    {
+      "case": "claim-05",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.97,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 173,
+      "input_tokens": 555
+    },
+    {
+      "case": "claim-06",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.97,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 202,
+      "input_tokens": 550
+    },
+    {
+      "case": "claim-10",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 304,
+      "input_tokens": 548
+    },
+    {
+      "case": "claim-11",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 182,
+      "input_tokens": 550
+    },
+    {
+      "case": "claim-12",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 214,
+      "input_tokens": 550
+    },
+    {
+      "case": "claim-13",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 201,
+      "input_tokens": 548
+    },
+    {
+      "case": "claim-14",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 236,
+      "input_tokens": 549
+    },
+    {
+      "case": "claim-18",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.97,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 203,
+      "input_tokens": 553
+    },
+    {
+      "case": "claim-19",
+      "expected": "contradicted",
+      "label": "missing_evidence",
+      "confidence": 0.3,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 194,
+      "input_tokens": 547
+    },
+    {
+      "case": "claim-20",
+      "expected": "contradicted",
+      "label": "missing_evidence",
+      "confidence": 0.88,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 190,
+      "input_tokens": 550
+    },
+    {
+      "case": "claim-21",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.96,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 174,
+      "input_tokens": 556
+    },
+    {
+      "case": "claim-22",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 277,
+      "input_tokens": 555
+    }
+  ],
+  "holdout": [
+    {
+      "case": "claim-07",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.94,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 239,
+      "input_tokens": 556
+    },
+    {
+      "case": "claim-08",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.97,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 181,
+      "input_tokens": 553
+    },
+    {
+      "case": "claim-09",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.7,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 269,
+      "input_tokens": 556
+    },
+    {
+      "case": "claim-15",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 157,
+      "input_tokens": 549
+    },
+    {
+      "case": "claim-16",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 191,
+      "input_tokens": 552
+    },
+    {
+      "case": "claim-17",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 164,
+      "input_tokens": 556
+    },
+    {
+      "case": "claim-23",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.72,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 182,
+      "input_tokens": 553
+    },
+    {
+      "case": "claim-24",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.88,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 186,
+      "input_tokens": 551
+    }
+  ]
+}

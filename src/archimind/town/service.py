@@ -29,6 +29,7 @@ SCHEMA = [
     "CREATE TABLE IF NOT EXISTS job_events (job TEXT NOT NULL, seq INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(job,seq))",
     "CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, owner TEXT NOT NULL, revision INTEGER NOT NULL)",
     "CREATE TABLE IF NOT EXISTS revisions (project TEXT NOT NULL, revision INTEGER NOT NULL, home TEXT NOT NULL, PRIMARY KEY(project,revision))",
+    "CREATE TABLE IF NOT EXISTS town_decision_checks (owner TEXT NOT NULL, project TEXT NOT NULL, id TEXT NOT NULL, created BIGINT NOT NULL, signature TEXT NOT NULL, result TEXT, PRIMARY KEY(owner,project,id))",
     "CREATE TABLE IF NOT EXISTS job_brief_decisions (job TEXT PRIMARY KEY, mode TEXT NOT NULL, threshold DOUBLE PRECISION)",
     "CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, owner TEXT NOT NULL, project TEXT NOT NULL, base INTEGER NOT NULL, created BIGINT NOT NULL, started BIGINT, status TEXT NOT NULL, request TEXT NOT NULL, result TEXT, UNIQUE(owner,id))",
 ]
@@ -86,6 +87,7 @@ def initialize():
                 "jobs",
                 "job_events",
                 "job_brief_decisions",
+                "town_decision_checks",
             ]:
                 q(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
                 q(f"REVOKE ALL ON {table} FROM PUBLIC, anon, authenticated")
@@ -150,6 +152,20 @@ def local_extra_team_jobs(req, now):
     )
 
 
+def model_calls_used(q, day):
+    jobs = q(
+        "SELECT COALESCE(SUM((CASE WHEN request LIKE ? THEN 3 ELSE 1 END) "
+        "+ (CASE WHEN d.job IS NULL THEN 0 ELSE 1 END)),0) "
+        "FROM jobs LEFT JOIN job_brief_decisions d ON d.job=jobs.id "
+        "WHERE created>=? AND request LIKE ?",
+        ('%"agent_team":true%', day, '%"live":true%'),
+    ).fetchone()[0]
+    reviews = q(
+        "SELECT count(*) FROM town_decision_checks WHERE created>=?", (day,)
+    ).fetchone()[0]
+    return jobs + reviews
+
+
 def enqueue(owner, req):
     p, j = str(req.project), str(req.id)
     with transaction() as q:
@@ -198,13 +214,7 @@ def enqueue(owner, req):
         # Reserve three calls for team jobs and one for legacy interpretation.
         decision_slot = None
         if req.live:
-            used = q(
-                "SELECT COALESCE(SUM((CASE WHEN request LIKE ? THEN 3 ELSE 1 END) "
-                "+ (CASE WHEN d.job IS NULL THEN 0 ELSE 1 END)),0) "
-                "FROM jobs LEFT JOIN job_brief_decisions d ON d.job=jobs.id "
-                "WHERE created>=? AND request LIKE ?",
-                ('%"agent_team":true%', day, '%"live":true%'),
-            ).fetchone()[0]
+            used = model_calls_used(q, day)
             cap = int(os.getenv("TOWN_DAILY_MODEL_CALLS", "0"))
             reserve = int(os.getenv("TOWN_CALL_RESERVE_MICROUSD", "0"))
             budget = int(os.getenv("TOWN_DAILY_MICROUSD", "0"))

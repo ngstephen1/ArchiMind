@@ -1,0 +1,19 @@
+{
+  "mode": "local Town with recorded Decisions responses",
+  "viewport": [
+    1440,
+    1000
+  ],
+  "fixture_calls": 4,
+  "external_calls": 0,
+  "writes": 0,
+  "page_errors": [],
+  "checks": [
+    "independent promotion",
+    "timeout",
+    "direct answer without model",
+    "evidence on revision 2",
+    "discard delayed result on input edit",
+    "walkthrough without Decisions call"
+  ]
+}

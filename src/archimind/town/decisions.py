@@ -89,23 +89,77 @@ def settings():
     return ("shadow", None) if mode == "shadow" else ("off", None)
 
 
-def audit(payload, *, deadline, key=None, client_factory=None):
+def probability(value):
+    return type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 1
+
+
+def parse_answer(answer, question):
+    if answer.type == "refusal":
+        return None
+    if answer.type != question["type"]:
+        raise ValueError("Unexpected Decisions answer type")
+    if answer.type == "predicate":
+        if not probability(answer.probability):
+            raise ValueError("Invalid Decisions probability")
+        return answer.probability
+    if answer.type == "choice":
+        labels = [row["value"] for row in question["choices"]]
+    else:
+        labels = list(range(len(question["levels"])))
+    distribution = {}
+    for item in answer.probabilities:
+        if not any(
+            type(item.value) is type(label) and item.value == label for label in labels
+        ):
+            raise ValueError("Unknown Decisions label")
+        if item.value in distribution or not probability(item.probability):
+            raise ValueError("Invalid Decisions distribution")
+        distribution[item.value] = item.probability
+    if len(distribution) != len(labels) or abs(sum(distribution.values()) - 1) > 0.03:
+        raise ValueError("Invalid Decisions distribution total")
+    if not probability(answer.confidence):
+        raise ValueError("Invalid Decisions confidence")
+    if answer.type == "choice":
+        if not any(
+            type(answer.choice) is type(label) and answer.choice == label
+            for label in labels
+        ):
+            raise ValueError("Unknown Decisions choice")
+        return {
+            "label": answer.choice,
+            "confidence": answer.confidence,
+            "distribution": distribution,
+        }
+    if type(answer.score) not in (int, float) or not 0 <= answer.score <= max(labels):
+        raise ValueError("Invalid Decisions score")
+    return {
+        "score": answer.score,
+        "confidence": answer.confidence,
+        "distribution": distribution,
+    }
+
+
+def query(
+    payload, questions, *, deadline, key=None, client_factory=None, rubric=RUBRIC
+):
     """Return bounded review evidence without retaining request or response bodies."""
     start = time.monotonic()
 
-    def result(status, *, reason=None, probabilities=None, input_tokens=None):
+    def result(status, *, reason=None, answers=None, input_tokens=None):
         return {
-            "rubric": RUBRIC,
+            "rubric": rubric,
             "model": MODEL,
             "status": status,
             "reason": reason,
-            "probabilities": probabilities or {},
+            "answers": answers or {},
             "input_tokens": input_tokens,
             "elapsed_ms": round(1000 * (time.monotonic() - start)),
         }
 
-    text = json.dumps(
-        payload | {"modeling_capabilities": CAPABILITIES}, ensure_ascii=False
+    text = (
+        json.dumps(payload, ensure_ascii=False)
+        if isinstance(payload, dict)
+        else payload
     )
     key = (os.getenv("OPENAI_API_KEY", "") if key is None else key).strip()
     timeout = min(5.0, deadline - start - 10.0)
@@ -113,46 +167,44 @@ def audit(payload, *, deadline, key=None, client_factory=None):
         return result("unavailable", reason="credentials")
     if timeout <= 0:
         return result("unavailable", reason="deadline")
-    if len(text.encode("utf-8")) > 8192:
+    limit = 8192 if isinstance(text, str) else 2_000_000
+    if (
+        len(
+            (
+                text if isinstance(text, str) else json.dumps(text, ensure_ascii=False)
+            ).encode("utf-8")
+        )
+        > limit
+    ):
         return result("unavailable", reason="input_limit")
     try:
         with (client_factory or _client)(key) as client:
             reply = client.decisions.create(
-                model=MODEL, input=text, questions=QUESTIONS, timeout=timeout
+                model=MODEL, input=text, questions=questions, timeout=timeout
             )
         if time.monotonic() - start > timeout:
             return result("unavailable", reason="deadline")
         if reply.model != MODEL:
             raise ValueError("Unexpected Decisions model")
-        probabilities = {}
+        specifications = {question["name"]: question for question in questions}
+        answers = {}
         for answer in reply.answers:
             name = answer.name
-            if name not in CRITERIA or name in probabilities:
+            if name not in specifications or name in answers:
                 raise ValueError("Unexpected Decisions answer name")
-            if answer.type == "refusal":
-                probabilities[name] = None
-                continue
-            value = answer.probability
-            if (
-                answer.type != "predicate"
-                or isinstance(value, bool)
-                or not isinstance(value, (int, float))
-                or not math.isfinite(value)
-                or not 0 <= value <= 1
-            ):
-                raise ValueError("Invalid Decisions probability")
-            probabilities[name] = value
+            answers[name] = parse_answer(answer, specifications[name])
         usage = reply.usage.input_tokens
         if (
-            probabilities.keys() != CRITERIA.keys()
+            answers.keys() != specifications.keys()
             or type(usage) is not int
             or usage < 0
         ):
             raise ValueError("Incomplete Decisions response")
+        partial = None in answers.values()
         return result(
-            "partial" if None in probabilities.values() else "checked",
-            reason="refusal" if None in probabilities.values() else None,
-            probabilities=probabilities,
+            "partial" if partial else "checked",
+            reason="refusal" if partial else None,
+            answers=answers,
             input_tokens=usage,
         )
     except APIStatusError as exc:
@@ -170,6 +222,18 @@ def audit(payload, *, deadline, key=None, client_factory=None):
         return result("unavailable", reason="provider")
     except (AttributeError, ValueError, TypeError):
         return result("unavailable", reason="invalid_response")
+
+
+def audit(payload, *, deadline, key=None, client_factory=None):
+    result = query(
+        payload | {"modeling_capabilities": CAPABILITIES},
+        QUESTIONS,
+        deadline=deadline,
+        key=key,
+        client_factory=client_factory,
+    )
+    result["probabilities"] = result.pop("answers")
+    return result
 
 
 def flagged(review, threshold):

@@ -160,8 +160,14 @@
       <p id="notice" role="status"></p>
       <div class="actions">
         <button id="generate" class="dark">Generate layouts</button
+        ><button id="checkRequest" hidden>Check request with OpenAI</button
         ><button id="cancel" hidden>Cancel job</button
         ><button id="undo" hidden>Restore previous revision</button>
+      </div>
+      <div id="requestReview" hidden>
+        <small>This optional check sends your request to OpenAI. You choose the next action.</small>
+        <p id="requestReviewStatus" role="status"></p>
+        <button type="button" id="openSavedAnswer" hidden>Open saved-design explanation</button>
       </div>
       <details id="chairStudio" hidden>
         <summary>Bedroom designer furniture</summary>
@@ -222,6 +228,12 @@
           placeholder="Why is the chair next to the desk?" /></label
       ><button id="askWhy">Explain</button>
       <p id="whyAnswer" role="status"></p>
+      <div id="evidenceReview" hidden>
+        <small>This optional check sends your question, answer claims and scoped facts from the saved design to OpenAI.</small>
+        <button type="button" id="checkEvidence">Check evidence with OpenAI</button>
+        <p id="evidenceReviewStatus" role="status"></p>
+        <ol id="evidenceReviewItems"></ol>
+      </div>
       <section id="renderPanel" hidden>
         <h3>Blender presentation</h3>
         <button type="button" id="renderProof">Render this revision</button>

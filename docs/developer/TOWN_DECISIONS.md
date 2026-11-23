@@ -40,3 +40,51 @@ All 36 responses were complete, with 34,356 reported input tokens and 655 ms p95
 The deterministic interpreter now retains the six-place single-table wording and asks for clarification with Decisions off. A local desktop Chrome run with recorded model responses exercised the clarification path, the two validated alternatives after a corrected brief, and timeout recovery while revision 1 stayed applied. The browser run made no external model calls. [Browser receipt](../data/town-decisions/browser-receipt.json) · [Clarification](../data/town-decisions/clarification.png) · [Alternatives](../data/town-decisions/alternatives.png) · [Timeout](../data/town-decisions/timeout.png)
 
 To repeat the browser check, build Town in local mode and run `python scripts/check_town_decisions_browser.py --output /tmp/town-decisions-browser` with Playwright and Chrome available.
+
+## Checks for a saved design
+
+**Check request with OpenAI** appears beside Generate layouts when routing is enabled and a saved home is selected. A request can suggest an answer, a revision comparison, an edit, a new design, or a clarification. Known saved-design questions use the existing explanation path without a model call. An advisory answer or comparison offers a separate button to open that explanation. Edits and generation still require the existing explicit controls.
+
+**Check evidence with OpenAI** appears after Explain in a saved home’s presentation when evidence review is enabled. One request evaluates up to six statements from the displayed answer against server-calculated facts. The scope covers the current bedroom chair and Belaya footprints, the preceding revision’s chair position and gap, desk-to-window center distances, and saved route, seating and passage measures. The reviewer can mark a statement supported, missing evidence, or contradicted. Scores apply to the supplied record. Knee clearance, glare, acoustic privacy and an unrecorded placement rationale still require evidence. Questions about unsupported facts can yield no reliable finding. The original explanation stays visible.
+
+Both checks start off and use independent server settings. Buttons authorize a single call. Shadow runs show availability without suggesting an action or labeling a claim. Configure advisory mode with an operator-controlled receipt matching the model, rubric and both evaluation splits. A missing, stale or failing receipt selects shadow. Starting a tour, opening a presentation, generating a render, or changing views makes no review call. Results that arrive after the selection or draft changes are discarded by the browser.
+
+```sh
+TOWN_DAILY_MODEL_CALLS=12 TOWN_DAILY_MICROUSD=1200000 \
+  ARCHIMIND_TOWN_DECISIONS_ROUTE_MODE=shadow \
+  ARCHIMIND_TOWN_DECISIONS_EVIDENCE_MODE=advisory \
+  ARCHIMIND_TOWN_DECISIONS_EVIDENCE_RECEIPT=docs/data/town-decision-reviews/evidence-receipt.json \
+  .venv/bin/python scripts/run_town.py
+```
+
+Use `ARCHIMIND_TOWN_DECISIONS_ROUTE_RECEIPT` for a future qualifying route receipt. The server also requires the existing live studio flag and OpenAI key. An ordinary startup with nine call reservations leaves no optional slots before three ordinary jobs. Both optional features and the brief check share the same remaining headroom. Cancelled or timed-out reservations count for that UTC day. Hosted operators run the existing database initializer before deploying the updated API. The server retains a request digest for replay detection and the typed outcomes, usage and duration. It sends the request text and, for evidence checks, the claims and scoped revision facts to OpenAI.
+
+### Independent calibration
+
+| Review | Development and holdout | Holdout result | Status |
+| --- | --- | --- | --- |
+| Routing | 32 + 16 prompts | 10 of 10 shown correct at 0.40, 62.5% coverage, zero saved questions routed to write, 295 ms p95 | Shadow. Coverage missed the 70% gate. |
+| Evidence | 16 + 8 written claims | 8 of 8 correct at 0.30, zero false supported claims, 269 ms p95 | Eligible for opt-in advisory. |
+
+The routing gate is at least 95% precision and 70% coverage with zero accepted saved questions routed to write. Evidence requires at least 80% recognition of all labels and zero false supported claims. Each independently requires complete responses and at most 3 seconds p95. The cutoff is selected using development cases before sending the holdout cases. These are small, locally authored suites. Evidence uses one saved home and its predecessor, with one claim per evaluation request. The browser fixtures also exercise multi-claim presentation and delayed response handling. The separate brief predicate holdout is unchanged. [Route cases](../data/town-decision-reviews/route-cases.json) · [Route receipt](../data/town-decision-reviews/route-receipt.json) · [Evidence cases](../data/town-decision-reviews/evidence-cases.json) · [Evidence receipt](../data/town-decision-reviews/evidence-receipt.json)
+
+```sh
+PYTHONPATH=src python scripts/evaluate_town_decision_reviews.py route
+PYTHONPATH=src python scripts/evaluate_town_decision_reviews.py evidence
+PYTHONPATH=src python scripts/evaluate_town_decision_reviews.py evidence \
+  --live --env-file .env --output /tmp/town-evidence-receipt.json
+TOWN_MODE=local TOWN_API_URL=/api node frontend/realistic_viewer/town/build.mjs
+PYTHONPATH=src python scripts/check_town_decision_reviews.py --output /tmp/town-decision-browser
+```
+
+The Chrome check requires Playwright and Chrome, uses recorded response fixtures, and spends no live calls. It checks route shadow, timeout, direct explanation, advisory evidence and an in-flight answer discarded after a draft edit. [Browser receipt](../data/town-decision-reviews/browser-receipt.json)
+
+### Offline render quality experiment
+
+The Score adapter rates window readability, grounding and material separation on three pinned revision-2 Cycles cameras. The offline script verifies source hashes and uses one request per source JPEG and one for its same-camera blurred and washed-out control. The desk view omits window readability. All eight applicable scores were higher on the originals. This experiment distinguishes the originals from deliberately degraded images. It has no independent quality ratings or test against subtle lighting or material regressions. The scores have no role in render approval, geometry, or publishing. [Render receipt](../data/town-decision-reviews/render-receipt.json)
+
+```sh
+PYTHONPATH=src python scripts/evaluate_town_render_decisions.py --live \
+  --artifacts output/live-design-quality --env-file .env \
+  --output /tmp/town-render-decisions.json
+```
