@@ -509,7 +509,12 @@ def test_evaluator_exposes_receipt_only_after_a_complete_run(
         assert not output.exists()
         if interrupt:
             raise KeyboardInterrupt
-        return {"status": "checked", "elapsed_ms": 1, "input_tokens": 1, "scores": {}}
+        return {
+            "status": "checked",
+            "elapsed_ms": 1,
+            "input_tokens": 1,
+            "probabilities": dict.fromkeys(decisions.CRITERIA, 0.0),
+        }
 
     monkeypatch.setattr(decisions, "audit", audit)
     if interrupt:
