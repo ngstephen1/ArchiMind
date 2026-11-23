@@ -1196,3 +1196,65 @@ def test_live_capacity_uses_the_same_one_table_end_interpretation(monkeypatch):
     request = review_request(text, live=True, width=15, depth=16)
     with pytest.raises(service.BriefClarification, match="still required at one table"):
         service.interpret(request, None)
+
+
+@pytest.mark.parametrize("setting", ["for family dinners", "in the kitchen"])
+def test_opposite_end_counts_retain_the_total_and_room_restriction(setting):
+    text = f"Seat four people at one table and two at the other end {setting}."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert brief.dining_seats == 6 and not brief.split_dining
+    if setting == "in the kitchen":
+        assert any("kitchen-dining" in question for question in questions)
+
+
+def test_one_table_with_two_ends_can_be_part_of_a_named_split():
+    text = (
+        "Seat two people at a single table and two at the other end of it in the formal salon. "
+        "Seat two people at a separate table in the kitchen."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+def test_fallback_with_an_unsupported_requirement_keeps_clarification():
+    text = (
+        "Seat four at one table and two at another table, both in the formal salon if possible, "
+        "or put one table in each dining room only if there is a direct doorway between them."
+    )
+    _, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert any("one modeled table" in question for question in questions)
+
+
+def test_otherwise_imperative_can_supply_the_accepted_split():
+    text = (
+        "Seat four at one table and two at another table, both in the formal salon if possible, "
+        "otherwise put one table in each dining room."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+def test_offsite_one_table_does_not_override_home_split():
+    text = (
+        "We have dinner at a restaurant with two at one table and four at the other end of it. "
+        "At home, we need six dining places split across the kitchen and salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+def test_still_need_in_a_reason_describes_the_current_home():
+    text = (
+        "Keep a 90 cm clear passage because in our current home we can reach the bathroom "
+        "but still need a 70 cm clear passage to reach the kitchen."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
