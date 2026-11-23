@@ -29,3 +29,28 @@ The export resolves high-tier assets with Town’s pack loader. It uses Town’s
 The packed proof scene retains the room lights and materials. For a standard daytime view, select its named camera and apply the matching exposure from the proof receipt. The coverlet, clay and evening studies also change object visibility, materials or light settings. Rerun the proof workflow to reproduce those study images. For photography, the renderer reopens the approved scene and uses its hash-verified style receipt to select the daylight treatment. The eye-view receipt records the exposure and window emitters used for each shot. Supplying the original snapshot again also checks its SHA-256.
 
 For the final R2 presentation, pass `-f salon_cover=true` with the accepted proof run ID. The resulting `studio-eye-views` artifact includes the finished ten-page PDF when the source contains six rooms, its bedroom eye-level PNGs, the optional salon PNG, the render receipt and credit files. The plan identifies the saved pack and illustrates its authenticated surface textures. The edition with matched bedroom cameras is labeled on the bedroom sheet.
+
+## Send a checked two-revision designer handoff
+
+Save the two scene proof folders, the edited revision's three 1080p eye views
+and the corresponding client book. Keep the visual inspection receipt with the
+book. Record each inspected page in order and include both manifest hashes,
+the edited proof receipt hash and the exact doorway, desk and salon image
+hashes. Review the rendered book at print scale before handing it off.
+
+With Python dependencies installed and Poppler's `pdfinfo` on `PATH`, run from
+the checkout used to verify the release:
+
+```sh
+.venv/bin/python scripts/package_town_release.py \
+  output/release/r1/proof output/release/r2/proof output/release/r2/hd \
+  output/release/Client-Book.pdf output/release/book-inspection.json \
+  output/release/Designer-Handoff.zip --commit "$(git rev-parse HEAD)"
+```
+
+The ZIP binds the two saved manifests to the book, photographs and editable
+Blender file. It also includes dimensioned bedroom drawings, a concept DXF in
+metres, the furniture schedule, source notices and file checksums. The output
+path must be fresh. Unpack the ZIP and run `shasum -a 256 -c SHA256SUMS.txt` in
+its root. For an existing home, confirm the actual site dimensions and
+supplier clearances before using the concept for procurement or construction.
