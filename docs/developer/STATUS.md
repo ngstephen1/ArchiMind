@@ -15,12 +15,17 @@ the bedroom chair by 0.300 m and increased its plan gap to the desk from
 replay. The live receipt identifies the exact code tested.
 [Fresh run, saved inputs and local replay commands](../data/nov24-fresh-live#reopen-both-revisions)
 
-The fresh layered proofs and their client-book production are tracked in
-[#69](https://github.com/ngstephen1/ArchiMind/issues/69). The independent
-revision cross-check, held-out evaluation, rehearsals, freeze and release
-gates remain open. The public Vercel walkthrough serves static content.
-Hosted design service acceptance remains open.
-[Hosted scope and prior conference-home commands](CONFERENCE_REPLAY.md)
+The delegated revision review on `512ed26` verified both saved homes,
+the 300 mm chair move, the matched renders, and ten replayed chatbot answers
+at desktop and narrow widths. The rebuilt designer handoff passed all 32
+checksum-listed files. Hieu's independent revision review, the held-out live
+evaluation, both owners' rehearsal, freeze, and publication remain open.
+[Delegated review](https://github.com/ngstephen1/ArchiMind/issues/67#issuecomment-7106415558) ·
+[Verified handoff and checksums](https://github.com/ngstephen1/ArchiMind/issues/69#issuecomment-7105933953) ·
+[Portable replay and launch commands](../data/nov24-fresh-live#rehearse-from-the-portable-download)
+
+The public Vercel walkthrough serves static content. Managed design-service
+acceptance remains open. [Hosted scope and prior launch commands](CONFERENCE_REPLAY.md)
 
 ## Historical implementation status
 
