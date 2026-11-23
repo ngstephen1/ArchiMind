@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from archimind.designer_handoff.chair_study import (
     ChairFieldRecord,
     bedroom_board,
@@ -94,3 +93,32 @@ def test_floor_object_can_obstruct_the_pulled_back_passage(board):
     pulled = chair_study(board)["states"][2]
     assert pulled["rear_gap_m"] == pytest.approx(0.10)
     assert pulled["modeled_rear_gap"] == "obstructed"
+
+
+def test_sheet_shows_the_same_floor_obstacles_and_travel_as_the_report(board):
+    report = chair_study(board)
+    sheet = draw_study(board, report)
+    assert report["floor_obstacles"]
+    for item in report["floor_obstacles"]:
+        assert sheet.count(f'data-object="{item["id"]}"') == 3
+    assert "0.150 m under the desk" in sheet
+    assert "0.300 m back from saved position" in sheet
+
+
+def test_cli_writes_utf8_drawings(tmp_path, monkeypatch):
+    from xml.etree.ElementTree import parse
+
+    from archimind.designer_handoff.chair_study import main
+
+    manifest = (
+        Path(__file__).resolve().parents[1]
+        / "docs/data/nov24-fresh-live/snapshot-r2.json"
+    )
+    destination = tmp_path / "study"
+    monkeypatch.setattr(
+        "sys.argv", ["chair_study", str(manifest), "--output", str(destination)]
+    )
+    main()
+    sheet = destination / "chair-operation.svg"
+    assert bytes([194, 183]) in sheet.read_bytes()
+    assert parse(sheet).getroot().tag.endswith("svg")

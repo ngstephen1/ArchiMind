@@ -214,7 +214,8 @@ def chair_study(
                 "chair": moved.model_dump(mode="json"),
                 "rear_gap_m": round(rear_gap, 3),
                 "min_passage_m": config.walking_clearance_m,
-                "modeled_room_circulation": report.status,
+                "modeled_room_circulation": report.checks["circulation"].status,
+                "modeled_layout_checks": report.status,
                 "modeled_failures": [
                     violation.message
                     for violation in report.violations
@@ -230,6 +231,7 @@ def chair_study(
         "project": board["project"],
         "home_id": board["home_id"],
         "revision": board["revision"],
+        "floor_obstacles": [item.model_dump(mode="json") for item in floor_dressing],
         "desk_id": desk.id,
         "chair_id": chair.id,
         "model": {
@@ -256,9 +258,15 @@ def draw_study(board, report):
         source_label="Saved Town geometry",
     )
     scale = min(320 / room.width_m, 245 / room.depth_m)
+    labels = {
+        "tucked-in": f"{report['model']['tuck_m']:.3f} m under the desk",
+        "occupied": "Saved chair position",
+        "pulled-back": f"{report['model']['pullout_from_occupied_m']:.3f} m back from saved position",
+    }
     for index, state in enumerate(report["states"]):
         x, base = 40 + index * 380, 455
-        _text(svg, x, 181, state["state"].replace("-", " ").title(), 22)
+        _text(svg, x, 177, state["state"].replace("-", " ").title(), 22)
+        _text(svg, x, 199, labels[state["state"]], 14, MUTED)
         _rect(
             svg,
             x,
@@ -298,7 +306,7 @@ def draw_study(board, report):
             for item in design.furniture
             if item.id != report["chair_id"]
         ]
-        for item in [*saved, state["chair"]]:
+        for item in [*saved, *report["floor_obstacles"], state["chair"]]:
             active = item["id"] == report["chair_id"]
             node = _rect(
                 svg,
@@ -323,6 +331,14 @@ def draw_study(board, report):
             f"Modeled room circulation · {state['modeled_room_circulation']}",
         )
         _text(svg, x, 539, f"Modeled rear gap · {state['modeled_rear_gap']}")
+        if state["modeled_layout_checks"] != "passed":
+            _text(
+                svg,
+                x,
+                588,
+                f"Combined layout checks · {state['modeled_layout_checks']}",
+                color=MUTED,
+            )
         if state["state"] == "tucked-in":
             _text(svg, x, 566, "Physical tuck · " + state["physical_tuck"], color=MUTED)
     _text(svg, 40, 608, report["model"]["occupied_basis"], 14)
@@ -348,9 +364,11 @@ def main():
     report = chair_study(board, record=record, passage_m=args.passage_m)
     args.output.mkdir(parents=True)
     (args.output / "chair-operation.json").write_text(
-        json.dumps(report, indent=2) + "\n"
+        json.dumps(report, indent=2) + "\n", encoding="utf-8"
     )
-    (args.output / "chair-operation.svg").write_text(draw_study(board, report))
+    (args.output / "chair-operation.svg").write_text(
+        draw_study(board, report), encoding="utf-8"
+    )
 
 
 if __name__ == "__main__":
