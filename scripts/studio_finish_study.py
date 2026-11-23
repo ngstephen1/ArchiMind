@@ -43,10 +43,21 @@ def finish(source, name, color, grain=None):
             text.inputs["Scale"].default_value = grain
             text.inputs["Detail"].default_value = 2
             tree.links.new(coord.outputs["Object"], text.inputs["Vector"])
+            weave = tree.nodes.new("ShaderNodeTexVoronoi")
+            weave.voronoi_dimensions = "3D"
+            weave.feature = "DISTANCE_TO_EDGE"
+            weave.inputs["Scale"].default_value = grain * 0.60
+            weave.inputs["Randomness"].default_value = 0.21
+            tree.links.new(coord.outputs["Object"], weave.inputs["Vector"])
+            tone = tree.nodes.new("ShaderNodeMixRGB")
+            tone.inputs[1].default_value = (*(v * 0.73 for v in color), 1)
+            tone.inputs[2].default_value = (*(v * 1.12 for v in color), 1)
+            tree.links.new(text.outputs["Fac"], tone.inputs["Fac"])
+            tree.links.new(tone.outputs["Color"], base)
             bump = tree.nodes.new("ShaderNodeBump")
-            bump.inputs["Strength"].default_value = 0.22
-            bump.inputs["Distance"].default_value = 0.002
-            tree.links.new(text.outputs["Fac"], bump.inputs["Height"])
+            bump.inputs["Strength"].default_value = 0.34
+            bump.inputs["Distance"].default_value = 0.003
+            tree.links.new(weave.outputs["Distance"], bump.inputs["Height"])
             tree.links.new(bump.outputs["Normal"], node.inputs["Normal"])
     return material
 
@@ -70,6 +81,27 @@ def rug_binding(obj, low, high):
             < 0.026
         ):
             polygon.material_index = len(mesh.materials) - 1
+
+
+def cushion_welt(obj, source, low, high, color):
+    """Use an existing cushion edge band for a dark, woven welt."""
+    if obj.data.users > 1:
+        obj.data = obj.data.copy()
+    mesh = obj.data
+    height = high.z - low.z
+    seam = [
+        face
+        for face in mesh.polygons
+        if abs(face.normal.z) < 0.6
+        and 0.15 < ((obj.matrix_world @ face.center).z - low.z) / height < 0.30
+    ]
+    if not seam:
+        return 0
+    edge = finish(source, f"{source.name} | welt", tuple(v * 0.60 for v in color), 105)
+    mesh.materials.append(edge)
+    for face in seam:
+        face.material_index = len(mesh.materials) - 1
+    return len(seam)
 
 
 def drape(obj, low, high, role):
@@ -154,8 +186,9 @@ def polish():
     bedding = {
         "Duvet": ("soft sage linen duvet", (0.31, 0.39, 0.30)),
         "Folded throw": ("clay knitted throw", (0.28, 0.105, 0.055)),
-        "Pillow 1": ("ivory pillow", (0.79, 0.72, 0.61)),
-        "Pillow 2": ("cinnamon pillow", (0.42, 0.22, 0.13)),
+        "Pillow 1": ("warm stone pillow", (0.55, 0.44, 0.32)),
+        "Pillow 2": ("burnt clay pillow", (0.34, 0.14, 0.075)),
+        "Turned-down sheet": ("unbleached linen", (0.52, 0.47, 0.36)),
         "Upholstered headboard": ("warm flax headboard", (0.36, 0.28, 0.19)),
     }
     for obj in tuple(bpy.context.scene.objects):
@@ -183,7 +216,7 @@ def polish():
                 else ("bronzed window joinery", (0.095, 0.077, 0.051), None)
             )
         elif obj.name in {"bedroom/decor/rug", "Bound wool rug"}:
-            choice = "woven taupe rug", (0.28, 0.22, 0.16), 110
+            choice = "woven taupe rug", (0.22, 0.17, 0.12), 76
         elif (
             salon
             and source.name in {"wool", "moss"}
@@ -218,6 +251,10 @@ def polish():
                 "finish": label,
                 "world_bounds_m": [list(low), list(high)],
             }
+            if salon and obj.name.startswith(("Back cushion", "Boxed seat cushion")):
+                record["welt_faces"] = cushion_welt(
+                    obj, slot.material, low, high, color
+                )
             if bed and (
                 obj.name in {"Duvet", "Folded throw"} or obj.name.startswith("Pillow ")
             ):
