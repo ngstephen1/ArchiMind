@@ -100,10 +100,12 @@ ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
   .venv/bin/python scripts/run_town.py
 ```
 
-The extracted database passed SQLite integrity checks and reopened both
-revisions in Chrome at 1440 × 1000 and 390 × 844 on runtime `7c900e1`.
-Both local health endpoints returned HTTP 200. The browser entered the
-bedroom and opened each revision's design board. View the
+The ZIP records `98c80efa` as the source checkout used to assemble and
+validate the database against the archived snapshots. A later test on
+`7c900e1` opened a clean extraction of those same ZIP bytes. The database
+passed SQLite integrity checks, both local endpoints returned HTTP 200,
+and Chrome entered the bedroom and opened the design board for both
+revisions at 1440 × 1000 and 390 × 844. View the
 [inspected client book and designer archive](../nov24-fresh-book) separately.
 The release and independent operator checks are tracked in
 [#70](https://github.com/ngstephen1/ArchiMind/issues/70) and
