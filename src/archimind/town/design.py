@@ -661,9 +661,13 @@ def generate(brief, previous=None, *, on_progress=None):
         rooms = []
         for k, x, y, w, h in partitions:
             if k in brief.locks:
-                rooms.append(
-                    next(r for r in previous["rooms"] if r["design"]["room"]["id"] == k)
+                locked = next(
+                    room
+                    for room in previous["rooms"]
+                    if room["design"]["room"]["id"] == k
                 )
+                # Candidate styling must only change the candidate's room state.
+                rooms.append(copy.deepcopy(locked))
                 continue
             window_width = min(
                 h - 0.6,
