@@ -37,6 +37,9 @@ from archimind.town.service_layout import (
 
 Kind = Literal["salon", "bedroom", "study", "living", "kitchen-dining", "bathroom"]
 PROGRAM = ["bedroom", "study", "living", "kitchen-dining", "bathroom"]
+SERVICE_CORE_ROOMS = ("kitchen-dining", "salon")
+SERVICE_PORTAL = "service-core-passage"
+WARDROBE_RESERVATION = (1.35, 0.6, 2.0)
 STUDIO_ITEMS = {
     "salon": [
         ("salon-suite", "seating", 2.8, 2.35, 0.94),
@@ -98,6 +101,7 @@ class Brief(BaseModel):
     dining_seats: int = Field(default=0, ge=0, le=100)
     split_dining: bool = False
     service_layout: bool = False
+    compare_zoning: bool = False
     passage_m: float = Field(default=0.6, ge=0.6, le=2)
     seed: int = Field(default=42, ge=0, le=1000000)
     shift_bedroom_chair: bool = False
@@ -284,11 +288,29 @@ def validate_home(home, *, passage_m=None, measure=False):
     openings = {}
     kinds = []
     service_rooms = {}
+    service_portals = {}
+    zoning = home.get("zoning")
+    if zoning not in (None, "gallery", "service-core"):
+        raise ValueError("Unknown zoning scheme.")
+    grouped = zoning == "service-core"
     for part in home["rooms"]:
         d = RoomDesign.model_validate(part["design"])
         r = d.room
         if home.get("service_layout") and r.id in FIXTURES:
             service_rooms[r.id] = service_evidence(d, passage_m=passage_m)
+        if zoning and r.id == "bedroom":
+            wardrobe = next(
+                (f for f in d.furniture if f.id == "bedroom-wardrobe"), None
+            )
+            if (
+                wardrobe is None
+                or wardrobe.category != "wardrobe"
+                or (wardrobe.width_m, wardrobe.depth_m, wardrobe.height_m)
+                != WARDROBE_RESERVATION
+            ):
+                raise ValueError(
+                    "The zoning plan must retain the bedroom wardrobe reservation."
+                )
         kinds.append(r.id)
         orientation = part.get("suite_yaw_deg", 0)
         if orientation not in (0, 90) or (orientation and r.id != "salon"):
@@ -309,7 +331,8 @@ def validate_home(home, *, passage_m=None, measure=False):
                     )
         x, y = part["origin"]
         areas.append(box(x, y, x + r.width_m, y + r.depth_m))
-        if len(r.doors) != 1:
+        linked = grouped and r.id in SERVICE_CORE_ROOMS
+        if len(r.doors) != (2 if linked else 1):
             raise ValueError("Each room needs one entrance to the hall.")
         door = r.doors[0]
         west = door.wall == "west"
@@ -338,8 +361,22 @@ def validate_home(home, *, passage_m=None, measure=False):
                 box(seam - 0.055, high, seam + 0.055, y + r.depth_m),
             ]
         )
-        for side in (y, y + r.depth_m):
-            solids.append(box(x, side - 0.055, x + r.width_m, side + 0.055))
+        if linked:
+            transfer = r.doors[1]
+            expected_wall = "north" if r.id == "kitchen-dining" else "south"
+            if transfer.wall != expected_wall or transfer.id != SERVICE_PORTAL:
+                raise ValueError("Invalid service-core passage.")
+        for wall, side in (("south", y), ("north", y + r.depth_m)):
+            if linked and transfer.wall == wall:
+                start = x + transfer.offset_m
+                stop = start + transfer.width_m
+                service_portals[r.id] = (start, stop, side, transfer.height_m)
+                spans = ((x, start), (stop, x + r.width_m))
+            else:
+                spans = ((x, x + r.width_m),)
+            solids.extend(
+                box(a, side - 0.055, b, side + 0.055) for a, b in spans if a < b
+            )
         for f in d.furniture:
             solids.append(
                 box(x + f.x_m, y + f.y_m, x + f.x_m + f.width_m, y + f.y_m + f.depth_m)
@@ -363,13 +400,41 @@ def validate_home(home, *, passage_m=None, measure=False):
     free = shell.buffer(-radius).difference(unary_union(solids).buffer(radius))
     entry = Point(hall + 0.8, max(0.4, radius + 0.001))
     regions = getattr(free, "geoms", [free])
-    if not any(
-        g.covers(entry) and all(g.covers(Point(t)) for t in targets.values())
-        for g in regions
-    ):
+    connected = next(
+        (
+            g
+            for g in regions
+            if g.covers(entry) and all(g.covers(Point(t)) for t in targets.values())
+        ),
+        None,
+    )
+    if connected is None:
         raise ValueError(
             f"Entrance cannot reach every furnished room at {passage_m:g} m passage width."
         )
+    direct_service = None
+    if grouped:
+        first, second = (service_portals.get(room) for room in SERVICE_CORE_ROOMS)
+        if (
+            first is None
+            or second is None
+            or any(abs(a - b) > 1e-6 for a, b in zip(first, second, strict=True))
+        ):
+            raise ValueError(
+                "The service-core passage must have paired openings on a shared wall."
+            )
+        start, stop, seam, _height = first
+        center = (start + stop) / 2
+        over = radius + 0.35
+        crossing = LineString(((center, seam - over), (center, seam + over)))
+        if not connected.covers(crossing):
+            raise ValueError("The direct kitchen-to-salon passage is obstructed.")
+        direct_service = {
+            "rooms": list(SERVICE_CORE_ROOMS),
+            "door_id": SERVICE_PORTAL,
+            "clearance_checked_m": passage_m,
+            "crossing_m": round(crossing.length, 3),
+        }
     if measure:
         routes = []
         for a, b in (
@@ -399,6 +464,32 @@ def validate_home(home, *, passage_m=None, measure=False):
             dining_places=seats,
             passage_m=passage_m,
             **({"service_rooms": service_rooms} if service_rooms else {}),
+            **({"direct_service": direct_service} if direct_service else {}),
+            **(
+                {
+                    "room_areas_m2": {
+                        part["design"]["room"]["id"]: round(
+                            part["design"]["room"]["width_m"]
+                            * part["design"]["room"]["depth_m"],
+                            3,
+                        )
+                        for part in home["rooms"]
+                    },
+                    "wardrobes": [
+                        {
+                            "room": part["design"]["room"]["id"],
+                            "id": item["id"],
+                            "width_m": item["width_m"],
+                            "depth_m": item["depth_m"],
+                        }
+                        for part in home["rooms"]
+                        for item in part["design"]["furniture"]
+                        if item["category"] == "wardrobe"
+                    ],
+                }
+                if home.get("zoning")
+                else {}
+            ),
         )
     return None
 
@@ -548,6 +639,12 @@ def dining_capacity(*, salon, services, split):
 
 
 def _requirement_boundaries(brief, previous):
+    if brief.compare_zoning and brief.locks:
+        raise ValueError(
+            "Compare zoning on an unlocked shell, or turn off zoning comparison to edit the saved scheme."
+        )
+    if brief.compare_zoning and (brief.shift_bedroom_chair or brief.closer_study_desk):
+        raise ValueError("Compare zoning separately from a saved furniture move.")
     has_saved_services = bool((previous or {}).get("service_layout"))
     if brief.service_layout and not has_saved_services:
         conflicts = sorted(set(brief.locks).intersection(FIXTURES))
@@ -644,7 +741,15 @@ def _requirement_boundaries(brief, previous):
         )
     if not salon and any("salon" in pair for pair in pairs):
         raise ValueError("Include a formal salon before requesting its placement.")
+    if brief.compare_zoning and not salon:
+        raise ValueError(
+            "Include a formal salon to compare gallery and service-core zoning."
+        )
     return pairs, salon
+
+
+class ZoningInfeasible(ValueError):
+    """The bounded comparison could not produce both requested schemes."""
 
 
 def generate(brief, previous=None, *, on_progress=None):
@@ -658,18 +763,25 @@ def generate(brief, previous=None, *, on_progress=None):
         return [home]
     previous_comparison = (previous or {}).get("evidence", {}).get("comparison")
     services = brief.service_layout or bool((previous or {}).get("service_layout"))
-    presentation_detail = brief.compare_tradeoffs or (previous or {}).get(
-        "presentation_detail"
+    carried_zoning = (previous or {}).get("zoning")
+    presentation_detail = (
+        brief.compare_tradeoffs
+        or brief.compare_zoning
+        or (previous or {}).get("presentation_detail")
     )
     measure = (
         brief.compare_tradeoffs
+        or brief.compare_zoning
+        or carried_zoning
         or services
         or previous_comparison is not None
         or brief.dining_seats > 0
         or brief.passage_m != 0.6
     )
     candidates = []
-    for attempt in range(8):
+    schemes = ("gallery", "service-core") if brief.compare_zoning else (carried_zoning,)
+    for option in range(8 * len(schemes)):
+        zoning, attempt = schemes[option // 8], option % 8
         rng = random.Random(brief.seed + 7919 * attempt)
         hall = round((brief.width - 1.6) * rng.uniform(0.46, 0.54), 3)
         rows = [["living", "bedroom"], ["kitchen-dining", "bathroom", "study"]]
@@ -677,7 +789,12 @@ def generate(brief, previous=None, *, on_progress=None):
             rng.shuffle(row)
         if "quiet bedroom" in brief.priority:
             rows[0] = ["living", "bedroom"]
-        if salon:
+        if zoning == "service-core":
+            rows = [
+                ["kitchen-dining", "salon", "bathroom"],
+                ["living", "study", "bedroom"],
+            ]
+        elif salon:
             rows[0].insert(0, "salon")
         partitions = []
         for side, row in enumerate(rows):
@@ -743,15 +860,31 @@ def generate(brief, previous=None, *, on_progress=None):
                 if k == "study" and "bright study" in brief.priority
                 else 1.4,
             )
+            doors = [opening("east" if x == 0 else "west", (h - 1.1) / 2, k + "-door")]
+            if zoning == "service-core" and k in SERVICE_CORE_ROOMS:
+                if brief.locks:
+                    saved_room = next(
+                        p["design"]["room"]
+                        for p in previous["rooms"]
+                        if p["design"]["room"]["id"] == k
+                    )
+                    doors = [Door.model_validate(door) for door in saved_room["doors"]]
+                else:
+                    offset = round([0.7, 1.1, w - 1.8, 0.45][attempt % 4], 3)
+                    doors.append(
+                        opening(
+                            "north" if k == "kitchen-dining" else "south",
+                            offset,
+                            SERVICE_PORTAL,
+                        )
+                    )
             r = Room(
                 id=k,
                 name=k.title(),
                 width_m=w,
                 depth_m=h,
                 ceiling_height_m=2.8,
-                doors=[
-                    opening("east" if x == 0 else "west", (h - 1.1) / 2, k + "-door")
-                ],
+                doors=doors,
                 windows=[
                     Window(
                         id=k + "-window",
@@ -783,6 +916,22 @@ def generate(brief, previous=None, *, on_progress=None):
             ]
             proofs = {}
             if k == "bedroom":
+                if zoning:
+                    wardrobe_width, wardrobe_depth, wardrobe_height = (
+                        WARDROBE_RESERVATION
+                    )
+                    items.append(
+                        Furniture(
+                            id="bedroom-wardrobe",
+                            name="Bedroom wardrobe reservation",
+                            category="wardrobe",
+                            width_m=wardrobe_width,
+                            depth_m=wardrobe_depth,
+                            height_m=wardrobe_height,
+                            x_m=0.0,
+                            y_m=0.0,
+                        )
+                    )
                 spec = furniture_from_planning_envelope(
                     BELAYA_ID,
                     furniture_id="belaya",
@@ -827,6 +976,7 @@ def generate(brief, previous=None, *, on_progress=None):
             hall=hall,
             rooms=rooms,
             **({"service_layout": True} if services else {}),
+            **({"zoning": zoning} if zoning else {}),
             **(
                 {"presentation_detail": "bedroom-salon-v1"}
                 if presentation_detail
@@ -882,8 +1032,20 @@ def generate(brief, previous=None, *, on_progress=None):
             candidates.append(home)
             if on_progress and not pairs and not brief.compare_tradeoffs:
                 on_progress("Furnished candidate", home)
-        if not pairs and not brief.compare_tradeoffs and len(candidates) == 2:
+        if (
+            not pairs
+            and not brief.compare_tradeoffs
+            and not brief.compare_zoning
+            and len(candidates) == 2
+        ):
             break
+    if brief.compare_zoning and {home["zoning"] for home in candidates} != {
+        "gallery",
+        "service-core",
+    }:
+        raise ZoningInfeasible(
+            "The shell did not yield both a validated gallery and service-core plan. Increase the shell or revise the program."
+        )
     if not candidates:
         if salon:
             raise ValueError(
@@ -892,7 +1054,7 @@ def generate(brief, previous=None, *, on_progress=None):
         raise ValueError("Search exhausted without a connected furnished home.")
     if "quiet bedroom" in brief.priority:
         candidates.sort(key=lambda c: -c["evidence"]["bedroom_center_from_front_m"])
-    if pairs or brief.compare_tradeoffs:
+    if pairs or brief.compare_tradeoffs or brief.compare_zoning:
 
         def cost(candidate):
             return sum(
@@ -902,7 +1064,14 @@ def generate(brief, previous=None, *, on_progress=None):
 
         evaluated = len(candidates)
         candidates.sort(key=cost)
-        if brief.compare_tradeoffs:
+        if brief.compare_zoning:
+            # Walk the ranked list so the first selection reflects the brief.
+            first = candidates[0]
+            peer = next(
+                home for home in candidates if home["zoning"] != first["zoning"]
+            )
+            candidates = [first, peer]
+        elif brief.compare_tradeoffs:
             primary = candidates[0]
             alternate = choose_tradeoff(primary, candidates[1:])
             candidates = [primary, alternate] if alternate else [primary]

@@ -177,6 +177,7 @@ def coordinate(req, previous, interpret, emit):
             previous
             and _style_only_message(req.message)
             and (not brief.service_layout or previous.get("service_layout"))
+            and not brief.compare_zoning
             and (brief.width, brief.depth) == (previous["width"], previous["depth"])
             and not brief.room_goals
             and brief.priority == "balanced"

@@ -138,6 +138,70 @@ def test_legacy_job_retry_accepts_disabled_service_layout(local):
     assert local.post("/api/jobs", json=changed).status_code == 409
 
 
+def test_legacy_job_retry_accepts_disabled_zoning_comparison(local):
+    project = local.post("/api/projects").json()["project"]
+    req = job(project)
+    assert local.post("/api/jobs", json=req).json()["job"] == req["id"]
+    with service.transaction() as q:
+        (raw,) = q("SELECT request FROM jobs WHERE id=?", (req["id"],)).fetchone()
+    assert '"compare_zoning"' not in raw
+    pre_upgrade = json.loads(raw)
+    pre_upgrade["brief"]["compare_zoning"] = False
+    pre_upgrade["brief"]["service_layout"] = False
+    with service.transaction() as q:
+        q("UPDATE jobs SET request=? WHERE id=?", (json.dumps(pre_upgrade), req["id"]))
+    same = {**req, "brief": {"compare_zoning": False}}
+    assert local.post("/api/jobs", json=same).json()["job"] == req["id"]
+    changed = {**req, "brief": {"compare_zoning": True}}
+    assert local.post("/api/jobs", json=changed).status_code == 409
+
+
+def test_infeasible_zoning_requests_clarification_without_saving(local):
+    project = local.post("/api/projects").json()["project"]
+    req = job(
+        project,
+        brief={"width": 9, "depth": 9, "formal_salon": True, "compare_zoning": True},
+    )
+    identifier = local.post("/api/jobs", json=req).json()["job"]
+    assert service.work_once()
+    feed = local.get(f"/api/jobs/{identifier}/events").json()
+    reviews = [
+        event["artifact"]
+        for event in feed["events"]
+        if event["task"] == "Reviewable brief"
+    ]
+    assert feed["status"] == "failed"
+    assert reviews[-1]["status"] == "needs confirmation"
+    assert (
+        "both a validated gallery and service-core plan" in reviews[-1]["questions"][0]
+    )
+    assert local.get(f"/api/projects/{project}").json()["revision"] == 0
+
+
+def test_zoning_only_preserves_confirmed_program_and_room_scoped_dining():
+    from archimind.town.brief_review import requirement_controls
+
+    brief = Brief(formal_salon=True, compare_zoning=True)
+    _, questions = requirement_controls(brief, "No formal salon.", None)
+    assert any(
+        "turn off the zoning comparison and clear the formal salon control" in question
+        for question in questions
+    )
+    _, questions = requirement_controls(
+        Brief(compare_zoning=True), "No formal salon.", None
+    )
+    assert any("turn off the zoning comparison" in question for question in questions)
+    _, questions = requirement_controls(
+        brief, "No formal salon.", {"rooms": [{"design": {"room": {"id": "salon"}}}]}
+    )
+    assert any("start a new project without the formal salon" in q for q in questions)
+    reviewed, questions = requirement_controls(
+        brief, "Four seats in the kitchen-dining room.", None
+    )
+    assert not questions
+    assert reviewed.dining_seats == 4
+
+
 def test_owner_and_budget(local, monkeypatch):
     p = service.create("other")["project"]
     assert local.get("/api/projects/" + p).status_code == 404
