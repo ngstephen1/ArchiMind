@@ -104,11 +104,11 @@ def render(source, baseline_folder, spec, output, *, proof_only=False):
     ):
         raise ValueError("The studio proof is missing packed images.")
     scene.cycles.device = "CPU"
-    scene.cycles.samples = 24
+    scene.cycles.samples = pinned["max_samples"]
     scene.cycles.adaptive_threshold = pinned["threshold"]
     scene.cycles.use_denoising = True
     scene.render.resolution_x, scene.render.resolution_y = pinned["resolution"]
-    scene.render.resolution_percentage = 50
+    scene.render.resolution_percentage = 100
     scene.render.image_settings.file_format = "PNG"
     scene.view_settings.view_transform = pinned["view_transform"]
     scene.view_settings.look = pinned["view_look"]
@@ -198,9 +198,8 @@ def render(source, baseline_folder, spec, output, *, proof_only=False):
                 "proof_blend_sha256": pinned["proof_blend_sha256"],
                 "editable_sha256": sha(editable),
                 "blender": bpy.app.version_string,
-                "resolution": [value // 2 for value in pinned["resolution"]],
-                "max_samples": 24,
-                "preview_trial": True,
+                "resolution": pinned["resolution"],
+                "max_samples": pinned["max_samples"],
                 "device": "CPU",
                 "geometry": geometry_receipt,
                 "source_notices": notices,
