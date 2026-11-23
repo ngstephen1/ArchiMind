@@ -15,7 +15,7 @@ from render_studio_eye_views import architectural_camera, camera, sha  # noqa: E
 from studio_finish_study import bounds, polish  # noqa: E402
 from studio_photography import attach_textile_detail  # noqa: E402
 
-SOFT_LAYERS = {"Duvet", "Folded throw"}
+SOFT_LAYERS = {"Duvet", "Folded throw", "Pillow 1", "Pillow 2"}
 
 
 def evaluated_geometry():
@@ -46,7 +46,9 @@ def compare_geometry(before, after):
         raise ValueError("The finish study must preserve the complete mesh inventory.")
     edited = {name for name in before if before[name] != after[name]}
     if edited != SOFT_LAYERS:
-        raise ValueError("Only the duvet and throw may have new mesh geometry.")
+        raise ValueError(
+            "Only the duvet, throw and pillows may have new mesh geometry."
+        )
     for name in sorted(edited):
         old_transform, old_bounds, _ = before[name]
         new_transform, new_bounds, _ = after[name]

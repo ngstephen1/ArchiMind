@@ -72,7 +72,7 @@ def rug_binding(obj, low, high):
             polygon.material_index = len(mesh.materials) - 1
 
 
-def drape(obj, low, high, folds):
+def drape(obj, low, high, role):
     """Fit a softly rounded fabric layer wholly inside its original part envelope."""
     width, depth, height = high - low
     nx, ny = 56, 28
@@ -85,14 +85,28 @@ def drape(obj, low, high, folds):
                 u = i / nx
                 # Contract the plan corners slightly rather than overhanging the saved furniture.
                 corner = math.sin(math.pi * u) * math.sin(math.pi * v)
-                fold = 0.5 + 0.5 * math.sin(
-                    math.tau * folds * u + 0.85 * math.sin(math.pi * v)
-                )
-                edge = min(1, u * 15, (1 - u) * 15, v * 15, (1 - v) * 15)
-                body = 0.40 + 0.32 * edge + 0.21 * edge * fold + 0.04 * corner
-                z = low.z + height * body if upper else low.z + height * 0.1
-                x = low.x + width * (u * 0.997 + 0.0015)
-                y = low.y + depth * (v * 0.992 + 0.004)
+                edge = min(1, u * 13, (1 - u) * 13, v * 13, (1 - v) * 13)
+                center = v - 0.5
+                if role == "Pillow":
+                    head = math.sin(math.pi * u) ** 0.7 * math.sin(math.pi * v) ** 0.7
+                    hollow = math.exp(-18 * ((u - 0.45) ** 2 + center**2))
+                    upper_profile = 0.47 + 0.48 * head - 0.15 * hollow
+                    lower_profile = 0.34 - 0.22 * head
+                elif role == "Folded throw":
+                    fold = 0.5 + 0.5 * math.sin(math.tau * (6 * u + 0.33 * v))
+                    upper_profile = 0.33 + edge * (0.20 + 0.32 * fold + 0.12 * corner)
+                    lower_profile = 0.10
+                else:
+                    phase = math.tau * (
+                        3.0 * u + 0.26 * v + 0.25 * math.sin(math.pi * v)
+                    )
+                    fold = 0.5 + 0.5 * math.sin(phase)
+                    ridge = math.exp(-100 * (v - 0.80 - 0.028 * math.sin(phase)) ** 2)
+                    upper_profile = 0.35 + edge * (0.22 + 0.31 * fold + 0.10 * ridge)
+                    lower_profile = 0.10
+                z = low.z + height * (upper_profile if upper else lower_profile)
+                x = low.x + width * (u * 0.986 + 0.007)
+                y = low.y + depth * (v * 0.984 + 0.008)
                 vertices.append(inverse @ Vector((x, y, z)))
     count = (nx + 1) * (ny + 1)
     for j in range(ny):
@@ -114,8 +128,13 @@ def drape(obj, low, high, folds):
     mesh = bpy.data.meshes.new(f"Study draped {obj.name}")
     mesh.from_pydata(vertices, [], faces)
     mesh.materials.append(material)
+    if role == "Pillow":
+        welt = finish(material, f"{material.name} edge", (0.28, 0.20, 0.13), 140)
+        mesh.materials.append(welt)
     for polygon in mesh.polygons:
         polygon.use_smooth = True
+        if role == "Pillow" and polygon.index >= 2 * nx * ny:
+            polygon.material_index = 1
     mesh.update()
     obj.data = mesh
     bpy.context.view_layer.update()
@@ -133,8 +152,8 @@ def polish():
     bpy.context.view_layer.update()
     changes = []
     bedding = {
-        "Duvet": ("oat linen duvet", (0.38, 0.46, 0.36)),
-        "Folded throw": ("olive knitted throw", (0.29, 0.12, 0.07)),
+        "Duvet": ("soft sage linen duvet", (0.31, 0.39, 0.30)),
+        "Folded throw": ("clay knitted throw", (0.28, 0.105, 0.055)),
         "Pillow 1": ("ivory pillow", (0.79, 0.72, 0.61)),
         "Pillow 2": ("cinnamon pillow", (0.42, 0.22, 0.13)),
         "Upholstered headboard": ("warm flax headboard", (0.36, 0.28, 0.19)),
@@ -199,10 +218,11 @@ def polish():
                 "finish": label,
                 "world_bounds_m": [list(low), list(high)],
             }
-            if bed and obj.name in {"Duvet", "Folded throw"}:
-                record["edited_bounds_m"] = drape(
-                    obj, low, high, 4 if obj.name == "Duvet" else 7
-                )
+            if bed and (
+                obj.name in {"Duvet", "Folded throw"} or obj.name.startswith("Pillow ")
+            ):
+                role = "Pillow" if obj.name.startswith("Pillow ") else obj.name
+                record["edited_bounds_m"] = drape(obj, low, high, role)
             changes.append(record)
     for data in bpy.data.lights:
         if not data.name.startswith("Daylight through ") or not data.name.endswith(
@@ -214,6 +234,21 @@ def polish():
         data.energy *= 0.72
         changes.append(
             {"light": data.name, "previous_watts": previous_watts, "watts": data.energy}
+        )
+    for light in bpy.context.scene.objects:
+        if light.type != "LIGHT" or not light.name.startswith("Pendant practical"):
+            continue
+        if not (0 <= light.location.x < 6.398 and 0 <= light.location.y < 6.089):
+            continue
+        previous_watts = light.data.energy
+        light.data.energy = max(previous_watts, 15)
+        light.data.color = (1.0, 0.78, 0.58)
+        changes.append(
+            {
+                "light": light.name,
+                "previous_watts": previous_watts,
+                "watts": light.data.energy,
+            }
         )
     shade = bpy.data.objects.get("salon/decor/floor_lamp.002")
     if shade:
