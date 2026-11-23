@@ -61,7 +61,7 @@ class Outlet(SurveyRecord):
     id: Text
     wall: Annotated[int, Field(ge=0, strict=True)]
     offset_m: Nonnegative
-    height_m: Nonnegative
+    height_m: Nonnegative | None = None
     source: Text
 
 
@@ -159,7 +159,27 @@ class Survey(SurveyRecord):
                 items.append(
                     f"Verify the operating direction and clearance of door {opening.id}."
                 )
+        for outlet in self.outlets:
+            if outlet.height_m is None:
+                items.append(
+                    f"Measure outlet {outlet.id} height above the finished floor."
+                )
         return items
+
+    def drawing_source_json(self) -> str:
+        """Keep fingerprints stable for older surveys without the new measurements."""
+        absent_window_details = {
+            index: {
+                key
+                for key in ("reveal_depth_m", "trim_projection_m")
+                if getattr(opening, key) is None
+            }
+            for index, opening in enumerate(self.openings)
+        }
+        excluded = {"openings": absent_window_details}
+        if not self.outlets:
+            excluded["outlets"] = True
+        return self.model_dump_json(exclude=excluded)
 
     @model_validator(mode="after")
     def validate_geometry(self) -> Self:
@@ -217,7 +237,11 @@ class Survey(SurveyRecord):
                 raise ValueError(f"{outlet.id} references an unknown wall.")
             if outlet.offset_m > dist(*self.wall(outlet.wall)) + 1e-9:
                 raise ValueError(f"{outlet.id} extends past the measured wall.")
-            if self.height_m is not None and outlet.height_m > self.height_m + 1e-9:
+            if (
+                outlet.height_m is not None
+                and self.height_m is not None
+                and outlet.height_m > self.height_m + 1e-9
+            ):
                 raise ValueError(f"{outlet.id} extends above the measured ceiling.")
         for fixture in self.fixtures:
             if not polygon.buffer(1e-9).covers(Polygon(fixture.corners())):

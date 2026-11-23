@@ -209,8 +209,9 @@ def test_survey_cli_keeps_submitted_evidence_and_rejects_overwrites(
     assert retry.returncode == 1 and "already exists" in retry.stderr
 
 
+@pytest.mark.parametrize("known_height", [True, False])
 def test_export_preserves_window_reveal_and_outlet_without_inventing_a_depth(
-    intake, tmp_path
+    intake, tmp_path, known_height
 ):
     from archimind.designer_handoff.survey import export_intake
 
@@ -222,6 +223,8 @@ def test_export_preserves_window_reveal_and_outlet_without_inventing_a_depth(
         "height_m": 0.31,
         "source": "sketch",
     }
+    if not known_height:
+        outlet.pop("height_m")
     intake["outlets"] = [outlet]
     source, output = tmp_path / "site.json", tmp_path / "edition"
     source.write_text(json.dumps(intake))
@@ -235,7 +238,9 @@ def test_export_preserves_window_reveal_and_outlet_without_inventing_a_depth(
             "trim_projection_m": None,
         }
     ]
-    assert report["outlets"] == [outlet]
+    assert report["outlets"] == [{"height_m": None} | outlet]
+    pending = "Measure outlet O1 height above the finished floor."
+    assert (pending in report["field_verification_items"]) is (not known_height)
     dxf = (output / "existing-conditions.dxf").read_text()
     assert dxf.count("8\nOUTLETS\n") == 2
 
@@ -250,3 +255,18 @@ def test_unbound_outlet_values_are_rejected(intake, mutation):
     ]
     with pytest.raises(ValidationError):
         Survey.model_validate(intake)
+
+
+def test_old_survey_drawing_fingerprint_keeps_previous_form(intake):
+    survey = Survey.model_validate(intake)
+    previous = survey.model_dump_json(
+        exclude={
+            "outlets": True,
+            "openings": {"__all__": {"reveal_depth_m", "trim_projection_m"}},
+        }
+    )
+    assert survey.drawing_source_json() == previous
+    intake["openings"][1]["trim_projection_m"] = 0.04
+    with_trim = Survey.model_validate(intake).drawing_source_json()
+    assert '"trim_projection_m":0.04' in with_trim
+    assert '"reveal_depth_m"' not in with_trim
