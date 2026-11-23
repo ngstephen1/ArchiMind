@@ -33,6 +33,12 @@ intent open. [Paired calculations and SHA-256 digests](paired-measurements.json)
 - [Desktop revision 2 chair explanation](desktop-saved-revision.png)
 - [Narrow revision 2 plan](narrow-saved-revision.png)
 
+A separate offline replay rebuilt the saved snapshots, checked both service
+health endpoints and entered the same bedroom at desktop and narrow sizes.
+Both revisions rendered the bedroom photographs. The replay made no provider
+requests and ran against the replay code already on main at `9adf26f`.
+[Desktop 3D view](walkthrough-1440-r2.jpg) · [Narrow 3D view](walkthrough-390-r2.jpg)
+
 ## Reopen both revisions
 
 After the [Town setup](../../../README.md#quick-start), run from the repository
