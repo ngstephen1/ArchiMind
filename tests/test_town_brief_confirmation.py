@@ -1144,3 +1144,30 @@ def test_split_match_accepts_an_elliptical_second_allocation(second):
         settings, text + " Everyone must sit at one table.", None
     )
     assert any("asks for one dining table" in question for question in questions)
+
+
+def test_explicit_split_does_not_drop_a_shared_room_request():
+    text = "Seat four people at one table and two people at another table, both in the formal salon."
+    settings = Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True)
+    brief, questions = requirement_controls(settings, text, None)
+    assert brief.dining_seats == 6
+    assert any(
+        "formal salon has one modeled table" in question for question in questions
+    )
+
+
+@pytest.mark.parametrize("positions", ["end", "side"])
+def test_places_at_the_other_end_still_belong_to_one_table(positions):
+    text = f"Seat two people at a single dining table and two at the other {positions} of it."
+    settings = Brief(compare_tradeoffs=True, formal_salon=True)
+    brief, questions = requirement_controls(settings, text, None)
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
+def test_current_home_width_in_a_reason_remains_background():
+    text = (
+        "Keep a 90 cm clear passage because we need room to turn "
+        "but we use a 60 cm clear passage in our current home."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
