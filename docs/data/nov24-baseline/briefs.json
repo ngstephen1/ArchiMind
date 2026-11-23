@@ -120,8 +120,7 @@
       "expected_calls": [
         0,
         1
-      ],
-      "known_gap": "Seat six people at a single table can lose the six-seat requirement."
+      ]
     },
     {
       "case": "passage-conversion",

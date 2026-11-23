@@ -17,12 +17,20 @@ from archimind.style_packs import StyleId
 from archimind.town.agents import coordinate
 from archimind.town.brief_review import (
     REVIEW_FIELDS,
+    opening_questions,
     provider_brief,
     requests_single_table,
     requirement_controls,
     review_summary,
+    salon_choice,
 )
-from archimind.town.design import Brief, Kind, RoomGoal, interpret_offline
+from archimind.town.design import (
+    Brief,
+    Kind,
+    RoomGoal,
+    check_brief,
+    interpret_offline,
+)
 
 SCHEMA = [
     "CREATE TABLE IF NOT EXISTS job_events (job TEXT NOT NULL, seq INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(job,seq))",
@@ -286,7 +294,42 @@ def clarification_guidance(req, parsed):
     return " ".join(options)
 
 
+def reviewed_brief(req, brief, previous, **kwargs):
+    return review_summary(
+        brief,
+        message=req.message,
+        previous=previous,
+        controls=req.brief.model_fields_set
+        - ({"locks"} if not req.brief.locks else set()),
+        control_locks=req.brief.locks,
+        **kwargs,
+    )
+
+
 def interpret(req, previous):
+    """Interpret the request, then confirm its hard requirements before generation.
+
+    A reviewed brief that generation would reject stops here as a clarification,
+    so no layout job runs and the saved revision is untouched.
+    """
+    brief = _interpret(req, previous)
+    if brief.compare_tradeoffs:
+        questions = opening_questions(req.message, brief.locks)
+        try:
+            check_brief(brief, previous)
+        except ValueError as exc:
+            questions.append(str(exc))
+        if questions:
+            raise BriefClarification(
+                req,
+                None,
+                reviewed=reviewed_brief(req, brief, previous, questions=questions),
+                question=" ".join(questions),
+            )
+    return brief
+
+
+def _interpret(req, previous):
     brief = req.brief
     review = brief.compare_tradeoffs
     if review or previous:
@@ -295,9 +338,7 @@ def interpret(req, previous):
             raise BriefClarification(
                 req,
                 None,
-                reviewed=review_summary(
-                    brief, message=req.message, questions=questions
-                ),
+                reviewed=reviewed_brief(req, brief, previous, questions=questions),
                 question=" ".join(questions),
             )
     if req.agent_team and not req.message.strip():
@@ -348,7 +389,15 @@ def interpret(req, previous):
                 if any(f["id"] == item for f in r["design"]["furniture"])
             ]
             if len(match) != 1:
-                raise Problem("Clarify which room contains the furniture to lock.")
+                question = "Clarify which room contains the furniture to lock."
+                if not brief.compare_tradeoffs:
+                    raise Problem(question)
+                raise BriefClarification(
+                    req,
+                    None,
+                    reviewed=reviewed_brief(req, brief, previous, questions=[question]),
+                    question=question,
+                )
             locks.update(match)
         goals = []
         seen = set()
@@ -364,7 +413,11 @@ def interpret(req, previous):
                 "priority": parsed.priority,
                 "style": parsed.style,
                 "room_goals": goals,
-                "formal_salon": parsed.formal_salon or brief.formal_salon,
+                "formal_salon": brief.formal_salon
+                or (
+                    parsed.formal_salon
+                    and (not review or salon_choice(req.message)[0] is not False)
+                ),
                 "locks": sorted(locks),
                 "shift_bedroom_chair": parsed.shift_bedroom_chair
                 or brief.shift_bedroom_chair,
@@ -399,9 +452,10 @@ def interpret(req, previous):
                         "Choose a formal salon with a supported seating arrangement, or revise the requirement."
                     )
             if question or parsed.unsupported or parsed.clarification:
-                reviewed = review_summary(
+                reviewed = reviewed_brief(
+                    req,
                     brief,
-                    message=req.message,
+                    previous,
                     questions=[question, parsed.clarification],
                     unsupported=parsed.unsupported,
                 )
@@ -467,7 +521,7 @@ def work_once():
                     "A",
                     "completed",
                     "Reviewable brief",
-                    review_summary(brief, message=request.message),
+                    reviewed_brief(request, brief, previous_home),
                 )
             return brief
 
