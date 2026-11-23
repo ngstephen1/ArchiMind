@@ -60,7 +60,7 @@ supplier clearances before using the concept for procurement or construction.
 
 ### Bedroom lighting proofs
 
-Dispatch the Studio Home workflow with `fresh_home=true` and `lighting_proof=true` and the accepted proof run, manifest and snapshot for each revision. Supply the **same pinned** `camera_source=<sha>:<manifest-path>` for both dispatches. The bedroom doorway and desk views use this common camera, and the task view repeats the desk pose. Add `salon_cover=true` to include optional salon and living detail images. They document the selected revision and use that revision's own cameras. The receipt identifies the camera source for every shot. For example, on a branch with the lighting-proof workflow:
+Dispatch the Studio Home workflow with `fresh_home=true` and `lighting_proof=true` and the accepted proof run, manifest and snapshot for each revision. Supply the **same pinned** `camera_source=<sha>:<manifest-path>` for both dispatches. The bedroom doorway and desk views use this common camera, and the task view repeats the desk pose. Add `salon_cover=true` to include optional salon and living detail images. They use the selected revision’s own cameras. The renderer skips fallback salon detail cameras and includes a living detail only when a non-fallback pose differs from the overview. The receipt identifies the camera source for every shot. For example, on a branch with the lighting-proof workflow:
 
 ```bash
 rev=2
