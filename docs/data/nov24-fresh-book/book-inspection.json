@@ -1,0 +1,142 @@
+{
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "displacement_m": 0.29999999999999893,
+  "revisions": [
+    {
+      "revision": 1,
+      "home_id": "d49a87b77fe4f85e9012ef7d391262189aefca508b805b2ecd702d666b79c67a",
+      "manifest_sha256": "81acf4e5cf41a289b1d37104bce62b3e3f2a6592a77aeeab5899669685f8a139",
+      "chair_xy_m": [
+        0.56,
+        4.131126822710037
+      ],
+      "chair_home_xy_m": [
+        0.56,
+        14.618126822710037
+      ],
+      "chair_desk_gap_m": 0.06000000000000005,
+      "desk_center_to_window_midpoint_m": 2.4877055663632084,
+      "window_wall": "west",
+      "desk_id": "belaya",
+      "chair_id": "desk-chair",
+      "window_id": "bedroom-window"
+    },
+    {
+      "revision": 2,
+      "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+      "manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+      "chair_xy_m": [
+        0.56,
+        3.8311268227100372
+      ],
+      "chair_home_xy_m": [
+        0.56,
+        14.318126822710038
+      ],
+      "chair_desk_gap_m": 0.3599999999999999,
+      "desk_center_to_window_midpoint_m": 2.4877055663632084,
+      "window_wall": "west",
+      "desk_id": "belaya",
+      "chair_id": "desk-chair",
+      "window_id": "bedroom-window"
+    }
+  ],
+  "images": {
+    "doorway": {
+      "fixed_camera": true,
+      "sha256": [
+        "73c8e6385f57959e7f596b042d16d0ff455d8a02ba1e7af18a5be3b6128728ed",
+        "002d9da59c8c027ef111454d7764877d4fd16e7d6d0ab023bd2973334564a3fd"
+      ]
+    },
+    "desk": {
+      "fixed_camera": true,
+      "sha256": [
+        "21bcccaf5d9fd538659747a1e57bd3ebc6c0dfe00ad62f3a90bb3c6da63a1d65",
+        "e42b776dc27aa42c8ca2844d4caa13e06e403b50ad2cec769807fe433530fad6"
+      ]
+    }
+  },
+  "html_sha256": "9e04bf28b745a96bcd9861d5224f55eb57c48d6690a3138e0af714debcd0a893",
+  "book_sha256": "1205af8dd7f3b9b1541776c829eb8cd7f637a34f7c962b3a62efec50bfda8b63",
+  "page_count": 12,
+  "portfolio_sha256": "97ae2870b11cd0d5128a3753daa6c4dc9bdfaface494ccce030ba9d1aa198ce7",
+  "revision": 2,
+  "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+  "source_receipt_sha256": "96470a66cf3b16797b757577b55f43d5b879ae5fe60c28a060c9b4b503013f4c",
+  "hero_sha256": "c6d14beec36a7d3de8c223c64fb7f76a685fe3e87f4acbc0a0423b3c28f73105",
+  "inspection": [
+    {
+      "page": 1,
+      "subject": "Cover",
+      "observed": "Salon 1080p frame, title, model dimensions and revision footer are visible. Chairs and serving table frame the foreground.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 2,
+      "subject": "Plan and finishes",
+      "observed": "All six dimension labels, openings, finish swatches, attribution and site verification are visible. Schematic planning footprints.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 3,
+      "subject": "Drawing and daylight",
+      "observed": "The sketch and rendered halves align at the same cut. The color half uses the CPU proof image.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 4,
+      "subject": "Evening lighting",
+      "observed": "The darker proof-style view and its footer are legible. The lighting study is illustrative.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 5,
+      "subject": "Salon",
+      "observed": "The 1080p doorway view, dining detail, two schematic elevations and complete schedule are visible.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 6,
+      "subject": "Living",
+      "observed": "Both captions, elevations and schedule are visible. The two proof images repeat one view.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 7,
+      "subject": "Bedroom",
+      "observed": "Both 1080p views, two elevations and all four furniture rows appear above the footer.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 8,
+      "subject": "Bathroom",
+      "observed": "Doorway and tub studies, two elevations and both schedule rows are complete. Fixtures are schematic.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 9,
+      "subject": "Kitchen-dining",
+      "observed": "Both proof views, elevations and both furniture rows appear. The lighting remains dim.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 10,
+      "subject": "Study",
+      "observed": "Both proof views, elevations and both furniture rows appear. The study is dim and minimally dressed.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 11,
+      "subject": "Bedroom approach",
+      "observed": "Both fixed-camera 1080p images and revision captions display the separate positions. The plan measurements and fit caveat are visible.",
+      "raster_dpi": 150
+    },
+    {
+      "page": 12,
+      "subject": "Writing desk",
+      "observed": "Both fixed-camera 1080p images show the desk and changed chair position. Measurements and the field-fit caveat are visible.",
+      "raster_dpi": 150
+    }
+  ]
+}
