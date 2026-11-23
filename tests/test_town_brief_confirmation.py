@@ -794,8 +794,14 @@ def test_cannot_lock_a_room_that_does_not_exist(monkeypatch):
         service.interpret(request, previous)
 
 
-def test_object_clearance_is_not_cited_as_the_default_plan_passage():
-    text = "Keep the passage width at least 0.6 m between the sofa and the wall."
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Keep the passage width at least 0.6 m between the sofa and the wall.",
+        "Keep a 0.6 m clear passage between the sofa and the wall.",
+    ],
+)
+def test_object_clearance_is_not_cited_as_the_default_plan_passage(text):
     brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
     assert questions
     sources = review_summary(brief, message=text, questions=questions)["sources"]
@@ -832,3 +838,39 @@ def test_checked_locks_are_attributed_only_to_the_checked_rooms(saved_home):
     }
     assert origins["Keep bedroom"] == "controls"
     assert origins["Keep study"] == "interpreted"
+
+
+def test_salon_correction_after_an_unrelated_but_clause():
+    text = (
+        "Include a formal salon, but keep the living room separate. "
+        "Skip the salon for now."
+    )
+    result, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and not result.formal_salon
+
+
+def test_offsite_meal_does_not_hide_separate_home_seating():
+    text = "We have dinner at a restaurant, so we need five seats in the salon for breakfast."
+    _, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True), text, None
+    )
+    assert any("requested 5 places" in question for question in questions)
+
+
+def test_qualified_door_does_not_hide_separate_window_request():
+    text = "Keep the door to the bedroom and the window in the study."
+    assert len(opening_questions(text, ["bedroom"])) == 1
+    assert not opening_questions(text, ["bedroom", "study"])
+
+
+def test_newline_after_negation_preserves_dining_evidence():
+    text = "Four seats in the salon, not beside the door\nTwo seats in the kitchen."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6
+    assert {
+        "requirement": "6 dining places across two tables",
+        "origin": "brief",
+        "statement": text,
+    } in review_summary(brief, message=text)["sources"]
