@@ -149,6 +149,7 @@ def render(source, baseline_folder, spec, output, *, proof_only=False):
     for index, (shot, camera_obj) in enumerate(photospecs):
         view = scene if index == 0 else scene.copy()
         view.name = Path(shot["file"]).stem
+        view.use_fake_user = True
         if set(view.objects.keys()) != originals:
             raise ValueError(
                 "The editable camera scenes must share the mesh inventory."
