@@ -2,6 +2,14 @@ name: Studio home proof
 on:
   workflow_dispatch:
     inputs:
+      finish_study:
+        description: Render only the November fixed-camera bedroom and salon finish comparison
+        type: boolean
+        default: false
+      finish_proof_only:
+        description: For the finish study, verify the packed geometry and all editable cameras without rendering
+        type: boolean
+        default: false
       fresh_home:
         description: Render the fresh-home acceptance manifest only
         type: boolean
@@ -42,6 +50,7 @@ permissions:
   actions: read
 jobs:
   render:
+    if: ${{ !inputs.finish_study }}
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
@@ -172,4 +181,41 @@ jobs:
         with:
           name: studio-home-edited-proof
           path: ${{ runner.temp }}/edited-proof
+          if-no-files-found: error
+
+  finish-study:
+    if: inputs.finish_study
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Install the pinned Blender binary
+        working-directory: ${{ runner.temp }}
+        run: |
+          name=blender-5.1.2-linux-x64.tar.xz
+          curl -fsSL --retry 2 "https://download.blender.org/release/Blender5.1/$name" -o blender.tar.xz ||
+            curl -fsSL --retry 2 "https://ftp.halifax.rwth-aachen.de/blender/release/Blender5.1/$name" -o blender.tar.xz
+          echo 'aaccb355f50183979b698bcce7467103a76261b5fa59f4972295842662a285fb  blender.tar.xz' | sha256sum -c
+          tar xf blender.tar.xz
+      - name: Fetch the frozen public baseline artifacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 44993303088 --name studio-home-proof --dir "$RUNNER_TEMP/finish-source"
+          gh run download 44994306268 --name studio-eye-views --dir "$RUNNER_TEMP/finish-before"
+      - name: Render matched bedroom and salon finish proofs
+        env:
+          FINISH_PROOF_ONLY: ${{ inputs.finish_proof_only }}
+        run: |
+          options=()
+          if [[ "$FINISH_PROOF_ONLY" == "true" ]]; then options+=(--proof-only); fi
+          "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_finish_study.py -- \
+            "$RUNNER_TEMP/finish-source" "$RUNNER_TEMP/finish-before" \
+            docs/data/nov24-baseline/visual-baseline.json "$RUNNER_TEMP/finish-study" "${options[@]}"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: studio-finish-study
+          path: ${{ runner.temp }}/finish-study
           if-no-files-found: error
