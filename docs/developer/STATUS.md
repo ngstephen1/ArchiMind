@@ -2,13 +2,25 @@
 
 ## November 22–30 release sprint
 
-Milestone 2 has closed all five preparation issues. Later milestones track
-the fresh live Town run and two-revision handoff, held-out evaluation, client
-book, independent rehearsal and release. The November 21 conference home
-remains available as a verified local replay. The hosted Vercel walkthrough
-serves static content. Hosted design service acceptance remains open.
-[Sprint tracker](https://github.com/ngstephen1/ArchiMind/issues/54) ·
-[Local commands and hosted scope](CONFERENCE_REPLAY.md)
+As of November 23, **11 of the original 19 issues are closed**. Milestone 2
+is complete (5/5), and milestone 3 has finished six of seven issues. The
+archived bedroom finish comparison met the material and window-detail
+criteria at 1080p. [Sprint tracker](https://github.com/ngstephen1/ArchiMind/issues/54) ·
+[Archived finish comparison](../data/nov24-baseline/layered-finish)
+
+A fresh Town browser run used the live provider and returned two validated
+whole-home alternatives. Layout A was saved as revision 1. Revision 2 moved
+the bedroom chair by 0.300 m and increased its plan gap to the desk from
+0.060 m to 0.360 m. Both revisions also reopened in a provider-free Chrome
+replay. The live receipt identifies the exact code tested.
+[Fresh run, saved inputs and local replay commands](../data/nov24-fresh-live#reopen-both-revisions)
+
+The fresh layered proofs and their client-book production are tracked in
+[#69](https://github.com/ngstephen1/ArchiMind/issues/69). The independent
+revision cross-check, held-out evaluation, rehearsals, freeze and release
+gates remain open. The public Vercel walkthrough serves static content.
+Hosted design service acceptance remains open.
+[Hosted scope and prior conference-home commands](CONFERENCE_REPLAY.md)
 
 ## Historical implementation status
 
