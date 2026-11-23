@@ -19,10 +19,32 @@ NUMBERS = {
             "eight",
             "nine",
             "ten",
+            "eleven",
+            "twelve",
+            "thirteen",
+            "fourteen",
+            "fifteen",
+            "sixteen",
+            "seventeen",
+            "eighteen",
+            "nineteen",
         )
     )
 }
-COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")\b"
+TENS = {
+    word: value * 10
+    for value, word in enumerate(
+        ("twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"),
+        start=2,
+    )
+}
+COUNT_SEPARATOR = r"[-‐‑–— ]"
+UNITS = "|".join(word for word, value in NUMBERS.items() if 1 <= value <= 9)
+COMPOUND_COUNT = rf"(?:{'|'.join(TENS)})(?:{COUNT_SEPARATOR}(?:{UNITS}))?"
+COUNT = (
+    rf"(?<![-+‐‑–—])\b(\d{{1,3}}|{COMPOUND_COUNT}|{'|'.join(NUMBERS)})\b"
+    r"(?![-‐‑–—]\w)"
+)
 
 
 MEASUREMENT = r"(?<![\d.])(\d+(?:\.\d+)?|\.\d+)\s*(mm|cm|m)\b"
@@ -66,10 +88,13 @@ TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
 TABLE_POSITION = r"\s+(?:at|around)\s+"
 SINGLE_TABLE = r"(?:one|a single|the same) (?:dining )?table\b"
 SUBJECT_TABLE_COUNT = re.compile(
-    rf"(?<![-+])(?P<party>{GROUPS}|{GROUP})\s+"
+    rf"(?P<party>{GROUPS}|{GROUP})\s+"
     r"(?:must|need to|have to)\s+"
     r"(?:all\s+)?(?:sit|dine|eat|be seated)(?:\s+together)?"
     rf"(?={TABLE_POSITION}{SINGLE_TABLE})"
+)
+EXPLORATORY_DINING = re.compile(
+    r"\b(?:whether|what if)\b|^\s*(?:if|could|would|can|should|do|does|must)\b"
 )
 NAMED_SINGLE_TABLE = re.compile(
     rf"(?:\bseat\s+)?(?P<count>{TABLE_ALLOCATION}){TABLE_POSITION}{SINGLE_TABLE}"
@@ -406,6 +431,8 @@ def _dining_clauses(clauses, *, for_arrangement=False):
             if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
                 home.strip()
             ):
+                if EXPLORATORY_DINING.search(home) and SUBJECT_TABLE_COUNT.search(home):
+                    continue
                 home = SUBJECT_TABLE_COUNT.sub(r"\g<party>", home)
                 yield OPTIONAL_SECOND_TABLE.sub(
                     lambda match: (
@@ -418,7 +445,12 @@ def _dining_clauses(clauses, *, for_arrangement=False):
 
 
 def _seat_count(value):
-    return int(value) if value.isdecimal() else NUMBERS[value]
+    if value.isdecimal():
+        return int(value)
+    tens, *ones = re.split(COUNT_SEPARATOR, value)
+    if tens in TENS:
+        return TENS[tens] + (NUMBERS[ones[0]] if ones else 0)
+    return NUMBERS[tens]
 
 
 def _allocation_count(text):

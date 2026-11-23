@@ -123,20 +123,46 @@ def test_modal_seating_includes_required_allocations_only(split_dining, phrase, 
     assert brief.split_dining is (split_dining and count == 4)
 
 
-@pytest.mark.parametrize(
-    "phrase",
-    [
-        "Can we see whether five attendees can sit at one table in the formal salon?",
-        "Twenty-one attendees must sit together at one table in the salon.",
-    ],
-)
-def test_modal_seating_does_not_extract_speculative_or_partial_counts(phrase):
-    brief, _ = requirement_controls(
+@pytest.mark.parametrize("modal", ["can", "must"])
+def test_modal_seating_does_not_extract_speculative_counts(modal):
+    brief, questions = requirement_controls(
         Brief(formal_salon=True, compare_tradeoffs=True, split_dining=False),
-        phrase + " Four dining seats are required.",
+        f"Could we check whether five attendees {modal} sit at one table in the salon? "
+        "Four dining seats are required.",
         None,
     )
     assert brief.dining_seats == 4
+    assert not questions
+
+
+def test_exploratory_modal_seating_does_not_override_split_control():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        "Could we check whether five attendees must sit at one table in the salon? "
+        "Four dining seats are required.",
+        None,
+    )
+    assert (brief.dining_seats, brief.split_dining) == (4, True)
+    assert not questions
+
+
+@pytest.mark.parametrize(
+    ("phrase", "count"),
+    [
+        ("Thirty-one attendees and two adults must sit at one table in the salon.", 33),
+        ("Seat thirty-one attendees at one table in the salon.", 31),
+        ("Twenty‑one attendees must sit at one table in the salon.", 21),
+        ("Twenty one attendees must sit at one table in the salon.", 21),
+    ],
+)
+def test_compound_party_counts_are_kept_whole(phrase, count):
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=False),
+        phrase,
+        None,
+    )
+    assert brief.dining_seats == count
+    assert any("four modeled places" in question for question in questions)
 
 
 def test_modal_guest_count_keeps_conflicting_total_visible():
