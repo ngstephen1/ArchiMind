@@ -190,12 +190,10 @@ def enqueue(owner, req):
             raise Problem("One design is already in progress.", 409)
         day = now - now % 86400
         extra = local_extra_team_jobs(req, now)
-        if (
-            q(
-                "SELECT count(*) FROM jobs WHERE owner=? AND created>=?", (owner, day)
-            ).fetchone()[0]
-            >= 3 + extra
-        ):
+        jobs_today = q(
+            "SELECT count(*) FROM jobs WHERE owner=? AND created>=?", (owner, day)
+        ).fetchone()[0]
+        if jobs_today >= 3 + extra:
             raise Problem("Daily design job limit reached.", 429)
         # Reserve three calls for team jobs and one for legacy interpretation.
         decision_slot = None
@@ -217,13 +215,15 @@ def enqueue(owner, req):
             if total > cap or reserve <= 0 or total * reserve > budget:
                 raise Problem("The operator's daily AI allowance is exhausted.", 429)
             mode, threshold = decisions.settings()
+            # Preserve enough budget for this owner's remaining ordinary team jobs.
+            with_optional = total + 1 + 3 * (2 + extra - jobs_today)
             if (
                 mode != "off"
                 and req.agent_team
                 and req.brief.compare_tradeoffs
                 and req.message.strip()
-                and total + 1 <= cap
-                and (total + 1) * reserve <= budget
+                and with_optional <= cap
+                and with_optional * reserve <= budget
             ):
                 decision_slot = (j, mode, threshold)
         q(

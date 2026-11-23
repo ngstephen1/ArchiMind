@@ -3,6 +3,7 @@
 import json
 import math
 import os
+import re
 import time
 from pathlib import Path
 
@@ -76,6 +77,7 @@ def settings():
                 and receipt["heldout_gate_passed"] is True
                 and receipt["responses_complete"] is True
                 and receipt["requests"] == 6
+                and re.fullmatch(r"[0-9a-f]{64}", receipt["public_calibration_sha256"])
                 and type(receipt["p95_ms"]) is int
                 and 0 <= receipt["p95_ms"] <= 3000
                 and threshold in THRESHOLDS

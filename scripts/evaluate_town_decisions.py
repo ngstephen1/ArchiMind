@@ -5,6 +5,7 @@ import json
 import math
 import os
 import time
+from hashlib import sha256
 from pathlib import Path
 
 from run_with_agent import settings_from_dotenv
@@ -39,6 +40,7 @@ def main():
         default=ROOT / "docs/data/town-decisions/public-cases.json",
     )
     parser.add_argument("--threshold", type=float, choices=decisions.THRESHOLDS)
+    parser.add_argument("--public-receipt", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     cases = json.loads(args.cases.read_bytes())["cases"]
@@ -53,6 +55,31 @@ def main():
         return
     if not args.output:
         parser.error("--live requires --output for the receipt.")
+    cases_hash = sha256(args.cases.read_bytes()).hexdigest()
+    public_hash = None
+    if args.threshold is not None:
+        if len(cases) != 6 or not args.public_receipt:
+            parser.error(
+                "Held-out evaluation requires six cases and a public calibration receipt."
+            )
+        raw = args.public_receipt.read_bytes()
+        public = json.loads(raw)
+        expected_corpus = ROOT / "docs/data/town-decisions/public-cases.json"
+        if (
+            public.get("rubric") != decisions.RUBRIC
+            or public.get("model") != decisions.MODEL
+            or public.get("requests") != 36
+            or public.get("responses_complete") is not True
+            or public.get("selected_threshold") != args.threshold
+            or public.get("public_cases_sha256")
+            != sha256(expected_corpus.read_bytes()).hexdigest()
+            or not any(
+                row.get("threshold") == args.threshold and row.get("passed") is True
+                for row in public.get("scores", [])
+            )
+        ):
+            parser.error("The public calibration did not qualify this threshold.")
+        public_hash = sha256(raw).hexdigest()
     key = os.getenv("OPENAI_API_KEY") or settings_from_dotenv(args.env_file).get(
         "OPENAI_API_KEY"
     )
@@ -88,6 +115,8 @@ def main():
         "model": decisions.MODEL,
         "rubric": decisions.RUBRIC,
         "requests": len(rows),
+        "public_cases_sha256": cases_hash if public_hash is None else None,
+        "public_calibration_sha256": public_hash,
         "responses_complete": complete,
         "input_tokens_reported": sum(
             row["review"]["input_tokens"] or 0 for row in rows
@@ -95,9 +124,7 @@ def main():
         "p95_ms": p95,
         "scores": scores,
         "selected_threshold": selected,
-        "heldout_gate_passed": bool(
-            args.threshold and len(rows) == 6 and selected and p95 <= 3000
-        ),
+        "heldout_gate_passed": bool(public_hash and selected and p95 <= 3000),
         "cases": rows,
     }
     args.output.write_text(json.dumps(receipt, indent=2) + "\n")

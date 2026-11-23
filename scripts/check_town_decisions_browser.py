@@ -123,6 +123,7 @@ def check(output):
                     "rubric": decisions.RUBRIC,
                     "selected_threshold": 0.85,
                     "heldout_gate_passed": True,
+                    "public_calibration_sha256": "a" * 64,
                     "responses_complete": True,
                     "requests": 6,
                     "p95_ms": 500,

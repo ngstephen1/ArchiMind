@@ -184,22 +184,24 @@ def requirement_controls(brief, message, previous):
                 )
         elif not re.match(r"\s+(?:per|for each)\b", tail):
             totals.add(value)
-    for match in re.finditer(
-        r"\bseat\s+" + count_at + r"(?:one|a single|the same) (?:dining )?table\b",
-        dining,
-    ):
-        seats_requested = count(match[1])
-        totals.add(seats_requested)
-        if seats_requested > 4:
-            questions.append(
-                f"All {seats_requested} dining places are still required at one table. "
-                "The largest modeled table has four places. Revise the single-table brief to proceed."
-            )
+    single_table = requests_single_table(message)
+    if single_table:
+        for match in re.finditer(
+            r"\bseat\s+" + count_at + r"(?:one|a single|the same) (?:dining )?table\b",
+            dining,
+        ):
+            seats_requested = count(match[1])
+            if seats_requested > 4:
+                totals.add(seats_requested)
+                questions.append(
+                    f"All {seats_requested} dining places are still required at one table. "
+                    "The largest modeled table has four places. Revise the single-table brief to proceed."
+                )
     if requested_split and not split:
         questions.append(
             "Confirm separate dining tables in the brief controls, or revise the seating arrangement."
         )
-    if requests_single_table(text):
+    if single_table:
         if split and "split_dining" in explicit:
             questions.append(
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."

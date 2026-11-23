@@ -99,6 +99,7 @@ def town(tmp_path, monkeypatch):
                 "rubric": decisions.RUBRIC,
                 "selected_threshold": 0.85,
                 "heldout_gate_passed": True,
+                "public_calibration_sha256": "a" * 64,
                 "responses_complete": True,
                 "requests": 6,
                 "p95_ms": 500,
@@ -206,7 +207,7 @@ def test_review_modes(town, monkeypatch, mode, unavailable, completion):
 
 def test_optional_reservation_counts_against_cap(town, monkeypatch):
     monkeypatch.setenv("ARCHIMIND_TOWN_DECISIONS_MODE", "shadow")
-    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "7")
+    monkeypatch.setenv("TOWN_DAILY_MODEL_CALLS", "10")
     client, _, _ = town
     first, payload = submit(town)
     assert first.status_code == 200
@@ -222,6 +223,10 @@ def test_optional_reservation_counts_against_cap(town, monkeypatch):
     )
     assert service.work_once()
     assert client.get(f"/api/jobs/{second.json()['job']}").json()["status"] == "ready"
+    third, _ = submit(town)
+    assert third.status_code == 200
+    assert service.work_once()
+    assert client.get(f"/api/jobs/{third.json()['job']}").json()["status"] == "ready"
 
 
 def test_single_table_regression_without_decisions(town, monkeypatch):
@@ -281,3 +286,43 @@ def test_saved_edit_and_proof_retry_use_no_decisions_calls(town, monkeypatch):
         == "queued"
     )
     assert seen == ["proof", "proof"] and len(calls) == 1
+
+
+@pytest.mark.parametrize(
+    ("message", "formal_salon", "dining_seats", "split_dining"),
+    [
+        (
+            "Seat four guests at one table in the salon and two residents at a separate table in the kitchen.",
+            True,
+            6,
+            True,
+        ),
+        ("Seat four people at a single table in the formal salon.", True, 0, False),
+        (
+            "Seat four people at a single table in the kitchen-dining room.",
+            False,
+            0,
+            False,
+        ),
+    ],
+)
+def test_supported_table_phrasing_keeps_existing_path(
+    town, message, formal_salon, dining_seats, split_dining
+):
+    response, _ = submit(
+        town,
+        message,
+        brief={
+            "compare_tradeoffs": True,
+            "width": 15,
+            "depth": 16,
+            "formal_salon": formal_salon,
+            "dining_seats": dining_seats,
+            "split_dining": split_dining,
+        },
+    )
+    assert response.status_code == 200
+    assert service.work_once()
+    client, _, _ = town
+    result = client.get(f"/api/jobs/{response.json()['job']}").json()
+    assert result["status"] == "ready", result
