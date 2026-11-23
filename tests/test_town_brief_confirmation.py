@@ -1185,6 +1185,25 @@ def test_offsite_single_table_does_not_restrict_home_split():
     assert not questions and brief.dining_seats == 6 and brief.split_dining
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "We need six dining seats at home and for our Friday outing seat everyone at one table while we have dinner at a restaurant.",
+        "We have breakfast at work and seat six guests at one table for dinner at a restaurant and need six dining seats at home.",
+        "For dinner at home seat six across two tables and have breakfast off-site and need eight seats there.",
+    ],
+)
+def test_offsite_table_in_a_compound_sentence_does_not_restrict_home_split(text):
+    brief, questions = requirement_controls(
+        Brief(
+            compare_tradeoffs=True, formal_salon=True, split_dining=True, dining_seats=6
+        ),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
 def test_live_interpreter_receives_optional_seating_as_prose(monkeypatch):
     monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
     text = "Seat four at one table and two at the other table if possible."

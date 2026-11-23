@@ -118,12 +118,11 @@ OFFSITE_MEAL = (
 HOME_DINING_LOCATION = re.compile(
     r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|" + ROOM_NAMES + r"))\b"
 )
-DINING_TRANSITION = re.compile(r"\b(?:so|and|then|while)\s+")
-HOME_DINING_REQUEST = re.compile(
-    r"\b(?:so|and|then|while)\s+(?:(?:we|i)\s+)?"
-    r"(?=(?:need|want|require|add|provide|seat)\b)"
+DINING_TRANSITION = re.compile(
+    r"\b(?:so|and|then)\s+(?=(?:(?:we|i)\s+)?"
+    r"(?:(?:will|would|must)\s+)?"
+    r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
 )
-
 SALON_ACTION = (
     r"\b(?:include|add|use|with) (?:a |the )?(?:(?:separate|dedicated|additional) )?"
     r"formal salon\b"
@@ -275,22 +274,14 @@ def salon_choice(message):
 
 
 def _home_meal_clauses(clause):
-    offsite = re.search(OFFSITE_MEAL, clause)
-    if not offsite:
+    if not re.search(OFFSITE_MEAL, clause):
         yield clause
         return
-    for transition in reversed(
-        list(DINING_TRANSITION.finditer(clause, 0, offsite.start()))
-    ):
-        before = clause[: transition.start()]
-        if HOME_DINING_LOCATION.search(before):
-            yield before
-            break
-    after = clause[offsite.end() :]
-    if request := HOME_DINING_REQUEST.search(after):
-        home = after[request.end() :]
-        if HOME_DINING_LOCATION.search(home):
-            yield home
+    for activity in DINING_TRANSITION.split(clause):
+        if HOME_DINING_LOCATION.search(activity) and not re.search(
+            OFFSITE_MEAL, activity
+        ):
+            yield activity
 
 
 def _dining_clauses(clauses):
