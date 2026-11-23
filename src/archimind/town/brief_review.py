@@ -42,8 +42,8 @@ COUNT_SEPARATOR = r"[-‐‑–— ]"
 UNITS = "|".join(word for word, value in NUMBERS.items() if 1 <= value <= 9)
 COMPOUND_COUNT = rf"(?:{'|'.join(TENS)})(?:{COUNT_SEPARATOR}(?:{UNITS}))?"
 COUNT = (
-    rf"(?<![-+‐‑])\b(\d{{1,3}}|{COMPOUND_COUNT}|{'|'.join(NUMBERS)})\b"
-    r"(?![-‐‑]\w)"
+    rf"(?<![-+‐‑])(?<!\d[–—])\b(\d{{1,3}}|{COMPOUND_COUNT}|{'|'.join(NUMBERS)})\b"
+    r"(?![-‐‑]\w|[–—]\d)"
 )
 
 
@@ -99,6 +99,10 @@ SUBJECT_TABLE_COUNT = re.compile(
 EXPLORATORY_DINING = re.compile(
     r"\b(?:whether|what if)\b|^\s*(?:if|could|would|can|should|do|does|must)\b"
 )
+EXPLORATORY_QUESTION = re.compile(
+    r"^\s*(?:could|would|can|should|do|does)\b[^.;!?]*\bwhether\b"
+)
+DINING_RANGE = re.compile(r"\b(?:dining|seating) for (\d{1,3}\s*[-‐‑–—]\s*\d{1,3})\b")
 NAMED_SINGLE_TABLE = re.compile(
     rf"(?:\bseat\s+)?(?P<count>{TABLE_ALLOCATION}){TABLE_POSITION}{SINGLE_TABLE}"
     rf"\s+in (?:the )?(?P<room>{TABLE_ROOM})\b"
@@ -435,10 +439,12 @@ def _dining_clauses(clauses, *, for_arrangement=False):
                 home.strip()
             ):
                 subject = SUBJECT_TABLE_COUNT.search(home)
-                if subject and EXPLORATORY_DINING.search(
-                    home[: subject.start()].rsplit(",", 1)[-1]
-                ):
-                    continue
+                if subject:
+                    prefix = home[: subject.start()]
+                    if EXPLORATORY_QUESTION.search(prefix) or EXPLORATORY_DINING.search(
+                        prefix.rsplit(",", 1)[-1]
+                    ):
+                        continue
                 home = SUBJECT_TABLE_COUNT.sub(r"\g<party>", home)
                 yield OPTIONAL_SECOND_TABLE.sub(
                     lambda match: (
@@ -542,6 +548,11 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     salon = brief.formal_salon or saved_salon or program is True
     totals = set()
     questions = []
+    for span in dict.fromkeys(DINING_RANGE.findall(dining)):
+        questions.append(
+            f"The brief requests a seating range of {span}. "
+            "Choose one required seat count for the layout."
+        )
     if brief.compare_tradeoffs and program is False:
         if saved_salon:
             questions.append(
@@ -726,8 +737,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     for (start, end), total in parties:
         if (start, end) in counted:
             continue
-        if not DINING_GROUPS.fullmatch(dining[start:end]) and not re.match(
-            TABLE_POSITION + SINGLE_TABLE, dining[end:]
+        if not (
+            DINING_GROUPS.fullmatch(dining[start:end])
+            or re.match(TABLE_POSITION + SINGLE_TABLE, dining[end:])
+            or re.search(r"\b(?:dining for|seat(?:ing)?(?: for)?)\s+$", dining[:start])
         ):
             continue
         location = re.match(r"\s+in (?:the )?" + dining_room + r"\b", dining[end:])

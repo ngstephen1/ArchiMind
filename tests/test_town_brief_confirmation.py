@@ -135,10 +135,11 @@ def test_modal_seating_does_not_extract_speculative_counts(modal):
     assert not questions
 
 
-def test_exploratory_modal_seating_does_not_override_split_control():
+@pytest.mark.parametrize("aside", ["", ", for dinner,"])
+def test_exploratory_modal_seating_does_not_override_split_control(aside):
     brief, questions = requirement_controls(
         Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
-        "Could we check whether five attendees must sit at one table in the salon? "
+        f"Could we check whether{aside} five attendees must sit at one table in the salon? "
         "Four dining seats are required.",
         None,
     )
@@ -187,6 +188,43 @@ def test_household_description_does_not_override_requested_dining_seats():
     )
     assert brief.dining_seats == 4
     assert not questions
+
+
+def test_explicit_mixed_dining_group_keeps_total_without_table():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        "We need dining for five guests and two children.",
+        None,
+    )
+    assert brief.dining_seats == 7
+    assert not questions
+    with pytest.raises(ValueError, match="up to four"):
+        check_brief(brief, None)
+
+
+def test_dining_range_requests_one_count_without_inventing_conflict():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        "Seating for 2–4 attendees at one table in the salon.",
+        None,
+    )
+    assert brief.dining_seats == 0
+    assert questions == [
+        "The brief requests a seating range of 2–4. Choose one required seat count for the layout."
+    ]
+
+
+def test_same_table_ends_preserve_named_room_source():
+    phrase = "Five attendees must sit at one table in the salon and two at the other end of it."
+    with pytest.raises(
+        service.BriefClarification, match="salon has four modeled"
+    ) as err:
+        service.interpret(review_request(phrase, formal_salon=True), None)
+    assert {
+        "requirement": "Requested 7 dining places at one table in the salon",
+        "origin": "brief",
+        "statement": phrase,
+    } in err.value.reviewed["sources"]
 
 
 def test_modal_guest_count_keeps_conflicting_total_visible():
