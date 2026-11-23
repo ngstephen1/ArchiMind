@@ -1,0 +1,20 @@
+{
+  "artifact_id": 14799621061,
+  "run": "45134685184",
+  "declared_candidate_commit": "e8b4dbe85cd22b58d645cc25cc34404b271f1d2b",
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "revision": 2,
+  "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+  "pdf_sha256": "1205af8dd7f3b9b1541776c829eb8cd7f637a34f7c962b3a62efec50bfda8b63",
+  "zip_sha256": "7fe516323175d1c731573d38f4c7b1d2818f61122546d9f4aea8d3526bd96f82",
+  "hashed_files": 31,
+  "svg_sheets": 6,
+  "schedules": {
+    "procurement/finishes-schedule.csv": 3,
+    "procurement/furniture-schedule.csv": 4,
+    "procurement/operational-checks.csv": 6
+  },
+  "site_status": "demonstration geometry",
+  "native_scene_check": "Package hash equals the previously reopened packed scene.",
+  "dxf_check": "Header/entity/end markers and file digest checked."
+}

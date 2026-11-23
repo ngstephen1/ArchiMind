@@ -38,3 +38,13 @@ scope note, citations, schedules, matching render views and continuous
 folios. The wider portfolio includes lower-resolution proofs. The living
 room repeats its proof view, and the bathroom, study and kitchen-dining
 remain schematic. [Page-by-page inspection and PDF digest](book-inspection.json)
+
+The [staged designer transfer](https://github.com/ngstephen1/ArchiMind/actions/runs/45134685184)
+passed an independent clean-download check of 31 digest-listed files,
+including six readable SVGs, a concept DXF, three schedules and the packed
+Blender scene. [Candidate verification](designer-candidate-verification.json)
+
+GitHub Actions retains these artifact downloads for a limited period. This
+record preserves the digests, inspection and preview images. The approved
+PDF and editable transfer belong in the versioned GitHub Release after
+the [publication gate](https://github.com/ngstephen1/ArchiMind/issues/72) passes.
