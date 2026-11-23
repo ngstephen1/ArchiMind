@@ -64,6 +64,37 @@ def review_request(message="", live=False, **brief):
     )
 
 
+@pytest.mark.parametrize("split_dining", [True, False])
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "Five attendees must all sit together at one table in the formal salon.",
+        "Seat five diners around a single table in the formal salon.",
+    ],
+)
+def test_single_table_clarification_preserves_count_location_and_capacity(
+    split_dining, phrase, monkeypatch
+):
+    monkeypatch.setattr(
+        service.provider, "configuration", lambda _: pytest.fail("called provider")
+    )
+    request = review_request(
+        phrase, live=True, formal_salon=True, split_dining=split_dining
+    )
+    brief, _ = requirement_controls(request.brief, phrase, None)
+    assert brief.dining_seats == 5
+    assert brief.split_dining is False
+    with pytest.raises(
+        service.BriefClarification, match="four modeled places"
+    ) as error:
+        service.interpret(request, None)
+    assert {
+        "requirement": "Requested 5 dining places at one table in the formal salon",
+        "origin": "brief",
+        "statement": phrase,
+    } in error.value.reviewed["sources"]
+
+
 def test_locked_room_contradiction_is_reviewed_before_generation(
     saved_home, monkeypatch
 ):

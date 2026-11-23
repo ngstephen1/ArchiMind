@@ -67,6 +67,19 @@ TABLE_ALLOCATION = (
 )
 TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
 TABLE_POSITION = r"\s+(?:at|around)\s+"
+SINGLE_TABLE = r"(?:one|a single|the same) (?:dining )?table\b"
+SUBJECT_TABLE_COUNT = re.compile(
+    rf"(?P<count>{COUNT})\s+"
+    r"(?:people|persons|guests|diners|hosts|residents|adults|attendees|"
+    r"(?:household |family )?members)\s+"
+    r"(?:must|should|will|can|need to|have to)\s+"
+    r"(?:all\s+)?(?:sit|dine|eat|be seated)(?:\s+together)?"
+    rf"(?={TABLE_POSITION}{SINGLE_TABLE})"
+)
+NAMED_SINGLE_TABLE = re.compile(
+    rf"(?P<count>{TABLE_ALLOCATION}){TABLE_POSITION}{SINGLE_TABLE}"
+    rf"\s+in (?:the )?(?P<room>{TABLE_ROOM})\b"
+)
 FIRST_TABLE = (
     r"(?P<first>"
     + TABLE_ALLOCATION
@@ -424,9 +437,24 @@ def _normalize_table_ends(text):
     return SAME_TABLE_ENDS.sub(combine, text)
 
 
+def _normalize_table_subject(text):
+    return SUBJECT_TABLE_COUNT.sub(r"\g<count> people", text)
+
+
+def _named_single_tables(clauses):
+    for clause in _dining_clauses(clauses):
+        dining = _normalize_table_subject(_normalize_table_ends(clause))
+        dining = SEPARATE_TABLE_COUNTS.sub(" ", dining)
+        for table in NAMED_SINGLE_TABLE.finditer(dining):
+            if requests_single_table(dining[table.start() :]):
+                yield _allocation_count(table["count"]), table["room"]
+
+
 def requests_single_table(message):
     for clause in _dining_clauses(_affirmative_clauses(message), for_arrangement=True):
-        clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
+        clause = _normalize_table_subject(
+            _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
+        )
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
         )
@@ -476,7 +504,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
 
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
-    dining = _normalize_table_ends(". ".join(_dining_clauses(clauses)))
+    dining = _normalize_table_subject(
+        _normalize_table_ends(". ".join(_dining_clauses(clauses)))
+    )
     program, _ = salon_choice(message)
     saved_salon = any(
         part["design"]["room"]["id"] == "salon"
@@ -659,7 +689,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         questions.append(
             "Confirm separate dining tables in the brief controls, or revise the seating arrangement."
         )
-    if requests_single_table(text):
+    single_table = requests_single_table(text)
+    if single_table:
         if split and "split_dining" in explicit:
             questions.append(
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
@@ -724,6 +755,30 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         )
     elif totals:
         seats = totals.pop()
+
+    if brief.compare_tradeoffs and single_table:
+        for amount, room in dict.fromkeys(_named_single_tables(clauses)):
+            if "kitchen" in room and kitchen_table:
+                continue
+            if not salon:
+                questions.append(
+                    f"The five-room program has no modeled table in the {room}. "
+                    f"Confirm how to accommodate the requested {amount} places there."
+                )
+            elif amount > 4:
+                questions.append(
+                    f"The {room} has four modeled places at one table. "
+                    f"Confirm how to accommodate the requested {amount} places there."
+                )
+        if (
+            seats > 4
+            and questions
+            and not any("four modeled places" in question for question in questions)
+        ):
+            questions.append(
+                "Town models up to four places at one table. Confirm a different "
+                "seating arrangement or revise the required count."
+            )
 
     circulation = text if evaluate_passage else ""
     if fixed := re.search(FIXED_PASSAGE, circulation):
@@ -1008,6 +1063,11 @@ def review_summary(
             interpreted=True,
             quote=salon_statement if salon_requested else None,
         )
+    pending_tables = (
+        dict.fromkeys(_named_single_tables(_affirmative_clauses(message)))
+        if questions
+        else {}
+    )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
         require(
@@ -1016,6 +1076,15 @@ def review_summary(
             "dining_seats",
             inherited=brief.dining_seats == comparison.get("required_dining_seats"),
             quote=_dining_quote(brief, message),
+        )
+    for amount, room in pending_tables:
+        require(
+            f"Requested {amount} dining places at one table in the {room}",
+            DINING_CONTEXT,
+            "dining_seats",
+            accepts=lambda sentence: (
+                (amount, room) in _named_single_tables(_affirmative_clauses(sentence))
+            ),
         )
     for room_id in brief.locks:
         require(
