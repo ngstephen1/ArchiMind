@@ -59,6 +59,15 @@ GROUP = (
     COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
 )
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
+COUNT_AT_TABLE = (
+    COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
+)
+SEPARATE_TABLE_COUNTS = re.compile(
+    COUNT_AT_TABLE
+    + r"one table\s*,?\s+and\s+"
+    + COUNT_AT_TABLE
+    + r"(?:the )?(?:other|second)(?: table)?\b"
+)
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
     r"bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon"
@@ -135,7 +144,11 @@ def _join_wrapped_qualifiers(message):
     """Keep a line-wrapped location or scope qualifier with its requirement."""
     return re.sub(
         r"(?<=[^.!?;\s])[ \t]*\r?\n[ \t]*"
-        r"(?=" + WRAPPED_QUALIFIER + r")"
+        r"(?="
+        + WRAPPED_QUALIFIER
+        + r"|and[ \t]+(?!(?:please[ \t]+)?"
+        + INDEPENDENT_ACTION
+        + r"))"
         r"(?![^,;.!?\n]*,\s*(?:please\s+)?" + INDEPENDENT_ACTION + r")",
         " ",
         message,
@@ -234,6 +247,7 @@ def _dining_clauses(clauses):
 
 def requests_single_table(message):
     for clause in _affirmative_clauses(message):
+        clause = SEPARATE_TABLE_COUNTS.sub(" ", clause)
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
         )
@@ -307,15 +321,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 "Confirm the five-room program by clearing the formal salon control."
             )
     per_table = []
-    count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
-    split_counts = re.search(
-        count_at
-        + r"one table\s*,?\s+and\s+"
-        + count_at
-        + r"(?:the )?(?:other|second)(?: table)?\b",
-        dining,
-    )
-    each_table = re.search(count_at + r"each(?: of the two)? tables?\b", dining)
+    split_counts = SEPARATE_TABLE_COUNTS.search(dining)
+    each_table = re.search(COUNT_AT_TABLE + r"each(?: of the two)? tables?\b", dining)
     if split_counts:
         per_table = [count(value) for value in split_counts.groups()]
         dining = dining[: split_counts.start()] + " " + dining[split_counts.end() :]

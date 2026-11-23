@@ -1084,3 +1084,43 @@ def test_fronted_room_preference_is_not_a_wrapped_passage_qualifier():
     text = "Keep a 65 cm wide passage\nBetween the study and living room, prefer more separation."
     brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
     assert not questions and brief.passage_m == 0.65
+
+
+@pytest.mark.parametrize("linebreak", [" ", "\n"])
+def test_coordinated_table_allocations_keep_the_total_and_room_qualifier(linebreak):
+    text = (
+        "Seat three guests at one table"
+        + linebreak
+        + "and three guests at the other in the kitchen-dining room."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+def test_a_wrapped_opening_list_still_checks_the_second_room():
+    text = "Keep the bedroom door\nand the study window."
+    assert len(opening_questions(text, ["bedroom"])) == 1
+    assert not opening_questions(text, ["bedroom", "study"])
+
+
+def test_live_payload_preserves_a_coordinated_opening_request(monkeypatch, saved_home):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    action = "and please preserve the existing study window."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == action
+        assert facts["confirmed_layout_controls"]["modeled_passage_m"] == 0.65
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    req = review_request(
+        "Keep a 65 cm wide passage\n" + action,
+        width=15,
+        depth=16,
+        locks=["study"],
+        live=True,
+    )
+    assert service.interpret(req, saved_home).passage_m == 0.65
