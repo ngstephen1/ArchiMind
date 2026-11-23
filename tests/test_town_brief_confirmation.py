@@ -464,3 +464,59 @@ def test_distinct_room_minima_need_two_tables():
     )
     assert not questions
     assert brief.dining_seats == 6
+
+
+def test_independent_action_does_not_inherit_opening_verb():
+    message = "Keep the bedroom window and use the study door for access."
+    assert opening_questions(message, locks=("bedroom",)) == []
+
+
+def test_meal_language_counts_the_party_and_cites_the_source():
+    message = "Two hosts and four guests will eat together."
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert brief.dining_seats == 6 and not questions
+    source = next(
+        item
+        for item in review_summary(brief, message=message)["sources"]
+        if item["requirement"].startswith("6 dining")
+    )
+    assert source["statement"] == message
+    assert source["origin"] == "brief"
+
+
+def test_room_minimum_cites_the_source_in_review():
+    message = "Four seats in the salon."
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert not questions
+    assert {
+        "requirement": "4 dining places at one table",
+        "origin": "brief",
+        "statement": message,
+    } in review_summary(brief, message=message)["sources"]
+
+
+def test_repeated_four_person_room_minima_add_up_to_eight():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        "Four seats in the salon and four seats in the kitchen.",
+        None,
+    )
+    assert review_summary(brief)["status"] == "confirmed"
+    assert not questions and brief.dining_seats == 8
+
+
+def test_negative_salon_statement_is_not_cited(saved_home):
+    review = review_summary(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        message="Do not add a salon.",
+        previous=saved_home,
+    )
+    assert {
+        "requirement": "Formal salon",
+        "origin": "saved revision",
+        "statement": None,
+    } in review["sources"]

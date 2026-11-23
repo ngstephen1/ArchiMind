@@ -46,9 +46,16 @@ GROUP = (
 )
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
-ROOMS = (
-    r"(bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon)"
+ROOM_NAMES = (
+    r"bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon"
 )
+ROOMS = f"({ROOM_NAMES})"
+DINING_CONTEXT = (
+    r"\b(?:seats?|seating|places|dining|dine|diners?|dinner|tables?|"
+    r"eat\s+together|(?:share|have)\s+(?:a\s+)?(?:meal|lunch|breakfast))\b"
+)
+SALON_REQUEST = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
+
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
 # the door" and "move the desk closer to its window" are not opening requests.
@@ -62,9 +69,9 @@ OPENING_VERB = r"keep|preserve|move|relocate|shift|add|remove|block|widen|enlarg
 OPENING_REQUEST = r"\b(" + OPENING_VERB + ")" + r"\s+" + OPENING_OBJECT
 COORDINATED_OPENING = re.compile(
     r"(?:\s*,\s*(?:(?:and|or)\s+)?|\s+(?:and|or)\s+)"
-    + r"(?!(?:"
-    + OPENING_VERB
-    + r")\b)"
+    + r"(?=(?:the|a|an|that|those|its|existing|all|both|another|"
+    + ROOM_NAMES
+    + r"|doors?|doorways?|windows?|openings?)\b)"
     + OPENING_OBJECT
 )
 
@@ -139,11 +146,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
     dining = ". ".join(
-        clause
-        for clause in clauses
-        if re.search(
-            r"\b(?:seats?|seating|dining|dine|diners?|dinner|tables?)\b", clause
-        )
+        clause for clause in clauses if re.search(DINING_CONTEXT, clause)
     )
     salon = (
         brief.formal_salon
@@ -151,9 +154,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             part["design"]["room"]["id"] == "salon"
             for part in (previous or {}).get("rooms", ())
         )
-        or bool(
-            re.search(r"\b(?:include|add|use|with) (?:a |the )?formal salon\b", text)
-        )
+        or bool(re.search(SALON_REQUEST, text))
     )
     totals = set()
     questions = []
@@ -480,7 +481,11 @@ def _source(
 
 def _dining_statement_matches(brief, sentence):
     stated, questions = requirement_controls(
-        Brief(formal_salon=True, split_dining=brief.split_dining),
+        Brief(
+            formal_salon=brief.formal_salon,
+            split_dining=brief.split_dining,
+            compare_tradeoffs=brief.compare_tradeoffs,
+        ),
         sentence,
         None,
         evaluate_passage=False,
@@ -579,12 +584,16 @@ def review_summary(
             "formal_salon",
             inherited="salon" in saved_rooms,
             interpreted=True,
+            accepts=lambda sentence: any(
+                re.search(SALON_REQUEST, clause)
+                for clause in _affirmative_clauses(sentence)
+            ),
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
         require(
             f"{brief.dining_seats} dining places {arrangement}",
-            r"\b(?:seats?|seating|places|tables?|guests|diners|dinner)\b",
+            DINING_CONTEXT,
             "dining_seats",
             inherited=brief.dining_seats == comparison.get("required_dining_seats"),
             accepts=lambda sentence: _dining_statement_matches(brief, sentence),
