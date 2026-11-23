@@ -543,6 +543,14 @@ def _requirement_boundaries(brief, previous):
         raise ValueError(
             "Apply room-distance preferences separately from a furniture move."
         )
+    if previous and brief.locks:
+        saved_rooms = {part["design"]["room"]["id"] for part in previous["rooms"]}
+        missing_locks = set(brief.locks) - saved_rooms
+        if missing_locks and not (brief.formal_salon and "salon" not in saved_rooms):
+            missing = ", ".join(sorted(missing_locks))
+            raise ValueError(
+                f"Cannot lock rooms absent from the saved home: {missing}."
+            )
     if brief.shift_bedroom_chair or brief.closer_study_desk:
         if (
             brief.formal_salon

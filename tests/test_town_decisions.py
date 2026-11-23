@@ -97,6 +97,7 @@ def town(tmp_path, monkeypatch):
             {
                 "model": decisions.MODEL,
                 "rubric": decisions.RUBRIC,
+                "payload_profile": decisions.APP_PAYLOAD_PROFILE,
                 "selected_threshold": 0.85,
                 "heldout_gate_passed": True,
                 "public_calibration_sha256": "a" * 64,
@@ -252,6 +253,8 @@ def test_clarification_requires_six_case_promotion_receipt(town, monkeypatch):
     monkeypatch.setenv("ARCHIMIND_TOWN_DECISIONS_PROMOTION_RECEIPT", str(promotion))
     assert decisions.settings() == ("clarify", 0.85)
     data = json.loads(promotion.read_text())
+    promotion.write_text(json.dumps(data | {"payload_profile": None}))
+    assert decisions.settings() == ("shadow", None)
     promotion.write_text(json.dumps(data | {"requests": 36}))
     assert decisions.settings() == ("shadow", None)
 
@@ -361,3 +364,29 @@ def test_calibration_holdout_accepts_pairs_without_public_reuse(monkeypatch):
     assert api["distinct_holdout"](pair, [example("Seat four diners", 4)])
     assert not api["distinct_holdout"](pair + pair[:1], [])
     assert not api["distinct_holdout"](pair, [example("SEAT  SIX diners", 3)])
+
+
+def test_historical_reduced_cases_cannot_qualify_runtime_payloads(monkeypatch):
+    import runpy
+    from pathlib import Path
+
+    from archimind.town.brief_review import review_summary
+    from archimind.town.design import Brief
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    monkeypatch.syspath_prepend(str(scripts))
+    api = runpy.run_path(str(scripts / "evaluate_town_decisions.py"))
+    old = json.loads(
+        (scripts.parent / "docs/data/town-decisions/public-cases.json").read_bytes()
+    )["cases"]
+    assert len(old) == 36
+    assert api["reviewed_payload_profile"](old) is None
+    current = [
+        {
+            "input": {
+                "confirmed_controls": {},
+                "proposed_brief": review_summary(Brief(compare_tradeoffs=True)),
+            }
+        }
+    ]
+    assert api["reviewed_payload_profile"](current) == decisions.APP_PAYLOAD_PROFILE

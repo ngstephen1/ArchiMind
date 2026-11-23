@@ -13,6 +13,7 @@ from archimind.agents.requirements_agent import _client
 
 MODEL = "gpt-6-luna"
 RUBRIC = "town-brief-v1"
+APP_PAYLOAD_PROFILE = "reviewed-brief-v1"
 THRESHOLDS = (0.70, 0.75, 0.80, 0.85, 0.90, 0.95)
 TASK = "OpenAI · Brief consistency check"
 CRITERIA = {
@@ -74,6 +75,7 @@ def settings():
             if (
                 receipt["model"] == MODEL
                 and receipt["rubric"] == RUBRIC
+                and receipt.get("payload_profile") == APP_PAYLOAD_PROFILE
                 and receipt["heldout_gate_passed"] is True
                 and receipt["responses_complete"] is True
                 and receipt["requests"] == 6
