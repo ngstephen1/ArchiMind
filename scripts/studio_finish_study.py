@@ -1,6 +1,8 @@
-"""Finish study for the saved Studio House revision 2."""
+"""Apply the bedroom and salon finish study within saved room geometry."""
 
+import hashlib
 import math
+import struct
 
 import bpy
 from mathutils import Vector
@@ -43,10 +45,21 @@ def finish(source, name, color, grain=None):
             text.inputs["Scale"].default_value = grain
             text.inputs["Detail"].default_value = 2
             tree.links.new(coord.outputs["Object"], text.inputs["Vector"])
+            weave = tree.nodes.new("ShaderNodeTexVoronoi")
+            weave.voronoi_dimensions = "3D"
+            weave.feature = "DISTANCE_TO_EDGE"
+            weave.inputs["Scale"].default_value = grain * 0.60
+            weave.inputs["Randomness"].default_value = 0.21
+            tree.links.new(coord.outputs["Object"], weave.inputs["Vector"])
+            tone = tree.nodes.new("ShaderNodeMixRGB")
+            tone.inputs[1].default_value = (*(v * 0.73 for v in color), 1)
+            tone.inputs[2].default_value = (*(v * 1.12 for v in color), 1)
+            tree.links.new(text.outputs["Fac"], tone.inputs["Fac"])
+            tree.links.new(tone.outputs["Color"], base)
             bump = tree.nodes.new("ShaderNodeBump")
-            bump.inputs["Strength"].default_value = 0.22
-            bump.inputs["Distance"].default_value = 0.002
-            tree.links.new(text.outputs["Fac"], bump.inputs["Height"])
+            bump.inputs["Strength"].default_value = 0.34
+            bump.inputs["Distance"].default_value = 0.003
+            tree.links.new(weave.outputs["Distance"], bump.inputs["Height"])
             tree.links.new(bump.outputs["Normal"], node.inputs["Normal"])
     return material
 
@@ -72,7 +85,60 @@ def rug_binding(obj, low, high):
             polygon.material_index = len(mesh.materials) - 1
 
 
-def drape(obj, low, high, folds):
+def cushion_welt(obj, source, low, high, color):
+    """Shade a thin welt at a consistent height without changing the cushion mesh."""
+    material = source.copy()
+    material.name = f"{source.name} | welt · {obj.name}"
+    tree = material.node_tree
+    shader = next(node for node in tree.nodes if node.type == "BSDF_PRINCIPLED")
+    base = shader.inputs["Base Color"]
+    weave_color = base.links[0].from_socket
+    geometry = tree.nodes.new("ShaderNodeNewGeometry")
+    position = tree.nodes.new("ShaderNodeSeparateXYZ")
+    tree.links.new(geometry.outputs["Position"], position.inputs["Vector"])
+    compare = tree.nodes.new("ShaderNodeMath")
+    compare.operation = "COMPARE"
+    center = low.z + 0.24 * (high.z - low.z)
+    width = 0.086 * (high.z - low.z)
+    compare.inputs[1].default_value = center
+    compare.inputs[2].default_value = width / 2
+    tree.links.new(position.outputs["Z"], compare.inputs[0])
+    accent = tree.nodes.new("ShaderNodeMixRGB")
+    accent.inputs[2].default_value = (*(value * 0.60 for value in color), 1)
+    tree.links.new(compare.outputs["Value"], accent.inputs["Fac"])
+    tree.links.new(weave_color, accent.inputs[1])
+    tree.links.new(accent.outputs["Color"], base)
+    obj.material_slots[0].material = material
+    return {"center_z_m": center, "width_m": width}
+
+
+def blanket_bands(obj, spacing, width, color):
+    """Couch a contrasting yarn into narrow bands at physical spacing."""
+    material = obj.material_slots[0].material
+    tree = material.node_tree
+    shader = next(node for node in tree.nodes if node.type == "BSDF_PRINCIPLED")
+    base = shader.inputs["Base Color"]
+    woven = base.links[0].from_socket
+    geometry = tree.nodes.new("ShaderNodeNewGeometry")
+    position = tree.nodes.new("ShaderNodeSeparateXYZ")
+    tree.links.new(geometry.outputs["Position"], position.inputs["Vector"])
+    period = tree.nodes.new("ShaderNodeMath")
+    period.operation = "PINGPONG"
+    period.inputs[1].default_value = spacing / 2
+    tree.links.new(position.outputs["Y"], period.inputs[0])
+    band = tree.nodes.new("ShaderNodeMath")
+    band.operation = "LESS_THAN"
+    band.inputs[1].default_value = width / 2
+    tree.links.new(period.outputs["Value"], band.inputs[0])
+    accent = tree.nodes.new("ShaderNodeMixRGB")
+    tree.links.new(band.outputs["Value"], accent.inputs["Fac"])
+    tree.links.new(woven, accent.inputs[1])
+    accent.inputs[2].default_value = (*color, 1)
+    tree.links.new(accent.outputs["Color"], base)
+    return {"spacing_m": spacing, "width_m": width, "linear_rgb": color}
+
+
+def drape(obj, low, high, role):
     """Fit a softly rounded fabric layer wholly inside its original part envelope."""
     width, depth, height = high - low
     nx, ny = 56, 28
@@ -85,14 +151,30 @@ def drape(obj, low, high, folds):
                 u = i / nx
                 # Contract the plan corners slightly rather than overhanging the saved furniture.
                 corner = math.sin(math.pi * u) * math.sin(math.pi * v)
-                fold = 0.5 + 0.5 * math.sin(
-                    math.tau * folds * u + 0.85 * math.sin(math.pi * v)
-                )
-                edge = min(1, u * 15, (1 - u) * 15, v * 15, (1 - v) * 15)
-                body = 0.40 + 0.32 * edge + 0.21 * edge * fold + 0.04 * corner
-                z = low.z + height * body if upper else low.z + height * 0.1
-                x = low.x + width * (u * 0.997 + 0.0015)
-                y = low.y + depth * (v * 0.992 + 0.004)
+                edge = min(1, u * 13, (1 - u) * 13, v * 13, (1 - v) * 13)
+                center = v - 0.5
+                if role == "Pillow":
+                    head = math.sin(math.pi * u) ** 0.7 * math.sin(math.pi * v) ** 0.7
+                    hollow = math.exp(-18 * ((u - 0.45) ** 2 + center**2))
+                    upper_profile = 0.47 + 0.48 * head - 0.15 * hollow
+                    lower_profile = 0.34 - 0.22 * head
+                elif role == "Folded throw":
+                    fold = 0.5 + 0.5 * math.sin(math.tau * (6 * u + 0.33 * v))
+                    upper_profile = 0.54 + edge * (0.16 + 0.17 * fold + 0.09 * corner)
+                    lower_profile = 0.10
+                else:
+                    phase = math.tau * (
+                        3.0 * u + 0.26 * v + 0.25 * math.sin(math.pi * v)
+                    )
+                    fold = 0.5 + 0.5 * math.sin(phase)
+                    ridge = math.exp(-100 * (v - 0.80 - 0.028 * math.sin(phase)) ** 2)
+                    # Keep the shallow top valleys above the mattress. The
+                    # underside still sits within the original tucked envelope.
+                    upper_profile = 0.78 + edge * (0.045 + 0.085 * fold + 0.05 * ridge)
+                    lower_profile = 0.10
+                z = low.z + height * (upper_profile if upper else lower_profile)
+                x = low.x + width * (u * 0.986 + 0.007)
+                y = low.y + depth * (v * 0.984 + 0.008)
                 vertices.append(inverse @ Vector((x, y, z)))
     count = (nx + 1) * (ny + 1)
     for j in range(ny):
@@ -114,8 +196,13 @@ def drape(obj, low, high, folds):
     mesh = bpy.data.meshes.new(f"Study draped {obj.name}")
     mesh.from_pydata(vertices, [], faces)
     mesh.materials.append(material)
+    if role == "Pillow":
+        welt = finish(material, f"{material.name} edge", (0.28, 0.20, 0.13), 140)
+        mesh.materials.append(welt)
     for polygon in mesh.polygons:
         polygon.use_smooth = True
+        if role == "Pillow" and polygon.index >= 2 * nx * ny:
+            polygon.material_index = 1
     mesh.update()
     obj.data = mesh
     bpy.context.view_layer.update()
@@ -129,14 +216,92 @@ def drape(obj, low, high, folds):
     return [list(adjusted_low), list(adjusted_high)]
 
 
-def polish():
+def evaluated_geometry():
     bpy.context.view_layer.update()
+    graph = bpy.context.evaluated_depsgraph_get()
+    meshes = {}
+    for source in bpy.context.scene.objects:
+        if source.type != "MESH":
+            continue
+        obj = source.evaluated_get(graph)
+        digest = hashlib.sha256()
+        for vertex in obj.data.vertices:
+            digest.update(struct.pack("<fff", *vertex.co))
+        for polygon in obj.data.polygons:
+            digest.update(struct.pack("<I", len(polygon.vertices)))
+            for index in polygon.vertices:
+                digest.update(struct.pack("<I", index))
+        meshes[obj.name] = (
+            tuple(tuple(row) for row in obj.matrix_world),
+            tuple(tuple(point) for point in bounds(obj)),
+            digest.hexdigest(),
+        )
+    return meshes
+
+
+def compare_geometry(before, after):
+    if before.keys() != after.keys():
+        raise ValueError("The finish study must preserve the complete mesh inventory.")
+    edited = {name for name in before if before[name] != after[name]}
+    if edited != {"Duvet", "Folded throw", "Pillow 1", "Pillow 2"}:
+        raise ValueError("Only the duvet and throw may have new mesh geometry.")
+    for name in sorted(edited):
+        old_transform, old_bounds, _ = before[name]
+        new_transform, new_bounds, _ = after[name]
+        if old_transform != new_transform or any(
+            new_bounds[0][i] < old_bounds[0][i] - 0.00001
+            or new_bounds[1][i] > old_bounds[1][i] + 0.00001
+            for i in range(3)
+        ):
+            raise ValueError(f"{name} moved or exceeded its original fabric envelope.")
+    return {
+        "unchanged_meshes": len(before) - len(edited),
+        "bounded_fabric_layers": sorted(edited),
+    }
+
+
+def inside_room(part, point):
+    x, y = part["origin"]
+    room = part["room"]
+    return x <= point.x < x + room["width_m"] and y <= point.y < y + room["depth_m"]
+
+
+def near_window(part, point):
+    x, y = part["origin"]
+    room = part["room"]
+    walls = {
+        "west": (point.x - x, point.y - y),
+        "east": (point.x - x - room["width_m"], point.y - y),
+        "south": (point.y - y, point.x - x),
+        "north": (point.y - y - room["depth_m"], point.x - x),
+    }
+    for window in room["windows"]:
+        perpendicular, tangent = walls[window["wall"]]
+        offset = window["offset_m"]
+        if (
+            abs(perpendicular) <= 0.15
+            and offset - 0.15 <= tangent <= offset + window["width_m"] + 0.15
+        ):
+            return True
+    return False
+
+
+def polish(board):
+    bpy.context.view_layer.update()
+    focal = {
+        part["room"]["id"]: part
+        for part in board["rooms"]
+        if part["room"]["id"] in {"bedroom", "salon"}
+    }
+    if set(focal) != {"bedroom", "salon"}:
+        raise ValueError("The paired finish study requires a saved bedroom and salon.")
     changes = []
     bedding = {
-        "Duvet": ("oat linen duvet", (0.38, 0.46, 0.36)),
-        "Folded throw": ("olive knitted throw", (0.29, 0.12, 0.07)),
-        "Pillow 1": ("ivory pillow", (0.79, 0.72, 0.61)),
-        "Pillow 2": ("cinnamon pillow", (0.42, 0.22, 0.13)),
+        "Duvet": ("soft sage linen duvet", (0.31, 0.39, 0.30)),
+        "Folded throw": ("rust and flax knitted throw", (0.33, 0.12, 0.062)),
+        "Pillow 1": ("warm stone pillow", (0.55, 0.44, 0.32)),
+        "Pillow 2": ("burnt clay pillow", (0.34, 0.14, 0.075)),
+        "Turned-down sheet": ("unbleached linen", (0.52, 0.47, 0.36)),
         "Upholstered headboard": ("warm flax headboard", (0.36, 0.28, 0.19)),
     }
     for obj in tuple(bpy.context.scene.objects):
@@ -144,8 +309,8 @@ def polish():
             continue
         low, high = bounds(obj)
         middle = (low + high) / 2
-        salon = 0 <= middle.x < 6.398 and 0 <= middle.y < 6.089
-        bed = 0 <= middle.x < 6.398 and 6.089 <= middle.y < 10.995
+        salon = inside_room(focal["salon"], middle)
+        bed = inside_room(focal["bedroom"], middle)
         source = obj.material_slots[0].material
         choice = None
         if bed and obj.name in bedding:
@@ -153,18 +318,16 @@ def polish():
             choice = label, color, 140
         elif obj.name.startswith(("bedroom/decor/curtain:", "salon/decor/curtain:")):
             choice = "warm flax curtains", (0.56, 0.42, 0.29), 160
-        elif (
-            abs(middle.x) < 0.15
-            and (salon or bed)
-            and obj.name.startswith(("Window frame", "Window horizontal rail", "Sill"))
-        ):
+        elif obj.name.startswith(
+            ("Window frame", "Window horizontal rail", "Sill")
+        ) and any(near_window(part, middle) for part in focal.values()):
             choice = (
                 ("warm matching joinery", (0.32, 0.24, 0.16), None)
                 if obj.name.startswith(("Window horizontal rail", "Sill"))
                 else ("bronzed window joinery", (0.095, 0.077, 0.051), None)
             )
         elif obj.name in {"bedroom/decor/rug", "Bound wool rug"}:
-            choice = "woven taupe rug", (0.28, 0.22, 0.16), 110
+            choice = "woven taupe rug", (0.22, 0.17, 0.12), 76
         elif (
             salon
             and source.name in {"wool", "moss"}
@@ -173,9 +336,9 @@ def polish():
             )
         ):
             choice = (
-                ("walnut-olive upholstery", (0.12, 0.17, 0.087), 170)
+                ("walnut-olive upholstery", (0.105, 0.157, 0.071), 125)
                 if source.name == "moss"
-                else ("mushroom upholstery", (0.44, 0.35, 0.27), 170)
+                else ("warm nutmeg upholstery", (0.34, 0.23, 0.15), 116)
             )
         elif obj.name.startswith("salon/decor/plant") and source.name.split(" · ")[
             -1
@@ -199,9 +362,16 @@ def polish():
                 "finish": label,
                 "world_bounds_m": [list(low), list(high)],
             }
-            if bed and obj.name in {"Duvet", "Folded throw"}:
-                record["edited_bounds_m"] = drape(
-                    obj, low, high, 4 if obj.name == "Duvet" else 7
+            if salon and obj.name.startswith(("Back cushion", "Boxed seat cushion")):
+                record["welt_band"] = cushion_welt(obj, slot.material, low, high, color)
+            if bed and (
+                obj.name in {"Duvet", "Folded throw"} or obj.name.startswith("Pillow ")
+            ):
+                role = "Pillow" if obj.name.startswith("Pillow ") else obj.name
+                record["edited_bounds_m"] = drape(obj, low, high, role)
+            if bed and obj.name == "Folded throw":
+                record["woven_bands"] = blanket_bands(
+                    obj, 0.086, 0.014, (0.66, 0.50, 0.34)
                 )
             changes.append(record)
     for data in bpy.data.lights:
@@ -214,6 +384,21 @@ def polish():
         data.energy *= 0.72
         changes.append(
             {"light": data.name, "previous_watts": previous_watts, "watts": data.energy}
+        )
+    for light in bpy.context.scene.objects:
+        if light.type != "LIGHT" or not light.name.startswith("Pendant practical"):
+            continue
+        if not inside_room(focal["salon"], light.location):
+            continue
+        previous_watts = light.data.energy
+        light.data.energy = max(previous_watts, 15)
+        light.data.color = (1.0, 0.78, 0.58)
+        changes.append(
+            {
+                "light": light.name,
+                "previous_watts": previous_watts,
+                "watts": light.data.energy,
+            }
         )
     shade = bpy.data.objects.get("salon/decor/floor_lamp.002")
     if shade:

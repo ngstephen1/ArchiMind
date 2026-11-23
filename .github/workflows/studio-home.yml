@@ -10,6 +10,10 @@ on:
         description: For the finish study, verify the packed geometry and all editable cameras without rendering
         type: boolean
         default: false
+      layered_finish:
+        description: Preview the matched bedroom and salon finish within an approved saved-style scene
+        type: boolean
+        default: false
       fresh_home:
         description: Render the fresh-home acceptance manifest only
         type: boolean
@@ -140,8 +144,11 @@ jobs:
           if-no-files-found: error
       - name: Reopen the editable scene and render every room
         if: ${{ !inputs.approved_proof_run }}
+        env:
+          LAYERED_FINISH: ${{ inputs.layered_finish }}
         run: |
           options=()
+          if [ "$LAYERED_FINISH" = true ]; then options+=(--layered-finish); fi
           if [ -f "$RUNNER_TEMP/saved-style.json" ]; then options+=(--saved-style "$RUNNER_TEMP/saved-style.json"); fi
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --python-exit-code 1 -P scripts/render_studio_home.py -- "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/proof" --proof "${options[@]}"
       - name: Make the revision-bound client book and print to PDF

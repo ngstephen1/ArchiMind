@@ -387,6 +387,19 @@ def render(args):
     if style:
         dress_scene(style, board, bedroom, out)
         fabrics = attach_textile_detail()
+        if args.layered_finish:
+            from studio_finish_study import compare_geometry, evaluated_geometry, polish
+
+            original_meshes = evaluated_geometry()
+            changes = polish(board)
+            check = compare_geometry(original_meshes, evaluated_geometry())
+            (out / "layered-finish-receipt.json").write_text(
+                json.dumps(
+                    {"geometry": check, "alterations": changes, "external_assets": []},
+                    indent=2,
+                )
+                + "\n"
+            )
         if board.get("presentation_detail"):
             window_backdrop(scene.world)
     scene["board_sha256"] = hashlib.sha256(source).hexdigest()
@@ -473,6 +486,7 @@ if __name__ == "__main__":
         type=Path,
         help="Verified high-tier overlay from export-saved-style.mjs",
     )
+    p.add_argument("--layered-finish", action="store_true")
     p.add_argument("--gpu", action="store_true")
     p.add_argument("--proof", action="store_true")
     p.add_argument(
@@ -482,5 +496,7 @@ if __name__ == "__main__":
     )
 
     args = p.parse_args(sys.argv[sys.argv.index("--") + 1 :])
+    if args.layered_finish and not args.saved_style:
+        p.error("--layered-finish requires --saved-style")
     args.proof = args.proof or args.quick_proof
     render(args)

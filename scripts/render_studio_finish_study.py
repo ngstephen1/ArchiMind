@@ -1,9 +1,7 @@
 """Render the pinned November finish study with frozen cameras and verified geometry."""
 
 import argparse
-import hashlib
 import json
-import struct
 import sys
 import time
 from pathlib import Path
@@ -12,54 +10,8 @@ import bpy
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from render_studio_eye_views import architectural_camera, camera, sha  # noqa: E402
-from studio_finish_study import bounds, polish  # noqa: E402
+from studio_finish_study import compare_geometry, evaluated_geometry, polish  # noqa: E402
 from studio_photography import attach_textile_detail  # noqa: E402
-
-SOFT_LAYERS = {"Duvet", "Folded throw"}
-
-
-def evaluated_geometry():
-    bpy.context.view_layer.update()
-    graph = bpy.context.evaluated_depsgraph_get()
-    meshes = {}
-    for source in bpy.context.scene.objects:
-        if source.type != "MESH":
-            continue
-        obj = source.evaluated_get(graph)
-        digest = hashlib.sha256()
-        for vertex in obj.data.vertices:
-            digest.update(struct.pack("<fff", *vertex.co))
-        for polygon in obj.data.polygons:
-            digest.update(struct.pack("<I", len(polygon.vertices)))
-            for index in polygon.vertices:
-                digest.update(struct.pack("<I", index))
-        meshes[obj.name] = (
-            tuple(tuple(row) for row in obj.matrix_world),
-            tuple(tuple(point) for point in bounds(obj)),
-            digest.hexdigest(),
-        )
-    return meshes
-
-
-def compare_geometry(before, after):
-    if before.keys() != after.keys():
-        raise ValueError("The finish study must preserve the complete mesh inventory.")
-    edited = {name for name in before if before[name] != after[name]}
-    if edited != SOFT_LAYERS:
-        raise ValueError("Only the duvet and throw may have new mesh geometry.")
-    for name in sorted(edited):
-        old_transform, old_bounds, _ = before[name]
-        new_transform, new_bounds, _ = after[name]
-        if old_transform != new_transform or any(
-            new_bounds[0][i] < old_bounds[0][i] - 0.00001
-            or new_bounds[1][i] > old_bounds[1][i] + 0.00001
-            for i in range(3)
-        ):
-            raise ValueError(f"{name} moved or exceeded its original fabric envelope.")
-    return {
-        "unchanged_meshes": len(before) - len(edited),
-        "bounded_fabric_layers": sorted(edited),
-    }
 
 
 def camera_signature(scene):
@@ -120,7 +72,7 @@ def render(source, baseline_folder, spec, output, *, proof_only=False):
             raise ValueError(f"Source notice does not match the frozen proof: {name}")
     before = evaluated_geometry()
     attach_textile_detail()
-    alterations = polish()
+    alterations = polish(json.loads((source / "manifest.json").read_bytes()))
     geometry_receipt = compare_geometry(before, evaluated_geometry())
     geometry_receipt["scope"] = "Blender evaluated meshes from the loaded view layer"
     scene["finish_study_manifest_sha256"] = pinned["manifest_sha256"]
