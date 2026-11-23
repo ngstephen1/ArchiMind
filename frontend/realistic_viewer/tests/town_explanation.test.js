@@ -141,3 +141,23 @@ test("saved comparison evidence preserves a specific daylight question", () => {
   assert.match(explanation(home, "Explain daylight in the study"), /nearest window center/);
   assert.match(explanation(home, "Explain the placements"), /modeled passage check/);
 });
+
+test("saved storage and task lighting answers distinguish objects from missing measurements", () => {
+  const {home, bedroom} = selected();
+  assert.match(explanation(home, "What storage is in the bedroom?"), /no recorded storage/);
+  bedroom.furniture.push({id: "retained-wardrobe", category: "wardrobe", width_m: 1.2, depth_m: .6});
+  assert.match(explanation(home, "What bedroom storage is provided?"), /bedroom retained-wardrobe, 1.20 × 0.60 m/);
+  assert.match(explanation(home, "Explain task lighting at the bedroom desk"), /bedroom workspace: belaya.*work-surface light measurement/);
+});
+
+test("saved dining capacity reports seats per recorded table and ignores stale room evidence", () => {
+  const home = {rooms: [
+    {design: {room: {id: "bedroom"}, furniture: []}},
+    {design: {room: {id: "kitchen-dining"}, furniture: [{id: "breakfast-suite"}]}},
+  ], evidence: {comparison: {dining_places: {"kitchen-dining": 4, salon: 4}}}};
+  const ask = () => explanation(home, "How many seats are at the dining table?");
+  assert.match(ask(), /kitchen-dining breakfast-suite: 4 modeled places at one table/);
+  assert.doesNotMatch(ask(), /salon|8 modeled places/);
+  home.rooms[1].design.furniture = [];
+  assert.match(ask(), /no recorded seating capacity/);
+});

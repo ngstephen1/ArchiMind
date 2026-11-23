@@ -69,6 +69,34 @@ export function explanation(home, question, manifest = null, previous = null) {
   const q = question.toLowerCase();
   if (asksChairChange(q)) return chairChange(home, manifest, previous);
   const comparison = home.evidence?.comparison;
+  const mentionedRooms = q.match(/\b(bedroom|study|living|salon|kitchen|bathroom)\b/g) ?? [];
+  const requestedRooms = mentionedRooms.length
+    ? home.rooms.filter(({design}) =>
+        mentionedRooms.includes(design.room.id === "kitchen-dining" ? "kitchen" : design.room.id))
+    : home.rooms;
+  if (/\b(wardrobe|closet|storage)\b/.test(q)) {
+    const storage = requestedRooms.flatMap(({design}) =>
+      design.furniture.filter(item => ["storage", "wardrobe"].includes(item.category)).map(item =>
+        `${design.room.id} ${item.id}, ${item.width_m.toFixed(2)} × ${item.depth_m.toFixed(2)} m in plan`
+      )
+    );
+    return storage.length
+      ? "Saved storage reservations: " + storage.join("; ") + ". Interior capacity and door operation need separate measurements."
+      : "The requested area has no recorded storage reservation in this design.";
+  }
+  if (/\b(dining|dine|dinner guests)\b/.test(q) &&
+      /\b(seats?|seating|places?|table|capacity|dine|guests)\b/.test(q)) {
+    const groups = requestedRooms.flatMap(({design}) => {
+      const count = comparison?.dining_places?.[design.room.id];
+      const table = design.furniture.find(item => ["salon-dining", "breakfast-suite"].includes(item.id));
+      return table && Number.isInteger(count) && count > 0
+        ? [`${design.room.id} ${table.id}: ${count} modeled places at one table`]
+        : [];
+    });
+    return groups.length
+      ? groups.join("; ") + ". Each count applies to its own table."
+      : "This design has no recorded seating capacity tied to a dining table.";
+  }
   if (comparison && /\b(why|explain|layout|route|seating)\b/.test(q) &&
       !/\b(desk|window|rug|chair|lamp|oak|daylight|glare)\b/.test(q)) {
     const routes = comparison.routes.map(r => `${r.room} to ${r.target} via hall ${r.distance_m.toFixed(2)} m`);
@@ -98,6 +126,14 @@ export function explanation(home, question, manifest = null, previous = null) {
   const namedStudyDesk = studyDesks.find(f =>
     [f.name, f.id].some(label => label && normalized.includes(label.toLowerCase().replaceAll("-", " ")))
   );
+  if (/\b(task[- ]light(?:ing)?|reading light|desk lamp)\b/.test(q)) {
+    const design = /\bstudy\b/.test(q) || namedStudyDesk ? study?.design : bedroom.design;
+    if (!design) return "This design has no recorded study.";
+    const workspaces = design.furniture.filter(item => item.category === "desk");
+    const ids = workspaces.map(item => item.id);
+    return (ids.length ? `Saved ${design.room.id} workspace: ${ids.join(", ")}. ` : "") +
+      "To assess task lighting, provide the fixture or a work-surface light measurement. A daylight view alone cannot establish task illuminance or glare.";
+  }
   if (/\bstudy\b/.test(q) || namedStudyDesk) {
     if (!study) return "This revision has no recorded study.";
     if (/chair|knee|slide under/.test(q))
