@@ -72,7 +72,7 @@ def print_book(before, after, eyes, destination, chrome):
         if any(board["home_id"][:12] not in p for p in pages):
             raise ValueError("Printed page lacks the expected home identity.")
         if any(
-            not page.endswith(f"{number} / {len(pages)}")
+            not page.endswith(f" · {number} / {len(pages)}")
             for number, page in enumerate(pages, start=1)
         ):
             raise ValueError(
@@ -87,6 +87,7 @@ def print_book(before, after, eyes, destination, chrome):
                 "revision": board["revision"],
                 "home_id": board["home_id"],
                 "source_receipt_sha256": digest(after / "receipt.json"),
+                "before_receipt_sha256": digest(before / "receipt.json"),
             }
         )
         hero = stage / f"presentation-{portfolio_cover(board)}.png"

@@ -93,23 +93,32 @@ jobs:
           gh run download "$REVIEWED_BOOK" -n revision-client-book -D "$RUNNER_TEMP/reviewed"
           gh api "repos/$GITHUB_REPOSITORY/contents/$inspection_path?ref=$inspection_commit" \
             -H "Accept: application/vnd.github.raw+json" > "$RUNNER_TEMP/book-inspection.json"
-          python - "$RUNNER_TEMP" <<'PYTHON'
-          import json, sys
-          from pathlib import Path
-          root = Path(sys.argv[1])
-          reviewed = json.loads((root / "book-inspection.json").read_bytes())
-          rows = reviewed.pop("inspection")
-          assert rows and all(isinstance(row, dict) and row.get("page") for row in rows)
-          original = json.loads((root / "reviewed/Client-Book.json").read_bytes())
-          assert reviewed == original, "The approved receipt must only add page inspection rows."
-          PYTHON
           command -v pdfinfo || { sudo apt-get update -qq && sudo apt-get install -y poppler-utils; }
           python -m pip install -e .
+          PYTHONPATH=scripts python - "$RUNNER_TEMP" <<'PYTHON'
+          import json
+          import sys
+          from pathlib import Path
+          from publish_revision_study import load_revision, matched_frames
+
+          root = Path(sys.argv[1])
+          proofs = (root / "before", root / "after")
+          boards, receipts = zip(*(load_revision(path) for path in proofs), strict=True)
+          frames = matched_frames(
+              boards, receipts, proofs, (root / "old-photos", root / "new-photos")
+          )
+          original = json.loads((root / "reviewed/Client-Book.json").read_bytes())
+          for view, pair in frames.items():
+              expected = [frame[2] for frame in pair]
+              if original["images"][view]["sha256"] != expected:
+                  raise ValueError(f"The {view} images do not match the reviewed book.")
+          PYTHON
           mkdir "$RUNNER_TEMP/output"
           python scripts/package_town_release.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" \
             "$RUNNER_TEMP/new-photos" "$RUNNER_TEMP/reviewed/Client-Book.pdf" \
             "$RUNNER_TEMP/book-inspection.json" "$RUNNER_TEMP/output/Designer-Handoff.zip" \
-            --commit "$RELEASE_COMMIT"
+            --commit "$RELEASE_COMMIT" \
+            --original-book-receipt "$RUNNER_TEMP/reviewed/Client-Book.json"
           cp "$RUNNER_TEMP/reviewed/Client-Book.pdf" "$RUNNER_TEMP/output/Client-Book.pdf"
           cp "$RUNNER_TEMP/book-inspection.json" "$RUNNER_TEMP/output/book-inspection.json"
           cd "$RUNNER_TEMP/output"
