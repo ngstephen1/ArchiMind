@@ -353,3 +353,52 @@ def test_conflicting_count_is_not_cited_for_retained_seating():
         "origin": "controls",
         "statement": None,
     }
+
+
+def test_remote_work_headcount_does_not_define_dining():
+    review, questions = requirement_controls(
+        Brief(dining_seats=0),
+        "Two residents and one guest work remotely. Move the study desk toward the window.",
+        None,
+    )
+    assert not questions
+    assert review.dining_seats == 0
+
+
+def test_grouped_party_stays_in_its_named_room():
+    review, questions = requirement_controls(
+        Brief(formal_salon=True, split_dining=True),
+        "Seat four hosts and two residents in the salon.",
+        None,
+    )
+    assert any("requested 6 places there" in question for question in questions)
+    assert review.dining_seats == 0
+
+
+def test_coordinated_openings_retain_locked_room_scope():
+    assert (
+        opening_questions(
+            "Preserve the doors and windows in the bedroom.", locks=("bedroom",)
+        )
+        == []
+    )
+
+
+def test_salon_in_brief_can_enable_the_kitchen_table_program():
+    review, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "Include a formal salon. Seat four people at a single table in the kitchen-dining room.",
+        None,
+    )
+    assert review.formal_salon and not questions
+
+
+def test_supported_split_quote_survives_separate_passage_problem():
+    sentence = "Seat six dining places split across the salon and kitchen-dining with a 5 m clear passage."
+    reviewed = review_summary(
+        Brief(formal_salon=True, dining_seats=6, split_dining=True), message=sentence
+    )
+    assert any(
+        item["statement"] == sentence and item["origin"] == "brief"
+        for item in reviewed["sources"]
+    )

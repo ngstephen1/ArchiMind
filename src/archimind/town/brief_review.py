@@ -39,7 +39,7 @@ WIDTH_PATTERNS = (
     + MEASUREMENT
     + r"(?!\s+(?:long|in length|or shorter|(?:away\s+)?from|between|past)\b)",
 )
-PARTY = r"\s+(?:people|persons|guests|diners)\b"
+PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
 GROUP = (
     COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
@@ -105,7 +105,7 @@ def _widths(text):
     }
 
 
-def requirement_controls(brief, message, previous):
+def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     """Return normalized controls and any conflicts that need user confirmation."""
     evidence = (previous or {}).get("evidence", {}).get("comparison", {})
     explicit = brief.model_fields_set
@@ -126,30 +126,26 @@ def requirement_controls(brief, message, previous):
     def count(value):
         return int(value) if value.isdecimal() else NUMBERS[value]
 
-    text = message.lower()
-    dining = ". ".join(_affirmative_clauses(message))
-    totals = set()
-    questions = []
-    if brief.compare_tradeoffs and not (
+    text = ". ".join(_affirmative_clauses(message))
+    dining = ". ".join(
+        clause
+        for clause in text.split(". ")
+        if re.search(
+            r"\b(?:seats?|seating|dining|dine|diners?|dinner|tables?)\b", clause
+        )
+    )
+    salon = (
         brief.formal_salon
         or any(
             part["design"]["room"]["id"] == "salon"
             for part in (previous or {}).get("rooms", ())
         )
-    ):
-        kitchen_table = re.search(
-            COUNT
-            + PARTY
-            + r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table"
-            + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
-            dining,
+        or bool(
+            re.search(r"\b(?:include|add|use|with) (?:a |the )?formal salon\b", text)
         )
-        if kitchen_table:
-            questions.append(
-                f"The brief requests {count(kitchen_table[1])} dining places in the kitchen-dining room. "
-                "The five-room program has no modeled dining table there. "
-                "Confirm the six-room program or revise the seating requirement."
-            )
+    )
+    totals = set()
+    questions = []
     per_table = []
     count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
     split_counts = re.search(
@@ -180,6 +176,33 @@ def requirement_controls(brief, message, previous):
         (party.span(), sum(count(group[1]) for group in re.finditer(GROUP, party[0])))
         for party in re.finditer(GROUPS, dining)
     ]
+    kitchen_table = re.search(
+        COUNT
+        + PARTY
+        + r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table"
+        + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
+        dining,
+    )
+    if kitchen_table and brief.compare_tradeoffs:
+        amount = next(
+            (
+                total
+                for (start, stop), total in parties
+                if start <= kitchen_table.start() < stop
+            ),
+            count(kitchen_table[1]),
+        )
+        if amount > 4:
+            questions.append(
+                f"The kitchen-dining room has four modeled places. "
+                f"Confirm how to accommodate the requested {amount} places there."
+            )
+        elif not salon:
+            questions.append(
+                f"The brief requests {amount} dining places in the kitchen-dining room. "
+                "The five-room program has no modeled dining table there. "
+                "Confirm the six-room program or revise the seating requirement."
+            )
     counted = set()
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
     for match in re.finditer(
@@ -259,7 +282,17 @@ def requirement_controls(brief, message, previous):
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
             )
         split = False
-    totals.update(total for span, total in parties if span not in counted)
+    for (start, end), total in parties:
+        if (start, end) in counted:
+            continue
+        location = re.match(r"\s+in (?:the )?" + dining_room + r"\b", dining[end:])
+        if location and total > 4:
+            questions.append(
+                f"The {location[1]} has four modeled places. "
+                f"Confirm how to accommodate the requested {total} places there."
+            )
+        elif not location:
+            totals.add(total)
     guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
     if guests and residents:
@@ -275,7 +308,7 @@ def requirement_controls(brief, message, previous):
     elif totals:
         seats = totals.pop()
 
-    circulation = ". ".join(_affirmative_clauses(message))
+    circulation = text if evaluate_passage else ""
     if fixed := re.search(
         PASSAGE
         + r"\s+(?:width\s+)?(?:of |at least |of at least )?"
@@ -307,14 +340,7 @@ def requirement_controls(brief, message, previous):
             "dining_seats": seats,
             "split_dining": split,
             "passage_m": passage,
-            "formal_salon": brief.formal_salon
-            or any(
-                room["design"]["room"]["id"] == "salon"
-                for room in (previous or {}).get("rooms", ())
-            )
-            or bool(
-                re.search(r"\b(?:include|add|use) (?:a |the )?formal salon\b", text)
-            ),
+            "formal_salon": salon,
         }
     ), questions
 
@@ -327,7 +353,10 @@ def _room_id(name):
 def _opening_room(clause, match, fronted):
     """Name the room of one opening request, e.g. "the bedroom window"."""
     words = match[2]
-    after = r"\s+(?:in|of|for|on)\s+(?:the\s+)?" + ROOMS + r"\b"
+    after = (
+        r"(?:\s+and\s+(?:the\s+)?(?:doors?|doorways?|windows?|openings?))?"
+        r"\s+(?:in|of|for|on)\s+(?:the\s+)?" + ROOMS + r"\b"
+    )
     before = re.findall(r"\b" + ROOMS + r"\b", clause[: match.start()])
     if own := re.search(r"\b" + ROOMS + r"\b", words) or re.match(
         after, clause[match.end() :]
@@ -395,7 +424,12 @@ def _source(
 
 
 def _dining_statement_matches(brief, sentence):
-    stated, questions = requirement_controls(Brief(formal_salon=True), sentence, None)
+    stated, questions = requirement_controls(
+        Brief(formal_salon=True, split_dining=brief.split_dining),
+        sentence,
+        None,
+        evaluate_passage=False,
+    )
     return not questions and (stated.dining_seats, stated.split_dining) == (
         brief.dining_seats,
         brief.split_dining,
@@ -481,7 +515,7 @@ def review_summary(
     assumptions = []
     if sources[1]["origin"] == "default":
         assumptions.append(
-            "0.6 m modeled passage is Town's default because no width was stated."
+            "0.6 m modeled passage is Town's default when there is no accepted width."
         )
     assumptions.append(
         "Doors and windows are modeled by Town. Confirm existing openings, "
