@@ -1,6 +1,8 @@
 """Editable metric survey plan contract and rejection cases."""
 
+import json
 from math import sqrt
+from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
@@ -148,6 +150,28 @@ def test_archival_survey_keeps_unknowns_and_conflicts_visible(intake):
     assert any("floor-to-ceiling" in i for i in items)
     assert any("5.0000 m" in i and "5.5 m" in i for i in items)
     assert any("entry" in i for i in items)
+
+
+def test_zane_street_packet_cannot_supply_a_survey_polygon():
+    packet = (
+        Path(__file__).resolve().parents[1] / "docs/handovers/zane-street/evidence.json"
+    )
+    evidence = json.loads(packet.read_bytes())
+    assert evidence["profile"] == "angled north bay"
+    assert evidence["current_building_status"] == "unverified"
+    assert evidence["surveyed_polygon_m"] is None
+    assert evidence["height_m"] is None
+    source = {"id": "habs", "description": evidence["plan_reference"]}
+    with pytest.raises(ValidationError) as error:
+        Survey.model_validate(
+            {
+                "source_kind": "archival",
+                "sources": [source],
+                "geometry_source": source["id"],
+                "height_m": evidence["height_m"],
+            }
+        )
+    assert [item["loc"] for item in error.value.errors()] == [("vertices_m",)]
 
 
 def test_survey_cli_keeps_submitted_evidence_and_rejects_overwrites(intake, tmp_path):
