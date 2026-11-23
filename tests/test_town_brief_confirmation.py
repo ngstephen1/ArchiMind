@@ -680,3 +680,29 @@ def test_conditional_salon_omission_does_not_cancel_an_unconditional_request():
         Brief(compare_tradeoffs=True), message, None
     )
     assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+@pytest.mark.parametrize(
+    "correction",
+    [
+        "No salon, keep the five standard rooms.",
+        "Omit the salon for now, please.",
+        "Skip the salon this time, please, keep the five standard rooms.",
+    ],
+)
+def test_explicit_program_correction_after_a_salon_request(correction):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), "Include a formal salon. " + correction, None
+    )
+    assert not questions and not brief.formal_salon
+
+
+def test_new_instruction_must_not_truncate_a_conditional_program_correction():
+    message = (
+        "Include a formal salon. No salon, but only if it won't fit. "
+        "Four seats in the salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and brief.formal_salon and brief.dining_seats == 4

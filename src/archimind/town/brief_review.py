@@ -67,7 +67,8 @@ SALON_DECLINE = (
     r"leave (?:it|(?:the )?(?:formal )?salon) out|"
     r"(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
     r"(?:no|without) (?:a |the )?(?:formal )?salon)"
-    r"(?:,?\s+(?:please|instead|for now|after all|this time|today))?"
+    r"(?:,?\s+(?:please|instead|for now|after all|this time|today)){0,3}"
+    r"(?:,\s*(?:keep|use) (?:the )?five standard rooms)?"
     r"\s*[.!;]?\s*$"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
