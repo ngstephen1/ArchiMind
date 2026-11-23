@@ -62,12 +62,13 @@ DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
 SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
 SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
 SALON_DECLINE = (
-    r"\s*(?:(?:actually|no),\s*)?(?:"
-    r"no[.!;]?\s*$|not (?:needed|required|wanted)\b|"
-    r"leave (?:it|(?:the )?(?:formal )?salon) out\b|"
-    r"(?:(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
+    r"\s*(?:(?:actually|no),\s*)?"
+    r"(?:no|not (?:needed|required|wanted)|"
+    r"leave (?:it|(?:the )?(?:formal )?salon) out|"
+    r"(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
     r"(?:no|without) (?:a |the )?(?:formal )?salon)"
-    r"(?=\s*(?:$|[.!?,;]|(?:please|instead|for now|after all|this time|today)\b)))"
+    r"(?:,?\s+(?:please|instead|for now|after all|this time|today))?"
+    r"\s*[.!;]?\s*$"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
 

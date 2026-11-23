@@ -655,11 +655,28 @@ def test_salon_room_cancellation_can_have_a_timing_qualifier(timing):
     assert not questions and not brief.formal_salon
 
 
-def test_exact_where_wording_cites_an_explicit_lock():
+def test_exact_where_wording_cites_an_explicit_lock(saved_home, monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(
+        service.provider, "request", live_answer(lock_rooms=["bedroom"])
+    )
     message = "Keep the bedroom exactly where it is."
-    brief = Brief(locks=["bedroom"])
+    request = review_request(message, live=True, width=15, depth=16)
+    brief = service.interpret(request, saved_home)
+    assert brief.locks == ["bedroom"]
     assert {
         "requirement": "Keep bedroom",
         "origin": "brief",
         "statement": message,
-    } in review_summary(brief, message=message)["sources"]
+    } in service.reviewed_brief(request, brief, saved_home)["sources"]
+
+
+def test_conditional_salon_omission_does_not_cancel_an_unconditional_request():
+    message = (
+        "Include a formal salon. Skip the salon this time only if it won't fit. "
+        "Four seats in the salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
