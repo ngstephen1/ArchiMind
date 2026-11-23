@@ -831,8 +831,8 @@ def review_summary(
     }
 
 
-def provider_brief(message):
-    """Route known seating and explanation clauses to the app before interpretation."""
+def provider_brief(message, brief):
+    """Separate complete, app-verified control statements from live interpretation."""
     hosting = (
         r"(?:design a home for )?"
         + COUNT
@@ -857,4 +857,34 @@ def provider_brief(message):
         message,
         flags=re.IGNORECASE,
     )
-    return re.sub(explanation + r"(?=\s*$)", "", remaining, flags=re.IGNORECASE).strip()
+    remaining = re.sub(explanation + r"(?=\s*$)", "", remaining, flags=re.IGNORECASE)
+    # Only remove complete statements with no room, object, or code-clearance qualifier.
+    passage = (
+        r"(?:(?:keep|use|provide|maintain|reserve) (?:a |an )?)?"
+        r"(?:" + "|".join(WIDTH_PATTERNS) + r")[.!;]?"
+    )
+    split_seating = (
+        r"(?:seat|provide seating for) "
+        + COUNT
+        + r"(?: (?:people|persons|guests|diners|seats|places))?(?: total)?"
+        r" (?:split )?(?:across|between) two (?:dining )?tables"
+        r" in (?:the )?(?:formal )?salon and (?:the )?kitchen[- ]dining(?: room)?[.!;]?"
+    )
+    statements = []
+    for statement in re.split(STATEMENT_BREAK, remaining.strip()):
+        clause = statement.strip()
+        normalized = clause.lower()
+        if re.fullmatch(passage, normalized) and _widths(normalized) == {
+            brief.passage_m
+        }:
+            continue
+        if (
+            brief.formal_salon
+            and brief.split_dining
+            and re.fullmatch(split_seating, normalized)
+            and _dining_statement_matches(brief, clause)
+        ):
+            continue
+        if clause:
+            statements.append(clause)
+    return "\n".join(statements)

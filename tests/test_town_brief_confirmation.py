@@ -972,3 +972,53 @@ def test_explicit_salon_exclusion_cannot_add_a_salon(prefix, monkeypatch):
         depth=16,
     )
     assert not service.interpret(request, None).formal_salon
+
+
+def test_live_interpreter_receives_verified_controls_without_reinterpreting_them(
+    monkeypatch,
+):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    seating = "Seat six people total across two tables in the formal salon and kitchen-dining room."
+    passage = "Keep a 65 cm wide passage."
+    preference = "Prefer the study away from the living room."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["confirmed_layout_controls"] == {
+            "dining_seats": 6,
+            "split_dining": True,
+            "modeled_passage_m": 0.65,
+        }
+        assert preference in facts["request"]
+        unsupported = [
+            phrase for phrase in (seating, passage) if phrase in facts["request"]
+        ]
+        return live_answer(formal_salon=True, unsupported=unsupported)(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    request = review_request(
+        " ".join((seating, passage, preference)),
+        live=True,
+        width=15,
+        depth=16,
+        formal_salon=True,
+        dining_seats=6,
+        split_dining=True,
+        passage_m=0.65,
+    )
+    brief = service.interpret(request, None)
+    assert brief.dining_seats == 6 and brief.split_dining and brief.passage_m == 0.65
+
+
+def test_live_interpreter_still_receives_mixed_unenforceable_requirements(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    statement = "Keep a 65 cm wide passage and certify it meets local building code."
+
+    def answer(schema, payload, **_kwargs):
+        assert statement in json.loads(payload)["request"]
+        return live_answer(unsupported=["Building code certification"])(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    request = review_request(statement, live=True, width=15, depth=16, passage_m=0.65)
+    with pytest.raises(service.BriefClarification, match="Building code certification"):
+        service.interpret(request, None)
