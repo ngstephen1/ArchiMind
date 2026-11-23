@@ -38,7 +38,12 @@ A separate offline replay rebuilt the saved snapshots, checked both service
 health endpoints and entered the same bedroom at desktop and narrow sizes.
 Both revisions rendered the bedroom photographs. The replay made no provider
 requests and ran against the replay code already on main at `9adf26f`.
-[Desktop 3D view](walkthrough-1440-r2.jpg) · [Narrow 3D view](walkthrough-390-r2.jpg)
+[Replay receipt](replay-receipt.json)
+
+| Saved walkthrough | Desktop | Narrow |
+| --- | --- | --- |
+| Revision 1 | [Desk and chair](walkthrough-1440-r1.jpg) | [Desk and chair](walkthrough-390-r1.jpg) |
+| Revision 2 | [Desk and chair](walkthrough-1440-r2.jpg) | [Desk and chair](walkthrough-390-r2.jpg) |
 
 ## Reopen both revisions
 
