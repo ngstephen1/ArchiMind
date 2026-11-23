@@ -32,6 +32,8 @@ class Opening(SurveyRecord):
     height_m: Length
     sill_m: Nonnegative
     source: Text
+    reveal_depth_m: Nonnegative | None = None
+    trim_projection_m: Nonnegative | None = None
     # Hinge side is relative to travel along the directed wall segment.
     hinge: Literal["start", "end"] | None = None
     swing: Literal["inward", "outward", "sliding", "fixed"] | None = None
@@ -40,11 +42,27 @@ class Opening(SurveyRecord):
     def check_swing(self) -> Self:
         if self.kind == "window" and (self.hinge or self.swing):
             raise ValueError("Door swing fields belong on doors only.")
+        if self.kind != "window" and (
+            self.reveal_depth_m is not None or self.trim_projection_m is not None
+        ):
+            raise ValueError(
+                "Window reveal and trim dimensions belong on windows only."
+            )
         if self.swing in {"inward", "outward"} and not self.hinge:
             raise ValueError("A hinged door swing needs its hinge end.")
         if self.hinge and self.swing not in {"inward", "outward"}:
             raise ValueError("State the direction of the hinged door swing.")
         return self
+
+
+class Outlet(SurveyRecord):
+    """A surveyed outlet center on a wall, above the finished floor."""
+
+    id: Text
+    wall: Annotated[int, Field(ge=0, strict=True)]
+    offset_m: Nonnegative
+    height_m: Nonnegative
+    source: Text
 
 
 class Fixture(SurveyRecord):
@@ -95,6 +113,7 @@ class Survey(SurveyRecord):
     height_source: Text | None = None
     openings: list[Opening] = Field(default_factory=list)
     fixtures: list[Fixture] = Field(default_factory=list)
+    outlets: list[Outlet] = Field(default_factory=list)
     fixture_inventory_source: Text | None = None
     checks: list[CheckMeasure] = Field(default_factory=list)
     field_checks: list[Text] = Field(default_factory=list)
@@ -156,9 +175,9 @@ class Survey(SurveyRecord):
         source_ids = {s.id for s in self.sources}
         if len(source_ids) != len(self.sources):
             raise ValueError("Duplicate survey source ID.")
-        elements = [*self.openings, *self.fixtures]
+        elements = [*self.openings, *self.fixtures, *self.outlets]
         if len({o.id for o in elements}) != len(elements):
-            raise ValueError("Duplicate opening or fixture ID.")
+            raise ValueError("Duplicate opening, fixture or outlet ID.")
         references = {e.source for e in [*elements, *self.checks]}
         references.add(self.geometry_source)
         if self.fixture_inventory_source:
@@ -193,6 +212,13 @@ class Survey(SurveyRecord):
                         f"Overlapping plan openings on wall {i}; verify the survey."
                     )
                 end = opening.offset_m + opening.width_m
+        for outlet in self.outlets:
+            if outlet.wall >= len(self.vertices_m):
+                raise ValueError(f"{outlet.id} references an unknown wall.")
+            if outlet.offset_m > dist(*self.wall(outlet.wall)) + 1e-9:
+                raise ValueError(f"{outlet.id} extends past the measured wall.")
+            if self.height_m is not None and outlet.height_m > self.height_m + 1e-9:
+                raise ValueError(f"{outlet.id} extends above the measured ceiling.")
         for fixture in self.fixtures:
             if not polygon.buffer(1e-9).covers(Polygon(fixture.corners())):
                 raise ValueError(f"{fixture.id} extends outside the surveyed polygon.")
@@ -257,6 +283,8 @@ def write_survey_dxf(survey: Survey, path: Path) -> None:
         "FIXTURES": 8,
         "DOOR_LEAVES": 3,
     }
+    if survey.outlets:
+        layers["OUTLETS"] = 6
     groups(
         (0, "SECTION"), (2, "TABLES"), (0, "TABLE"), (2, "LAYER"), (5, "F0"), (330, "0")
     )
@@ -285,6 +313,11 @@ def write_survey_dxf(survey: Survey, path: Path) -> None:
         pts = fixture.corners()
         for i, a in enumerate(pts):
             line("FIXTURES", a, pts[(i + 1) % len(pts)])
+    for outlet in survey.outlets:
+        x, y = survey.along(outlet.wall, outlet.offset_m)
+        marker = 0.035
+        line("OUTLETS", (x - marker, y), (x + marker, y))
+        line("OUTLETS", (x, y - marker), (x, y + marker))
     groups((0, "ENDSEC"), (0, "EOF"))
     Path(path).write_text("\n".join(content) + "\n", encoding="ascii")
 
@@ -314,6 +347,21 @@ def export_intake(source: Path, destination: Path) -> None:
         "field_verification_items": items,
         "review_status": "pending professional review",
     }
+    windows = [
+        {
+            "id": row.id,
+            "source": row.source,
+            "reveal_depth_m": row.reveal_depth_m,
+            "trim_projection_m": row.trim_projection_m,
+        }
+        for row in survey.openings
+        if row.kind == "window"
+        and (row.reveal_depth_m is not None or row.trim_projection_m is not None)
+    ]
+    if windows:
+        report["window_details"] = windows
+    if survey.outlets:
+        report["outlets"] = [outlet.model_dump() for outlet in survey.outlets]
     if survey.project_id is not None:
         report["project_id"] = survey.project_id
     if survey.surveyed_on is not None:

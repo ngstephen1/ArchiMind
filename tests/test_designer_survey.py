@@ -207,3 +207,46 @@ def test_survey_cli_keeps_submitted_evidence_and_rejects_overwrites(
     assert report["field_verification_items"]
     retry = subprocess.run(cmd, capture_output=True, text=True)
     assert retry.returncode == 1 and "already exists" in retry.stderr
+
+
+def test_export_preserves_window_reveal_and_outlet_without_inventing_a_depth(
+    intake, tmp_path
+):
+    from archimind.designer_handoff.survey import export_intake
+
+    intake["openings"][1]["reveal_depth_m"] = 0.17
+    outlet = {
+        "id": "O1",
+        "wall": 4,
+        "offset_m": 3,
+        "height_m": 0.31,
+        "source": "sketch",
+    }
+    intake["outlets"] = [outlet]
+    source, output = tmp_path / "site.json", tmp_path / "edition"
+    source.write_text(json.dumps(intake))
+    export_intake(source, output)
+    report = json.loads((output / "field-verification.json").read_text())
+    assert report["window_details"] == [
+        {
+            "id": "light",
+            "source": "sketch",
+            "reveal_depth_m": 0.17,
+            "trim_projection_m": None,
+        }
+    ]
+    assert report["outlets"] == [outlet]
+    dxf = (output / "existing-conditions.dxf").read_text()
+    assert dxf.count("8\nOUTLETS\n") == 2
+
+
+@pytest.mark.parametrize(
+    "mutation", [{"offset_m": 5}, {"height_m": 3}, {"source": "other"}]
+)
+def test_unbound_outlet_values_are_rejected(intake, mutation):
+    intake["outlets"] = [
+        {"id": "O1", "wall": 4, "offset_m": 3, "height_m": 0.31, "source": "sketch"}
+        | mutation
+    ]
+    with pytest.raises(ValidationError):
+        Survey.model_validate(intake)
