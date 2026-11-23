@@ -115,6 +115,15 @@ OFFSITE_MEAL = (
     r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine)(?:\s+together)?)"
     r"\s+(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
 )
+HOME_DINING_LOCATION = re.compile(
+    r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|" + ROOM_NAMES + r"))\b"
+)
+DINING_TRANSITION = re.compile(r"\b(?:so|and|then|while)\s+")
+HOME_DINING_REQUEST = re.compile(
+    r"\b(?:so|and|then|while)\s+(?:(?:we|i)\s+)?"
+    r"(?=(?:need|want|require|add|provide|seat)\b)"
+)
+
 SALON_ACTION = (
     r"\b(?:include|add|use|with) (?:a |the )?(?:(?:separate|dedicated|additional) )?"
     r"formal salon\b"
@@ -265,28 +274,33 @@ def salon_choice(message):
     return decision, statement
 
 
+def _home_meal_clauses(clause):
+    offsite = re.search(OFFSITE_MEAL, clause)
+    if not offsite:
+        yield clause
+        return
+    for transition in reversed(
+        list(DINING_TRANSITION.finditer(clause, 0, offsite.start()))
+    ):
+        before = clause[: transition.start()]
+        if HOME_DINING_LOCATION.search(before):
+            yield before
+            break
+    after = clause[offsite.end() :]
+    if request := HOME_DINING_REQUEST.search(after):
+        home = after[request.end() :]
+        if HOME_DINING_LOCATION.search(home):
+            yield home
+
+
 def _dining_clauses(clauses):
     for clause in clauses:
-        if offsite := re.search(OFFSITE_MEAL, clause):
-            home_request = re.search(
-                r"\b(?:so|and)\s+(?:(?:we|i)\s+)?(?:need|want|require|add|provide)\b",
-                clause[offsite.end() :],
-            )
-            if not home_request:
-                continue
-            clause = clause[offsite.end() + home_request.end() :]
-            if not re.search(
-                r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|"
-                + ROOM_NAMES
-                + r"))\b",
-                clause,
-            ):
-                continue
-        if re.search(DINING_CONTEXT, clause):
-            yield OPTIONAL_SECOND_TABLE.sub(
-                lambda match: clause[match.start() : match.start("second_clause")],
-                clause,
-            )
+        for home in _home_meal_clauses(clause):
+            if re.search(DINING_CONTEXT, home):
+                yield OPTIONAL_SECOND_TABLE.sub(
+                    lambda match: home[match.start() : match.start("second_clause")],
+                    home,
+                )
 
 
 def _seat_count(value):
@@ -456,10 +470,12 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + r"|\bseat(?:ing)?\s+"
         + COUNT
         + PARTY
-        + r"|"
+        + r"|(?:"
         + COUNT
         + PARTY
-        + r"\s+(?=(?:at|around) (?:one|a single|the same) (?:dining )?table\b)",
+        + r"|\bseat\s+"
+        + COUNT
+        + r")\s+(?=(?:at|around) (?:one|a single|the same) (?:dining )?table\b)",
         dining,
     ):
         index = next(i for i, group in enumerate(match.groups(), 1) if group)

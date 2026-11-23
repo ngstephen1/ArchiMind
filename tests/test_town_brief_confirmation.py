@@ -1139,9 +1139,12 @@ def test_counted_seating_keeps_both_allocations_with_a_meal_qualifier(
 
 @pytest.mark.parametrize("location", ["the other table", "the other end"])
 @pytest.mark.parametrize("separator", [" and ", "\nand seat "])
-def test_optional_second_group_does_not_raise_required_seating(location, separator):
+@pytest.mark.parametrize("first", ["four", "four guests"])
+def test_optional_second_group_does_not_raise_required_seating(
+    location, separator, first
+):
     text = (
-        "Seat four guests at one table"
+        f"Seat {first} at one table"
         + separator
         + "two at "
         + location
@@ -1154,6 +1157,52 @@ def test_optional_second_group_does_not_raise_required_seating(location, separat
     )
     assert not questions and brief.dining_seats == 4 and not brief.split_dining
     check_brief(brief)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Six dining seats. Seat everyone at one table at home for breakfast and have dinner at a restaurant.",
+        "Six dining seats. We have dinner at a restaurant and seat everyone at one table at home for breakfast.",
+    ],
+)
+def test_home_single_table_requirement_survives_offsite_meal(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+def test_offsite_single_table_does_not_restrict_home_split():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Six dining seats at home. Seat four guests at one table for dinner at a restaurant.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+def test_live_interpreter_receives_optional_seating_as_prose(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    text = "Seat four at one table and two at the other table if possible."
+
+    def answer(schema, payload, **kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == text
+        assert facts["confirmed_layout_controls"]["dining_seats"] == 4
+        assert facts["confirmed_layout_controls"]["split_dining"] is False
+        assert (
+            "described as optional in the request as a preference"
+            in kwargs["task_instructions"]
+        )
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    result = service.interpret(review_request(text, live=True, formal_salon=True), None)
+    assert result.dining_seats == 4 and not result.split_dining
 
 
 def test_grouped_seating_can_wrap_after_preposition():
