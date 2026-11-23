@@ -1339,6 +1339,20 @@ def test_optional_second_room_keeps_only_the_required_home_allocation(room, spli
     assert not questions and brief.dining_seats == 4 and brief.split_dining is split
 
 
+@pytest.mark.parametrize(
+    "first, second",
+    [("in the salon", "in the kitchen"), ("", "")],
+)
+def test_optional_table_does_not_waive_required_table_capacity(first, second):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"Seat six guests at one table {first} and two at the other table {second} if possible.",
+        None,
+    )
+    assert brief.dining_seats == 6
+    assert any("smaller group at the required table" in q for q in questions)
+
+
 def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),

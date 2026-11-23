@@ -473,6 +473,11 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             questions.append(
                 "Confirm the five-room program by clearing the formal salon control."
             )
+    optional_table_overflow = any(
+        match["separate_table"] and _allocation_count(match["first"]) > 4
+        for clause in _dining_clauses(clauses, for_arrangement=True)
+        for match in OPTIONAL_SECOND_TABLE.finditer(clause)
+    )
     per_table = []
     split_counts = SEPARATE_TABLE_COUNTS.search(dining)
     each_table = re.search(
@@ -505,10 +510,14 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         dining = dining[: each_table.start()] + " " + dining[each_table.end() :]
     if per_table:
         totals.add(sum(per_table))
-        if max(per_table) > 4:
-            questions.append(
-                "Each modeled table has four places. Revise the requested split."
-            )
+    if optional_table_overflow:
+        questions.append(
+            "Each modeled table has four places. Confirm a smaller group at the required table."
+        )
+    elif per_table and max(per_table) > 4:
+        questions.append(
+            "Each modeled table has four places. Revise the requested split."
+        )
 
     shared = r"\s*,?\s+(?:to be )?(?:split|shared|divided) (?:between|across)\b"
     requested_split = bool(per_table) or bool(re.search(r"\bsplit dining\b", dining))
