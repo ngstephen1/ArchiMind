@@ -60,6 +60,19 @@ supplier clearances before using the concept for procurement or construction.
 
 ### Bedroom lighting proofs
 
-Dispatch the Studio Home workflow with `lighting_proof=true` and the accepted proof run, manifest and snapshot for each revision. Supply the **same pinned** `camera_source=<sha>:<manifest-path>` for both dispatches. The bedroom doorway and desk views use this common camera, and the task view repeats the desk pose. The salon and living detail images document the selected revision and use that revision's own cameras. The receipt identifies the camera source for every shot.
+Dispatch the Studio Home workflow with `fresh_home=true` and `lighting_proof=true` and the accepted proof run, manifest and snapshot for each revision. Supply the **same pinned** `camera_source=<sha>:<manifest-path>` for both dispatches. The bedroom doorway and desk views use this common camera, and the task view repeats the desk pose. The salon and living detail images document the selected revision and use that revision's own cameras. The receipt identifies the camera source for every shot. For example, on a branch with the lighting-proof workflow:
+
+```bash
+rev=2
+pin=85cd2c548a96a0f62127891bb0adc6d92f75fbf2
+gh workflow run studio-home.yml \
+  -f fresh_home=true -f lighting_proof=true -f salon_cover=true \
+  -f approved_proof_run=45130362035 \
+  -f manifest_source="$pin:docs/data/nov24-fresh-live/manifest-r$rev.json" \
+  -f snapshot_source="$pin:docs/data/nov24-fresh-live/snapshot-r$rev.json" \
+  -f camera_source="$pin:docs/data/nov24-fresh-live/manifest-r2.json"
+```
+
+For the matching before view, set `rev=1`, use approved run `45130361857`, and keep the camera source unchanged.
 
 The 960 × 540 outputs are published as `studio-lighting-proof`. Use `studio-eye-views` for the 1920 × 1080 revision-book input. The evening proof disables existing light objects and material emission before adding the modeled task and fill sources. The result shows a lighting concept. Fixture specification and work-surface illuminance require separate evidence.
