@@ -594,3 +594,25 @@ def test_salon_shorthand_before_seating_is_quoted():
         "origin": "brief",
         "statement": "Formal salon;",
     } in review_summary(brief, message=phrase)["sources"]
+
+
+def test_an_unrelated_prohibition_does_not_cancel_salon_seating():
+    phrase = "Formal salon. No changes to the bedroom. Four seats in the salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+@pytest.mark.parametrize("decline", ["leave it out", "omit it", "not needed"])
+def test_salon_omission_and_replacement_are_read_in_context(decline):
+    phrase = f"Formal salon; {decline}."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and not brief.formal_salon
+
+    phrase += " Actually, include a formal salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon
+    assert {
+        "requirement": "Formal salon",
+        "origin": "brief",
+        "statement": "Actually, include a formal salon.",
+    } in review_summary(brief, message=phrase)["sources"]
