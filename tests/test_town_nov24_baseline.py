@@ -9,6 +9,7 @@ from typing import NamedTuple
 from uuid import uuid4
 
 import pytest
+from pydantic import ValidationError
 
 from archimind.town import service
 from archimind.town.design import Brief, digest, generate, validate_home
@@ -47,6 +48,8 @@ def supported_observation(homes, prepared, previous, expected):
         assert home["id"] == digest({k: v for k, v in home.items() if k != "id"})
         assert len(home["rooms"]) == expected["rooms"]
         assert (home["width"], home["depth"]) == (prepared.width, prepared.depth)
+        if "lot_wd_m" in expected:
+            assert [home["width"], home["depth"]] == expected["lot_wd_m"]
         spaces = validate_home(home, passage_m=prepared.passage_m, measure=True)
         comparison = home["evidence"]["comparison"]
         assert comparison["passage_m"] == prepared.passage_m
@@ -95,7 +98,7 @@ def supported_observation(homes, prepared, previous, expected):
 
 
 class KnownBaselineGap(AssertionError):
-    """Fail only for the two documented behaviors of the pinned baseline."""
+    """Fail only for the one remaining documented behavior of the pinned baseline."""
 
 
 @pytest.mark.parametrize(
@@ -156,6 +159,8 @@ def test_nov24_brief(case, saved_home, monkeypatch, record_property):
         try:
             prepared = service.interpret(request, previous)
             homes = generate(prepared, previous)
+        except ValidationError:
+            raise
         except (service.Problem, ValueError) as exc:
             error = exc
         elapsed_ms = round((time.perf_counter() - start) * 1000)
@@ -182,23 +187,6 @@ def test_nov24_brief(case, saved_home, monkeypatch, record_property):
         allowed_calls = [allowed_calls]
     assert len(calls) in allowed_calls
     after_sha = digest(previous)
-    changed_fields = []
-    if after_sha != previous_digest:
-        assert case["case"] == "locked-bedroom"
-        before_room, after_room = room(before, "bedroom"), room(previous, "bedroom")
-        changed_fields = sorted(
-            key
-            for key in before_room.keys() | after_room.keys()
-            if before_room.get(key) != after_room.get(key)
-        )
-        assert changed_fields == ["style"]
-        restored = copy.deepcopy(previous)
-        restored_room = room(restored, "bedroom")
-        if "style" in before_room:
-            restored_room["style"] = before_room["style"]
-        else:
-            restored_room.pop("style")
-        assert restored == before
     record_property(
         "observation",
         json.dumps(
@@ -210,9 +198,8 @@ def test_nov24_brief(case, saved_home, monkeypatch, record_property):
                 "elapsed_ms": elapsed_ms,
                 "input_sha256_before": previous_digest if before else None,
                 "input_sha256_after": after_sha if previous else None,
-                "changed_locked_fields": changed_fields,
+                "changed_locked_fields": [],
             }
         ),
     )
-    if changed_fields:
-        raise KnownBaselineGap(case["known_gap"])
+    assert after_sha == previous_digest, "The saved input snapshot changed"

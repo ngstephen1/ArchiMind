@@ -28,7 +28,7 @@ PYTHONPATH=src .venv/bin/python -m pytest -q -rxX -o junit_family=xunit1 \
   --junitxml=/tmp/archimind-nov24-briefs.xml tests/test_town_nov24_baseline.py
 ```
 
-Read each JUnit test case's `observation` property as JSON. Candidate hashes bind the returned geometry and evidence. Elapsed milliseconds cover interpretation and generation on the test host and exclude the saved fixture setup and the second verification pass. Each provider fixture call returns typed data in-process. The run uses zero external model calls and measures no browser or network latency. `--runxfail` exposes the two known baseline defects as ordinary failures.
+Read each JUnit test case's `observation` property as JSON. Candidate hashes bind the returned geometry and evidence. The historical receipt aggregates the JUnit observations with manually recorded case verdicts, expected outcomes and gap descriptions. Replay against the current branch reflects subsequent fixes. Elapsed milliseconds cover interpretation and generation on the test host and exclude the saved fixture setup and the second verification pass. Each provider fixture call returns typed data in-process. The run uses zero external model calls and measures no browser or network latency. `--runxfail` exposes the remaining single-table baseline defect as ordinary failures.
 
 Hieu should review the expectations before tuning. Keep six distinct live prompts and their expected outcomes with the evaluation owner until the candidate is fixed. Prepare one per reserved slot below. Reuse the scoring rules but change room names, numbers or phrasing enough to test generalization. Hold back the prompt text, answer key and any client data from the training or tuning corpus. This package specifies the six slots. The private prompts and live outcome receipts are still due in [held-out evaluation #68](https://github.com/ngstephen1/ArchiMind/issues/68).
 
@@ -54,6 +54,8 @@ Apply each row independently. Mark candidate difference `N/A` for expected clari
 The 45-second threshold is the review target chosen for this baseline. Report fixture and live latency separately. For live runs, record time to first valid preview or terminal clarification, total elapsed time, clarification turns, configured model, actual call count and available token and cost observations. The fixture receipt scores behavior and records local latency. It does not award points for browser or billed provider behavior.
 
 ## Revision-2 visual baseline
+
+The checked-in crops and receipts are durable. Full-resolution images and the packed scene are Action artifacts subject to retention.
 
 [Camera and artifact receipt](visual-baseline.json) binds the three saved views to the [revision-2 Town manifest](../live-quality-proof/live-manifest-r2.json) and the SHA-256 of the packed Blender scene. Keep the same saved manifest, eye, target, FOV, architectural shift, output framing, AgX treatment and exposure for the styling comparison. The three source PNGs are 1920 × 1080 at a maximum of 96 Cycles CPU samples on Blender 5.1.2. If a lighting trial changes exposure, archive that version separately and retain the fixed-exposure pair. [Packed scene and proof](https://github.com/ngstephen1/ArchiMind/actions/runs/44993303088) · [Full-resolution render and book](https://github.com/ngstephen1/ArchiMind/actions/runs/44994306268)
 
