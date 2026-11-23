@@ -65,30 +65,42 @@ TABLE_ALLOCATION = (
     + COUNT
     + r"(?:\s+(?:people|persons?|diners?|guests?|hosts?|residents?|seats|places))?"
 )
-TABLE_POSITION = r"\s+(?:at|around) "
+TABLE_POSITION = r"\s+(?:at|around)\s+"
 FIRST_TABLE = (
     r"(?P<first>"
     + TABLE_ALLOCATION
     + r")"
     + TABLE_POSITION
-    + r"(?:one|a single|the same) (?:dining )?table\s*,?\s+and\s+(?:seat\s+)?"
+    + r"(?:one|a single|the same) (?:dining )?table"
+    + r"(?P<second_clause>\s*,?\s+and\s+(?:seat\s+)?"
     + r"(?P<second>"
     + TABLE_ALLOCATION
     + r")"
     + TABLE_POSITION
-)
-TABLE_BOUNDARY = r"(?=\s*(?:$|[,.!?;]|in\b|for (?:breakfast|lunch|dinner)\b))"
-SEPARATE_TABLE_COUNTS = re.compile(
-    FIRST_TABLE
-    + r"(?:the )?(?:other|second)\b(?: (?:dining )?table\b|"
-    + TABLE_BOUNDARY
     + r")"
 )
-SAME_TABLE_ENDS = re.compile(
+TABLE_OPTION = r"(?:if|when)\s+(?:possible|practical|feasible|space permits)\b"
+TABLE_BOUNDARY = (
+    r"(?=\s*(?:$|[,.!?;]|in\b|for (?:breakfast|lunch|dinner)\b|" + TABLE_OPTION + r"))"
+)
+OTHER_TABLE = (
+    r"(?:the )?(?:other|second)\b(?: (?:dining )?table\b|" + TABLE_BOUNDARY + r")"
+)
+OTHER_END = (
+    r"the other (?:end|side)\b(?: of (?:it|the table)\b|" + TABLE_BOUNDARY + r")"
+)
+SEPARATE_TABLE_COUNTS = re.compile(FIRST_TABLE + OTHER_TABLE)
+SAME_TABLE_ENDS = re.compile(FIRST_TABLE + OTHER_END)
+OPTIONAL_SECOND_TABLE = re.compile(
     FIRST_TABLE
-    + r"the other (?:end|side)\b(?: of (?:it|the table)\b|"
-    + TABLE_BOUNDARY
+    + r"(?:"
+    + OTHER_TABLE
+    + r"|"
+    + OTHER_END
     + r")"
+    + r"(?:\s+in (?:the )?(?:formal salon|salon|kitchen[- ]dining(?: room)?))?"
+    + r"(?:\s+for (?:breakfast|lunch|dinner))?\s*,?\s+"
+    + TABLE_OPTION
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
@@ -271,7 +283,10 @@ def _dining_clauses(clauses):
             ):
                 continue
         if re.search(DINING_CONTEXT, clause):
-            yield clause
+            yield OPTIONAL_SECOND_TABLE.sub(
+                lambda match: clause[match.start() : match.start("second_clause")],
+                clause,
+            )
 
 
 def _seat_count(value):
@@ -291,7 +306,7 @@ def _normalize_table_ends(text):
 
 
 def requests_single_table(message):
-    for clause in _affirmative_clauses(message):
+    for clause in _dining_clauses(_affirmative_clauses(message)):
         clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause

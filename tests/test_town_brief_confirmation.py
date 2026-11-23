@@ -1137,6 +1137,34 @@ def test_counted_seating_keeps_both_allocations_with_a_meal_qualifier(
     assert bool(questions) is single
 
 
+@pytest.mark.parametrize("location", ["the other table", "the other end"])
+@pytest.mark.parametrize("separator", [" and ", "\nand seat "])
+def test_optional_second_group_does_not_raise_required_seating(location, separator):
+    text = (
+        "Seat four guests at one table"
+        + separator
+        + "two at "
+        + location
+        + " if possible."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=False),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+    check_brief(brief)
+
+
+def test_grouped_seating_can_wrap_after_preposition():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Four guests at\none table and two at\nthe other table.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
 @pytest.mark.parametrize(("first", "total"), [("one host", 4), ("three hosts", 6)])
 def test_same_table_retains_every_group_at_each_end(first, total):
     brief, questions = requirement_controls(
