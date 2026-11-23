@@ -66,7 +66,7 @@ jobs:
           command -v pdfunite || { sudo apt-get update -qq && sudo apt-get install -y poppler-utils; }
           python scripts/print_revision_book.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" \
             "$RUNNER_TEMP/output/Client-Book.pdf" "${options[@]}"
-          pdftoppm -scale-to 600 -jpeg "$RUNNER_TEMP/output/Client-Book.pdf" "$RUNNER_TEMP/output/sheet"
+          pdftoppm -r 150 -jpeg "$RUNNER_TEMP/output/Client-Book.pdf" "$RUNNER_TEMP/output/sheet"
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         if: inputs.reviewed_book_run
         with:
