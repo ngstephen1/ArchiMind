@@ -1,0 +1,125 @@
+{
+  "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+  "source": "internal technical replay",
+  "camera_manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+  "renders": [
+    {
+      "run": 45249324624,
+      "revision": 2,
+      "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+      "manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+      "artifact_id": 14856877230,
+      "shots": {
+        "doorway": {
+          "room": "bedroom",
+          "exposure_ev": 0.5870747566223145,
+          "view": "doorway",
+          "camera": {
+            "eye": [
+              5.6579999999999995,
+              1.57,
+              -8.892
+            ],
+            "fov": 69,
+            "id": "doorway",
+            "label": "Doorway",
+            "reason": null,
+            "target": [
+              1.0399,
+              0.58,
+              -7.2343
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+          "file": "bedroom-doorway.png",
+          "sha256": "b56dd8922a1a922415d6c4774ad2d976661cd9dea3926bb4920c3632cf53bfb6"
+        },
+        "desk": {
+          "room": "bedroom",
+          "exposure_ev": 0.5870747566223145,
+          "view": "desk",
+          "camera": {
+            "eye": [
+              5.360000000000002,
+              1.57,
+              -8.689
+            ],
+            "fov": 58,
+            "id": "desk",
+            "label": "Desk and chair",
+            "reason": null,
+            "target": [
+              3.96,
+              0.5535709201097488,
+              -7.000404882967473
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+          "file": "bedroom-desk.png",
+          "sha256": "6868d0bda2936ec6a3aacdddea6460ddca49452a62824bbe50eccd485ba6cb80"
+        }
+      }
+    },
+    {
+      "run": 45248529623,
+      "revision": 3,
+      "home_id": "aa7a27815efc2bc4c38b0017a4896255df923789974273f4ac2a35a182960182",
+      "manifest_sha256": "a503cabfb2d29c996b9eec354cff2ab6d7328a0567eb84ec66e81f7cb424c32e",
+      "artifact_id": 14856003029,
+      "shots": {
+        "doorway": {
+          "room": "bedroom",
+          "exposure_ev": 0.5870747566223145,
+          "view": "doorway",
+          "camera": {
+            "eye": [
+              5.6579999999999995,
+              1.57,
+              -8.892
+            ],
+            "fov": 69,
+            "id": "doorway",
+            "label": "Doorway",
+            "reason": null,
+            "target": [
+              1.0399,
+              0.58,
+              -7.2343
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+          "file": "bedroom-doorway.png",
+          "sha256": "129376087a18e2a51c8471cae52d6ee43f7d3780751ecd384481f9ef42a96648"
+        },
+        "desk": {
+          "room": "bedroom",
+          "exposure_ev": 0.5870747566223145,
+          "view": "desk",
+          "camera": {
+            "eye": [
+              5.360000000000002,
+              1.57,
+              -8.689
+            ],
+            "fov": 58,
+            "id": "desk",
+            "label": "Desk and chair",
+            "reason": null,
+            "target": [
+              3.96,
+              0.5535709201097488,
+              -7.000404882967473
+            ]
+          },
+          "architectural_projection": null,
+          "camera_manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+          "file": "bedroom-desk.png",
+          "sha256": "cf23b7ae95fce8aa97dcc3ea9f9b992a1a9c72c1cbfe501c507ed5a8b6833d2c"
+        }
+      }
+    }
+  ]
+}
