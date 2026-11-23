@@ -731,3 +731,104 @@ def test_unqualified_five_room_correction_on_separate_line():
         Brief(compare_tradeoffs=True), message, None
     )
     assert not questions and not brief.formal_salon
+
+
+def test_salon_correction_in_the_same_sentence():
+    brief = Brief(compare_tradeoffs=True)
+    text = "Include a formal salon, but skip the salon for now."
+    result, questions = requirement_controls(brief, text, None)
+    assert not questions and not result.formal_salon
+    result, questions = requirement_controls(
+        brief, "Include a formal salon, but skip the salon only if it won't fit.", None
+    )
+    assert not questions and result.formal_salon
+
+
+def test_independent_conditional_finish_does_not_reverse_the_room_correction():
+    message = (
+        "Include a formal salon.\nNo salon, keep the five standard rooms\n\n"
+        "If possible, use oak."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and not brief.formal_salon
+
+
+def test_restaurant_table_does_not_supply_a_home_dining_count():
+    message = (
+        "Two hosts and four guests will have dinner at a restaurant table. "
+        "Four dining places."
+    )
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert not questions and brief.dining_seats == 4
+
+
+def test_split_total_must_cover_both_tables():
+    settings = Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True)
+    text = "Four dining places split between the salon and kitchen. Four seats in the salon."
+    _, questions = requirement_controls(settings, text, None)
+    assert any("room-specific seating" in item for item in questions)
+    brief, questions = requirement_controls(
+        settings, text.replace("Four dining places", "Five dining places"), None
+    )
+    assert not questions and brief.dining_seats == 5
+
+
+def test_preserved_connecting_door_respects_an_existing_study_lock():
+    text = "Keep the door to the study where it is."
+    assert not opening_questions(text, ["study"])
+    assert opening_questions(text, ["bedroom"])
+
+
+def test_cannot_lock_a_room_that_does_not_exist(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(service.provider, "request", live_answer())
+    previous = generate(Brief(width=15, depth=16))[0]
+    request = review_request(
+        "Keep the salon window.", live=True, width=15, depth=16, locks=["salon"]
+    )
+    with pytest.raises(service.BriefClarification, match="absent from the saved home"):
+        service.interpret(request, previous)
+
+
+def test_object_clearance_is_not_cited_as_the_default_plan_passage():
+    text = "Keep the passage width at least 0.6 m between the sofa and the wall."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert questions
+    sources = review_summary(brief, message=text, questions=questions)["sources"]
+    assert next(
+        item for item in sources if "modeled passage" in item["requirement"]
+    ) == {
+        "requirement": "0.6 m modeled passage",
+        "origin": "default",
+        "statement": None,
+    }
+
+
+def test_two_room_allocations_are_quoted_as_the_combined_dining_total():
+    text = "Four seats in the salon. Two seats in the kitchen."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6
+    assert {
+        "requirement": "6 dining places across two tables",
+        "origin": "brief",
+        "statement": text,
+    } in review_summary(brief, message=text)["sources"]
+
+
+def test_checked_locks_are_attributed_only_to_the_checked_rooms(saved_home):
+    request = review_request(
+        "Keep the study desk exactly where it is.", locks=["bedroom"]
+    )
+    brief = request.brief.model_copy(update={"locks": ["bedroom", "study"]})
+    origins = {
+        source["requirement"]: source["origin"]
+        for source in service.reviewed_brief(request, brief, saved_home)["sources"]
+    }
+    assert origins["Keep bedroom"] == "controls"
+    assert origins["Keep study"] == "interpreted"
