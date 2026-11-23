@@ -1099,6 +1099,18 @@ def test_coordinated_table_allocations_keep_the_total_and_room_qualifier(linebre
     assert not questions and brief.dining_seats == 6 and brief.split_dining
 
 
+@pytest.mark.parametrize("separator", [" ", "\n"])
+def test_opposite_ends_of_one_table_do_not_confirm_split_dining(separator):
+    text = (
+        "Seat four guests at one table" + separator + "and two at the other end of it."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
 def test_a_wrapped_opening_list_still_checks_the_second_room():
     text = "Keep the bedroom door\nand the study window."
     assert len(opening_questions(text, ["bedroom"])) == 1

@@ -66,7 +66,14 @@ SEPARATE_TABLE_COUNTS = re.compile(
     COUNT_AT_TABLE
     + r"one table\s*,?\s+and\s+"
     + COUNT_AT_TABLE
-    + r"(?:the )?(?:other|second)(?: table)?\b"
+    + r"(?:the )?(?:other|second)\b(?: (?:dining )?table\b|"
+    r"(?=\s*(?:$|[,.!?;]|in\b)))"
+)
+SAME_TABLE_ENDS = re.compile(
+    COUNT_AT_TABLE
+    + r"(?:one|a single|the same) (?:dining )?table\s*,?\s+and\s+(?:seat\s+)?"
+    + COUNT_AT_TABLE
+    + r"the other (?:end|side)(?: of (?:it|the table)\b|(?=\s*(?:$|[,.!?;]|in\b)))"
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
@@ -245,9 +252,21 @@ def _dining_clauses(clauses):
             yield clause
 
 
+def _seat_count(value):
+    return int(value) if value.isdecimal() else NUMBERS[value]
+
+
+def _normalize_table_ends(text):
+    def combine(match):
+        total = sum(_seat_count(value) for value in match.groups())
+        return f"seat {total} people at a single table"
+
+    return SAME_TABLE_ENDS.sub(combine, text)
+
+
 def requests_single_table(message):
     for clause in _affirmative_clauses(message):
-        clause = SEPARATE_TABLE_COUNTS.sub(" ", clause)
+        clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
         )
@@ -295,12 +314,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         brief.passage_m if "passage_m" in explicit else evidence.get("passage_m", 0.6)
     )
 
-    def count(value):
-        return int(value) if value.isdecimal() else NUMBERS[value]
-
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
-    dining = ". ".join(_dining_clauses(clauses))
+    dining = _normalize_table_ends(". ".join(_dining_clauses(clauses)))
     program, _ = salon_choice(message)
     saved_salon = any(
         part["design"]["room"]["id"] == "salon"
@@ -324,10 +340,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     split_counts = SEPARATE_TABLE_COUNTS.search(dining)
     each_table = re.search(COUNT_AT_TABLE + r"each(?: of the two)? tables?\b", dining)
     if split_counts:
-        per_table = [count(value) for value in split_counts.groups()]
+        per_table = [_seat_count(value) for value in split_counts.groups()]
         dining = dining[: split_counts.start()] + " " + dining[split_counts.end() :]
     elif each_table:
-        per_table = [count(each_table[1])] * 2
+        per_table = [_seat_count(each_table[1])] * 2
         dining = dining[: each_table.start()] + " " + dining[each_table.end() :]
     if per_table:
         totals.add(sum(per_table))
@@ -340,7 +356,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     requested_split = bool(per_table) or bool(re.search(r"\bsplit dining\b", dining))
 
     parties = [
-        (party.span(), sum(count(group[1]) for group in re.finditer(GROUP, party[0])))
+        (
+            party.span(),
+            sum(_seat_count(group[1]) for group in re.finditer(GROUP, party[0])),
+        )
         for party in re.finditer(GROUPS, dining)
     ]
     kitchen_table = re.search(
@@ -357,7 +376,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 for (start, stop), total in parties
                 if start <= kitchen_table.start() < stop
             ),
-            count(kitchen_table[1]),
+            _seat_count(kitchen_table[1]),
         )
         if amount > 4:
             questions.append(
@@ -394,7 +413,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         dining,
     ):
         index = next(i for i, group in enumerate(match.groups(), 1) if group)
-        value, end = count(match[index]), match.end()
+        value, end = _seat_count(match[index]), match.end()
         for (start, stop), total in parties:
             if start <= match.start(index) < stop:
                 value, end = total, max(end, stop)
@@ -473,9 +492,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
     if guests and residents:
-        totals.add(count(guests[1]) + count(residents[1]))
+        totals.add(_seat_count(guests[1]) + _seat_count(residents[1]))
     elif guests and not totals:
-        totals.add(max(seats, count(guests[1])))
+        totals.add(max(seats, _seat_count(guests[1])))
     if room_minima:
         for room, counts in room_minima.items():
             if len(counts) > 1:
