@@ -121,7 +121,11 @@ HOME_DINING_LOCATION = re.compile(
 DINING_TRANSITION = re.compile(
     r"\b(?:so|and|then)\s+(?=(?:(?:we|i)\s+)?"
     r"(?:(?:will|would|must)\s+)?"
-    r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
+    r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)|\bwhile\s+"
+)
+HOME_TABLE_FOLLOWUP = re.compile(
+    r"(?:need|want|require)\s+(?:everyone|everybody|all (?:of us|guests|diners))"
+    r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table\b"
 )
 SALON_ACTION = (
     r"\b(?:include|add|use|with) (?:a |the )?(?:(?:separate|dedicated|additional) )?"
@@ -277,11 +281,32 @@ def _home_meal_clauses(clause):
     if not re.search(OFFSITE_MEAL, clause):
         yield clause
         return
-    for activity in DINING_TRANSITION.split(clause):
-        if HOME_DINING_LOCATION.search(activity) and not re.search(
-            OFFSITE_MEAL, activity
-        ):
+    # The shared location after paired allocations can scope both counts.
+    internal = {
+        match.start("second_clause") + transition.start()
+        for pattern in (SEPARATE_TABLE_COUNTS, SAME_TABLE_ENDS)
+        for match in pattern.finditer(clause)
+        for transition in DINING_TRANSITION.finditer(match["second_clause"])
+    }
+    boundaries = [
+        match
+        for match in DINING_TRANSITION.finditer(clause)
+        if match.start() not in internal
+    ]
+    starts = [0, *(match.end() for match in boundaries)]
+    ends = [*(match.start() for match in boundaries), len(clause)]
+    home = False
+    for start, end in zip(starts, ends, strict=True):
+        activity = clause[start:end]
+        if re.search(OFFSITE_MEAL, activity):
+            home = False
+        elif HOME_DINING_LOCATION.search(activity):
+            home = True
             yield activity
+        elif home and HOME_TABLE_FOLLOWUP.fullmatch(activity.strip(" ,.!?")):
+            yield activity
+        else:
+            home = False
 
 
 def _dining_clauses(clauses):

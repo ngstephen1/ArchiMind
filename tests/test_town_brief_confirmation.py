@@ -1204,6 +1204,33 @@ def test_offsite_table_in_a_compound_sentence_does_not_restrict_home_split(text)
     assert not questions and brief.dining_seats == 6 and brief.split_dining
 
 
+def test_same_table_followup_inherits_home_seating_location():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "We have lunch at work and need six dining seats at home and want everyone at one table.",
+        None,
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "We have dinner at a restaurant on Fridays and seat four guests at one table and seat two guests at the other table at home.",
+        "We need six dining seats at home while our neighbors have dinner at a restaurant.",
+        "We have dinner at a restaurant while our housemates need six dining seats at home.",
+    ],
+)
+def test_offsite_meal_preserves_full_home_requirement(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
 def test_live_interpreter_receives_optional_seating_as_prose(monkeypatch):
     monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
     text = "Seat four at one table and two at the other table if possible."
