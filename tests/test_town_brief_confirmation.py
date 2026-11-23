@@ -425,7 +425,9 @@ def test_lot_and_locks_are_not_credited_to_unrelated_requirements():
     ],
 )
 def test_supported_room_specific_dining_retains_the_count(message):
-    review, questions = requirement_controls(Brief(formal_salon=True), message, None)
+    review, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
     assert review.dining_seats == 4
     assert questions == []
 
@@ -437,3 +439,28 @@ def test_coordinated_openings_require_each_room_to_be_locked():
     assert "keep the study window" in question
     (question,) = opening_questions(message, locks=("study",))
     assert "keep the bedroom window" in question
+
+
+def test_room_minimum_does_not_override_a_larger_total():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        "Six total dining places. Four seats in the salon.",
+        None,
+    )
+    assert not questions
+    assert brief.dining_seats == 6
+
+
+def test_distinct_room_minima_need_two_tables():
+    message = "Four seats in the formal salon and two seats in the kitchen."
+    base = Brief(formal_salon=True, compare_tradeoffs=True)
+    brief, questions = requirement_controls(base, message, None)
+    assert brief.dining_seats == 6
+    assert any("Confirm separate tables" in item for item in questions)
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        message,
+        None,
+    )
+    assert not questions
+    assert brief.dining_seats == 6

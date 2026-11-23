@@ -215,10 +215,11 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 "Confirm the six-room program or revise the seating requirement."
             )
     counted = set()
+    room_minima = {}
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
     for match in re.finditer(
         COUNT
-        + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
+        + r"\s+(?:(?:dining\s+)?(?:total\s+)?|total\s+dining\s+)(?:seats|places)\b"
         + r"|\bseating for\s+"
         + COUNT
         + r"|\bdining room for\s+"
@@ -281,13 +282,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                     f"The {location[1]} has four modeled places. "
                     f"Confirm how to accommodate the requested {value} places there."
                 )
-            else:
-                totals.add(value)
-                if not salon:
-                    questions.append(
-                        f"The five-room program has no modeled table in the {location[1]}. "
-                        "Confirm the six-room program or revise the seating requirement."
-                    )
+            elif brief.compare_tradeoffs:
+                room_minima.setdefault(
+                    _room_id(location[1].removeprefix("formal ")), set()
+                ).add(value)
         elif not re.match(r"\s+(?:per|for each)\b", tail):
             totals.add(value)
     if requested_split and not split:
@@ -309,19 +307,46 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 f"The {location[1]} has four modeled places. "
                 f"Confirm how to accommodate the requested {total} places there."
             )
+        elif location:
+            if brief.compare_tradeoffs:
+                room_minima.setdefault(
+                    _room_id(location[1].removeprefix("formal ")), set()
+                ).add(total)
         else:
             totals.add(total)
-            if location and not salon:
-                questions.append(
-                    f"The five-room program has no modeled table in the {location[1]}. "
-                    "Confirm the six-room program or revise the seating requirement."
-                )
     guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
     if guests and residents:
         totals.add(count(guests[1]) + count(residents[1]))
     elif guests and not totals:
         totals.add(max(seats, count(guests[1])))
+    if room_minima:
+        for room, counts in room_minima.items():
+            if len(counts) > 1:
+                questions.append(
+                    f"Confirm one minimum number of dining places for the {room}."
+                )
+            if not salon:
+                questions.append(
+                    f"The five-room program has no modeled table in the {room}. "
+                    "Confirm the six-room program or revise the seating requirement."
+                )
+        if len(room_minima) > 1 and not split:
+            questions.append(
+                "Confirm separate tables for the requested room-specific seating."
+            )
+        minimum = sum(max(counts) for counts in room_minima.values())
+        if (
+            totals
+            and min(totals) < minimum
+            or "dining_seats" in explicit
+            and 0 < seats < minimum
+        ):
+            questions.append(
+                "Confirm a total that covers the requested room-specific seating."
+            )
+        elif not totals and (not seats or seats < minimum):
+            totals.add(minimum)
     if len(totals) > 1 or (
         totals and "dining_seats" in explicit and seats not in totals
     ):
