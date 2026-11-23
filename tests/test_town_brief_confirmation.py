@@ -957,8 +957,13 @@ def test_hypothetical_door_in_rationale_is_not_an_opening_request():
     assert not opening_questions(text, [])
 
 
-def test_kitchen_capacity_uses_final_program_when_formal_salon_is_inferred():
-    text = "Seat four people at a single table in the formal salon. Two people at a single table in the kitchen."
+@pytest.mark.parametrize("connector", [". Two", " and two"])
+def test_kitchen_capacity_uses_final_program_when_formal_salon_is_inferred(connector):
+    text = (
+        "Seat four people at a single table in the formal salon"
+        + connector
+        + " people at a single table in the kitchen."
+    )
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, split_dining=True), text, None
     )
@@ -1015,8 +1020,11 @@ def test_five_room_correction_overrides_a_model_salon_even_after_another_prefere
         service.interpret(checked, None)
 
 
-def test_width_cue_after_fixture_endpoints_needs_clarification():
-    text = "Keep a 90 cm route between the kitchen island and the counters, measured across the open gap."
+@pytest.mark.parametrize(
+    "cue", ["measured", "with the width taken", "with the width measured"]
+)
+def test_width_cue_after_fixture_endpoints_needs_clarification(cue):
+    text = f"Keep a 90 cm route between the kitchen island and the counters, {cue} across the open gap."
     _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
     assert any("90 cm clearance between specific objects" in item for item in questions)
 
@@ -1084,3 +1092,38 @@ def test_saved_salon_removal_identifies_the_new_project_path(saved_home):
     request = review_request("Keep the five standard rooms.", width=15, depth=16)
     with pytest.raises(service.BriefClarification, match="Start a new project"):
         service.interpret(request, saved_home)
+
+
+@pytest.mark.parametrize("prefix", ["", "Keep the five standard rooms. "])
+def test_explicit_salon_exclusion_cannot_add_a_salon(prefix, monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(service.provider, "request", live_answer(formal_salon=True))
+    request = review_request(
+        prefix + "Avoid a plan with a separate formal salon.",
+        live=True,
+        width=15,
+        depth=16,
+    )
+    assert not service.interpret(request, None).formal_salon
+
+
+def test_alternate_room_does_not_split_the_whole_party():
+    text = (
+        "We need six dining places. Seat everyone at one table in the formal salon. "
+        "If the salon is unavailable, seat everyone at one table in the kitchen."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not brief.split_dining
+    assert brief.dining_seats == 6
+    assert any("one dining table" in question for question in questions)
+
+
+def test_rejected_width_within_a_rationale_is_not_a_requirement():
+    text = (
+        "Keep a 90 cm clear passage because the chair is narrow "
+        "but a 60 cm clear passage is too small."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
