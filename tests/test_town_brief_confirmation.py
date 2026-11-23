@@ -1053,3 +1053,34 @@ def test_standalone_control_line_does_not_consume_the_next_request(monkeypatch):
         ).passage_m
         == 0.65
     )
+
+
+def test_a_coordinated_line_has_an_independent_requirement():
+    text = "Don't add a formal salon,\nand please keep a 65 cm wide passage."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.65 and not brief.formal_salon
+
+    text = "Don't add a formal salon,\nand please keep the existing study window."
+    assert opening_questions(text, [])
+
+
+@pytest.mark.parametrize("separator", [" ", "\n"])
+def test_study_separation_does_not_change_the_one_table_request(separator):
+    text = (
+        "Seat six guests at one table"
+        + separator
+        + "and keep the study separate from the living room."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+def test_fronted_room_preference_is_not_a_wrapped_passage_qualifier():
+    text = "Keep a 65 cm wide passage\nBetween the study and living room, prefer more separation."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.65

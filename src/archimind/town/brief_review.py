@@ -95,10 +95,13 @@ SALON_DECLINE = (
     r"\s*[.!;]?\s*$"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
+INDEPENDENT_ACTION = r"(?:keep|use|provide|maintain|reserve|prefer|add|include|seat|preserve|move|leave)\b"
 PROVIDER_STATEMENT_BREAK = (
-    r"(?<=[.!?])\s+|(?<=;)\s*|"
-    r"\n+(?=\s*(?:keep|use|provide|maintain|reserve|prefer|add|include|seat)\b)"
+    r"(?<=[.!?])\s+|(?<=;)\s*|\n+(?=\s*(?:and\s+)?(?:please\s+)?"
+    + INDEPENDENT_ACTION
+    + r")"
 )
+WRAPPED_QUALIFIER = r"(?:between|around|through|past|in|for|beside|near|from|with)\b"
 CONDITIONAL_CONTINUATION = (
     r"\s*(?:but\s+)?"
     r"(?!(?:if|when)\s+(?:possible|practical|convenient|appropriate)\s*,)"
@@ -132,7 +135,8 @@ def _join_wrapped_qualifiers(message):
     """Keep a line-wrapped location or scope qualifier with its requirement."""
     return re.sub(
         r"(?<=[^.!?;\s])[ \t]*\r?\n[ \t]*"
-        r"(?=(?:between|around|through|past|in|for|beside|near|from|and|with)\b)",
+        r"(?=" + WRAPPED_QUALIFIER + r")"
+        r"(?![^,;.!?\n]*,\s*(?:please\s+)?" + INDEPENDENT_ACTION + r")",
         " ",
         message,
         flags=re.IGNORECASE,
@@ -234,7 +238,10 @@ def requests_single_table(message):
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
         )
         if not table or re.search(
-            r"\b(?:other|another|second|separate|split)\b", clause[table.end() :]
+            r"\b(?:other|another|second|separate) (?:dining )?tables?\b"
+            r"|\b(?:at|around) (?:the )?other\s*(?:[.,;]|$)"
+            r"|\bsplit (?:seating|dining|across|between)\b",
+            clause[table.end() :],
         ):
             continue
         prefix = clause[: table.start()].strip()
