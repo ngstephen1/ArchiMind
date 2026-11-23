@@ -41,7 +41,7 @@ export function homeBoard(snapshot) {
         furniture: furniture.map((f) => ({
           ...f,
           parts:
-            studio && room.id !== "bedroom"
+            room.id !== "bedroom" && (studio || (snapshot.home.service_layout && f.id === "breakfast-suite"))
               ? studioFurniture(f, part.suite_yaw_deg)
               : [],
         })),

@@ -141,6 +141,8 @@ function sync(data) {
   const requirements = applied.evidence?.comparison;
   el("diningSeats").value = requirements?.required_dining_seats ?? 0;
   el("splitDining").checked = requirements?.split_dining ?? false;
+  el("serviceLayout").checked = Boolean(applied.service_layout);
+  el("serviceLayout").disabled = Boolean(applied.service_layout);
   el("passage").value = requirements?.passage_m ?? 0.6;
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
@@ -315,6 +317,12 @@ function showComparison() {
       list.append(node("li", `${room} · ${count} seats at one table`));
     const opening = Math.min(...Object.values(measure.modeled_openings_m));
     list.append(node("li", `Narrowest modeled doorway ${opening.toFixed(2)} m · checked passage ${measure.passage_m.toFixed(2)} m`));
+    for (const [room, service] of Object.entries(measure.service_rooms ?? {})) {
+      const fixtures = service.operating_zones.map(zone =>
+        `${zone.fixture_id} ${zone.working_depth_m.toFixed(2)} m working depth`
+      );
+      list.append(node("li", `${room} · ${fixtures.join(", ")} · Connections need field verification`));
+    }
     area.append(list);
   }
   if (area.children.length)
@@ -449,6 +457,7 @@ bind("generate", async () => {
         compare_tradeoffs: true,
         ...(revision || Number(el("diningSeats").value) > 0 ? { dining_seats: Number(el("diningSeats").value) } : {}),
         split_dining: el("splitDining").checked,
+        service_layout: el("serviceLayout").checked,
         ...(revision || Number(el("passage").value) !== 0.6 ? { passage_m: Number(el("passage").value) } : {}),
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
@@ -681,6 +690,35 @@ function showExport(manifest, hash, studio, studioHash) {
   const whole=node("a","Download whole-home scene manifest");
   whole.href=homeUrl; whole.download="home-r"+revision+"-"+boardHome.id.slice(0,12)+".json";
   el("boardExports").replaceChildren(manifestLink, node("p",""),whole);
+  if (boardHome.service_layout) {
+    const section = node("div", "");
+    const button = node("button", "Prepare kitchen and bathroom drawings");
+    button.type = "button";
+    const selectedHomeId = boardHome.id;
+    button.onclick = async () => {
+      button.disabled = true;
+      try {
+        const study = await api("/projects/" + encodeURIComponent(manifest.project) +
+          "/service-study?revision=" + manifest.revision);
+        if (study.home_id !== selectedHomeId) throw Error("The drawings did not match this revision.");
+        const list = node("ul", "");
+        for (const [file, svg] of Object.entries(study.drawings)) {
+          const link = node("a", file);
+          link.href = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+          link.download = "r" + manifest.revision + "-" + file;
+          const row = node("li", "");
+          row.append(link);
+          list.append(row);
+        }
+        section.replaceChildren(list);
+      } catch (error) {
+        button.disabled = false;
+        section.replaceChildren(button, node("p", error.message));
+      }
+    };
+    section.append(button);
+    el("boardExports").append(section);
+  }
   const studioRelease = publicationFor(studio, studioHash, [...studioShowcasePublications, ...conferencePublications]);
   if (studioRelease) {
     const pdf = node("a", "Open the whole-home client book (PDF)");

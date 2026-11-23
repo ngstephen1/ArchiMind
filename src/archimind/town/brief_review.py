@@ -483,6 +483,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         for part in (previous or {}).get("rooms", ())
     )
     salon = brief.formal_salon or saved_salon or program is True
+    services = brief.service_layout or bool((previous or {}).get("service_layout"))
     totals = set()
     questions = []
     if brief.compare_tradeoffs and program is False:
@@ -573,7 +574,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 f"The kitchen-dining room has four modeled places. "
                 f"Confirm how to accommodate the requested {amount} places there."
             )
-        elif not salon:
+        elif not (salon or services):
             questions.append(
                 f"The brief requests {amount} dining places in the kitchen-dining room. "
                 "The five-room program has no modeled dining table there. "
@@ -693,7 +694,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 questions.append(
                     f"Confirm one minimum number of dining places for the {room}."
                 )
-            if not salon:
+            if not salon and (room != "kitchen-dining" or not services):
                 questions.append(
                     f"The five-room program has no modeled table in the {room}. "
                     "Confirm the six-room program or revise the seating requirement."
@@ -864,6 +865,7 @@ def _dining_statement_matches(brief, sentence):
     stated, questions = requirement_controls(
         Brief(
             formal_salon=brief.formal_salon,
+            service_layout=brief.service_layout,
             split_dining=brief.split_dining,
             compare_tradeoffs=brief.compare_tradeoffs,
         ),
@@ -1007,6 +1009,13 @@ def review_summary(
             inherited="salon" in saved_rooms,
             interpreted=True,
             quote=salon_statement if salon_requested else None,
+        )
+    if brief.service_layout or (previous or {}).get("service_layout"):
+        require(
+            "Kitchen and bathroom fixtures with modeled working clearances",
+            None,
+            "service_layout",
+            inherited=bool((previous or {}).get("service_layout")),
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
