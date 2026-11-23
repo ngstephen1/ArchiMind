@@ -1,0 +1,736 @@
+{
+  "published_fixture_commit": "84f9fc6efe319f06dce25a6697dff94eb0d971f5",
+  "cases": [
+    {
+      "case": "compact",
+      "input": {
+        "original_brief": "Use a 12 by 13 metre lot and keep the five standard rooms.",
+        "confirmed_controls": {
+          "width": 12,
+          "depth": 13,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 12 × 13 m",
+            "0.6 m modeled passage"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "hosting",
+      "input": {
+        "original_brief": "We host dinner often. Include a formal salon near the kitchen-dining room.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage",
+            "Formal salon"
+          ],
+          "preferences": [
+            "salon near kitchen-dining",
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "separation",
+      "input": {
+        "original_brief": "I work from home. Prefer the study far from the living room.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage"
+          ],
+          "preferences": [
+            "study far living",
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "split-dining",
+      "input": {
+        "original_brief": "Use two four-seat tables in the formal salon and kitchen-dining room for two residents and four dinner guests. Place the study far from the living room.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42,
+          "dining_seats": 6,
+          "split_dining": true
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage",
+            "Formal salon",
+            "6 dining places across two tables"
+          ],
+          "preferences": [
+            "study far living",
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "single-table",
+      "input": {
+        "original_brief": "Seat six people at a single table in the formal salon.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42,
+          "formal_salon": true
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage",
+            "Formal salon",
+            "6 dining places at one table"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [
+            "All 6 dining places are still required at one table. The largest modeled table has four places. Revise the single-table brief to proceed."
+          ],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "passage-conversion",
+      "input": {
+        "original_brief": "Keep the passage at least 65 cm wide.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.65 m modeled passage"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "width-conflict",
+      "input": {
+        "original_brief": "Keep the passage at least 90 cm wide.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42,
+          "passage_m": 0.6
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [
+            "Confirm one modeled passage width in both the brief and controls."
+          ],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "local-clearance",
+      "input": {
+        "original_brief": "There must be 90 cm between the sofa and the wall.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": [
+            "90 cm local sofa-to-wall clearance"
+          ]
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "locked-bedroom",
+      "input": {
+        "original_brief": "Keep the bedroom exactly as it is while considering the rest of the layout.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 123
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage",
+            "Formal salon",
+            "Keep bedroom"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "ambiguous-desk",
+      "input": {
+        "original_brief": "Keep the desk exactly in place.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [],
+          "questions": [
+            "Clarify which room contains the furniture to lock."
+          ],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "second-storey",
+      "input": {
+        "original_brief": "A second storey is mandatory.",
+        "confirmed_controls": {
+          "width": 15,
+          "depth": 16,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 15 × 16 m",
+            "0.6 m modeled passage"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": [
+            "second storey"
+          ]
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "tight-lot-exhausted",
+      "input": {
+        "original_brief": "Fit the standard five rooms on a 9 by 9 metre lot with a 1.4 m clear passage.",
+        "confirmed_controls": {
+          "width": 9,
+          "depth": 9,
+          "compare_tradeoffs": true,
+          "seed": 42
+        },
+        "proposed_brief": {
+          "requirements": [
+            "Lot 9 × 9 m",
+            "1.4 m modeled passage"
+          ],
+          "preferences": [
+            "scandinavian"
+          ],
+          "presentation_requests": [],
+          "questions": [],
+          "unsupported": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-01-preserved",
+      "input": {
+        "original_brief": "Seat six people at a single table in the formal salon.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Formal salon",
+            "Six dining places at one table"
+          ],
+          "questions": [
+            "One table fits four. Revise the dining arrangement."
+          ],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-01-dropped",
+      "input": {
+        "original_brief": "Seat six people at a single table in the formal salon.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Formal salon"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "dining_requirement_missing"
+      ]
+    },
+    {
+      "case": "paired-02-preserved",
+      "input": {
+        "original_brief": "I need four dinner seats in the salon, with none required in the kitchen.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Four dining places in the salon"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-02-dropped",
+      "input": {
+        "original_brief": "I need four dinner seats in the salon, with none required in the kitchen.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Four dining places in the kitchen"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "dining_requirement_missing"
+      ]
+    },
+    {
+      "case": "paired-03-preserved",
+      "input": {
+        "original_brief": "Allow six dinner places split between two tables.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Six dining places across two tables"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-03-dropped",
+      "input": {
+        "original_brief": "Allow six dinner places split between two tables.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Four dining places at one table"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "dining_requirement_missing"
+      ]
+    },
+    {
+      "case": "paired-04-preserved",
+      "input": {
+        "original_brief": "Keep a 65 cm clear passage throughout the modeled route.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "0.65 m modeled passage"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-04-dropped",
+      "input": {
+        "original_brief": "Keep a 65 cm clear passage throughout the modeled route.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "0.60 m modeled passage"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "clearance_requirement_missing"
+      ]
+    },
+    {
+      "case": "paired-05-preserved",
+      "input": {
+        "original_brief": "Leave 90 cm clear between the sofa and the wall.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [],
+          "questions": [
+            "How should we check the 90 cm sofa-to-wall clearance?"
+          ],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-05-dropped",
+      "input": {
+        "original_brief": "Leave 90 cm clear between the sofa and the wall.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "0.90 m modeled general passage"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "clearance_requirement_missing"
+      ]
+    },
+    {
+      "case": "paired-06-preserved",
+      "input": {
+        "original_brief": "I prefer walking routes under 8 m. Keep a passage at least 80 cm wide.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "0.80 m modeled passage"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": [
+            "Routes under 8 m"
+          ]
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-06-dropped",
+      "input": {
+        "original_brief": "I prefer walking routes under 8 m. Keep a passage at least 80 cm wide.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [],
+          "questions": [],
+          "unsupported": [],
+          "preferences": [
+            "Routes under 8 m"
+          ]
+        }
+      },
+      "expected_flags": [
+        "clearance_requirement_missing"
+      ]
+    },
+    {
+      "case": "paired-07-preserved",
+      "input": {
+        "original_brief": "Leave the bedroom exactly where it is and consider the rest of the layout.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Keep bedroom position"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-07-dropped",
+      "input": {
+        "original_brief": "Leave the bedroom exactly where it is and consider the rest of the layout.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Keep existing number of rooms"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "lock_or_opening_missing"
+      ]
+    },
+    {
+      "case": "paired-08-preserved",
+      "input": {
+        "original_brief": "Keep the existing bedroom window at its current location.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [],
+          "questions": [
+            "Confirm which bedroom window and its current position."
+          ],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-08-dropped",
+      "input": {
+        "original_brief": "Keep the existing bedroom window at its current location.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Add a bedroom window"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "lock_or_opening_missing"
+      ]
+    },
+    {
+      "case": "paired-09-preserved",
+      "input": {
+        "original_brief": "Keep the chair at its current desk position.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Keep the current chair position"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-09-dropped",
+      "input": {
+        "original_brief": "Keep the chair at its current desk position.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Use a chair and desk"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "lock_or_opening_missing"
+      ]
+    },
+    {
+      "case": "paired-10-preserved",
+      "input": {
+        "original_brief": "A second storey is mandatory.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [],
+          "questions": [],
+          "unsupported": [
+            "Second storey"
+          ],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-10-dropped",
+      "input": {
+        "original_brief": "A second storey is mandatory.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Five rooms on one level"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "unsupported_requirement_unaddressed"
+      ]
+    },
+    {
+      "case": "paired-11-preserved",
+      "input": {
+        "original_brief": "The study must have measured acoustic isolation from the salon.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [],
+          "questions": [],
+          "unsupported": [
+            "Acoustic isolation requires separate measurements"
+          ],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-11-dropped",
+      "input": {
+        "original_brief": "The study must have measured acoustic isolation from the salon.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Put the study 10 m from the salon"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "unsupported_requirement_unaddressed"
+      ]
+    },
+    {
+      "case": "paired-12-preserved",
+      "input": {
+        "original_brief": "Compliance with local building codes is mandatory before I can use this as a construction plan.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [],
+          "questions": [
+            "Separate local code review is required before any construction plan."
+          ],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": []
+    },
+    {
+      "case": "paired-12-dropped",
+      "input": {
+        "original_brief": "Compliance with local building codes is mandatory before I can use this as a construction plan.",
+        "confirmed_controls": {},
+        "proposed_brief": {
+          "requirements": [
+            "Construction-ready five-room layout"
+          ],
+          "questions": [],
+          "unsupported": [],
+          "preferences": []
+        }
+      },
+      "expected_flags": [
+        "unsupported_requirement_unaddressed"
+      ]
+    }
+  ]
+}

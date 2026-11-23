@@ -73,3 +73,5 @@ include docs/developer/RHINO_CHAIR.md
 
 recursive-include design/oak-bedside-lamp *.blend *.json
 recursive-include design/upholstered-linen-bed *.blend *.json
+
+include docs/data/town-decisions/public-cases.json
