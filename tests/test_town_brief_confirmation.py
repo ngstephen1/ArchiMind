@@ -1046,6 +1046,7 @@ def test_combined_seating_quote_preserves_a_semicolon_without_spaces():
     "text",
     [
         "Include a formal salon because we host family but keep a 90 cm clear passage.",
+        "Include a formal salon because we host family but we need a 90 cm clear passage.",
         "Keep a 90 cm clear passage because a 0.6 m clear passage won’t fit the wheelchair.",
     ],
 )
@@ -1054,8 +1055,11 @@ def test_reasons_cannot_erase_separate_width_requests(text):
     assert not questions and brief.passage_m == 0.9
 
 
-def test_opening_after_rationale_is_a_separate_request():
-    text = "Include a formal salon because we host family but move the study window."
+@pytest.mark.parametrize(
+    "opening", ["move the study window", "we need to keep the existing study window"]
+)
+def test_opening_after_rationale_is_a_separate_request(opening):
+    text = f"Include a formal salon because we host family but {opening}."
     assert opening_questions(text, [])
 
 
@@ -1127,3 +1131,16 @@ def test_rejected_width_within_a_rationale_is_not_a_requirement():
     )
     brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
     assert not questions and brief.passage_m == 0.9
+
+
+@pytest.mark.parametrize("second", ["two at the other", "two people at another table"])
+def test_split_match_accepts_an_elliptical_second_allocation(second):
+    text = f"Seat four people at one table and {second}."
+    settings = Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True)
+    brief, questions = requirement_controls(settings, text, None)
+    assert not questions and brief.split_dining and brief.dining_seats == 6
+
+    _, questions = requirement_controls(
+        settings, text + " Everyone must sit at one table.", None
+    )
+    assert any("asks for one dining table" in question for question in questions)

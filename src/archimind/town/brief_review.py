@@ -59,6 +59,17 @@ GROUP = (
     COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
 )
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
+COUNT_AT_TABLE = (
+    COUNT + r"\s+(?:(?:people|persons|diners|guests|residents|hosts|seats|places)\s+)?"
+    r"(?:at|around) "
+)
+SEPARATE_TABLE_COUNTS = re.compile(
+    COUNT_AT_TABLE
+    + r"(?:one|a single) (?:dining )?table\s*,?\s+and\s+(?:seat\s+)?"
+    + COUNT_AT_TABLE
+    + r"(?:(?:the )?(?:other|second)(?: (?:dining )?table)?|"
+    r"(?:another|a separate|a second) (?:dining )?table)\b"
+)
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
     r"bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon"
@@ -153,7 +164,8 @@ def _affirmative_clauses(message, *, retain_dining_context=False):
 
     message = re.sub(
         r"\b(?:because|otherwise)\b"
-        r"(?:(?!\bbut\s+(?:keep|add|use|include|require|need|give|move|preserve|"
+        r"(?:(?!\bbut\s+(?:(?:we|i|you)\s+)?(?:really\s+)?"
+        r"(?:keep|add|use|include|require|need|give|move|preserve|"
         r"relocate|shift|remove|block|widen|enlarge|seat|ensure|maintain|provide)\b"
         r"|[;!?,\n]|\.(?!\d)).)*",
         replace_rationale,
@@ -250,6 +262,7 @@ def requests_single_table(message):
     named_rooms = set()
     saw_single = False
     for clause in _affirmative_clauses(message):
+        clause = SEPARATE_TABLE_COUNTS.sub(" ", clause)
         end = 0
         for table in re.finditer(
             r"\b(?:at|around) (one|a single|the same|a separate|a second|another)"
@@ -358,15 +371,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 "Confirm the five-room program by clearing the formal salon control."
             )
     per_table = []
-    count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
-    split_counts = re.search(
-        count_at
-        + r"one table\s*,?\s+and\s+"
-        + count_at
-        + r"(?:the )?(?:other|second)(?: table)?\b",
-        dining,
-    )
-    each_table = re.search(count_at + r"each(?: of the two)? tables?\b", dining)
+    split_counts = SEPARATE_TABLE_COUNTS.search(dining)
+    each_table = re.search(COUNT_AT_TABLE + r"each(?: of the two)? tables?\b", dining)
     if split_counts:
         per_table = [count(value) for value in split_counts.groups()]
         dining = dining[: split_counts.start()] + " " + dining[split_counts.end() :]
