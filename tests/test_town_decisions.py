@@ -403,3 +403,66 @@ def test_historical_reduced_cases_cannot_qualify_runtime_payloads(monkeypatch):
         reduced = current[0]["input"]["proposed_brief"] | {field: []}
         altered = [{"input": current[0]["input"] | {"proposed_brief": reduced}}]
         assert api["reviewed_payload_profile"](altered) is None
+
+
+def test_evaluator_validates_input_before_a_dry_run_or_provider_request(
+    monkeypatch, tmp_path
+):
+    import runpy
+    import sys
+    from pathlib import Path
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    monkeypatch.syspath_prepend(str(scripts))
+    api = runpy.run_path(str(scripts / "evaluate_town_decisions.py"))
+    broken = tmp_path / "invalid.json"
+    broken.write_text(
+        json.dumps({"cases": [{"case": "case", "expected_flags": [], "input": None}]})
+    )
+    monkeypatch.setattr(sys, "argv", ["evaluate", "--cases", str(broken)])
+    monkeypatch.setattr(
+        decisions, "audit", lambda *_a, **_kw: pytest.fail("Unexpected call")
+    )
+    with pytest.raises(SystemExit) as error:
+        api["main"]()
+    assert error.value.code == 2
+
+
+def test_evaluator_never_overwrites_an_input_or_existing_receipt(monkeypatch, tmp_path):
+    import runpy
+    import sys
+    from pathlib import Path
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    monkeypatch.syspath_prepend(str(scripts))
+    api = runpy.run_path(str(scripts / "evaluate_town_decisions.py"))
+    source = tmp_path / "cases.json"
+    raw = json.dumps(
+        {
+            "cases": [
+                {
+                    "case": "test",
+                    "expected_flags": [],
+                    "input": {
+                        "original_brief": "A bedroom",
+                        "confirmed_controls": {},
+                        "proposed_brief": {},
+                    },
+                }
+            ]
+        }
+    ).encode()
+    source.write_bytes(raw)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["evaluate", "--live", "--cases", str(source), "--output", str(source)],
+    )
+    monkeypatch.setenv("OPENAI_API_KEY", "fixture")
+    monkeypatch.setattr(
+        decisions, "audit", lambda *_a, **_kw: pytest.fail("Unexpected call")
+    )
+    with pytest.raises(SystemExit) as error:
+        api["main"]()
+    assert error.value.code == 2
+    assert source.read_bytes() == raw

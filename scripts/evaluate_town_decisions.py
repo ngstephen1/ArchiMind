@@ -93,6 +93,45 @@ def reviewed_payload_profile(cases):
     return decisions.APP_PAYLOAD_PROFILE
 
 
+def read_cases(raw):
+    document = json.loads(raw)
+    cases = document.get("cases") if isinstance(document, dict) else None
+    if not isinstance(cases, list) or not 1 <= len(cases) <= 36:
+        raise ValueError(
+            "Expected a cases array with between 1 and 36 labeled records."
+        )
+    seen = set()
+    for row in cases:
+        if not isinstance(row, dict):
+            raise ValueError("Each case must be an object.")
+        name = row.get("case")
+        flags = row.get("expected_flags")
+        payload = row.get("input")
+        if not isinstance(name, str) or not name.strip() or name in seen:
+            raise ValueError("Case IDs must be distinct nonempty strings.")
+        seen.add(name)
+        if (
+            not isinstance(flags, list)
+            or any(
+                not isinstance(flag, str) or flag not in decisions.CRITERIA
+                for flag in flags
+            )
+            or len(set(flags)) != len(flags)
+        ):
+            raise ValueError("Each expected flag must be a distinct criterion name.")
+        if (
+            not isinstance(payload, dict)
+            or not isinstance(payload.get("original_brief"), str)
+            or not payload["original_brief"].strip()
+            or not isinstance(payload.get("confirmed_controls"), dict)
+            or not isinstance(payload.get("proposed_brief"), dict)
+        ):
+            raise ValueError(
+                "Each case needs a brief, controls object and proposed brief object."
+            )
+    return cases
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true")
@@ -111,19 +150,17 @@ def main():
     )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    cases = json.loads(args.cases.read_bytes())["cases"]
-    if not 1 <= len(cases) <= 36 or len({row["case"] for row in cases}) != len(cases):
-        parser.error("Expected 1 to 36 cases with distinct IDs.")
-    if any(
-        not set(row["expected_flags"]) <= decisions.CRITERIA.keys() for row in cases
-    ):
-        parser.error("Unknown expected flag.")
+    try:
+        raw_cases = args.cases.read_bytes()
+        cases = read_cases(raw_cases)
+    except (OSError, ValueError) as exc:
+        parser.error(f"Unable to validate the cases: {exc}")
     print(f"Validated {len(cases)} labeled cases for {decisions.RUBRIC}.")
     if not args.live:
         return
     if not args.output:
         parser.error("--live requires --output for the receipt.")
-    cases_hash = sha256(args.cases.read_bytes()).hexdigest()
+    cases_hash = sha256(raw_cases).hexdigest()
     payload_profile = reviewed_payload_profile(cases)
     public_hash = None
     if args.threshold is not None:
@@ -131,10 +168,15 @@ def main():
             parser.error(
                 "Held-out evaluation requires six cases and a public calibration receipt."
             )
-        raw = args.public_receipt.read_bytes()
-        public = json.loads(raw)
-        expected_corpus = args.public_corpus.read_bytes()
-        public_cases = json.loads(expected_corpus)["cases"]
+        try:
+            raw = args.public_receipt.read_bytes()
+            public = json.loads(raw)
+            expected_corpus = args.public_corpus.read_bytes()
+            public_cases = read_cases(expected_corpus)
+        except (OSError, ValueError) as exc:
+            parser.error(f"Unable to validate the public calibration inputs: {exc}")
+        if not isinstance(public, dict):
+            parser.error("The public calibration receipt must be an object.")
         if (
             payload_profile != decisions.APP_PAYLOAD_PROFILE
             or len(public_cases) != 36
@@ -164,50 +206,58 @@ def main():
     )
     if not key:
         parser.error("Server credentials are unavailable.")
-    rows = [
-        {
-            "case": case["case"],
-            "expected_flags": case["expected_flags"],
-            "review": decisions.audit(
-                case["input"], key=key, deadline=time.monotonic() + 20
+    try:
+        destination = args.output.open("x", encoding="utf-8")
+    except OSError as exc:
+        parser.error(
+            f"Choose a new writable receipt path before making live requests: {exc}"
+        )
+    with destination:
+        rows = [
+            {
+                "case": case["case"],
+                "expected_flags": case["expected_flags"],
+                "review": decisions.audit(
+                    case["input"], key=key, deadline=time.monotonic() + 20
+                ),
+            }
+            for case in cases
+        ]
+        scores = [
+            score(rows, threshold)
+            for threshold in (
+                decisions.THRESHOLDS if args.threshold is None else (args.threshold,)
+            )
+        ]
+        complete = all(row["review"]["status"] == "checked" for row in rows)
+        durations = sorted(row["review"]["elapsed_ms"] for row in rows)
+        p95 = durations[math.ceil(len(durations) * 0.95) - 1]
+        selected = (
+            max(
+                (result["threshold"] for result in scores if result["passed"]),
+                default=None,
+            )
+            if complete
+            else None
+        )
+        receipt = {
+            "model": decisions.MODEL,
+            "rubric": decisions.RUBRIC,
+            "payload_profile": payload_profile,
+            "requests": len(rows),
+            "public_cases_sha256": cases_hash if public_hash is None else None,
+            "public_calibration_sha256": public_hash,
+            "responses_complete": complete,
+            "input_tokens_reported": sum(
+                row["review"]["input_tokens"] or 0 for row in rows
             ),
+            "p95_ms": p95,
+            "scores": scores,
+            "selected_threshold": selected,
+            "heldout_gate_passed": bool(public_hash and selected and p95 <= 3000),
+            "cases": rows,
         }
-        for case in cases
-    ]
-    scores = [
-        score(rows, threshold)
-        for threshold in (
-            decisions.THRESHOLDS if args.threshold is None else (args.threshold,)
-        )
-    ]
-    complete = all(row["review"]["status"] == "checked" for row in rows)
-    durations = sorted(row["review"]["elapsed_ms"] for row in rows)
-    p95 = durations[math.ceil(len(durations) * 0.95) - 1]
-    selected = (
-        max(
-            (result["threshold"] for result in scores if result["passed"]), default=None
-        )
-        if complete
-        else None
-    )
-    receipt = {
-        "model": decisions.MODEL,
-        "rubric": decisions.RUBRIC,
-        "payload_profile": payload_profile,
-        "requests": len(rows),
-        "public_cases_sha256": cases_hash if public_hash is None else None,
-        "public_calibration_sha256": public_hash,
-        "responses_complete": complete,
-        "input_tokens_reported": sum(
-            row["review"]["input_tokens"] or 0 for row in rows
-        ),
-        "p95_ms": p95,
-        "scores": scores,
-        "selected_threshold": selected,
-        "heldout_gate_passed": bool(public_hash and selected and p95 <= 3000),
-        "cases": rows,
-    }
-    args.output.write_text(json.dumps(receipt, indent=2) + "\n")
+        destination.write(json.dumps(receipt, indent=2) + "\n")
     print(
         f"{len(rows)} requests. Complete responses {complete}. "
         f"Selected threshold {selected}. P95 {p95} ms."

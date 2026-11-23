@@ -76,7 +76,7 @@ SAME_TABLE_ENDS = re.compile(
     COUNT_AT_TABLE
     + r"(?:one|a single|the same) (?:dining )?table\s*,?\s+and\s+(?:seat\s+)?"
     + COUNT_AT_TABLE
-    + r"the other (?:end|side)(?: of (?:it|the table)\b|(?=\s*(?:$|[,.!?;])))"
+    + r"the other (?:end|side)(?: of (?:it|the table)\b|(?=\s*(?:$|[,.!?;]|for\b|in\b)))"
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
@@ -171,10 +171,10 @@ def _affirmative_clauses(message, *, retain_dining_context=False):
         return " "
 
     message = re.sub(
-        r"\b(?:because|otherwise)\b"
+        r"\b(?:because|otherwise(?!\s+(?:put|place|use)\b))\b"
         r"(?:(?!\bbut\s+(?:(?:we|i|you)\s+(?:really\s+)?"
         r"(?:need|want|require|must|should)"
-        r"|(?:(?:please|really|definitely|still)\s+)?"
+        r"|(?:(?:please|really|definitely)\s+)?"
         r"(?:keep|add|use|include|require|need|give|move|preserve|"
         r"relocate|shift|remove|block|widen|enlarge|seat|ensure|maintain|provide))\b"
         r"|[;!?,\n]|\.(?!\d)).)*",
@@ -268,13 +268,23 @@ def _dining_clauses(clauses):
             yield clause
 
 
+def _seat_count(value):
+    return int(value) if value.isdecimal() else NUMBERS[value]
+
+
+def _normalize_table_ends(text):
+    def combine(match):
+        total = sum(_seat_count(value) for value in match.groups())
+        return f"seat {total} people at a single table"
+
+    return SAME_TABLE_ENDS.sub(combine, text)
+
+
 def requests_single_table(message):
     named_rooms = set()
     saw_single = False
-    for clause in _affirmative_clauses(message):
-        clause = SEPARATE_TABLE_COUNTS.sub(" ", clause)
-        if SAME_TABLE_ENDS.search(clause):
-            return True
+    for clause in _dining_clauses(_affirmative_clauses(message)):
+        clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
         end = 0
         for table in re.finditer(
             r"\b(?:at|around) (one|a single|the same|a separate|a second|another)"
@@ -344,9 +354,6 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         brief.passage_m if "passage_m" in explicit else evidence.get("passage_m", 0.6)
     )
 
-    def count(value):
-        return int(value) if value.isdecimal() else NUMBERS[value]
-
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
     dining = ". ".join(
@@ -383,10 +390,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 "Confirm the five-room program by clearing the formal salon control."
             )
     per_table = []
-    same_table = SAME_TABLE_ENDS.search(dining)
-    if same_table:
-        totals.add(sum(count(group) for group in same_table.groups()))
-        dining = dining[: same_table.start()] + " " + dining[same_table.end() :]
+    dining = _normalize_table_ends(dining)
     split_counts = SEPARATE_TABLE_COUNTS.search(dining)
     each_table = re.search(COUNT_AT_TABLE + r"each(?: of the two)? tables?\b", dining)
     if split_counts:
@@ -398,16 +402,16 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         if location and not re.match(
             r"\s+if\s+(?:possible|practical|feasible)\s*,?\s+"
             r"(?:or|otherwise)\s+(?:put|place|use)\s+one\s+table\s+"
-            r"in\s+each\s+(?:dining\s+)?room\b",
+            r"in\s+each\s+(?:dining\s+)?room(?=\s*(?:$|[.!?;]))",
             dining[split_counts.end() + location.end() :],
         ):
             questions.append(
                 f"The {location[1]} has one modeled table. Confirm a different location for the second table."
             )
-        per_table = [count(value) for value in split_counts.groups()]
+        per_table = [_seat_count(value) for value in split_counts.groups()]
         dining = dining[: split_counts.start()] + " " + dining[split_counts.end() :]
     elif each_table:
-        per_table = [count(each_table[1])] * 2
+        per_table = [_seat_count(each_table[1])] * 2
         dining = dining[: each_table.start()] + " " + dining[each_table.end() :]
     if per_table:
         totals.add(sum(per_table))
@@ -420,7 +424,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     requested_split = bool(per_table) or bool(re.search(r"\bsplit dining\b", dining))
 
     parties = [
-        (party.span(), sum(count(group[1]) for group in re.finditer(GROUP, party[0])))
+        (
+            party.span(),
+            sum(_seat_count(group[1]) for group in re.finditer(GROUP, party[0])),
+        )
         for party in re.finditer(GROUPS, dining)
     ]
     kitchen_table = re.search(
@@ -451,11 +458,11 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + r"|"
         + COUNT
         + PARTY
-        + r"\s+(?=(?:at|around) (?:one|a single|the same) (?:dining )?table\b)",
+        + r"\s+(?=(?:at|around) (?:one|a single|the same|a separate|a second|another) (?:dining )?table\b)",
         dining,
     ):
         index = next(i for i, group in enumerate(match.groups(), 1) if group)
-        value, end = count(match[index]), match.end()
+        value, end = _seat_count(match[index]), match.end()
         for (start, stop), total in parties:
             if start <= match.start(index) < stop:
                 value, end = total, max(end, stop)
@@ -548,9 +555,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
     if guests and residents:
-        totals.add(count(guests[1]) + count(residents[1]))
+        totals.add(_seat_count(guests[1]) + _seat_count(residents[1]))
     elif guests and not totals:
-        totals.add(max(seats, count(guests[1])))
+        totals.add(max(seats, _seat_count(guests[1])))
     if "salon" in room_minima and salon_seating:
         salon = True
     if kitchen_table and brief.compare_tradeoffs:
@@ -560,7 +567,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 for (start, stop), total in parties
                 if start <= kitchen_table.start() < stop
             ),
-            count(kitchen_table[1]),
+            _seat_count(kitchen_table[1]),
         )
         if amount > 4:
             questions.append(
