@@ -1231,6 +1231,34 @@ def test_offsite_meal_preserves_full_home_requirement(text):
     assert not questions and brief.dining_seats == 6 and brief.split_dining
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "We have lunch at work and need six dining seats while at home.",
+        "We have lunch at work and need six dining seats while in the house at home.",
+    ],
+)
+def test_while_location_qualifier_stays_with_home_seating(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "For dinner at home, seat four guests at one table and seat two guests at the other table for lunch at work.",
+        "For lunch at work, seat two guests at one table and seat four guests at the other table for dinner at home.",
+    ],
+)
+def test_allocations_with_different_meals_keep_the_home_count(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True), text, None
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
 def test_live_interpreter_receives_optional_seating_as_prose(monkeypatch):
     monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
     text = "Seat four at one table and two at the other table if possible."

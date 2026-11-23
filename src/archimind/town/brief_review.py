@@ -121,7 +121,8 @@ HOME_DINING_LOCATION = re.compile(
 DINING_TRANSITION = re.compile(
     r"\b(?:so|and|then)\s+(?=(?:(?:we|i)\s+)?"
     r"(?:(?:will|would|must)\s+)?"
-    r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)|\bwhile\s+"
+    r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
+    r"|\bwhile\s+(?!(?:at|in|near|around)\b)"
 )
 HOME_TABLE_FOLLOWUP = re.compile(
     r"(?:need|want|require)\s+(?:everyone|everybody|all (?:of us|guests|diners))"
@@ -288,11 +289,21 @@ def _home_meal_clauses(clause):
         for match in pattern.finditer(clause)
         for transition in DINING_TRANSITION.finditer(match["second_clause"])
     }
-    boundaries = [
-        match
-        for match in DINING_TRANSITION.finditer(clause)
-        if match.start() not in internal
-    ]
+    transitions = list(DINING_TRANSITION.finditer(clause))
+    boundaries = []
+    for i, match in enumerate(transitions):
+        if match.start() in internal:
+            left = clause[transitions[i - 1].end() if i else 0 : match.start()]
+            stop = (
+                transitions[i + 1].start() if i + 1 < len(transitions) else len(clause)
+            )
+            right = clause[match.end() : stop]
+            separate_meals = (
+                HOME_DINING_LOCATION.search(left) and re.search(OFFSITE_MEAL, right)
+            ) or (re.search(OFFSITE_MEAL, left) and HOME_DINING_LOCATION.search(right))
+            if not separate_meals:
+                continue
+        boundaries.append(match)
     starts = [0, *(match.end() for match in boundaries)]
     ends = [*(match.start() for match in boundaries), len(clause)]
     home = False
