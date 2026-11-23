@@ -5,9 +5,12 @@ on:
       - .github/workflows/town-render-queue.yml
       - scripts/check_town_render_queue.py
       - scripts/render_studio*.py
+      - scripts/render_saved_style.py
       - scripts/studio_*.py
       - src/archimind/town/**
       - frontend/realistic_viewer/town/**
+      - frontend/realistic_viewer/src/**
+      - src/archimind/_viewer_assets/**
       - frontend/realistic_viewer/package*.json
       - docs/data/live-quality-proof/live-*.json
       - services/town/requirements.txt

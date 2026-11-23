@@ -67,13 +67,16 @@ def check(url, output):
         context.set_default_timeout(90_000)
         page = context.new_page()
         page.on("pageerror", lambda error: errors.append(str(error)))
-        board_navigation = []
 
-        def record_navigation(frame):
-            if frame == page.main_frame:
-                board_navigation.append(frame.url)
-
-        page.on("framenavigated", record_navigation)
+        def board_continuity():
+            return page.locator("#board[open]").evaluate("""board => {
+                const changes = [];
+                const observer = new MutationObserver(records => changes.push(...records));
+                observer.observe(board, { attributes: true, attributeFilter: ["open"] });
+                window.townProofBoardUnchanged = () =>
+                    board.isConnected && board.open && !changes.length && !observer.takeRecords().length;
+                return performance.timeOrigin;
+            }""")
 
         def state(revision):
             response = page.request.get(f"{endpoint}?revision={revision}")
@@ -138,7 +141,7 @@ def check(url, output):
         observe("failed", revision=1, obstacle="isolated cache path was a file")
         cache.unlink()
         queue(1)
-        board_document = len(board_navigation)
+        board_document = board_continuity()
         wait_capture(1, "running", phase=BLENDER_PHASE, timeout=150)
         # Keep the presentation open while a second tab walks the same revision.
         walker = context.new_page()
@@ -169,18 +172,22 @@ def check(url, output):
                 )
                 observe("revision-isolated-before-render", revision=2, stage="proof")
                 queue(2)
-                board_document = len(board_navigation)
+                board_document = board_continuity()
             proof = wait_capture(revision, "ready")
             proofs[str(revision)] = proof
             expect(page.locator("#renderDownloads")).to_contain_text(
                 "Proof · bedroom-doorway.png", timeout=25000
             )
             expect(page.locator("#board[open]")).to_be_visible()
-            assert len(board_navigation) == board_document
+            assert page.evaluate("performance.timeOrigin") == board_document
+            assert page.evaluate("window.townProofBoardUnchanged?.()")
             observe("ready-links-without-reload", revision=revision)
             expect(page.locator("#renderProof")).to_be_disabled()
             page.locator("#renderPanel").screenshot(
                 path=output / f"proof-ready-r{revision}.png"
+            )
+            page.locator("#boardSource").screenshot(
+                path=output / f"proof-revision-r{revision}.png"
             )
             for name, expected_sha in proof["files"].items():
                 response = page.request.get(

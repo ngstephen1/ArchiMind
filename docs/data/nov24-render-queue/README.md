@@ -18,3 +18,5 @@ Ordinary Town at 1440 × 1000 in Chrome, served over loopback with a real Blende
 [Event timings](events.json) · [Download hashes and browser results](verification.json) · [Revision 1 receipt](r1-receipt.json) · [Revision 2 receipt](r2-receipt.json) · [Committed evidence hashes](SHA256SUMS.txt)
 
 The deliberate failure occurred before Cycles started. The screenshots show proof-mode desktop Chrome. They establish an Ubuntu loopback worker baseline. Mac hardware, HD approval and an already open board updating its links without reopening remain outside this run's evidence.
+
+The committed ready panels are historical UI captures. The workflow now uploads separate `proof-revision-r1.png` and `proof-revision-r2.png` captures identifying each saved revision, alongside the ready panels and hashed manifests.
