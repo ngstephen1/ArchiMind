@@ -137,9 +137,11 @@ DINING_CONTEXT = (
     r"\b(?:seats?|seating|places|dining|dine|diners?|dinner|tables?|"
     r"eat\s+together|(?:share|have)\s+(?:a\s+)?(?:meal|lunch|breakfast))\b"
 )
+OFFSITE_LOCATION = r"(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)"
 OFFSITE_MEAL = (
     r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine)(?:\s+together)?)"
-    r"\s+(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
+    rf"\s+{OFFSITE_LOCATION}\b"
+    rf"|^\s*{OFFSITE_LOCATION}\s*[,:]"
 )
 HOME_DINING_LOCATION = re.compile(
     r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|" + ROOM_NAMES + r"))\b"
@@ -244,6 +246,13 @@ def _affirmative_clauses(message):
         r"\b(?:don['’]t|do not|never)\b[^.;!?\n]*,\s*or\b[^.;!?\n]*",
         "",
         _join_wrapped_qualifiers(message).lower(),
+    )
+    # Keep an explicit off-site heading attached to its activity when a comma
+    # would otherwise split off the imperative that follows.
+    message = re.sub(
+        rf"(^|[.;!?\n])(?P<location>\s*{OFFSITE_LOCATION})\s*,",
+        r"\1\g<location>:",
+        message,
     )
     clauses = re.split(
         r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:and\s+)?"

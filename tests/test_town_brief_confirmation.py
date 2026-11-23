@@ -1353,6 +1353,17 @@ def test_optional_table_does_not_waive_required_table_capacity(first, second):
     assert any("smaller group at the required table" in q for q in questions)
 
 
+@pytest.mark.parametrize("location", ["At the restaurant", "At work", "Away from home"])
+def test_fronted_offsite_location_cannot_supply_home_table_requirements(location):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"{location}, put six at one table and two at the other table if possible. "
+        "At home, seat four at one table and one at the other table.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 5
+
+
 def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
