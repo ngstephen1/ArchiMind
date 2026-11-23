@@ -323,6 +323,7 @@ def reviewed_brief(req, brief, previous, **kwargs):
         previous=previous,
         controls=req.brief.model_fields_set
         - ({"locks"} if not req.brief.locks else set()),
+        control_locks=req.brief.locks,
         **kwargs,
     )
 
