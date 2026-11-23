@@ -128,6 +128,10 @@ def test_legacy_job_retry_accepts_disabled_service_layout(local):
     with service.transaction() as q:
         (raw,) = q("SELECT request FROM jobs WHERE id=?", (req["id"],)).fetchone()
     assert '"service_layout"' not in raw
+    pre_upgrade = json.loads(raw)
+    pre_upgrade["brief"]["service_layout"] = False
+    with service.transaction() as q:
+        q("UPDATE jobs SET request=? WHERE id=?", (json.dumps(pre_upgrade), req["id"]))
     same = {**req, "brief": {"service_layout": False}}
     assert local.post("/api/jobs", json=same).json()["job"] == req["id"]
     changed = {**req, "brief": {"service_layout": True}}
@@ -141,6 +145,11 @@ def test_legacy_job_retry_accepts_disabled_zoning_comparison(local):
     with service.transaction() as q:
         (raw,) = q("SELECT request FROM jobs WHERE id=?", (req["id"],)).fetchone()
     assert '"compare_zoning"' not in raw
+    pre_upgrade = json.loads(raw)
+    pre_upgrade["brief"]["compare_zoning"] = False
+    pre_upgrade["brief"]["service_layout"] = False
+    with service.transaction() as q:
+        q("UPDATE jobs SET request=? WHERE id=?", (json.dumps(pre_upgrade), req["id"]))
     same = {**req, "brief": {"compare_zoning": False}}
     assert local.post("/api/jobs", json=same).json()["job"] == req["id"]
     changed = {**req, "brief": {"compare_zoning": True}}
@@ -167,6 +176,21 @@ def test_infeasible_zoning_requests_clarification_without_saving(local):
         "both a validated gallery and service-core plan" in reviews[-1]["questions"][0]
     )
     assert local.get(f"/api/projects/{project}").json()["revision"] == 0
+
+
+def test_zoning_only_preserves_confirmed_program_and_room_scoped_dining():
+    from archimind.town.brief_review import requirement_controls
+
+    brief = Brief(formal_salon=True, compare_zoning=True)
+    _, questions = requirement_controls(brief, "No formal salon.", None)
+    assert any(
+        "clearing the formal salon control" in question for question in questions
+    )
+    reviewed, questions = requirement_controls(
+        brief, "Four seats in the kitchen-dining room.", None
+    )
+    assert not questions
+    assert reviewed.dining_seats == 4
 
 
 def test_owner_and_budget(local, monkeypatch):

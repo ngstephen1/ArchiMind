@@ -458,6 +458,7 @@ def _widths(text):
 
 def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     """Return normalized controls and any conflicts that need user confirmation."""
+    reviewed_program = brief.compare_tradeoffs or brief.compare_zoning
     evidence = (previous or {}).get("evidence", {}).get("comparison", {})
     explicit = brief.model_fields_set
     seats = (
@@ -486,7 +487,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     services = brief.service_layout or bool((previous or {}).get("service_layout"))
     totals = set()
     questions = []
-    if brief.compare_tradeoffs and program is False:
+    if reviewed_program and program is False:
         if saved_salon:
             questions.append(
                 "This saved project includes the formal salon. Start a new project by "
@@ -560,7 +561,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
         dining,
     )
-    if kitchen_table and brief.compare_tradeoffs:
+    if kitchen_table and reviewed_program:
         amount = next(
             (
                 total
@@ -650,7 +651,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                     f"The {location[1]} has four modeled places. "
                     f"Confirm how to accommodate the requested {value} places there."
                 )
-            elif brief.compare_tradeoffs:
+            elif reviewed_program:
                 room_minima.setdefault(
                     _room_id(location[1].removeprefix("formal ")), set()
                 ).add(value)
@@ -676,7 +677,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 f"Confirm how to accommodate the requested {total} places there."
             )
         elif location:
-            if brief.compare_tradeoffs:
+            if reviewed_program:
                 room_minima.setdefault(
                     _room_id(location[1].removeprefix("formal ")), set()
                 ).add(total)
@@ -868,6 +869,7 @@ def _dining_statement_matches(brief, sentence):
             service_layout=brief.service_layout,
             split_dining=brief.split_dining,
             compare_tradeoffs=brief.compare_tradeoffs,
+            compare_zoning=brief.compare_zoning,
         ),
         sentence,
         None,
