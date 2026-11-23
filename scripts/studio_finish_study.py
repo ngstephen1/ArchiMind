@@ -97,7 +97,7 @@ def cushion_welt(obj, source, low, high, color):
     compare = tree.nodes.new("ShaderNodeMath")
     compare.operation = "COMPARE"
     center = low.z + 0.24 * (high.z - low.z)
-    width = 0.05 * (high.z - low.z)
+    width = 0.086 * (high.z - low.z)
     compare.inputs[1].default_value = center
     compare.inputs[2].default_value = width / 2
     tree.links.new(position.outputs["Z"], compare.inputs[0])
@@ -108,6 +108,32 @@ def cushion_welt(obj, source, low, high, color):
     tree.links.new(accent.outputs["Color"], base)
     obj.material_slots[0].material = material
     return {"center_z_m": center, "width_m": width}
+
+
+def blanket_bands(obj, spacing, width, color):
+    """Couch a contrasting yarn into narrow bands at physical spacing."""
+    material = obj.material_slots[0].material
+    tree = material.node_tree
+    shader = next(node for node in tree.nodes if node.type == "BSDF_PRINCIPLED")
+    base = shader.inputs["Base Color"]
+    woven = base.links[0].from_socket
+    geometry = tree.nodes.new("ShaderNodeNewGeometry")
+    position = tree.nodes.new("ShaderNodeSeparateXYZ")
+    tree.links.new(geometry.outputs["Position"], position.inputs["Vector"])
+    period = tree.nodes.new("ShaderNodeMath")
+    period.operation = "PINGPONG"
+    period.inputs[1].default_value = spacing / 2
+    tree.links.new(position.outputs["Y"], period.inputs[0])
+    band = tree.nodes.new("ShaderNodeMath")
+    band.operation = "LESS_THAN"
+    band.inputs[1].default_value = width / 2
+    tree.links.new(period.outputs["Value"], band.inputs[0])
+    accent = tree.nodes.new("ShaderNodeMixRGB")
+    tree.links.new(band.outputs["Value"], accent.inputs["Fac"])
+    tree.links.new(woven, accent.inputs[1])
+    accent.inputs[2].default_value = (*color, 1)
+    tree.links.new(accent.outputs["Color"], base)
+    return {"spacing_m": spacing, "width_m": width, "linear_rgb": color}
 
 
 def drape(obj, low, high, role):
@@ -132,7 +158,7 @@ def drape(obj, low, high, role):
                     lower_profile = 0.34 - 0.22 * head
                 elif role == "Folded throw":
                     fold = 0.5 + 0.5 * math.sin(math.tau * (6 * u + 0.33 * v))
-                    upper_profile = 0.33 + edge * (0.20 + 0.32 * fold + 0.12 * corner)
+                    upper_profile = 0.54 + edge * (0.16 + 0.17 * fold + 0.09 * corner)
                     lower_profile = 0.10
                 else:
                     phase = math.tau * (
@@ -140,7 +166,9 @@ def drape(obj, low, high, role):
                     )
                     fold = 0.5 + 0.5 * math.sin(phase)
                     ridge = math.exp(-100 * (v - 0.80 - 0.028 * math.sin(phase)) ** 2)
-                    upper_profile = 0.35 + edge * (0.22 + 0.31 * fold + 0.10 * ridge)
+                    # Keep the shallow top valleys above the mattress. The
+                    # underside still sits within the original tucked envelope.
+                    upper_profile = 0.78 + edge * (0.045 + 0.085 * fold + 0.05 * ridge)
                     lower_profile = 0.10
                 z = low.z + height * (upper_profile if upper else lower_profile)
                 x = low.x + width * (u * 0.986 + 0.007)
@@ -191,7 +219,7 @@ def polish():
     changes = []
     bedding = {
         "Duvet": ("soft sage linen duvet", (0.31, 0.39, 0.30)),
-        "Folded throw": ("clay knitted throw", (0.28, 0.105, 0.055)),
+        "Folded throw": ("rust and flax knitted throw", (0.33, 0.12, 0.062)),
         "Pillow 1": ("warm stone pillow", (0.55, 0.44, 0.32)),
         "Pillow 2": ("burnt clay pillow", (0.34, 0.14, 0.075)),
         "Turned-down sheet": ("unbleached linen", (0.52, 0.47, 0.36)),
@@ -231,9 +259,9 @@ def polish():
             )
         ):
             choice = (
-                ("walnut-olive upholstery", (0.12, 0.17, 0.087), 170)
+                ("walnut-olive upholstery", (0.105, 0.157, 0.071), 125)
                 if source.name == "moss"
-                else ("mushroom upholstery", (0.44, 0.35, 0.27), 170)
+                else ("warm nutmeg upholstery", (0.34, 0.23, 0.15), 116)
             )
         elif obj.name.startswith("salon/decor/plant") and source.name.split(" · ")[
             -1
@@ -258,14 +286,16 @@ def polish():
                 "world_bounds_m": [list(low), list(high)],
             }
             if salon and obj.name.startswith(("Back cushion", "Boxed seat cushion")):
-                record["welt_faces"] = cushion_welt(
-                    obj, slot.material, low, high, color
-                )
+                record["welt_band"] = cushion_welt(obj, slot.material, low, high, color)
             if bed and (
                 obj.name in {"Duvet", "Folded throw"} or obj.name.startswith("Pillow ")
             ):
                 role = "Pillow" if obj.name.startswith("Pillow ") else obj.name
                 record["edited_bounds_m"] = drape(obj, low, high, role)
+            if bed and obj.name == "Folded throw":
+                record["woven_bands"] = blanket_bands(
+                    obj, 0.086, 0.014, (0.66, 0.50, 0.34)
+                )
             changes.append(record)
     for data in bpy.data.lights:
         if not data.name.startswith("Daylight through ") or not data.name.endswith(
