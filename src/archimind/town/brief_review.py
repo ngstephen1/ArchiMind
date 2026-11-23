@@ -64,9 +64,10 @@ SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
 SALON_DECLINE = (
     r"\s*(?:(?:actually|no),\s*)?(?:"
     r"no[.!;]?\s*$|not (?:needed|required|wanted)\b|"
-    r"(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)\b|"
     r"leave (?:it|(?:the )?(?:formal )?salon) out\b|"
-    r"(?:no|without) (?:a |the )?(?:formal )?salon\b)"
+    r"(?:(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
+    r"(?:no|without) (?:a |the )?(?:formal )?salon)"
+    r"(?=\s*(?:$|[.!?,;]|(?:please|instead)\b)))"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
 
@@ -544,15 +545,18 @@ def _lot_statement_matches(brief, sentence):
     )
 
 
-def _lock_statement_matches(brief, sentence):
-    requested = {
-        _room_id(name)
+def _lock_statement_matches(room_id, sentence):
+    pattern = (
+        r"\b(?:keep|lock|preserve)\s+(?:the\s+)?"
+        + ROOMS
+        + r"\b(?=\s*(?:$|[.!?,;]|(?:where it is|(?:exactly )?as it is|"
+        r"unchanged|in place|and)\b))"
+    )
+    return any(
+        _room_id(name) == room_id
         for clause in _affirmative_clauses(sentence)
-        for name in re.findall(
-            r"\b(?:keep|lock|preserve)\s+(?:the\s+)?" + ROOMS + r"\b", clause
-        )
-    }
-    return requested == set(brief.locks)
+        for name in re.findall(pattern, clause)
+    )
 
 
 def review_summary(
@@ -627,13 +631,13 @@ def review_summary(
             inherited=brief.dining_seats == comparison.get("required_dining_seats"),
             accepts=lambda sentence: _dining_statement_matches(brief, sentence),
         )
-    if brief.locks:
+    for room_id in brief.locks:
         require(
-            "Keep " + ", ".join(brief.locks),
+            "Keep " + room_id,
             r"\b(?:keep|lock|preserve)\b",
             "locks",
             interpreted=True,
-            accepts=lambda sentence: _lock_statement_matches(brief, sentence),
+            accepts=lambda sentence: _lock_statement_matches(room_id, sentence),
         )
     assumptions = []
     if sources[1]["origin"] == "default":
