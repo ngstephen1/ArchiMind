@@ -72,7 +72,7 @@ The routing gate is at least 95% precision and 70% coverage with zero accepted s
 PYTHONPATH=src python scripts/evaluate_town_decision_reviews.py route
 PYTHONPATH=src python scripts/evaluate_town_decision_reviews.py evidence
 PYTHONPATH=src python scripts/evaluate_town_decision_reviews.py evidence \
-  --live --env-file .env --output /tmp/town-evidence-receipt.json
+  --live --locked-threshold 0.30 --env-file .env --output /tmp/town-evidence-receipt.json
 TOWN_MODE=local TOWN_API_URL=/api node frontend/realistic_viewer/town/build.mjs
 PYTHONPATH=src python scripts/check_town_decision_reviews.py --output /tmp/town-decision-browser
 ```

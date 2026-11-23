@@ -157,6 +157,17 @@ def test_independent_promotion_and_budget_headroom(state, monkeypatch):
         assert service.model_calls_used(q, 0) == 3
 
 
+def test_old_evidence_packet_cannot_enable_advice(tmp_path, monkeypatch):
+    receipt = json.loads((RECEIPTS / "evidence-receipt.json").read_bytes())
+    receipt.pop("evidence_schema")
+    old = tmp_path / "old-receipt.json"
+    old.write_text(json.dumps(receipt))
+    monkeypatch.setenv("ARCHIMIND_ENABLE_OPENAI_STUDIO", "1")
+    monkeypatch.setenv("ARCHIMIND_TOWN_DECISIONS_EVIDENCE_MODE", "advisory")
+    monkeypatch.setenv("ARCHIMIND_TOWN_DECISIONS_EVIDENCE_RECEIPT", str(old))
+    assert decision_review.settings("evidence") == ("shadow", None)
+
+
 @pytest.mark.parametrize("type_", ["choice", "score"])
 def test_typed_adapter(type_):
     question = {"name": "criterion", "type": type_}

@@ -17,10 +17,11 @@ from archimind.town import decision_review, service
 
 COMPARE = "What changed when we pulled the chair out?"
 TIMEOUT = "It might need a different chair."
+GENERAL_COMPARE = "Compare the two saved revisions."
 MIXED = "Why is the chair there? Move it closer."
 
 
-def browser_check(url, output, stale_started, release_stale):
+def browser_check(url, output, stale_started, release_stale, route_receipt):
     errors = []
     with sync_playwright() as driver:
         browser = driver.chromium.launch(channel="chrome")
@@ -42,7 +43,9 @@ def browser_check(url, output, stale_started, release_stale):
         page.locator("#message").fill(TIMEOUT)
         page.locator("#checkRequest").click()
         expect(route).to_contain_text("Review unavailable")
-        page.locator("#message").fill("Why will the chair fit?")
+        page.locator("#message").fill(
+            "Why will the chair fit? I mean the one at Belaya."
+        )
         page.locator("#checkRequest").click()
         expect(route).to_contain_text("question about a saved design")
         page.locator("#openSavedAnswer").click()
@@ -71,6 +74,26 @@ def browser_check(url, output, stale_started, release_stale):
             release_stale.set()
         expect(page.locator("#evidenceReview")).to_be_hidden()
         expect(page.locator("#evidenceReviewItems")).to_be_empty()
+        page.get_by_label("Close presentation").click()
+
+        # Simulate a qualifying route receipt to exercise the advisory delivery.
+        os.environ["ARCHIMIND_TOWN_DECISIONS_ROUTE_RECEIPT"] = str(route_receipt)
+        page.reload()
+        page.locator("#design").click()
+        page.locator("#message").fill(COMPARE)
+        page.locator("#checkRequest").click()
+        expect(route).to_contain_text("compare the saved revisions")
+        page.locator("#openSavedAnswer").click()
+        expect(page.locator("#whyAnswer")).to_contain_text("0.300 m")
+        page.get_by_label("Close presentation").click()
+
+        page.locator("#design").click()
+        page.locator("#message").fill(GENERAL_COMPARE)
+        page.locator("#checkRequest").click()
+        page.locator("#openSavedAnswer").click()
+        expect(page.locator("#whyAnswer")).to_contain_text(
+            "currently cover the bedroom desk chair"
+        )
         page.get_by_label("Close presentation").click()
         page.locator("#tour").click()
         expect(page.locator("#revision")).to_contain_text("Revision 2")
@@ -119,14 +142,19 @@ def check(output):
         }
 
     with tempfile.TemporaryDirectory() as temporary, socket.socket() as listener:
+        route_receipt = Path(temporary) / "simulated-route-receipt.json"
+        promoted = json.loads((CORPUS / "route-receipt.json").read_bytes())
+        promoted["heldout_passed"] = True
+        promoted["holdout_metrics"].update(coverage=1.0, accepted=16, correct=16)
+        route_receipt.write_text(json.dumps(promoted))
         env = {
             "TOWN_DB": str(Path(temporary) / "town.sqlite"),
             "TOWN_MODE": "local",
             "TOWN_STATIC": str(ROOT / "dist/town"),
             "OPENAI_API_KEY": "browser-fixture",
             "ARCHIMIND_ENABLE_OPENAI_STUDIO": "1",
-            "TOWN_DAILY_MODEL_CALLS": "15",
-            "TOWN_DAILY_MICROUSD": "15",
+            "TOWN_DAILY_MODEL_CALLS": "17",
+            "TOWN_DAILY_MICROUSD": "17",
             "TOWN_CALL_RESERVE_MICROUSD": "1",
             "ARCHIMIND_TOWN_DECISIONS_ROUTE_MODE": "advisory",
             "ARCHIMIND_TOWN_DECISIONS_ROUTE_RECEIPT": str(
@@ -163,6 +191,7 @@ def check(output):
                     output,
                     stale_started,
                     release_stale,
+                    route_receipt,
                 )
             finally:
                 release_stale.set()
@@ -179,6 +208,8 @@ def check(output):
             ("route", TIMEOUT),
             ("evidence", COMPARE),
             ("evidence", "Why will the chair fit?"),
+            ("route", COMPARE),
+            ("route", GENERAL_COMPARE),
         ]
         and not errors
     )
@@ -196,6 +227,7 @@ def check(output):
                     "timeout",
                     "direct answer without model",
                     "mixed request uses configured review",
+                    "simulated advisory comparison and explicit unsupported comparison",
                     "evidence on revision 2",
                     "discard delayed result on input edit",
                     "walkthrough without Decisions call",

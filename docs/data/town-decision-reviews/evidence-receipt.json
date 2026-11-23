@@ -336,5 +336,6 @@
       "elapsed_ms": 199,
       "input_tokens": 553
     }
-  ]
+  ],
+  "evidence_schema": "validated-passage-check-v1"
 }

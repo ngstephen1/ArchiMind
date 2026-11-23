@@ -32,9 +32,11 @@ export function isSavedDesignQuestion(question) {
 
 export function isUnambiguousSavedDesignQuestion(question) {
   const text = question.trim();
-  return isSavedDesignQuestion(text) &&
-    !/[.!?;]\s*[^\d\s]/.test(text) &&
-    !/\b(?:and|but|please)\s+(?:can you\s+)?(?:move|shift|replace|remove|add|edit|start|make|create|generate|apply|redo|swap)\b/i.test(text);
+  if (!isSavedDesignQuestion(text)) return false;
+  const action = /(?:\b(?:and|but|please|i mean)\s+|,\s*|^)(?:can you\s+)?(?:move|shift|replace|remove|add|edit|start|make|create|generate|apply|redo|swap)\b/i;
+  if (action.test(text)) return false;
+  const [, ...details] = text.split(/[.!?;]+(?=\s|$)/).map(part => part.trim()).filter(Boolean);
+  return details.every(detail => /^(?:i mean|i(?:'m| am) referring to)\s+the\b/i.test(detail));
 }
 
 export function asksChairChange(question) {

@@ -27,6 +27,7 @@ CLAIM_LABELS = {
     "contradicted": "At least one factual part of the claim disagrees with an explicit fact in the packet.",
 }
 RUBRICS = {"route": "town-request-route-v1", "evidence": "town-answer-evidence-v1"}
+EVIDENCE_SCHEMA = "validated-passage-check-v1"
 CASE_COUNTS = {"route": (32, 16), "evidence": (16, 8)}
 THRESHOLDS = (0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90)
 
@@ -97,6 +98,10 @@ def settings(kind):
                     and receipt["model"] == decisions.MODEL
                     and receipt["heldout_passed"] is True
                     and cutoff in THRESHOLDS
+                    and (
+                        kind != "evidence"
+                        or receipt.get("evidence_schema") == EVIDENCE_SCHEMA
+                    )
                     and re.fullmatch(r"[0-9a-f]{64}", receipt["corpus_sha256"])
                     and meets_gate(
                         kind,

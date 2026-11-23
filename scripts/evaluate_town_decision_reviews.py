@@ -167,6 +167,7 @@ def main():
             if facts
             else None
         ),
+        "evidence_schema": decision_review.EVIDENCE_SCHEMA if facts else None,
         "evidence_sha256": sha256(
             json.dumps(facts, sort_keys=True).encode()
         ).hexdigest()
