@@ -128,6 +128,10 @@ def test_legacy_job_retry_accepts_disabled_service_layout(local):
     with service.transaction() as q:
         (raw,) = q("SELECT request FROM jobs WHERE id=?", (req["id"],)).fetchone()
     assert '"service_layout"' not in raw
+    pre_upgrade = json.loads(raw)
+    pre_upgrade["brief"]["service_layout"] = False
+    with service.transaction() as q:
+        q("UPDATE jobs SET request=? WHERE id=?", (json.dumps(pre_upgrade), req["id"]))
     same = {**req, "brief": {"service_layout": False}}
     assert local.post("/api/jobs", json=same).json()["job"] == req["id"]
     changed = {**req, "brief": {"service_layout": True}}

@@ -167,7 +167,11 @@ def enqueue(owner, req):
         ).fetchone()
         if existing:
             if existing[0] != raw:
-                raise Problem("Request ID already used.", 409)
+                saved = json.loads(existing[0])
+                if saved["brief"].get("service_layout") is False:
+                    del saved["brief"]["service_layout"]
+                if saved != json.loads(raw):
+                    raise Problem("Request ID already used.", 409)
             return {"job": j}
         if head != req.base:
             raise Problem("Project changed. Reload this revision.", 409)
