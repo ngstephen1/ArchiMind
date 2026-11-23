@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 import pytest
+
 from archimind.designer_handoff.chair_study import (
     ChairFieldRecord,
     bedroom_board,
