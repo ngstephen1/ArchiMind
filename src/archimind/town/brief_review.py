@@ -52,7 +52,7 @@ def _affirmative_clauses(message):
         r"(?:not|never|no|keep|add|use|place|put|include|maintain|reserve|leave|allow|ensure|provide|make|seating)\b)",
         message,
     )
-    negative = r"\b(?:not(?!\s+only\b)|never|don['’]t|no need|instead of)\b"
+    negative = r"\b(?:not(?!\s+only\b)|never|don['’]t|cannot|can['’]t|won['’]t|mustn['’]t|no need|instead of)\b"
     return [
         re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, 1)[0]
         for clause in clauses

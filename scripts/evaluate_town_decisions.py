@@ -30,6 +30,12 @@ def score(rows, threshold):
     }
 
 
+def brief_keys(cases):
+    return {
+        " ".join(row["input"]["original_brief"].casefold().split()) for row in cases
+    }
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true")
@@ -79,6 +85,16 @@ def main():
             )
         ):
             parser.error("The public calibration did not qualify this threshold.")
+        public_cases = json.loads(expected_corpus.read_bytes())["cases"]
+        heldout = brief_keys(cases)
+        if (
+            "" in heldout
+            or len(heldout) != len(cases)
+            or heldout & brief_keys(public_cases)
+        ):
+            parser.error(
+                "Held-out briefs must be distinct from each other and the public corpus."
+            )
         public_hash = sha256(raw).hexdigest()
     key = os.getenv("OPENAI_API_KEY") or settings_from_dotenv(args.env_file).get(
         "OPENAI_API_KEY"

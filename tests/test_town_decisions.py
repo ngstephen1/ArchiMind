@@ -299,6 +299,12 @@ def test_saved_edit_and_proof_retry_use_no_decisions_calls(town, monkeypatch):
         ),
         ("Seat four people at a single table in the formal salon.", True, 0, False),
         (
+            "We cannot seat six people at a single table. Use four dining places instead.",
+            True,
+            4,
+            False,
+        ),
+        (
             "Seat four people at a single table in the kitchen-dining room.",
             False,
             0,
@@ -326,3 +332,11 @@ def test_supported_table_phrasing_keeps_existing_path(
     client, _, _ = town
     result = client.get(f"/api/jobs/{response.json()['job']}").json()
     assert result["status"] == "ready", result
+    for candidate in result["result"]:
+        plan = candidate["evidence"]["comparison"]
+        assert plan["required_dining_seats"] == dining_seats
+        assert plan["split_dining"] is split_dining
+        if formal_salon:
+            assert plan["dining_places"] == {"kitchen-dining": 4, "salon": 4}
+        else:
+            assert "salon" not in plan["dining_places"]
