@@ -52,10 +52,20 @@ ROOMS = (
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
 # the door" and "move the desk closer to its window" are not opening requests.
-OPENING_REQUEST = (
-    r"\b(keep|preserve|move|relocate|shift|add|remove|block|widen|enlarge)\s+"
+OPENING_OBJECT = (
     r"((?:(?!(?:near|away|from|to|by|next|close|closer|beside|facing|towards?|with"
     r"|and|or|in|on|at)\b)[\w-]+\s+){0,3}?)(doors?|doorways?|windows?|openings?)\b"
+)
+
+
+OPENING_VERB = r"keep|preserve|move|relocate|shift|add|remove|block|widen|enlarge"
+OPENING_REQUEST = r"\b(" + OPENING_VERB + ")" + r"\s+" + OPENING_OBJECT
+COORDINATED_OPENING = re.compile(
+    r"(?:\s*,\s*(?:(?:and|or)\s+)?|\s+(?:and|or)\s+)"
+    + r"(?!(?:"
+    + OPENING_VERB
+    + r")\b)"
+    + OPENING_OBJECT
 )
 
 
@@ -271,6 +281,13 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                     f"The {location[1]} has four modeled places. "
                     f"Confirm how to accommodate the requested {value} places there."
                 )
+            else:
+                totals.add(value)
+                if not salon:
+                    questions.append(
+                        f"The five-room program has no modeled table in the {location[1]}. "
+                        "Confirm the six-room program or revise the seating requirement."
+                    )
         elif not re.match(r"\s+(?:per|for each)\b", tail):
             totals.add(value)
     if requested_split and not split:
@@ -292,8 +309,13 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 f"The {location[1]} has four modeled places. "
                 f"Confirm how to accommodate the requested {total} places there."
             )
-        elif not location:
+        else:
             totals.add(total)
+            if location and not salon:
+                questions.append(
+                    f"The five-room program has no modeled table in the {location[1]}. "
+                    "Confirm the six-room program or revise the seating requirement."
+                )
     guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
     if guests and residents:
@@ -351,9 +373,8 @@ def _room_id(name):
     return "kitchen-dining" if word.startswith("kitchen") else word
 
 
-def _opening_room(clause, match, fronted):
+def _opening_room(clause, match, words, fronted):
     """Name the room of one opening request, e.g. "the bedroom window"."""
-    words = match[2]
     after = (
         r"(?:\s+and\s+(?:the\s+)?(?:doors?|doorways?|windows?|openings?))?"
         r"\s+(?:in|of|for|on)\s+(?:the\s+)?" + ROOMS + r"\b"
@@ -379,15 +400,23 @@ def opening_questions(message, locks):
     for clause in _affirmative_clauses(message):
         for match in re.finditer(OPENING_REQUEST, clause):
             verb, words, noun = match.groups()
-            room_id = _opening_room(clause, match, fronted)
-            if verb in {"keep", "preserve"} and room_id in locks:
-                continue
-            requested = f"{verb} {words}{noun}".strip()
-            questions.append(
-                f"Town places doors and windows itself and cannot guarantee a request to "
-                f"{requested} for a specific door or window. Lock the room on a saved "
-                "revision to keep its openings, or revise the brief."
-            )
+            objects = [(match, words, noun)]
+            end = match.end()
+            while continuation := COORDINATED_OPENING.match(clause, end):
+                words, noun = continuation.groups()
+                objects.append((continuation, words, noun))
+                end = continuation.end()
+            room_id = fronted
+            for item, words, noun in objects:
+                room_id = _opening_room(clause, item, words, room_id)
+                if verb in {"keep", "preserve"} and room_id in locks:
+                    continue
+                requested = f"{verb} {words}{noun}".strip()
+                questions.append(
+                    f"Town places doors and windows itself and cannot guarantee a request to "
+                    f"{requested} for a specific door or window. Lock the room on a saved "
+                    "revision to keep its openings, or revise the brief."
+                )
         # "In the bedroom, keep the window" names the room in its own clause.
         qualifier = re.fullmatch(
             r"\s*(?:in|for)\s+(?:the\s+)?" + ROOMS + r"\s*", clause

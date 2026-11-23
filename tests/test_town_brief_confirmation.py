@@ -414,3 +414,26 @@ def test_lot_and_locks_are_not_credited_to_unrelated_requirements():
     assert evidence["Lot 13 × 13 m"]["origin"] == "controls"
     assert evidence["Keep bedroom"]["origin"] == "controls"
     assert evidence["Keep bedroom"]["statement"] is None
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Seat four people in the kitchen-dining room.",
+        "Seat four people in the formal salon.",
+        "Seat two hosts and two guests in the kitchen-dining room.",
+    ],
+)
+def test_supported_room_specific_dining_retains_the_count(message):
+    review, questions = requirement_controls(Brief(formal_salon=True), message, None)
+    assert review.dining_seats == 4
+    assert questions == []
+
+
+def test_coordinated_openings_require_each_room_to_be_locked():
+    message = "Keep the bedroom window and the study window where they are."
+    assert opening_questions(message, locks=("bedroom", "study")) == []
+    (question,) = opening_questions(message, locks=("bedroom",))
+    assert "keep the study window" in question
+    (question,) = opening_questions(message, locks=("study",))
+    assert "keep the bedroom window" in question
