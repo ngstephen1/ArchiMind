@@ -63,19 +63,31 @@ def check(url, output):
         browser = playwright.chromium.launch(
             channel="chrome", args=["--enable-unsafe-swiftshader"]
         )
-        page = browser.new_page(viewport={"width": 1440, "height": 1000})
+        context = browser.new_context(viewport={"width": 1440, "height": 1000})
+        context.set_default_timeout(90_000)
+        page = context.new_page()
         page.on("pageerror", lambda error: errors.append(str(error)))
+        board_navigation = []
+
+        def record_navigation(frame):
+            if frame == page.main_frame:
+                board_navigation.append(frame.url)
+
+        page.on("framenavigated", record_navigation)
 
         def state(revision):
             response = page.request.get(f"{endpoint}?revision={revision}")
             assert response.ok, response.status
             return response.json()
 
-        def open_board(revision):
-            page.goto(f"{url}/?project={project}&revision={revision}")
-            expect(page.locator("#revision")).to_have_text(
-                re.compile(f"Revision {revision}$"), timeout=30000
+        def open_home(tab, revision):
+            tab.goto(f"{url}/?project={project}&revision={revision}")
+            expect(tab.locator("#revision")).to_have_text(
+                re.compile(f"Revision {revision}$"), timeout=30_000
             )
+
+        def open_board(revision):
+            open_home(page, revision)
             page.locator("#present").click()
             expect(page.locator("#boardSource")).to_contain_text(
                 f"Saved revision {revision}"
@@ -126,18 +138,23 @@ def check(url, output):
         observe("failed", revision=1, obstacle="isolated cache path was a file")
         cache.unlink()
         queue(1)
+        board_document = len(board_navigation)
         wait_capture(1, "running", phase=BLENDER_PHASE, timeout=150)
-        page.get_by_role("button", name="Close presentation").click()
-        page.locator("#tour").click()
-        page.locator("#door").click()
-        page.locator("#roomJump").select_option("bedroom")
-        expect(page.locator("#place")).to_have_text("Bedroom")
+        # Keep the presentation open while a second tab walks the same revision.
+        walker = context.new_page()
+        walker.on("pageerror", lambda error: errors.append(str(error)))
+        open_home(walker, 1)
+        walker.locator("#tour").click()
+        walker.locator("#door").click()
+        walker.locator("#roomJump").select_option("bedroom")
+        expect(walker.locator("#place")).to_have_text("Bedroom", timeout=30_000)
         assert state(1)["proof"] == {"state": "running", "phase": BLENDER_PHASE}
-        page.screenshot(path=output / "walk-during-proof.png")
+        walker.screenshot(path=output / "walk-during-proof.png")
         assert state(1)["proof"] == {"state": "running", "phase": BLENDER_PHASE}
         observe("walkthrough-during-render", revision=1, phase=BLENDER_PHASE)
-        page.locator("#present").click()
-        expect(page.locator("#boardSource")).to_contain_text("Saved revision 1")
+        walker.close()
+        page.bring_to_front()
+        expect(page.locator("#board[open]")).to_be_visible()
 
         for revision in (1, 2):
             if revision == 2:
@@ -152,11 +169,14 @@ def check(url, output):
                 )
                 observe("revision-isolated-before-render", revision=2, stage="proof")
                 queue(2)
+                board_document = len(board_navigation)
             proof = wait_capture(revision, "ready")
             proofs[str(revision)] = proof
             expect(page.locator("#renderDownloads")).to_contain_text(
                 "Proof · bedroom-doorway.png", timeout=25000
             )
+            expect(page.locator("#board[open]")).to_be_visible()
+            assert len(board_navigation) == board_document
             observe("ready-links-without-reload", revision=revision)
             expect(page.locator("#renderProof")).to_be_disabled()
             page.locator("#renderPanel").screenshot(
