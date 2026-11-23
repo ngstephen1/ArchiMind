@@ -10,7 +10,9 @@ from studio_bedroom_dims import (
     FRAME_DEPTH_M,
     SILL_DEPTH_M,
     SILL_THICKNESS_M,
+    STYLED_FINISHED_FLOOR_M,
     WALL_DEPTH_M,
+    saved_curtain_mount,
 )
 
 from archimind.designer_handoff.drawings import (
@@ -74,7 +76,32 @@ def _detail_board(manifest: dict) -> dict:
     }
 
 
-def study(board: dict) -> tuple[str, dict]:
+def rendered_mount(board, room, window, receipt):
+    if any(
+        board[key] != receipt.get(key) for key in ("project", "revision", "home_id")
+    ):
+        raise ValueError("The styled render receipt belongs to another revision.")
+    bedroom = receipt.get("rooms", {}).get("bedroom", {})
+    curtain_id = f"curtain:{window.id}"
+    saved = next(
+        (
+            item
+            for item in bedroom.get("saved_dressing", [])
+            if item["id"] == curtain_id
+        ),
+        None,
+    )
+    mount = bedroom.get("modeled_curtain_mounts", {}).get(curtain_id)
+    if (
+        not saved
+        or saved["wall"] != window.wall
+        or mount != saved_curtain_mount(room.model_dump(), saved)
+    ):
+        raise ValueError("The render receipt has no matching modeled curtain mount.")
+    return mount
+
+
+def study(board: dict, *, render_receipt: dict | None = None) -> tuple[str, dict]:
     board = _detail_board(board)
     design = _room_design(board)
     room = design.room
@@ -97,6 +124,25 @@ def study(board: dict) -> tuple[str, dict]:
     rail_left = max(0.0, window.offset_m - 0.14)
     rail_right = min(span, window.offset_m + window.width_m + 0.14)
 
+    mount = (
+        rendered_mount(board, room, window, render_receipt)
+        if render_receipt is not None
+        else None
+    )
+    mounting_label = "Proposed track datum"
+    opening_label = "Saved head"
+    plotted_head, plotted_sill = head, sill
+    if mount:
+        rail = mount["elevation_m"]
+        rail_left = mount["start_m"]
+        rail_right = rail_left + mount["span_m"]
+        mounting_label = "Modeled track underside"
+        opening_label = "Modeled head above finish"
+        plotted_head, plotted_sill = (
+            head - STYLED_FINISHED_FLOOR_M,
+            sill - STYLED_FINISHED_FLOOR_M,
+        )
+
     # Town's unrotated procedural queen-bed template places the head at +Y.
     head_y = bed.y_m + bed.depth_m
     head_gap = room.depth_m - head_y
@@ -116,8 +162,8 @@ def study(board: dict) -> tuple[str, dict]:
     center = 300
     finish_floor = 544
     x = center - window.width_m * s / 2
-    y_head = finish_floor - head * s
-    y_sill = finish_floor - sill * s
+    y_head = finish_floor - plotted_head * s
+    y_sill = finish_floor - plotted_sill * s
     _line(svg, 65, finish_floor, 540, finish_floor, MUTED)
     _rect(svg, x, y_head, window.width_m * s, window.height_m * s, "#e2edf0", GLASS)
     _line(svg, center, y_head, center, y_sill, GLASS)
@@ -137,10 +183,25 @@ def study(board: dict) -> tuple[str, dict]:
         svg,
         40,
         217,
-        f"Proposed track datum +{rail:.3f} m · {rail_right - rail_left:.3f} m span",
+        f"{mounting_label} +{rail:.3f} m · {rail_right - rail_left:.3f} m span",
         14,
     )
-    _text(svg, 40, 238, f"Saved head +{head:.3f} m · sill +{sill:.3f} m", 14)
+    _text(
+        svg,
+        40,
+        238,
+        f"{opening_label} +{plotted_head:.3f} m · sill +{plotted_sill:.3f} m",
+        14,
+    )
+    if mount:
+        _text(
+            svg,
+            40,
+            579,
+            f"Rail section {mount['rail_size_m'] * 1000:.0f} mm square · "
+            f"center {mount['wall_projection_m'] * 1000:.0f} mm from wall",
+            14,
+        )
     _dimension(svg, x, y_sill + 30, x + window.width_m * s, f"{window.width_m:.3f} m")
 
     scale = min(460 / room.width_m, 320 / room.depth_m)
@@ -207,7 +268,7 @@ def study(board: dict) -> tuple[str, dict]:
             "exterior_reveal_m": EXTERIOR_REVEAL_M,
         },
         "mounting_study": {
-            "status": "proposed",
+            "status": "modeled" if mount else "proposed",
             "track_elevation_m": round(rail, 3),
             "track_span_m": round(rail_right - rail_left, 3),
         },
@@ -218,6 +279,13 @@ def study(board: dict) -> tuple[str, dict]:
         },
         "field_status": "awaiting verified reveal, sill, mount and bed-head services",
     }
+    if mount:
+        evidence["mounting_study"]["rendered_geometry"] = mount
+        evidence["styled_elevation_above_finish_m"] = {
+            "head": round(plotted_head, 3),
+            "sill": round(plotted_sill, 3),
+            "head_to_track": round(rail - plotted_head, 3),
+        }
     return ET.tostring(svg, encoding="unicode"), evidence
 
 
@@ -225,8 +293,18 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("manifest", type=Path)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--render-receipt",
+        type=Path,
+        help="Saved-style receipt for the selected revision",
+    )
     args = parser.parse_args()
-    svg, evidence = study(json.loads(args.manifest.read_bytes()))
+    receipt = (
+        json.loads(args.render_receipt.read_bytes()) if args.render_receipt else None
+    )
+    svg, evidence = study(
+        json.loads(args.manifest.read_bytes()), render_receipt=receipt
+    )
     args.output.mkdir(parents=True)
     (args.output / "window-and-bed-head.svg").write_text(svg, encoding="utf-8")
     (args.output / "window-and-bed-head.json").write_text(

@@ -6,6 +6,7 @@ import re
 
 import bpy
 from mathutils import Matrix
+from studio_bedroom_dims import STYLED_FINISHED_FLOOR_M, saved_curtain_mount
 
 
 def read_verified(path, sha, size):
@@ -170,6 +171,60 @@ def decor_shape(shape, label, base, palette):
     mesh.materials.append(palette[key])
 
 
+def mount_bedroom_curtains(part, board, base, material):
+    """Keep the saved fabric and model its rail and two wall supports."""
+    if part["id"] != "bedroom":
+        return {}
+    bedroom = next(room for room in board["rooms"] if room["room"]["id"] == "bedroom")
+    ox, oy = bedroom["origin"]
+    mounts = {}
+    for curtain in part["dressing"]:
+        if curtain["kind"] != "curtain":
+            continue
+        mount = saved_curtain_mount(bedroom["room"], curtain)
+        along_y = mount["wall"] in {"east", "west"}
+        span = mount["span_m"]
+        center = mount["rail_center_m"]
+        underside = mount["elevation_m"] + STYLED_FINISHED_FLOOR_M
+        size = mount["rail_size_m"]
+        fabric_top = max(
+            vertex[2]
+            for shape in part["shapes"]
+            if shape["group"] == f"decor/{curtain['id']}"
+            for vertex in shape["vertices"]
+        )
+        if abs(fabric_top - underside) > 1e-5:
+            raise ValueError(
+                "Curtain geometry disagrees with its finished-floor mount."
+            )
+
+        def place(label, along, across, length, thickness):
+            location = (
+                (ox + across, oy + along) if along_y else (ox + along, oy + across)
+            )
+            footprint = (thickness, length) if along_y else (length, thickness)
+            base.box(
+                label + " / " + curtain["id"],
+                (*location, underside + size / 2),
+                (*footprint, size),
+                material,
+                0.002,
+            )
+
+        place("Curtain rail", mount["start_m"] + span / 2, center, span, size)
+        wall = mount["wall_coordinate_m"]
+        for offset in mount["bracket_offsets_m"]:
+            place(
+                "Curtain bracket",
+                offset,
+                (center + wall) / 2,
+                size,
+                mount["wall_projection_m"],
+            )
+        mounts[curtain["id"]] = mount
+    return mounts
+
+
 def dress_scene(plan, board, base, out):
     root = base.ASSETS
     ref = plan["style_pack"]
@@ -224,7 +279,7 @@ def dress_scene(plan, board, base, out):
         w, d = r["width_m"], r["depth_m"]
         base.box(
             "Town pack floor " + r["id"],
-            (ox + w / 2, oy + d / 2, 0.008),
+            (ox + w / 2, oy + d / 2, STYLED_FINISHED_FLOOR_M - 0.007),
             (w, d, 0.014),
             materials["tile" if r["id"] == "bathroom" else "floor"],
         )
@@ -257,6 +312,9 @@ def dress_scene(plan, board, base, out):
             "rendered_native_models": imported,
             "saved_bindings": part["bindings"],
             "saved_dressing": part["dressing"],
+            "modeled_curtain_mounts": mount_bedroom_curtains(
+                part, board, base, materials["trim"]
+            ),
             "procedural_dressing_slots": sorted({s["group"] for s in part["shapes"]}),
         }
     summary = {
