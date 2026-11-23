@@ -59,6 +59,7 @@ def test_nonprocedural_headboard_is_not_inferred(tmp_path):
 
 def test_modeled_mount_uses_saved_curtain_and_same_revision(monkeypatch):
     import runpy
+    from xml.etree.ElementTree import fromstring
 
     import pytest
 
@@ -99,6 +100,12 @@ def test_modeled_mount_uses_saved_curtain_and_same_revision(monkeypatch):
     assert "Modeled head above finish +2.135 m" in svg
     assert "Modeled track underside +2.680 m" in svg
     assert "Rail section 28 mm square · center 100 mm from wall" in svg
+    elements = fromstring(svg)
+    glazing = next(e for e in elements if e.get("fill") == "#e2edf0")
+    track = next(e for e in elements if e.get("stroke-dasharray") == "5 3")
+    px_per_m = float(glazing.attrib["width"]) / evidence["window"]["width_m"]
+    actual_gap = (float(glazing.attrib["y"]) - float(track.attrib["y1"])) / px_per_m
+    assert actual_gap == pytest.approx(0.545, abs=0.001)
     with pytest.raises(ValueError, match="another revision"):
         study_module["study"](manifest, render_receipt={**receipt, "revision": 1})
     mount["wall_projection_m"] = 0.15
