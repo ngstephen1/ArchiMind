@@ -90,6 +90,13 @@ def test_modeled_mount_uses_saved_curtain_and_same_revision(monkeypatch):
     svg, evidence = study_module["study"](manifest, render_receipt=receipt)
     assert evidence["mounting_study"]["status"] == "modeled"
     assert evidence["mounting_study"]["rendered_geometry"] == mount
+    assert evidence["window"]["head_m"] == pytest.approx(2.15)
+    assert evidence["styled_elevation_above_finish_m"] == {
+        "head": 2.135,
+        "sill": 0.985,
+        "head_to_track": 0.545,
+    }
+    assert "Modeled head above finish +2.135 m" in svg
     assert "Modeled track underside +2.680 m" in svg
     assert "Rail section 28 mm square · center 100 mm from wall" in svg
     with pytest.raises(ValueError, match="another revision"):

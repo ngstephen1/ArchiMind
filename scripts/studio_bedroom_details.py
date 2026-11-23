@@ -10,6 +10,7 @@ from studio_bedroom_dims import (
     FRAME_DEPTH_M,
     SILL_DEPTH_M,
     SILL_THICKNESS_M,
+    STYLED_FINISHED_FLOOR_M,
     WALL_DEPTH_M,
     saved_curtain_mount,
 )
@@ -129,11 +130,18 @@ def study(board: dict, *, render_receipt: dict | None = None) -> tuple[str, dict
         else None
     )
     mounting_label = "Proposed track datum"
+    opening_label = "Saved head"
+    plotted_head, plotted_sill = head, sill
     if mount:
         rail = mount["elevation_m"]
         rail_left = mount["start_m"]
         rail_right = rail_left + mount["span_m"]
         mounting_label = "Modeled track underside"
+        opening_label = "Modeled head above finish"
+        plotted_head, plotted_sill = (
+            head - STYLED_FINISHED_FLOOR_M,
+            sill - STYLED_FINISHED_FLOOR_M,
+        )
 
     # Town's unrotated procedural queen-bed template places the head at +Y.
     head_y = bed.y_m + bed.depth_m
@@ -154,8 +162,8 @@ def study(board: dict, *, render_receipt: dict | None = None) -> tuple[str, dict
     center = 300
     finish_floor = 544
     x = center - window.width_m * s / 2
-    y_head = finish_floor - head * s
-    y_sill = finish_floor - sill * s
+    y_head = finish_floor - plotted_head * s
+    y_sill = finish_floor - plotted_sill * s
     _line(svg, 65, finish_floor, 540, finish_floor, MUTED)
     _rect(svg, x, y_head, window.width_m * s, window.height_m * s, "#e2edf0", GLASS)
     _line(svg, center, y_head, center, y_sill, GLASS)
@@ -178,7 +186,13 @@ def study(board: dict, *, render_receipt: dict | None = None) -> tuple[str, dict
         f"{mounting_label} +{rail:.3f} m · {rail_right - rail_left:.3f} m span",
         14,
     )
-    _text(svg, 40, 238, f"Saved head +{head:.3f} m · sill +{sill:.3f} m", 14)
+    _text(
+        svg,
+        40,
+        238,
+        f"{opening_label} +{plotted_head:.3f} m · sill +{plotted_sill:.3f} m",
+        14,
+    )
     if mount:
         _text(
             svg,
@@ -267,6 +281,11 @@ def study(board: dict, *, render_receipt: dict | None = None) -> tuple[str, dict
     }
     if mount:
         evidence["mounting_study"]["rendered_geometry"] = mount
+        evidence["styled_elevation_above_finish_m"] = {
+            "head": round(plotted_head, 3),
+            "sill": round(plotted_sill, 3),
+            "head_to_track": round(rail - plotted_head, 3),
+        }
     return ET.tostring(svg, encoding="unicode"), evidence
 
 
