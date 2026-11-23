@@ -6,6 +6,10 @@ on:
         description: Render only the November fixed-camera bedroom and salon finish comparison
         type: boolean
         default: false
+      finish_proof_only:
+        description: For the finish study, verify the packed geometry and all editable cameras without rendering
+        type: boolean
+        default: false
       fresh_home:
         description: Render the fresh-home acceptance manifest only
         type: boolean
@@ -202,10 +206,14 @@ jobs:
           gh run download 44993303088 --name studio-home-proof --dir "$RUNNER_TEMP/finish-source"
           gh run download 44994306268 --name studio-eye-views --dir "$RUNNER_TEMP/finish-before"
       - name: Render matched bedroom and salon finish proofs
+        env:
+          FINISH_PROOF_ONLY: ${{ inputs.finish_proof_only }}
         run: |
+          options=()
+          if [[ "$FINISH_PROOF_ONLY" == "true" ]]; then options+=(--proof-only); fi
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_finish_study.py -- \
             "$RUNNER_TEMP/finish-source" "$RUNNER_TEMP/finish-before" \
-            docs/data/nov24-baseline/visual-baseline.json "$RUNNER_TEMP/finish-study"
+            docs/data/nov24-baseline/visual-baseline.json "$RUNNER_TEMP/finish-study" "${options[@]}"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: studio-finish-study
