@@ -46,16 +46,40 @@ GROUP = (
 )
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
-ROOMS = (
-    r"(bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon)"
+ROOM_NAMES = (
+    r"bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon"
 )
+ROOMS = f"({ROOM_NAMES})"
+DINING_CONTEXT = (
+    r"\b(?:seats?|seating|places|dining|dine|diners?|dinner|tables?|"
+    r"eat\s+together|(?:share|have)\s+(?:a\s+)?(?:meal|lunch|breakfast))\b"
+)
+OFFSITE_MEAL = (
+    r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine)(?:\s+together)?)"
+    r"\s+(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
+)
+DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
+SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
+SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
+
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
 # the door" and "move the desk closer to its window" are not opening requests.
-OPENING_REQUEST = (
-    r"\b(keep|preserve|move|relocate|shift|add|remove|block|widen|enlarge)\s+"
+OPENING_OBJECT = (
     r"((?:(?!(?:near|away|from|to|by|next|close|closer|beside|facing|towards?|with"
     r"|and|or|in|on|at)\b)[\w-]+\s+){0,3}?)(doors?|doorways?|windows?|openings?)\b"
+)
+
+
+OPENING_VERB = r"keep|preserve|move|relocate|shift|add|remove|block|widen|enlarge"
+OPENING_REQUEST = r"\b(" + OPENING_VERB + ")" + r"\s+" + OPENING_OBJECT
+COORDINATED_OPENING = re.compile(
+    r"(?:\s*,\s*(?:(?:and|or)\s+)?|\s+(?:and|or)\s+)"
+    + r"(?=(?:the|a|an|that|those|its|existing|original|current|historic|front|back|"
+    r"rear|side|main|north|south|east|west|all|both|another|"
+    + ROOM_NAMES
+    + r"|doors?|doorways?|windows?|openings?)\b)"
+    + OPENING_OBJECT
 )
 
 
@@ -76,6 +100,20 @@ def _affirmative_clauses(message):
         re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, maxsplit=1)[0]
         for clause in clauses
     ]
+
+
+def _requests_salon(message):
+    # Keep qualifications on a bare noun phrase. Trimming “not needed” would
+    # flip a declined room into an affirmative request.
+    sentences = re.split(r"(?<=[.!?])\s+|(?<=;)\s*|\n+", message.lower())
+    bare_request = any(
+        re.fullmatch(SALON_ONLY, sentence.strip())
+        and not re.match(r"\s*(?:no|not|never|skip)\b", following)
+        for sentence, following in zip(sentences, sentences[1:] + [""], strict=True)
+    )
+    return bare_request or any(
+        re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(message)
+    )
 
 
 def requests_single_table(message):
@@ -131,9 +169,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     dining = ". ".join(
         clause
         for clause in clauses
-        if re.search(
-            r"\b(?:seats?|seating|dining|dine|diners?|dinner|tables?)\b", clause
-        )
+        if re.search(DINING_CONTEXT, clause)
+        and (not re.search(OFFSITE_MEAL, clause) or re.search(DIRECT_SEATING, clause))
     )
     salon = (
         brief.formal_salon
@@ -141,9 +178,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             part["design"]["room"]["id"] == "salon"
             for part in (previous or {}).get("rooms", ())
         )
-        or bool(
-            re.search(r"\b(?:include|add|use|with) (?:a |the )?formal salon\b", text)
-        )
+        or _requests_salon(message)
     )
     totals = set()
     questions = []
@@ -205,10 +240,11 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 "Confirm the six-room program or revise the seating requirement."
             )
     counted = set()
+    room_minima = {}
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
     for match in re.finditer(
         COUNT
-        + r"\s+(?:dining\s+)?(?:total\s+)?(?:seats|places)\b"
+        + r"\s+(?:(?:dining\s+)?(?:total\s+)?|total\s+dining\s+)(?:seats|places)\b"
         + r"|\bseating for\s+"
         + COUNT
         + r"|\bdining room for\s+"
@@ -277,6 +313,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                     f"The {location[1]} has four modeled places. "
                     f"Confirm how to accommodate the requested {value} places there."
                 )
+            elif brief.compare_tradeoffs:
+                room_minima.setdefault(
+                    _room_id(location[1].removeprefix("formal ")), set()
+                ).add(value)
         elif not re.match(r"\s+(?:per|for each)\b", tail):
             totals.add(value)
     if requested_split and not split:
@@ -298,7 +338,12 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 f"The {location[1]} has four modeled places. "
                 f"Confirm how to accommodate the requested {total} places there."
             )
-        elif not location:
+        elif location:
+            if brief.compare_tradeoffs:
+                room_minima.setdefault(
+                    _room_id(location[1].removeprefix("formal ")), set()
+                ).add(total)
+        else:
             totals.add(total)
     guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
@@ -306,6 +351,33 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         totals.add(count(guests[1]) + count(residents[1]))
     elif guests and not totals:
         totals.add(max(seats, count(guests[1])))
+    if room_minima:
+        for room, counts in room_minima.items():
+            if len(counts) > 1:
+                questions.append(
+                    f"Confirm one minimum number of dining places for the {room}."
+                )
+            if not salon:
+                questions.append(
+                    f"The five-room program has no modeled table in the {room}. "
+                    "Confirm the six-room program or revise the seating requirement."
+                )
+        if len(room_minima) > 1 and not split:
+            questions.append(
+                "Confirm separate tables for the requested room-specific seating."
+            )
+        minimum = sum(max(counts) for counts in room_minima.values())
+        if (
+            totals
+            and min(totals) < minimum
+            or "dining_seats" in explicit
+            and 0 < seats < minimum
+        ):
+            questions.append(
+                "Confirm a total that covers the requested room-specific seating."
+            )
+        elif not totals and (not seats or seats < minimum):
+            totals.add(minimum)
     if len(totals) > 1 or (
         totals and "dining_seats" in explicit and seats not in totals
     ):
@@ -357,9 +429,8 @@ def _room_id(name):
     return "kitchen-dining" if word.startswith("kitchen") else word
 
 
-def _opening_room(clause, match, fronted):
+def _opening_room(clause, match, words, fronted):
     """Name the room of one opening request, e.g. "the bedroom window"."""
-    words = match[2]
     after = (
         r"(?:\s+and\s+(?:the\s+)?(?:doors?|doorways?|windows?|openings?))?"
         r"\s+(?:in|of|for|on)\s+(?:the\s+)?" + ROOMS + r"\b"
@@ -385,15 +456,23 @@ def opening_questions(message, locks):
     for clause in _affirmative_clauses(message):
         for match in re.finditer(OPENING_REQUEST, clause):
             verb, words, noun = match.groups()
-            room_id = _opening_room(clause, match, fronted)
-            if verb in {"keep", "preserve"} and room_id in locks:
-                continue
-            requested = f"{verb} {words}{noun}".strip()
-            questions.append(
-                f"Town places doors and windows itself and cannot guarantee a request to "
-                f"{requested} for a specific door or window. Lock the room on a saved "
-                "revision to keep its openings, or revise the brief."
-            )
+            objects = [(match, words, noun)]
+            end = match.end()
+            while continuation := COORDINATED_OPENING.match(clause, end):
+                words, noun = continuation.groups()
+                objects.append((continuation, words, noun))
+                end = continuation.end()
+            room_id = fronted
+            for item, words, noun in objects:
+                room_id = _opening_room(clause, item, words, room_id)
+                if verb in {"keep", "preserve"} and room_id in locks:
+                    continue
+                requested = f"{verb} {words}{noun}".strip()
+                questions.append(
+                    f"Town places doors and windows itself and cannot guarantee a request to "
+                    f"{requested} for a specific door or window. Lock the room on a saved "
+                    "revision to keep its openings, or revise the brief."
+                )
         # "In the bedroom, keep the window" names the room in its own clause.
         qualifier = re.fullmatch(
             r"\s*(?:in|for)\s+(?:the\s+)?" + ROOMS + r"\s*", clause
@@ -432,7 +511,11 @@ def _source(
 
 def _dining_statement_matches(brief, sentence):
     stated, questions = requirement_controls(
-        Brief(formal_salon=True, split_dining=brief.split_dining),
+        Brief(
+            formal_salon=brief.formal_salon,
+            split_dining=brief.split_dining,
+            compare_tradeoffs=brief.compare_tradeoffs,
+        ),
         sentence,
         None,
         evaluate_passage=False,
@@ -531,12 +614,15 @@ def review_summary(
             "formal_salon",
             inherited="salon" in saved_rooms,
             interpreted=True,
+            accepts=lambda sentence: (
+                _requests_salon(message) and _requests_salon(sentence)
+            ),
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
         require(
             f"{brief.dining_seats} dining places {arrangement}",
-            r"\b(?:seats?|seating|places|tables?|guests|diners|dinner)\b",
+            DINING_CONTEXT,
             "dining_seats",
             inherited=brief.dining_seats == comparison.get("required_dining_seats"),
             accepts=lambda sentence: _dining_statement_matches(brief, sentence),
