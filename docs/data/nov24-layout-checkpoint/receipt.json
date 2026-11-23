@@ -1,0 +1,193 @@
+{
+  "base_commit": "c7e33364d2b148293b62ae26ad59375bdb1eb9ce",
+  "source_path": "docs/data/live-quality-proof/live-snapshot-r2.json",
+  "source_file_sha256": "40f00cfe91439d7cdbc54824a45b345bfb99fb937ee8a45784e310a86364195b",
+  "locked_edit": {
+    "source_revision": 2,
+    "source_home_id": "6c5dac99245c8796ddf5bf6d04ff997242b9d92703826d670c688addcb0d9869",
+    "brief": {
+      "width": 15.0,
+      "depth": 16.0,
+      "priority": "balanced",
+      "style": "japandi",
+      "room_goals": [],
+      "formal_salon": false,
+      "compare_tradeoffs": true,
+      "dining_seats": 6,
+      "split_dining": true,
+      "passage_m": 0.6,
+      "seed": 123,
+      "shift_bedroom_chair": false,
+      "closer_study_desk": false,
+      "locks": [
+        "bedroom"
+      ]
+    },
+    "source_home_digest_before": "6c5906a41a4f8b3bd5c9ddef5b485229483abac7361002b627cb5d16c3cdda95",
+    "source_home_digest_after": "6c5906a41a4f8b3bd5c9ddef5b485229483abac7361002b627cb5d16c3cdda95",
+    "preserved_locked_bedroom_digest": "213fc9edc5dd231755900d0766ac2522997e0ba15c7ea6ba9c0957d985b2d7c1",
+    "returned_candidates": 1,
+    "validated_candidate_home_id": "140fdf98cea090316c4465abaf6fcfa9309c3ab5c4fb31d171c6a7a68e392615"
+  },
+  "stale_edit": {
+    "base_revision": 1,
+    "base_home_id": "73025da193c76c4555e42bf9df04090cdfab130ef90c46eab1b02f1db7b23538",
+    "stale_preview_id": "0929947c49229420a85f88209ee93cf5c196240b81d5a0790f895ef7b8ae21e7",
+    "saved_head_revision": 2,
+    "saved_head_home_id": "88a889d71d1250ab47445845c2c6d146f71a6d027bf0a89125b58bae0381ceb3",
+    "stale_apply_http_status": 409,
+    "stale_apply_error": "A newer revision exists. Reopen the current design.",
+    "original_revision_unchanged": true
+  },
+  "comparison": {
+    "measurement": "Validated modeled hall route, in meters",
+    "brief": {
+      "width": 15.0,
+      "depth": 16.0,
+      "priority": "balanced",
+      "style": "scandinavian",
+      "room_goals": [
+        {
+          "room": "study",
+          "relation": "far",
+          "target": "living"
+        }
+      ],
+      "formal_salon": true,
+      "compare_tradeoffs": true,
+      "dining_seats": 6,
+      "split_dining": true,
+      "passage_m": 0.6,
+      "seed": 42,
+      "shift_bedroom_chair": false,
+      "closer_study_desk": false,
+      "locks": []
+    },
+    "alternatives": [
+      {
+        "name": "A",
+        "home_id": "5bcb61037489af2ecf9a0ed6e8ab98aa4031b5c27b4e2e946ad264d59fc5cc2b",
+        "comparison": {
+          "routes": [
+            {
+              "room": "study",
+              "target": "living",
+              "distance_m": 13.599
+            },
+            {
+              "room": "kitchen-dining",
+              "target": "salon",
+              "distance_m": 12.874
+            },
+            {
+              "room": "bedroom",
+              "target": "bathroom",
+              "distance_m": 3.724
+            }
+          ],
+          "modeled_openings_m": {
+            "salon": 1.1,
+            "bedroom": 1.1,
+            "living": 1.1,
+            "study": 1.1,
+            "bathroom": 1.1,
+            "kitchen-dining": 1.1
+          },
+          "dining_places": {
+            "salon": 4,
+            "kitchen-dining": 4
+          },
+          "passage_m": 0.6
+        },
+        "room_preferences": [
+          {
+            "room": "living",
+            "target": "study",
+            "relation": "far",
+            "center_distance_m": 13.462
+          }
+        ]
+      },
+      {
+        "name": "B",
+        "home_id": "88b090d3da3bc254f0e4526987c23784a4a1f0f1d7782c7c8584930f476c0bdd",
+        "comparison": {
+          "routes": [
+            {
+              "room": "study",
+              "target": "living",
+              "distance_m": 8.622
+            },
+            {
+              "room": "kitchen-dining",
+              "target": "salon",
+              "distance_m": 7.992
+            },
+            {
+              "room": "bedroom",
+              "target": "bathroom",
+              "distance_m": 14.118
+            }
+          ],
+          "modeled_openings_m": {
+            "salon": 1.1,
+            "living": 1.1,
+            "bedroom": 1.1,
+            "bathroom": 1.1,
+            "kitchen-dining": 1.1,
+            "study": 1.1
+          },
+          "dining_places": {
+            "salon": 4,
+            "kitchen-dining": 4
+          },
+          "passage_m": 0.6
+        },
+        "room_preferences": [
+          {
+            "room": "living",
+            "target": "study",
+            "relation": "far",
+            "center_distance_m": 10.025
+          }
+        ]
+      }
+    ],
+    "tradeoffs": [
+      {
+        "pair": [
+          "study",
+          "living"
+        ],
+        "a_minus_b_m": 4.977
+      },
+      {
+        "pair": [
+          "kitchen-dining",
+          "salon"
+        ],
+        "a_minus_b_m": 4.882
+      },
+      {
+        "pair": [
+          "bedroom",
+          "bathroom"
+        ],
+        "a_minus_b_m": -10.394
+      }
+    ]
+  },
+  "evidence_scope": {
+    "provider_calls": 0,
+    "layout_and_lock": "Deterministic application replay",
+    "stale_edit": "Town HTTP handlers through Starlette TestClient with isolated SQLite and the public showcase fixture",
+    "runtime_tests_passed": 136,
+    "test_files": [
+      "tests/test_town.py",
+      "tests/test_town_live_quality.py",
+      "tests/test_town_conference_scenarios.py",
+      "tests/test_style_packs.py"
+    ]
+  },
+  "tested_runtime_patch_commit": "10dfd4e77455b5cbea9f69c6a005a0ae809fa59f"
+}
