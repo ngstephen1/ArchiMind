@@ -383,13 +383,21 @@ def draw_study(board, report):
     for index, finding in enumerate(report["physical_findings"]):
         _text(svg, 40, 654 + 20 * index, finding, 14, INK)
     if observed:
-        _text(svg, 40, 718, f"Observed pullback · {observed['pullback_m']:.3f} m", 14)
+        target = report["states"][0]["min_passage_m"]
+        _text(
+            svg,
+            40,
+            718,
+            f"Observed pullback · {observed['pullback_m']:.3f} m · "
+            f"Observed passage target {target} m",
+            14,
+        )
         for index, (state, check) in enumerate(observed["passages"].items()):
             _text(
                 svg,
                 40 + index * 380,
                 742,
-                f"{state.title()} · {check['width_m']:.3f} m · {check['status']}",
+                f"{state.title()} · {check['width_m']} m · {check['status']}",
                 14,
             )
     return ET.tostring(svg, encoding="unicode")

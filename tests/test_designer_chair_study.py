@@ -175,5 +175,8 @@ def test_observed_passage_stays_separate_from_modeled_clearance(board):
         },
     }
     assert "Observed pullback · 0.210 m" in draw_study(board, report)
-    assert "Pulled-Back · 0.420 m · below target" in draw_study(board, report)
+    assert "Pulled-Back · 0.42 m · below target" in draw_study(board, report)
     assert "observed_operation" not in chair_study(board)
+    precise = draw_study(board, chair_study(board, record=record, passage_m=0.604))
+    assert "Observed passage target 0.604 m" in precise
+    assert "Occupied · 0.6 m · below target" in precise
