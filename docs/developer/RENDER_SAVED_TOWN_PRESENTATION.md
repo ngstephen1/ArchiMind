@@ -65,7 +65,7 @@ Dispatch the Studio Home workflow with `fresh_home=true` and `lighting_proof=tru
 ```bash
 rev=2
 pin=85cd2c548a96a0f62127891bb0adc6d92f75fbf2
-gh workflow run studio-home.yml \
+gh workflow run studio-home.yml --ref "$(git branch --show-current)" \
   -f fresh_home=true -f lighting_proof=true -f salon_cover=true \
   -f approved_proof_run=45130362035 \
   -f manifest_source="$pin:docs/data/nov24-fresh-live/manifest-r$rev.json" \

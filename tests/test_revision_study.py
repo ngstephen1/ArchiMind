@@ -201,3 +201,15 @@ def test_matched_hd_receipts_without_room_field(
     assert (
         len(MODULE["matched_frames"](boards, receipts, (one, two), eyes)["desk"]) == 2
     )
+
+
+def test_living_room_book_uses_distinct_saved_cameras():
+    select = runpy.run_path(str(ROOT / "scripts/publish_studio_board.py"))[
+        "living_room_views"
+    ]
+    board = json.loads(
+        (ROOT / "docs/data/nov24-fresh-live/manifest-r2.json").read_bytes()
+    )
+    views = next(p["cameras"] for p in board["rooms"] if p["room"]["id"] == "living")
+    assert [view["id"] for view in select(views, {})] == ["overview", "media-console"]
+    assert [view["id"] for view in select(views[:2], {})] == ["overview"]
