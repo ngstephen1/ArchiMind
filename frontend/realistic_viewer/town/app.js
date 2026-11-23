@@ -6,7 +6,7 @@ import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
-import { asksChairChange, explanation, isSavedDesignQuestion } from "./explanation.js";
+import { asksChairChange, asksZoningTradeoff, explanation, isSavedDesignQuestion } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
@@ -936,7 +936,7 @@ el("askWhy").onclick = async () => {
   const serial = ++questionSerial, generation = boardGeneration;
   const question = el("whyQuery").value, manifest = evidenceManifest;
   let previous = null;
-  if (asksChairChange(question) && manifest?.revision > 1) {
+  if ((asksChairChange(question) || asksZoningTradeoff(question)) && manifest?.revision > 1) {
     el("whyAnswer").textContent = "Checking the previous saved revision…";
     try {
       previous = await api("/projects/" + encodeURIComponent(manifest.project) + "?revision=" + (manifest.revision - 1));
