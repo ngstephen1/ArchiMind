@@ -644,3 +644,22 @@ def test_each_room_lock_quotes_its_own_statement():
         ]
         == "interpreted"
     )
+
+
+@pytest.mark.parametrize("timing", ["for now", "after all", "this time"])
+def test_salon_room_cancellation_can_have_a_timing_qualifier(timing):
+    message = f"Include a formal salon. Skip the salon {timing}."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and not brief.formal_salon
+
+
+def test_exact_where_wording_cites_an_explicit_lock():
+    message = "Keep the bedroom exactly where it is."
+    brief = Brief(locks=["bedroom"])
+    assert {
+        "requirement": "Keep bedroom",
+        "origin": "brief",
+        "statement": message,
+    } in review_summary(brief, message=message)["sources"]
