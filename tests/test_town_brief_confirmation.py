@@ -520,3 +520,32 @@ def test_negative_salon_statement_is_not_cited(saved_home):
         "origin": "saved revision",
         "statement": None,
     } in review["sources"]
+
+
+def test_opening_modifiers_can_continue_a_preservation_request():
+    message = "Keep the bedroom window and original study door."
+    (question,) = opening_questions(message, locks=("bedroom",))
+    assert "keep original study door" in question
+
+
+def test_offsite_meal_does_not_override_home_seating():
+    message = (
+        "Two hosts and four guests will have breakfast off-site. Four dining places."
+    )
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, dining_seats=4), message, None
+    )
+    assert not questions and brief.dining_seats == 4
+
+
+def test_review_quotes_a_standalone_salon_request():
+    message = "Formal salon"
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert brief.formal_salon and not questions
+    assert {
+        "requirement": "Formal salon",
+        "origin": "brief",
+        "statement": message,
+    } in review_summary(brief, message=message)["sources"]

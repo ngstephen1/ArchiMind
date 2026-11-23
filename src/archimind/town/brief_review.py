@@ -54,7 +54,12 @@ DINING_CONTEXT = (
     r"\b(?:seats?|seating|places|dining|dine|diners?|dinner|tables?|"
     r"eat\s+together|(?:share|have)\s+(?:a\s+)?(?:meal|lunch|breakfast))\b"
 )
-SALON_REQUEST = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
+OFFSITE_MEAL = r"\b(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
+DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
+SALON_REQUEST = (
+    r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
+    r"|^\s*(?:a\s+)?formal salon(?:,?\s+please)?[.!?]?\s*$"
+)
 
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
@@ -69,7 +74,8 @@ OPENING_VERB = r"keep|preserve|move|relocate|shift|add|remove|block|widen|enlarg
 OPENING_REQUEST = r"\b(" + OPENING_VERB + ")" + r"\s+" + OPENING_OBJECT
 COORDINATED_OPENING = re.compile(
     r"(?:\s*,\s*(?:(?:and|or)\s+)?|\s+(?:and|or)\s+)"
-    + r"(?=(?:the|a|an|that|those|its|existing|all|both|another|"
+    + r"(?=(?:the|a|an|that|those|its|existing|original|current|historic|front|back|"
+    r"rear|side|main|north|south|east|west|all|both|another|"
     + ROOM_NAMES
     + r"|doors?|doorways?|windows?|openings?)\b)"
     + OPENING_OBJECT
@@ -146,7 +152,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
     dining = ". ".join(
-        clause for clause in clauses if re.search(DINING_CONTEXT, clause)
+        clause
+        for clause in clauses
+        if re.search(DINING_CONTEXT, clause)
+        and (not re.search(OFFSITE_MEAL, clause) or re.search(DIRECT_SEATING, clause))
     )
     salon = (
         brief.formal_salon
