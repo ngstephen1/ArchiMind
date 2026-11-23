@@ -59,22 +59,36 @@ GROUP = (
     COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
 )
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
-COUNT_AT_TABLE = (
-    COUNT
-    + r"\s+(?:(?:people|diners|guests|hosts|residents|seats|places)\s+)?(?:at|around) "
+TABLE_ALLOCATION = (
+    GROUPS
+    + r"|"
+    + COUNT
+    + r"(?:\s+(?:people|persons?|diners?|guests?|hosts?|residents?|seats|places))?"
 )
+TABLE_POSITION = r"\s+(?:at|around) "
+FIRST_TABLE = (
+    r"(?P<first>"
+    + TABLE_ALLOCATION
+    + r")"
+    + TABLE_POSITION
+    + r"(?:one|a single|the same) (?:dining )?table\s*,?\s+and\s+(?:seat\s+)?"
+    + r"(?P<second>"
+    + TABLE_ALLOCATION
+    + r")"
+    + TABLE_POSITION
+)
+TABLE_BOUNDARY = r"(?=\s*(?:$|[,.!?;]|in\b|for (?:breakfast|lunch|dinner)\b))"
 SEPARATE_TABLE_COUNTS = re.compile(
-    COUNT_AT_TABLE
-    + r"one table\s*,?\s+and\s+"
-    + COUNT_AT_TABLE
+    FIRST_TABLE
     + r"(?:the )?(?:other|second)\b(?: (?:dining )?table\b|"
-    r"(?=\s*(?:$|[,.!?;]|in\b)))"
+    + TABLE_BOUNDARY
+    + r")"
 )
 SAME_TABLE_ENDS = re.compile(
-    COUNT_AT_TABLE
-    + r"(?:one|a single|the same) (?:dining )?table\s*,?\s+and\s+(?:seat\s+)?"
-    + COUNT_AT_TABLE
-    + r"the other (?:end|side)(?: of (?:it|the table)\b|(?=\s*(?:$|[,.!?;]|in\b)))"
+    FIRST_TABLE
+    + r"the other (?:end|side)\b(?: of (?:it|the table)\b|"
+    + TABLE_BOUNDARY
+    + r")"
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
@@ -150,6 +164,13 @@ COORDINATED_OPENING = re.compile(
 
 def _join_wrapped_qualifiers(message):
     """Keep a line-wrapped location or scope qualifier with its requirement."""
+    for allocations in (SAME_TABLE_ENDS, SEPARATE_TABLE_COUNTS):
+        message = re.sub(
+            allocations.pattern,
+            lambda match: re.sub(r"[ \t]*\r?\n[ \t]*", " ", match[0]),
+            message,
+            flags=re.IGNORECASE,
+        )
     return re.sub(
         r"(?<=[^.!?;\s])[ \t]*\r?\n[ \t]*"
         r"(?="
@@ -257,9 +278,13 @@ def _seat_count(value):
     return int(value) if value.isdecimal() else NUMBERS[value]
 
 
+def _allocation_count(text):
+    return sum(_seat_count(number[1]) for number in re.finditer(COUNT, text))
+
+
 def _normalize_table_ends(text):
     def combine(match):
-        total = sum(_seat_count(value) for value in match.groups())
+        total = _allocation_count(match["first"]) + _allocation_count(match["second"])
         return f"{total} seats at a single table"
 
     return SAME_TABLE_ENDS.sub(combine, text)
@@ -339,12 +364,21 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             )
     per_table = []
     split_counts = SEPARATE_TABLE_COUNTS.search(dining)
-    each_table = re.search(COUNT_AT_TABLE + r"each(?: of the two)? tables?\b", dining)
+    each_table = re.search(
+        r"(?P<count>"
+        + TABLE_ALLOCATION
+        + ")"
+        + TABLE_POSITION
+        + r"each(?: of the two)? tables?\b",
+        dining,
+    )
     if split_counts:
-        per_table = [_seat_count(value) for value in split_counts.groups()]
+        per_table = [
+            _allocation_count(split_counts[name]) for name in ("first", "second")
+        ]
         dining = dining[: split_counts.start()] + " " + dining[split_counts.end() :]
     elif each_table:
-        per_table = [_seat_count(each_table[1])] * 2
+        per_table = [_allocation_count(each_table["count"])] * 2
         dining = dining[: each_table.start()] + " " + dining[each_table.end() :]
     if per_table:
         totals.add(sum(per_table))

@@ -1120,6 +1120,38 @@ def test_same_table_seats_are_not_an_additional_headcount():
     assert not questions and brief.dining_seats == 4 and not brief.split_dining
 
 
+@pytest.mark.parametrize(
+    "qualifier", ["the other for dinner", "the other end for dinner"]
+)
+@pytest.mark.parametrize("separator", [" and ", "\nand seat "])
+def test_counted_seating_keeps_both_allocations_with_a_meal_qualifier(
+    qualifier, separator
+):
+    single = "end" in qualifier
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Seat four guests at one table" + separator + "two at " + qualifier + ".",
+        None,
+    )
+    assert brief.dining_seats == 6 and brief.split_dining is not single
+    assert bool(questions) is single
+
+
+@pytest.mark.parametrize(("first", "total"), [("one host", 4), ("three hosts", 6)])
+def test_same_table_retains_every_group_at_each_end(first, total):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"For dinner, {first} and two guests at a single table and one at the other end of it.",
+        None,
+    )
+    assert not questions and brief.dining_seats == total and not brief.split_dining
+    if total > 4:
+        with pytest.raises(ValueError, match="four places at one table"):
+            check_brief(brief)
+    else:
+        check_brief(brief)
+
+
 def test_a_wrapped_opening_list_still_checks_the_second_room():
     text = "Keep the bedroom door\nand the study window."
     assert len(opening_questions(text, ["bedroom"])) == 1
