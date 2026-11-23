@@ -1389,6 +1389,17 @@ def test_keep_home_seats_with_offsite_timing_qualifier(sequence):
         check_brief(brief)
 
 
+def test_table_allocation_can_refer_back_to_an_offsite_timing_venue():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "At home, we need four dining seats before we have dinner at a restaurant "
+        "and seat six guests there.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4
+    check_brief(brief)
+
+
 def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),

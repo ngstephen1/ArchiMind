@@ -363,15 +363,24 @@ def _home_meal_clauses(clause):
     starts = [0, *(match.end() for match in boundaries)]
     ends = [*(match.start() for match in boundaries), len(clause)]
     segments = [clause[start:end] for start, end in zip(starts, ends, strict=True)]
-    scopes = [_dining_scope(segment) for segment in segments]
+    scopes = []
+    preceding_offsite = False
+    for segment in segments:
+        scope = _dining_scope(segment, preceding_offsite=preceding_offsite)
+        scopes.append(scope)
+        # A timing clause may introduce the venue for a later "there",
+        # even when it does not set the venue of the current request.
+        timing = DINING_ACTIVITY_END.search(segment)
+        preceding_offsite = scope[2] or bool(
+            timing and re.search(OFFSITE_MEAL, segment[timing.end() :])
+        )
     if not any(offsite for _, _, offsite in scopes):
         # An off-site meal mentioned only as a time reference does not give
         # the seating request a separate venue.
         yield from (activity for activity, _, _ in scopes)
         return
-    home = offsite = False
-    for segment in segments:
-        activity, at_home, offsite = _dining_scope(segment, preceding_offsite=offsite)
+    home = False
+    for activity, at_home, offsite in scopes:
         if offsite:
             home = False
         elif at_home:
