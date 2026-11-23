@@ -128,6 +128,26 @@ def requirement_controls(brief, message, previous):
     dining = ". ".join(_affirmative_clauses(message))
     totals = set()
     questions = []
+    if brief.compare_tradeoffs and not (
+        brief.formal_salon
+        or any(
+            part["design"]["room"]["id"] == "salon"
+            for part in (previous or {}).get("rooms", ())
+        )
+    ):
+        kitchen_table = re.search(
+            COUNT
+            + PARTY
+            + r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table"
+            + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
+            dining,
+        )
+        if kitchen_table:
+            questions.append(
+                f"The brief requests {count(kitchen_table[1])} dining places in the kitchen-dining room. "
+                "The five-room program has no modeled dining table there. "
+                "Confirm the six-room program or revise the seating requirement."
+            )
     per_table = []
     count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
     split_counts = re.search(

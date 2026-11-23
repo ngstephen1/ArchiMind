@@ -318,3 +318,20 @@ def test_ambiguous_furniture_lock_publishes_a_reviewed_brief(saved_home, monkeyp
     with pytest.raises(service.BriefClarification, match="furniture to lock") as exc:
         service.interpret(request, saved_home)
     assert exc.value.reviewed["status"] == "needs confirmation"
+
+
+def test_kitchen_seating_without_a_modeled_table_requires_review():
+    request = service.Request(
+        project=uuid.uuid4(),
+        id=uuid.uuid4(),
+        base=0,
+        brief=Brief(width=15, depth=16, compare_tradeoffs=True),
+        message="Seat four people at a single table in the kitchen-dining room.",
+        live=True,
+    )
+    with pytest.raises(
+        service.BriefClarification, match="4 dining places in the kitchen-dining"
+    ) as error:
+        service.interpret(request, None)
+    assert error.value.reviewed["status"] == "needs confirmation"
+    assert "five-room program" in error.value.reviewed["questions"][0]
