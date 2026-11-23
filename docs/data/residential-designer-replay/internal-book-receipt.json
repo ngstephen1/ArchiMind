@@ -1,0 +1,68 @@
+{
+  "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+  "displacement_m": 0.2999999999999998,
+  "revisions": [
+    {
+      "revision": 2,
+      "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+      "manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+      "chair_xy_m": [
+        3.72,
+        1.1618731772899629
+      ],
+      "chair_home_xy_m": [
+        3.72,
+        7.2508731772899635
+      ],
+      "chair_desk_gap_m": 0.3600000000000001,
+      "desk_center_to_window_midpoint_m": 4.460108097818034,
+      "window_wall": "west",
+      "desk_id": "belaya",
+      "chair_id": "desk-chair",
+      "window_id": "bedroom-window"
+    },
+    {
+      "revision": 3,
+      "home_id": "aa7a27815efc2bc4c38b0017a4896255df923789974273f4ac2a35a182960182",
+      "manifest_sha256": "a503cabfb2d29c996b9eec354cff2ab6d7328a0567eb84ec66e81f7cb424c32e",
+      "chair_xy_m": [
+        3.72,
+        1.461873177289963
+      ],
+      "chair_home_xy_m": [
+        3.72,
+        7.550873177289963
+      ],
+      "chair_desk_gap_m": 0.6600000000000001,
+      "desk_center_to_window_midpoint_m": 4.460108097818034,
+      "window_wall": "west",
+      "desk_id": "belaya",
+      "chair_id": "desk-chair",
+      "window_id": "bedroom-window"
+    }
+  ],
+  "images": {
+    "doorway": {
+      "fixed_camera": true,
+      "sha256": [
+        "b56dd8922a1a922415d6c4774ad2d976661cd9dea3926bb4920c3632cf53bfb6",
+        "129376087a18e2a51c8471cae52d6ee43f7d3780751ecd384481f9ef42a96648"
+      ]
+    },
+    "desk": {
+      "fixed_camera": true,
+      "sha256": [
+        "6868d0bda2936ec6a3aacdddea6460ddca49452a62824bbe50eccd485ba6cb80",
+        "cf23b7ae95fce8aa97dcc3ea9f9b992a1a9c72c1cbfe501c507ed5a8b6833d2c"
+      ]
+    }
+  },
+  "html_sha256": "f38444bb83aaa6ae82bdd73f3762196f7abe33815c3ee5e341babd1159d61662",
+  "book_sha256": "f8eaff60d6aa4a466151c8578e28b33db7f4d92a2929cb9708fb4260cc2f35a3",
+  "page_count": 12,
+  "portfolio_sha256": "8c1128abf220d5c9bfed9aa91d9c219f8e3f4f43b579d7d95a3369aeab526571",
+  "revision": 3,
+  "home_id": "aa7a27815efc2bc4c38b0017a4896255df923789974273f4ac2a35a182960182",
+  "source_receipt_sha256": "65e313b3ced9f04fa021cbad66660960c91bf99d651bf887771877f662c4e246",
+  "before_receipt_sha256": "3383bc7838869a64ab9b447bab34cbc35d73c9c538a6408b83dee7380b6eae58"
+}

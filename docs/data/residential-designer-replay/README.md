@@ -9,3 +9,7 @@ This is an internal technical rehearsal for issue #97. A separate designer must 
 ## Matched Blender views
 
 The [render receipt](matched-camera-receipt.json) records two 1920 × 1080 bedroom views per revision. The doorway pair and desk pair share the exact camera parameters and exposure. The renders were verified against the saved room and image digests. Compare the [revision 2 artifact](https://github.com/ngstephen1/ArchiMind/actions/runs/45249324624) and [revision 3 artifact](https://github.com/ngstephen1/ArchiMind/actions/runs/45248529623) to see the changed chair position.
+
+## Internal comparison book
+
+The [12-page book artifact](https://github.com/ngstephen1/ArchiMind/actions/runs/45253409871) uses those four matched images. Its [book receipt](internal-book-receipt.json) records the PDF digest and image digests. I checked all twelve pages at contact-sheet size and inspected appendix pages 11 and 12 at larger scale. Both pages show the 300 mm chair move and the modeled gap increase from 0.360 m to 0.660 m. This is an internal replay for the independent reviewer.
