@@ -1,0 +1,42 @@
+{
+  "classification": "internal technical replay",
+  "commit": "c3846af5aa51d9a035d74d307a1afe873845a475",
+  "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+  "revisions": [
+    2,
+    3
+  ],
+  "home_ids": [
+    "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+    "aa7a27815efc2bc4c38b0017a4896255df923789974273f4ac2a35a182960182"
+  ],
+  "chair_y_m": [
+    1.1618731772899629,
+    1.461873177289963
+  ],
+  "window_width_m": 1.4,
+  "files": {
+    "internal-r2/drawings/bedroom-elevations.svg": "14be90c312b3e47105cd8d984f6faf57b10d7fccc6d144559c7699e7e34e9423",
+    "internal-r2/drawings/bedroom-plan.svg": "96800848ddb477ea06835f04faa25c9e8c3fece4fc364bb63cdd4a14bed4ad46",
+    "internal-r2/drawings/bedroom-section.svg": "ea39a88dbf3b74e9580c47323206015ef6a3b2bd47bfd0269be3ec592c13327b",
+    "internal-r2/drawings/window-and-bed-head.json": "61aae12ec28dfcba7ba76a1313a0b9cc018ea6c6dd97634afb0111ede13a5303",
+    "internal-r2/drawings/window-and-bed-head.svg": "89f7e867abdb06f5780e82276c4b84afbe6bac59ac833ade038df299e39fed8d",
+    "internal-r2/manifest.json": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+    "internal-r2/procurement/cost-summary.json": "fe303e23ff304954818fc42e8c14a34926a8bd1cf45b1f1c060ebd09f02f5c7b",
+    "internal-r2/procurement/finishes-schedule.csv": "0411c7dad78b8c82312d6bd014f90cdcde9b88356dfd7394ed12805b4d9df7be",
+    "internal-r2/procurement/furniture-schedule.csv": "03bc3a66dabac300e56e767d17673b6a6cd8c41938caf70348c99ff2608b3e40",
+    "internal-r2/procurement/operational-checks.csv": "c71242211e9ed4d1968eecb92e89497af16042a7c18f3658890141997327c62a",
+    "internal-r2/snapshot.json": "71ad868c434ec3008d65aa4f86650324db51a73e16dd2b3260d10cf04ba5760c",
+    "internal-r3/drawings/bedroom-elevations.svg": "61a9e93ee1acb8387a1a2d55094b97df49854bb59c48ebeca98301450da6a35e",
+    "internal-r3/drawings/bedroom-plan.svg": "63c71ead8d8a1be144bdefbe5b8ee07575c92ff26b48cb4b1154c5369beed783",
+    "internal-r3/drawings/bedroom-section.svg": "b6852795e21517fba47fa10639f74ba955d1b987f5046ced41acc2622f6c45f6",
+    "internal-r3/drawings/window-and-bed-head.json": "845a68fe9f7395c8fe9ef536102359333d06b32457b0d4cf837f8ffa96f2fe19",
+    "internal-r3/drawings/window-and-bed-head.svg": "2f2b5772bb26b183b8558961d4c65501ac970d993f87cf1dc9236bd1a40da26d",
+    "internal-r3/manifest.json": "a503cabfb2d29c996b9eec354cff2ab6d7328a0567eb84ec66e81f7cb424c32e",
+    "internal-r3/procurement/cost-summary.json": "e5bad37eaad1f2c7cb555a35d40363febebfce197204a93c405688551353406a",
+    "internal-r3/procurement/finishes-schedule.csv": "0222ce24173c358ef454b92e021af14e99997ce65eeca02b5986f12c924c1fbe",
+    "internal-r3/procurement/furniture-schedule.csv": "74fa55183232937c555202559bc5c74df1e4e892f4329bfccf6173df2510fa13",
+    "internal-r3/procurement/operational-checks.csv": "d79386e6f210b5fb816db350a481c3851d2c067b3225cc015b1972e168d75e88",
+    "internal-r3/snapshot.json": "8cfa13e5770bc6d3263600cc6a3310c92727036913e5da32aceae2eddd9235e6"
+  }
+}
