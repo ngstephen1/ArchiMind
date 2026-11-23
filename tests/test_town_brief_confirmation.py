@@ -909,3 +909,35 @@ def test_combined_seating_citation_omits_unrelated_study_preference():
         "origin": "brief",
         "statement": "Four seats in the salon.\nTwo seats in the kitchen.",
     } in review_summary(brief, message=text)["sources"]
+
+
+def test_five_room_correction_overrides_a_model_salon_even_after_another_preference(
+    monkeypatch,
+):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(service.provider, "request", live_answer(formal_salon=True))
+    text = "Include a formal salon. Use oak floors. Actually, no, keep the five standard rooms."
+    request = review_request(text, live=True, width=15, depth=16)
+    assert not service.interpret(request, None).formal_salon
+    checked = review_request(text, live=True, width=15, depth=16, formal_salon=True)
+    with pytest.raises(service.BriefClarification, match="Confirm the five-room"):
+        service.interpret(checked, None)
+
+
+def test_width_cue_after_fixture_endpoints_needs_clarification():
+    text = "Keep a 90 cm route between the kitchen island and the counters, measured across the open gap."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("90 cm clearance between specific objects" in item for item in questions)
+
+
+def test_combined_seating_quote_preserves_a_semicolon_without_spaces():
+    text = "Four seats in the salon;Two seats in the kitchen."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6
+    assert {
+        "requirement": "6 dining places across two tables",
+        "origin": "brief",
+        "statement": text,
+    } in review_summary(brief, message=text)["sources"]

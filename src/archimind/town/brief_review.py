@@ -47,6 +47,10 @@ FIXED_PASSAGE = (
     + r"\s+(?:width\s+)?(?:of |at least |of at least )?"
     + MEASUREMENT
     + r")(?:\s+wide)?\s+between\b"
+    + r"|"
+    + MEASUREMENT
+    + r"\s+routes?\s+between\b[^.;!?\n]*"
+    + r"\b(?:measured\s+)?across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
 PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
@@ -69,9 +73,10 @@ OFFSITE_MEAL = (
 )
 SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
 SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
+FIVE_STANDARD_ROOMS = r"\b(?:keep|use) (?:the )?five standard rooms\b"
 SALON_DECLINE = (
-    r"\s*(?:(?:actually|no),\s*)?"
-    r"(?:no|not (?:needed|required|wanted)|"
+    r"\s*(?:(?:actually|no),\s*){0,2}"
+    r"(?:no|not (?:needed|required|wanted)|" + FIVE_STANDARD_ROOMS + r"|"
     r"leave (?:it|(?:the )?(?:formal )?salon) out|"
     r"(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
     r"(?:no|without) (?:a |the )?(?:formal )?salon)"
@@ -128,11 +133,12 @@ def _affirmative_clauses(message):
     ]
 
 
-def _salon_statement(message):
-    """Return the original affirmative clause that requires the optional room."""
+def salon_choice(message):
+    """Return the last explicit program decision and its source, when recognized."""
     sentences = re.split(SALON_SEGMENT_BREAK, message)
     following_sentences = sentences[1:] + [""]
     continuations = [*sentences, "", ""][2:]
+    decision = None
     statement = None
     conditional_correction = False
     previous = ""
@@ -146,18 +152,20 @@ def _salon_statement(message):
             not conditional_correction
             and re.match(SALON_DECLINE, sentence.lower())
             and (
-                re.search(r"\bsalon\b", sentence, re.IGNORECASE)
-                or previous == statement
+                re.search(r"\bsalon\b|" + FIVE_STANDARD_ROOMS, sentence, re.IGNORECASE)
+                or (decision is True and previous == statement)
             )
         ):
-            statement = None
+            decision = False
+            statement = sentence.strip()
         conditional_correction = bool(wrapped_condition)
         if re.fullmatch(SALON_ONLY, sentence.strip().lower()) or any(
             re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(sentence)
         ):
+            decision = True
             statement = sentence.strip()
         previous = sentence.strip()
-    return statement
+    return decision, statement
 
 
 def _dining_clauses(clauses):
@@ -233,16 +241,19 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
     dining = ". ".join(_dining_clauses(clauses))
-    salon = (
-        brief.formal_salon
-        or any(
-            part["design"]["room"]["id"] == "salon"
-            for part in (previous or {}).get("rooms", ())
-        )
-        or bool(_salon_statement(message))
+    program, _ = salon_choice(message)
+    existing_salon = brief.formal_salon or any(
+        part["design"]["room"]["id"] == "salon"
+        for part in (previous or {}).get("rooms", ())
     )
+    salon = existing_salon or program is True
     totals = set()
     questions = []
+    if brief.compare_tradeoffs and existing_salon and program is False:
+        questions.append(
+            "The controls or saved revision include a formal salon. Confirm the five-room "
+            "program in a new brief, or keep the formal salon."
+        )
     per_table = []
     count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
     split_counts = re.search(
@@ -613,7 +624,7 @@ def _dining_quote(brief, message):
         if any(_dining_clauses(_affirmative_clauses(sentence))):
             gap = message[end:start]
             if excerpts:
-                excerpts.append(gap if gap.isspace() else "\n")
+                excerpts.append(gap if not gap.strip() else "\n")
             excerpts.append(sentence)
             end = start + len(sentence)
     combined = "".join(excerpts).strip()
@@ -718,14 +729,14 @@ def review_summary(
         ),
     )
     if brief.formal_salon:
-        salon_statement = _salon_statement(message)
+        salon_requested, salon_statement = salon_choice(message)
         require(
             "Formal salon",
             None,
             "formal_salon",
             inherited="salon" in saved_rooms,
             interpreted=True,
-            quote=salon_statement,
+            quote=salon_statement if salon_requested else None,
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
