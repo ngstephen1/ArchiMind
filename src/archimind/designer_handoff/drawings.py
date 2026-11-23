@@ -48,7 +48,7 @@ def _rect(parent, x, y, w, h, fill, stroke=INK, **attrs):
     )
 
 
-def _sheet(board, provenance, title, sheet_no, h=760):
+def _sheet(board, provenance, title, sheet_no, h=760, *, source_label=None):
     svg = ET.Element(
         "svg",
         {
@@ -77,7 +77,7 @@ def _sheet(board, provenance, title, sheet_no, h=760):
     )
     _line(svg, 40, 55, 1130, 55, MUTED)
     _text(svg, 40, 105, title, 38).set("font-family", "Georgia, serif")
-    source = (
+    source = source_label or (
         "Studio House demonstration geometry"
         if provenance == "demonstration"
         else "Selected design linked to supplied survey"
