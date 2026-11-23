@@ -4,8 +4,9 @@ The ordinary Town UI started from a fresh local database on November 23, 2026.
 It submitted the synthetic brief at [`e0d70e8`](https://github.com/ngstephen1/ArchiMind/commit/e0d70e816e77574568f4c726e1af743c21c7ee2d)
 and returned two validated alternatives in **8.56 seconds**. Interpretation,
 styling and visual critique each made one model request and completed. The
-15 × 16 m lot, six seats across two tables, and 0.65 m modeled passage
-survived generation. [Browser receipt](receipt.json) · [Worker events](events.json)
+15 × 16 m lot, the requirement for six seats across two tables and the
+0.65 m modeled passage survived generation. Both layouts modeled four
+places in the salon and four in the kitchen-dining room. [Browser receipt](receipt.json) · [Worker events](events.json)
 
 The measured hall route from study to living room was 8.62 m for Layout A and
 3.25 m for B. The route from kitchen-dining to salon was 7.99 m for A and
@@ -42,13 +43,20 @@ requests and ran against the replay code already on main at `9adf26f`.
 ## Reopen both revisions
 
 After the [Town setup](../../../README.md#quick-start), run from the repository
-root. The temporary directory links the four archived inputs under the names
-the replay builder expects. It checks the snapshot and manifest bytes before
-opening an isolated local database with both AI providers disabled.
+root with Bash or Zsh and `shasum` on `PATH`. Stop any other Town launcher
+running from that checkout first. A second launcher in the same checkout
+would overwrite the persisted API and editor URLs. Run concurrent launchers
+from separate checkouts.
+
+The command checks the four archived files against their SHA-256 digests.
+The replay builder also validates each saved home and reproduces its
+manifest before opening an isolated local database with both AI providers
+disabled.
 
 ```bash
 replay_dir=$(mktemp -d) &&
 repo_data="$PWD/docs/data/nov24-fresh-live" &&
+(cd "$repo_data" && shasum -a 256 -c SHA256SUMS.txt) &&
 ln -s "$repo_data/snapshot-r1.json" "$replay_dir/snapshot-r1.json" &&
 ln -s "$repo_data/snapshot-r2.json" "$replay_dir/snapshot-r2.json" &&
 ln -s "$repo_data/manifest-r1.json" "$replay_dir/before.json" &&
