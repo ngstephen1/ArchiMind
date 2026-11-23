@@ -31,6 +31,7 @@ from archimind.style_packs.scene import style_payload
 from archimind.town.service_layout import (
     FIXTURES,
     design_service_room,
+    kitchen_depth_for_passage,
     service_evidence,
 )
 
@@ -540,7 +541,22 @@ def check_brief(brief, previous=None):
     _requirement_boundaries(brief, previous)
 
 
+def dining_capacity(*, salon, services, split):
+    if salon and split:
+        return 8
+    return 4 if salon or services else 0
+
+
 def _requirement_boundaries(brief, previous):
+    has_saved_services = bool((previous or {}).get("service_layout"))
+    if brief.service_layout and not has_saved_services:
+        conflicts = sorted(set(brief.locks).intersection(FIXTURES))
+        if conflicts:
+            raise ValueError(
+                "Unlock rooms before adding kitchen and bathroom fixtures: "
+                + ", ".join(conflicts)
+                + "."
+            )
     pairs = {}
     for goal in brief.room_goals:
         pair = tuple(sorted((goal.room, goal.target)))
@@ -618,8 +634,10 @@ def _requirement_boundaries(brief, previous):
         and not any(p["design"]["room"]["id"] == "salon" for p in previous["rooms"])
     ):
         raise ValueError("Adding a salon requires repartitioning. Unlock rooms first.")
-    if brief.dining_seats and (
-        not salon or brief.dining_seats > (8 if brief.split_dining else 4)
+    if brief.dining_seats > dining_capacity(
+        salon=salon,
+        services=brief.service_layout or has_saved_services,
+        split=brief.split_dining,
     ):
         raise ValueError(
             "Dining requires up to four places at one table, or up to eight across the two dining rooms after explicit confirmation. Review the seating requirement."
@@ -666,6 +684,14 @@ def generate(brief, previous=None, *, on_progress=None):
             x = 0 if side == 0 else hall + 1.6
             w = hall if side == 0 else brief.width - x
             weights = [rng.uniform(0.9, 1.2) if k != "bathroom" else 0.78 for k in row]
+            if services and "kitchen-dining" in row:
+                kitchen_index = row.index("kitchen-dining")
+                kitchen_depth = kitchen_depth_for_passage(brief.passage_m)
+                if brief.depth * weights[kitchen_index] < kitchen_depth * sum(weights):
+                    other_weight = sum(weights) - weights[kitchen_index]
+                    weights[kitchen_index] = (
+                        kitchen_depth * other_weight / (brief.depth - kitchen_depth)
+                    )
             y = 0
             for n, (k, weight) in enumerate(zip(row, weights)):
                 h = (
@@ -769,7 +795,7 @@ def generate(brief, previous=None, *, on_progress=None):
             room_seed = rng.randrange(100000)
             if services and k in FIXTURES:
                 try:
-                    design = design_service_room(r)
+                    design = design_service_room(r, passage_m=brief.passage_m)
                 except ValueError:
                     break
             else:

@@ -29,6 +29,7 @@ from archimind.town.design import (
     Kind,
     RoomGoal,
     check_brief,
+    dining_capacity,
     interpret_offline,
 )
 
@@ -434,9 +435,11 @@ def _interpret(req, previous):
         )
         if brief.compare_tradeoffs:
             question = ""
-            if brief.dining_seats and (
-                not brief.formal_salon
-                or brief.dining_seats > (8 if brief.split_dining else 4)
+            if brief.dining_seats > dining_capacity(
+                salon=brief.formal_salon,
+                services=brief.service_layout
+                or bool((previous or {}).get("service_layout")),
+                split=brief.split_dining,
             ):
                 if brief.dining_seats > 4 and requests_single_table(req.message):
                     question = (

@@ -18,6 +18,7 @@ from starlette.staticfiles import StaticFiles
 
 from . import designer_chair, render_queue
 from . import service as db
+from .service_drawings import service_study
 
 
 def identity(request):
@@ -76,6 +77,23 @@ def handle(request, data):
             return FileResponse(asset, filename=asset.name)
         raise db.Problem("Render action unavailable.", 404)
     with db.transaction() as q:
+        if (
+            len(path) == 3
+            and path[0] == "projects"
+            and path[2] == "service-study"
+            and request.method == "GET"
+        ):
+            p = path[1]
+            db.project(q, owner, p)
+            n = int(request.query_params.get("revision", "0"))
+            if n < 1:
+                raise db.Problem("Select a saved revision.")
+            home = db.revision(q, p, n)
+            if not home.get("service_layout"):
+                raise db.Problem(
+                    "This revision has no kitchen and bathroom fixture program.", 404
+                )
+            return {"home_id": home["id"], "drawings": service_study(p, n, home)}
         if (
             len(path) == 4
             and path[0] == "projects"

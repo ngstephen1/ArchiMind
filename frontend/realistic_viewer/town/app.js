@@ -690,6 +690,35 @@ function showExport(manifest, hash, studio, studioHash) {
   const whole=node("a","Download whole-home scene manifest");
   whole.href=homeUrl; whole.download="home-r"+revision+"-"+boardHome.id.slice(0,12)+".json";
   el("boardExports").replaceChildren(manifestLink, node("p",""),whole);
+  if (boardHome.service_layout) {
+    const section = node("div", "");
+    const button = node("button", "Prepare kitchen and bathroom drawings");
+    button.type = "button";
+    const selectedHomeId = boardHome.id;
+    button.onclick = async () => {
+      button.disabled = true;
+      try {
+        const study = await api("/projects/" + encodeURIComponent(manifest.project) +
+          "/service-study?revision=" + manifest.revision);
+        if (study.home_id !== selectedHomeId) throw Error("The drawings did not match this revision.");
+        const list = node("ul", "");
+        for (const [file, svg] of Object.entries(study.drawings)) {
+          const link = node("a", file);
+          link.href = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+          link.download = "r" + manifest.revision + "-" + file;
+          const row = node("li", "");
+          row.append(link);
+          list.append(row);
+        }
+        section.replaceChildren(list);
+      } catch (error) {
+        button.disabled = false;
+        section.replaceChildren(button, node("p", error.message));
+      }
+    };
+    section.append(button);
+    el("boardExports").append(section);
+  }
   const studioRelease = publicationFor(studio, studioHash, [...studioShowcasePublications, ...conferencePublications]);
   if (studioRelease) {
     const pdf = node("a", "Open the whole-home client book (PDF)");

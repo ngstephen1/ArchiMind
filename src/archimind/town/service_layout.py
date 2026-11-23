@@ -2,9 +2,12 @@
 
 from dataclasses import dataclass
 
+from shapely.geometry import box
+
 from archimind.geometry import validate_accessibility
 from archimind.geometry.accessibility import AccessibilityConfig
-from archimind.models import Furniture, Room, RoomDesign
+from archimind.geometry.footprints import furniture_footprint, room_footprint
+from archimind.models import Door, Furniture, Room, RoomDesign
 
 
 @dataclass(frozen=True)
@@ -34,9 +37,46 @@ FIXTURES = {
 
 DINING_RESERVATION = (1.75, 2.4, 0.87)
 FIXTURE_GAP_M = 0.15
+DINING_WALL_GAP_M = 0.12
+INWARD = {"south": (0, 1), "north": (0, -1), "west": (1, 0), "east": (-1, 0)}
 
 
-def design_service_room(room: Room) -> RoomDesign:
+def door_swing(room: Room, door: Door) -> dict:
+    """Model an inward leaf hinged at the start jamb of the saved opening."""
+    start_along = door.offset_m
+    if door.wall in {"south", "north"}:
+        hinge = (start_along, 0 if door.wall == "south" else room.depth_m)
+        closed = (round(start_along + door.width_m, 6), hinge[1])
+    else:
+        hinge = (0 if door.wall == "west" else room.width_m, start_along)
+        closed = (hinge[0], round(start_along + door.width_m, 6))
+    dx, dy = INWARD[door.wall]
+    opened = (
+        round(hinge[0] + dx * door.width_m, 6),
+        round(hinge[1] + dy * door.width_m, 6),
+    )
+    return {
+        "door_id": door.id,
+        "hinge": hinge,
+        "closed": closed,
+        "opened": opened,
+        "leaf_m": door.width_m,
+    }
+
+
+def swing_reserve(swing: dict):
+    xs, ys = zip(swing["hinge"], swing["closed"], swing["opened"], strict=True)
+    return box(min(xs), min(ys), max(xs), max(ys))
+
+
+def kitchen_depth_for_passage(passage_m: float) -> float:
+    frontage = max(
+        spec.depth_m + spec.operating_depth_m for spec in FIXTURES["kitchen-dining"]
+    )
+    return frontage + passage_m + DINING_RESERVATION[1] + DINING_WALL_GAP_M + 0.01
+
+
+def design_service_room(room: Room, *, passage_m: float = 0.6) -> RoomDesign:
     """Place a fixture run at the south wall with a north-facing working side."""
     specs = FIXTURES[room.id]
     run_width = sum(spec.width_m for spec in specs) + (len(specs) - 1) * FIXTURE_GAP_M
@@ -58,20 +98,36 @@ def design_service_room(room: Room) -> RoomDesign:
         x = round(x + spec.width_m + FIXTURE_GAP_M, 6)
     if room.id == "kitchen-dining":
         w, d, h = DINING_RESERVATION
-        objects.append(
-            Furniture(
+        spare = room.width_m - run_width
+        mid = (room.width_m - w) / 2
+        for shift, table_x in (
+            (0, mid),
+            (spare / 2 - 0.12, 0.12),
+            (0.12 - spare / 2, room.width_m - w - 0.12),
+        ):
+            run = [
+                item.model_copy(update={"x_m": round(item.x_m + shift, 6)})
+                for item in objects
+            ]
+            table = Furniture(
                 id="breakfast-suite",
                 name="Breakfast Suite",
                 category="table",
-                x_m=round((room.width_m - w) / 2, 6),
-                y_m=round(room.depth_m - d - 0.12, 6),
+                x_m=round(table_x, 6),
+                y_m=round(room.depth_m - d - DINING_WALL_GAP_M, 6),
                 width_m=w,
                 depth_m=d,
                 height_m=h,
             )
-        )
+            design = RoomDesign(room=room, furniture=[*run, table])
+            try:
+                service_evidence(design, passage_m=passage_m)
+            except ValueError:
+                continue
+            return design
+        raise ValueError("Kitchen cannot fit the fixture run and dining reservation.")
     design = RoomDesign(room=room, furniture=objects)
-    service_evidence(design)
+    service_evidence(design, passage_m=passage_m)
     return design
 
 
@@ -99,6 +155,15 @@ def service_evidence(design: RoomDesign, *, passage_m: float = 0.6) -> dict:
         ):
             raise ValueError("Dining must retain its four-place reservation.")
     states = []
+    swings = [door_swing(design.room, door) for door in design.room.doors]
+    footprints = [furniture_footprint(item) for item in design.furniture]
+    reserves = [(state["door_id"], swing_reserve(state)) for state in swings]
+    interior = room_footprint(design.room)
+    for identifier, reserve in reserves:
+        if not interior.covers(reserve) or any(
+            reserve.intersection(footprint).area > 1e-8 for footprint in footprints
+        ):
+            raise ValueError(f"{identifier} modeled inward door swing is obstructed.")
     config = AccessibilityConfig(walking_clearance_m=passage_m)
     for spec in specs:
         item = objects[spec.id]
@@ -113,6 +178,11 @@ def service_evidence(design: RoomDesign, *, passage_m: float = 0.6) -> dict:
             )
         open_depth = round(item.depth_m + spec.operating_depth_m, 6)
         occupied = item.model_copy(update={"depth_m": open_depth})
+        if any(
+            reserve.intersection(furniture_footprint(occupied)).area > 1e-8
+            for _, reserve in reserves
+        ):
+            raise ValueError(f"{item.id} working zone overlaps a modeled door swing.")
         open_design = design.model_copy(
             update={
                 "furniture": [
@@ -137,5 +207,6 @@ def service_evidence(design: RoomDesign, *, passage_m: float = 0.6) -> dict:
         )
     return {
         "operating_zones": states,
+        "door_swings": swings,
         "service_connections": "field verification pending",
     }
