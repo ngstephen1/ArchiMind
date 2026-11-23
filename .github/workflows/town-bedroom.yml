@@ -1,56 +1,74 @@
-name: Town bedroom browser
+name: Verify public Town walkthrough
 on:
-  pull_request:
-    paths:
-      - frontend/realistic_viewer/town/**
-      - src/archimind/town/**
-      - scripts/check_bedroom_walkthrough.py
-      - tests/town_browser_worker.py
-      - .github/workflows/town-bedroom.yml
   workflow_dispatch:
-concurrency:
-  group: town-bedroom-${{ github.ref }}
-  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
-  bedroom:
+  tour:
     runs-on: ubuntu-latest
-    # Chromium renders the furnished home on a software GPU. Allow the desktop
-    # and narrow walkthroughs to finish and upload their presentation images.
-    timeout-minutes: 25
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
         with:
           python-version: "3.11"
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
-        with:
-          node-version: "20"
-      - name: Prepare local Town and browser driver
+      - run: python -m pip install playwright==1.56.0
+      - name: Verify the deployed app in desktop and narrow Chrome
         run: |
-          python -m pip install -e . -r services/town/requirements.txt playwright==1.56.0
-          npm ci --prefix frontend/realistic_viewer --ignore-scripts
-          TOWN_MODE=local node frontend/realistic_viewer/town/build.mjs
-      - name: Capture and check seed 42 with offline model responses
-        env:
-          TOWN_MODE: local
-          ARCHIMIND_ENABLE_OPENAI_STUDIO: "1"
-          ARCHIMIND_ENABLE_CODEX_ADVISOR: "0"
-          OPENAI_API_KEY: offline-browser-fixture
-          TOWN_DAILY_MODEL_CALLS: "3"
-          TOWN_CALL_RESERVE_MICROUSD: "1"
-          TOWN_DAILY_MICROUSD: "3"
-          TOWN_STATIC: ${{ github.workspace }}/dist/town
-          TOWN_DB: ${{ runner.temp }}/bedroom-check.sqlite3
-        run: |
-          python -c 'from archimind.town.service import initialize; initialize()'
-          python tests/town_browser_worker.py & worker=$!
-          python -m uvicorn archimind.town.api:app --port 8790 & api=$!
-          trap 'kill "$worker" "$api" 2>/dev/null || true' EXIT
-          curl --retry 10 --retry-delay 1 --retry-connrefused -fsS http://127.0.0.1:8790/health
-          python scripts/check_bedroom_walkthrough.py --output "$RUNNER_TEMP/bedroom-photos"
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+          from playwright.sync_api import expect, sync_playwright
+
+          site = "https://archimind-town-walkthrough.vercel.app/"
+          output = Path(os.environ["RUNNER_TEMP"]) / "public-town"
+          output.mkdir()
+          results = []
+          with sync_playwright() as playwright:
+              browser = playwright.chromium.launch(
+                  channel="chrome",
+                  args=["--enable-unsafe-swiftshader", "--disable-dev-shm-usage"],
+              )
+              for width, height in ((1440, 1000), (390, 844)):
+                  page = browser.new_page(viewport={"width": width, "height": height},
+                                          reduced_motion="reduce",
+                                          is_mobile=width < 400, has_touch=width < 400)
+                  page.set_default_timeout(45000)
+                  mutations, failures = [], []
+                  page.on("request", lambda request: mutations.append(request.url)
+                          if request.method not in ("GET", "HEAD", "OPTIONS") else None)
+                  page.on("pageerror", lambda error: failures.append(str(error)))
+                  response = page.goto(site)
+                  config = page.request.get(site + "config.json")
+                  assert response.status == config.status == 200
+                  assert not any(config.json()[key] for key in ("api", "editor", "supabase", "anon"))
+                  expect(page.locator("#design")).to_be_hidden()
+                  page.locator("#tour").click()
+                  expect(page.locator("#door")).to_be_enabled()
+                  page.locator("#door").click()
+                  page.locator("#roomJump").select_option("bedroom")
+                  expect(page.locator("#place")).to_contain_text("Bedroom")
+                  expect(page.locator("#world")).to_have_attribute("data-desk", "verified")
+                  page.screenshot(path=output / f"public-bedroom-{width}.png")
+                  checks = {path: page.request.get(site + path).status for path in (
+                      "health", "api/projects", "assets/BELAYA_ATTRIBUTION.txt",
+                  )}
+                  assert checks["health"] == checks["api/projects"] == 404
+                  assert checks["assets/BELAYA_ATTRIBUTION.txt"] == 200
+                  assert not mutations and not failures, (mutations, failures)
+                  results.append({"viewport_px": [width, height], "endpoints": checks,
+                                  "entrypoint": response.status, "native_desk": True,
+                                  "design_controls_visible": False, "write_requests": 0,
+                                  "page_errors": 0})
+                  page.close()
+          (output / "deployed-check.json").write_text(json.dumps({
+              "url": site, "checked_at": datetime.now(timezone.utc).isoformat(),
+              "mode": "public static walkthrough", "viewports": results,
+          }, indent=2) + "\n")
+          PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: town-bedroom-photos
-          path: ${{ runner.temp }}/bedroom-photos/
+          name: public-town
+          path: ${{ runner.temp }}/public-town/
+          if-no-files-found: error
