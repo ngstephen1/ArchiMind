@@ -161,10 +161,11 @@ def evidence(home, revision, previous):
     packet = {"revision": revision, "home_id": home["id"]}
     comparison = home.get("evidence", {}).get("comparison") or {}
     packet["plan"] = {
-        key: comparison[key]
-        for key in ("routes", "dining_places", "passage_m")
-        if key in comparison
+        key: comparison[key] for key in ("routes", "dining_places") if key in comparison
     }
+    if "passage_m" in comparison:
+        # This is the configured check, not a measurement of the narrowest passage.
+        packet["plan"]["validated_passage_check_m"] = comparison["passage_m"]
     packet["bedroom_footprints"] = footprint(items)
     packet["prior_bedroom_footprints"] = (
         footprint(bedroom_items(previous)[1]) if previous else None

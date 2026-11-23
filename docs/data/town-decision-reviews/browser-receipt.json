@@ -4,7 +4,7 @@
     1440,
     1000
   ],
-  "fixture_calls": 4,
+  "fixture_calls": 5,
   "external_calls": 0,
   "writes": 0,
   "page_errors": [],
@@ -12,6 +12,7 @@
     "independent promotion",
     "timeout",
     "direct answer without model",
+    "mixed request uses configured review",
     "evidence on revision 2",
     "discard delayed result on input edit",
     "walkthrough without Decisions call"

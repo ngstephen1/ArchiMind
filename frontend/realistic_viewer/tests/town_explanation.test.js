@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {readFileSync} from "node:fs";
-import {asksChairChange, explanation, isSavedDesignQuestion} from "../town/explanation.js";
+import {asksChairChange, explanation, isSavedDesignQuestion, isUnambiguousSavedDesignQuestion} from "../town/explanation.js";
 
 test("placement answers use revision geometry, including older inventories",()=>{
  const h=JSON.parse(readFileSync(new URL("../town/showcase.json",import.meta.url)));
@@ -140,4 +140,12 @@ test("saved comparison evidence preserves a specific daylight question", () => {
   home.evidence.comparison = {routes: [], dining_places: {}, passage_m: 0.6};
   assert.match(explanation(home, "Explain daylight in the study"), /nearest window center/);
   assert.match(explanation(home, "Explain the placements"), /modeled passage check/);
+});
+
+
+test("the Decisions shortcut only bypasses standalone saved questions", () => {
+  assert.equal(isUnambiguousSavedDesignQuestion("Why is the desk 4.46 m from the window?"), true);
+  assert.equal(isUnambiguousSavedDesignQuestion("Why is the chair there? Move it closer."), false);
+  assert.equal(isUnambiguousSavedDesignQuestion("Why is it there and move the chair closer?"), false);
+  assert.equal(isUnambiguousSavedDesignQuestion("Why is it there and can you create a new one?"), false);
 });

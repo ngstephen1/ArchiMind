@@ -30,6 +30,13 @@ export function isSavedDesignQuestion(question) {
     !/\b(?:then|also|redesign|change)\b/i.test(question);
 }
 
+export function isUnambiguousSavedDesignQuestion(question) {
+  const text = question.trim();
+  return isSavedDesignQuestion(text) &&
+    !/[.!?;]\s*[^\d\s]/.test(text) &&
+    !/\b(?:and|but|please)\s+(?:can you\s+)?(?:move|shift|replace|remove|add|edit|start|make|create|generate|apply|redo|swap)\b/i.test(text);
+}
+
 export function asksChairChange(question) {
   const q = question.toLowerCase();
   if (!/\bchair\b/.test(q) || /\bstudy\b/.test(q)) return false;

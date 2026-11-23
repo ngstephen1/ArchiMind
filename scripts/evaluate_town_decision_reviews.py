@@ -4,7 +4,6 @@ import argparse
 import json
 import math
 import os
-import subprocess
 from hashlib import sha256
 from pathlib import Path
 
@@ -16,7 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
 CORPUS = ROOT / "docs/data/town-decision-reviews"
 THRESHOLDS = decision_review.THRESHOLDS
 COUNTS = decision_review.CASE_COUNTS
-PRIOR = "80a8e61:docs/data/live-quality-proof/live-snapshot-r1.json"
+PRIOR = CORPUS / "revision-1.json"
+CURRENT = ROOT / "docs/data/live-quality-proof/live-snapshot-r2.json"
 
 
 def summary(kind, rows, threshold):
@@ -86,6 +86,7 @@ def main():
     parser.add_argument("kind", choices=COUNTS)
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--locked-threshold", type=float, choices=THRESHOLDS)
     parser.add_argument("--live", action="store_true")
     args = parser.parse_args()
     kind = args.kind
@@ -118,10 +119,8 @@ def main():
         parser.error("OpenAI credentials are unavailable.")
     facts = None
     if kind == "evidence":
-        prior = json.loads(subprocess.check_output(["git", "show", PRIOR], cwd=ROOT))
-        current = json.loads(
-            (ROOT / "docs/data/live-quality-proof/live-snapshot-r2.json").read_bytes()
-        )
+        prior = json.loads(PRIOR.read_bytes())
+        current = json.loads(CURRENT.read_bytes())
         if (
             prior["project"] != current["project"]
             or current["revision"] != prior["revision"] + 1
@@ -134,7 +133,12 @@ def main():
     development = collect(kind, dev, facts, key)
     metrics = {cutoff: summary(kind, development, cutoff) for cutoff in THRESHOLDS}
     # Freeze the cutoff before making any request for a holdout case.
-    eligible = [cutoff for cutoff, stats in metrics.items() if stats["passed"]]
+    eligible = [
+        cutoff
+        for cutoff, stats in metrics.items()
+        if stats["passed"]
+        and (args.locked_threshold is None or cutoff == args.locked_threshold)
+    ]
     threshold = (
         max(eligible, key=lambda cutoff: (metrics[cutoff]["accepted"], cutoff))
         if eligible
@@ -155,12 +159,21 @@ def main():
         "model": decisions.MODEL,
         "rubric": decision_review.RUBRICS[kind],
         "corpus_sha256": sha256(raw).hexdigest(),
+        "source_fixture_sha256": (
+            {
+                path.name: sha256(path.read_bytes()).hexdigest()
+                for path in (PRIOR, CURRENT)
+            }
+            if facts
+            else None
+        ),
         "evidence_sha256": sha256(
             json.dumps(facts, sort_keys=True).encode()
         ).hexdigest()
         if facts
         else None,
         "threshold": threshold,
+        "locked_threshold": args.locked_threshold,
         "diagnostic_threshold": diagnostic_threshold,
         "heldout_passed": bool(threshold is not None and heldout["passed"]),
         "development_metrics": metrics,

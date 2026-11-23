@@ -4,20 +4,20 @@ import argparse
 import json
 import os
 import socket
-import subprocess
 import tempfile
 import threading
 from pathlib import Path
 from unittest.mock import patch
 
 import uvicorn
-from evaluate_town_decision_reviews import CORPUS, PRIOR, ROOT
+from evaluate_town_decision_reviews import CORPUS, CURRENT, PRIOR, ROOT
 from playwright.sync_api import expect, sync_playwright
 
 from archimind.town import decision_review, service
 
 COMPARE = "What changed when we pulled the chair out?"
 TIMEOUT = "It might need a different chair."
+MIXED = "Why is the chair there? Move it closer."
 
 
 def browser_check(url, output, stale_started, release_stale):
@@ -35,6 +35,10 @@ def browser_check(url, output, stale_started, release_stale):
         expect(page.locator("#openSavedAnswer")).to_be_hidden()
         page.locator("#requestReview").screenshot(path=output / "request-shadow.png")
 
+        page.locator("#message").fill(MIXED)
+        page.locator("#checkRequest").click()
+        expect(route).to_contain_text("Calibration check recorded")
+        expect(page.locator("#openSavedAnswer")).to_be_hidden()
         page.locator("#message").fill(TIMEOUT)
         page.locator("#checkRequest").click()
         expect(route).to_contain_text("Review unavailable")
@@ -90,7 +94,12 @@ def check(output):
                 }
             return {
                 "status": "checked",
-                "answers": {"intent": {"label": "compare", "confidence": 0.9}},
+                "answers": {
+                    "intent": {
+                        "label": "clarify" if message == MIXED else "compare",
+                        "confidence": 0.9,
+                    }
+                },
             }
         assert facts["chair_displacement_m"] == 0.3
         if message != COMPARE:
@@ -134,14 +143,8 @@ def check(output):
         ):
             os.environ.pop("DATABASE_URL", None)
             service.initialize()
-            first = json.loads(
-                subprocess.check_output(["git", "show", PRIOR], cwd=ROOT)
-            )
-            second = json.loads(
-                (
-                    ROOT / "docs/data/live-quality-proof/live-snapshot-r2.json"
-                ).read_bytes()
-            )
+            first = json.loads(PRIOR.read_bytes())
+            second = json.loads(CURRENT.read_bytes())
             owner = "local-designer"
             project = service.create(owner)["project"]
             with service.transaction() as q:
@@ -172,6 +175,7 @@ def check(output):
         calls
         == [
             ("route", COMPARE),
+            ("route", MIXED),
             ("route", TIMEOUT),
             ("evidence", COMPARE),
             ("evidence", "Why will the chair fit?"),
@@ -191,6 +195,7 @@ def check(output):
                     "independent promotion",
                     "timeout",
                     "direct answer without model",
+                    "mixed request uses configured review",
                     "evidence on revision 2",
                     "discard delayed result on input edit",
                     "walkthrough without Decisions call",

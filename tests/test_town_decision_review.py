@@ -110,6 +110,8 @@ def test_evidence_is_scoped_and_shadow_is_private(state, monkeypatch):
     assert facts["revision"] == 2 and facts["prior_revision"] == 1
     assert facts["bedroom_footprints"]["footprint_gap_m"] == 0.36
     assert facts["chair_displacement_m"] == 0
+    assert facts["plan"]["validated_passage_check_m"] == 0.6
+    assert "passage_m" not in facts["plan"]
     assert facts["bedroom_desk_to_window_centers_m"]["bedroom-window"] == 4.46
     with service.transaction() as q:
         persisted = q("SELECT result FROM town_decision_checks").fetchone()[0]

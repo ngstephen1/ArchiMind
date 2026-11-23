@@ -49,7 +49,7 @@
     "split": "development",
     "message": "Check this statement about the saved design.",
     "claims": [
-      "The modeled passage width is 0.6 m."
+      "The saved layout passed a modeled passage check set at 0.6 m."
     ],
     "expected": "supported"
   },
@@ -175,7 +175,7 @@
     "split": "development",
     "message": "Check this statement about the saved design.",
     "claims": [
-      "The modeled passage width is 1.2 m."
+      "The modeled passage check recorded for this plan was set at 1.2 m."
     ],
     "expected": "contradicted"
   },

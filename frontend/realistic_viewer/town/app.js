@@ -6,7 +6,7 @@ import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
-import { asksChairChange, explanation, isSavedDesignQuestion } from "./explanation.js";
+import { asksChairChange, explanation, isSavedDesignQuestion, isUnambiguousSavedDesignQuestion } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
@@ -154,15 +154,15 @@ bind("checkRequest", async () => {
     status.textContent = "Enter a request to check.";
     return;
   }
-  function offerSavedAnswer() {
+  function offerSavedAnswer(compare = false) {
     el("openSavedAnswer").hidden = false;
     el("openSavedAnswer").onclick = async () => {
       if (serial !== routeSerial || !isCurrentReview(context)) return;
       el("panel").close();
-      await askSavedDesign(message);
+      await askSavedDesign(message, { compare });
     };
   }
-  if (isSavedDesignQuestion(message)) {
+  if (isUnambiguousSavedDesignQuestion(message)) {
     status.textContent = "This is a question about a saved design.";
     offerSavedAnswer();
     return;
@@ -181,7 +181,7 @@ bind("checkRequest", async () => {
       new: "Suggested next step: start a new design.",
       clarify: "Suggested next step: say whether you want an explanation, an edit, or a new design.",
     })[label];
-    if (label === "answer" || label === "compare") offerSavedAnswer();
+    if (label === "answer" || label === "compare") offerSavedAnswer(label === "compare");
   } catch {
     if (current()) status.textContent = "Review unavailable. Your saved design is unchanged.";
   } finally {
@@ -637,10 +637,10 @@ bind("apply", async () => {
   el("panel").close();
   if (followup) await askSavedDesign(followup);
 });
-async function askSavedDesign(question) {
+async function askSavedDesign(question, options) {
   await el("present").onclick();
   el("whyQuery").value = question;
-  await el("askWhy").onclick();
+  await explainSavedQuestion(options);
 }
 bind("undo", async () => {
   sync(await api("/projects/" + project + "/undo", { base: revision }));
@@ -991,11 +991,15 @@ bind("checkEvidence", async () => {
     if (current()) el("checkEvidence").disabled = false;
   }
 });
-el("askWhy").onclick = async () => {
+async function explainSavedQuestion({ compare = false } = {}) {
   const serial = ++questionSerial, generation = boardGeneration;
   clearEvidenceReview();
   const question = el("whyQuery").value.trim(), manifest = evidenceManifest;
   const context = reviewContext();
+  if (compare && !asksChairChange(question)) {
+    el("whyAnswer").textContent = "Revision comparisons currently cover the bedroom desk chair. Ask how its position or gap to the desk changed.";
+    return;
+  }
   let previous = null;
   if (asksChairChange(question) && manifest?.revision > 1) {
     el("whyAnswer").textContent = "Checking the previous saved revision…";
@@ -1011,7 +1015,8 @@ el("askWhy").onclick = async () => {
     renderedAnswer = { answer, question, context };
     el("evidenceReview").hidden = false;
   }
-};
+}
+el("askWhy").onclick = () => explainSavedQuestion();
 el("printBoard").onclick = () => window.print();
 
 // Chromium retains modal scroll position during printing. Print a normal-flow
