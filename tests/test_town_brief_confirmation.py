@@ -743,3 +743,28 @@ def test_new_instruction_must_not_truncate_a_conditional_program_correction():
         Brief(compare_tradeoffs=True), message, None
     )
     assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+@pytest.mark.parametrize("linebreak", [" ", "\n", "\r\n", "\n\n"])
+@pytest.mark.parametrize("condition", ["only if it won't fit", "unless there is space"])
+def test_wrapped_condition_does_not_turn_a_salon_fallback_into_a_cancellation(
+    linebreak, condition
+):
+    message = (
+        "Include a formal salon. No salon, keep the five standard rooms"
+        f"{linebreak}{condition}. Four seats in the salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+def test_unqualified_five_room_correction_on_separate_line():
+    message = (
+        "Include a formal salon.\nNo salon, keep the five standard rooms.\nUse oak."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and not brief.formal_salon
