@@ -95,6 +95,10 @@ SALON_DECLINE = (
     r"\s*[.!;]?\s*$"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
+PROVIDER_STATEMENT_BREAK = (
+    r"(?<=[.!?])\s+|(?<=;)\s*|"
+    r"\n+(?=\s*(?:keep|use|provide|maintain|reserve|prefer|add|include|seat)\b)"
+)
 CONDITIONAL_CONTINUATION = (
     r"\s*(?:but\s+)?"
     r"(?!(?:if|when)\s+(?:possible|practical|convenient|appropriate)\s*,)"
@@ -124,12 +128,23 @@ COORDINATED_OPENING = re.compile(
 )
 
 
+def _join_wrapped_qualifiers(message):
+    """Keep a line-wrapped location or scope qualifier with its requirement."""
+    return re.sub(
+        r"(?<=[^.!?;\s])[ \t]*\r?\n[ \t]*"
+        r"(?=(?:between|around|through|past|in|for|beside|near|from|and|with)\b)",
+        " ",
+        message,
+        flags=re.IGNORECASE,
+    )
+
+
 def _affirmative_clauses(message):
     """Keep supported affirmative clauses ahead of an explicit negation."""
     message = re.sub(
         r"\b(?:don['’]t|do not|never)\b[^.;!?\n]*,\s*or\b[^.;!?\n]*",
         "",
-        message.lower(),
+        _join_wrapped_qualifiers(message).lower(),
     )
     clauses = re.split(
         r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:and\s+)?"
@@ -860,7 +875,7 @@ def provider_brief(message, brief):
     remaining = re.sub(explanation + r"(?=\s*$)", "", remaining, flags=re.IGNORECASE)
     # Only remove complete statements with no room, object, or code-clearance qualifier.
     passage = (
-        r"(?:(?:keep|use|provide|maintain|reserve) (?:a |an )?)?"
+        r"(?:(?:keep|use|provide|maintain|reserve) (?:a |an |the )?)?"
         r"(?:" + "|".join(WIDTH_PATTERNS) + r")[.!;]?"
     )
     split_seating = (
@@ -871,7 +886,11 @@ def provider_brief(message, brief):
         r" in (?:the )?(?:formal )?salon and (?:the )?kitchen[- ]dining(?: room)?[.!;]?"
     )
     statements = []
-    for statement in re.split(STATEMENT_BREAK, remaining.strip()):
+    for statement in re.split(
+        PROVIDER_STATEMENT_BREAK,
+        _join_wrapped_qualifiers(remaining).strip(),
+        flags=re.IGNORECASE,
+    ):
         clause = statement.strip()
         normalized = clause.lower()
         if re.fullmatch(passage, normalized) and _widths(normalized) == {

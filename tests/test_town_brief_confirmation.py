@@ -974,12 +974,15 @@ def test_explicit_salon_exclusion_cannot_add_a_salon(prefix, monkeypatch):
     assert not service.interpret(request, None).formal_salon
 
 
+@pytest.mark.parametrize(
+    "passage", ["Keep a 65 cm wide passage.", "Keep the passage width at least 65 cm."]
+)
 def test_live_interpreter_receives_verified_controls_without_reinterpreting_them(
     monkeypatch,
+    passage,
 ):
     monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
     seating = "Seat six people total across two tables in the formal salon and kitchen-dining room."
-    passage = "Keep a 65 cm wide passage."
     preference = "Prefer the study away from the living room."
 
     def answer(schema, payload, **_kwargs):
@@ -1022,3 +1025,31 @@ def test_live_interpreter_still_receives_mixed_unenforceable_requirements(monkey
     request = review_request(statement, live=True, width=15, depth=16, passage_m=0.65)
     with pytest.raises(service.BriefClarification, match="Building code certification"):
         service.interpret(request, None)
+
+
+def test_wrapped_specific_clearance_remains_a_single_requirement():
+    text = "Keep a 65 cm wide passage\nbetween the kitchen island and the counters."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("65 cm clearance between specific objects" in item for item in questions)
+
+
+def test_standalone_control_line_does_not_consume_the_next_request(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    preference = "Prefer the study away from the living room."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == preference
+        assert facts["confirmed_layout_controls"]["modeled_passage_m"] == 0.65
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    assert (
+        service.interpret(
+            review_request(
+                "Keep the passage width at least 65 cm\n" + preference, live=True
+            ),
+            None,
+        ).passage_m
+        == 0.65
+    )
