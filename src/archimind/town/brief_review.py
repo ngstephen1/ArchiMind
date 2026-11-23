@@ -65,6 +65,7 @@ TABLE_ALLOCATION = (
     + COUNT
     + r"(?:\s+(?:people|persons?|diners?|guests?|hosts?|residents?|seats|places))?"
 )
+TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
 TABLE_POSITION = r"\s+(?:at|around)\s+"
 FIRST_TABLE = (
     r"(?P<first>"
@@ -72,6 +73,9 @@ FIRST_TABLE = (
     + r")"
     + TABLE_POSITION
     + r"(?:one|a single|the same) (?:dining )?table"
+    + r"(?:\s+in (?:the )?(?P<first_room>"
+    + TABLE_ROOM
+    + r")\b)?"
     + r"(?P<second_clause>\s*,?\s+and\s+(?:seat\s+)?"
     + r"(?P<second>"
     + TABLE_ALLOCATION
@@ -89,7 +93,13 @@ OTHER_TABLE = (
 OTHER_END = (
     r"the other (?:end|side)\b(?: of (?:it|the table)\b|" + TABLE_BOUNDARY + r")"
 )
-SEPARATE_TABLE_COUNTS = re.compile(FIRST_TABLE + OTHER_TABLE)
+SEPARATE_TABLE_COUNTS = re.compile(
+    FIRST_TABLE
+    + OTHER_TABLE
+    + r"(?:\s+in (?:the )?(?P<second_room>"
+    + TABLE_ROOM
+    + r")\b)?"
+)
 SAME_TABLE_ENDS = re.compile(FIRST_TABLE + OTHER_END)
 OPTIONAL_SECOND_TABLE = re.compile(
     FIRST_TABLE
@@ -101,6 +111,20 @@ OPTIONAL_SECOND_TABLE = re.compile(
     + r"(?:\s+in (?:the )?(?:formal salon|salon|kitchen[- ]dining(?: room)?))?"
     + r"(?:\s+for (?:breakfast|lunch|dinner))?\s*,?\s+"
     + TABLE_OPTION
+)
+SECOND_ALLOCATION_ONLY = (
+    r"seat\s+(?:" + TABLE_ALLOCATION + ")" + TABLE_POSITION + OTHER_TABLE
+)
+OPTIONAL_STANDALONE = re.compile(
+    r"(?:"
+    + TABLE_OPTION
+    + r",?\s+"
+    + SECOND_ALLOCATION_ONLY
+    + r"|"
+    + SECOND_ALLOCATION_ONLY
+    + r"\s+"
+    + TABLE_OPTION
+    + r")[.,!?]?"
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
@@ -280,11 +304,17 @@ def salon_choice(message):
     return decision, statement
 
 
-def _dining_locations(activity):
-    dining = DINING_ACTIVITY_END.split(activity, maxsplit=1)[0]
-    return bool(HOME_DINING_LOCATION.search(dining)), bool(
-        re.search(OFFSITE_MEAL, dining)
-    )
+HOME_MEAL = re.compile(r"\b(?:breakfast|lunch|dinner|meal|dine)\s+at home\b")
+
+
+def _dining_scope(activity):
+    parts = DINING_ACTIVITY_END.split(activity, maxsplit=1)
+    scope = parts[0]
+    home = HOME_DINING_LOCATION.search(scope)
+    offsite = re.search(OFFSITE_MEAL, scope)
+    if not home and not offsite and len(parts) == 2 and HOME_MEAL.search(parts[1]):
+        home = True
+    return scope, bool(home), bool(offsite)
 
 
 def _home_meal_clauses(clause):
@@ -307,8 +337,8 @@ def _home_meal_clauses(clause):
                 transitions[i + 1].start() if i + 1 < len(transitions) else len(clause)
             )
             right = clause[match.end() : stop]
-            left_home, left_offsite = _dining_locations(left)
-            right_home, right_offsite = _dining_locations(right)
+            _, left_home, left_offsite = _dining_scope(left)
+            _, right_home, right_offsite = _dining_scope(right)
             if not (left_home and right_offsite or right_home and left_offsite):
                 continue
         boundaries.append(match)
@@ -316,8 +346,7 @@ def _home_meal_clauses(clause):
     ends = [*(match.start() for match in boundaries), len(clause)]
     home = False
     for start, end in zip(starts, ends, strict=True):
-        activity = clause[start:end]
-        at_home, off_site = _dining_locations(activity)
+        activity, at_home, off_site = _dining_scope(clause[start:end])
         if off_site:
             home = False
         elif at_home:
@@ -332,7 +361,9 @@ def _home_meal_clauses(clause):
 def _dining_clauses(clauses):
     for clause in clauses:
         for home in _home_meal_clauses(clause):
-            if re.search(DINING_CONTEXT, home):
+            if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
+                home.strip()
+            ):
                 yield OPTIONAL_SECOND_TABLE.sub(
                     lambda match: home[match.start() : match.start("second_clause")],
                     home,
@@ -441,6 +472,18 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         per_table = [
             _allocation_count(split_counts[name]) for name in ("first", "second")
         ]
+        first_room, second_room = (
+            split_counts["first_room"],
+            split_counts["second_room"],
+        )
+        if (
+            first_room
+            and second_room
+            and (("salon" in first_room) == ("salon" in second_room))
+        ):
+            questions.append(
+                "The requested room has one modeled table. Confirm a different location for the second table."
+            )
         dining = dining[: split_counts.start()] + " " + dining[split_counts.end() :]
     elif each_table:
         per_table = [_allocation_count(each_table["count"])] * 2

@@ -1270,6 +1270,64 @@ def test_later_home_activity_does_not_rescope_restaurant_seating():
     assert not questions and brief.dining_seats == 4 and not brief.split_dining
 
 
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        (
+            "We need four dining seats at home before we have dinner at a restaurant with seating for six.",
+            4,
+        ),
+        (
+            "We have lunch at work and need seating for four after we get together for dinner at home.",
+            4,
+        ),
+        (
+            "We need seating for four at home. If possible, seat two at the second table.",
+            4,
+        ),
+        (
+            "We need seating for four at home. Seat two at the second table if possible.",
+            4,
+        ),
+    ],
+)
+def test_temporal_and_optional_statements_do_not_lose_required_seats(text, expected):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True), text, None
+    )
+    assert not questions and brief.dining_seats == expected and not brief.split_dining
+
+
+@pytest.mark.parametrize(
+    ("text", "total", "message"),
+    [
+        (
+            "Seat four at one table in the kitchen and seat two at the other table in the salon.",
+            6,
+            "",
+        ),
+        (
+            "Seat five at one table in the kitchen and seat two at the other table in the salon.",
+            7,
+            "four places",
+        ),
+        (
+            "Seat four at one table in the kitchen and seat two at the other table in the kitchen-dining room.",
+            6,
+            "different location",
+        ),
+    ],
+)
+def test_room_qualified_table_allocations_keep_both_counts(text, total, message):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert brief.dining_seats == total and brief.split_dining
+    assert (
+        any(message in question for question in questions) if message else not questions
+    )
+
+
 def test_live_interpreter_receives_optional_seating_as_prose(monkeypatch):
     monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
     text = "Seat four at one table and two at the other table if possible."
