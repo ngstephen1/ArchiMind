@@ -121,6 +121,23 @@ def test_two_clients_apply_undo_and_cancel(local):
     assert local.get("/api/projects/" + p + "?revision=1").json()["home"] == h
 
 
+def test_legacy_job_retry_accepts_disabled_service_layout(local):
+    project = local.post("/api/projects").json()["project"]
+    req = job(project)
+    assert local.post("/api/jobs", json=req).json()["job"] == req["id"]
+    with service.transaction() as q:
+        (raw,) = q("SELECT request FROM jobs WHERE id=?", (req["id"],)).fetchone()
+    assert '"service_layout"' not in raw
+    pre_upgrade = json.loads(raw)
+    pre_upgrade["brief"]["service_layout"] = False
+    with service.transaction() as q:
+        q("UPDATE jobs SET request=? WHERE id=?", (json.dumps(pre_upgrade), req["id"]))
+    same = {**req, "brief": {"service_layout": False}}
+    assert local.post("/api/jobs", json=same).json()["job"] == req["id"]
+    changed = {**req, "brief": {"service_layout": True}}
+    assert local.post("/api/jobs", json=changed).status_code == 409
+
+
 def test_owner_and_budget(local, monkeypatch):
     p = service.create("other")["project"]
     assert local.get("/api/projects/" + p).status_code == 404

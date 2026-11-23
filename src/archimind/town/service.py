@@ -29,6 +29,7 @@ from archimind.town.design import (
     Kind,
     RoomGoal,
     check_brief,
+    dining_capacity,
     interpret_offline,
 )
 
@@ -158,13 +159,19 @@ def enqueue(owner, req):
         excluded["brief"] = set(REVIEW_FIELDS) - req.brief.model_fields_set
         if not req.brief.room_goals:
             excluded["brief"].add("room_goals")
+        if not req.brief.service_layout:
+            excluded["brief"].add("service_layout")
         raw = req.model_dump_json(exclude=excluded)
         existing = q(
             "SELECT request FROM jobs WHERE id=? AND owner=?", (j, owner)
         ).fetchone()
         if existing:
             if existing[0] != raw:
-                raise Problem("Request ID already used.", 409)
+                saved = json.loads(existing[0])
+                if saved["brief"].get("service_layout") is False:
+                    del saved["brief"]["service_layout"]
+                if saved != json.loads(raw):
+                    raise Problem("Request ID already used.", 409)
             return {"job": j}
         if head != req.base:
             raise Problem("Project changed. Reload this revision.", 409)
@@ -352,6 +359,7 @@ def _interpret(req, previous):
                     "dining_seats",
                     "split_dining",
                     "passage_m",
+                    "service_layout",
                 }
             ),
             "previous_rooms": [
@@ -433,9 +441,11 @@ def _interpret(req, previous):
         )
         if brief.compare_tradeoffs:
             question = ""
-            if brief.dining_seats and (
-                not brief.formal_salon
-                or brief.dining_seats > (8 if brief.split_dining else 4)
+            if brief.dining_seats > dining_capacity(
+                salon=brief.formal_salon,
+                services=brief.service_layout
+                or bool((previous or {}).get("service_layout")),
+                split=brief.split_dining,
             ):
                 if brief.dining_seats > 4 and requests_single_table(req.message):
                     question = (
