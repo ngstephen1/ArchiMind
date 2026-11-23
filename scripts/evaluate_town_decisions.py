@@ -36,6 +36,22 @@ def brief_keys(cases):
     }
 
 
+def distinct_holdout(cases, public_cases):
+    heldout = brief_keys(cases)
+    drafts = {
+        (
+            " ".join(row["input"]["original_brief"].casefold().split()),
+            json.dumps(row["input"]["proposed_brief"], sort_keys=True),
+        )
+        for row in cases
+    }
+    return (
+        "" not in heldout
+        and len(drafts) == len(cases)
+        and not heldout.intersection(brief_keys(public_cases))
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true")
@@ -86,14 +102,9 @@ def main():
         ):
             parser.error("The public calibration did not qualify this threshold.")
         public_cases = json.loads(expected_corpus.read_bytes())["cases"]
-        heldout = brief_keys(cases)
-        if (
-            "" in heldout
-            or len(heldout) != len(cases)
-            or heldout & brief_keys(public_cases)
-        ):
+        if not distinct_holdout(cases, public_cases):
             parser.error(
-                "Held-out briefs must be distinct from each other and the public corpus."
+                "Holdout needs distinct brief-and-draft pairs and no public brief reuse."
             )
         public_hash = sha256(raw).hexdigest()
     key = os.getenv("OPENAI_API_KEY") or settings_from_dotenv(args.env_file).get(

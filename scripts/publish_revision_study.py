@@ -84,6 +84,8 @@ def matched_frames(boards, receipts, directories, eyes):
     frames = {k: [] for k in ("doorway", "desk")}
     if bool(eyes[0]) != bool(eyes[1]):
         raise ValueError("Supply both eye-view directories for a matched HD study.")
+    camera_sources = {receipt["manifest_sha256"] for receipt in receipts}
+    camera_source = None
     for board, proof, directory, eye in zip(
         boards, receipts, directories, eyes, strict=True
     ):
@@ -93,12 +95,15 @@ def matched_frames(boards, receipts, directories, eyes):
             hd["home_id"] != board["home_id"]
             or hd["revision"] != board["revision"]
             or hd["manifest_sha256"] != proof["manifest_sha256"]
-            or hd["camera_manifest_sha256"] != receipts[0]["manifest_sha256"]
+            or hd["camera_manifest_sha256"] not in camera_sources
+            or camera_source not in (None, hd["camera_manifest_sha256"])
             or hd["proof_blend_sha256"] != proof["files"]["home.blend"]
         ):
             raise ValueError(
                 "Eye-view receipt disagrees with the scene or camera source."
             )
+        if hd:
+            camera_source = hd["camera_manifest_sha256"]
         for view, pair in frames.items():
             filename = f"bedroom-{view}.png"
             if hd:

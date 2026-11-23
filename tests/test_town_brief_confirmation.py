@@ -414,3 +414,332 @@ def test_lot_and_locks_are_not_credited_to_unrelated_requirements():
     assert evidence["Lot 13 × 13 m"]["origin"] == "controls"
     assert evidence["Keep bedroom"]["origin"] == "controls"
     assert evidence["Keep bedroom"]["statement"] is None
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "Seat four people in the kitchen-dining room.",
+        "Seat four people in the formal salon.",
+        "Seat two hosts and two guests in the kitchen-dining room.",
+    ],
+)
+def test_supported_room_specific_dining_retains_the_count(message):
+    review, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert review.dining_seats == 4
+    assert questions == []
+
+
+def test_coordinated_openings_require_each_room_to_be_locked():
+    message = "Keep the bedroom window and the study window where they are."
+    assert opening_questions(message, locks=("bedroom", "study")) == []
+    (question,) = opening_questions(message, locks=("bedroom",))
+    assert "keep the study window" in question
+    (question,) = opening_questions(message, locks=("study",))
+    assert "keep the bedroom window" in question
+
+
+def test_room_minimum_does_not_override_a_larger_total():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        "Six total dining places. Four seats in the salon.",
+        None,
+    )
+    assert not questions
+    assert brief.dining_seats == 6
+
+
+def test_distinct_room_minima_need_two_tables():
+    message = "Four seats in the formal salon and two seats in the kitchen."
+    base = Brief(formal_salon=True, compare_tradeoffs=True)
+    brief, questions = requirement_controls(base, message, None)
+    assert brief.dining_seats == 6
+    assert any("Confirm separate tables" in item for item in questions)
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        message,
+        None,
+    )
+    assert not questions
+    assert brief.dining_seats == 6
+
+
+def test_independent_action_does_not_inherit_opening_verb():
+    message = "Keep the bedroom window and use the study door for access."
+    assert opening_questions(message, locks=("bedroom",)) == []
+
+
+def test_meal_language_counts_the_party_and_cites_the_source():
+    message = "Two hosts and four guests will eat together."
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert brief.dining_seats == 6 and not questions
+    source = next(
+        item
+        for item in review_summary(brief, message=message)["sources"]
+        if item["requirement"].startswith("6 dining")
+    )
+    assert source["statement"] == message
+    assert source["origin"] == "brief"
+
+
+def test_room_minimum_cites_the_source_in_review():
+    message = "Four seats in the salon."
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert not questions
+    assert {
+        "requirement": "4 dining places at one table",
+        "origin": "brief",
+        "statement": message,
+    } in review_summary(brief, message=message)["sources"]
+
+
+def test_repeated_four_person_room_minima_add_up_to_eight():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        "Four seats in the salon and four seats in the kitchen.",
+        None,
+    )
+    assert review_summary(brief)["status"] == "confirmed"
+    assert not questions and brief.dining_seats == 8
+
+
+def test_negative_salon_statement_is_not_cited(saved_home):
+    review = review_summary(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        message="Do not add a salon.",
+        previous=saved_home,
+    )
+    assert {
+        "requirement": "Formal salon",
+        "origin": "saved revision",
+        "statement": None,
+    } in review["sources"]
+
+
+def test_opening_modifiers_can_continue_a_preservation_request():
+    message = "Keep the bedroom window and original study door."
+    (question,) = opening_questions(message, locks=("bedroom",))
+    assert "keep original study door" in question
+
+
+def test_offsite_meal_does_not_override_home_seating():
+    message = (
+        "Two hosts and four guests will have breakfast off-site. Four dining places."
+    )
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, dining_seats=4), message, None
+    )
+    assert not questions and brief.dining_seats == 4
+
+
+def test_review_quotes_a_standalone_salon_request():
+    message = "Formal salon"
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert brief.formal_salon and not questions
+    assert {
+        "requirement": "Formal salon",
+        "origin": "brief",
+        "statement": message,
+    } in review_summary(brief, message=message)["sources"]
+
+
+def test_day_at_work_does_not_discard_an_at_home_meal():
+    phrase = "We dine together at home with two residents and two dinner guests after a day at work."
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), phrase, None
+    )
+    assert not questions and brief.dining_seats == 4
+
+
+def test_declined_standalone_salon_is_not_a_requirement_or_source():
+    phrase = "Formal salon, not needed"
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and not brief.formal_salon
+    assert {
+        "requirement": "Formal salon",
+        "origin": "controls",
+        "statement": None,
+    } in review_summary(
+        Brief(formal_salon=True), message=phrase, controls={"formal_salon"}
+    )["sources"]
+
+
+def test_salon_question_followed_by_no_does_not_add_a_room():
+    phrase = "Formal salon? No, keep the five standard rooms."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and not brief.formal_salon
+    assert {
+        "requirement": "Formal salon",
+        "origin": "controls",
+        "statement": None,
+    } in review_summary(
+        Brief(formal_salon=True), message=phrase, controls={"formal_salon"}
+    )["sources"]
+
+
+def test_salon_shorthand_before_seating_is_quoted():
+    phrase = "Formal salon; four seats in the salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+    assert {
+        "requirement": "Formal salon",
+        "origin": "brief",
+        "statement": "Formal salon;",
+    } in review_summary(brief, message=phrase)["sources"]
+
+
+def test_vacant_count_control_can_take_a_new_count_or_clear_the_previous_one(
+    saved_home,
+):
+    brief = Brief(formal_salon=True, compare_tradeoffs=True, dining_seats=0)
+    updated, questions = requirement_controls(
+        brief, "Seat four people at a single table in the formal salon.", saved_home
+    )
+    assert not questions and updated.dining_seats == 4
+    previous = copy.deepcopy(saved_home)
+    previous["evidence"].setdefault("comparison", {})["required_dining_seats"] = 4
+    cleared, questions = requirement_controls(brief, "", previous)
+    assert not questions and cleared.dining_seats == 0
+
+
+def test_negative_necessity_retains_a_required_width():
+    parsed, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "We can't do without a 90 cm clear passage.",
+        None,
+    )
+    assert not questions and parsed.passage_m == 0.9
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "A dining room for six won't work. Use four dining places instead.",
+        "We can't fit six people at a single table, so use four dining places instead.",
+    ],
+)
+def test_rejected_seats_are_replaced_by_the_affirmative_count(message):
+    parsed, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert not questions and parsed.dining_seats == 4
+
+
+def test_an_unrelated_prohibition_does_not_cancel_salon_seating():
+    phrase = "Formal salon. No changes to the bedroom. Four seats in the salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+@pytest.mark.parametrize("decline", ["leave it out", "omit it", "not needed"])
+def test_salon_omission_and_replacement_are_read_in_context(decline):
+    phrase = f"Formal salon; {decline}."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and not brief.formal_salon
+
+    phrase += " Actually, include a formal salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon
+    assert {
+        "requirement": "Formal salon",
+        "origin": "brief",
+        "statement": "Actually, include a formal salon.",
+    } in review_summary(brief, message=phrase)["sources"]
+
+
+def test_excluding_a_salon_feature_does_not_exclude_the_room():
+    phrase = (
+        "Include a formal salon. No salon fireplace, please. Four seats in the salon."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+def test_each_room_lock_quotes_its_own_statement():
+    message = "Move the bedroom door. Keep the bedroom;keep the study."
+    brief = Brief(locks=["bedroom", "study"])
+    entries = {
+        item["requirement"]: item
+        for item in review_summary(brief, message=message)["sources"]
+    }
+    assert entries["Keep bedroom"]["statement"] == "Keep the bedroom;"
+    assert entries["Keep study"]["statement"] == "keep the study."
+    entries = review_summary(
+        Brief(locks=["bedroom"]), message="Keep the bedroom window."
+    )["sources"]
+    assert (
+        next(item for item in entries if item["requirement"] == "Keep bedroom")[
+            "origin"
+        ]
+        == "interpreted"
+    )
+
+
+@pytest.mark.parametrize("timing", ["for now", "after all", "this time"])
+def test_salon_room_cancellation_can_have_a_timing_qualifier(timing):
+    message = f"Include a formal salon. Skip the salon {timing}."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and not brief.formal_salon
+
+
+def test_exact_where_wording_cites_an_explicit_lock(saved_home, monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(
+        service.provider, "request", live_answer(lock_rooms=["bedroom"])
+    )
+    message = "Keep the bedroom exactly where it is."
+    request = review_request(message, live=True, width=15, depth=16)
+    brief = service.interpret(request, saved_home)
+    assert brief.locks == ["bedroom"]
+    assert {
+        "requirement": "Keep bedroom",
+        "origin": "brief",
+        "statement": message,
+    } in service.reviewed_brief(request, brief, saved_home)["sources"]
+
+
+def test_conditional_salon_omission_does_not_cancel_an_unconditional_request():
+    message = (
+        "Include a formal salon. Skip the salon this time only if it won't fit. "
+        "Four seats in the salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+@pytest.mark.parametrize(
+    "correction",
+    [
+        "No salon, keep the five standard rooms.",
+        "Omit the salon for now, please.",
+        "Skip the salon this time, please, keep the five standard rooms.",
+    ],
+)
+def test_explicit_program_correction_after_a_salon_request(correction):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), "Include a formal salon. " + correction, None
+    )
+    assert not questions and not brief.formal_salon
+
+
+def test_new_instruction_must_not_truncate_a_conditional_program_correction():
+    message = (
+        "Include a formal salon. No salon, but only if it won't fit. "
+        "Four seats in the salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
