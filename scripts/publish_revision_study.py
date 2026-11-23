@@ -154,7 +154,7 @@ def build(directories, eyes, dest, *, preceding_pages=0):
         pages.append(f"""<section><header>ARCHIMIND &emsp; / &emsp; INTERIOR DESIGN DEVELOPMENT</header>
         <h1>{"The bedroom approach" if view == "doorway" else "At the writing desk"}</h1>
         <p>{"Fixed camera across both revisions." if same else "Independently framed cameras. Use the plan dimensions to compare positions."}
-        &emsp; Blender Cycles · {"HD photography" if eyes[0] else "CPU proof"}</p>
+        &emsp; Blender Cycles · {"1080p render" if eyes[0] else "CPU proof"}</p>
         <main>{"".join(figures)}</main><article><div><h2>{displacement * 1000:.0f} mm</h2>Writing-chair displacement on the whole-home plan</div>
         <div><h2>{rows[1]["desk_center_to_window_midpoint_m"]:.3f} m</h2>Desk center to {escape(rows[1]["window_wall"])} window midpoint in the edited room</div></article>
         <p>Chair and desk clearances above use their floor footprints. Confirm passage between desk supports,
