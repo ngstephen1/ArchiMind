@@ -2,7 +2,16 @@
   "run": "45128050577",
   "commit": "ebd1c373c30759d3cadc239988833bd66fa8893e",
   "artifact_id": 14797343721,
-  "baseline_model_sha256": "8eabe6186fdee17b7df8d94f14085494e3c3e363025fdac7eff1bff73e9707ce",
+  "comparison_baseline": {
+    "editable_sha256": "8eabe6186fdee17b7df8d94f14085494e3c3e363025fdac7eff1bff73e9707ce",
+    "original_proof_blend_sha256": "d3e4f4c2169030da18319f4428592d518cc80e492c78877136a3202ad034a0a1",
+    "images_sha256": {
+      "bedroom-doorway.png": "77e730493b03b8d8195f29c1b073a01c7013ff4635e0b195a1603a349a72b67d",
+      "bedroom-desk.png": "c19f18a587a11a0aa1fd2847301850e3281c678c2909308681b5659392ce0d82",
+      "salon-overview.png": "8b99e619d3ac4f6965efd6ce6de3fbf1bb641b7bacf26fc3afde7c89432251e3"
+    },
+    "run": "45119308941"
+  },
   "mean_absolute_pixel_difference_rgb": {
     "bedroom-doorway.png": [
       0.8454774305555556,
@@ -21,12 +30,12 @@
     ]
   },
   "comparison_jpg_sha256": {
-    "bedroom-doorway-detail.jpg": "023dd8f7ba8fef4f74524af4a8af8430e913f1ab5cbb37475fe4ed3acd071aca",
-    "bedroom-doorway-full.jpg": "b53ad0a07ea85c3fa41a0d3b71f3507ace1d76b1c8055aa3a5c9a30dc4bec766",
-    "bedroom-desk-detail.jpg": "e283e4a3b7712bdeb78d2ae10dbcb0f92c8695298147d6adb85c4bd3899d952f",
-    "bedroom-desk-full.jpg": "08bbbdc8c1da8e9d92d13490c127c4c3419164acaefea8d2380c633d8a630761",
-    "salon-overview-detail.jpg": "2277c02e10c329715b9da449af196e18d05c2900c116c60015d0b56e8d19f6c3",
-    "salon-overview-full.jpg": "fa49857f03568789723b0f700ce782357ba2d32b2800b4271a9c95450f13d581"
+    "bedroom-doorway-detail.jpg": "8b002f2f3f29fae6c10798c69d94c1b65bd2de107854dd60eb77064ab81c674b",
+    "bedroom-doorway-full.jpg": "eb063bb77a22d89ff51257f9644309f1783ef9ea0727a6acea0959f47661db77",
+    "bedroom-desk-detail.jpg": "03d1627e67805fed77f93a3bf686261529376e0effb63057596d656e8eb93ea0",
+    "bedroom-desk-full.jpg": "c4d1ff3bf663dee99ec3c82e51fca9731ebd061a5acca7ca33137d6acf65f4ad",
+    "salon-overview-detail.jpg": "be46b89e220501f7e2474617d17d31e167aa198c2763862d253cbaa060aff7eb",
+    "salon-overview-full.jpg": "3abe65ca5b603d9ee2b09301f28877829c700beef0a5a3ddd454cb3a62736725"
   },
   "trial_receipt": {
     "home_id": "6c5dac99245c8796ddf5bf6d04ff997242b9d92703826d670c688addcb0d9869",

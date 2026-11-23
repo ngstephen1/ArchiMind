@@ -13,7 +13,15 @@ lighting and salon foliage treatment.
 [Matched receipt and digests](verified-render.json) ·
 [Frozen rubric and original camera sources](../README.md#revision-2-visual-baseline)
 
-| Camera | Whole frame | Native-detail comparison | CPU render time |
+The left panels are from the [previous finish render](https://github.com/ngstephen1/ArchiMind/actions/runs/45119308941),
+which already applied the earlier trim, curtain and lighting treatment to
+the frozen packed scene. Its 1080p PNGs differ from the original frozen
+crops. This comparison uses the original camera, exposure and crop bounds.
+Both detail panels fit within 850 × 700 pixels without upscaling. The
+receipt records the original proof digest, the previous finish's editable
+scene digest and all three previous render hashes separately.
+
+| Camera | Whole frame | Matched detail crop | CPU render time |
 | --- | --- | --- | --- |
 | Bedroom doorway | [Pair](bedroom-doorway-full.jpg) | [Bed and window](bedroom-doorway-detail.jpg) | 461.459 s |
 | Bedroom desk | [Pair](bedroom-desk-full.jpg) | [Desk, chair and timber](bedroom-desk-detail.jpg) | 455.364 s |
