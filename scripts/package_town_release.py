@@ -13,12 +13,13 @@ from pathlib import Path
 
 from package_designer_demo import demo_shell, sha, verified
 from publish_revision_study import load_revision, measurements
+from publish_studio_board import portfolio_cover
 
 from archimind.designer_handoff.drawings import write_drawings
 from archimind.designer_handoff.schedule import write_schedule
 from archimind.designer_handoff.survey import write_survey_dxf
 
-VIEWS = ("bedroom-doorway.png", "bedroom-desk.png", "salon-overview.png")
+BEDROOM_VIEWS = ("bedroom-doorway.png", "bedroom-desk.png")
 STYLE_NOTICE = "saved-style-receipt.json"
 NOTICES = (
     "BELAYA_ATTRIBUTION.txt",
@@ -29,6 +30,13 @@ NOTICES = (
 
 def read_json(path):
     return json.loads(path.read_bytes())
+
+
+def views_for(board):
+    cover = portfolio_cover(board)
+    if not re.fullmatch(r"salon-[a-z0-9-]+", cover):
+        raise ValueError("The handoff requires a named saved salon cover.")
+    return (*BEDROOM_VIEWS, cover + ".png")
 
 
 def check_photos(photos, board, proof, before_digest):
@@ -47,10 +55,11 @@ def check_photos(photos, board, proof, before_digest):
             "The matched 1080p views must identify the approved edited scene."
         )
     by_view = {shot["file"]: shot["sha256"] for shot in eyes["shots"]}
-    if set(by_view) != set(VIEWS) or len(eyes["shots"]) != len(VIEWS):
+    views = views_for(board)
+    if set(by_view) != set(views) or len(eyes["shots"]) != len(views):
         raise ValueError("Expected exactly three named eye-level views.")
     inputs = {receipt.name: receipt}
-    for name in VIEWS:
+    for name in views:
         path = verified(photos / name, by_view[name])
         with path.open("rb") as image:
             header = image.read(24)
@@ -104,7 +113,7 @@ def check_book(book, receipt, board, proofs, after, photos):
             view = view["sha256"]
         if len(view) != 2 or view[1] != digest:
             raise ValueError("The book receipt refers to different edited photographs.")
-    if inspected.get("hero_sha256") != sha(photos["salon-overview.png"]):
+    if inspected.get("hero_sha256") != sha(photos[views_for(board)[-1]]):
         raise ValueError("The book receipt refers to different edited photographs.")
     verified(book, inspected["book_sha256"])
     metadata = subprocess.check_output(["pdfinfo", str(book)], text=True)
@@ -134,17 +143,19 @@ def build(before, after, photos, book, book_receipt, destination, commit):
         after = snapshot(
             after, "after", ("manifest.json", "receipt.json", "home.blend")
         )
+        old, first = load_revision(before)
+        board, second = load_revision(after)
         notices = (
             (*NOTICES, STYLE_NOTICE) if (photos / STYLE_NOTICE).is_file() else NOTICES
         )
-        photos = snapshot(photos, "photos", ("eye-view-receipt.json", *VIEWS, *notices))
+        photos = snapshot(
+            photos, "photos", ("eye-view-receipt.json", *views_for(board), *notices)
+        )
         staged_book, staged_inspection = stage / "book.pdf", stage / "inspection.json"
         shutil.copyfile(book, staged_book)
         shutil.copyfile(book_receipt, staged_inspection)
         book, book_receipt = staged_book, staged_inspection
 
-        old, first = load_revision(before)
-        board, second = load_revision(after)
         if old["project"] != board["project"] or [
             old["revision"],
             board["revision"],

@@ -9,7 +9,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from publish_revision_study import build, digest, load_revision
-from publish_studio_board import book
+from publish_studio_board import book, portfolio_cover
 
 
 def print_page(chrome, source, output, profile):
@@ -83,7 +83,7 @@ def print_book(before, after, eyes, destination, chrome):
                 "source_receipt_sha256": digest(after / "receipt.json"),
             }
         )
-        hero = stage / "presentation-salon-overview.png"
+        hero = stage / f"presentation-{portfolio_cover(board)}.png"
         if hero.is_file():
             evidence["hero_sha256"] = digest(hero)
         receipt = work / "book.json"

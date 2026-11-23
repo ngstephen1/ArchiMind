@@ -101,6 +101,14 @@ def elevations(part):
     return "".join(result)
 
 
+def portfolio_cover(board):
+    """Return the room and saved camera used by the portfolio cover."""
+    featured = next(
+        (r for r in board["rooms"] if r["room"]["id"] == "salon"), board["rooms"][0]
+    )
+    return featured["room"]["id"] + "-" + featured["cameras"][0]["id"]
+
+
 def book(directory, eye_views=None):
     receipt = json.loads((directory / "receipt.json").read_bytes())
     for name, expected in receipt["files"].items():
@@ -165,10 +173,7 @@ def book(directory, eye_views=None):
         return esc(text)
 
     pages = []
-    featured = next(
-        (r for r in board["rooms"] if r["room"]["id"] == "salon"), board["rooms"][0]
-    )
-    hero = featured["room"]["id"] + "-" + featured["cameras"][0]["id"]
+    hero = portfolio_cover(board)
     palette = (
         (style["style_pack"]["id"] + " style pack")
         if style

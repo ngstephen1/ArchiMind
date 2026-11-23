@@ -13,13 +13,17 @@ def digest(data):
     return hashlib.sha256(data).hexdigest()
 
 
+def salon_cover(camera="overview"):
+    return [{"room": {"id": "salon"}, "cameras": [{"id": camera}]}]
+
+
 def test_edited_photographs_must_match_the_packed_proof(tmp_path, monkeypatch):
     monkeypatch.syspath_prepend(str(SCRIPTS))
     api = runpy.run_path(str(SCRIPTS / "package_town_release.py"))
-    board = {"home_id": "home", "revision": 2}
+    board = {"home_id": "home", "revision": 2, "rooms": salon_cover()}
     proof = {"manifest_sha256": "r2", "files": {"home.blend": "native"}}
     shots = []
-    for name in api["VIEWS"]:
+    for name in api["views_for"](board):
         # The packager checks the published header and bytes, while Blender
         # and the independent image inspection own actual decode and appearance.
         header = b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0dIHDR"
@@ -67,8 +71,14 @@ def test_book_receipt_must_bind_the_project_photos_and_inspected_pages(
     monkeypatch.syspath_prepend(str(SCRIPTS))
     api = runpy.run_path(str(SCRIPTS / "package_town_release.py"))
     monkeypatch.setattr("subprocess.check_output", lambda *args, **kwargs: "Pages: 2\n")
+    board = {
+        "project": "first",
+        "revision": 2,
+        "home_id": "home",
+        "rooms": salon_cover(),
+    }
     photo_paths = {}
-    for name in api["VIEWS"]:
+    for name in api["views_for"](board):
         path = tmp_path / name
         path.write_text(name)
         photo_paths[name] = path
@@ -92,7 +102,6 @@ def test_book_receipt_must_bind_the_project_photos_and_inspected_pages(
         book_sha256=digest(book.read_bytes()),
         inspection=[{"page": 1}, {"page": 2}],
     )
-    board = {"project": "first", "revision": 2, "home_id": "home"}
     proofs = [{"manifest_sha256": "r1"}, {"manifest_sha256": "r2"}]
     qa_path.write_text(json.dumps(qa))
     arguments = book, qa_path, board, proofs, tmp_path, photo_paths
@@ -116,7 +125,10 @@ def test_book_receipt_must_bind_the_project_photos_and_inspected_pages(
         api["check_book"](*arguments)
 
 
-def test_build_writes_verified_zip_and_refuses_to_replace_it(tmp_path, monkeypatch):
+@pytest.mark.parametrize("salon_camera", ["overview", "doorway"])
+def test_build_writes_verified_zip_and_refuses_to_replace_it(
+    tmp_path, monkeypatch, salon_camera
+):
     import zipfile
 
     monkeypatch.syspath_prepend(str(SCRIPTS))
@@ -129,6 +141,9 @@ def test_build_writes_verified_zip_and_refuses_to_replace_it(tmp_path, monkeypat
         folder.mkdir()
         data = (source / name).read_bytes()
         board = json.loads(data)
+        cover = next(part for part in board["rooms"] if part["room"]["id"] == "salon")
+        cover["cameras"][0]["id"] = salon_camera
+        data = json.dumps(board).encode()
         (folder / "manifest.json").write_bytes(data)
         (folder / "home.blend").write_bytes(native)
         proof = {
@@ -144,7 +159,7 @@ def test_build_writes_verified_zip_and_refuses_to_replace_it(tmp_path, monkeypat
     photos.mkdir()
     image = b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0dIHDR" + struct.pack(">II", 1920, 1080)
     shots = []
-    for name in api["VIEWS"]:
+    for name in api["views_for"](boards[1]):
         (photos / name).write_bytes(image)
         shots.append({"file": name, "sha256": digest(image)})
     notices = {}
@@ -207,7 +222,7 @@ def test_build_writes_verified_zip_and_refuses_to_replace_it(tmp_path, monkeypat
             "revisions/r1-manifest.json",
             "revisions/r2-manifest.json",
             "presentation/Client-Book.pdf",
-            "presentation/salon-overview.png",
+            f"presentation/salon-{salon_camera}.png",
             "drawings/bedroom-concept-shell.dxf",
             "native/home.blend",
             "SHA256SUMS.txt",
