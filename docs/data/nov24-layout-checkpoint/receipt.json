@@ -25,9 +25,15 @@
     },
     "source_home_digest_before": "6c5906a41a4f8b3bd5c9ddef5b485229483abac7361002b627cb5d16c3cdda95",
     "source_home_digest_after": "6c5906a41a4f8b3bd5c9ddef5b485229483abac7361002b627cb5d16c3cdda95",
-    "preserved_locked_bedroom_digest": "213fc9edc5dd231755900d0766ac2522997e0ba15c7ea6ba9c0957d985b2d7c1",
     "returned_candidates": 1,
-    "validated_candidate_home_id": "140fdf98cea090316c4465abaf6fcfa9309c3ab5c4fb31d171c6a7a68e392615"
+    "validated_candidate_home_id": "140fdf98cea090316c4465abaf6fcfa9309c3ab5c4fb31d171c6a7a68e392615",
+    "preserved_bedroom_geometry_and_binding_sha256": "213fc9edc5dd231755900d0766ac2522997e0ba15c7ea6ba9c0957d985b2d7c1",
+    "bedroom_digest_fields": [
+      "origin",
+      "design",
+      "asset_bindings"
+    ],
+    "digest_method": "SHA-256 of UTF-8 JSON with sorted keys, compact separators, and finite numbers"
   },
   "stale_edit": {
     "base_revision": 1,
