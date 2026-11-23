@@ -69,13 +69,14 @@ SEPARATE_TABLE_COUNTS = re.compile(
     + COUNT_AT_TABLE
     + r"(?:(?:the )?(?:other|second)(?: (?:dining )?table|"
     r"(?=\s*(?:$|[,.!?;]|in\b)))|"
+    r"(?:the other (?:end|side) of (?:the )?room (?:at|around) )?"
     r"(?:another|a separate|a second) (?:dining )?table)\b"
 )
 SAME_TABLE_ENDS = re.compile(
     COUNT_AT_TABLE
     + r"(?:one|a single|the same) (?:dining )?table\s*,?\s+and\s+(?:seat\s+)?"
     + COUNT_AT_TABLE
-    + r"the other (?:end|side)(?: of (?:it|the table))?\b"
+    + r"the other (?:end|side)(?: of (?:it|the table)\b|(?=\s*(?:$|[,.!?;])))"
 )
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
@@ -173,8 +174,9 @@ def _affirmative_clauses(message, *, retain_dining_context=False):
         r"\b(?:because|otherwise)\b"
         r"(?:(?!\bbut\s+(?:(?:we|i|you)\s+(?:really\s+)?"
         r"(?:need|want|require|must|should)"
-        r"|keep|add|use|include|require|need|give|move|preserve|"
-        r"relocate|shift|remove|block|widen|enlarge|seat|ensure|maintain|provide)\b"
+        r"|(?:(?:please|really|definitely|still)\s+)?"
+        r"(?:keep|add|use|include|require|need|give|move|preserve|"
+        r"relocate|shift|remove|block|widen|enlarge|seat|ensure|maintain|provide))\b"
         r"|[;!?,\n]|\.(?!\d)).)*",
         replace_rationale,
         message,
@@ -271,6 +273,8 @@ def requests_single_table(message):
     saw_single = False
     for clause in _affirmative_clauses(message):
         clause = SEPARATE_TABLE_COUNTS.sub(" ", clause)
+        if SAME_TABLE_ENDS.search(clause):
+            return True
         end = 0
         for table in re.finditer(
             r"\b(?:at|around) (one|a single|the same|a separate|a second|another)"
@@ -387,11 +391,16 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     each_table = re.search(COUNT_AT_TABLE + r"each(?: of the two)? tables?\b", dining)
     if split_counts:
         location = re.match(
-            r"\s*,?\s+(?:both\s+|all\s+)?in\s+(?:the\s+)?"
+            r"\s*,?\s+(?:both|all)\s+in\s+(?:the\s+)?"
             r"(formal salon|salon|kitchen(?:[- ]dining)?)\b",
             dining[split_counts.end() :],
         )
-        if location and re.search(r"\b(?:both|all)\b", location[0]):
+        if location and not re.match(
+            r"\s+if\s+(?:possible|practical|feasible)\s*,?\s+"
+            r"(?:or|otherwise)\s+(?:put|place|use)\s+one\s+table\s+"
+            r"in\s+each\s+(?:dining\s+)?room\b",
+            dining[split_counts.end() + location.end() :],
+        ):
             questions.append(
                 f"The {location[1]} has one modeled table. Confirm a different location for the second table."
             )
@@ -421,7 +430,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
         dining,
     )
-    single_table = bool(same_table) or requests_single_table(text)
+    single_table = requests_single_table(text)
     counted = set()
     room_minima = {}
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
