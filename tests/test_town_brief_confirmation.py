@@ -631,3 +631,53 @@ def test_rejected_seats_are_replaced_by_the_affirmative_count(message):
         Brief(formal_salon=True, compare_tradeoffs=True), message, None
     )
     assert not questions and parsed.dining_seats == 4
+
+
+def test_an_unrelated_prohibition_does_not_cancel_salon_seating():
+    phrase = "Formal salon. No changes to the bedroom. Four seats in the salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+@pytest.mark.parametrize("decline", ["leave it out", "omit it", "not needed"])
+def test_salon_omission_and_replacement_are_read_in_context(decline):
+    phrase = f"Formal salon; {decline}."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and not brief.formal_salon
+
+    phrase += " Actually, include a formal salon."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon
+    assert {
+        "requirement": "Formal salon",
+        "origin": "brief",
+        "statement": "Actually, include a formal salon.",
+    } in review_summary(brief, message=phrase)["sources"]
+
+
+def test_excluding_a_salon_feature_does_not_exclude_the_room():
+    phrase = (
+        "Include a formal salon. No salon fireplace, please. Four seats in the salon."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+def test_each_room_lock_quotes_its_own_statement():
+    message = "Move the bedroom door. Keep the bedroom;keep the study."
+    brief = Brief(locks=["bedroom", "study"])
+    entries = {
+        item["requirement"]: item
+        for item in review_summary(brief, message=message)["sources"]
+    }
+    assert entries["Keep bedroom"]["statement"] == "Keep the bedroom;"
+    assert entries["Keep study"]["statement"] == "keep the study."
+    entries = review_summary(
+        Brief(locks=["bedroom"]), message="Keep the bedroom window."
+    )["sources"]
+    assert (
+        next(item for item in entries if item["requirement"] == "Keep bedroom")[
+            "origin"
+        ]
+        == "interpreted"
+    )

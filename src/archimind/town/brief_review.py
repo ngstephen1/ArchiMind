@@ -61,6 +61,15 @@ OFFSITE_MEAL = (
 DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
 SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
 SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
+SALON_DECLINE = (
+    r"\s*(?:(?:actually|no),\s*)?(?:"
+    r"no[.!;]?\s*$|not (?:needed|required|wanted)\b|"
+    r"leave (?:it|(?:the )?(?:formal )?salon) out\b|"
+    r"(?:(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
+    r"(?:no|without) (?:a |the )?(?:formal )?salon)"
+    r"(?=\s*(?:$|[.!?,;]|(?:please|instead)\b)))"
+)
+STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
 
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
@@ -112,18 +121,17 @@ def _affirmative_clauses(message):
     ]
 
 
-def _requests_salon(message):
-    # Keep qualifications on a bare noun phrase. Trimming “not needed” would
-    # flip a declined room into an affirmative request.
-    sentences = re.split(r"(?<=[.!?])\s+|(?<=;)\s*|\n+", message.lower())
-    bare_request = any(
-        re.fullmatch(SALON_ONLY, sentence.strip())
-        and not re.match(r"\s*(?:no|not|never|skip)\b", following)
-        for sentence, following in zip(sentences, sentences[1:] + [""], strict=True)
-    )
-    return bare_request or any(
-        re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(message)
-    )
+def _salon_statement(message):
+    """Return the original affirmative clause that requires the optional room."""
+    sentences = re.split(STATEMENT_BREAK, message)
+    for sentence, following in zip(sentences, sentences[1:] + [""], strict=True):
+        if re.match(SALON_DECLINE, following.lower()):
+            continue
+        if re.fullmatch(SALON_ONLY, sentence.strip().lower()) or any(
+            re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(sentence)
+        ):
+            return sentence.strip()
+    return None
 
 
 def requests_single_table(message):
@@ -188,7 +196,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             part["design"]["room"]["id"] == "salon"
             for part in (previous or {}).get("rooms", ())
         )
-        or _requests_salon(message)
+        or bool(_salon_statement(message))
     )
     totals = set()
     questions = []
@@ -493,7 +501,7 @@ def opening_questions(message, locks):
 
 def _statement(message, pattern, accepts):
     """Return the user's sentence that states a requirement, if one does."""
-    for sentence in re.split(r"(?<=[.!?;])\s+|\n+", message.strip()):
+    for sentence in re.split(STATEMENT_BREAK, message.strip()):
         if (
             sentence
             and re.search(pattern, sentence, re.IGNORECASE)
@@ -553,15 +561,18 @@ def _lot_statement_matches(brief, sentence):
     )
 
 
-def _lock_statement_matches(brief, sentence):
-    requested = {
-        _room_id(name)
+def _lock_statement_matches(room_id, sentence):
+    pattern = (
+        r"\b(?:keep|lock|preserve)\s+(?:the\s+)?"
+        + ROOMS
+        + r"\b(?=\s*(?:$|[.!?,;]|(?:where it is|(?:exactly )?as it is|"
+        r"unchanged|in place|and)\b))"
+    )
+    return any(
+        _room_id(name) == room_id
         for clause in _affirmative_clauses(sentence)
-        for name in re.findall(
-            r"\b(?:keep|lock|preserve)\s+(?:the\s+)?" + ROOMS + r"\b", clause
-        )
-    }
-    return requested == set(brief.locks)
+        for name in re.findall(pattern, clause)
+    )
 
 
 def review_summary(
@@ -618,15 +629,14 @@ def review_summary(
         ),
     )
     if brief.formal_salon:
+        salon_statement = _salon_statement(message)
         require(
             "Formal salon",
             r"\bsalon\b",
             "formal_salon",
             inherited="salon" in saved_rooms,
             interpreted=True,
-            accepts=lambda sentence: (
-                _requests_salon(message) and _requests_salon(sentence)
-            ),
+            accepts=lambda sentence: sentence.strip() == salon_statement,
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
@@ -637,13 +647,13 @@ def review_summary(
             inherited=brief.dining_seats == comparison.get("required_dining_seats"),
             accepts=lambda sentence: _dining_statement_matches(brief, sentence),
         )
-    if brief.locks:
+    for room_id in brief.locks:
         require(
-            "Keep " + ", ".join(brief.locks),
+            "Keep " + room_id,
             r"\b(?:keep|lock|preserve)\b",
             "locks",
             interpreted=True,
-            accepts=lambda sentence: _lock_statement_matches(brief, sentence),
+            accepts=lambda sentence: _lock_statement_matches(room_id, sentence),
         )
     assumptions = []
     if sources[1]["origin"] == "default":
