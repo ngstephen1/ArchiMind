@@ -19,7 +19,10 @@ the frozen packed scene. Its 1080p PNGs differ from the original frozen
 crops. This comparison uses the original camera, exposure and crop bounds.
 Both detail panels fit within 850 × 700 pixels without upscaling. The
 receipt records the original proof digest, the previous finish's editable
-scene digest and all three previous render hashes separately.
+scene digest and all three previous render hashes separately. The numerical
+RGB differences use those previous-finish PNGs and the new layered PNGs.
+The nested render receipt still points to the original frozen PNGs for
+source integrity.
 
 | Camera | Whole frame | Matched detail crop | CPU render time |
 | --- | --- | --- | --- |

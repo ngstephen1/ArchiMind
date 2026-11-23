@@ -10,24 +10,24 @@
       "bedroom-desk.png": "c19f18a587a11a0aa1fd2847301850e3281c678c2909308681b5659392ce0d82",
       "salon-overview.png": "8b99e619d3ac4f6965efd6ce6de3fbf1bb641b7bacf26fc3afde7c89432251e3"
     },
-    "run": "45119308941"
-  },
-  "mean_absolute_pixel_difference_rgb": {
-    "bedroom-doorway.png": [
-      0.8454774305555556,
-      0.828212287808642,
-      0.8366878858024691
-    ],
-    "bedroom-desk.png": [
-      1.3355695408950616,
-      1.3374204282407407,
-      1.3820047260802468
-    ],
-    "salon-overview.png": [
-      2.184886188271605,
-      2.262755111882716,
-      2.707989486882716
-    ]
+    "run": "45119308941",
+    "mean_absolute_rgb_difference_vs_layered_finish": {
+      "bedroom-doorway.png": [
+        0.8454774305555556,
+        0.828212287808642,
+        0.8366878858024691
+      ],
+      "bedroom-desk.png": [
+        1.3355695408950616,
+        1.3374204282407407,
+        1.3820047260802468
+      ],
+      "salon-overview.png": [
+        2.184886188271605,
+        2.262755111882716,
+        2.707989486882716
+      ]
+    }
   },
   "comparison_jpg_sha256": {
     "bedroom-doorway-detail.jpg": "8b002f2f3f29fae6c10798c69d94c1b65bd2de107854dd60eb77064ab81c674b",
