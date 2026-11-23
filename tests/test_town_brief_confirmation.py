@@ -594,3 +594,40 @@ def test_salon_shorthand_before_seating_is_quoted():
         "origin": "brief",
         "statement": "Formal salon;",
     } in review_summary(brief, message=phrase)["sources"]
+
+
+def test_vacant_count_control_can_take_a_new_count_or_clear_the_previous_one(
+    saved_home,
+):
+    brief = Brief(formal_salon=True, compare_tradeoffs=True, dining_seats=0)
+    updated, questions = requirement_controls(
+        brief, "Seat four people at a single table in the formal salon.", saved_home
+    )
+    assert not questions and updated.dining_seats == 4
+    previous = copy.deepcopy(saved_home)
+    previous["evidence"].setdefault("comparison", {})["required_dining_seats"] = 4
+    cleared, questions = requirement_controls(brief, "", previous)
+    assert not questions and cleared.dining_seats == 0
+
+
+def test_negative_necessity_retains_a_required_width():
+    parsed, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "We can't do without a 90 cm clear passage.",
+        None,
+    )
+    assert not questions and parsed.passage_m == 0.9
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "A dining room for six won't work. Use four dining places instead.",
+        "We can't fit six people at a single table, so use four dining places instead.",
+    ],
+)
+def test_rejected_seats_are_replaced_by_the_affirmative_count(message):
+    parsed, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), message, None
+    )
+    assert not questions and parsed.dining_seats == 4

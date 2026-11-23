@@ -90,8 +90,13 @@ def _affirmative_clauses(message):
         "",
         message.lower(),
     )
+    message = re.sub(
+        r"\b(?:cannot|can not|can['’]t) (?:do without|compromise on)\b",
+        "need",
+        message,
+    )
     clauses = re.split(
-        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:and\s+)?"
+        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:(?:and|so)\s+)?"
         r"(?:not|never|no|keep|add|use|place|put|include|maintain|reserve|leave|allow|ensure|provide|make|seating)\b)",
         message,
     )
@@ -99,6 +104,11 @@ def _affirmative_clauses(message):
     return [
         re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, maxsplit=1)[0]
         for clause in clauses
+        if not re.search(
+            r"\b(?:won['’]t|will not|cannot|can['’]t) (?:work|fit)\b"
+            r"|\b(?:is|are) not (?:acceptable|feasible)\b",
+            clause,
+        )
     ]
 
 
@@ -379,7 +389,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         elif not totals and (not seats or seats < minimum):
             totals.add(minimum)
     if len(totals) > 1 or (
-        totals and "dining_seats" in explicit and seats not in totals
+        totals and "dining_seats" in explicit and seats > 0 and seats not in totals
     ):
         questions.append(
             "Confirm one total number of dining places in both the brief and controls."

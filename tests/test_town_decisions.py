@@ -289,31 +289,34 @@ def test_saved_edit_and_proof_retry_use_no_decisions_calls(town, monkeypatch):
 
 
 @pytest.mark.parametrize(
-    ("message", "formal_salon", "dining_seats", "split_dining"),
+    ("message", "formal_salon", "dining_seats", "split_dining", "expected_seats"),
     [
         (
             "Seat four guests at one table in the salon and two residents at a separate table in the kitchen.",
             True,
             6,
             True,
+            6,
         ),
-        ("Seat four people at a single table in the formal salon.", True, 0, False),
+        ("Seat four people at a single table in the formal salon.", True, 0, False, 4),
         (
             "We cannot seat six people at a single table. Use four dining places instead.",
             True,
             4,
             False,
+            4,
         ),
         (
             "Seat four people at a single table in the kitchen-dining room.",
             False,
             0,
             False,
+            None,
         ),
     ],
 )
 def test_supported_table_phrasing_keeps_existing_path(
-    town, message, formal_salon, dining_seats, split_dining
+    town, message, formal_salon, dining_seats, split_dining, expected_seats
 ):
     response, _ = submit(
         town,
@@ -338,6 +341,23 @@ def test_supported_table_phrasing_keeps_existing_path(
     assert result["status"] == "ready", result
     for candidate in result["result"]:
         plan = candidate["evidence"]["comparison"]
-        assert plan["required_dining_seats"] == dining_seats
+        assert plan["required_dining_seats"] == expected_seats
         assert plan["split_dining"] is split_dining
         assert plan["dining_places"] == {"kitchen-dining": 4, "salon": 4}
+
+
+def test_calibration_holdout_accepts_pairs_without_public_reuse(monkeypatch):
+    import runpy
+    from pathlib import Path
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    monkeypatch.syspath_prepend(str(scripts))
+    api = runpy.run_path(str(scripts / "evaluate_town_decisions.py"))
+
+    def example(brief, seats):
+        return {"input": {"original_brief": brief, "proposed_brief": {"seats": seats}}}
+
+    pair = [example("Seat six diners", 6), example("Seat six diners", 4)]
+    assert api["distinct_holdout"](pair, [example("Seat four diners", 4)])
+    assert not api["distinct_holdout"](pair + pair[:1], [])
+    assert not api["distinct_holdout"](pair, [example("SEAT  SIX diners", 3)])
