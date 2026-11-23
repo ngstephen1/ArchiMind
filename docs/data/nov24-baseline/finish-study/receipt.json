@@ -1,0 +1,118 @@
+{
+  "home_id": "6c5dac99245c8796ddf5bf6d04ff997242b9d92703826d670c688addcb0d9869",
+  "revision": 2,
+  "manifest_sha256": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+  "proof_blend_sha256": "d3e4f4c2169030da18319f4428592d518cc80e492c78877136a3202ad034a0a1",
+  "editable_sha256": "da836df27d096727863978795c74dd245044d082a7459ad0b4900558b46d8fe3",
+  "blender": "5.1.2",
+  "resolution": [
+    1920,
+    1080
+  ],
+  "max_samples": 96,
+  "device": "CPU",
+  "geometry": {
+    "unchanged_meshes": 647,
+    "bounded_fabric_layers": [
+      "Duvet",
+      "Folded throw"
+    ]
+  },
+  "new_external_assets": [],
+  "shots": [
+    {
+      "file": "bedroom-doorway.png",
+      "sha256": "ff5517f70fd7a0c558504e050d738f884751420171f58497cfbf25b1b864c6dc",
+      "baseline_sha256": "b487a311a734dc315e27addf96939a4b60a12f45291dea52f3572d8a42d3237b",
+      "camera": {
+        "eye": [
+          5.6579999999999995,
+          1.57,
+          -8.892
+        ],
+        "fov": 69,
+        "id": "doorway",
+        "label": "Doorway",
+        "reason": null,
+        "target": [
+          1.0399,
+          0.58,
+          -7.2343
+        ]
+      },
+      "exposure_ev": 0.5870747566223145,
+      "seconds": 432.314,
+      "comparison_crop_bounds_px": [
+        748,
+        184,
+        1336,
+        744
+      ]
+    },
+    {
+      "file": "bedroom-desk.png",
+      "sha256": "2153f3f00c93a5144457320443472040ea74e464632a55b9d712e1dfc925ee44",
+      "baseline_sha256": "8fed572937e5cc2ff0aa602c645c4d6c00cb10cd9895b3fe0151ace5e32b36b7",
+      "camera": {
+        "eye": [
+          5.360000000000002,
+          1.57,
+          -8.689
+        ],
+        "fov": 58,
+        "id": "desk",
+        "label": "Desk and chair",
+        "reason": null,
+        "target": [
+          3.96,
+          0.5535709201097488,
+          -7.000404882967473
+        ]
+      },
+      "exposure_ev": 0.5870747566223145,
+      "seconds": 427.041,
+      "comparison_crop_bounds_px": [
+        470,
+        334,
+        1480,
+        1014
+      ]
+    },
+    {
+      "file": "salon-overview.png",
+      "sha256": "37422affeaef296b5e99c16d5deaed3c85284a42e22b4831965fbd59970581ba",
+      "baseline_sha256": "2f4f173c08b0b56451cfba606cadf8284cba0c013091ef2f48ca8b04a722ab10",
+      "camera": {
+        "eye": [
+          6.1579999999999995,
+          1.44,
+          -5.849
+        ],
+        "fov": 52,
+        "id": "overview",
+        "label": "Salon and dining",
+        "reason": null,
+        "target": [
+          2.1038,
+          1.08,
+          -3.3251600000000003
+        ]
+      },
+      "exposure_ev": -0.1802438497543335,
+      "seconds": 392.329,
+      "comparison_crop_bounds_px": [
+        507,
+        204,
+        1815,
+        948
+      ]
+    }
+  ],
+  "workflow_url": "https://github.com/ngstephen1/ArchiMind/actions/runs/45115827131",
+  "tested_commit": "ccd3efe1a50f245c09d2a2c082017f8c31399e34",
+  "comparison_jpg_sha256": {
+    "bedroom-desk-detail.jpg": "7a53c472613bb8652dceda39f7e39e41f1f35571dfb98f62553dfcf098d7ab72",
+    "bedroom-doorway-detail.jpg": "e97cdcc3598463c2dae94c796d2328fab077b7b749dea3772808677a19ac3ff4",
+    "salon-overview-full.jpg": "b68c7c939b7edff794be37846b2ebac3467c13a3c7ec68e47229d05401ce14c8"
+  }
+}
