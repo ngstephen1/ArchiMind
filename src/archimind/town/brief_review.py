@@ -50,7 +50,8 @@ FIXED_PASSAGE = (
     + r"|"
     + MEASUREMENT
     + r"\s+routes?\s+between\b[^.;!?\n]*"
-    + r"\bmeasured\s+across\s+(?:the\s+)?(?:open\s+)?gap\b"
+    + r"\b(?:measured|(?:the\s+)?(?:clear\s+)?width(?:\s+(?:is|taken|measured|specified)){0,3})"
+    r"\s+across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
 PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
@@ -74,6 +75,12 @@ OFFSITE_MEAL = (
 SALON_ACTION = (
     r"\b(?:include|add|use|with) (?:a |the )?(?:(?:separate|dedicated|additional) )?"
     r"formal salon\b"
+)
+SALON_EXCLUSION = (
+    r"\s*(?:please\s+)?(?:avoid|exclude|omit|skip|do not (?:include|add)|"
+    r"don['’]t (?:include|add))\s+(?:(?:a|the)\s+)?"
+    r"(?:plan\s+with\s+(?:(?:a|the)\s+)?)?"
+    r"(?:(?:separate|dedicated|additional)\s+)?formal salon\b"
 )
 SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
 FIVE_STANDARD_ROOMS = r"\b(?:keep|use) (?:the )?five standard rooms\b"
@@ -151,7 +158,17 @@ def salon_choice(message):
         wrapped_condition = not following.rstrip().endswith(
             (".", "?", "!", ";")
         ) and re.match(CONDITIONAL_CONTINUATION, continuation.lower())
+        exclusion = re.match(SALON_EXCLUSION, sentence.lower())
         if (
+            exclusion
+            and not conditional_correction
+            and not re.match(
+                CONDITIONAL_CONTINUATION, sentence[exclusion.end() :].lower()
+            )
+        ):
+            decision = False
+            statement = sentence.strip()
+        elif (
             not conditional_correction
             and re.match(SALON_DECLINE, sentence.lower())
             and (
@@ -161,12 +178,16 @@ def salon_choice(message):
         ):
             decision = False
             statement = sentence.strip()
-        conditional_correction = bool(wrapped_condition)
-        if re.fullmatch(SALON_ONLY, sentence.strip().lower()) or any(
-            re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(sentence)
+        elif not exclusion and (
+            re.fullmatch(SALON_ONLY, sentence.strip().lower())
+            or any(
+                re.search(SALON_ACTION, clause)
+                for clause in _affirmative_clauses(sentence)
+            )
         ):
             decision = True
             statement = sentence.strip()
+        conditional_correction = bool(wrapped_condition)
         previous = sentence.strip()
     return decision, statement
 
@@ -255,8 +276,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     if brief.compare_tradeoffs and program is False:
         if saved_salon:
             questions.append(
-                "This saved project includes the formal salon. Start a new project for "
-                "a five-room plan, or keep the salon in this revision."
+                "This saved project includes the formal salon. Start a new project by "
+                "opening Town without the project and revision query parameters, "
+                "then choose Design a home. You can also keep the salon in this revision."
             )
         elif brief.formal_salon:
             questions.append(
