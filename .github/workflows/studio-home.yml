@@ -36,6 +36,7 @@ on:
       - scripts/*studio_home.py
       - scripts/publish_studio_board.py
       - scripts/render_saved_bedroom.py
+      - scripts/studio_bedroom_dims.py
       - scripts/render_town_templates.py
       - scripts/render_saved_style.py
       - frontend/realistic_viewer/town/export-saved-style.mjs

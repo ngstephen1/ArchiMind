@@ -5,6 +5,14 @@ import json
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+from studio_bedroom_dims import (
+    EXTERIOR_REVEAL_M,
+    FRAME_DEPTH_M,
+    SILL_DEPTH_M,
+    SILL_THICKNESS_M,
+    WALL_DEPTH_M,
+)
+
 from archimind.designer_handoff.drawings import (
     GLASS,
     MUTED,
@@ -16,16 +24,48 @@ from archimind.designer_handoff.drawings import (
     _sheet,
     _text,
 )
-from studio_bedroom_dims import (
-    EXTERIOR_REVEAL_M,
-    FRAME_DEPTH_M,
-    SILL_DEPTH_M,
-    SILL_THICKNESS_M,
-    WALL_DEPTH_M,
-)
+
+
+def _detail_board(manifest: dict) -> dict:
+    """Accept either the whole-home scene or Town's standalone bedroom export."""
+    if "rooms" in manifest:
+        return manifest
+    if (
+        manifest.get("schema_version") != 1
+        or manifest.get("coordinates")
+        != "Bedroom-local metres: +X east, +Y north, +Z up"
+        or manifest.get("room", {}).get("id") != "bedroom"
+    ):
+        raise ValueError("Supply a Town scene manifest or a version-1 bedroom export.")
+    furniture = []
+    for item in manifest["furniture"]:
+        if item["id"] != "queen-bed":
+            continue
+        if item.get("source") is not None:
+            raise ValueError("The bed-head study requires the procedural queen bed.")
+        x, y = item["footprint_xy_m"]
+        width, depth, height = item["reservation_wdh_m"]
+        furniture.append(
+            {
+                "id": item["id"],
+                "name": item["name"],
+                "category": "bed",
+                "x_m": x,
+                "y_m": y,
+                "width_m": width,
+                "depth_m": depth,
+                "height_m": height,
+                "rotation_deg": item["rotation_deg"],
+            }
+        )
+    return {
+        **manifest,
+        "rooms": [{"room": manifest["room"], "furniture": furniture}],
+    }
 
 
 def study(board: dict) -> tuple[str, dict]:
+    board = _detail_board(board)
     design = _room_design(board)
     room = design.room
     try:
@@ -37,6 +77,8 @@ def study(board: dict) -> tuple[str, dict]:
         raise ValueError(
             "The revision needs the identified bedroom window and bed."
         ) from exc
+    if bed.category != "bed":
+        raise ValueError("The bed-head study requires the procedural queen bed.")
     sill, head = window.sill_height_m, window.sill_height_m + window.height_m
     if head > room.ceiling_height_m - 0.06:
         raise ValueError("The modeled head gap is too small for this mounting study.")
