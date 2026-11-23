@@ -103,9 +103,9 @@ SEPARATE_TABLE_COUNTS = re.compile(
 SAME_TABLE_ENDS = re.compile(FIRST_TABLE + OTHER_END)
 OPTIONAL_SECOND_TABLE = re.compile(
     FIRST_TABLE
-    + r"(?:"
+    + r"(?:(?P<separate_table>"
     + OTHER_TABLE
-    + r"|"
+    + r")|"
     + OTHER_END
     + r")"
     + r"(?:\s+in (?:the )?(?:"
@@ -314,7 +314,12 @@ def _dining_scope(activity, *, preceding_offsite=False):
     scope = parts[0]
     home = HOME_DINING_LOCATION.search(scope)
     offsite = re.search(OFFSITE_MEAL, scope) or (
-        not home and preceding_offsite and re.search(r"\bthere\b", scope)
+        not home
+        and preceding_offsite
+        and re.search(
+            r"\bthere\b(?!\s+(?:(?:to\s+)?be|is|are|was|were|will\s+be|would\s+be)\b)",
+            scope,
+        )
     )
     if not home and not offsite and len(parts) == 2 and HOME_MEAL.search(parts[1]):
         home = True
@@ -364,14 +369,18 @@ def _home_meal_clauses(clause):
             home = False
 
 
-def _dining_clauses(clauses):
+def _dining_clauses(clauses, *, for_arrangement=False):
     for clause in clauses:
         for home in _home_meal_clauses(clause):
             if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
                 home.strip()
             ):
                 yield OPTIONAL_SECOND_TABLE.sub(
-                    lambda match: home[match.start() : match.start("second_clause")],
+                    lambda match: (
+                        match[0]
+                        if for_arrangement and match["separate_table"]
+                        else home[match.start() : match.start("second_clause")]
+                    ),
                     home,
                 )
 
@@ -393,7 +402,7 @@ def _normalize_table_ends(text):
 
 
 def requests_single_table(message):
-    for clause in _dining_clauses(_affirmative_clauses(message)):
+    for clause in _dining_clauses(_affirmative_clauses(message), for_arrangement=True):
         clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause

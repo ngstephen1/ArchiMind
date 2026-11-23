@@ -1329,13 +1329,33 @@ def test_room_qualified_table_allocations_keep_both_counts(text, total, message)
 
 
 @pytest.mark.parametrize("room", ["kitchen", "kitchen-dining"])
-def test_optional_second_room_keeps_only_the_required_home_allocation(room):
+@pytest.mark.parametrize("split", [False, True])
+def test_optional_second_room_keeps_only_the_required_home_allocation(room, split):
     brief, questions = requirement_controls(
-        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=False),
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=split),
         f"Seat four at one table in the salon and two at the other table in the {room} if possible.",
         None,
     )
-    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+    assert not questions and brief.dining_seats == 4 and brief.split_dining is split
+
+
+def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Seat four at one table in the salon and two at the other end if possible.",
+        None,
+    )
+    assert brief.dining_seats == 4 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+def test_existential_there_does_not_inherit_the_offsite_location():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "We have lunch at work and need there to be seating for six before we have dinner at home.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
 
 
 def test_explicit_offsite_reference_comes_before_later_home_meal():
