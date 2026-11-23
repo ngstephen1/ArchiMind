@@ -1,0 +1,114 @@
+{
+  "commit": "e0d70e816e77574568f4c726e1af743c21c7ee2d",
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "revisions": [
+    1,
+    2
+  ],
+  "brief": "Design a single-storey home for two residents who work from home and host four dinner guests. Include a formal salon. Seat six people total across two tables in the formal salon and kitchen-dining room. Prefer the study away from the living room. Keep a 65 cm wide passage.",
+  "actual_time_to_preview_s": 8.56,
+  "confirmed_seats": 6,
+  "modeled_passage_m": 0.65,
+  "routes": [
+    {
+      "study/living": 8.622,
+      "kitchen-dining/salon": 7.992,
+      "bedroom/bathroom": 14.118
+    },
+    {
+      "study/living": 3.253,
+      "kitchen-dining/salon": 3.29,
+      "bedroom/bathroom": 3.038
+    }
+  ],
+  "chair_and_desk": [
+    {
+      "chair": {
+        "id": "desk-chair",
+        "name": "Oak writing chair",
+        "category": "chair",
+        "x_m": 0.56,
+        "y_m": 4.131126822710037,
+        "width_m": 0.48,
+        "depth_m": 0.52,
+        "height_m": 0.83,
+        "rotation_deg": 0
+      },
+      "desk": {
+        "id": "belaya",
+        "name": "Belaya writing desk",
+        "category": "desk",
+        "x_m": 0.0,
+        "y_m": 4.711126822710037,
+        "width_m": 1.6,
+        "depth_m": 0.8018731772899628,
+        "height_m": 0.7516312003135682,
+        "rotation_deg": 0
+      }
+    },
+    {
+      "chair": {
+        "id": "desk-chair",
+        "name": "Oak writing chair",
+        "category": "chair",
+        "x_m": 0.56,
+        "y_m": 3.8311268227100372,
+        "width_m": 0.48,
+        "depth_m": 0.52,
+        "height_m": 0.83,
+        "rotation_deg": 0
+      },
+      "desk": {
+        "id": "belaya",
+        "name": "Belaya writing desk",
+        "category": "desk",
+        "x_m": 0.0,
+        "y_m": 4.711126822710037,
+        "width_m": 1.6,
+        "depth_m": 0.8018731772899628,
+        "height_m": 0.7516312003135682,
+        "rotation_deg": 0
+      }
+    }
+  ],
+  "edit_answer": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda · Revision 2 · Bedroom desk-chair footprint origin, revision 1: (0.560, 4.131) m; revision 2: (0.560, 3.831) m. Displacement: 0.300 m. Closest footprint gap to belaya: 0.060 m before and 0.360 m after. Source: saved bedroom furniture coordinates.",
+  "answers_by_revision": {
+    "1": {
+      "tradeoffs": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda · Revision 1 · Measured routes between room entrances · study to living via hall 8.62 m, kitchen-dining to salon via hall 7.99 m, bedroom to bathroom via hall 14.12 m. Modeled dining · salon 4 places at one table, kitchen-dining 4 places at one table. The layout passed the 0.65 m modeled passage check. These measurements describe the plan. Acoustic privacy, glare and clear opening hardware need separate evidence.",
+      "chair_fit": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda · Revision 1 · The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.06 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints.",
+      "window_distance": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda · Revision 1 · Belaya is 2.49 m from the nearest window center on the west wall, measured center to center in plan. Source: bedroom belaya footprint and window bedroom-window. This measures proximity. Placement intent and screen glare have not been established."
+    },
+    "2": {
+      "tradeoffs": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda · Revision 2 · Measured routes between room entrances · study to living via hall 8.62 m, kitchen-dining to salon via hall 7.99 m, bedroom to bathroom via hall 14.12 m. Modeled dining · salon 4 places at one table, kitchen-dining 4 places at one table. The layout passed the 0.65 m modeled passage check. These measurements describe the plan. Acoustic privacy, glare and clear opening hardware need separate evidence.",
+      "chair_fit": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda · Revision 2 · The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.36 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints.",
+      "window_distance": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda · Revision 2 · Belaya is 2.49 m from the nearest window center on the west wall, measured center to center in plan. Source: bedroom belaya footprint and window bedroom-window. This measures proximity. Placement intent and screen glare have not been established."
+    }
+  },
+  "paired_measurements": "paired-measurements.json",
+  "provider_phases_started": 3,
+  "provider_phase_outcomes": [
+    {
+      "task": "OpenAI · Interpret brief",
+      "state": "completed",
+      "time": 1795417280.7382882
+    },
+    {
+      "task": "OpenAI · Generate styling direction",
+      "state": "completed",
+      "time": 1795417282.073954
+    },
+    {
+      "task": "OpenAI · Review plan images",
+      "state": "completed",
+      "time": 1795417286.102413
+    }
+  ],
+  "provider_count_basis": "one bounded call per recorded OpenAI phase in the current worker",
+  "artifact_sha256": {
+    "snapshot-r1.json": "e88700a59400f1718cf94a304c11b4f7a6a11f58a813141bf94b967ee9953d87",
+    "manifest-r1.json": "81acf4e5cf41a289b1d37104bce62b3e3f2a6592a77aeeab5899669685f8a139",
+    "snapshot-r2.json": "e5fd4343a5e5de05954c5d340c197d3de6177a3e828dafe419dfe494e835eb00",
+    "manifest-r2.json": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d"
+  },
+  "live_events": "events.json"
+}

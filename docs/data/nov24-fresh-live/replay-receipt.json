@@ -1,0 +1,49 @@
+{
+  "runtime_base": "9adf26f704c3684f40b7e773e2be57d896eef6ca",
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "isolated_sqlite": true,
+  "provider_calls": 0,
+  "health_http": {
+    "http://127.0.0.1:8852/health": 200,
+    "http://127.0.0.1:8853/_stcore/health": 200
+  },
+  "walkthrough": [
+    {
+      "revision": 1,
+      "viewport_px": [
+        1440,
+        1000
+      ],
+      "file": "walkthrough-1440-r1.jpg",
+      "sha256": "aef6d1a9404865ed31039091e2c2d204db7241246cf7890be8569a0ab44d25f2"
+    },
+    {
+      "revision": 1,
+      "viewport_px": [
+        390,
+        844
+      ],
+      "file": "walkthrough-390-r1.jpg",
+      "sha256": "a8cbecea0cf4bec097f839632d8abf3c558fa0e3063de69daeafa09ea0243835"
+    },
+    {
+      "revision": 2,
+      "viewport_px": [
+        1440,
+        1000
+      ],
+      "file": "walkthrough-1440-r2.jpg",
+      "sha256": "02f60570e581f393e8ace5dfb4db54ba1a5431249c4e1ec9921047968bbd3df7"
+    },
+    {
+      "revision": 2,
+      "viewport_px": [
+        390,
+        844
+      ],
+      "file": "walkthrough-390-r2.jpg",
+      "sha256": "ad60a497f75f2276e11d4c1018dad18a4f0f276833e2d73ac03c4da1d37d5cf7"
+    }
+  ],
+  "observation": "Both revisions loaded their bedroom presentation photographs in both Chrome viewports. This is the separate offline replay."
+}

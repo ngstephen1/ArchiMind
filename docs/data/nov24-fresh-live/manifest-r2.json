@@ -1,0 +1,5369 @@
+{
+  "bedroom": {
+    "cameras": [
+      {
+        "eye_xyz_m": [
+          5.851999999999999,
+          3.1065000000000005,
+          1.57
+        ],
+        "id": "doorway",
+        "label": "Doorway",
+        "reason": null,
+        "target_xyz_m": [
+          2.7686,
+          1.409650000000001,
+          0.58
+        ],
+        "vertical_fov_degrees": 69
+      },
+      {
+        "eye_xyz_m": [
+          2.14,
+          2.83,
+          1.57
+        ],
+        "id": "desk",
+        "label": "Desk and chair",
+        "reason": null,
+        "target_xyz_m": [
+          0.8,
+          4.601595117032527,
+          0.5535709201097488
+        ],
+        "vertical_fov_degrees": 58
+      },
+      {
+        "eye_xyz_m": [
+          0.76,
+          3.290000000000001,
+          1.57
+        ],
+        "id": "bedside",
+        "label": "Bedside",
+        "reason": null,
+        "target_xyz_m": [
+          1.63,
+          2.045,
+          0.742
+        ],
+        "vertical_fov_degrees": 58
+      }
+    ],
+    "coordinates": "Bedroom-local metres: +X east, +Y north, +Z up",
+    "furniture": [
+      {
+        "center_floor_xyz_m": [
+          0.8,
+          5.1120634113550185,
+          0
+        ],
+        "footprint_xy_m": [
+          0,
+          4.711126822710037
+        ],
+        "id": "belaya",
+        "name": "Belaya writing desk",
+        "reservation_wdh_m": [
+          1.6,
+          0.8018731772899628,
+          0.7516312003135682
+        ],
+        "rotation_deg": 0,
+        "source": {
+          "id": "abo-b074l4976t-amazon-co-uk",
+          "kind": "catalog",
+          "sha256": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+          "translation_m": [
+            0,
+            0.08341898024082184,
+            0
+          ],
+          "version": "1.0.0"
+        }
+      },
+      {
+        "center_floor_xyz_m": [
+          2.71,
+          1.26,
+          0
+        ],
+        "footprint_xy_m": [
+          1.91,
+          0.26
+        ],
+        "id": "queen-bed",
+        "name": "Queen Bed",
+        "reservation_wdh_m": [
+          1.6,
+          2,
+          0.6
+        ],
+        "rotation_deg": 0,
+        "source": null
+      },
+      {
+        "center_floor_xyz_m": [
+          0.8,
+          4.091126822710037,
+          0
+        ],
+        "footprint_xy_m": [
+          0.56,
+          3.8311268227100372
+        ],
+        "id": "desk-chair",
+        "name": "Oak writing chair",
+        "reservation_wdh_m": [
+          0.48,
+          0.52,
+          0.83
+        ],
+        "rotation_deg": 180,
+        "source": null
+      },
+      {
+        "center_floor_xyz_m": [
+          1.63,
+          2.045,
+          0
+        ],
+        "footprint_xy_m": [
+          1.39,
+          1.8299999999999998
+        ],
+        "id": "bedside-lamp",
+        "name": "Nightstand with reading lamp",
+        "reservation_wdh_m": [
+          0.48,
+          0.43,
+          1.06
+        ],
+        "rotation_deg": 0,
+        "source": null
+      }
+    ],
+    "hall_context": {
+      "depth_m": 16,
+      "opposite_rooms": [
+        {
+          "origin_xy_m": [
+            8.192,
+            -10.487
+          ],
+          "room": {
+            "ceiling_height_m": 2.8,
+            "depth_m": 4.252,
+            "doors": [
+              {
+                "height_m": 2.15,
+                "id": "bathroom-door",
+                "offset_m": 1.5759999999999998,
+                "wall": "west",
+                "width_m": 1.1
+              }
+            ],
+            "id": "bathroom",
+            "name": "Bathroom",
+            "width_m": 6.808,
+            "windows": [
+              {
+                "height_m": 1.15,
+                "id": "bathroom-window",
+                "offset_m": 1.426,
+                "sill_height_m": 1,
+                "wall": "east",
+                "width_m": 1.4
+              }
+            ]
+          }
+        },
+        {
+          "origin_xy_m": [
+            8.192,
+            -6.235
+          ],
+          "room": {
+            "ceiling_height_m": 2.8,
+            "depth_m": 6.461,
+            "doors": [
+              {
+                "height_m": 2.15,
+                "id": "kitchen-dining-door",
+                "offset_m": 2.6805000000000003,
+                "wall": "west",
+                "width_m": 1.1
+              }
+            ],
+            "id": "kitchen-dining",
+            "name": "Kitchen-Dining",
+            "width_m": 6.808,
+            "windows": [
+              {
+                "height_m": 1.15,
+                "id": "kitchen-dining-window",
+                "offset_m": 2.5305,
+                "sill_height_m": 1,
+                "wall": "east",
+                "width_m": 1.4
+              }
+            ]
+          }
+        },
+        {
+          "origin_xy_m": [
+            8.192,
+            0.22600000000000087
+          ],
+          "room": {
+            "ceiling_height_m": 2.8,
+            "depth_m": 5.286999999999999,
+            "doors": [
+              {
+                "height_m": 2.15,
+                "id": "study-door",
+                "offset_m": 2.0934999999999997,
+                "wall": "west",
+                "width_m": 1.1
+              }
+            ],
+            "id": "study",
+            "name": "Study",
+            "width_m": 6.808,
+            "windows": [
+              {
+                "height_m": 1.15,
+                "id": "study-window",
+                "offset_m": 1.9434999999999996,
+                "sill_height_m": 1,
+                "wall": "east",
+                "width_m": 1.4
+              }
+            ]
+          }
+        }
+      ],
+      "origin_xy_m": [
+        6.592,
+        -10.487
+      ],
+      "width_m": 1.6
+    },
+    "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+    "origin_xy_m": [
+      0,
+      10.487
+    ],
+    "palette": "oak",
+    "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+    "revision": 2,
+    "room": {
+      "ceiling_height_m": 2.8,
+      "depth_m": 5.513,
+      "doors": [
+        {
+          "height_m": 2.15,
+          "id": "bedroom-door",
+          "offset_m": 2.2065,
+          "wall": "east",
+          "width_m": 1.1
+        }
+      ],
+      "id": "bedroom",
+      "name": "Bedroom",
+      "width_m": 6.592,
+      "windows": [
+        {
+          "height_m": 1.15,
+          "id": "bedroom-window",
+          "offset_m": 2.0564999999999998,
+          "sill_height_m": 1,
+          "wall": "west",
+          "width_m": 1.4
+        }
+      ]
+    },
+    "schema_version": 1,
+    "surface_sources": [
+      {
+        "asset": "oak_veneer_01",
+        "local": "oak-veneer-512.jpg",
+        "sha256": "a47e7b1de36638bbe6945cf2154140211d1f7c76ecf24cd317a3201735c0f32d",
+        "source_sha256": "c14681f72f59f17bff568cae7a837641443b607b899f0c279cd64a5638f877a7"
+      },
+      {
+        "asset": "rough_linen",
+        "local": "linen-normal-256.jpg",
+        "sha256": "79f4699154defeeeecc01b6fa50ce026e866922fefc805c943164d9981bfcdf4",
+        "source_sha256": "e2402166d1a489f7414814e69e1836ab672aa24e30bec2d41fea356f81687e53"
+      },
+      {
+        "asset": "urban_courtyard_02",
+        "local": "courtyard-256.hdr",
+        "sha256": "ed2d9a91852dcf21d1340ce1958c37f39b33d16189092b05d106ec6b4ac1f64e",
+        "source_sha256": "e67375321c7c2f413bc1a2855f9e4b391181a40fd6a34058bb7fac410d03b59e"
+      },
+      {
+        "asset": "rough_linen",
+        "local": "linen-weave-512.jpg",
+        "sha256": "1a72bc0366e14394ffb109132a4c98c091b9954c2c3b7b9cb89242238939ca61",
+        "source_sha256": "04897d7611d7390ddf5b2c6f7273f448dfc48341fdbd1f4f207fa30b331d7f57"
+      }
+    ]
+  },
+  "depth": 16,
+  "finishes": {
+    "brass": "#aa8752",
+    "clay": "#9e5f4b",
+    "glass": "#637873",
+    "ink": "#343b39",
+    "marble": "#e6e0d3",
+    "moss": "#596a4d",
+    "oak": "#9d7555",
+    "paper": "#e3d9c1",
+    "walnut": "#523b32",
+    "wool": "#d6cbb8"
+  },
+  "hall": 6.592,
+  "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+  "kind": "whole-home-presentation",
+  "palette": "oak",
+  "presentation_detail": "bedroom-salon-v1",
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "revision": 2,
+  "rooms": [
+    {
+      "cameras": [
+        {
+          "eye": [
+            5.851999999999999,
+            1.57,
+            -2.491
+          ],
+          "fov": 69,
+          "id": "doorway",
+          "label": "Doorway",
+          "reason": null,
+          "target": [
+            3.296,
+            0.91,
+            -2.491
+          ]
+        },
+        {
+          "eye": [
+            1.22,
+            1.57,
+            -2.37
+          ],
+          "fov": 58,
+          "id": "salon-dining",
+          "label": "Salon Dining",
+          "reason": null,
+          "target": [
+            4.300000000000001,
+            0.7,
+            -3.522
+          ]
+        },
+        {
+          "eye": [
+            1.22,
+            1.57,
+            -0.99
+          ],
+          "fov": 58,
+          "id": "salon-suite",
+          "label": "Salon Suite",
+          "reason": null,
+          "target": [
+            1.4,
+            0.6579999999999999,
+            -3.8070000000000004
+          ]
+        }
+      ],
+      "details": [
+        {
+          "finish": "walnut",
+          "name": "Shadow-box frame",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.52,
+            0.065,
+            0.85
+          ],
+          "xyz": [
+            2.7159999999999997,
+            0.035,
+            1.6
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Cotton paper",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.485,
+            0.012,
+            0.815
+          ],
+          "xyz": [
+            2.7159999999999997,
+            0.071,
+            1.6
+          ]
+        },
+        {
+          "finish": "moss",
+          "name": "Cut paper arc",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.3,
+            0.015,
+            0.38
+          ],
+          "xyz": [
+            2.671,
+            0.081,
+            1.64
+          ]
+        },
+        {
+          "finish": "wool",
+          "name": "Cut paper horizon",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.32,
+            0.014,
+            0.08
+          ],
+          "xyz": [
+            2.7659999999999996,
+            0.095,
+            1.46
+          ]
+        },
+        {
+          "finish": "walnut",
+          "name": "Shadow-box frame",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.52,
+            0.065,
+            0.85
+          ],
+          "xyz": [
+            3.296,
+            0.035,
+            1.6
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Cotton paper",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.485,
+            0.012,
+            0.815
+          ],
+          "xyz": [
+            3.296,
+            0.071,
+            1.6
+          ]
+        },
+        {
+          "finish": "clay",
+          "name": "Cut paper arc",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.3,
+            0.015,
+            0.38
+          ],
+          "xyz": [
+            3.251,
+            0.081,
+            1.5699999999999998
+          ]
+        },
+        {
+          "finish": "wool",
+          "name": "Cut paper horizon",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.32,
+            0.014,
+            0.08
+          ],
+          "xyz": [
+            3.3459999999999996,
+            0.095,
+            1.46
+          ]
+        },
+        {
+          "finish": "walnut",
+          "name": "Shadow-box frame",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.52,
+            0.065,
+            0.85
+          ],
+          "xyz": [
+            3.876,
+            0.035,
+            1.6
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Cotton paper",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.485,
+            0.012,
+            0.815
+          ],
+          "xyz": [
+            3.876,
+            0.071,
+            1.6
+          ]
+        },
+        {
+          "finish": "ink",
+          "name": "Cut paper arc",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.3,
+            0.015,
+            0.38
+          ],
+          "xyz": [
+            3.831,
+            0.081,
+            1.5
+          ]
+        },
+        {
+          "finish": "wool",
+          "name": "Cut paper horizon",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            0.32,
+            0.014,
+            0.08
+          ],
+          "xyz": [
+            3.9259999999999997,
+            0.095,
+            1.46
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "North plaster moulding",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            6.592,
+            0.048,
+            0.048
+          ],
+          "xyz": [
+            3.296,
+            4.958,
+            0.13
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "South plaster moulding",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            6.592,
+            0.048,
+            0.048
+          ],
+          "xyz": [
+            3.296,
+            0.024,
+            0.13
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "North plaster moulding",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            6.592,
+            0.048,
+            0.048
+          ],
+          "xyz": [
+            3.296,
+            4.958,
+            2.69
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "South plaster moulding",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            6.592,
+            0.048,
+            0.048
+          ],
+          "xyz": [
+            3.296,
+            0.024,
+            2.69
+          ]
+        },
+        {
+          "finish": "brass",
+          "name": "Ceiling rose",
+          "radius": 0.008,
+          "shape": "cylinder",
+          "wdh": [
+            0.16,
+            0.16,
+            0.044
+          ],
+          "xyz": [
+            4.300000000000001,
+            3.522,
+            2.778
+          ]
+        },
+        {
+          "finish": "ink",
+          "name": "Pendant suspension",
+          "radius": 0.008,
+          "shape": "cylinder",
+          "wdh": [
+            0.009,
+            0.009,
+            0.6799999999999997
+          ],
+          "xyz": [
+            3.900000000000001,
+            3.522,
+            2.46
+          ]
+        },
+        {
+          "finish": "ink",
+          "name": "Pendant suspension",
+          "radius": 0.008,
+          "shape": "cylinder",
+          "wdh": [
+            0.009,
+            0.009,
+            0.6799999999999997
+          ],
+          "xyz": [
+            4.700000000000001,
+            3.522,
+            2.46
+          ]
+        },
+        {
+          "finish": "brass",
+          "name": "Pendant arm",
+          "radius": 0.008,
+          "shape": "box",
+          "wdh": [
+            1.12,
+            0.025,
+            0.025
+          ],
+          "xyz": [
+            4.300000000000001,
+            3.522,
+            2.12
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            3.8200000000000007,
+            3.437,
+            2.09
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            4.140000000000001,
+            3.437,
+            2.155
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            4.460000000000001,
+            3.437,
+            2.09
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            4.780000000000001,
+            3.437,
+            2.155
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            3.8200000000000007,
+            3.6069999999999998,
+            2.09
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            4.140000000000001,
+            3.6069999999999998,
+            2.155
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            4.460000000000001,
+            3.6069999999999998,
+            2.09
+          ]
+        },
+        {
+          "finish": "paper",
+          "name": "Opal globe",
+          "radius": 0.008,
+          "shape": "sphere",
+          "wdh": [
+            0.168,
+            0.168,
+            0.168
+          ],
+          "xyz": [
+            4.780000000000001,
+            3.6069999999999998,
+            2.155
+          ]
+        }
+      ],
+      "furniture": [
+        {
+          "category": "dining",
+          "depth_m": 2.92,
+          "height_m": 1,
+          "id": "salon-dining",
+          "name": "Salon Dining",
+          "parts": [
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                3.668,
+                3.218,
+                0.3525
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                3.668,
+                3.8259999999999996,
+                0.3525
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                4.932,
+                3.218,
+                0.3525
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                4.932,
+                3.8259999999999996,
+                0.3525
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tabletop",
+              "radius": 0.022,
+              "shape": "box",
+              "wdh": [
+                1.58,
+                0.76,
+                0.046
+              ],
+              "xyz": [
+                4.300000000000001,
+                3.522,
+                0.727
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.676,
+                2.618,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.676,
+                2.9859999999999998,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.0440000000000005,
+                2.618,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.0440000000000005,
+                2.9859999999999998,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.44,
+                0.44,
+                0.15
+              ],
+              "xyz": [
+                3.8600000000000003,
+                2.8019999999999996,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.438,
+                0.33,
+                0.15
+              ],
+              "xyz": [
+                3.8600000000000003,
+                2.847,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.434,
+                0.17,
+                0.43
+              ],
+              "xyz": [
+                3.8600000000000003,
+                2.657,
+                0.625
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                3.6850000000000005,
+                2.8019999999999996,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                4.035,
+                2.8019999999999996,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.676,
+                4.058,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.676,
+                4.426,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.0440000000000005,
+                4.058,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.0440000000000005,
+                4.426,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.44,
+                0.44,
+                0.15
+              ],
+              "xyz": [
+                3.8600000000000003,
+                4.241999999999999,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.438,
+                0.33,
+                0.15
+              ],
+              "xyz": [
+                3.8600000000000003,
+                4.196999999999999,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.434,
+                0.17,
+                0.43
+              ],
+              "xyz": [
+                3.8600000000000003,
+                4.387,
+                0.625
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                3.6850000000000005,
+                4.241999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                4.035,
+                4.241999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.556,
+                2.618,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.556,
+                2.9859999999999998,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.924,
+                2.618,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.924,
+                2.9859999999999998,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.44,
+                0.44,
+                0.15
+              ],
+              "xyz": [
+                4.74,
+                2.8019999999999996,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.438,
+                0.33,
+                0.15
+              ],
+              "xyz": [
+                4.74,
+                2.847,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.434,
+                0.17,
+                0.43
+              ],
+              "xyz": [
+                4.74,
+                2.657,
+                0.625
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                4.565,
+                2.8019999999999996,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                4.915,
+                2.8019999999999996,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.556,
+                4.058,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.556,
+                4.426,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.924,
+                4.058,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                4.924,
+                4.426,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.44,
+                0.44,
+                0.15
+              ],
+              "xyz": [
+                4.74,
+                4.241999999999999,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.438,
+                0.33,
+                0.15
+              ],
+              "xyz": [
+                4.74,
+                4.196999999999999,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.434,
+                0.17,
+                0.43
+              ],
+              "xyz": [
+                4.74,
+                4.387,
+                0.625
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                4.565,
+                4.241999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.39,
+                0.27
+              ],
+              "xyz": [
+                4.915,
+                4.241999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Thrown dinner plate",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.225,
+                0.225,
+                0.026
+              ],
+              "xyz": [
+                3.8600000000000003,
+                3.3019999999999996,
+                0.763
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Linen napkin",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.065,
+                0.148,
+                0.016
+              ],
+              "xyz": [
+                3.8600000000000003,
+                3.3019999999999996,
+                0.782
+              ]
+            },
+            {
+              "finish": "glass",
+              "name": "Water tumbler",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.061,
+                0.061,
+                0.13
+              ],
+              "xyz": [
+                4.050000000000001,
+                3.372,
+                0.815
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass cutlery",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.012,
+                0.15,
+                0.012
+              ],
+              "xyz": [
+                3.7100000000000004,
+                3.3019999999999996,
+                0.758
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Thrown dinner plate",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.225,
+                0.225,
+                0.026
+              ],
+              "xyz": [
+                3.8600000000000003,
+                3.742,
+                0.763
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Linen napkin",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.065,
+                0.148,
+                0.016
+              ],
+              "xyz": [
+                3.8600000000000003,
+                3.742,
+                0.782
+              ]
+            },
+            {
+              "finish": "glass",
+              "name": "Water tumbler",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.061,
+                0.061,
+                0.13
+              ],
+              "xyz": [
+                4.050000000000001,
+                3.6719999999999997,
+                0.815
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass cutlery",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.012,
+                0.15,
+                0.012
+              ],
+              "xyz": [
+                3.7100000000000004,
+                3.742,
+                0.758
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Thrown dinner plate",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.225,
+                0.225,
+                0.026
+              ],
+              "xyz": [
+                4.74,
+                3.3019999999999996,
+                0.763
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Linen napkin",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.065,
+                0.148,
+                0.016
+              ],
+              "xyz": [
+                4.74,
+                3.3019999999999996,
+                0.782
+              ]
+            },
+            {
+              "finish": "glass",
+              "name": "Water tumbler",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.061,
+                0.061,
+                0.13
+              ],
+              "xyz": [
+                4.93,
+                3.372,
+                0.815
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass cutlery",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.012,
+                0.15,
+                0.012
+              ],
+              "xyz": [
+                4.59,
+                3.3019999999999996,
+                0.758
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Thrown dinner plate",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.225,
+                0.225,
+                0.026
+              ],
+              "xyz": [
+                4.74,
+                3.742,
+                0.763
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Linen napkin",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.065,
+                0.148,
+                0.016
+              ],
+              "xyz": [
+                4.74,
+                3.742,
+                0.782
+              ]
+            },
+            {
+              "finish": "glass",
+              "name": "Water tumbler",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.061,
+                0.061,
+                0.13
+              ],
+              "xyz": [
+                4.93,
+                3.6719999999999997,
+                0.815
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass cutlery",
+              "radius": 0.005,
+              "shape": "box",
+              "wdh": [
+                0.012,
+                0.15,
+                0.012
+              ],
+              "xyz": [
+                4.59,
+                3.742,
+                0.758
+              ]
+            },
+            {
+              "finish": "marble",
+              "name": "Stoneware tray",
+              "radius": 0.029,
+              "shape": "box",
+              "wdh": [
+                0.4,
+                0.21,
+                0.06
+              ],
+              "xyz": [
+                4.300000000000001,
+                3.522,
+                0.78
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 2.2,
+          "x_m": 3.2,
+          "y_m": 2.062
+        },
+        {
+          "category": "seating",
+          "depth_m": 2.35,
+          "height_m": 0.94,
+          "id": "salon-suite",
+          "name": "Salon Suite",
+          "parts": [
+            {
+              "finish": "paper",
+              "name": "Bound wool rug",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                2.778,
+                2.3280000000000003,
+                0.022
+              ],
+              "xyz": [
+                1.4,
+                3.8070000000000004,
+                0.011
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Woven border",
+              "radius": 0.001,
+              "shape": "box",
+              "wdh": [
+                0.022,
+                2.21,
+                0.002
+              ],
+              "xyz": [
+                0.07200000000000006,
+                3.8070000000000004,
+                0.023
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Woven border",
+              "radius": 0.001,
+              "shape": "box",
+              "wdh": [
+                0.022,
+                2.21,
+                0.002
+              ],
+              "xyz": [
+                2.7279999999999998,
+                3.8070000000000004,
+                0.023
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.6079999999999999,
+                4.2620000000000005,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.6079999999999999,
+                4.902000000000001,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.192,
+                4.2620000000000005,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.192,
+                4.902000000000001,
+                0.12
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                1.96,
+                0.78,
+                0.15
+              ],
+              "xyz": [
+                1.4,
+                4.582000000000001,
+                0.28
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.968,
+                0.67,
+                0.15
+              ],
+              "xyz": [
+                0.9049999999999999,
+                4.537000000000001,
+                0.416
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.964,
+                0.17,
+                0.53
+              ],
+              "xyz": [
+                0.9049999999999999,
+                4.897,
+                0.6749999999999999
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.968,
+                0.67,
+                0.15
+              ],
+              "xyz": [
+                1.8949999999999998,
+                4.537000000000001,
+                0.416
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.964,
+                0.17,
+                0.53
+              ],
+              "xyz": [
+                1.8949999999999998,
+                4.897,
+                0.6749999999999999
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.73,
+                0.27
+              ],
+              "xyz": [
+                0.46499999999999997,
+                4.582000000000001,
+                0.51
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.73,
+                0.27
+              ],
+              "xyz": [
+                2.335,
+                4.582000000000001,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.09799999999999992,
+                2.7,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.09799999999999992,
+                3.244,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.722,
+                2.7,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.722,
+                3.244,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.76,
+                0.66,
+                0.15
+              ],
+              "xyz": [
+                0.41,
+                2.972,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.758,
+                0.55,
+                0.15
+              ],
+              "xyz": [
+                0.41,
+                3.0170000000000003,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.754,
+                0.17,
+                0.41
+              ],
+              "xyz": [
+                0.41,
+                2.717,
+                0.615
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.6100000000000001,
+                0.27
+              ],
+              "xyz": [
+                0.07499999999999996,
+                2.972,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.6100000000000001,
+                0.27
+              ],
+              "xyz": [
+                0.745,
+                2.972,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.0779999999999994,
+                2.7,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.0779999999999994,
+                3.244,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.702,
+                2.7,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.702,
+                3.244,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.76,
+                0.66,
+                0.15
+              ],
+              "xyz": [
+                2.3899999999999997,
+                2.972,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.758,
+                0.55,
+                0.15
+              ],
+              "xyz": [
+                2.3899999999999997,
+                3.0170000000000003,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.754,
+                0.17,
+                0.41
+              ],
+              "xyz": [
+                2.3899999999999997,
+                2.717,
+                0.615
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.6100000000000001,
+                0.27
+              ],
+              "xyz": [
+                2.0549999999999997,
+                2.972,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.6100000000000001,
+                0.27
+              ],
+              "xyz": [
+                2.7249999999999996,
+                2.972,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.335
+              ],
+              "xyz": [
+                0.9879999999999999,
+                3.5100000000000002,
+                0.1675
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.335
+              ],
+              "xyz": [
+                0.9879999999999999,
+                3.894,
+                0.1675
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.335
+              ],
+              "xyz": [
+                1.8119999999999998,
+                3.5100000000000002,
+                0.1675
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.335
+              ],
+              "xyz": [
+                1.8119999999999998,
+                3.894,
+                0.1675
+              ]
+            },
+            {
+              "finish": "marble",
+              "name": "Tabletop",
+              "radius": 0.022,
+              "shape": "box",
+              "wdh": [
+                1.03,
+                0.48,
+                0.046
+              ],
+              "xyz": [
+                1.4,
+                3.702,
+                0.357
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Earthenware vase",
+              "radius": 0,
+              "shape": "sphere",
+              "wdh": [
+                0.14,
+                0.14,
+                0.19
+              ],
+              "xyz": [
+                1.65,
+                3.702,
+                0.475
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Ceramic neck",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.052,
+                0.052,
+                0.064
+              ],
+              "xyz": [
+                1.65,
+                3.702,
+                0.56
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Botanical stem",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.006,
+                0.006,
+                0.19
+              ],
+              "xyz": [
+                1.65,
+                3.732,
+                0.6649999999999999
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Olive leaf",
+              "radius": 0,
+              "shape": "sphere",
+              "wdh": [
+                0.065,
+                0.025,
+                0.039
+              ],
+              "xyz": [
+                1.668,
+                3.732,
+                0.75
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Botanical stem",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.006,
+                0.006,
+                0.209
+              ],
+              "xyz": [
+                1.6718782456050052,
+                3.7182090691760443,
+                0.6745
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Olive leaf",
+              "radius": 0,
+              "shape": "sphere",
+              "wdh": [
+                0.065,
+                0.025,
+                0.039
+              ],
+              "xyz": [
+                1.6898782456050052,
+                3.7182090691760443,
+                0.769
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Botanical stem",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.006,
+                0.006,
+                0.228
+              ],
+              "xyz": [
+                1.6736417330974676,
+                3.689515594903586,
+                0.6839999999999999
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Olive leaf",
+              "radius": 0,
+              "shape": "sphere",
+              "wdh": [
+                0.065,
+                0.025,
+                0.039
+              ],
+              "xyz": [
+                1.6916417330974676,
+                3.689515594903586,
+                0.788
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Botanical stem",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.006,
+                0.006,
+                0.247
+              ],
+              "xyz": [
+                1.6536691202095564,
+                3.6723002251019867,
+                0.6935
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Olive leaf",
+              "radius": 0,
+              "shape": "sphere",
+              "wdh": [
+                0.065,
+                0.025,
+                0.039
+              ],
+              "xyz": [
+                1.6716691202095564,
+                3.6723002251019867,
+                0.807
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Botanical stem",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.006,
+                0.006,
+                0.266
+              ],
+              "xyz": [
+                1.6303231351219938,
+                3.682390691374092,
+                0.703
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Olive leaf",
+              "radius": 0,
+              "shape": "sphere",
+              "wdh": [
+                0.065,
+                0.025,
+                0.039
+              ],
+              "xyz": [
+                1.6483231351219938,
+                3.682390691374092,
+                0.8260000000000001
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Art monograph",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.23,
+                0.18,
+                0.038
+              ],
+              "xyz": [
+                1.19,
+                3.712,
+                0.399
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 2.8,
+          "x_m": 0,
+          "y_m": 2.632
+        }
+      ],
+      "origin": [
+        0,
+        0
+      ],
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 4.982,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "salon-door",
+            "offset_m": 1.941,
+            "wall": "east",
+            "width_m": 1.1
+          }
+        ],
+        "id": "salon",
+        "name": "Salon",
+        "width_m": 6.592,
+        "windows": [
+          {
+            "height_m": 1.75,
+            "id": "salon-window",
+            "offset_m": 1.066,
+            "sill_height_m": 0.55,
+            "wall": "west",
+            "width_m": 2.85
+          }
+        ]
+      },
+      "textile": null
+    },
+    {
+      "cameras": [
+        {
+          "eye": [
+            6.280000000000004,
+            1.57,
+            -6.892
+          ],
+          "fov": 58,
+          "id": "overview",
+          "label": "Living",
+          "reason": null,
+          "target": [
+            2.755,
+            0.9799999999999999,
+            -6.847
+          ]
+        },
+        {
+          "eye": [
+            6.280000000000004,
+            1.57,
+            -6.892
+          ],
+          "fov": 58,
+          "id": "ensemble",
+          "label": "Reading Suite",
+          "reason": null,
+          "target": [
+            2.755,
+            0.9799999999999999,
+            -6.847
+          ]
+        },
+        {
+          "eye": [
+            2.14,
+            1.57,
+            -8.732
+          ],
+          "fov": 58,
+          "id": "media-console",
+          "label": "Media Console",
+          "reason": null,
+          "target": [
+            3.2700000000000005,
+            0.44799999999999995,
+            -10.297
+          ]
+        }
+      ],
+      "details": [],
+      "furniture": [
+        {
+          "category": "storage",
+          "depth_m": 0.38,
+          "height_m": 0.64,
+          "id": "media-console",
+          "name": "Media Console",
+          "parts": [
+            {
+              "finish": "walnut",
+              "name": "Carcass side",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.035,
+                0.38,
+                0.64
+              ],
+              "xyz": [
+                2.4875000000000003,
+                5.315,
+                0.32
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Carcass side",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.035,
+                0.38,
+                0.64
+              ],
+              "xyz": [
+                4.0525,
+                5.315,
+                0.32
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                1.6,
+                0.38,
+                0.04
+              ],
+              "xyz": [
+                3.2700000000000005,
+                5.315,
+                0.02
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                1.6,
+                0.38,
+                0.04
+              ],
+              "xyz": [
+                3.2700000000000005,
+                5.315,
+                0.32
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                1.6,
+                0.38,
+                0.04
+              ],
+              "xyz": [
+                3.2700000000000005,
+                5.315,
+                0.62
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.2
+              ],
+              "xyz": [
+                2.5700000000000003,
+                5.315,
+                0.14
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.23500000000000001
+              ],
+              "xyz": [
+                2.6220000000000003,
+                5.315,
+                0.14
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.2
+              ],
+              "xyz": [
+                2.6740000000000004,
+                5.315,
+                0.14
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.23500000000000001
+              ],
+              "xyz": [
+                2.726,
+                5.315,
+                0.14
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.2
+              ],
+              "xyz": [
+                2.778,
+                5.315,
+                0.14
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 1.6,
+          "x_m": 2.47,
+          "y_m": 5.125
+        },
+        {
+          "category": "seating",
+          "depth_m": 2.35,
+          "height_m": 1.4,
+          "id": "reading-suite",
+          "name": "Reading Suite",
+          "parts": [
+            {
+              "finish": "paper",
+              "name": "Loop pile rug",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                2.8200000000000003,
+                2.3200000000000003,
+                0.024
+              ],
+              "xyz": [
+                2.755,
+                1.865,
+                0.012
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                1.979,
+                2.282,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                1.979,
+                2.938,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.531,
+                2.282,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.531,
+                2.938,
+                0.12
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                1.92,
+                0.7999999999999999,
+                0.15
+              ],
+              "xyz": [
+                2.755,
+                2.6100000000000003,
+                0.28
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.948,
+                0.69,
+                0.15
+              ],
+              "xyz": [
+                2.27,
+                2.5650000000000004,
+                0.416
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.944,
+                0.17,
+                0.48000000000000004
+              ],
+              "xyz": [
+                2.27,
+                2.935,
+                0.65
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.948,
+                0.69,
+                0.15
+              ],
+              "xyz": [
+                3.24,
+                2.5650000000000004,
+                0.416
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.944,
+                0.17,
+                0.48000000000000004
+              ],
+              "xyz": [
+                3.24,
+                2.935,
+                0.65
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.75,
+                0.27
+              ],
+              "xyz": [
+                1.8400000000000003,
+                2.6100000000000003,
+                0.51
+              ]
+            },
+            {
+              "finish": "wool",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.75,
+                0.27
+              ],
+              "xyz": [
+                3.67,
+                2.6100000000000003,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                1.448,
+                0.818,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                1.448,
+                1.362,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.072,
+                0.818,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.072,
+                1.362,
+                0.12
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.76,
+                0.66,
+                0.15
+              ],
+              "xyz": [
+                1.76,
+                1.0899999999999999,
+                0.28
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.758,
+                0.55,
+                0.15
+              ],
+              "xyz": [
+                1.76,
+                1.135,
+                0.416
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.754,
+                0.17,
+                0.4000000000000001
+              ],
+              "xyz": [
+                1.76,
+                0.835,
+                0.61
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.6100000000000001,
+                0.27
+              ],
+              "xyz": [
+                1.425,
+                1.0899999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.6100000000000001,
+                0.27
+              ],
+              "xyz": [
+                2.095,
+                1.0899999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.325
+              ],
+              "xyz": [
+                2.395,
+                1.416,
+                0.1625
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.325
+              ],
+              "xyz": [
+                2.395,
+                1.784,
+                0.1625
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.325
+              ],
+              "xyz": [
+                3.115,
+                1.416,
+                0.1625
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.325
+              ],
+              "xyz": [
+                3.115,
+                1.784,
+                0.1625
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tabletop",
+              "radius": 0.022,
+              "shape": "box",
+              "wdh": [
+                0.9,
+                0.46,
+                0.046
+              ],
+              "xyz": [
+                2.755,
+                1.6,
+                0.347
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Open book",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.25,
+                0.17,
+                0.024
+              ],
+              "xyz": [
+                2.6550000000000002,
+                1.6,
+                0.382
+              ]
+            },
+            {
+              "finish": "ink",
+              "name": "Reading lamp base",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.29,
+                0.29,
+                0.07
+              ],
+              "xyz": [
+                3.91,
+                1.0899999999999999,
+                0.035
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Reading lamp stem",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.026,
+                0.026,
+                1.2
+              ],
+              "xyz": [
+                3.91,
+                1.0899999999999999,
+                0.65
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Linen drum shade",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.37,
+                0.37,
+                0.33
+              ],
+              "xyz": [
+                3.91,
+                1.0899999999999999,
+                1.235
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 2.85,
+          "x_m": 1.33,
+          "y_m": 0.69
+        }
+      ],
+      "origin": [
+        0,
+        4.982
+      ],
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 5.505,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "living-door",
+            "offset_m": 2.2024999999999997,
+            "wall": "east",
+            "width_m": 1.1
+          }
+        ],
+        "id": "living",
+        "name": "Living",
+        "width_m": 6.592,
+        "windows": [
+          {
+            "height_m": 1.15,
+            "id": "living-window",
+            "offset_m": 2.0525,
+            "sill_height_m": 1,
+            "wall": "west",
+            "width_m": 1.4
+          }
+        ]
+      },
+      "textile": null
+    },
+    {
+      "cameras": [
+        {
+          "eye": [
+            5.851999999999999,
+            1.57,
+            -13.5935
+          ],
+          "fov": 69,
+          "id": "doorway",
+          "label": "Doorway",
+          "reason": null,
+          "target": [
+            2.7686,
+            0.58,
+            -11.896650000000001
+          ]
+        },
+        {
+          "eye": [
+            2.14,
+            1.57,
+            -13.317
+          ],
+          "fov": 58,
+          "id": "desk",
+          "label": "Desk and chair",
+          "reason": null,
+          "target": [
+            0.8,
+            0.5535709201097488,
+            -15.088595117032527
+          ]
+        },
+        {
+          "eye": [
+            0.76,
+            1.57,
+            -13.777000000000001
+          ],
+          "fov": 58,
+          "id": "bedside",
+          "label": "Bedside",
+          "reason": null,
+          "target": [
+            1.63,
+            0.742,
+            -12.532
+          ]
+        }
+      ],
+      "details": [],
+      "furniture": [
+        {
+          "category": "desk",
+          "depth_m": 0.8018731772899628,
+          "height_m": 0.7516312003135682,
+          "id": "belaya",
+          "name": "Belaya writing desk",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 1.6,
+          "x_m": 0,
+          "y_m": 4.711126822710037
+        },
+        {
+          "category": "bed",
+          "depth_m": 2,
+          "height_m": 0.6,
+          "id": "queen-bed",
+          "name": "Queen Bed",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 1.6,
+          "x_m": 1.91,
+          "y_m": 0.26
+        },
+        {
+          "category": "chair",
+          "depth_m": 0.52,
+          "height_m": 0.83,
+          "id": "desk-chair",
+          "name": "Oak writing chair",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 0.48,
+          "x_m": 0.56,
+          "y_m": 3.8311268227100372
+        },
+        {
+          "category": "table",
+          "depth_m": 0.43,
+          "height_m": 1.06,
+          "id": "bedside-lamp",
+          "name": "Nightstand with reading lamp",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 0.48,
+          "x_m": 1.39,
+          "y_m": 1.8299999999999998
+        }
+      ],
+      "origin": [
+        0,
+        10.487
+      ],
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 5.513,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "bedroom-door",
+            "offset_m": 2.2065,
+            "wall": "east",
+            "width_m": 1.1
+          }
+        ],
+        "id": "bedroom",
+        "name": "Bedroom",
+        "width_m": 6.592,
+        "windows": [
+          {
+            "height_m": 1.15,
+            "id": "bedroom-window",
+            "offset_m": 2.0564999999999998,
+            "sill_height_m": 1,
+            "wall": "west",
+            "width_m": 1.4
+          }
+        ]
+      },
+      "textile": null
+    },
+    {
+      "cameras": [
+        {
+          "eye": [
+            8.932,
+            1.57,
+            -2.126
+          ],
+          "fov": 69,
+          "id": "doorway",
+          "label": "Doorway",
+          "reason": null,
+          "target": [
+            11.596,
+            0.91,
+            -2.126
+          ]
+        },
+        {
+          "eye": [
+            12.862000000000002,
+            1.57,
+            -2.14
+          ],
+          "fov": 58,
+          "id": "tub",
+          "label": "Tub",
+          "reason": null,
+          "target": [
+            14.25,
+            0.385,
+            -3.892
+          ]
+        },
+        {
+          "eye": [
+            13.322000000000003,
+            1.57,
+            -2.14
+          ],
+          "fov": 58,
+          "id": "vanity",
+          "label": "Vanity",
+          "reason": null,
+          "target": [
+            14.575,
+            0.595,
+            -0.25
+          ]
+        }
+      ],
+      "details": [],
+      "furniture": [
+        {
+          "category": "bath",
+          "depth_m": 0.72,
+          "height_m": 0.55,
+          "id": "tub",
+          "name": "Tub",
+          "parts": [
+            {
+              "finish": "oak",
+              "name": "Bath plinth",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                1.42,
+                0.64,
+                0.396
+              ],
+              "xyz": [
+                6.058,
+                3.892,
+                0.198
+              ]
+            },
+            {
+              "finish": "marble",
+              "name": "Enamel basin",
+              "radius": 0.13,
+              "shape": "box",
+              "wdh": [
+                1.5,
+                0.72,
+                0.264
+              ],
+              "xyz": [
+                6.058,
+                3.892,
+                0.41800000000000004
+              ]
+            },
+            {
+              "finish": "glass",
+              "name": "Inset basin",
+              "radius": 0.1,
+              "shape": "box",
+              "wdh": [
+                1.35,
+                0.5599999999999999,
+                0.006600000000000001
+              ],
+              "xyz": [
+                6.058,
+                3.892,
+                0.5467000000000001
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 1.5,
+          "x_m": 5.308,
+          "y_m": 3.532
+        },
+        {
+          "category": "vanity",
+          "depth_m": 0.5,
+          "height_m": 0.85,
+          "id": "vanity",
+          "name": "Vanity",
+          "parts": [
+            {
+              "finish": "ink",
+              "name": "Plinth",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.77,
+                0.45,
+                0.1
+              ],
+              "xyz": [
+                6.383,
+                0.25,
+                0.05
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Cabinet",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.83,
+                0.47,
+                0.697
+              ],
+              "xyz": [
+                6.383,
+                0.25,
+                0.442
+              ]
+            },
+            {
+              "finish": "marble",
+              "name": "Honed stone",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.85,
+                0.5,
+                0.046
+              ],
+              "xyz": [
+                6.383,
+                0.25,
+                0.827
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Oak drawer",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.408,
+                0.03,
+                0.6034999999999999
+              ],
+              "xyz": [
+                6.1756,
+                0.019,
+                0.4505
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass pull",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.102,
+                0.014,
+                0.018
+              ],
+              "xyz": [
+                6.1756,
+                0.007,
+                0.612
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Oak drawer",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.408,
+                0.03,
+                0.6034999999999999
+              ],
+              "xyz": [
+                6.5904,
+                0.019,
+                0.4505
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass pull",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.102,
+                0.014,
+                0.018
+              ],
+              "xyz": [
+                6.5904,
+                0.007,
+                0.612
+              ]
+            },
+            {
+              "finish": "ink",
+              "name": "Inset sink",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.3825,
+                0.33,
+                0.002
+              ],
+              "xyz": [
+                6.383,
+                0.25,
+                0.849
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 0.85,
+          "x_m": 5.958,
+          "y_m": 0
+        }
+      ],
+      "origin": [
+        8.192,
+        0
+      ],
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 4.252,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "bathroom-door",
+            "offset_m": 1.5759999999999998,
+            "wall": "west",
+            "width_m": 1.1
+          }
+        ],
+        "id": "bathroom",
+        "name": "Bathroom",
+        "width_m": 6.808,
+        "windows": [
+          {
+            "height_m": 1.15,
+            "id": "bathroom-window",
+            "offset_m": 1.426,
+            "sill_height_m": 1,
+            "wall": "east",
+            "width_m": 1.4
+          }
+        ]
+      },
+      "textile": null
+    },
+    {
+      "cameras": [
+        {
+          "eye": [
+            8.952,
+            1.57,
+            -8.232
+          ],
+          "fov": 58,
+          "id": "overview",
+          "label": "Kitchen-Dining",
+          "reason": null,
+          "target": [
+            10.937000000000001,
+            0.609,
+            -5.452
+          ]
+        },
+        {
+          "eye": [
+            13.322000000000003,
+            1.57,
+            -5.4719999999999995
+          ],
+          "fov": 58,
+          "id": "ensemble",
+          "label": "Breakfast Suite",
+          "reason": null,
+          "target": [
+            10.937000000000001,
+            0.609,
+            -5.452
+          ]
+        },
+        {
+          "eye": [
+            8.492,
+            1.57,
+            -8.692
+          ],
+          "fov": 58,
+          "id": "counter",
+          "label": "Counter",
+          "reason": null,
+          "target": [
+            9.192,
+            0.644,
+            -10.393
+          ]
+        }
+      ],
+      "details": [],
+      "furniture": [
+        {
+          "category": "table",
+          "depth_m": 2.4,
+          "height_m": 0.87,
+          "id": "breakfast-suite",
+          "name": "Breakfast Suite",
+          "parts": [
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.695
+              ],
+              "xyz": [
+                2.217,
+                0.9119999999999999,
+                0.3475
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.695
+              ],
+              "xyz": [
+                2.217,
+                1.488,
+                0.3475
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.695
+              ],
+              "xyz": [
+                3.273,
+                0.9119999999999999,
+                0.3475
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.695
+              ],
+              "xyz": [
+                3.273,
+                1.488,
+                0.3475
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Tabletop",
+              "radius": 0.022,
+              "shape": "box",
+              "wdh": [
+                1.32,
+                0.72,
+                0.046
+              ],
+              "xyz": [
+                2.745,
+                1.2,
+                0.717
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.237,
+                0.42999999999999994,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.237,
+                0.75,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.573,
+                0.42999999999999994,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.573,
+                0.75,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.39999999999999997,
+                0.38,
+                0.15
+              ],
+              "xyz": [
+                2.4050000000000002,
+                0.59,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.39799999999999996,
+                0.27,
+                0.15
+              ],
+              "xyz": [
+                2.4050000000000002,
+                0.635,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.39399999999999996,
+                0.17,
+                0.4000000000000001
+              ],
+              "xyz": [
+                2.4050000000000002,
+                0.475,
+                0.61
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                2.25,
+                0.59,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                2.56,
+                0.59,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.9170000000000003,
+                0.42999999999999994,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.9170000000000003,
+                0.75,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.253,
+                0.42999999999999994,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.253,
+                0.75,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.39999999999999997,
+                0.38,
+                0.15
+              ],
+              "xyz": [
+                3.085,
+                0.59,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.39799999999999996,
+                0.27,
+                0.15
+              ],
+              "xyz": [
+                3.085,
+                0.635,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.39399999999999996,
+                0.17,
+                0.4000000000000001
+              ],
+              "xyz": [
+                3.085,
+                0.475,
+                0.61
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                2.93,
+                0.59,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                3.24,
+                0.59,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.237,
+                1.65,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.237,
+                1.9700000000000002,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.573,
+                1.65,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.573,
+                1.9700000000000002,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.39999999999999997,
+                0.38,
+                0.15
+              ],
+              "xyz": [
+                2.4050000000000002,
+                1.81,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.39799999999999996,
+                0.27,
+                0.15
+              ],
+              "xyz": [
+                2.4050000000000002,
+                1.7650000000000001,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.39399999999999996,
+                0.17,
+                0.4000000000000001
+              ],
+              "xyz": [
+                2.4050000000000002,
+                1.925,
+                0.61
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                2.25,
+                1.81,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                2.56,
+                1.81,
+                0.51
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.9170000000000003,
+                1.65,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                2.9170000000000003,
+                1.9700000000000002,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.253,
+                1.65,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                3.253,
+                1.9700000000000002,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.39999999999999997,
+                0.38,
+                0.15
+              ],
+              "xyz": [
+                3.085,
+                1.81,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.39799999999999996,
+                0.27,
+                0.15
+              ],
+              "xyz": [
+                3.085,
+                1.7650000000000001,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.39399999999999996,
+                0.17,
+                0.4000000000000001
+              ],
+              "xyz": [
+                3.085,
+                1.925,
+                0.61
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                2.93,
+                1.81,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.33,
+                0.27
+              ],
+              "xyz": [
+                3.24,
+                1.81,
+                0.51
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Breakfast bowl",
+              "radius": 0,
+              "shape": "sphere",
+              "wdh": [
+                0.22,
+                0.22,
+                0.12
+              ],
+              "xyz": [
+                2.745,
+                1.2,
+                0.8
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Stoneware side plate",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.19,
+                0.19,
+                0.024
+              ],
+              "xyz": [
+                2.4050000000000002,
+                1.2,
+                0.752
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Stoneware side plate",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.19,
+                0.19,
+                0.024
+              ],
+              "xyz": [
+                3.085,
+                1.2,
+                0.752
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 1.75,
+          "x_m": 1.87,
+          "y_m": 0
+        },
+        {
+          "category": "counter",
+          "depth_m": 0.64,
+          "height_m": 0.92,
+          "id": "counter",
+          "name": "Counter",
+          "parts": [
+            {
+              "finish": "ink",
+              "name": "Plinth",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                1.92,
+                0.59,
+                0.1
+              ],
+              "xyz": [
+                1,
+                6.141,
+                0.05
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Cabinet",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                1.98,
+                0.61,
+                0.7544
+              ],
+              "xyz": [
+                1,
+                6.141,
+                0.47840000000000005
+              ]
+            },
+            {
+              "finish": "marble",
+              "name": "Honed stone",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                2,
+                0.64,
+                0.046
+              ],
+              "xyz": [
+                1,
+                6.141,
+                0.897
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Oak drawer",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.96,
+                0.03,
+                0.6532
+              ],
+              "xyz": [
+                0.512,
+                5.84,
+                0.48760000000000003
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass pull",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.24,
+                0.014,
+                0.018
+              ],
+              "xyz": [
+                0.512,
+                5.827999999999999,
+                0.6624
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Oak drawer",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.96,
+                0.03,
+                0.6532
+              ],
+              "xyz": [
+                1.488,
+                5.84,
+                0.48760000000000003
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Brass pull",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.24,
+                0.014,
+                0.018
+              ],
+              "xyz": [
+                1.488,
+                5.827999999999999,
+                0.6624
+              ]
+            },
+            {
+              "finish": "ink",
+              "name": "Inset sink",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.9,
+                0.42240000000000005,
+                0.002
+              ],
+              "xyz": [
+                1,
+                6.141,
+                0.919
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 2,
+          "x_m": 0,
+          "y_m": 5.821
+        }
+      ],
+      "origin": [
+        8.192,
+        4.252
+      ],
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 6.461,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "kitchen-dining-door",
+            "offset_m": 2.6805000000000003,
+            "wall": "west",
+            "width_m": 1.1
+          }
+        ],
+        "id": "kitchen-dining",
+        "name": "Kitchen-Dining",
+        "width_m": 6.808,
+        "windows": [
+          {
+            "height_m": 1.15,
+            "id": "kitchen-dining-window",
+            "offset_m": 2.5305,
+            "sill_height_m": 1,
+            "wall": "east",
+            "width_m": 1.4
+          }
+        ]
+      },
+      "textile": null
+    },
+    {
+      "cameras": [
+        {
+          "eye": [
+            11.252,
+            1.57,
+            -12.393
+          ],
+          "fov": 58,
+          "id": "overview",
+          "label": "Study",
+          "reason": null,
+          "target": [
+            9.067,
+            0.7909999999999999,
+            -15.075
+          ]
+        },
+        {
+          "eye": [
+            11.712,
+            1.57,
+            -15.153000000000002
+          ],
+          "fov": 58,
+          "id": "ensemble",
+          "label": "Writing Suite",
+          "reason": null,
+          "target": [
+            9.067,
+            0.7909999999999999,
+            -15.075
+          ]
+        },
+        {
+          "eye": [
+            14.702000000000005,
+            1.57,
+            -13.083000000000002
+          ],
+          "fov": 58,
+          "id": "bookcase",
+          "label": "Bookcase",
+          "reason": null,
+          "target": [
+            13.286999999999999,
+            1.2249999999999999,
+            -10.883000000000001
+          ]
+        }
+      ],
+      "details": [],
+      "furniture": [
+        {
+          "category": "storage",
+          "depth_m": 0.34,
+          "height_m": 1.75,
+          "id": "bookcase",
+          "name": "Bookcase",
+          "parts": [
+            {
+              "finish": "walnut",
+              "name": "Carcass side",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.035,
+                0.34,
+                1.75
+              ],
+              "xyz": [
+                4.6875,
+                0.17,
+                0.875
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Carcass side",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.035,
+                0.34,
+                1.75
+              ],
+              "xyz": [
+                5.5024999999999995,
+                0.17,
+                0.875
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.85,
+                0.34,
+                0.04
+              ],
+              "xyz": [
+                5.095,
+                0.17,
+                0.02
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.85,
+                0.34,
+                0.04
+              ],
+              "xyz": [
+                5.095,
+                0.17,
+                0.362
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.85,
+                0.34,
+                0.04
+              ],
+              "xyz": [
+                5.095,
+                0.17,
+                0.704
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.85,
+                0.34,
+                0.04
+              ],
+              "xyz": [
+                5.095,
+                0.17,
+                1.046
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.85,
+                0.34,
+                0.04
+              ],
+              "xyz": [
+                5.095,
+                0.17,
+                1.388
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Shelf",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.85,
+                0.34,
+                0.04
+              ],
+              "xyz": [
+                5.095,
+                0.17,
+                1.7300000000000002
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.2
+              ],
+              "xyz": [
+                4.77,
+                0.17,
+                0.14
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.23500000000000001
+              ],
+              "xyz": [
+                4.822,
+                0.17,
+                0.14
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.2
+              ],
+              "xyz": [
+                4.874,
+                0.17,
+                0.14
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.23500000000000001
+              ],
+              "xyz": [
+                4.926,
+                0.17,
+                0.14
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Clothbound volume",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.04,
+                0.18,
+                0.2
+              ],
+              "xyz": [
+                4.978,
+                0.17,
+                0.14
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 0.85,
+          "x_m": 4.67,
+          "y_m": 0
+        },
+        {
+          "category": "desk",
+          "depth_m": 1.85,
+          "height_m": 1.13,
+          "id": "writing-suite",
+          "name": "Writing Suite",
+          "parts": [
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                0.23499999999999988,
+                4.610999999999999,
+                0.3525
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                0.23499999999999988,
+                5.202999999999999,
+                0.3525
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                1.5150000000000001,
+                4.610999999999999,
+                0.3525
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.705
+              ],
+              "xyz": [
+                1.5150000000000001,
+                5.202999999999999,
+                0.3525
+              ]
+            },
+            {
+              "finish": "oak",
+              "name": "Tabletop",
+              "radius": 0.022,
+              "shape": "box",
+              "wdh": [
+                1.6,
+                0.74,
+                0.046
+              ],
+              "xyz": [
+                0.875,
+                4.906999999999999,
+                0.727
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.679,
+                3.9669999999999987,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                0.679,
+                4.366999999999999,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                1.071,
+                3.9669999999999987,
+                0.12
+              ]
+            },
+            {
+              "finish": "walnut",
+              "name": "Tapered foot",
+              "radius": 0.008,
+              "shape": "box",
+              "wdh": [
+                0.044,
+                0.044,
+                0.24
+              ],
+              "xyz": [
+                1.071,
+                4.366999999999999,
+                0.12
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Upholstered deck",
+              "radius": 0.055,
+              "shape": "box",
+              "wdh": [
+                0.47,
+                0.48,
+                0.15
+              ],
+              "xyz": [
+                0.875,
+                4.166999999999999,
+                0.28
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Boxed seat cushion",
+              "radius": 0.065,
+              "shape": "box",
+              "wdh": [
+                0.46799999999999997,
+                0.37,
+                0.15
+              ],
+              "xyz": [
+                0.875,
+                4.211999999999999,
+                0.416
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Back cushion",
+              "radius": 0.075,
+              "shape": "box",
+              "wdh": [
+                0.46399999999999997,
+                0.17,
+                0.43
+              ],
+              "xyz": [
+                0.875,
+                4.001999999999999,
+                0.625
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.43,
+                0.27
+              ],
+              "xyz": [
+                0.685,
+                4.166999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "moss",
+              "name": "Arm bolster",
+              "radius": 0.05,
+              "shape": "box",
+              "wdh": [
+                0.11,
+                0.43,
+                0.27
+              ],
+              "xyz": [
+                1.065,
+                4.166999999999999,
+                0.51
+              ]
+            },
+            {
+              "finish": "clay",
+              "name": "Leather blotter",
+              "radius": 0.004,
+              "shape": "box",
+              "wdh": [
+                0.72,
+                0.38,
+                0.008
+              ],
+              "xyz": [
+                0.875,
+                4.886999999999999,
+                0.754
+              ]
+            },
+            {
+              "finish": "ink",
+              "name": "Lamp base",
+              "radius": 0.008,
+              "shape": "cylinder",
+              "wdh": [
+                0.18,
+                0.18,
+                0.06
+              ],
+              "xyz": [
+                0.25,
+                5.036999999999999,
+                0.78
+              ]
+            },
+            {
+              "finish": "brass",
+              "name": "Lamp stem",
+              "radius": 0,
+              "shape": "cylinder",
+              "wdh": [
+                0.016,
+                0.016,
+                0.27
+              ],
+              "xyz": [
+                0.25,
+                5.036999999999999,
+                0.94
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Lamp shade",
+              "radius": 0.006,
+              "shape": "sphere",
+              "wdh": [
+                0.22,
+                0.22,
+                0.11
+              ],
+              "xyz": [
+                0.25,
+                5.036999999999999,
+                1.075
+              ]
+            },
+            {
+              "finish": "paper",
+              "name": "Notebook",
+              "radius": 0.012,
+              "shape": "box",
+              "wdh": [
+                0.16,
+                0.22,
+                0.017
+              ],
+              "xyz": [
+                1.165,
+                4.927,
+                0.767
+              ]
+            }
+          ],
+          "rotation_deg": 0,
+          "width_m": 1.75,
+          "x_m": 0,
+          "y_m": 3.436999999999999
+        }
+      ],
+      "origin": [
+        8.192,
+        10.713000000000001
+      ],
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 5.286999999999999,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "study-door",
+            "offset_m": 2.0934999999999997,
+            "wall": "west",
+            "width_m": 1.1
+          }
+        ],
+        "id": "study",
+        "name": "Study",
+        "width_m": 6.808,
+        "windows": [
+          {
+            "height_m": 1.15,
+            "id": "study-window",
+            "offset_m": 1.9434999999999996,
+            "sill_height_m": 1,
+            "wall": "east",
+            "width_m": 1.4
+          }
+        ]
+      },
+      "textile": null
+    }
+  ],
+  "schema_version": 1,
+  "width": 15
+}
