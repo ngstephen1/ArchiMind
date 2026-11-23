@@ -28,6 +28,11 @@ from archimind.style_packs import (
     styles_mentioned,
 )
 from archimind.style_packs.scene import style_payload
+from archimind.town.service_layout import (
+    FIXTURES,
+    design_service_room,
+    service_evidence,
+)
 
 Kind = Literal["salon", "bedroom", "study", "living", "kitchen-dining", "bathroom"]
 PROGRAM = ["bedroom", "study", "living", "kitchen-dining", "bathroom"]
@@ -91,6 +96,7 @@ class Brief(BaseModel):
     compare_tradeoffs: bool = False
     dining_seats: int = Field(default=0, ge=0, le=100)
     split_dining: bool = False
+    service_layout: bool = False
     passage_m: float = Field(default=0.6, ge=0.6, le=2)
     seed: int = Field(default=42, ge=0, le=1000000)
     shift_bedroom_chair: bool = False
@@ -276,9 +282,12 @@ def validate_home(home, *, passage_m=None, measure=False):
     targets = {}
     openings = {}
     kinds = []
+    service_rooms = {}
     for part in home["rooms"]:
         d = RoomDesign.model_validate(part["design"])
         r = d.room
+        if home.get("service_layout") and r.id in FIXTURES:
+            service_rooms[r.id] = service_evidence(d, passage_m=passage_m)
         kinds.append(r.id)
         orientation = part.get("suite_yaw_deg", 0)
         if orientation not in (0, 90) or (orientation and r.id != "salon"):
@@ -388,6 +397,7 @@ def validate_home(home, *, passage_m=None, measure=False):
             modeled_openings_m=openings,
             dining_places=seats,
             passage_m=passage_m,
+            **({"service_rooms": service_rooms} if service_rooms else {}),
         )
     return None
 
@@ -552,6 +562,10 @@ def _requirement_boundaries(brief, previous):
                 f"Cannot lock rooms absent from the saved home: {missing}."
             )
     if brief.shift_bedroom_chair or brief.closer_study_desk:
+        if brief.service_layout and not (previous or {}).get("service_layout"):
+            raise ValueError(
+                "Plan kitchen and bathroom fixtures in a separate run before moving furniture."
+            )
         if (
             brief.formal_salon
             and previous
@@ -625,11 +639,13 @@ def generate(brief, previous=None, *, on_progress=None):
             on_progress("Furnished candidate", home)
         return [home]
     previous_comparison = (previous or {}).get("evidence", {}).get("comparison")
+    services = brief.service_layout or bool((previous or {}).get("service_layout"))
     presentation_detail = brief.compare_tradeoffs or (previous or {}).get(
         "presentation_detail"
     )
     measure = (
         brief.compare_tradeoffs
+        or services
         or previous_comparison is not None
         or brief.dining_seats > 0
         or brief.passage_m != 0.6
@@ -750,12 +766,19 @@ def generate(brief, previous=None, *, on_progress=None):
                 )
                 items.append(spec.furniture)
                 proofs[spec.furniture.id] = spec.binding
-            res = generate_layout_candidates(
-                r, items, seed=rng.randrange(100000), max_candidates=1, max_attempts=40
-            )
-            if not res.candidates:
-                break
-            design = res.candidates[0].design
+            room_seed = rng.randrange(100000)
+            if services and k in FIXTURES:
+                try:
+                    design = design_service_room(r)
+                except ValueError:
+                    break
+            else:
+                res = generate_layout_candidates(
+                    r, items, seed=room_seed, max_candidates=1, max_attempts=40
+                )
+                if not res.candidates:
+                    break
+                design = res.candidates[0].design
             if k == "bedroom":
                 design = dress_bedroom(design)
                 if design is None:
@@ -777,6 +800,7 @@ def generate(brief, previous=None, *, on_progress=None):
             depth=brief.depth,
             hall=hall,
             rooms=rooms,
+            **({"service_layout": True} if services else {}),
             **(
                 {"presentation_detail": "bedroom-salon-v1"}
                 if presentation_detail
