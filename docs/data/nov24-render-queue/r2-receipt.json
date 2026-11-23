@@ -1,0 +1,72 @@
+{
+  "home_id": "6c5dac99245c8796ddf5bf6d04ff997242b9d92703826d670c688addcb0d9869",
+  "revision": 2,
+  "manifest_sha256": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+  "bedroom_representations": {
+    "bedside-lamp": "procedural Town template",
+    "belaya": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+    "desk-chair": "saved style pack",
+    "queen-bed": "saved style pack"
+  },
+  "devices": [
+    "CPU"
+  ],
+  "samples": 16,
+  "daylight_exposure_ev": {
+    "salon-overview": -0.1802438497543335,
+    "salon-seating": -0.1802438497543335,
+    "salon-dining": -0.1802438497543335,
+    "bedroom-doorway": 0.5870747566223145,
+    "bedroom-desk": 0.5870747566223145,
+    "bedroom-bedside": 0.5870747566223145,
+    "living-overview": 0.5972204804420471,
+    "living-ensemble": 0.5972204804420471,
+    "living-media-console": 0.5972204804420471,
+    "study-overview": 0.7034248113632202,
+    "study-ensemble": 0.7034248113632202,
+    "study-bookcase": 0.7034248113632202,
+    "bathroom-doorway": 0.530714750289917,
+    "bathroom-tub": 0.530714750289917,
+    "bathroom-vanity": 0.530714750289917,
+    "kitchen-dining-overview": 0.726911723613739,
+    "kitchen-dining-ensemble": 0.726911723613739,
+    "kitchen-dining-counter": 0.726911723613739
+  },
+  "textile_relief_materials": [
+    "Sage upholstery.001",
+    "Upholstery piping.001"
+  ],
+  "benchmark": null,
+  "size": [
+    960,
+    540
+  ],
+  "files": {
+    "salon-overview-evening.png": "23b3ea17969b8891673a736109ff186f5fe6ad2bb471082184fa4d38df2105fd",
+    "surface-sources.json": "63b070d004bdf50531f3e19d14bcbfa87ad241ace84b9d42a5f66fc4e83e7bce",
+    "salon-seating.png": "a5363ba6b8a95c04a525896611fa7820fa8fba6874f13671ebebd38cb586a528",
+    "living-overview.png": "82c21b1f45a923f432ab95f272d759597240313102140517d2bfdf2a414d9742",
+    "bedroom-doorway.png": "bba1747d8b8351de8c74d5c90d430c316aaf6b1787bdd9636928206dc19cc820",
+    "bedroom-bedside.png": "5ad0ed337058d29671d1e883de399893c2b2cef0324be017426e4db22a5489dc",
+    "salon-dining.png": "de6ad5a5ff05ea70e34181a9243652f68a546f4b4bda98adfaa05fab2f8380f5",
+    "study-bookcase.png": "acdabe6ac85f2d8bc4123594d8751e8fc01f4b32e3ba1b3009628329ffe96e04",
+    "study-overview.png": "a0091cd0e046f77c0f8f9c1c7c2673e0e7e2bb74f58e9cac8d983c9969dd3a4c",
+    "bathroom-vanity.png": "bc337da76c54c8325b1875f33956cf60622ff2749363158a599d273faf292423",
+    "living-ensemble.png": "840bd25e63210f7c41b1b19ab8f5ec56c0958cc3df8d42c91c4dd5e1a8affecc",
+    "kitchen-dining-counter.png": "aebdbe609bacbdeed95031079033e07e986990cdbf8c84983cc5cb1849ff7fa7",
+    "study-ensemble.png": "76eb17a99cd619c3e80e30027131db1eaacbacadb194fac4b3243bce99e0df7b",
+    "ABO_LICENSE_CC_BY_4.0.txt": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+    "BELAYA_ATTRIBUTION.txt": "d98f0345b88863f862a360065e5cb92a0497675d47afd6cf6cd36436ce4469d8",
+    "living-media-console.png": "2abfbe4e36e39e25b1a27468a6acba76dc5415b61084526a0646492656831a80",
+    "salon-overview.png": "83324650d5397b5fd25628dab0d76c77386db210fdde65d6e908e74be836b8a2",
+    "salon-overview-drawing.png": "a74a2d02657d10d5970b295e4be24312eb09447ee33d8370d3d4d3787ca7dbde",
+    "home.blend": "7ef63acf43476dd203450b141080ef844d44024d6e9d24ce679f04ced8391b2a",
+    "bedroom-desk.png": "3ba886ef3464c519edbb62e4ae20936c744b384630c50745b73dbc22e83f8d96",
+    "bathroom-tub.png": "023338c1e4e40f9c23214c41e172074aea6fa46990a9f96810b530761525270d",
+    "manifest.json": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+    "bathroom-doorway.png": "fd52b7867d126036edeb79b15bf0b32264d893863a299c55f787898b89ae16c4",
+    "saved-style-receipt.json": "83bf75b3f2edf6f4a1671900aeb8c804765f5cba0ad693a5628e8cb520cbbf8f",
+    "kitchen-dining-overview.png": "f79095324537133910297052f2d35e9ef0c3eb1c83cf319505602486d3fb796c",
+    "kitchen-dining-ensemble.png": "6313f5e2d7993111fb020248e7b4af1ac272bd5806b9955e17493f3890db2d9b"
+  }
+}
