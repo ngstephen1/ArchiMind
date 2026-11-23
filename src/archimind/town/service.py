@@ -159,6 +159,8 @@ def enqueue(owner, req):
         excluded["brief"] = set(REVIEW_FIELDS) - req.brief.model_fields_set
         if not req.brief.room_goals:
             excluded["brief"].add("room_goals")
+        if not req.brief.service_layout:
+            excluded["brief"].add("service_layout")
         raw = req.model_dump_json(exclude=excluded)
         existing = q(
             "SELECT request FROM jobs WHERE id=? AND owner=?", (j, owner)
