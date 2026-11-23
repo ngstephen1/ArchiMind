@@ -23,6 +23,10 @@ on:
       approved_proof_run:
         description: Accepted fresh-home proof run ID for a two-view 1080p render
         type: string
+      lighting_proof:
+        description: Reopen a checked scene for fixed-camera daylight and task-lighting proofs at 960 × 540
+        type: boolean
+        default: false
       salon_cover:
         description: Also render the saved salon camera for the final client cover
         type: boolean
@@ -56,14 +60,15 @@ jobs:
     timeout-minutes: 55
     steps:
       - name: Check conference render inputs
-        if: inputs.approved_proof_run || inputs.manifest_source || inputs.camera_source || inputs.snapshot_source
+        if: inputs.approved_proof_run || inputs.manifest_source || inputs.camera_source || inputs.snapshot_source || inputs.lighting_proof
         env:
           FRESH: ${{ inputs.fresh_home }}
           PROOF_RUN: ${{ inputs.approved_proof_run }}
           CAMERA: ${{ inputs.camera_source }}
+          LIGHTING_PROOF: ${{ inputs.lighting_proof }}
         run: |
           test "$FRESH" = true
-          if [ -n "$CAMERA" ]; then test -n "$PROOF_RUN"; fi
+          if [ -n "$CAMERA" ] || [ "$LIGHTING_PROOF" = true ]; then test -n "$PROOF_RUN"; fi
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
@@ -109,13 +114,14 @@ jobs:
           npm ci --prefix frontend/realistic_viewer --ignore-scripts
           python scripts/run_studio_home.py --export "$RUNNER_TEMP/saved.json"
           node frontend/realistic_viewer/town/export-home.mjs "$RUNNER_TEMP/saved.json" "$RUNNER_TEMP/manifest.json"
-      - name: Reopen an accepted proof for matched 1080p eye-level images
+      - name: Reopen an accepted proof for camera-matched eye-level images
         if: inputs.approved_proof_run
         env:
           GH_TOKEN: ${{ github.token }}
           PROOF_RUN: ${{ inputs.approved_proof_run }}
           CAMERA_SOURCE: ${{ inputs.camera_source }}
           SALON_COVER: ${{ inputs.salon_cover }}
+          LIGHTING_PROOF: ${{ inputs.lighting_proof }}
         run: |
           [[ "$PROOF_RUN" =~ ^[0-9]+$ ]]
           workflow_id="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/studio-home.yml" --jq .id)"
@@ -128,15 +134,17 @@ jobs:
           fi
           options=()
           if [ "$SALON_COVER" = true ]; then options+=(--salon-cover); fi
+          if [ "$LIGHTING_PROOF" = true ]; then options+=(--lighting-proof); fi
           if [ -f "$RUNNER_TEMP/snapshot.json" ]; then options+=(--expected-snapshot "$RUNNER_TEMP/snapshot.json"); fi
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_eye_views.py -- "$RUNNER_TEMP/accepted" "$RUNNER_TEMP/manifest.json" "$RUNNER_TEMP/camera.json" "$RUNNER_TEMP/eye-views" "${options[@]}"
+          if [ "$LIGHTING_PROOF" = true ]; then exit 0; fi
           python scripts/publish_studio_board.py "$RUNNER_TEMP/accepted" --eye-views "$RUNNER_TEMP/eye-views"
           google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf" "file://$RUNNER_TEMP/accepted/index.html"
           test -s "$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: inputs.approved_proof_run
         with:
-          name: studio-eye-views
+          name: ${{ inputs.lighting_proof && 'studio-lighting-proof' || 'studio-eye-views' }}
           path: ${{ runner.temp }}/eye-views
           if-no-files-found: error
       - name: Reopen the editable scene and render every room

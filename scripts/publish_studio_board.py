@@ -109,6 +109,24 @@ def portfolio_cover(board):
     return featured["room"]["id"] + "-" + featured["cameras"][0]["id"]
 
 
+def living_room_views(views, replacements):
+    """Use two distinct saved views when the close camera repeats the overview."""
+    result = []
+    seen = set()
+    for view in views:
+        camera = replacements.get(f"living-{view['id']}.png", view)
+        if result and camera.get("reason"):
+            continue
+        pose = (tuple(camera["eye"]), tuple(camera["target"]), camera["fov"])
+        if pose in seen:
+            continue
+        seen.add(pose)
+        result.append(view)
+        if len(result) == 2:
+            break
+    return result or views[:1]
+
+
 def book(directory, eye_views=None, *, comparison_pages=0):
     receipt = json.loads((directory / "receipt.json").read_bytes())
     for name, expected in receipt["files"].items():
@@ -232,7 +250,9 @@ def book(directory, eye_views=None, *, comparison_pages=0):
     pages.append("<h2>Evening lighting study</h2>" + img(hero + "-evening"))
     for part in board["rooms"]:
         r = part["room"]
-        views = part["cameras"]
+        views = part["cameras"][:2]
+        if r["id"] == "living":
+            views = living_room_views(part["cameras"], replacement_cameras)
         rows = "".join(
             f"<tr><td>{esc(f['name'])}</td><td>{f['width_m']:.2f} × {f['depth_m']:.2f} × {f['height_m']:.2f}</td><td>{f['x_m']:.2f}, {f['y_m']:.2f}</td></tr>"
             for f in part["furniture"]
@@ -245,7 +265,7 @@ def book(directory, eye_views=None, *, comparison_pages=0):
                 + "<figcaption>"
                 + caption(r["id"], v)
                 + "</figcaption></figure>"
-                for v in views[:2]
+                for v in views
             )
             + '</div><div class="grid">'
             + elevations(part)

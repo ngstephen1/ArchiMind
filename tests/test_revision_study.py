@@ -149,7 +149,20 @@ def test_printed_receipt_and_both_appendix_pages(tmp_path):
     assert result["displacement_m"] == pytest.approx(0.3)
 
 
-def test_matched_hd_receipts_without_room_field(tmp_path):
+@pytest.mark.parametrize(
+    ("receipt_size", "image_size", "failure"),
+    [
+        ((1920, 1080), (1920, 1080), None),
+        (None, (1920, 1080), "receipts"),
+        ((960, 540), (960, 540), "receipts"),
+        ((1920, 1080), (960, 540), "PNGs"),
+    ],
+)
+def test_matched_hd_receipts_without_room_field(
+    tmp_path, receipt_size, image_size, failure
+):
+    import struct
+
     one = proof(tmp_path / "r1", "before.json")
     two = proof(tmp_path / "r2", "manifest.json")
     boards, receipts = zip(*(MODULE["load_revision"](folder) for folder in (one, two)))
@@ -159,7 +172,10 @@ def test_matched_hd_receipts_without_room_field(tmp_path):
         shots = []
         for view in ("desk", "doorway"):
             image = folder / f"bedroom-{view}.png"
-            image.write_bytes(view.encode())
+            image.write_bytes(
+                b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0dIHDR"
+                + struct.pack(">II", *image_size)
+            )
             shots.append(
                 dict(
                     view=view,
@@ -175,9 +191,46 @@ def test_matched_hd_receipts_without_room_field(tmp_path):
             manifest_sha256=receipt["manifest_sha256"],
             camera_manifest_sha256=receipts[0]["manifest_sha256"],
             proof_blend_sha256=receipt["files"]["home.blend"],
+            resolution=receipt_size,
             shots=shots,
         )
-        (folder / "eye-view-receipt.json").write_text(json.dumps(eye_receipt))
+        (folder / "eye-view-receipt.json").write_text(
+            json.dumps(eye_receipt if receipt_size else {})
+        )
+    if failure:
+        with pytest.raises(ValueError, match=failure):
+            MODULE["matched_frames"](boards, receipts, (one, two), eyes)
+        return
     assert (
         len(MODULE["matched_frames"](boards, receipts, (one, two), eyes)["desk"]) == 2
     )
+
+
+def test_living_room_book_uses_distinct_saved_cameras():
+    select = runpy.run_path(str(ROOT / "scripts/publish_studio_board.py"))[
+        "living_room_views"
+    ]
+    board = json.loads(
+        (ROOT / "docs/data/nov24-fresh-live/manifest-r2.json").read_bytes()
+    )
+    views = next(p["cameras"] for p in board["rooms"] if p["room"]["id"] == "living")
+    assert [view["id"] for view in select(views, {})] == ["overview", "media-console"]
+    assert [view["id"] for view in select(views[:2], {})] == ["overview"]
+
+
+def test_living_room_book_keeps_the_doorway_overview_fallback():
+    select = runpy.run_path(str(ROOT / "scripts/publish_studio_board.py"))[
+        "living_room_views"
+    ]
+    board = json.loads(
+        (ROOT / "docs/data/nov24-fresh-live/manifest-r2.json").read_bytes()
+    )
+    overview, ensemble, detail = next(
+        p["cameras"] for p in board["rooms"] if p["room"]["id"] == "living"
+    )
+    views = [
+        {**overview, "reason": "Unobstructed doorway fallback"},
+        {**ensemble, "reason": "Unobstructed doorway fallback"},
+        detail,
+    ]
+    assert [view["id"] for view in select(views, {})] == ["overview", "media-console"]
