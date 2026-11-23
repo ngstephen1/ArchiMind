@@ -21,7 +21,8 @@
       },
       "provider_fixture": {},
       "expected": {
-        "rooms": 5
+        "rooms": 5,
+        "lot_wd_m": [12, 13]
       },
       "expected_calls": 1
     },
@@ -178,8 +179,7 @@
         "rooms": 6,
         "lock": "bedroom"
       },
-      "expected_calls": 1,
-      "known_gap": "Locked geometry is preserved, but generation mutates the input room's presentation metadata."
+      "expected_calls": 1
     },
     {
       "case": "ambiguous-desk",
