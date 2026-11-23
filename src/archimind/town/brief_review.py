@@ -60,7 +60,8 @@ GROUP = (
 )
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
 COUNT_AT_TABLE = (
-    COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
+    COUNT
+    + r"\s+(?:(?:people|diners|guests|hosts|residents|seats|places)\s+)?(?:at|around) "
 )
 SEPARATE_TABLE_COUNTS = re.compile(
     COUNT_AT_TABLE
@@ -259,7 +260,7 @@ def _seat_count(value):
 def _normalize_table_ends(text):
     def combine(match):
         total = sum(_seat_count(value) for value in match.groups())
-        return f"seat {total} people at a single table"
+        return f"{total} seats at a single table"
 
     return SAME_TABLE_ENDS.sub(combine, text)
 

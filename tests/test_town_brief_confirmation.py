@@ -1111,6 +1111,15 @@ def test_opposite_ends_of_one_table_do_not_confirm_split_dining(separator):
     assert any("one dining table" in question for question in questions)
 
 
+def test_same_table_seats_are_not_an_additional_headcount():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "Seat two hosts at one table and two at the other end of it for dinner with two guests.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
 def test_a_wrapped_opening_list_still_checks_the_second_room():
     text = "Keep the bedroom door\nand the study window."
     assert len(opening_questions(text, ["bedroom"])) == 1
