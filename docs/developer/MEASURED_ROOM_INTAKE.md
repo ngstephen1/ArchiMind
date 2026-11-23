@@ -72,3 +72,12 @@ Read `field-verification.json` for calculated area, lengths, evidence IDs and un
 For a rectangular Town bedroom, call `write_drawings(board, destination, provenance="survey-linked", survey=survey)` with the verified intake. Record an independent check dimension across the room. If the site inspection found no fixed obstructions, set `fixture_inventory_source` to the ID of the field record documenting that observation. The exporter compares the four vertices in room-local southwest-first order, ceiling and every opening with the selected room. It rejects unresolved field checks, unmodelled fixed fixtures and discrepancies. Each SVG includes the digest of the validated survey model. Keep the survey and CAD plan with the SVGs to review door operation. For an irregular room, use the surveyed DXF directly.
 
 [Example archival bedroom with original plan and photo](../handovers/zane-street/README.md) · [Studio House designer transfer](STUDIO_HOUSE_DESIGNER_TRANSFER.md)
+
+The styled Blender proof records the bedroom curtain rail and two brackets against the saved drape. Use the proof's `saved-style-receipt.json` to include the modeled mounting dimensions in the revision's window detail.
+
+```bash
+.venv/bin/python scripts/studio_bedroom_details.py manifest.json \
+  --render-receipt saved-style-receipt.json --output window-detail
+```
+
+The receipt must match the project, revision and home. A drawing generated without the receipt labels the rail datum as proposed. Verify the installed projection, fixing substrate, bracket specification and actual window reveal in the field.
