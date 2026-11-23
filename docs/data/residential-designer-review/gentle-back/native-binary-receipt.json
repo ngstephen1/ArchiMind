@@ -1,0 +1,45 @@
+{
+  "file_format": "BLENDER17-01v0501",
+  "decoded_bytes": 23675529,
+  "objects": 584,
+  "mesh_blocks": 554,
+  "window_width_raw_mesh_m": 1.399999,
+  "window_wall_edge_endpoints_y_m": [
+    1.753,
+    3.153
+  ],
+  "window_wall_object_names": [
+    "west plaster",
+    "west plaster.003"
+  ],
+  "desk_mesh_count": 1,
+  "chair_mesh_count": 10,
+  "desk_north_mesh_y_m": 0.801873,
+  "chair_south_mesh_y_m": 1.161873,
+  "mesh_axis_aligned_bounds_gap_m": 0.36,
+  "desk_world_bounds_xyz_m": [
+    [
+      3.16,
+      6.089,
+      0.0
+    ],
+    [
+      4.76,
+      6.890873,
+      0.751631
+    ]
+  ],
+  "chair_world_bounds_xyz_m": [
+    [
+      3.72,
+      7.250873,
+      0.015
+    ],
+    [
+      4.2,
+      7.770873,
+      0.845
+    ]
+  ],
+  "scope": "Raw Blender mesh positions plus stored object and parent transforms. No modifier evaluation, Blender GUI or physical measurement."
+}

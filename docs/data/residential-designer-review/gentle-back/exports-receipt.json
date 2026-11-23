@@ -1,0 +1,262 @@
+{
+  "release_member_checksums_passed": 34,
+  "dxf_window_line_xy_m": [
+    [
+      [
+        0.0,
+        3.153
+      ],
+      [
+        0.0,
+        1.7530000000000001
+      ]
+    ]
+  ],
+  "native_sha256": "7b8a968c415bc040e1b85aea34f167db551accf34eee8f81cd6c0146dbcd18d7",
+  "revisions": {
+    "2": {
+      "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+      "revision": 2,
+      "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+      "manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 4.906,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "bedroom-door",
+            "offset_m": 1.9029999999999998,
+            "wall": "east",
+            "width_m": 1.1
+          }
+        ],
+        "id": "bedroom",
+        "name": "Bedroom",
+        "width_m": 6.398,
+        "windows": [
+          {
+            "height_m": 1.15,
+            "id": "bedroom-window",
+            "offset_m": 1.753,
+            "sill_height_m": 1,
+            "wall": "west",
+            "width_m": 1.4
+          }
+        ]
+      },
+      "saved_furniture_reservations": [
+        {
+          "category": "desk",
+          "depth_m": 0.8018731772899628,
+          "height_m": 0.7516312003135682,
+          "id": "belaya",
+          "name": "Belaya writing desk",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 1.6,
+          "x_m": 3.16,
+          "y_m": 0
+        },
+        {
+          "category": "bed",
+          "depth_m": 2,
+          "height_m": 0.6,
+          "id": "queen-bed",
+          "name": "Queen Bed",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 1.6,
+          "x_m": 0,
+          "y_m": 0
+        },
+        {
+          "category": "chair",
+          "depth_m": 0.52,
+          "height_m": 0.83,
+          "id": "desk-chair",
+          "name": "Oak writing chair",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 0.48,
+          "x_m": 3.72,
+          "y_m": 1.1618731772899629
+        },
+        {
+          "category": "table",
+          "depth_m": 0.43,
+          "height_m": 1.06,
+          "id": "bedside-lamp",
+          "name": "Nightstand with reading lamp",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 0.48,
+          "x_m": 1.6400000000000001,
+          "y_m": 1.57
+        }
+      ],
+      "chair": {
+        "center_floor_xyz_m": [
+          3.96,
+          1.4218731772899629,
+          0
+        ],
+        "footprint_xy_m": [
+          3.72,
+          1.1618731772899629
+        ],
+        "id": "desk-chair",
+        "name": "Oak writing chair",
+        "reservation_wdh_m": [
+          0.48,
+          0.52,
+          0.83
+        ],
+        "rotation_deg": 0,
+        "source": null
+      },
+      "chair_desk_gap_m": 0.36,
+      "all_furniture_needs_supplier_quote": true,
+      "drawing_schedule_checksums": {
+        "drawings/bedroom-concept-shell.dxf": "6be5376a8a95ed800f113f0b9e2f3cc3b455c4c466303981fbe57050d9b95bca",
+        "drawings/bedroom-concept-shell.json": "4101d810753c7d3584cc9adb9fc5d496c4b36a76acce7c4c201efc5a1ebe1135",
+        "drawings/bedroom-elevations.svg": "14be90c312b3e47105cd8d984f6faf57b10d7fccc6d144559c7699e7e34e9423",
+        "drawings/bedroom-plan.svg": "96800848ddb477ea06835f04faa25c9e8c3fece4fc364bb63cdd4a14bed4ad46",
+        "drawings/bedroom-section.svg": "ea39a88dbf3b74e9580c47323206015ef6a3b2bd47bfd0269be3ec592c13327b",
+        "drawings/window-and-bed-head.json": "da384274376de0a0cd6a997eb0f22857e11567c717871b5551b137878bbb2f09",
+        "drawings/window-and-bed-head.svg": "89f7e867abdb06f5780e82276c4b84afbe6bac59ac833ade038df299e39fed8d",
+        "procurement/cost-summary.json": "b314dafc05ac5681036f5407af16210982fa8e61824b49222c025d6d00c76d22",
+        "procurement/finishes-schedule.csv": "0411c7dad78b8c82312d6bd014f90cdcde9b88356dfd7394ed12805b4d9df7be",
+        "procurement/furniture-schedule.csv": "03bc3a66dabac300e56e767d17673b6a6cd8c41938caf70348c99ff2608b3e40",
+        "procurement/operational-checks.csv": "c71242211e9ed4d1968eecb92e89497af16042a7c18f3658890141997327c62a"
+      }
+    },
+    "3": {
+      "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+      "revision": 3,
+      "home_id": "a04a783e6ca7706aa5f8806e60a1cd9c05b5cebfcd300c8bbf38daebb92c20a4",
+      "manifest_sha256": "97eeb252440574f9f3ff8d459cba537eb95c222991ef7065b7fbfa713759020f",
+      "room": {
+        "ceiling_height_m": 2.8,
+        "depth_m": 4.906,
+        "doors": [
+          {
+            "height_m": 2.15,
+            "id": "bedroom-door",
+            "offset_m": 1.9029999999999998,
+            "wall": "east",
+            "width_m": 1.1
+          }
+        ],
+        "id": "bedroom",
+        "name": "Bedroom",
+        "width_m": 6.398,
+        "windows": [
+          {
+            "height_m": 1.15,
+            "id": "bedroom-window",
+            "offset_m": 1.753,
+            "sill_height_m": 1,
+            "wall": "west",
+            "width_m": 1.4
+          }
+        ]
+      },
+      "saved_furniture_reservations": [
+        {
+          "category": "desk",
+          "depth_m": 0.8018731772899628,
+          "height_m": 0.7516312003135682,
+          "id": "belaya",
+          "name": "Belaya writing desk",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 1.6,
+          "x_m": 3.16,
+          "y_m": 0
+        },
+        {
+          "category": "bed",
+          "depth_m": 2,
+          "height_m": 0.6,
+          "id": "queen-bed",
+          "name": "Queen Bed",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 1.6,
+          "x_m": 0,
+          "y_m": 0
+        },
+        {
+          "category": "chair",
+          "depth_m": 0.52,
+          "height_m": 0.83,
+          "id": "desk-chair",
+          "name": "Oak writing chair",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 0.48,
+          "x_m": 3.72,
+          "y_m": 1.1618731772899629
+        },
+        {
+          "category": "table",
+          "depth_m": 0.43,
+          "height_m": 1.06,
+          "id": "bedside-lamp",
+          "name": "Nightstand with reading lamp",
+          "parts": [],
+          "rotation_deg": 0,
+          "width_m": 0.48,
+          "x_m": 1.6400000000000001,
+          "y_m": 1.57
+        }
+      ],
+      "chair": {
+        "center_floor_xyz_m": [
+          3.96,
+          1.4218731772899629,
+          0
+        ],
+        "footprint_xy_m": [
+          3.72,
+          1.1618731772899629
+        ],
+        "id": "desk-chair",
+        "name": "Oak writing chair with sage upholstery",
+        "reservation_wdh_m": [
+          0.48,
+          0.52,
+          0.83
+        ],
+        "rotation_deg": 0,
+        "source": {
+          "id": "oak-sage-writing-chair",
+          "kind": "concept",
+          "sha256": "54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81",
+          "translation_m": [
+            0,
+            0,
+            0
+          ],
+          "version": "1.0.0"
+        }
+      },
+      "chair_desk_gap_m": 0.36,
+      "all_furniture_needs_supplier_quote": true,
+      "drawing_schedule_checksums": {
+        "drawings/bedroom-concept-shell.dxf": "6be5376a8a95ed800f113f0b9e2f3cc3b455c4c466303981fbe57050d9b95bca",
+        "drawings/bedroom-concept-shell.json": "db2829f2cccd923b4a0b49fb637de38074849b468d1773e15cb7af51ec72be23",
+        "drawings/bedroom-elevations.svg": "b4a0b2a566a3aacc1a66ca4c1b924a543103dcc969ee63c09a635656277d9664",
+        "drawings/bedroom-plan.svg": "2c1fd4c8f261469861932f1774712e3a16c77659a0f8b3f93940fa634b34086b",
+        "drawings/bedroom-section.svg": "ae00fb4b5010bdd667ea98c1db00245579004d7c9e0307d535dd2114be186771",
+        "drawings/window-and-bed-head.json": "919f8fb0067984b364fd590c50202403009ec784ea381e96eff20ff4caf29bbb",
+        "drawings/window-and-bed-head.svg": "7ae16ced7f186165d4b0aad556e53784bade36035f2d3d213aa8ddb95d1a7230",
+        "procurement/cost-summary.json": "8cb0e0b9cda63f6e7aa12a95627550b24ef57d727d2b1f79759f0b92cbd640bf",
+        "procurement/finishes-schedule.csv": "7472a684c6ea556e53fecae76abf89ca84fc6f884bb1709e64be72a04d1a7c66",
+        "procurement/furniture-schedule.csv": "dbee56a1b203143d210b3f051316f8f2b4fe8e875afb6bc67173b912d705ea98",
+        "procurement/operational-checks.csv": "3f4b169df35cae59e569ee1070d8cb3a603d622dd3444a8f9c06714b11d6d2ed"
+      }
+    }
+  }
+}
