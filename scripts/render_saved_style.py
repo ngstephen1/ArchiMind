@@ -6,7 +6,7 @@ import re
 
 import bpy
 from mathutils import Matrix
-from studio_bedroom_dims import saved_curtain_mount
+from studio_bedroom_dims import STYLED_FINISHED_FLOOR_M, saved_curtain_mount
 
 
 def read_verified(path, sha, size):
@@ -185,7 +185,18 @@ def mount_bedroom_curtains(part, board, base, material):
         along_y = mount["wall"] in {"east", "west"}
         span = mount["span_m"]
         center = mount["rail_center_m"]
-        z, size = mount["elevation_m"], mount["rail_size_m"]
+        underside = mount["elevation_m"] + STYLED_FINISHED_FLOOR_M
+        size = mount["rail_size_m"]
+        fabric_top = max(
+            vertex[2]
+            for shape in part["shapes"]
+            if shape["group"] == f"decor/{curtain['id']}"
+            for vertex in shape["vertices"]
+        )
+        if abs(fabric_top - underside) > 1e-5:
+            raise ValueError(
+                "Curtain geometry disagrees with its finished-floor mount."
+            )
 
         def place(label, along, across, length, thickness):
             location = (
@@ -194,7 +205,7 @@ def mount_bedroom_curtains(part, board, base, material):
             footprint = (thickness, length) if along_y else (length, thickness)
             base.box(
                 label + " / " + curtain["id"],
-                (*location, z + size / 2),
+                (*location, underside + size / 2),
                 (*footprint, size),
                 material,
                 0.002,
@@ -268,7 +279,7 @@ def dress_scene(plan, board, base, out):
         w, d = r["width_m"], r["depth_m"]
         base.box(
             "Town pack floor " + r["id"],
-            (ox + w / 2, oy + d / 2, 0.008),
+            (ox + w / 2, oy + d / 2, STYLED_FINISHED_FLOOR_M - 0.007),
             (w, d, 0.014),
             materials["tile" if r["id"] == "bathroom" else "floor"],
         )

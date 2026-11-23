@@ -4,6 +4,7 @@ WALL_DEPTH_M = 0.12
 FRAME_DEPTH_M = 0.08
 SILL_DEPTH_M = 0.20
 SILL_THICKNESS_M = 0.045
+STYLED_FINISHED_FLOOR_M = 0.015
 # The studio frame is centered on the inside face of the wall.
 EXTERIOR_REVEAL_M = WALL_DEPTH_M - FRAME_DEPTH_M / 2
 
@@ -28,7 +29,7 @@ def saved_curtain_mount(room, curtain):
         start >= -1e-9
         and start + span <= wall_length + 1e-9
         and min(span, projection, top) > rail_size
-        and top + rail_size <= room["ceiling_height_m"] + 1e-9
+        and top + rail_size + STYLED_FINISHED_FLOOR_M <= room["ceiling_height_m"] + 1e-9
         and (center < wall_coordinate if wall in {"east", "north"} else center > 0)
     ):
         raise ValueError(

@@ -183,7 +183,7 @@ def study(board: dict, *, render_receipt: dict | None = None) -> tuple[str, dict
         _text(
             svg,
             40,
-            259,
+            579,
             f"Rail section {mount['rail_size_m'] * 1000:.0f} mm square · "
             f"center {mount['wall_projection_m'] * 1000:.0f} mm from wall",
             14,
