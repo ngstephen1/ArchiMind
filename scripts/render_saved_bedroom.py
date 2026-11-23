@@ -188,6 +188,14 @@ def hall_context(hall, bedroom, materials):
         )
 
 
+from studio_bedroom_dims import (  # noqa: E402
+    FRAME_DEPTH_M,
+    SILL_DEPTH_M,
+    SILL_THICKNESS_M,
+    WALL_DEPTH_M,
+)
+
+
 def architecture(room, materials, *, pleated_curtains=True):
     w, d, h = room["width_m"], room["depth_m"], room["ceiling_height_m"]
     box(
@@ -262,8 +270,8 @@ def architecture(room, materials, *, pleated_curtains=True):
                     right,
                     z,
                     low,
-                    0.12,
-                    -0.06,
+                    WALL_DEPTH_M,
+                    -WALL_DEPTH_M / 2,
                     materials["plaster"],
                 )
                 if z == 0 and low > 0.1:
@@ -290,9 +298,9 @@ def architecture(room, materials, *, pleated_curtains=True):
                 "Sill",
                 x - 0.035,
                 x + span + 0.035,
-                sill - 0.045,
+                sill - SILL_THICKNESS_M,
                 sill,
-                0.20,
+                SILL_DEPTH_M,
                 0.02,
                 materials["ivory"],
             )
@@ -303,7 +311,7 @@ def architecture(room, materials, *, pleated_curtains=True):
                     t + 0.025,
                     sill,
                     sill + high,
-                    0.08,
+                    FRAME_DEPTH_M,
                     0,
                     materials["ivory"],
                 )
@@ -314,7 +322,7 @@ def architecture(room, materials, *, pleated_curtains=True):
                     x + span,
                     elevation,
                     elevation + 0.037,
-                    0.08,
+                    FRAME_DEPTH_M,
                     0,
                     materials["ivory"],
                 )

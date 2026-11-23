@@ -6,6 +6,7 @@ on:
     paths:
       - .github/workflows/bedroom-presentation.yml
       - scripts/render_saved_bedroom.py
+      - scripts/studio_bedroom_dims.py
       - scripts/render_town_templates.py
       - design/bedroom-showcase/manifest.json
 permissions:

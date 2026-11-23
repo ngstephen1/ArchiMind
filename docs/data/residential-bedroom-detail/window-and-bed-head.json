@@ -1,0 +1,29 @@
+{
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "revision": 2,
+  "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+  "window": {
+    "id": "bedroom-window",
+    "width_m": 1.4,
+    "sill_m": 1,
+    "head_m": 2.15
+  },
+  "nominal_render_assembly": {
+    "wall_depth_m": 0.12,
+    "frame_depth_m": 0.08,
+    "sill_depth_m": 0.2,
+    "sill_thickness_m": 0.045,
+    "exterior_reveal_m": 0.07999999999999999
+  },
+  "mounting_study": {
+    "status": "proposed",
+    "track_elevation_m": 2.31,
+    "track_span_m": 1.68
+  },
+  "bed": {
+    "id": "queen-bed",
+    "head_faces_wall": "north",
+    "saved_head_to_wall_m": 3.253
+  },
+  "field_status": "awaiting verified reveal, sill, mount and bed-head services"
+}
