@@ -161,3 +161,34 @@ test("saved dining capacity reports seats per recorded table and ignores stale r
   home.rooms[1].design.furniture = [];
   assert.match(ask(), /no recorded seating capacity/);
 });
+
+test("specific lighting questions keep their room and bypass the overview", () => {
+  const home = {id: fresh.home_id, rooms: fresh.rooms.map(design => ({design})),
+    evidence: {comparison: {routes: [], dining_places: {}, passage_m: 0.6}}};
+  home.rooms.find(p => p.design.room.id === "living").design.furniture.push({id: "reading-suite"});
+  assert.match(explanation(home, "Explain task lighting in the study"), /study workspace: writing-suite/);
+  assert.match(explanation(home, "Explain task lighting at the desk"), /Which workspace.*belaya.*writing-suite/);
+  assert.match(explanation(home, "Explain task lighting at the Belaya"), /bedroom workspace: belaya/);
+  const reading = explanation(home, "How is the reading light in the living room?");
+  assert.match(reading, /living reading-suite.*modeled reading lamp/);
+  assert.doesNotMatch(reading, /belaya/);
+  assert.match(explanation(home, "How far is the bedside reading light from the bed?"), /nearest edge/);
+});
+
+test("named dining groups and dedicated storage use their own saved evidence", () => {
+  const home = {rooms: [
+    {design: {room: {id: "bedroom"}, furniture: []}},
+    {design: {room: {id: "kitchen-dining"}, furniture: [{id: "breakfast-suite"}]}},
+    {design: {room: {id: "salon"}, furniture: [{id: "salon-dining"}]}},
+    {design: {room: {id: "study"}, furniture: [
+      {id: "bookcase", name: "Bookcase", category: "storage", width_m: .85, depth_m: .34},
+    ]}},
+  ], evidence: {salon: {dining_places: 4}}};
+  assert.match(explanation(home, "How many dining seats are in the salon?"), /salon salon-dining: 4 modeled places/);
+  home.evidence.comparison = {dining_places: {"kitchen-dining": 4, salon: 4}};
+  const breakfast = explanation(home, "How many seats are at the Breakfast Suite?");
+  assert.match(breakfast, /kitchen-dining breakfast-suite: 4 modeled places/);
+  assert.doesNotMatch(breakfast, /salon/);
+  assert.match(explanation(home, "How much closet space is in the study?"), /no recorded wardrobe or closet/);
+  assert.match(explanation(home, "What storage is in the study?"), /study bookcase/);
+});
