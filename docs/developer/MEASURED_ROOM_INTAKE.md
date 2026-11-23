@@ -40,7 +40,7 @@ Give the field record a date and the bedroom project ID. Add a source ID beside 
 
 | Record | What to capture |
 | --- | --- |
-| Perimeter and height | Each finished-face wall run and bay segment, at least one independent check dimension, and finished floor-to-ceiling height. |
+| Perimeter and height | Each finished-face wall run, every bay corner and the finished floor-to-ceiling height. Record each corner as coordinates from the same datum or measure the wall runs and corner angles needed to locate it. Record at least one independent cross-room check dimension. For an angled bay, add check diagonals that independently locate its corners. |
 | Window and door | Window jamb positions, sill height, reveal depth and trim projection. Door jamb positions, hinge end, swing direction and clear opening. |
 | Fixed services and retained furniture | Outlet wall, offset and height. Locate fixed obstructions and record each retained item's footprint and height. |
 | Desk and chair | Desk clear width, height to the lowest underside obstruction and usable knee depth. Chair arm height, width and overall depth. Record where the chair stands tucked in, occupied and pulled back, and measure the narrowest remaining passage in each state. |
