@@ -45,6 +45,8 @@ Set `surveyed_on` to the field visit date (ISO format) and `project_id` to the b
 | Fixed services and retained furniture | Outlet wall, offset and height. Locate fixed obstructions and record each retained item's footprint and height. |
 | Desk and chair | Desk clear width, height to the lowest underside obstruction and usable knee depth. Chair arm height, width and overall depth. Record where the chair stands tucked in, occupied and pulled back, and measure the narrowest remaining passage in each state. |
 
+On a window record, add `reveal_depth_m` and `trim_projection_m` where measured. For each entry in `outlets`, supply `id`, directed `wall`, `offset_m` to the outlet center, `height_m` above the finished floor, and `source`. When the wall and offset are known, you can leave `height_m` unset. The receipt adds a field check and the plan still plots the outlet. The editable DXF marks their plan positions on `OUTLETS`. The verification receipt retains their heights and the source-linked window detail. Leave unknown dimensions out and list them under `field_checks`.
+
 Use the current field record for the bedroom project. Keep the whole-home demonstration under its own project ID. The Zane Street archive supplies an angled-bay observation and nominal room dimensions. Its current condition, exact perimeter and ceiling height still need field evidence.
 
 ### Chair operating study

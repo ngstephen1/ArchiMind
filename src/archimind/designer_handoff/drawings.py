@@ -423,7 +423,7 @@ def write_drawings(
         if survey is not None:
             sheet.set(
                 "data-survey-sha256",
-                hashlib.sha256(survey.model_dump_json().encode()).hexdigest(),
+                hashlib.sha256(survey.drawing_source_json().encode()).hexdigest(),
             )
             sheet.set("data-survey-project-id", survey.project_id)
             sheet.set("data-survey-date", survey.surveyed_on.isoformat())
