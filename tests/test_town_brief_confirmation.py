@@ -1364,6 +1364,19 @@ def test_fronted_offsite_location_cannot_supply_home_table_requirements(location
     assert not questions and brief.dining_seats == 5
 
 
+@pytest.mark.parametrize(
+    "other",
+    ["we eat lunch", "we seat two at one table"],
+)
+def test_split_out_home_seating_after_a_fronted_offsite_heading(other):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"At work, {other}, and at home we need six dining seats.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
+
+
 def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),

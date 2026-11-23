@@ -147,7 +147,7 @@ HOME_DINING_LOCATION = re.compile(
     r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|" + ROOM_NAMES + r"))\b"
 )
 DINING_TRANSITION = re.compile(
-    r"\b(?:so|and|then)\s+(?=(?:(?:we|i)\s+)?"
+    r"\b(?:so|and|then)\s+(?=(?:at home\s*,?\s+)?(?:(?:we|i)\s+)?"
     r"(?:(?:will|would|must)\s+)?"
     r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
     r"|\bwhile\s+(?!(?:at|in|near|around)\b)"
