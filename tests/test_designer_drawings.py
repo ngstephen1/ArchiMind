@@ -64,6 +64,8 @@ def test_viewing_east_mirrors_south_origin_offset(board, tmp_path):
     survey = Survey.model_validate(
         {
             "source_kind": "measured",
+            "project_id": board["project"],
+            "surveyed_on": "2026-11-23",
             "vertices_m": [(0, 0), (w, 0), (w, d), (0, d)],
             "height_m": room["ceiling_height_m"],
             "geometry_source": "test",
@@ -103,6 +105,22 @@ def test_viewing_east_mirrors_south_origin_offset(board, tmp_path):
     )
     with pytest.raises(ValueError, match="required"):
         write_drawings(board, tmp_path, provenance="survey-linked")
+    for missing_binding in ({"project_id": None}, {"surveyed_on": None}):
+        with pytest.raises(ValueError, match="dated survey"):
+            write_drawings(
+                board,
+                tmp_path,
+                provenance="survey-linked",
+                survey=survey.model_copy(update=missing_binding),
+            )
+    with pytest.raises(ValueError, match="different project"):
+        write_drawings(
+            board,
+            tmp_path,
+            provenance="survey-linked",
+            survey=survey.model_copy(update={"project_id": "another-room"}),
+        )
+    assert not list(tmp_path.iterdir())
     for missing in ({"checks": []}, {"fixture_inventory_source": None}):
         with pytest.raises(ValueError, match="Resolve field checks"):
             write_drawings(
@@ -119,6 +137,8 @@ def test_viewing_east_mirrors_south_origin_offset(board, tmp_path):
         write_drawings(board, tmp_path, provenance="survey-linked", survey=survey)
     door["offset_m"] -= 0.01
     root = ET.parse(elevation)
+    assert root.getroot().attrib["data-survey-project-id"] == board["project"]
+    assert root.getroot().attrib["data-survey-date"] == "2026-11-23"
     rect = root.find(".//*[@data-opening='bedroom-door']")
     assert rect is not None
     scale = float(rect.attrib["height"]) / door["height_m"]

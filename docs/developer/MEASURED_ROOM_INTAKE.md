@@ -36,7 +36,7 @@ Use `source_kind: measured` for sourced site measurements or `archival` for a do
 
 ### Current bedroom field record
 
-Give the field record a date and the bedroom project ID. Add a source ID beside each value on the sketch or in the measurement log. Keep the original record with the survey edition. Leave unresolved measurements blank and list the missing observations in `field_checks`.
+Set `surveyed_on` to the field visit date (ISO format) and `project_id` to the bedroom project ID. Both fields are required to link drawings to the survey. The selected project ID must match even when the room dimensions are identical. Add a source ID beside each value on the sketch or in the measurement log. Keep the original record with the survey edition. Leave unresolved measurements blank and list the missing observations in `field_checks`.
 
 | Record | What to capture |
 | --- | --- |
