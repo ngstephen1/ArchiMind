@@ -185,6 +185,7 @@ test("named dining groups and dedicated storage use their own saved evidence", (
     ]}},
   ], evidence: {salon: {dining_places: 4}}};
   assert.match(explanation(home, "How many dining seats are in the salon?"), /salon salon-dining: 4 modeled places/);
+  assert.match(explanation(home, "What is the number of dining places in the salon?"), /salon salon-dining: 4 modeled places/);
   home.evidence.comparison = {dining_places: {"kitchen-dining": 4, salon: 4}};
   const breakfast = explanation(home, "How many seats are at the Breakfast Suite?");
   assert.match(breakfast, /kitchen-dining breakfast-suite: 4 modeled places/);

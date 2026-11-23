@@ -106,7 +106,7 @@ export function explanation(home, question, manifest = null, previous = null) {
       : [];
   });
   if ((namedTables.length || /\b(dining|dine|dinner guests)\b/.test(q)) &&
-      /\b(seats?|seating|capacity|dine|guests|how many|places at)\b/.test(q)) {
+      /\b(seats?|seating|capacity|dine|guests|how many|dining places?|places at)\b/.test(q)) {
     const groups = diningEvidence(namedTables.length ? home.rooms : requestedRooms, namedTables);
     return groups.length
       ? groups.join("; ") + ". Each count applies to its own table."
