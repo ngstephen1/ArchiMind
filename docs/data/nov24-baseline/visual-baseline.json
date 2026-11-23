@@ -1,0 +1,190 @@
+{
+  "home_id": "6c5dac99245c8796ddf5bf6d04ff997242b9d92703826d670c688addcb0d9869",
+  "revision": 2,
+  "manifest_sha256": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+  "camera_manifest_sha256": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+  "proof_blend_sha256": "d3e4f4c2169030da18319f4428592d518cc80e492c78877136a3202ad034a0a1",
+  "blender_version": "5.1.2",
+  "engine": "CYCLES",
+  "device": "CPU",
+  "max_samples": 96,
+  "threshold": 0.01,
+  "resolution": [
+    1920,
+    1080
+  ],
+  "view_transform": "AgX",
+  "view_look": "AgX - Medium High Contrast",
+  "textile_relief_materials": [
+    "Sage upholstery.001",
+    "Upholstery piping.001"
+  ],
+  "transmitted_window_emitters": [],
+  "packed_file_image_count": 40,
+  "daylight_rgb": [
+    1.0,
+    0.955,
+    0.91
+  ],
+  "daylight_emitters": [
+    "Daylight through bathroom-window",
+    "Daylight through bedroom-window",
+    "Daylight through kitchen-dining-window",
+    "Daylight through living-window",
+    "Daylight through salon-window",
+    "Daylight through study-window"
+  ],
+  "source_notices": {
+    "BELAYA_ATTRIBUTION.txt": "d98f0345b88863f862a360065e5cb92a0497675d47afd6cf6cd36436ce4469d8",
+    "ABO_LICENSE_CC_BY_4.0.txt": "419896aea50c15d6e40c5b4baf4bd346f78223b9a354c7357ad00262afdc08ec",
+    "surface-sources.json": "63b070d004bdf50531f3e19d14bcbfa87ad241ace84b9d42a5f66fc4e83e7bce",
+    "saved-style-receipt.json": "83bf75b3f2edf6f4a1671900aeb8c804765f5cba0ad693a5628e8cb520cbbf8f"
+  },
+  "shots": [
+    {
+      "room": "bedroom",
+      "exposure_ev": 0.5870747566223145,
+      "view": "doorway",
+      "camera": {
+        "eye": [
+          5.6579999999999995,
+          1.57,
+          -8.892
+        ],
+        "fov": 69,
+        "id": "doorway",
+        "label": "Doorway",
+        "reason": null,
+        "target": [
+          1.0399,
+          0.58,
+          -7.2343
+        ]
+      },
+      "architectural_projection": null,
+      "camera_manifest_sha256": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+      "file": "bedroom-doorway.png",
+      "sha256": "b487a311a734dc315e27addf96939a4b60a12f45291dea52f3572d8a42d3237b",
+      "crop": {
+        "file": "crops/bedroom-doorway.jpg",
+        "sha256": "8d384778737d25cec44e4692a2ee9128262e6f96b88267009cfded41e0d329d7",
+        "bounds_px_left_top_right_bottom": [
+          748,
+          184,
+          1336,
+          744
+        ],
+        "subject": "Window frame and pleats, bedding edge and rug return",
+        "output_size_px": [
+          588,
+          560
+        ]
+      }
+    },
+    {
+      "room": "bedroom",
+      "exposure_ev": 0.5870747566223145,
+      "view": "desk",
+      "camera": {
+        "eye": [
+          5.360000000000002,
+          1.57,
+          -8.689
+        ],
+        "fov": 58,
+        "id": "desk",
+        "label": "Desk and chair",
+        "reason": null,
+        "target": [
+          3.96,
+          0.5535709201097488,
+          -7.000404882967473
+        ]
+      },
+      "architectural_projection": null,
+      "camera_manifest_sha256": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+      "file": "bedroom-desk.png",
+      "sha256": "8fed572937e5cc2ff0aa602c645c4d6c00cb10cd9895b3fe0151ace5e32b36b7",
+      "crop": {
+        "file": "crops/bedroom-desk.jpg",
+        "sha256": "21d696cd31a0165d30eca7a6b4ab28e41e93096b354cc42584439f2ce635c570",
+        "bounds_px_left_top_right_bottom": [
+          470,
+          334,
+          1480,
+          1014
+        ],
+        "subject": "Belaya oak, chair textile, contact shadows and floor gap",
+        "output_size_px": [
+          850,
+          572
+        ]
+      }
+    },
+    {
+      "room": "salon",
+      "exposure_ev": -0.1802438497543335,
+      "view": "overview",
+      "camera": {
+        "eye": [
+          6.1579999999999995,
+          1.44,
+          -5.849
+        ],
+        "fov": 52,
+        "id": "overview",
+        "label": "Salon and dining",
+        "reason": null,
+        "target": [
+          2.1038,
+          1.08,
+          -3.3251600000000003
+        ]
+      },
+      "architectural_projection": {
+        "level_target": [
+          2.1038,
+          1.44,
+          -3.3251600000000003
+        ],
+        "shift_y": -0.07727931439876556
+      },
+      "camera_manifest_sha256": "6837f16fa22931f0338816deb9e10e1a96bf585cb389c86847b235139d757253",
+      "file": "salon-overview.png",
+      "sha256": "2f4f173c08b0b56451cfba606cadf8284cba0c013091ef2f48ca8b04a722ab10",
+      "crop": {
+        "file": "crops/salon-overview.jpg",
+        "sha256": "fb803fa6ca76d1749d83b22fe4b0a24deb4972a1c8e9d21742807e15d59c6959",
+        "bounds_px_left_top_right_bottom": [
+          507,
+          204,
+          1815,
+          948
+        ],
+        "subject": "Window highlights, both groups and circulation between them",
+        "output_size_px": [
+          850,
+          483
+        ]
+      }
+    }
+  ],
+  "baseline_commit": "c7e33364d2b148293b62ae26ad59375bdb1eb9ce",
+  "blender_scene_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44993303088",
+  "full_resolution_render_run": "https://github.com/ngstephen1/ArchiMind/actions/runs/44994306268",
+  "crop_preparation": {
+    "color_mode": "RGB",
+    "fit_within_px": [
+      850,
+      700
+    ],
+    "upscale": false,
+    "resample": "Lanczos",
+    "output": {
+      "format": "JPEG",
+      "quality": 91,
+      "optimize": true,
+      "subsampling": 0
+    }
+  }
+}

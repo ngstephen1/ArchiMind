@@ -418,15 +418,37 @@ function showBrief(summary) {
   const panel = el("reviewBrief");
   panel.hidden = false;
   panel.replaceChildren(node("h3", "Review the design brief"));
+  const states = {
+    confirmed: "Hard requirements confirmed. Layouts are generated from this brief.",
+    "needs confirmation": "Needs your confirmation. No layout was generated and your saved home is unchanged.",
+    unsupported: "Includes an unsupported requirement. No layout was generated and your saved home is unchanged.",
+  };
+  if (states[summary.status]) panel.append(node("p", states[summary.status]));
+  const origins = {
+    brief: "From your brief", controls: "From the brief controls",
+    "saved revision": "Carried from the saved revision", interpreted: "Interpreted from your request",
+    default: "Town default",
+  };
+  const sources = new Map((summary.sources || []).map(s => [s.requirement, s]));
   for (const [title, values] of [
-    ["Requirements", summary.requirements], ["Preferences", summary.preferences],
+    ["Hard requirements", summary.requirements], ["Preferences", summary.preferences],
+    ["Assumptions", summary.assumptions || []],
     ["Presentation requests", summary.presentation_requests || []],
     ["Questions", summary.questions], ["Unsupported requirements", summary.unsupported],
   ]) {
     if (!values.length) continue;
     panel.append(node("h4", title));
     const list = node("ul", "");
-    values.forEach(value => list.append(node("li", value)));
+    for (const value of values) {
+      const item = node("li", value);
+      const source = sources.get(value);
+      if (title === "Hard requirements" && source) {
+        const cite = node("small", " · " + (origins[source.origin] || source.origin) +
+          (source.statement ? `: “${source.statement}”` : ""));
+        item.append(cite);
+      }
+      list.append(item);
+    }
     panel.append(list);
   }
 }

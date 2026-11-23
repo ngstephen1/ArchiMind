@@ -45,12 +45,18 @@ def test_fixture_locks_and_rejections():
     assert next(b for b in bedroom["asset_bindings"] if b["furniture_id"] == "belaya")[
         "envelope_sha256"
     ]
-    assert (
-        bedroom
-        in generate(Brief(seed=499, palette="sage", locks=["bedroom"]), home)[0][
-            "rooms"
-        ]
+    original = copy.deepcopy(home)
+    changed = generate(Brief(seed=499, palette="sage", locks=["bedroom"]), home)[0]
+    locked = next(
+        part for part in changed["rooms"] if part["design"]["room"]["id"] == "bedroom"
     )
+    assert {key: value for key, value in locked.items() if key != "style"} == {
+        key: value for key, value in bedroom.items() if key != "style"
+    }
+    assert locked["style"]["style_pack"]["id"] == "japandi"
+    assert home == original
+    locked["design"]["room"]["windows"][0]["offset_m"] += 0.01
+    assert home == original
     with pytest.raises(ValueError, match="shell dimensions"):
         generate(Brief(width=12, locks=["bedroom"]), home)
     damaged = copy.deepcopy(home)
@@ -654,6 +660,56 @@ def test_pullout_is_a_validated_preview_of_the_saved_revision(local):
     assert local.post(url + "/apply", json=data).status_code == 409
     assert (
         local.post(f"/api/projects/{p}/undo", json={"base": 2}).json()["home"] == home
+    )
+
+
+def test_stale_chair_preview_cannot_replace_another_saved_edit(local, record_property):
+    project = service.create("local-designer")["project"]
+    original = json.loads(SHOWCASE.read_text())
+    with service.transaction() as q:
+        service.apply(q, "local-designer", project, 0, original)
+
+    url = f"/api/projects/{project}"
+    pullout = local.post(f"{url}/chair-pullout/preview", json={"base": 1})
+    assert pullout.status_code == 200, pullout.text
+    stale = {"base": 1, "preview_id": pullout.json()["home"]["id"]}
+    catalog = local.get("/api/designer-chairs").json()["chairs"]
+    binding = {key: catalog[0][key] for key in ("concept_id", "version", "sha256")}
+    selection = {"base": 1, "binding": binding}
+    preview = local.post(f"{url}/designer-chair/preview", json=selection)
+    assert preview.status_code == 200, preview.text
+    next_home = preview.json()["home"]
+    assert next_home["id"] != stale["preview_id"]
+    saved = local.post(
+        f"{url}/designer-chair/apply",
+        json=selection | {"preview_id": next_home["id"]},
+    )
+    assert saved.status_code == 200, saved.text
+    assert saved.json()["revision"] == 2
+    validate_home(next_home)
+
+    response = local.post(f"{url}/chair-pullout/apply", json=stale)
+    assert response.status_code == 409 and "newer revision" in response.json()["error"]
+    assert (
+        local.post(f"{url}/chair-pullout/preview", json={"base": 1}).status_code == 409
+    )
+    head = local.get(url).json()
+    assert (head["revision"], head["head"], head["home"]) == (2, 2, next_home)
+    assert local.get(url, params={"revision": 1}).json()["home"] == original
+    record_property(
+        "stale_edit_observation",
+        json.dumps(
+            {
+                "base_revision": stale["base"],
+                "base_home_id": original["id"],
+                "stale_preview_id": stale["preview_id"],
+                "saved_head_revision": head["revision"],
+                "saved_head_home_id": head["home"]["id"],
+                "stale_apply_http_status": response.status_code,
+                "stale_apply_error": response.json()["error"],
+                "original_revision_unchanged": True,
+            }
+        ),
     )
 
 

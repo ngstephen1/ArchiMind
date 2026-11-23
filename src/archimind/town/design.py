@@ -437,16 +437,7 @@ def dress_bedroom(design):
 
 
 def revise_bedroom_chair(brief, previous):
-    if not previous or "bedroom" in brief.locks:
-        raise ValueError("Apply a home and unlock its bedroom before moving the chair.")
-    if (
-        brief.closer_study_desk
-        or brief.priority != "balanced"
-        or (brief.width, brief.depth) != (previous["width"], previous["depth"])
-    ):
-        raise ValueError(
-            "Submit the chair move separately from desk, shell or priority changes."
-        )
+    # check_brief has confirmed the saved home, unlocked bedroom and isolated edit.
     home = copy.deepcopy(previous)
     part = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "bedroom")
     furniture = {f["id"]: f for f in part["design"]["furniture"]}
@@ -480,15 +471,7 @@ def revise_bedroom_chair(brief, previous):
 
 
 def revise_study_desk(brief, previous):
-    if not previous or "study" in brief.locks:
-        raise ValueError("Apply a home and unlock its study before moving the desk.")
-    if (brief.width, brief.depth) != (
-        previous["width"],
-        previous["depth"],
-    ) or brief.priority != "balanced":
-        raise ValueError(
-            "Submit the desk move separately from shell or priority changes."
-        )
+    # check_brief has confirmed the saved home, unlocked study and isolated edit.
     home = copy.deepcopy(previous)
     design = next(
         r["design"] for r in home["rooms"] if r["design"]["room"]["id"] == "study"
@@ -538,7 +521,16 @@ def revise_study_desk(brief, previous):
     )
 
 
-def generate(brief, previous=None, *, on_progress=None):
+def check_brief(brief, previous=None):
+    """Raise ValueError for a brief that generation would reject before searching.
+
+    Town calls this before any layout job so the user can confirm the hard
+    requirements in the reviewed brief; ``generate`` applies the same checks.
+    """
+    _requirement_boundaries(brief, previous)
+
+
+def _requirement_boundaries(brief, previous):
     pairs = {}
     for goal in brief.room_goals:
         pair = tuple(sorted((goal.room, goal.target)))
@@ -569,12 +561,24 @@ def generate(brief, previous=None, *, on_progress=None):
             raise ValueError(
                 "Confirm new seating or circulation requirements in a separate design run before moving furniture."
             )
-        home = (
-            revise_bedroom_chair if brief.shift_bedroom_chair else revise_study_desk
-        )(brief, previous)
-        if on_progress:
-            on_progress("Furnished candidate", home)
-        return [home]
+        chair = brief.shift_bedroom_chair
+        if not previous or ("bedroom" if chair else "study") in brief.locks:
+            raise ValueError(
+                "Apply a home and unlock its bedroom before moving the chair."
+                if chair
+                else "Apply a home and unlock its study before moving the desk."
+            )
+        if (
+            (chair and brief.closer_study_desk)
+            or brief.priority != "balanced"
+            or (brief.width, brief.depth) != (previous["width"], previous["depth"])
+        ):
+            raise ValueError(
+                "Submit the chair move separately from desk, shell or priority changes."
+                if chair
+                else "Submit the desk move separately from shell or priority changes."
+            )
+        return pairs, None
     if brief.locks and not previous:
         raise ValueError("Apply a home before locking rooms.")
     if brief.locks and (brief.width, brief.depth) != (
@@ -600,6 +604,18 @@ def generate(brief, previous=None, *, on_progress=None):
         )
     if not salon and any("salon" in pair for pair in pairs):
         raise ValueError("Include a formal salon before requesting its placement.")
+    return pairs, salon
+
+
+def generate(brief, previous=None, *, on_progress=None):
+    pairs, salon = _requirement_boundaries(brief, previous)
+    if brief.shift_bedroom_chair or brief.closer_study_desk:
+        home = (
+            revise_bedroom_chair if brief.shift_bedroom_chair else revise_study_desk
+        )(brief, previous)
+        if on_progress:
+            on_progress("Furnished candidate", home)
+        return [home]
     previous_comparison = (previous or {}).get("evidence", {}).get("comparison")
     presentation_detail = brief.compare_tradeoffs or (previous or {}).get(
         "presentation_detail"
@@ -661,9 +677,13 @@ def generate(brief, previous=None, *, on_progress=None):
         rooms = []
         for k, x, y, w, h in partitions:
             if k in brief.locks:
-                rooms.append(
-                    next(r for r in previous["rooms"] if r["design"]["room"]["id"] == k)
+                locked = next(
+                    room
+                    for room in previous["rooms"]
+                    if room["design"]["room"]["id"] == k
                 )
+                # Candidate styling must only change the candidate's room state.
+                rooms.append(copy.deepcopy(locked))
                 continue
             window_width = min(
                 h - 0.6,
