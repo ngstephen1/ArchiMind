@@ -54,12 +54,13 @@ DINING_CONTEXT = (
     r"\b(?:seats?|seating|places|dining|dine|diners?|dinner|tables?|"
     r"eat\s+together|(?:share|have)\s+(?:a\s+)?(?:meal|lunch|breakfast))\b"
 )
-OFFSITE_MEAL = r"\b(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
-DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
-SALON_REQUEST = (
-    r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
-    r"|^\s*(?:a\s+)?formal salon(?:,?\s+please)?[.!?]?\s*$"
+OFFSITE_MEAL = (
+    r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine)(?:\s+together)?)"
+    r"\s+(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
 )
+DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
+SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
+SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!?]?"
 
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
@@ -99,6 +100,17 @@ def _affirmative_clauses(message):
         re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, maxsplit=1)[0]
         for clause in clauses
     ]
+
+
+def _requests_salon(message):
+    # Keep qualifications on a bare noun phrase. Trimming “not needed” would
+    # flip a declined room into an affirmative request.
+    return any(
+        re.fullmatch(SALON_ONLY, sentence.strip().lower())
+        for sentence in re.split(r"(?<=[.!?;])\s+|\n+", message)
+    ) or any(
+        re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(message)
+    )
 
 
 def requests_single_table(message):
@@ -163,7 +175,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             part["design"]["room"]["id"] == "salon"
             for part in (previous or {}).get("rooms", ())
         )
-        or bool(re.search(SALON_REQUEST, text))
+        or _requests_salon(message)
     )
     totals = set()
     questions = []
@@ -593,10 +605,7 @@ def review_summary(
             "formal_salon",
             inherited="salon" in saved_rooms,
             interpreted=True,
-            accepts=lambda sentence: any(
-                re.search(SALON_REQUEST, clause)
-                for clause in _affirmative_clauses(sentence)
-            ),
+            accepts=_requests_salon,
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"

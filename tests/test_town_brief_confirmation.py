@@ -549,3 +549,24 @@ def test_review_quotes_a_standalone_salon_request():
         "origin": "brief",
         "statement": message,
     } in review_summary(brief, message=message)["sources"]
+
+
+def test_day_at_work_does_not_discard_an_at_home_meal():
+    phrase = "We dine together at home with two residents and two dinner guests after a day at work."
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True), phrase, None
+    )
+    assert not questions and brief.dining_seats == 4
+
+
+def test_declined_standalone_salon_is_not_a_requirement_or_source():
+    phrase = "Formal salon, not needed"
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), phrase, None)
+    assert not questions and not brief.formal_salon
+    assert {
+        "requirement": "Formal salon",
+        "origin": "controls",
+        "statement": None,
+    } in review_summary(
+        Brief(formal_salon=True), message=phrase, controls={"formal_salon"}
+    )["sources"]
