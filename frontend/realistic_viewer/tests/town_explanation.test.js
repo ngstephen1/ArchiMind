@@ -189,6 +189,14 @@ test("named dining groups and dedicated storage use their own saved evidence", (
   const breakfast = explanation(home, "How many seats are at the Breakfast Suite?");
   assert.match(breakfast, /kitchen-dining breakfast-suite: 4 modeled places/);
   assert.doesNotMatch(breakfast, /salon/);
+  for (const names of ["Breakfast Suite and the Salon Dining table", "Salon Dining table and the Breakfast Suite"]) {
+    const answer = explanation(home, `How many seats are at the ${names}?`);
+    assert.match(answer, /breakfast-suite: 4.*salon-dining: 4/);
+  }
+  const light = explanation(home, "Explain the task lighting over the Breakfast Suite table.");
+  assert.match(light, /kitchen-dining breakfast-suite.*work-surface light measurement/);
+  assert.doesNotMatch(light, /modeled places/);
   assert.match(explanation(home, "How much closet space is in the study?"), /no recorded wardrobe or closet/);
   assert.match(explanation(home, "What storage is in the study?"), /study bookcase/);
+  assert.match(explanation(home, "What study storage exists besides a closet?"), /study bookcase/);
 });

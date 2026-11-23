@@ -75,35 +75,39 @@ export function explanation(home, question, manifest = null, previous = null) {
     ? home.rooms.filter(({design}) =>
         mentionedRooms.includes(design.room.id === "kitchen-dining" ? "kitchen" : design.room.id))
     : home.rooms;
-  if (/\b(wardrobe|closet|storage)\b/.test(q)) {
-    const dedicated = /\b(wardrobe|closet)\b/.test(q);
+  if (/\b(wardrobes?|closets?|storage)\b/.test(q)) {
+    const excludesDedicated = /\b(?:besides|apart from|other than|except(?: for)?|excluding)\s+(?:(?:a|the|any)\s+)?(?:wardrobes?|closets?)\b/.test(q);
+    const dedicated = /\b(wardrobes?|closets?)\b/.test(q);
+    const isDedicated = item => item.category === "wardrobe" || /\b(wardrobes?|closets?)\b/i.test(item.name);
     const storage = requestedRooms.flatMap(({design}) =>
-      design.furniture.filter(item => dedicated
-        ? item.category === "wardrobe" || /\b(wardrobe|closet)\b/i.test(item.name)
+      design.furniture.filter(item => excludesDedicated
+        ? item.category === "storage" && !isDedicated(item)
+        : dedicated ? isDedicated(item)
         : ["storage", "wardrobe"].includes(item.category)).map(item =>
         `${design.room.id} ${item.id}, ${item.width_m.toFixed(2)} × ${item.depth_m.toFixed(2)} m in plan`
       )
     );
     return storage.length
       ? "Saved storage reservations: " + storage.join("; ") + ". Interior capacity and door operation need separate measurements."
-      : `The requested area has no recorded ${dedicated ? "wardrobe or closet" : "storage reservation"} in this design.`;
+      : `The requested area has no recorded ${excludesDedicated ? "other storage reservation" : dedicated ? "wardrobe or closet" : "storage reservation"} in this design.`;
   }
-  const namedTable = /\b(breakfast suite|salon dining)\b/.exec(normalized)?.[0].replaceAll(" ", "-");
+  const namedTables = (normalized.match(/\b(breakfast suite|salon dining)\b/g) ?? [])
+    .map(name => name.replaceAll(" ", "-"));
   const taskLighting = /\b(task[- ]light(?:ing)?|reading light|desk lamp)\b/.test(q) &&
     !/\b(bedside|nightstand)\b/.test(q);
-  const diningEvidence = (parts, tableId) => parts.flatMap(({design}) => {
+  const diningEvidence = (parts, tableIds = []) => parts.flatMap(({design}) => {
     const roomId = design.room.id;
     const count = comparison?.dining_places?.[roomId] ??
       (roomId === "salon" ? home.evidence?.salon?.dining_places : undefined);
     const table = design.furniture.find(item => ["salon-dining", "breakfast-suite"].includes(item.id) &&
-      (!tableId || item.id === tableId));
+      (!tableIds.length || tableIds.includes(item.id)));
     return table && Number.isInteger(count) && count > 0
       ? [`${roomId} ${table.id}: ${count} modeled places at one table`]
       : [];
   });
-  if ((namedTable || /\b(dining|dine|dinner guests)\b/.test(q)) &&
-      /\b(seats?|seating|places?|table|capacity|dine|guests)\b/.test(q)) {
-    const groups = diningEvidence(requestedRooms, namedTable);
+  if ((namedTables.length || /\b(dining|dine|dinner guests)\b/.test(q)) &&
+      /\b(seats?|seating|capacity|dine|guests|how many|places at)\b/.test(q)) {
+    const groups = diningEvidence(namedTables.length ? home.rooms : requestedRooms, namedTables);
     return groups.length
       ? groups.join("; ") + ". Each count applies to its own table."
       : "This design has no recorded seating capacity tied to a dining table.";
@@ -137,6 +141,9 @@ export function explanation(home, question, manifest = null, previous = null) {
     [f.name, f.id].some(label => label && normalized.includes(label.toLowerCase().replaceAll("-", " ")))
   );
   if (taskLighting) {
+    const surfaces = home.rooms.flatMap(({design}) => design.furniture
+      .filter(item => namedTables.includes(item.id))
+      .map(item => `${design.room.id} ${item.id}`));
     const lightingRooms = namedStudyDesk
       ? requestedRooms.filter(part => part === study)
       : /\bbelaya\b/.test(q)
@@ -147,11 +154,12 @@ export function explanation(home, question, manifest = null, previous = null) {
         (!namedStudyDesk || item === namedStudyDesk) &&
         (!/\bbelaya\b/.test(q) || item.id === "belaya"))
       .map(item => `${design.room.id} workspace: ${item.id}`));
-    if (workspaces.length > 1) return "Which workspace do you mean? " + workspaces.join("; ") + ".";
+    if (!namedTables.length && workspaces.length > 1) return "Which workspace do you mean? " + workspaces.join("; ") + ".";
     const reading = mentionedRooms.includes("living") && lightingRooms.some(({design}) =>
       design.room.id === "living" && design.furniture.some(item => item.id === "reading-suite"));
     return (reading ? "The living reading-suite includes a modeled reading lamp. " : "") +
-      (workspaces.length ? `Saved ${workspaces[0]}. ` : "") +
+      (namedTables.length ? (surfaces.length ? `Saved dining surface: ${surfaces.join(", ")}. ` : "") :
+        workspaces.length ? `Saved ${workspaces[0]}. ` : "") +
       "To assess task lighting, provide the fixture or a work-surface light measurement. A daylight view alone cannot establish task illuminance or glare.";
   }
   if (/\bstudy\b/.test(q) || namedStudyDesk) {
