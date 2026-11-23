@@ -1,5 +1,17 @@
 # Project status
 
+## November 22–30 release sprint
+
+Milestone 2 has closed all five preparation issues. Later milestones track
+the fresh live Town run and two-revision handoff, held-out evaluation, client
+book, independent rehearsal and release. The November 21 conference home
+remains available as a verified local replay. The hosted Vercel walkthrough
+serves static content. Hosted design service acceptance remains open.
+[Sprint tracker](https://github.com/ngstephen1/ArchiMind/issues/54) ·
+[Local commands and hosted scope](CONFERENCE_REPLAY.md)
+
+## Historical implementation status
+
 Last reviewed: **November 5, 2026**.
 
 **November 17 branch addition — 3D Studio.** The separate

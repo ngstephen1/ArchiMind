@@ -9,10 +9,47 @@ Complete the Town setup in the [README](../../README.md#quick-start). From the r
 ```bash
 conference_dir=$(mktemp -d) &&
 .venv/bin/python scripts/reopen_conference_home.py "$conference_dir/Conference-Town.sqlite3" &&
-ARCHIMIND_ENABLE_OPENAI_STUDIO=0 TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
+ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
+  TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
 ```
 
 Open [the edited home](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2). Click **Visit saved home**, then **Enter house**. Select **Bedroom** from **Visit a room**, then choose **Design presentation**. The visitor can see the plan, switch rooms, inspect the furniture schedule, open the client book or ask a question. Open [the earlier revision](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=1) in another tab. If using a different Town port, change the port in both links. The launch runs only after the export check succeeds.
+
+Run one Town launcher per checkout. Stop your earlier Town process before
+starting the replay in that checkout. Running both at once requires a
+separate checkout because each launcher writes the site's API and editor URLs
+to the same `dist/town/config.json`.
+
+If another process occupies ports 8790 or 8791, start the replay on a different
+pair. Set both variables so the town and editor share the same configuration.
+
+```bash
+ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
+  TOWN_PORT=8850 TOWN_EDITOR_PORT=8851 \
+  TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
+```
+
+Run these health checks from a second terminal while the launcher is running.
+
+```bash
+curl -fsS http://127.0.0.1:8850/health
+curl -fsS http://127.0.0.1:8851/_stcore/health
+```
+
+Open [revision 2 on port 8850](http://127.0.0.1:8850/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2).
+Both health endpoints returned HTTP 200 in the local command check. The saved
+revisions also reopened in desktop and narrow Chrome, and a separate local run
+without provider credentials declined a live job while keeping revision 2.
+[Replay verification](https://github.com/ngstephen1/ArchiMind/issues/66#issuecomment-7090628981)
+
+## Public walkthrough
+
+The [Vercel walkthrough](https://archimind-town-walkthrough.vercel.app/) serves
+the static Town. The November 23 deployment check found empty API, editor and
+sign-in configuration. The page and packaged files responded, while the
+same-origin API routes returned HTTP 404. Use the isolated local replay above
+for the saved revisions, explanations and client book.
+[Deployment evidence](https://github.com/ngstephen1/ArchiMind/issues/66#issuecomment-7090628981)
 
 ## Open both conference projects
 
@@ -22,7 +59,8 @@ After installing the checkout with the live conference evidence, give the builde
 conference_dir=$(mktemp -d) &&
 .venv/bin/python scripts/reopen_conference_home.py "$conference_dir/Conference-Town.sqlite3" \
   --example docs/data/conference-sprint --example docs/data/conference-live-final &&
-ARCHIMIND_ENABLE_OPENAI_STUDIO=0 TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
+ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
+  TOWN_DB="$conference_dir/Conference-Town.sqlite3" .venv/bin/python scripts/run_town.py
 ```
 
 Open [the fresh revision 2](http://127.0.0.1:8790/?project=c9339e4f-a57a-4328-95dc-40dc36dd5b89&revision=2), enter the bedroom and choose **Design presentation**. Revision 2 links its own client book and source scene. Use revision 1 for the comparison.

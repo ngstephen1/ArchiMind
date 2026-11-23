@@ -197,7 +197,7 @@ On later launches, run only the last command. Open [Town](http://127.0.0.1:8790)
 
 **Tour the six-room Studio House.** Run `.venv/bin/python scripts/run_studio_home.py` with the Town dependencies above. Open the printed revision link and choose **Design presentation**. The room selector switches between the formal salon, bedroom, living room, kitchen–dining room, study and bathroom. The guide also covers the printable client book, editable Blender scene and saved chair-and-finish edit. [Studio House guide](docs/developer/STUDIO_HOME.md)
 
-**Replay the conference home.** Open the two saved revisions of the six-room house, compare the 30 cm bedroom chair edit, and ask the chatbot which measurements support its answers. The replay guide includes the local launch command and the revision-specific client book. [Conference replay](docs/developer/CONFERENCE_REPLAY.md)
+**Replay the conference home.** Open the two saved revisions of the six-room house, compare the 30 cm bedroom chair edit, and ask the chatbot which measurements support its answers. The replay guide includes a zero-API local launch, alternative ports and the revision-specific client book. The public Vercel deployment serves the static walkthrough. [Conference replay](docs/developer/CONFERENCE_REPLAY.md) · [Public walkthrough](https://archimind-town-walkthrough.vercel.app/)
 
 #### Architecture diagram
 
