@@ -335,3 +335,21 @@ def test_kitchen_seating_without_a_modeled_table_requires_review():
         service.interpret(request, None)
     assert error.value.reviewed["status"] == "needs confirmation"
     assert "five-room program" in error.value.reviewed["questions"][0]
+
+
+def test_conflicting_count_is_not_cited_for_retained_seating():
+    reviewed = review_summary(
+        Brief(formal_salon=True, dining_seats=6),
+        message="Seat four people at a single table in the kitchen-dining room.",
+        controls={"dining_seats"},
+    )
+    source = next(
+        item
+        for item in reviewed["sources"]
+        if item["requirement"].startswith("6 dining")
+    )
+    assert source == {
+        "requirement": "6 dining places at one table",
+        "origin": "controls",
+        "statement": None,
+    }

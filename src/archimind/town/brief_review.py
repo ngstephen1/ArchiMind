@@ -2,6 +2,8 @@
 
 import re
 
+from .design import Brief
+
 NUMBERS = {
     word: number
     for number, word in enumerate(
@@ -392,6 +394,14 @@ def _source(
     return dict(requirement=requirement, origin=origin, statement=None)
 
 
+def _dining_statement_matches(brief, sentence):
+    stated, questions = requirement_controls(Brief(formal_salon=True), sentence, None)
+    return not questions and (stated.dining_seats, stated.split_dining) == (
+        brief.dining_seats,
+        brief.split_dining,
+    )
+
+
 def review_summary(
     brief,
     *,
@@ -459,6 +469,7 @@ def review_summary(
             r"\b(?:seats?|seating|places|tables?|guests|diners|dinner)\b",
             "dining_seats",
             inherited=brief.dining_seats == comparison.get("required_dining_seats"),
+            accepts=lambda sentence: _dining_statement_matches(brief, sentence),
         )
     if brief.locks:
         require(
