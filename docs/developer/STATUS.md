@@ -21,7 +21,7 @@ at desktop and narrow widths. The rebuilt designer handoff passed all 32
 checksum-listed files. Hieu's independent revision review, the held-out live
 evaluation, both owners' rehearsal, freeze, and publication remain open.
 [Delegated review](https://github.com/ngstephen1/ArchiMind/issues/67#issuecomment-7106415558) ·
-[Verified handoff and checksums](https://github.com/ngstephen1/ArchiMind/issues/69#issuecomment-7105933953) ·
+[Verified rehearsal handoff and checksums](../data/nov24-fresh-book) ·
 [Portable replay and launch commands](../data/nov24-fresh-live#rehearse-from-the-portable-download)
 
 The public Vercel walkthrough serves static content. Managed design-service

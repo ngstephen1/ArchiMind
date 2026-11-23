@@ -39,10 +39,17 @@ folios. The wider portfolio includes lower-resolution proofs. The living
 room repeats its proof view, and the bathroom, study and kitchen-dining
 remain schematic. [Page-by-page inspection and PDF digest](book-inspection.json)
 
-The [staged designer transfer](https://github.com/ngstephen1/ArchiMind/actions/runs/45134685184)
+The [earlier staged designer transfer](https://github.com/ngstephen1/ArchiMind/actions/runs/45134685184)
 passed an independent clean-download check of 31 digest-listed files,
 including six readable SVGs, a concept DXF, three schedules and the packed
 Blender scene. [Candidate verification](designer-candidate-verification.json)
+
+The rehearsal candidate at `512ed26` preserves the same inspected PDF and
+includes the original print receipt. Its clean-download check verified all 32
+checksum-listed files. The designer ZIP SHA-256 is
+`13e200835b80ae65c8fe9247623e1f76d6ec489aee2cf1ce8e72b8c20e63265a`.
+[Rehearsal archive](https://github.com/ngstephen1/ArchiMind/actions/runs/45207279553/artifacts/14834053043) ·
+[Rebuilt candidate verification](https://github.com/ngstephen1/ArchiMind/issues/69#issuecomment-7105933953)
 
 GitHub Actions retains these artifact downloads for a limited period. This
 record preserves the digests, inspection and preview images. The approved
