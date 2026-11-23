@@ -52,6 +52,32 @@ def distinct_holdout(cases, public_cases):
     )
 
 
+def reviewed_payload_profile(cases):
+    """Distinguish a reviewed app draft from the historical reduced examples."""
+    for case in cases:
+        payload = case["input"]
+        proposed = payload["proposed_brief"]
+        if (
+            not isinstance(payload["confirmed_controls"], dict)
+            or proposed.get("status")
+            not in {"confirmed", "needs confirmation", "unsupported"}
+            or any(
+                not isinstance(proposed.get(field), list)
+                for field in (
+                    "requirements",
+                    "sources",
+                    "assumptions",
+                    "questions",
+                    "preferences",
+                    "presentation_requests",
+                    "unsupported",
+                )
+            )
+        ):
+            return None
+    return decisions.APP_PAYLOAD_PROFILE
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--live", action="store_true")
@@ -63,6 +89,11 @@ def main():
     )
     parser.add_argument("--threshold", type=float, choices=decisions.THRESHOLDS)
     parser.add_argument("--public-receipt", type=Path)
+    parser.add_argument(
+        "--public-corpus",
+        type=Path,
+        default=ROOT / "docs/data/town-decisions/public-cases.json",
+    )
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     cases = json.loads(args.cases.read_bytes())["cases"]
@@ -78,6 +109,7 @@ def main():
     if not args.output:
         parser.error("--live requires --output for the receipt.")
     cases_hash = sha256(args.cases.read_bytes()).hexdigest()
+    payload_profile = reviewed_payload_profile(cases)
     public_hash = None
     if args.threshold is not None:
         if len(cases) != 6 or not args.public_receipt:
@@ -86,22 +118,27 @@ def main():
             )
         raw = args.public_receipt.read_bytes()
         public = json.loads(raw)
-        expected_corpus = ROOT / "docs/data/town-decisions/public-cases.json"
+        expected_corpus = args.public_corpus.read_bytes()
+        public_cases = json.loads(expected_corpus)["cases"]
         if (
-            public.get("rubric") != decisions.RUBRIC
+            payload_profile != decisions.APP_PAYLOAD_PROFILE
+            or len(public_cases) != 36
+            or reviewed_payload_profile(public_cases) != payload_profile
+            or public.get("payload_profile") != payload_profile
+            or public.get("rubric") != decisions.RUBRIC
             or public.get("model") != decisions.MODEL
             or public.get("requests") != 36
             or public.get("responses_complete") is not True
             or public.get("selected_threshold") != args.threshold
-            or public.get("public_cases_sha256")
-            != sha256(expected_corpus.read_bytes()).hexdigest()
+            or public.get("public_cases_sha256") != sha256(expected_corpus).hexdigest()
             or not any(
                 row.get("threshold") == args.threshold and row.get("passed") is True
                 for row in public.get("scores", [])
             )
         ):
-            parser.error("The public calibration did not qualify this threshold.")
-        public_cases = json.loads(expected_corpus.read_bytes())["cases"]
+            parser.error(
+                "Promotion needs a qualifying app-shaped public calibration and matching holdout."
+            )
         if not distinct_holdout(cases, public_cases):
             parser.error(
                 "Holdout needs distinct brief-and-draft pairs and no public brief reuse."
@@ -141,6 +178,7 @@ def main():
     receipt = {
         "model": decisions.MODEL,
         "rubric": decisions.RUBRIC,
+        "payload_profile": payload_profile,
         "requests": len(rows),
         "public_cases_sha256": cases_hash if public_hash is None else None,
         "public_calibration_sha256": public_hash,

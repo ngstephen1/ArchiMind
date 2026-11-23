@@ -119,7 +119,7 @@ def _affirmative_clauses(message):
         message,
     )
     clauses = re.split(
-        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:(?:and|so)\s+)?"
+        r"[;!?\n]|\.(?!\d)|\b(?:but|because|otherwise)\b|,(?=\s*(?:(?:and|so)\s+)?"
         r"(?:not|never|no|keep|add|use|place|put|include|maintain|reserve|leave|allow|ensure|provide|make|seating)\b)",
         message,
     )
@@ -391,6 +391,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     elif guests and not totals:
         totals.add(max(seats, count(guests[1])))
     if room_minima:
+        if "salon" in room_minima and re.search(r"\bformal salon\b", dining):
+            salon = True
         for room, counts in room_minima.items():
             if len(counts) > 1:
                 questions.append(

@@ -869,3 +869,26 @@ def test_checked_locks_are_attributed_only_to_the_checked_rooms(saved_home):
     }
     assert origins["Keep bedroom"] == "controls"
     assert origins["Keep study"] == "interpreted"
+
+
+def test_a_negative_reason_does_not_erase_its_affirmative_requirement():
+    settings = Brief(compare_tradeoffs=True)
+    brief, questions = requirement_controls(
+        settings,
+        "Keep a 90 cm clear passage, otherwise the wheelchair won't fit.",
+        None,
+    )
+    assert not questions and brief.passage_m == 0.9
+    brief, questions = requirement_controls(
+        settings, "Seat four people in the formal salon because six won't fit.", None
+    )
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+def test_explicit_formal_salon_seating_can_enable_the_room():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "Seat four people at a single table in the formal salon.",
+        None,
+    )
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
