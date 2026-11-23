@@ -128,7 +128,7 @@ def matched_frames(boards, receipts, directories, eyes):
     return frames
 
 
-def build(directories, eyes, dest):
+def build(directories, eyes, dest, *, preceding_pages=0):
     boards, receipts = zip(*(load_revision(p) for p in directories), strict=True)
     before, after = boards
     if (
@@ -140,7 +140,7 @@ def build(directories, eyes, dest):
     frames = matched_frames(boards, receipts, directories, eyes)
     displacement = math.dist(rows[0]["chair_home_xy_m"], rows[1]["chair_home_xy_m"])
     pages = []
-    for view, pair in frames.items():
+    for page, (view, pair) in enumerate(frames.items(), start=preceding_pages + 1):
         figures = []
         for board, row, (_, path, _) in zip(boards, rows, pair, strict=True):
             image = base64.b64encode(path.read_bytes()).decode("ascii")
@@ -148,6 +148,9 @@ def build(directories, eyes, dest):
                 f'<figure><img src="data:image/png;base64,{image}"><figcaption>Revision {board["revision"]} &nbsp;·&nbsp; Chair to desk {row["chair_desk_gap_m"]:.3f} m</figcaption></figure>'
             )
         same = pair[0][0] == pair[1][0]
+        folio = (
+            f" · {page} / {preceding_pages + len(frames)}" if preceding_pages else ""
+        )
         pages.append(f"""<section><header>ARCHIMIND &emsp; / &emsp; INTERIOR DESIGN DEVELOPMENT</header>
         <h1>{"The bedroom approach" if view == "doorway" else "At the writing desk"}</h1>
         <p>{"Fixed camera across both revisions." if same else "Independently framed cameras. Use the plan dimensions to compare positions."}
@@ -156,7 +159,7 @@ def build(directories, eyes, dest):
         <div><h2>{rows[1]["desk_center_to_window_midpoint_m"]:.3f} m</h2>Desk center to {escape(rows[1]["window_wall"])} window midpoint in the edited room</div></article>
         <p>Chair and desk clearances above use their floor footprints. Confirm passage between desk supports,
         floor-to-apron height and seated pullback before specifying the pair. Window distance alone does not establish glare performance.</p>
-        <footer>{escape(after["project"])} · {escape(before["home_id"][:12])} → {escape(after["home_id"][:12])} · desk-chair / belaya / bedroom-window</footer></section>""")
+        <footer>{escape(after["project"])} · {escape(before["home_id"][:12])} → {escape(after["home_id"][:12])} · desk-chair / belaya / bedroom-window{folio}</footer></section>""")
     css = """@page{size:A3 landscape;margin:0}*{box-sizing:border-box}body{margin:0;color:#263c34;background:#f9f7f1;font:14pt/1.45 Arial,sans-serif}section{width:420mm;height:297mm;padding:14mm 17mm;break-after:page;position:relative}section:last-child{break-after:auto}header,footer{font-size:10pt;letter-spacing:.07em;border-bottom:1px solid #86958a;padding-bottom:3mm}h1,h2{font:normal 39pt/1 Georgia,serif;margin:6mm 0 2mm}h2{font-size:27pt}main,article{display:grid;grid-template-columns:1fr 1fr;gap:8mm}figure{margin:1mm 0}img{width:100%;aspect-ratio:16/9;object-fit:contain}figcaption{font-weight:bold}footer{position:absolute;bottom:9mm;left:17mm;right:17mm;border:0;border-top:1px solid #86958a;padding-top:3mm}"""
     dest.write_text(
         '<!DOCTYPE html><html lang="en"><meta charset="utf-8"><title>Bedroom revision study</title><style>'
