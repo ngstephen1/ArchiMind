@@ -1,0 +1,102 @@
+{
+  "project": "58996f72-a0e3-4664-a20c-92ab45b86ec9",
+  "receipts": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "revision": 1,
+      "source": "Saved revision 1 · 15 × 16 m · 78d95f0a6268",
+      "drawings": [
+        {
+          "file": "r1-kitchen-dining-plan.svg",
+          "sha256": "406a91913edc4a19949f690fecf313b30bd9d4255e27b8cb3521fcd591a53109"
+        },
+        {
+          "file": "r1-bathroom-plan.svg",
+          "sha256": "95418b9a79cd34c200065c713eed2bc035f1b52fe3023bfb8138724afebe9f3d"
+        },
+        {
+          "file": "r1-kitchen-elevation.svg",
+          "sha256": "92ef563dc3cd2e8235b751b87d073137c17f5ba94f8e5178231f3e0e5ae10107"
+        },
+        {
+          "file": "r1-bathroom-services.svg",
+          "sha256": "136956fca936430ffac37206594b0d0d991993a238176ee68abcc8486960b43a"
+        }
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "revision": 2,
+      "source": "Saved revision 2 · 15 × 16 m · a93eac5011c9",
+      "drawings": [
+        {
+          "file": "r2-kitchen-dining-plan.svg",
+          "sha256": "be99c2c7d3184ce22745358c0257e50e4bf3be23398d027a337b79688ba02221"
+        },
+        {
+          "file": "r2-bathroom-plan.svg",
+          "sha256": "404a9edd4a5994527cb4816f8219717da9ecaf33245ec784249e29f3651c6ca6"
+        },
+        {
+          "file": "r2-kitchen-elevation.svg",
+          "sha256": "d7f7b15c55bda89c5774170aeea2269e0b928d14c99209aff06fe8b42d52d634"
+        },
+        {
+          "file": "r2-bathroom-services.svg",
+          "sha256": "0b98ea4b964c400b9d34958e586f4507f30281644b45a680e0030161711dc688"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "revision": 1,
+      "source": "Saved revision 1 · 15 × 16 m · 78d95f0a6268",
+      "drawings": [
+        {
+          "file": "r1-kitchen-dining-plan.svg",
+          "sha256": "406a91913edc4a19949f690fecf313b30bd9d4255e27b8cb3521fcd591a53109"
+        },
+        {
+          "file": "r1-bathroom-plan.svg",
+          "sha256": "95418b9a79cd34c200065c713eed2bc035f1b52fe3023bfb8138724afebe9f3d"
+        },
+        {
+          "file": "r1-kitchen-elevation.svg",
+          "sha256": "92ef563dc3cd2e8235b751b87d073137c17f5ba94f8e5178231f3e0e5ae10107"
+        },
+        {
+          "file": "r1-bathroom-services.svg",
+          "sha256": "136956fca936430ffac37206594b0d0d991993a238176ee68abcc8486960b43a"
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "revision": 2,
+      "source": "Saved revision 2 · 15 × 16 m · a93eac5011c9",
+      "drawings": [
+        {
+          "file": "r2-kitchen-dining-plan.svg",
+          "sha256": "be99c2c7d3184ce22745358c0257e50e4bf3be23398d027a337b79688ba02221"
+        },
+        {
+          "file": "r2-bathroom-plan.svg",
+          "sha256": "404a9edd4a5994527cb4816f8219717da9ecaf33245ec784249e29f3651c6ca6"
+        },
+        {
+          "file": "r2-kitchen-elevation.svg",
+          "sha256": "d7f7b15c55bda89c5774170aeea2269e0b928d14c99209aff06fe8b42d52d634"
+        },
+        {
+          "file": "r2-bathroom-services.svg",
+          "sha256": "0b98ea4b964c400b9d34958e586f4507f30281644b45a680e0030161711dc688"
+        }
+      ]
+    }
+  ],
+  "errors": []
+}

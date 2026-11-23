@@ -1,0 +1,80 @@
+{
+  "commit": "554dddc788520d2fdfb7202ed25a858931555633",
+  "project": "58996f72-a0e3-4664-a20c-92ab45b86ec9",
+  "brief": {
+    "width": 15.0,
+    "depth": 16.0,
+    "priority": "balanced",
+    "style": "scandinavian",
+    "room_goals": [],
+    "formal_salon": true,
+    "compare_tradeoffs": true,
+    "dining_seats": 4,
+    "split_dining": false,
+    "service_layout": true,
+    "compare_zoning": true,
+    "passage_m": 0.6,
+    "seed": 42,
+    "shift_bedroom_chair": false,
+    "closer_study_desk": false,
+    "locks": []
+  },
+  "revisions": [
+    {
+      "revision": 1,
+      "zoning": "gallery",
+      "home": "78d95f0a6268def903781b4a8b9f5e153e4b0a55ef59e458a75db1f093b400dc",
+      "snapshot_sha256": "3ebf18b5ae30d633fd04c221a876c569fb90568de5b13cce8b612c09d9cba142",
+      "routes": [
+        {
+          "room": "study",
+          "target": "living",
+          "distance_m": 3.253
+        },
+        {
+          "room": "kitchen-dining",
+          "target": "salon",
+          "distance_m": 3.29
+        },
+        {
+          "room": "bedroom",
+          "target": "bathroom",
+          "distance_m": 3.038
+        }
+      ],
+      "direct": null
+    },
+    {
+      "revision": 2,
+      "zoning": "service-core",
+      "home": "a93eac5011c9f3921d9508bca30793c61a6219d46b8ce587b02be48810b8baf7",
+      "snapshot_sha256": "2533a8e39337520c1a112c9af55a0609549a9fbbe5853c924f99029049aac99a",
+      "routes": [
+        {
+          "room": "study",
+          "target": "living",
+          "distance_m": 8.42
+        },
+        {
+          "room": "kitchen-dining",
+          "target": "salon",
+          "distance_m": 8.779
+        },
+        {
+          "room": "bedroom",
+          "target": "bathroom",
+          "distance_m": 3.358
+        }
+      ],
+      "direct": {
+        "rooms": [
+          "kitchen-dining",
+          "salon"
+        ],
+        "door_id": "service-core-passage",
+        "clearance_checked_m": 0.6,
+        "crossing_m": 1.3
+      }
+    }
+  ]
+}
