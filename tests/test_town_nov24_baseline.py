@@ -207,7 +207,6 @@ def test_nov24_brief(case, saved_home, monkeypatch, record_property):
         allowed_calls = [allowed_calls]
     assert len(calls) in allowed_calls
     after_sha = digest(previous)
-    assert after_sha == previous_digest
     record_property(
         "observation",
         json.dumps(
@@ -223,3 +222,4 @@ def test_nov24_brief(case, saved_home, monkeypatch, record_property):
             }
         ),
     )
+    assert after_sha == previous_digest, "The saved input snapshot changed"
