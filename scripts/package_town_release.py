@@ -21,6 +21,7 @@ from archimind.designer_handoff.survey import write_survey_dxf
 
 BEDROOM_VIEWS = ("bedroom-doorway.png", "bedroom-desk.png")
 STYLE_NOTICE = "saved-style-receipt.json"
+FINISH_NOTICE = "layered-finish-receipt.json"
 NOTICES = (
     "BELAYA_ATTRIBUTION.txt",
     "ABO_LICENSE_CC_BY_4.0.txt",
@@ -129,6 +130,7 @@ def build(before, after, photos, book, book_receipt, destination, commit):
     if destination.exists():
         raise FileExistsError("Choose a fresh destination for this release.")
     destination.parent.mkdir(parents=True, exist_ok=True)
+    proof_sources = (before, after)
     with tempfile.TemporaryDirectory(dir=destination.parent) as stage:
         stage = Path(stage)
 
@@ -223,6 +225,13 @@ def build(before, after, photos, book, book_receipt, destination, commit):
         for name, source in photo_inputs.items():
             category = "sources" if name in {*NOTICES, STYLE_NOTICE} else "presentation"
             copy(source, f"{category}/{name}")
+        for revision, (source, proof) in enumerate(
+            zip(proof_sources, (first, second), strict=True), start=1
+        ):
+            if expected := proof["files"].get(FINISH_NOTICE):
+                member = f"sources/r{revision}-{FINISH_NOTICE}"
+                copy(source / FINISH_NOTICE, member)
+                verified(root / member, expected)
         evidence = {
             "declared_release_commit": commit,
             "project": board["project"],
