@@ -62,12 +62,14 @@ DIRECT_SEATING = r"\b(?:seats?|seating|places|tables?)\b"
 SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
 SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
 SALON_DECLINE = (
-    r"\s*(?:(?:actually|no),\s*)?(?:"
-    r"no[.!;]?\s*$|not (?:needed|required|wanted)\b|"
-    r"leave (?:it|(?:the )?(?:formal )?salon) out\b|"
-    r"(?:(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
+    r"\s*(?:(?:actually|no),\s*)?"
+    r"(?:no|not (?:needed|required|wanted)|"
+    r"leave (?:it|(?:the )?(?:formal )?salon) out|"
+    r"(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
     r"(?:no|without) (?:a |the )?(?:formal )?salon)"
-    r"(?=\s*(?:$|[.!?,;]|(?:please|instead)\b)))"
+    r"(?:,?\s+(?:please|instead|for now|after all|this time|today)){0,3}"
+    r"(?:,\s*(?:keep|use) (?:the )?five standard rooms)?"
+    r"\s*[.!;]?\s*$"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
 
@@ -565,7 +567,7 @@ def _lock_statement_matches(room_id, sentence):
     pattern = (
         r"\b(?:keep|lock|preserve)\s+(?:the\s+)?"
         + ROOMS
-        + r"\b(?=\s*(?:$|[.!?,;]|(?:where it is|(?:exactly )?as it is|"
+        + r"\b(?=\s*(?:$|[.!?,;]|(?:(?:exactly )?(?:where|as) it is|"
         r"unchanged|in place|and)\b))"
     )
     return any(
