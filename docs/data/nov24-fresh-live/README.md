@@ -100,8 +100,8 @@ ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
   .venv/bin/python scripts/run_town.py
 ```
 
-The ZIP records `98c80efa` as the source checkout used to assemble and
-validate the database against the archived snapshots. A later test on
+The ZIP records `98c80efa` as the reference checkout for replaying the
+archived snapshots. A later test on
 `7c900e1` opened a clean extraction of those same ZIP bytes. The database
 passed SQLite integrity checks, both local endpoints returned HTTP 200,
 and Chrome entered the bedroom and opened the design board for both
