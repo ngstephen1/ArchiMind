@@ -29,6 +29,16 @@ from archimind.designer_handoff.drawings import (
 def _detail_board(manifest: dict) -> dict:
     """Accept either the whole-home scene or Town's standalone bedroom export."""
     if "rooms" in manifest:
+        saved_bed = next(
+            (
+                item
+                for item in (manifest.get("bedroom") or {}).get("furniture", [])
+                if item["id"] == "queen-bed"
+            ),
+            None,
+        )
+        if saved_bed and saved_bed.get("source") is not None:
+            raise ValueError("The bed-head study requires the procedural queen bed.")
         return manifest
     if (
         manifest.get("schema_version") != 1
