@@ -57,3 +57,9 @@ declared release commit to the accepted CI run before publishing. The output
 path must be fresh. Unpack the ZIP and run `shasum -a 256 -c SHA256SUMS.txt` in
 its root. For an existing home, confirm the actual site dimensions and
 supplier clearances before using the concept for procurement or construction.
+
+### Bedroom lighting proofs
+
+Dispatch the Studio Home workflow with `lighting_proof=true` and the accepted proof run, manifest and snapshot for each revision. Supply the **same pinned** `camera_source=<sha>:<manifest-path>` for both dispatches. The bedroom doorway and desk views use this common camera, and the task view repeats the desk pose. The salon and living detail images document the selected revision and use that revision's own cameras. The receipt identifies the camera source for every shot.
+
+The 960 × 540 outputs are published as `studio-lighting-proof`. Use `studio-eye-views` for the 1920 × 1080 revision-book input. The evening proof disables existing light objects and material emission before adding the modeled task and fill sources. The result shows a lighting concept. Fixture specification and work-surface illuminance require separate evidence.

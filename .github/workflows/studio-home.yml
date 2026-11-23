@@ -143,7 +143,7 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: inputs.approved_proof_run
         with:
-          name: studio-eye-views
+          name: ${{ inputs.lighting_proof && 'studio-lighting-proof' || 'studio-eye-views' }}
           path: ${{ runner.temp }}/eye-views
           if-no-files-found: error
       - name: Reopen the editable scene and render every room

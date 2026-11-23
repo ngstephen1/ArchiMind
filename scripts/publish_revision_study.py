@@ -5,6 +5,7 @@ import base64
 import hashlib
 import json
 import math
+import struct
 from html import escape
 from pathlib import Path
 
@@ -91,6 +92,8 @@ def matched_frames(boards, receipts, directories, eyes):
     ):
         (room,) = [r for r in board["rooms"] if r["room"]["id"] == "bedroom"]
         hd = json.loads((eye / "eye-view-receipt.json").read_bytes()) if eye else None
+        if hd and hd.get("resolution") != [1920, 1080]:
+            raise ValueError("The matched HD study requires 1920 × 1080 receipts.")
         if hd and (
             hd["home_id"] != board["home_id"]
             or hd["revision"] != board["revision"]
@@ -118,6 +121,15 @@ def matched_frames(boards, receipts, directories, eyes):
             else:
                 (camera,) = [c for c in room["cameras"] if c["id"] == view]
                 expected, path = proof["files"][filename], directory / filename
+            if hd:
+                with path.open("rb") as stream:
+                    header = stream.read(24)
+                if (
+                    len(header) != 24
+                    or header[:16] != b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0dIHDR"
+                    or struct.unpack(">II", header[16:]) != (1920, 1080)
+                ):
+                    raise ValueError("The matched HD study requires 1920 × 1080 PNGs.")
             if digest(path) != expected:
                 raise ValueError("Camera image digest mismatch.")
             pair.append((camera, path, expected))

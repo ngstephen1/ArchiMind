@@ -61,6 +61,43 @@ def architectural_camera(pose):
     return obj, {"level_target": level_target, "shift_y": obj.data.shift_y}
 
 
+def mute_material_emission(scene):
+    """Disable emissive shading in the task proof while retaining fixture geometry."""
+    checked = set()
+    muted = set()
+
+    def mute_tree(tree):
+        if tree in checked:
+            return False
+        checked.add(tree)
+        changed = False
+        for node in tree.nodes:
+            if node.type == "GROUP" and node.node_tree:
+                changed |= mute_tree(node.node_tree)
+            if node.type == "EMISSION":
+                strength = node.inputs["Strength"]
+            elif node.type == "BSDF_PRINCIPLED":
+                strength = node.inputs["Emission Strength"]
+            else:
+                continue
+            if not strength.is_linked and strength.default_value == 0:
+                continue
+            for link in list(strength.links):
+                tree.links.remove(link)
+            strength.default_value = 0.0
+            changed = True
+        if changed:
+            muted.add(tree.name)
+        return changed
+
+    for obj in scene.objects:
+        for slot in obj.material_slots:
+            material = slot.material
+            if material and material.use_nodes:
+                mute_tree(material.node_tree)
+    return sorted(muted)
+
+
 def desk_task_scene(scene, bedroom):
     """Switch the reopened proof to a controlled, modeled desk task light."""
     desk = next(
@@ -77,6 +114,7 @@ def desk_task_scene(scene, bedroom):
     for obj in scene.objects:
         if obj.type == "LIGHT":
             obj.hide_render = True
+    muted_material_trees = mute_material_emission(scene)
     if scene.world and scene.world.use_nodes:
         for node in scene.world.node_tree.nodes:
             if node.type == "BACKGROUND":
@@ -106,6 +144,7 @@ def desk_task_scene(scene, bedroom):
         "power_W": 9.0,
         "color_rgb": color,
         "ambient_world_strength": 0.04,
+        "muted_emission_node_trees": muted_material_trees,
         "room_fill": {"location_m": fill, "size_m": [2.4, 1.6], "power_W": 18.0},
     }
 
