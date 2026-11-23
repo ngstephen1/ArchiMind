@@ -354,6 +354,7 @@ def _interpret(req, previous):
                     "split_dining",
                     "passage_m",
                     "service_layout",
+                    "compare_zoning",
                 }
             ),
             "previous_rooms": [

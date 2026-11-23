@@ -143,6 +143,7 @@ function sync(data) {
   el("splitDining").checked = requirements?.split_dining ?? false;
   el("serviceLayout").checked = Boolean(applied.service_layout);
   el("serviceLayout").disabled = Boolean(applied.service_layout);
+  el("compareZoning").checked = false;
   el("passage").value = requirements?.passage_m ?? 0.6;
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
@@ -309,12 +310,21 @@ function showComparison() {
   for (const [index, home] of alternatives.entries()) {
     const measure = home.evidence.comparison;
     if (!measure) continue;
-    area.append(node("h4", "Layout " + String.fromCharCode(65 + index)));
+    const zoning = {gallery: "Gallery", "service-core": "Grouped service core"}[home.zoning];
+    area.append(node("h4", "Layout " + String.fromCharCode(65 + index) + (zoning ? " · " + zoning : "")));
     const list = node("ul", "");
     for (const route of measure.routes)
       list.append(node("li", `${route.room} to ${route.target} via hall · ${route.distance_m.toFixed(2)} m`));
     for (const [room, count] of Object.entries(measure.dining_places))
       list.append(node("li", `${room} · ${count} seats at one table`));
+    if (measure.direct_service)
+      list.append(node("li", `Kitchen and salon share a direct passage · ${measure.direct_service.crossing_m.toFixed(2)} m checked crossing`));
+    else if (zoning)
+      list.append(node("li", "Kitchen and salon connect through the gallery hall."));
+    for (const [room, area] of Object.entries(measure.room_areas_m2 ?? {}))
+      list.append(node("li", `${room} · ${area.toFixed(1)} m²`));
+    for (const item of measure.wardrobes ?? [])
+      list.append(node("li", `${item.room} ${item.id} · ${item.width_m.toFixed(2)} × ${item.depth_m.toFixed(2)} m reservation`));
     const opening = Math.min(...Object.values(measure.modeled_openings_m));
     list.append(node("li", `Narrowest modeled doorway ${opening.toFixed(2)} m · checked passage ${measure.passage_m.toFixed(2)} m`));
     for (const [room, service] of Object.entries(measure.service_rooms ?? {})) {
@@ -458,6 +468,7 @@ bind("generate", async () => {
         ...(revision || Number(el("diningSeats").value) > 0 ? { dining_seats: Number(el("diningSeats").value) } : {}),
         split_dining: el("splitDining").checked,
         service_layout: el("serviceLayout").checked,
+        compare_zoning: el("compareZoning").checked,
         ...(revision || Number(el("passage").value) !== 0.6 ? { passage_m: Number(el("passage").value) } : {}),
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,

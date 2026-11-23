@@ -1017,6 +1017,10 @@ def review_summary(
             "service_layout",
             inherited=bool((previous or {}).get("service_layout")),
         )
+    if brief.compare_zoning:
+        require(
+            "Compare gallery and grouped service-core zoning", None, "compare_zoning"
+        )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
         require(
