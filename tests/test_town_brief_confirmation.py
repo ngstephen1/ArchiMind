@@ -957,8 +957,13 @@ def test_hypothetical_door_in_rationale_is_not_an_opening_request():
     assert not opening_questions(text, [])
 
 
-def test_kitchen_capacity_uses_final_program_when_formal_salon_is_inferred():
-    text = "Seat four people at a single table in the formal salon. Two people at a single table in the kitchen."
+@pytest.mark.parametrize("connector", [". Two", " and two"])
+def test_kitchen_capacity_uses_final_program_when_formal_salon_is_inferred(connector):
+    text = (
+        "Seat four people at a single table in the formal salon"
+        + connector
+        + " people at a single table in the kitchen."
+    )
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, split_dining=True), text, None
     )
@@ -1100,3 +1105,25 @@ def test_explicit_salon_exclusion_cannot_add_a_salon(prefix, monkeypatch):
         depth=16,
     )
     assert not service.interpret(request, None).formal_salon
+
+
+def test_alternate_room_does_not_split_the_whole_party():
+    text = (
+        "We need six dining places. Seat everyone at one table in the formal salon. "
+        "If the salon is unavailable, seat everyone at one table in the kitchen."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not brief.split_dining
+    assert brief.dining_seats == 6
+    assert any("one dining table" in question for question in questions)
+
+
+def test_rejected_width_within_a_rationale_is_not_a_requirement():
+    text = (
+        "Keep a 90 cm clear passage because the chair is narrow "
+        "but a 60 cm clear passage is too small."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9

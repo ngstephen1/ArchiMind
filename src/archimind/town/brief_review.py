@@ -152,7 +152,10 @@ def _affirmative_clauses(message, *, retain_dining_context=False):
         return " "
 
     message = re.sub(
-        r"\b(?:because|otherwise)\b(?:(?!\bbut\b|[;!?,\n]|\.(?!\d)).)*",
+        r"\b(?:because|otherwise)\b"
+        r"(?:(?!\bbut\s+(?:keep|add|use|include|require|need|give|move|preserve|"
+        r"relocate|shift|remove|block|widen|enlarge|seat|ensure|maintain|provide)\b"
+        r"|[;!?,\n]|\.(?!\d)).)*",
         replace_rationale,
         message,
     )
@@ -245,28 +248,48 @@ def _dining_clauses(clauses):
 
 def requests_single_table(message):
     named_rooms = set()
+    saw_single = False
     for clause in _affirmative_clauses(message):
-        table = re.search(
-            r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
-        )
-        if not table or re.search(
-            r"\b(?:other|another|second|separate|split)\b", clause[table.end() :]
+        end = 0
+        for table in re.finditer(
+            r"\b(?:at|around) (one|a single|the same|a separate|a second|another)"
+            r" (?:dining )?table\b",
+            clause,
         ):
-            continue
-        prefix = clause[: table.start()].strip()
-        if re.search(
-            r"\b(?:all|everyone|party|seats?|places?|seating|dine|sit|seated|together"
-            r"|people|persons|guests|diners)\b",
-            prefix,
-        ):
+            prefix = clause[end : table.start()].strip()
+            end = table.end()
+            tail = clause[end:]
+            if not re.search(
+                r"\b(?:all|everyone|party|seats?|places?|seating|dine|sit|seated|together"
+                r"|people|persons|guests|diners|hosts|residents)\b",
+                prefix,
+            ):
+                continue
+            if re.match(
+                r"\s*(?:,?\s*(?:and|with)\s+)?(?:another|a second|split)\b", tail
+            ):
+                continue
             room = re.match(
-                r"\s+in (?:the )?(?:formal )?(salon|kitchen(?:[- ]dining)?)\b",
-                clause[table.end() :],
+                r"\s+in (?:the )?(?:formal )?(salon|kitchen(?:[- ]dining)?)\b", tail
             )
-            if not room:
+            if table[1] in {"a separate", "a second", "another"}:
+                if room and re.search(COUNT, prefix):
+                    end += room.end()
+                    named_rooms.add(_room_id(room[1]))
+                continue
+            saw_single = True
+            if (
+                not room
+                or not re.search(COUNT, prefix)
+                or re.search(
+                    r"\b(?:all|everyone|party|if|unless|otherwise|alternatively)\b",
+                    prefix,
+                )
+            ):
                 return True
+            end += room.end()
             named_rooms.add(_room_id(room[1]))
-    return len(named_rooms) == 1
+    return saw_single and len(named_rooms) == 1
 
 
 def _widths(text):
@@ -406,7 +429,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         table_location = (
             r""
             if single_table
-            else r"(?:(?:at|around) (?:one|a single|the same) (?:dining )?table\s+)?"
+            else r"(?:(?:at|around) (?:one|a single|the same|a separate|a second|another) (?:dining )?table\s+)?"
         )
         location = re.match(
             r"\s*" + table_location + r"(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b",
