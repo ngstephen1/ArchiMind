@@ -42,8 +42,8 @@ COUNT_SEPARATOR = r"[-‐‑–— ]"
 UNITS = "|".join(word for word, value in NUMBERS.items() if 1 <= value <= 9)
 COMPOUND_COUNT = rf"(?:{'|'.join(TENS)})(?:{COUNT_SEPARATOR}(?:{UNITS}))?"
 COUNT = (
-    rf"(?<![-+‐‑–—])\b(\d{{1,3}}|{COMPOUND_COUNT}|{'|'.join(NUMBERS)})\b"
-    r"(?![-‐‑–—]\w)"
+    rf"(?<![-+‐‑])\b(\d{{1,3}}|{COMPOUND_COUNT}|{'|'.join(NUMBERS)})\b"
+    r"(?![-‐‑]\w)"
 )
 
 
@@ -75,21 +75,24 @@ FIXED_PASSAGE = (
     + r"\b(?:measured|(?:the\s+)?(?:clear\s+)?width(?:\s+(?:is|taken|measured|specified)){0,3})"
     r"\s+across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
+DINING_ROLES = r"people|persons?|guests?|diners?|hosts?|residents?"
 DINER_ROLES = (
-    r"people|persons?|guests?|diners?|hosts?|residents?|adults?|children|child|"
-    r"attendees?|(?:household |family )?members?"
+    DINING_ROLES + r"|adults?|children|child|attendees?|(?:household |family )?members?"
 )
 PARTY = rf"\s+(?:{DINER_ROLES})\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
 GROUP = COUNT + rf"\s+(?:dinner\s+)?(?:{DINER_ROLES})\b"
-GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
+GROUP_JOIN = r"(?:\s*,\s*(?:and\s+)?|\s+and\s+)"
+GROUPS = GROUP + rf"(?:{GROUP_JOIN}{GROUP})+"
+DINING_GROUP = COUNT + rf"\s+(?:dinner\s+)?(?:{DINING_ROLES})\b"
+DINING_GROUPS = re.compile(DINING_GROUP + rf"(?:{GROUP_JOIN}{DINING_GROUP})+")
 TABLE_ALLOCATION = GROUPS + r"|" + COUNT + rf"(?:\s+(?:{DINER_ROLES}|seats|places))?"
 TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
 TABLE_POSITION = r"\s+(?:at|around)\s+"
 SINGLE_TABLE = r"(?:one|a single|the same) (?:dining )?table\b"
 SUBJECT_TABLE_COUNT = re.compile(
     rf"(?P<party>{GROUPS}|{GROUP})\s+"
-    r"(?:must|need to|have to)\s+"
+    r"(?:must|need to|have to|will|should)\s+"
     r"(?:all\s+)?(?:sit|dine|eat|be seated)(?:\s+together)?"
     rf"(?={TABLE_POSITION}{SINGLE_TABLE})"
 )
@@ -431,7 +434,10 @@ def _dining_clauses(clauses, *, for_arrangement=False):
             if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
                 home.strip()
             ):
-                if EXPLORATORY_DINING.search(home) and SUBJECT_TABLE_COUNT.search(home):
+                subject = SUBJECT_TABLE_COUNT.search(home)
+                if subject and EXPLORATORY_DINING.search(
+                    home[: subject.start()].rsplit(",", 1)[-1]
+                ):
                     continue
                 home = SUBJECT_TABLE_COUNT.sub(r"\g<party>", home)
                 yield OPTIONAL_SECOND_TABLE.sub(
@@ -460,7 +466,8 @@ def _allocation_count(text):
 def _normalize_table_ends(text):
     def combine(match):
         total = _allocation_count(match["first"]) + _allocation_count(match["second"])
-        return f"{total} seats at a single table"
+        room = f" in the {match['first_room']}" if match["first_room"] else ""
+        return f"{total} seats at a single table{room}"
 
     return SAME_TABLE_ENDS.sub(combine, text)
 
@@ -718,6 +725,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         split = False
     for (start, end), total in parties:
         if (start, end) in counted:
+            continue
+        if not DINING_GROUPS.fullmatch(dining[start:end]) and not re.match(
+            TABLE_POSITION + SINGLE_TABLE, dining[end:]
+        ):
             continue
         location = re.match(r"\s+in (?:the )?" + dining_room + r"\b", dining[end:])
         if location and total > 4:

@@ -149,13 +149,27 @@ def test_exploratory_modal_seating_does_not_override_split_control():
 @pytest.mark.parametrize(
     ("phrase", "count"),
     [
+        ("Five attendees will sit at one table in the salon.", 5),
+        (
+            "Whether dinner is formal or casual, five attendees must sit at one table in the salon.",
+            5,
+        ),
+        (
+            "Five attendees must sit at one table in the salon whether dinner is formal or casual.",
+            5,
+        ),
         ("Thirty-one attendees and two adults must sit at one table in the salon.", 33),
         ("Seat thirty-one attendees at one table in the salon.", 31),
         ("Twenty‑one attendees must sit at one table in the salon.", 21),
         ("Twenty one attendees must sit at one table in the salon.", 21),
+        ("Dining—6 seats at one table in the salon.", 6),
+        (
+            "Five attendees must sit at one table in the salon and two at the other end of it.",
+            7,
+        ),
     ],
 )
-def test_compound_party_counts_are_kept_whole(phrase, count):
+def test_single_table_counts_are_kept_whole(phrase, count):
     brief, questions = requirement_controls(
         Brief(formal_salon=True, compare_tradeoffs=True, split_dining=False),
         phrase,
@@ -163,6 +177,16 @@ def test_compound_party_counts_are_kept_whole(phrase, count):
     )
     assert brief.dining_seats == count
     assert any("four modeled places" in question for question in questions)
+
+
+def test_household_description_does_not_override_requested_dining_seats():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        "We are two adults and three children, and only need four dining seats.",
+        None,
+    )
+    assert brief.dining_seats == 4
+    assert not questions
 
 
 def test_modal_guest_count_keeps_conflicting_total_visible():
