@@ -87,6 +87,15 @@ def desk_task_scene(scene, bedroom):
     color = (1.0, 0.79, 0.57)
     name = "Modeled bedroom desk task emitter"
     light(name, location, target, 0.22, 0.14, 9.0, color)
+    shell = bedroom["room"]
+    fill = (
+        ox + shell["width_m"] * 0.57,
+        oy + shell["depth_m"] * 0.50,
+        shell["ceiling_height_m"] - 0.16,
+    )
+    light(
+        "Modeled bedroom evening fill", fill, target, 2.4, 1.6, 18.0, (1.0, 0.90, 0.77)
+    )
     return {
         "source": "Modeled task emitter for this proof",
         "fixture_status": "awaiting product and site measurements",
@@ -97,6 +106,7 @@ def desk_task_scene(scene, bedroom):
         "power_W": 9.0,
         "color_rgb": color,
         "ambient_world_strength": 0.04,
+        "room_fill": {"location_m": fill, "size_m": [2.4, 1.6], "power_W": 18.0},
     }
 
 
@@ -190,6 +200,27 @@ def render(
     if salon_cover:
         salon = next(r for r in board["rooms"] if r["room"]["id"] == "salon")
         photo_sources.append(("salon", salon["cameras"][0], source_sha))
+        if lighting_proof:
+            photo_sources.extend(
+                ("salon", pose, source_sha)
+                for pose in salon["cameras"]
+                if pose["id"] in {"salon-dining", "salon-suite"}
+                and pose.get("reason") is None
+            )
+            living = next(r for r in board["rooms"] if r["room"]["id"] == "living")
+            overview = next(p for p in living["cameras"] if p["id"] == "overview")
+            for alternative in living["cameras"]:
+                if (
+                    alternative["id"] != "overview"
+                    and alternative.get("reason") is None
+                    and any(
+                        alternative[key] != overview[key]
+                        for key in ("eye", "target", "fov")
+                    )
+                ):
+                    photo_sources.append(("living", alternative, source_sha))
+                    break
+
     for room_id, pose, pose_source in photo_sources:
         name = pose["id"]
         if room_id == "salon":
