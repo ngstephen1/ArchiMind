@@ -466,3 +466,57 @@ def test_evaluator_never_overwrites_an_input_or_existing_receipt(monkeypatch, tm
         api["main"]()
     assert error.value.code == 2
     assert source.read_bytes() == raw
+
+
+@pytest.mark.parametrize("interrupt", [False, True])
+def test_evaluator_exposes_receipt_only_after_a_complete_run(
+    monkeypatch, tmp_path, interrupt
+):
+    import runpy
+    import sys
+    from pathlib import Path
+
+    scripts = Path(__file__).resolve().parents[1] / "scripts"
+    monkeypatch.syspath_prepend(str(scripts))
+    api = runpy.run_path(str(scripts / "evaluate_town_decisions.py"))
+    source = tmp_path / "cases.json"
+    source.write_text(
+        json.dumps(
+            {
+                "cases": [
+                    {
+                        "case": "test",
+                        "expected_flags": [],
+                        "input": {
+                            "original_brief": "A bedroom",
+                            "confirmed_controls": {},
+                            "proposed_brief": {},
+                        },
+                    }
+                ]
+            }
+        )
+    )
+    output = tmp_path / "receipt.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["evaluate", "--live", "--cases", str(source), "--output", str(output)],
+    )
+    monkeypatch.setenv("OPENAI_API_KEY", "fixture")
+
+    def audit(*args, **kwargs):
+        assert not output.exists()
+        if interrupt:
+            raise KeyboardInterrupt
+        return {"status": "checked", "elapsed_ms": 1, "input_tokens": 1, "scores": {}}
+
+    monkeypatch.setattr(decisions, "audit", audit)
+    if interrupt:
+        with pytest.raises(KeyboardInterrupt):
+            api["main"]()
+        assert list(tmp_path.iterdir()) == [source]
+    else:
+        api["main"]()
+        assert json.loads(output.read_bytes())["requests"] == 1
+        assert set(tmp_path.iterdir()) == {source, output}

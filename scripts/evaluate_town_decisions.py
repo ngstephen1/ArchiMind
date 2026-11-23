@@ -7,6 +7,7 @@ import os
 import time
 from hashlib import sha256
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 
 from run_with_agent import settings_from_dotenv
 
@@ -206,8 +207,12 @@ def main():
     )
     if not key:
         parser.error("Server credentials are unavailable.")
+    if os.path.lexists(args.output):
+        parser.error("Choose a new receipt path before making live requests.")
     try:
-        destination = args.output.open("x", encoding="utf-8")
+        destination = NamedTemporaryFile(
+            mode="w", encoding="utf-8", dir=args.output.parent
+        )
     except OSError as exc:
         parser.error(
             f"Choose a new writable receipt path before making live requests: {exc}"
@@ -258,6 +263,11 @@ def main():
             "cases": rows,
         }
         destination.write(json.dumps(receipt, indent=2) + "\n")
+        destination.flush()
+        try:
+            os.link(destination.name, args.output)
+        except OSError as exc:
+            parser.error(f"Unable to publish the completed receipt: {exc}")
     print(
         f"{len(rows)} requests. Complete responses {complete}. "
         f"Selected threshold {selected}. P95 {p95} ms."
