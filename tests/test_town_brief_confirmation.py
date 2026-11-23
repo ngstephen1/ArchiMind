@@ -1328,6 +1328,47 @@ def test_room_qualified_table_allocations_keep_both_counts(text, total, message)
     )
 
 
+@pytest.mark.parametrize("room", ["kitchen", "kitchen-dining"])
+def test_optional_second_room_keeps_only_the_required_home_allocation(room):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=False),
+        f"Seat four at one table in the salon and two at the other table in the {room} if possible.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
+def test_explicit_offsite_reference_comes_before_later_home_meal():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "We have lunch at work and need seating for six there after we have breakfast at home. We need four dining seats at home.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4
+
+
+def test_live_interpreter_receives_room_qualified_pair_with_confirmed_total(
+    monkeypatch,
+):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    text = "Seat four at one table in the kitchen and seat two at the other table in the salon."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == text
+        assert facts["confirmed_layout_controls"]["dining_seats"] == 6
+        assert facts["confirmed_layout_controls"]["split_dining"] is True
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    assert (
+        service.interpret(
+            review_request(text, live=True, formal_salon=True, split_dining=True), None
+        ).dining_seats
+        == 6
+    )
+
+
 def test_live_interpreter_receives_optional_seating_as_prose(monkeypatch):
     monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
     text = "Seat four at one table and two at the other table if possible."

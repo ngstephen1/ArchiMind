@@ -108,7 +108,9 @@ OPTIONAL_SECOND_TABLE = re.compile(
     + r"|"
     + OTHER_END
     + r")"
-    + r"(?:\s+in (?:the )?(?:formal salon|salon|kitchen[- ]dining(?: room)?))?"
+    + r"(?:\s+in (?:the )?(?:"
+    + TABLE_ROOM
+    + r")\b)?"
     + r"(?:\s+for (?:breakfast|lunch|dinner))?\s*,?\s+"
     + TABLE_OPTION
 )
@@ -307,11 +309,13 @@ def salon_choice(message):
 HOME_MEAL = re.compile(r"\b(?:breakfast|lunch|dinner|meal|dine)\s+at home\b")
 
 
-def _dining_scope(activity):
+def _dining_scope(activity, *, preceding_offsite=False):
     parts = DINING_ACTIVITY_END.split(activity, maxsplit=1)
     scope = parts[0]
     home = HOME_DINING_LOCATION.search(scope)
-    offsite = re.search(OFFSITE_MEAL, scope)
+    offsite = re.search(OFFSITE_MEAL, scope) or (
+        not home and preceding_offsite and re.search(r"\bthere\b", scope)
+    )
     if not home and not offsite and len(parts) == 2 and HOME_MEAL.search(parts[1]):
         home = True
     return scope, bool(home), bool(offsite)
@@ -344,10 +348,12 @@ def _home_meal_clauses(clause):
         boundaries.append(match)
     starts = [0, *(match.end() for match in boundaries)]
     ends = [*(match.start() for match in boundaries), len(clause)]
-    home = False
+    home = offsite = False
     for start, end in zip(starts, ends, strict=True):
-        activity, at_home, off_site = _dining_scope(clause[start:end])
-        if off_site:
+        activity, at_home, offsite = _dining_scope(
+            clause[start:end], preceding_offsite=offsite
+        )
+        if offsite:
             home = False
         elif at_home:
             home = True
