@@ -374,10 +374,10 @@ def _home_meal_clauses(clause):
         preceding_offsite = scope[2] or bool(
             timing and re.search(OFFSITE_MEAL, segment[timing.end() :])
         )
-    if not any(offsite for _, _, offsite in scopes):
-        # An off-site meal mentioned only as a time reference does not give
-        # the seating request a separate venue.
-        yield from (activity for activity, _, _ in scopes)
+    if not any(_dining_scope(segment)[2] for segment in segments):
+        # A timing-only venue can scope a later reference without turning
+        # the otherwise unqualified home requirement into off-site seating.
+        yield from (activity for activity, _, offsite in scopes if not offsite)
         return
     home = False
     for activity, at_home, offsite in scopes:

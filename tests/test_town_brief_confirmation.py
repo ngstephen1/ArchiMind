@@ -1400,6 +1400,19 @@ def test_table_allocation_can_refer_back_to_an_offsite_timing_venue():
     check_brief(brief)
 
 
+@pytest.mark.parametrize("location", ["", "At home, "])
+def test_offsite_timing_reference_cannot_erase_the_home_count(location):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"{location}we need six dining seats for breakfast before we have lunch "
+        "at a restaurant and have dessert there.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
+    with pytest.raises(ValueError, match="four places at one table"):
+        check_brief(brief)
+
+
 def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
