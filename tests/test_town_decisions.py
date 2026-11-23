@@ -9,7 +9,7 @@ import pytest
 from openai import APITimeoutError
 from starlette.testclient import TestClient
 
-from archimind.town import decisions, service
+from archimind.town import decisions, render_queue, service
 from archimind.town.api import app
 from archimind.town.design import validate_home
 from archimind.town.design_review import Direction, VisualReview
@@ -249,3 +249,35 @@ def test_clarification_requires_six_case_promotion_receipt(town, monkeypatch):
     data = json.loads(promotion.read_text())
     promotion.write_text(json.dumps(data | {"requests": 36}))
     assert decisions.settings() == ("shadow", None)
+
+
+def test_saved_edit_and_proof_retry_use_no_decisions_calls(town, monkeypatch):
+    calls, result, events = review_fixture(town, monkeypatch, mode="shadow", flag=False)
+    assert result["status"] == "ready"
+    client, project, _ = town
+    job = events[0]["run"]
+    assert client.post(f"/api/jobs/{job}/apply", json={"index": 0}).status_code == 200
+    url = f"/api/projects/{project}"
+    assert (
+        client.post(f"{url}/chair-pullout/preview", json={"base": 1}).status_code == 200
+    )
+    assert client.get(f"{url}?revision=1").json()["home"] == result["result"][0]
+
+    monkeypatch.setattr(render_queue, "configuration", lambda: object())
+    seen = []
+
+    def start(snapshot, _blender, stage):
+        assert snapshot["revision"] == 1 and stage == "proof"
+        seen.append(stage)
+        return {"state": "failed" if len(seen) == 1 else "queued"}
+
+    monkeypatch.setattr(render_queue, "request", start)
+    assert (
+        client.post(f"{url}/render?revision=1", json={"stage": "proof"}).json()["state"]
+        == "failed"
+    )
+    assert (
+        client.post(f"{url}/render?revision=1", json={"stage": "proof"}).json()["state"]
+        == "queued"
+    )
+    assert seen == ["proof", "proof"] and len(calls) == 1

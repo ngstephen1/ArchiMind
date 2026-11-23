@@ -10,7 +10,8 @@
   "checks": [
     "clarification",
     "corrected A/B",
-    "timeout A/B with revision 1 preserved"
+    "timeout A/B with revision 1 preserved",
+    "switch to B and open the walkthrough with no extra Decisions call"
   ],
   "screenshots_sha256": {
     "alternatives.png": "313542bc14003b4f3af7c5984a1c5cd277f43734e16d28e79b70528fdbe0ef6a",

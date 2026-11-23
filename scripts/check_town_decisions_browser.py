@@ -85,6 +85,9 @@ def browser_check(url, output):
         expect(message).to_be_visible()
         message.screenshot(path=output / "timeout.png")
         expect(page.locator("#revision")).to_contain_text("Revision 1")
+        page.locator("#choices button").nth(1).click()
+        page.locator("#visit").click()
+        expect(page.locator("#panel")).to_be_hidden()
         browser.close()
     return errors
 
@@ -183,6 +186,7 @@ def check(output):
                     "clarification",
                     "corrected A/B",
                     "timeout A/B with revision 1 preserved",
+                    "switch to B and open the walkthrough with no extra Decisions call",
                 ],
             },
             indent=2,
