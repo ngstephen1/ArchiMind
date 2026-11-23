@@ -1,0 +1,230 @@
+{
+  "runtime_baseline": "c7e33364d2b148293b62ae26ad59375bdb1eb9ce",
+  "default_controls": {
+    "width": 15,
+    "depth": 16,
+    "compare_tradeoffs": true,
+    "seed": 42
+  },
+  "saved_home_cases": [
+    "locked-bedroom",
+    "ambiguous-desk"
+  ],
+  "cases": [
+    {
+      "case": "compact",
+      "brief": "Use a 12 by 13 metre lot and keep the five standard rooms.",
+      "outcome": "supported",
+      "controls": {
+        "width": 12,
+        "depth": 13
+      },
+      "provider_fixture": {},
+      "expected": {
+        "rooms": 5,
+        "lot_wd_m": [12, 13]
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "hosting",
+      "brief": "We host dinner often. Include a formal salon near the kitchen-dining room.",
+      "outcome": "supported",
+      "controls": {},
+      "provider_fixture": {
+        "formal_salon": true,
+        "room_goals": [
+          {
+            "room": "salon",
+            "relation": "near",
+            "target": "kitchen-dining"
+          }
+        ]
+      },
+      "expected": {
+        "rooms": 6,
+        "goal": [
+          "salon",
+          "near",
+          "kitchen-dining"
+        ]
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "separation",
+      "brief": "I work from home. Prefer the study far from the living room.",
+      "outcome": "supported",
+      "controls": {},
+      "provider_fixture": {
+        "room_goals": [
+          {
+            "room": "study",
+            "relation": "far",
+            "target": "living"
+          }
+        ]
+      },
+      "expected": {
+        "rooms": 5,
+        "goal": [
+          "study",
+          "far",
+          "living"
+        ]
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "split-dining",
+      "brief": "Use two four-seat tables in the formal salon and kitchen-dining room for two residents and four dinner guests. Place the study far from the living room.",
+      "outcome": "supported",
+      "controls": {
+        "dining_seats": 6,
+        "split_dining": true
+      },
+      "provider_fixture": {
+        "formal_salon": true,
+        "room_goals": [
+          {
+            "room": "study",
+            "relation": "far",
+            "target": "living"
+          }
+        ]
+      },
+      "expected": {
+        "rooms": 6,
+        "seats": 6,
+        "split": true,
+        "goal": [
+          "study",
+          "far",
+          "living"
+        ]
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "single-table",
+      "brief": "Seat six people at a single table in the formal salon.",
+      "outcome": "clarification",
+      "controls": {
+        "formal_salon": true
+      },
+      "provider_fixture": {},
+      "expected": {
+        "message": "one table",
+        "requirement": "6 dining places at one table"
+      },
+      "expected_calls": [
+        0,
+        1
+      ],
+      "known_gap": "Seat six people at a single table can lose the six-seat requirement."
+    },
+    {
+      "case": "passage-conversion",
+      "brief": "Keep the passage at least 65 cm wide.",
+      "outcome": "supported",
+      "controls": {},
+      "provider_fixture": {},
+      "expected": {
+        "rooms": 5,
+        "passage_m": 0.65
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "width-conflict",
+      "brief": "Keep the passage at least 90 cm wide.",
+      "outcome": "clarification",
+      "controls": {
+        "passage_m": 0.6
+      },
+      "provider_fixture": {},
+      "expected": {
+        "message": "Confirm one modeled passage width"
+      },
+      "expected_calls": 0
+    },
+    {
+      "case": "local-clearance",
+      "brief": "There must be 90 cm between the sofa and the wall.",
+      "outcome": "abstention",
+      "controls": {},
+      "provider_fixture": {
+        "unsupported": [
+          "90 cm local sofa-to-wall clearance"
+        ]
+      },
+      "expected": {
+        "message": "90 cm local sofa-to-wall clearance"
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "locked-bedroom",
+      "brief": "Keep the bedroom exactly as it is while considering the rest of the layout.",
+      "outcome": "supported",
+      "controls": {
+        "seed": 123
+      },
+      "provider_fixture": {
+        "lock_rooms": [
+          "bedroom"
+        ]
+      },
+      "expected": {
+        "rooms": 6,
+        "lock": "bedroom"
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "ambiguous-desk",
+      "brief": "Keep the desk exactly in place.",
+      "outcome": "clarification",
+      "controls": {},
+      "provider_fixture": {
+        "lock_furniture": [
+          "desk"
+        ]
+      },
+      "expected": {
+        "message": "Clarify which room"
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "second-storey",
+      "brief": "A second storey is mandatory.",
+      "outcome": "abstention",
+      "controls": {},
+      "provider_fixture": {
+        "unsupported": [
+          "second storey"
+        ]
+      },
+      "expected": {
+        "message": "second storey"
+      },
+      "expected_calls": 1
+    },
+    {
+      "case": "tight-lot-exhausted",
+      "brief": "Fit the standard five rooms on a 9 by 9 metre lot with a 1.4 m clear passage.",
+      "outcome": "abstention",
+      "controls": {
+        "width": 9,
+        "depth": 9
+      },
+      "provider_fixture": {},
+      "expected": {
+        "message": "exhausted",
+        "passage_m": 1.4
+      },
+      "expected_calls": 1
+    }
+  ]
+}
