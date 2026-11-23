@@ -174,14 +174,19 @@ def test_zane_street_packet_cannot_supply_a_survey_polygon():
     assert [item["loc"] for item in error.value.errors()] == [("vertices_m",)]
 
 
-def test_survey_cli_keeps_submitted_evidence_and_rejects_overwrites(intake, tmp_path):
+@pytest.mark.parametrize(
+    "metadata", [{}, {"project_id": "synthetic-bedroom", "surveyed_on": "2026-11-23"}]
+)
+def test_survey_cli_keeps_submitted_evidence_and_rejects_overwrites(
+    intake, tmp_path, metadata
+):
     import hashlib
     import json
     import subprocess
     import sys
 
     source, out = tmp_path / "input.json", tmp_path / "edition"
-    source.write_text(json.dumps(intake))
+    source.write_text(json.dumps(intake | metadata))
     cmd = [
         sys.executable,
         "-m",
@@ -196,6 +201,9 @@ def test_survey_cli_keeps_submitted_evidence_and_rejects_overwrites(intake, tmp_
     assert report["intake_sha256"] == hashlib.sha256(source.read_bytes()).hexdigest()
     assert report["plan_area_m2"] == pytest.approx(15.5)
     assert report["review_status"] == "pending professional review"
+    assert {
+        key: report[key] for key in ("project_id", "surveyed_on") if key in report
+    } == metadata
     assert report["field_verification_items"]
     retry = subprocess.run(cmd, capture_output=True, text=True)
     assert retry.returncode == 1 and "already exists" in retry.stderr
