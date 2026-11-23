@@ -59,6 +59,75 @@ GROUP = (
     COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
 )
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
+TABLE_ALLOCATION = (
+    GROUPS
+    + r"|"
+    + COUNT
+    + r"(?:\s+(?:people|persons?|diners?|guests?|hosts?|residents?|seats|places))?"
+)
+TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
+TABLE_POSITION = r"\s+(?:at|around)\s+"
+FIRST_TABLE = (
+    r"(?P<first>"
+    + TABLE_ALLOCATION
+    + r")"
+    + TABLE_POSITION
+    + r"(?:one|a single|the same) (?:dining )?table"
+    + r"(?:\s+in (?:the )?(?P<first_room>"
+    + TABLE_ROOM
+    + r")\b)?"
+    + r"(?P<second_clause>\s*,?\s+and\s+(?:seat\s+)?"
+    + r"(?P<second>"
+    + TABLE_ALLOCATION
+    + r")"
+    + TABLE_POSITION
+    + r")"
+)
+TABLE_OPTION = r"(?:if|when)\s+(?:possible|practical|feasible|space permits)\b"
+TABLE_BOUNDARY = (
+    r"(?=\s*(?:$|[,.!?;]|in\b|for (?:breakfast|lunch|dinner)\b|" + TABLE_OPTION + r"))"
+)
+OTHER_TABLE = (
+    r"(?:the )?(?:other|second)\b(?: (?:dining )?table\b|" + TABLE_BOUNDARY + r")"
+)
+OTHER_END = (
+    r"the other (?:end|side)\b(?: of (?:it|the table)\b|" + TABLE_BOUNDARY + r")"
+)
+SEPARATE_TABLE_COUNTS = re.compile(
+    FIRST_TABLE
+    + OTHER_TABLE
+    + r"(?:\s+in (?:the )?(?P<second_room>"
+    + TABLE_ROOM
+    + r")\b)?"
+)
+SAME_TABLE_ENDS = re.compile(FIRST_TABLE + OTHER_END)
+OPTIONAL_SECOND_TABLE = re.compile(
+    FIRST_TABLE
+    + r"(?:(?P<separate_table>"
+    + OTHER_TABLE
+    + r")|"
+    + OTHER_END
+    + r")"
+    + r"(?:\s+in (?:the )?(?:"
+    + TABLE_ROOM
+    + r")\b)?"
+    + r"(?:\s+for (?:breakfast|lunch|dinner))?\s*,?\s+"
+    + TABLE_OPTION
+)
+SECOND_ALLOCATION_ONLY = (
+    r"seat\s+(?:" + TABLE_ALLOCATION + ")" + TABLE_POSITION + OTHER_TABLE
+)
+OPTIONAL_STANDALONE = re.compile(
+    r"(?:"
+    + TABLE_OPTION
+    + r",?\s+"
+    + SECOND_ALLOCATION_ONLY
+    + r"|"
+    + SECOND_ALLOCATION_ONLY
+    + r"\s+"
+    + TABLE_OPTION
+    + r")[.,!?]?"
+)
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOM_NAMES = (
     r"bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon"
@@ -68,9 +137,26 @@ DINING_CONTEXT = (
     r"\b(?:seats?|seating|places|dining|dine|diners?|dinner|tables?|"
     r"eat\s+together|(?:share|have)\s+(?:a\s+)?(?:meal|lunch|breakfast))\b"
 )
+OFFSITE_LOCATION = r"(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)"
 OFFSITE_MEAL = (
     r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine)(?:\s+together)?)"
-    r"\s+(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)\b"
+    rf"\s+{OFFSITE_LOCATION}\b"
+    rf"|^\s*{OFFSITE_LOCATION}\s*[,:]"
+)
+HOME_DINING_LOCATION = re.compile(
+    r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|" + ROOM_NAMES + r"))\b"
+)
+DINING_TRANSITION = re.compile(
+    r"\b(?:so|and|then)\s+(?=(?:at home\s*,?\s+)?(?:(?:we|i)\s+)?"
+    r"(?:(?:will|would|must)\s+)?"
+    r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
+    r"|\bwhile\s+(?!(?:at|in|near|around)\b)"
+)
+DINING_ACTIVITY_END = re.compile(r"\b(?:before|after)\s+(?=(?:we|i|they|you)\s+)")
+HOME_TABLE_FOLLOWUP = re.compile(
+    r"(?:(?:we|i)\s+)?(?:(?:will|would|must)\s+)?"
+    r"(?:need|want|require)\s+(?:everyone|everybody|all (?:of us|guests|diners))"
+    r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table\b"
 )
 SALON_ACTION = (
     r"\b(?:include|add|use|with) (?:a |the )?(?:(?:separate|dedicated|additional) )?"
@@ -95,6 +181,13 @@ SALON_DECLINE = (
     r"\s*[.!;]?\s*$"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
+INDEPENDENT_ACTION = r"(?:keep|use|provide|maintain|reserve|prefer|add|include|seat|preserve|move|leave)\b"
+PROVIDER_STATEMENT_BREAK = (
+    r"(?<=[.!?])\s+|(?<=;)\s*|\n+(?=\s*(?:and\s+)?(?:please\s+)?"
+    + INDEPENDENT_ACTION
+    + r")"
+)
+WRAPPED_QUALIFIER = r"(?:between|around|through|past|in|for|beside|near|from|with)\b"
 CONDITIONAL_CONTINUATION = (
     r"\s*(?:but\s+)?"
     r"(?!(?:if|when)\s+(?:possible|practical|convenient|appropriate)\s*,)"
@@ -124,12 +217,42 @@ COORDINATED_OPENING = re.compile(
 )
 
 
+def _join_wrapped_qualifiers(message):
+    """Keep a line-wrapped location or scope qualifier with its requirement."""
+    for allocations in (SAME_TABLE_ENDS, SEPARATE_TABLE_COUNTS):
+        message = re.sub(
+            allocations.pattern,
+            lambda match: re.sub(r"[ \t]*\r?\n[ \t]*", " ", match[0]),
+            message,
+            flags=re.IGNORECASE,
+        )
+    return re.sub(
+        r"(?<=[^.!?;\s])[ \t]*\r?\n[ \t]*"
+        r"(?="
+        + WRAPPED_QUALIFIER
+        + r"|and[ \t]+(?!(?:please[ \t]+)?"
+        + INDEPENDENT_ACTION
+        + r"))"
+        r"(?![^,;.!?\n]*,\s*(?:please\s+)?" + INDEPENDENT_ACTION + r")",
+        " ",
+        message,
+        flags=re.IGNORECASE,
+    )
+
+
 def _affirmative_clauses(message):
     """Keep supported affirmative clauses ahead of an explicit negation."""
     message = re.sub(
         r"\b(?:don['’]t|do not|never)\b[^.;!?\n]*,\s*or\b[^.;!?\n]*",
         "",
-        message.lower(),
+        _join_wrapped_qualifiers(message).lower(),
+    )
+    # Keep an explicit off-site heading attached to its activity when a comma
+    # would otherwise split off the imperative that follows.
+    message = re.sub(
+        rf"(^|[.;!?\n])(?P<location>\s*{OFFSITE_LOCATION})\s*,",
+        r"\1\g<location>:",
+        message,
     )
     clauses = re.split(
         r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:and\s+)?"
@@ -192,34 +315,126 @@ def salon_choice(message):
     return decision, statement
 
 
-def _dining_clauses(clauses):
-    for clause in clauses:
-        if offsite := re.search(OFFSITE_MEAL, clause):
-            home_request = re.search(
-                r"\b(?:so|and)\s+(?:(?:we|i)\s+)?(?:need|want|require|add|provide)\b",
-                clause[offsite.end() :],
+HOME_MEAL = re.compile(r"\b(?:breakfast|lunch|dinner|meal|dine)\s+at home\b")
+
+
+def _dining_scope(activity, *, preceding_offsite=False):
+    parts = DINING_ACTIVITY_END.split(activity, maxsplit=1)
+    scope = parts[0]
+    home = HOME_DINING_LOCATION.search(scope)
+    offsite = re.search(OFFSITE_MEAL, scope) or (
+        not home
+        and preceding_offsite
+        and re.search(
+            r"\bthere\b(?!\s+(?:(?:to\s+)?be|is|are|was|were|will\s+be|would\s+be)\b)",
+            scope,
+        )
+    )
+    if not home and not offsite and len(parts) == 2 and HOME_MEAL.search(parts[1]):
+        home = True
+    return scope, bool(home), bool(offsite)
+
+
+def _home_meal_clauses(clause):
+    if not re.search(OFFSITE_MEAL, clause):
+        yield clause
+        return
+    # The shared location after paired allocations can scope both counts.
+    internal = {
+        match.start("second_clause") + transition.start()
+        for pattern in (SEPARATE_TABLE_COUNTS, SAME_TABLE_ENDS)
+        for match in pattern.finditer(clause)
+        for transition in DINING_TRANSITION.finditer(match["second_clause"])
+    }
+    transitions = list(DINING_TRANSITION.finditer(clause))
+    boundaries = []
+    for i, match in enumerate(transitions):
+        if match.start() in internal:
+            left = clause[transitions[i - 1].end() if i else 0 : match.start()]
+            stop = (
+                transitions[i + 1].start() if i + 1 < len(transitions) else len(clause)
             )
-            if not home_request:
+            right = clause[match.end() : stop]
+            _, left_home, left_offsite = _dining_scope(left)
+            _, right_home, right_offsite = _dining_scope(right)
+            if not (left_home and right_offsite or right_home and left_offsite):
                 continue
-            clause = clause[offsite.end() + home_request.end() :]
-            if not re.search(
-                r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|"
-                + ROOM_NAMES
-                + r"))\b",
-                clause,
+        boundaries.append(match)
+    starts = [0, *(match.end() for match in boundaries)]
+    ends = [*(match.start() for match in boundaries), len(clause)]
+    segments = [clause[start:end] for start, end in zip(starts, ends, strict=True)]
+    scopes = []
+    preceding_offsite = False
+    for segment in segments:
+        scope = _dining_scope(segment, preceding_offsite=preceding_offsite)
+        scopes.append(scope)
+        # A timing clause may introduce the venue for a later "there",
+        # even when it does not set the venue of the current request.
+        timing = DINING_ACTIVITY_END.search(segment)
+        preceding_offsite = scope[2] or bool(
+            timing and re.search(OFFSITE_MEAL, segment[timing.end() :])
+        )
+    if not any(_dining_scope(segment)[2] for segment in segments):
+        # A timing-only venue can scope a later reference without turning
+        # the otherwise unqualified home requirement into off-site seating.
+        yield from (activity for activity, _, offsite in scopes if not offsite)
+        return
+    home = False
+    for activity, at_home, offsite in scopes:
+        if offsite:
+            home = False
+        elif at_home:
+            home = True
+            yield activity
+        elif home and HOME_TABLE_FOLLOWUP.fullmatch(activity.strip(" ,.!?")):
+            yield activity
+        else:
+            home = False
+
+
+def _dining_clauses(clauses, *, for_arrangement=False):
+    for clause in clauses:
+        for home in _home_meal_clauses(clause):
+            if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
+                home.strip()
             ):
-                continue
-        if re.search(DINING_CONTEXT, clause):
-            yield clause
+                yield OPTIONAL_SECOND_TABLE.sub(
+                    lambda match: (
+                        match[0]
+                        if for_arrangement and match["separate_table"]
+                        else home[match.start() : match.start("second_clause")]
+                    ),
+                    home,
+                )
+
+
+def _seat_count(value):
+    return int(value) if value.isdecimal() else NUMBERS[value]
+
+
+def _allocation_count(text):
+    return sum(_seat_count(number[1]) for number in re.finditer(COUNT, text))
+
+
+def _normalize_table_ends(text):
+    def combine(match):
+        total = _allocation_count(match["first"]) + _allocation_count(match["second"])
+        return f"{total} seats at a single table"
+
+    return SAME_TABLE_ENDS.sub(combine, text)
 
 
 def requests_single_table(message):
-    for clause in _affirmative_clauses(message):
+    for clause in _dining_clauses(_affirmative_clauses(message), for_arrangement=True):
+        clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
         )
         if not table or re.search(
-            r"\b(?:other|another|second|separate|split)\b", clause[table.end() :]
+            r"\b(?:other|another|second|separate) (?:dining )?tables?\b"
+            r"|\b(?:at|around) (?:the )?other\s*(?:[.,;]|$)"
+            r"|\bsplit (?:seating|dining|across|between)\b",
+            clause[table.end() :],
         ):
             continue
         prefix = clause[: table.start()].strip()
@@ -259,12 +474,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         brief.passage_m if "passage_m" in explicit else evidence.get("passage_m", 0.6)
     )
 
-    def count(value):
-        return int(value) if value.isdecimal() else NUMBERS[value]
-
     clauses = _affirmative_clauses(message)
     text = ". ".join(clauses)
-    dining = ". ".join(_dining_clauses(clauses))
+    dining = _normalize_table_ends(". ".join(_dining_clauses(clauses)))
     program, _ = salon_choice(message)
     saved_salon = any(
         part["design"]["room"]["id"] == "salon"
@@ -284,34 +496,60 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             questions.append(
                 "Confirm the five-room program by clearing the formal salon control."
             )
+    optional_table_overflow = any(
+        match["separate_table"] and _allocation_count(match["first"]) > 4
+        for clause in _dining_clauses(clauses, for_arrangement=True)
+        for match in OPTIONAL_SECOND_TABLE.finditer(clause)
+    )
     per_table = []
-    count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
-    split_counts = re.search(
-        count_at
-        + r"one table\s*,?\s+and\s+"
-        + count_at
-        + r"(?:the )?(?:other|second)(?: table)?\b",
+    split_counts = SEPARATE_TABLE_COUNTS.search(dining)
+    each_table = re.search(
+        r"(?P<count>"
+        + TABLE_ALLOCATION
+        + ")"
+        + TABLE_POSITION
+        + r"each(?: of the two)? tables?\b",
         dining,
     )
-    each_table = re.search(count_at + r"each(?: of the two)? tables?\b", dining)
     if split_counts:
-        per_table = [count(value) for value in split_counts.groups()]
+        per_table = [
+            _allocation_count(split_counts[name]) for name in ("first", "second")
+        ]
+        first_room, second_room = (
+            split_counts["first_room"],
+            split_counts["second_room"],
+        )
+        if (
+            first_room
+            and second_room
+            and (("salon" in first_room) == ("salon" in second_room))
+        ):
+            questions.append(
+                "The requested room has one modeled table. Confirm a different location for the second table."
+            )
         dining = dining[: split_counts.start()] + " " + dining[split_counts.end() :]
     elif each_table:
-        per_table = [count(each_table[1])] * 2
+        per_table = [_allocation_count(each_table["count"])] * 2
         dining = dining[: each_table.start()] + " " + dining[each_table.end() :]
     if per_table:
         totals.add(sum(per_table))
-        if max(per_table) > 4:
-            questions.append(
-                "Each modeled table has four places. Revise the requested split."
-            )
+    if optional_table_overflow:
+        questions.append(
+            "Each modeled table has four places. Confirm a smaller group at the required table."
+        )
+    elif per_table and max(per_table) > 4:
+        questions.append(
+            "Each modeled table has four places. Revise the requested split."
+        )
 
     shared = r"\s*,?\s+(?:to be )?(?:split|shared|divided) (?:between|across)\b"
     requested_split = bool(per_table) or bool(re.search(r"\bsplit dining\b", dining))
 
     parties = [
-        (party.span(), sum(count(group[1]) for group in re.finditer(GROUP, party[0])))
+        (
+            party.span(),
+            sum(_seat_count(group[1]) for group in re.finditer(GROUP, party[0])),
+        )
         for party in re.finditer(GROUPS, dining)
     ]
     kitchen_table = re.search(
@@ -328,7 +566,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 for (start, stop), total in parties
                 if start <= kitchen_table.start() < stop
             ),
-            count(kitchen_table[1]),
+            _seat_count(kitchen_table[1]),
         )
         if amount > 4:
             questions.append(
@@ -358,14 +596,16 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + r"|\bseat(?:ing)?\s+"
         + COUNT
         + PARTY
-        + r"|"
+        + r"|(?:"
         + COUNT
         + PARTY
-        + r"\s+(?=(?:at|around) (?:one|a single|the same) (?:dining )?table\b)",
+        + r"|\bseat\s+"
+        + COUNT
+        + r")\s+(?=(?:at|around) (?:one|a single|the same|the other|the second) (?:dining )?table\b)",
         dining,
     ):
         index = next(i for i, group in enumerate(match.groups(), 1) if group)
-        value, end = count(match[index]), match.end()
+        value, end = _seat_count(match[index]), match.end()
         for (start, stop), total in parties:
             if start <= match.start(index) < stop:
                 value, end = total, max(end, stop)
@@ -444,9 +684,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
     if guests and residents:
-        totals.add(count(guests[1]) + count(residents[1]))
+        totals.add(_seat_count(guests[1]) + _seat_count(residents[1]))
     elif guests and not totals:
-        totals.add(max(seats, count(guests[1])))
+        totals.add(max(seats, _seat_count(guests[1])))
     if room_minima:
         for room, counts in room_minima.items():
             if len(counts) > 1:
@@ -831,8 +1071,8 @@ def review_summary(
     }
 
 
-def provider_brief(message):
-    """Route known seating and explanation clauses to the app before interpretation."""
+def provider_brief(message, brief):
+    """Separate complete, app-verified control statements from live interpretation."""
     hosting = (
         r"(?:design a home for )?"
         + COUNT
@@ -857,4 +1097,38 @@ def provider_brief(message):
         message,
         flags=re.IGNORECASE,
     )
-    return re.sub(explanation + r"(?=\s*$)", "", remaining, flags=re.IGNORECASE).strip()
+    remaining = re.sub(explanation + r"(?=\s*$)", "", remaining, flags=re.IGNORECASE)
+    # Only remove complete statements with no room, object, or code-clearance qualifier.
+    passage = (
+        r"(?:(?:keep|use|provide|maintain|reserve) (?:a |an |the )?)?"
+        r"(?:" + "|".join(WIDTH_PATTERNS) + r")[.!;]?"
+    )
+    split_seating = (
+        r"(?:seat|provide seating for) "
+        + COUNT
+        + r"(?: (?:people|persons|guests|diners|seats|places))?(?: total)?"
+        r" (?:split )?(?:across|between) two (?:dining )?tables"
+        r" in (?:the )?(?:formal )?salon and (?:the )?kitchen[- ]dining(?: room)?[.!;]?"
+    )
+    statements = []
+    for statement in re.split(
+        PROVIDER_STATEMENT_BREAK,
+        _join_wrapped_qualifiers(remaining).strip(),
+        flags=re.IGNORECASE,
+    ):
+        clause = statement.strip()
+        normalized = clause.lower()
+        if re.fullmatch(passage, normalized) and _widths(normalized) == {
+            brief.passage_m
+        }:
+            continue
+        if (
+            brief.formal_salon
+            and brief.split_dining
+            and re.fullmatch(split_seating, normalized)
+            and _dining_statement_matches(brief, clause)
+        ):
+            continue
+        if clause:
+            statements.append(clause)
+    return "\n".join(statements)

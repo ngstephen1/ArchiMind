@@ -972,3 +972,563 @@ def test_explicit_salon_exclusion_cannot_add_a_salon(prefix, monkeypatch):
         depth=16,
     )
     assert not service.interpret(request, None).formal_salon
+
+
+@pytest.mark.parametrize(
+    "passage", ["Keep a 65 cm wide passage.", "Keep the passage width at least 65 cm."]
+)
+def test_live_interpreter_receives_verified_controls_without_reinterpreting_them(
+    monkeypatch,
+    passage,
+):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    seating = "Seat six people total across two tables in the formal salon and kitchen-dining room."
+    preference = "Prefer the study away from the living room."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["confirmed_layout_controls"] == {
+            "dining_seats": 6,
+            "split_dining": True,
+            "modeled_passage_m": 0.65,
+        }
+        assert preference in facts["request"]
+        unsupported = [
+            phrase for phrase in (seating, passage) if phrase in facts["request"]
+        ]
+        return live_answer(formal_salon=True, unsupported=unsupported)(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    request = review_request(
+        " ".join((seating, passage, preference)),
+        live=True,
+        width=15,
+        depth=16,
+        formal_salon=True,
+        dining_seats=6,
+        split_dining=True,
+        passage_m=0.65,
+    )
+    brief = service.interpret(request, None)
+    assert brief.dining_seats == 6 and brief.split_dining and brief.passage_m == 0.65
+
+
+def test_live_interpreter_still_receives_mixed_unenforceable_requirements(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    statement = "Keep a 65 cm wide passage and certify it meets local building code."
+
+    def answer(schema, payload, **_kwargs):
+        assert statement in json.loads(payload)["request"]
+        return live_answer(unsupported=["Building code certification"])(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    request = review_request(statement, live=True, width=15, depth=16, passage_m=0.65)
+    with pytest.raises(service.BriefClarification, match="Building code certification"):
+        service.interpret(request, None)
+
+
+def test_wrapped_specific_clearance_remains_a_single_requirement():
+    text = "Keep a 65 cm wide passage\nbetween the kitchen island and the counters."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("65 cm clearance between specific objects" in item for item in questions)
+
+
+def test_standalone_control_line_does_not_consume_the_next_request(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    preference = "Prefer the study away from the living room."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == preference
+        assert facts["confirmed_layout_controls"]["modeled_passage_m"] == 0.65
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    assert (
+        service.interpret(
+            review_request(
+                "Keep the passage width at least 65 cm\n" + preference, live=True
+            ),
+            None,
+        ).passage_m
+        == 0.65
+    )
+
+
+def test_a_coordinated_line_has_an_independent_requirement():
+    text = "Don't add a formal salon,\nand please keep a 65 cm wide passage."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.65 and not brief.formal_salon
+
+    text = "Don't add a formal salon,\nand please keep the existing study window."
+    assert opening_questions(text, [])
+
+
+@pytest.mark.parametrize("separator", [" ", "\n"])
+def test_study_separation_does_not_change_the_one_table_request(separator):
+    text = (
+        "Seat six guests at one table"
+        + separator
+        + "and keep the study separate from the living room."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+def test_fronted_room_preference_is_not_a_wrapped_passage_qualifier():
+    text = "Keep a 65 cm wide passage\nBetween the study and living room, prefer more separation."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.65
+
+
+@pytest.mark.parametrize("linebreak", [" ", "\n"])
+def test_coordinated_table_allocations_keep_the_total_and_room_qualifier(linebreak):
+    text = (
+        "Seat three guests at one table"
+        + linebreak
+        + "and three guests at the other in the kitchen-dining room."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+@pytest.mark.parametrize("separator", [" ", "\n"])
+def test_opposite_ends_of_one_table_do_not_confirm_split_dining(separator):
+    text = (
+        "Seat four guests at one table" + separator + "and two at the other end of it."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+def test_same_table_seats_are_not_an_additional_headcount():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "Seat two hosts at one table and two at the other end of it for dinner with two guests.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "qualifier", ["the other for dinner", "the other end for dinner"]
+)
+@pytest.mark.parametrize("separator", [" and ", "\nand seat "])
+def test_counted_seating_keeps_both_allocations_with_a_meal_qualifier(
+    qualifier, separator
+):
+    single = "end" in qualifier
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Seat four guests at one table" + separator + "two at " + qualifier + ".",
+        None,
+    )
+    assert brief.dining_seats == 6 and brief.split_dining is not single
+    assert bool(questions) is single
+
+
+@pytest.mark.parametrize("location", ["the other table", "the other end"])
+@pytest.mark.parametrize("separator", [" and ", "\nand seat "])
+@pytest.mark.parametrize("first", ["four", "four guests"])
+def test_optional_second_group_does_not_raise_required_seating(
+    location, separator, first
+):
+    text = (
+        f"Seat {first} at one table"
+        + separator
+        + "two at "
+        + location
+        + " if possible."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=False),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+    check_brief(brief)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Six dining seats. Seat everyone at one table at home for breakfast and have dinner at a restaurant.",
+        "Six dining seats. We have dinner at a restaurant and seat everyone at one table at home for breakfast.",
+    ],
+)
+def test_home_single_table_requirement_survives_offsite_meal(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+def test_offsite_single_table_does_not_restrict_home_split():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Six dining seats at home. Seat four guests at one table for dinner at a restaurant.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "We need six dining seats at home and for our Friday outing seat everyone at one table while we have dinner at a restaurant.",
+        "We have breakfast at work and seat six guests at one table for dinner at a restaurant and need six dining seats at home.",
+        "For dinner at home seat six across two tables and have breakfast off-site and need eight seats there.",
+    ],
+)
+def test_offsite_table_in_a_compound_sentence_does_not_restrict_home_split(text):
+    brief, questions = requirement_controls(
+        Brief(
+            compare_tradeoffs=True, formal_salon=True, split_dining=True, dining_seats=6
+        ),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+@pytest.mark.parametrize("lead", ["want", "we want", "we would want"])
+def test_same_table_followup_inherits_home_seating_location(lead):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"We have lunch at work and need six dining seats at home and {lead} everyone at one table.",
+        None,
+    )
+    assert brief.dining_seats == 6 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "We have dinner at a restaurant on Fridays and seat four guests at one table and seat two guests at the other table at home.",
+        "We need six dining seats at home while our neighbors have dinner at a restaurant.",
+        "We have dinner at a restaurant while our housemates need six dining seats at home.",
+    ],
+)
+def test_offsite_meal_preserves_full_home_requirement(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "We have lunch at work and need six dining seats while at home.",
+        "We have lunch at work and need six dining seats while in the house at home.",
+    ],
+)
+def test_while_location_qualifier_stays_with_home_seating(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "For dinner at home, seat four guests at one table and seat two guests at the other table for lunch at work.",
+        "For lunch at work, seat two guests at one table and seat four guests at the other table for dinner at home.",
+        "For lunch at work, seat two at one table and seat four at the other table for dinner at home.",
+    ],
+)
+def test_allocations_with_different_meals_keep_the_home_count(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True), text, None
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
+def test_later_home_activity_does_not_rescope_restaurant_seating():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "For dinner at a restaurant, seat four guests at one table and seat two guests at the other table before we meet back at home. We need four dining seats.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        (
+            "We need four dining seats at home before we have dinner at a restaurant with seating for six.",
+            4,
+        ),
+        (
+            "We have lunch at work and need seating for four after we get together for dinner at home.",
+            4,
+        ),
+        (
+            "We need seating for four at home. If possible, seat two at the second table.",
+            4,
+        ),
+        (
+            "We need seating for four at home. Seat two at the second table if possible.",
+            4,
+        ),
+    ],
+)
+def test_temporal_and_optional_statements_do_not_lose_required_seats(text, expected):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True), text, None
+    )
+    assert not questions and brief.dining_seats == expected and not brief.split_dining
+
+
+@pytest.mark.parametrize(
+    ("text", "total", "message"),
+    [
+        (
+            "Seat four at one table in the kitchen and seat two at the other table in the salon.",
+            6,
+            "",
+        ),
+        (
+            "Seat five at one table in the kitchen and seat two at the other table in the salon.",
+            7,
+            "four places",
+        ),
+        (
+            "Seat four at one table in the kitchen and seat two at the other table in the kitchen-dining room.",
+            6,
+            "different location",
+        ),
+    ],
+)
+def test_room_qualified_table_allocations_keep_both_counts(text, total, message):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert brief.dining_seats == total and brief.split_dining
+    assert (
+        any(message in question for question in questions) if message else not questions
+    )
+
+
+@pytest.mark.parametrize("room", ["kitchen", "kitchen-dining"])
+@pytest.mark.parametrize("split", [False, True])
+def test_optional_second_room_keeps_only_the_required_home_allocation(room, split):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=split),
+        f"Seat four at one table in the salon and two at the other table in the {room} if possible.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4 and brief.split_dining is split
+
+
+@pytest.mark.parametrize(
+    "first, second",
+    [("in the salon", "in the kitchen"), ("", "")],
+)
+def test_optional_table_does_not_waive_required_table_capacity(first, second):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"Seat six guests at one table {first} and two at the other table {second} if possible.",
+        None,
+    )
+    assert brief.dining_seats == 6
+    assert any("smaller group at the required table" in q for q in questions)
+
+
+@pytest.mark.parametrize("location", ["At the restaurant", "At work", "Away from home"])
+def test_fronted_offsite_location_cannot_supply_home_table_requirements(location):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"{location}, put six at one table and two at the other table if possible. "
+        "At home, seat four at one table and one at the other table.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 5
+
+
+@pytest.mark.parametrize(
+    "other",
+    ["we eat lunch", "we seat two at one table"],
+)
+def test_split_out_home_seating_after_a_fronted_offsite_heading(other):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"At work, {other}, and at home we need six dining seats.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
+
+
+@pytest.mark.parametrize("sequence", ["after", "before"])
+def test_keep_home_seats_with_offsite_timing_qualifier(sequence):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"We need six dining seats, and at home we have dinner together {sequence} we eat at work.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
+    with pytest.raises(ValueError, match="four places at one table"):
+        check_brief(brief)
+
+
+def test_table_allocation_can_refer_back_to_an_offsite_timing_venue():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "At home, we need four dining seats before we have dinner at a restaurant "
+        "and seat six guests there.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4
+    check_brief(brief)
+
+
+@pytest.mark.parametrize("location", ["", "At home, "])
+def test_offsite_timing_reference_cannot_erase_the_home_count(location):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"{location}we need six dining seats for breakfast before we have lunch "
+        "at a restaurant and have dessert there.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
+    with pytest.raises(ValueError, match="four places at one table"):
+        check_brief(brief)
+
+
+def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Seat four at one table in the salon and two at the other end if possible.",
+        None,
+    )
+    assert brief.dining_seats == 4 and not brief.split_dining
+    assert any("one dining table" in question for question in questions)
+
+
+def test_existential_there_does_not_inherit_the_offsite_location():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "We have lunch at work and need there to be seating for six before we have dinner at home.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
+
+
+def test_explicit_offsite_reference_comes_before_later_home_meal():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "We have lunch at work and need seating for six there after we have breakfast at home. We need four dining seats at home.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 4
+
+
+def test_live_interpreter_receives_room_qualified_pair_with_confirmed_total(
+    monkeypatch,
+):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    text = "Seat four at one table in the kitchen and seat two at the other table in the salon."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == text
+        assert facts["confirmed_layout_controls"]["dining_seats"] == 6
+        assert facts["confirmed_layout_controls"]["split_dining"] is True
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    assert (
+        service.interpret(
+            review_request(text, live=True, formal_salon=True, split_dining=True), None
+        ).dining_seats
+        == 6
+    )
+
+
+def test_live_interpreter_receives_optional_seating_as_prose(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    text = "Seat four at one table and two at the other table if possible."
+
+    def answer(schema, payload, **kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == text
+        assert facts["confirmed_layout_controls"]["dining_seats"] == 4
+        assert facts["confirmed_layout_controls"]["split_dining"] is False
+        assert (
+            "described as optional in the request as a preference"
+            in kwargs["task_instructions"]
+        )
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    result = service.interpret(review_request(text, live=True, formal_salon=True), None)
+    assert result.dining_seats == 4 and not result.split_dining
+
+
+def test_grouped_seating_can_wrap_after_preposition():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Four guests at\none table and two at\nthe other table.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+@pytest.mark.parametrize(("first", "total"), [("one host", 4), ("three hosts", 6)])
+def test_same_table_retains_every_group_at_each_end(first, total):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"For dinner, {first} and two guests at a single table and one at the other end of it.",
+        None,
+    )
+    assert not questions and brief.dining_seats == total and not brief.split_dining
+    if total > 4:
+        with pytest.raises(ValueError, match="four places at one table"):
+            check_brief(brief)
+    else:
+        check_brief(brief)
+
+
+def test_a_wrapped_opening_list_still_checks_the_second_room():
+    text = "Keep the bedroom door\nand the study window."
+    assert len(opening_questions(text, ["bedroom"])) == 1
+    assert not opening_questions(text, ["bedroom", "study"])
+
+
+def test_live_payload_preserves_a_coordinated_opening_request(monkeypatch, saved_home):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    action = "and please preserve the existing study window."
+
+    def answer(schema, payload, **_kwargs):
+        facts = json.loads(payload)
+        assert facts["request"] == action
+        assert facts["confirmed_layout_controls"]["modeled_passage_m"] == 0.65
+        return live_answer()(schema)
+
+    monkeypatch.setattr(service.provider, "request", answer)
+    req = review_request(
+        "Keep a 65 cm wide passage\n" + action,
+        width=15,
+        depth=16,
+        locks=["study"],
+        live=True,
+    )
+    assert service.interpret(req, saved_home).passage_m == 0.65
