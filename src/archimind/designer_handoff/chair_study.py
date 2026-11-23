@@ -265,10 +265,11 @@ def draw_study(board, report):
     }
     for index, state in enumerate(report["states"]):
         x, base = 40 + index * 380, 455
-        _text(svg, x, 177, state["state"].replace("-", " ").title(), 22)
-        _text(svg, x, 199, labels[state["state"]], 14, MUTED)
+        panel = _element(svg, "g", **{"data-chair-state": state["state"]})
+        _text(panel, x, 177, state["state"].replace("-", " ").title(), 22)
+        _text(panel, x, 199, labels[state["state"]], 14, MUTED)
         _rect(
-            svg,
+            panel,
             x,
             base - room.depth_m * scale,
             room.width_m * scale,
@@ -281,7 +282,7 @@ def draw_study(board, report):
                 wall_x = x + (room.width_m * scale if opening.wall == "east" else 0)
                 y = base - opening.offset_m * scale
                 _line(
-                    svg,
+                    panel,
                     wall_x,
                     y,
                     wall_x,
@@ -293,7 +294,7 @@ def draw_study(board, report):
                 wall_y = base - (room.depth_m * scale if opening.wall == "north" else 0)
                 start = x + opening.offset_m * scale
                 _line(
-                    svg,
+                    panel,
                     start,
                     wall_y,
                     start + opening.width_m * scale,
@@ -309,7 +310,7 @@ def draw_study(board, report):
         for item in [*saved, *report["floor_obstacles"], state["chair"]]:
             active = item["id"] == report["chair_id"]
             node = _rect(
-                svg,
+                panel,
                 x + item["x_m"] * scale,
                 base - (item["y_m"] + item["depth_m"]) * scale,
                 item["width_m"] * scale,
@@ -319,28 +320,30 @@ def draw_study(board, report):
             )
             _element(node, "title").text = item["name"]
         _text(
-            svg,
+            panel,
             x,
             485,
             f"Rear gap {state['rear_gap_m']:.3f} m · target {state['min_passage_m']:.2f} m",
         )
         _text(
-            svg,
+            panel,
             x,
             512,
             f"Modeled room circulation · {state['modeled_room_circulation']}",
         )
-        _text(svg, x, 539, f"Modeled rear gap · {state['modeled_rear_gap']}")
+        _text(panel, x, 539, f"Modeled rear gap · {state['modeled_rear_gap']}")
         if state["modeled_layout_checks"] != "passed":
             _text(
-                svg,
+                panel,
                 x,
                 588,
                 f"Combined layout checks · {state['modeled_layout_checks']}",
                 color=MUTED,
             )
         if state["state"] == "tucked-in":
-            _text(svg, x, 566, "Physical tuck · " + state["physical_tuck"], color=MUTED)
+            _text(
+                panel, x, 566, "Physical tuck · " + state["physical_tuck"], color=MUTED
+            )
     _text(svg, 40, 608, report["model"]["occupied_basis"], 14)
     _text(svg, 40, 631, report["model"]["rear_gap_basis"], 14)
     for index, finding in enumerate(report["physical_findings"]):

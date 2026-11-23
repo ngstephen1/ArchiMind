@@ -144,6 +144,11 @@ def test_sheet_distinguishes_circulation_from_a_furniture_overlap(board):
     assert occupied["modeled_room_circulation"] == "passed"
     assert occupied["modeled_layout_checks"] == "failed"
     assert any("overlap" in failure for failure in occupied["modeled_failures"])
-    sheet = draw_study(board, report)
-    assert "Modeled room circulation · passed" in sheet
-    assert "Combined layout checks · failed" in sheet
+    from xml.etree.ElementTree import fromstring
+
+    sheet = fromstring(draw_study(board, report))
+    panel = next(node for node in sheet if node.get("data-chair-state") == "occupied")
+    labels = set(panel.itertext())
+    assert "Saved chair position" in labels
+    assert "Modeled room circulation · passed" in labels
+    assert "Combined layout checks · failed" in labels
