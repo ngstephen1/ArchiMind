@@ -59,6 +59,8 @@ Use `--passage-m` to set the required modeled passage. The study tests the saved
 
 Supply `--field-record chair-measurements.json` to evaluate physical tuck. The record identifies `project`, `revision`, `home_id`, `desk_id` and `chair_id`, plus the ISO date `recorded_on` and the field note reference `source`. Record `clear_width_m`, `clear_height_m`, `clear_depth_m`, `opening_offset_from_desk_west_m`, `chair_width_m`, `chair_depth_m` and `chair_arm_height_m`. Keep the original measurements with the project. The report leaves physical fit pending when the record is absent or its dimensions conflict with the modeled reservations.
 
+When all four values are available from the same visit, add an `observed_operation` object to the field record. Use `tucked_in_m`, `occupied_m`, and `pulled_back_m` for the narrowest measured passage in each position, and `pullback_m` for the observed travel from occupied to pulled back. Preserve the dated field note that identifies those positions. The sheet compares these widths with the selected target separately from the modeled circulation and rear gaps. If one value is missing, retain the partial notes in the original source and keep the observed check pending.
+
 Save the JSON as `room-survey.json`. From the installed ArchiMind environment run:
 
 ```sh

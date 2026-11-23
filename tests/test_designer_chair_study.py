@@ -152,3 +152,31 @@ def test_sheet_distinguishes_circulation_from_a_furniture_overlap(board):
     assert "Saved chair position" in labels
     assert "Modeled room circulation · passed" in labels
     assert "Combined layout checks · failed" in labels
+
+
+def test_observed_passage_stays_separate_from_modeled_clearance(board):
+    record = synthetic_measurements(
+        board,
+        observed_operation={
+            "tucked_in_m": 0.95,
+            "occupied_m": 0.60,
+            "pulled_back_m": 0.42,
+            "pullback_m": 0.21,
+        },
+    )
+    report = chair_study(board, record=record)
+    assert report["states"][2]["modeled_rear_gap"] == "passed"
+    assert report["observed_operation"] == {
+        "pullback_m": 0.21,
+        "passages": {
+            "tucked-in": {"width_m": 0.95, "target_m": 0.6, "status": "meets target"},
+            "occupied": {"width_m": 0.6, "target_m": 0.6, "status": "meets target"},
+            "pulled-back": {"width_m": 0.42, "target_m": 0.6, "status": "below target"},
+        },
+    }
+    assert "Observed pullback · 0.210 m" in draw_study(board, report)
+    assert "Pulled-Back · 0.42 m · below target" in draw_study(board, report)
+    assert "observed_operation" not in chair_study(board)
+    precise = draw_study(board, chair_study(board, record=record, passage_m=0.604))
+    assert "Observed passage target 0.604 m" in precise
+    assert "Occupied · 0.6 m · below target" in precise
