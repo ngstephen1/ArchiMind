@@ -298,7 +298,8 @@ def reviewed_brief(req, brief, previous, **kwargs):
         brief,
         message=req.message,
         previous=previous,
-        controls=req.brief.model_fields_set,
+        controls=req.brief.model_fields_set
+        - ({"locks"} if not req.brief.locks else set()),
         **kwargs,
     )
 
@@ -386,7 +387,15 @@ def _interpret(req, previous):
                 if any(f["id"] == item for f in r["design"]["furniture"])
             ]
             if len(match) != 1:
-                raise Problem("Clarify which room contains the furniture to lock.")
+                question = "Clarify which room contains the furniture to lock."
+                if not brief.compare_tradeoffs:
+                    raise Problem(question)
+                raise BriefClarification(
+                    req,
+                    None,
+                    reviewed=reviewed_brief(req, brief, previous, questions=[question]),
+                    question=question,
+                )
             locks.update(match)
         goals = []
         seen = set()

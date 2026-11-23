@@ -243,3 +243,78 @@ def test_rejected_contradiction_then_corrected_brief_keeps_saved_revision(
     assert json.dumps(original, sort_keys=True) == json.dumps(
         saved["home"], sort_keys=True
     )
+
+
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "Seat two guests and two hosts at one table.",
+        "Two hosts and two guests at one table.",
+        "Seat two guests, one host and one resident around one table.",
+    ],
+)
+def test_grouped_diners_form_one_party(phrase):
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, dining_seats=4), phrase, None
+    )
+    assert (brief.dining_seats, brief.split_dining) == (4, False)
+    assert questions == []
+
+
+def test_grouped_diners_keep_independent_total_conflicts():
+    _, questions = requirement_controls(
+        Brief(formal_salon=True),
+        "Seat two guests and two hosts at one table. Seating for six.",
+        None,
+    )
+    assert any("one total number" in q for q in questions)
+
+
+def test_fronted_room_keeps_locked_openings():
+    message = "In the bedroom, keep the window where it is."
+    assert opening_questions(message, locks=("bedroom",)) == []
+    assert opening_questions(message, locks=("study",))
+
+
+def test_each_opening_uses_its_own_room():
+    message = "Move the study door and keep the bedroom window."
+    (question,) = opening_questions(message, locks=("bedroom",))
+    assert "move the study door" in question
+    assert len(opening_questions(message, locks=("study",))) == 2
+
+
+def test_rejected_width_is_not_cited_for_the_default_passage():
+    message = "Keep a 5 m passage."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), message, None
+    )
+    reviewed = review_summary(brief, message=message, questions=questions)
+    passage = {s["requirement"]: s for s in reviewed["sources"]}[
+        "0.6 m modeled passage"
+    ]
+    assert passage == {
+        "requirement": "0.6 m modeled passage",
+        "origin": "default",
+        "statement": None,
+    }
+
+
+def test_interpreted_lock_is_not_credited_to_empty_lock_controls(saved_home):
+    request = review_request(locks=[])
+    brief = request.brief.model_copy(update={"locks": ["bedroom"]})
+    reviewed = service.reviewed_brief(request, brief, saved_home)
+    origins = {s["requirement"]: s["origin"] for s in reviewed["sources"]}
+    assert origins["Keep bedroom"] == "interpreted"
+
+
+def test_ambiguous_furniture_lock_publishes_a_reviewed_brief(saved_home, monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(
+        service.provider, "request", live_answer(lock_furniture=["missing-item"])
+    )
+    request = review_request(
+        "Keep the missing item where it is.", live=True, width=15, depth=16
+    )
+    with pytest.raises(service.BriefClarification, match="furniture to lock") as exc:
+        service.interpret(request, saved_home)
+    assert exc.value.reviewed["status"] == "needs confirmation"

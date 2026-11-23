@@ -38,6 +38,11 @@ WIDTH_PATTERNS = (
     + r"(?!\s+(?:long|in length|or shorter|(?:away\s+)?from|between|past)\b)",
 )
 PARTY = r"\s+(?:people|persons|guests|diners)\b"
+# Two or more groups that sit together, e.g. "two guests and two hosts".
+GROUP = (
+    COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
+)
+GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
 REVIEW_FIELDS = ("dining_seats", "split_dining", "passage_m")
 ROOMS = (
     r"(bedroom|study|living(?: room)?|kitchen(?:[- ]dining)?(?: room)?|bathroom|salon)"
@@ -88,6 +93,14 @@ def requests_single_table(message):
         ):
             return True
     return False
+
+
+def _widths(text):
+    return {
+        float(value) / {"m": 1, "cm": 100, "mm": 1000}[unit]
+        for pattern in WIDTH_PATTERNS
+        for value, unit in re.findall(pattern, text)
+    }
 
 
 def requirement_controls(brief, message, previous):
@@ -141,6 +154,11 @@ def requirement_controls(brief, message, previous):
     shared = r"\s*,?\s+(?:to be )?(?:split|shared|divided) (?:between|across)\b"
     requested_split = bool(per_table) or bool(re.search(r"\bsplit dining\b", dining))
 
+    parties = [
+        (party.span(), sum(count(group[1]) for group in re.finditer(GROUP, party[0])))
+        for party in re.finditer(GROUPS, dining)
+    ]
+    counted = set()
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
     for match in re.finditer(
         COUNT
@@ -162,8 +180,13 @@ def requirement_controls(brief, message, previous):
         + r"\s+(?=(?:at|around) (?:one|a single|the same) (?:dining )?table\b)",
         dining,
     ):
-        value = count(next(group for group in match.groups() if group is not None))
-        tail = dining[match.end() :]
+        index = next(i for i, group in enumerate(match.groups(), 1) if group)
+        value, end = count(match[index]), match.end()
+        for (start, stop), total in parties:
+            if start <= match.start(index) < stop:
+                value, end = total, max(end, stop)
+                counted.add((start, stop))
+        tail = dining[end:]
         shared_seats = re.match(shared, tail)
         location = re.match(r"\s+(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b", tail)
         if shared_seats:
@@ -214,7 +237,8 @@ def requirement_controls(brief, message, previous):
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
             )
         split = False
-    guests = re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
+    totals.update(total for span, total in parties if span not in counted)
+    guests = not parties and re.search(COUNT + r"\s+(?:dinner\s+)?guests\b", dining)
     residents = re.search(COUNT + r"\s+(?:residents|hosts|people)\b", dining)
     if guests and residents:
         totals.add(count(guests[1]) + count(residents[1]))
@@ -241,11 +265,7 @@ def requirement_controls(brief, message, previous):
             f"The requested {fixed[1]} {fixed[2]} clearance between specific objects "
             "needs a separate geometry check. Confirm a general circulation width or revise the brief."
         )
-    widths = {
-        float(value) / {"m": 1, "cm": 100, "mm": 1000}[unit]
-        for pattern in WIDTH_PATTERNS
-        for value, unit in re.findall(pattern, circulation)
-    }
+    widths = _widths(circulation)
     if any(not 0.6 <= value <= 2 for value in widths):
         questions.append("Choose a modeled passage width between 0.6 and 2 m.")
     elif len(widths) > 1 or (
@@ -282,6 +302,20 @@ def _room_id(name):
     return "kitchen-dining" if word.startswith("kitchen") else word
 
 
+def _opening_room(clause, match, fronted):
+    """Name the room of one opening request, e.g. "the bedroom window"."""
+    words = match[2]
+    after = r"\s+(?:in|of|for|on)\s+(?:the\s+)?" + ROOMS + r"\b"
+    before = re.findall(r"\b" + ROOMS + r"\b", clause[: match.start()])
+    if own := re.search(r"\b" + ROOMS + r"\b", words) or re.match(
+        after, clause[match.end() :]
+    ):
+        return _room_id(own[1])
+    if before:
+        return _room_id(before[-1])
+    return fronted
+
+
 def opening_questions(message, locks):
     """Ask before generation when the brief needs one specific door or window.
 
@@ -289,11 +323,11 @@ def opening_questions(message, locks):
     openings, so keeping the openings of a locked room is already satisfied.
     """
     questions = []
+    fronted = None
     for clause in _affirmative_clauses(message):
         for match in re.finditer(OPENING_REQUEST, clause):
             verb, words, noun = match.groups()
-            room = re.search(r"\b" + ROOMS + r"\b", clause)
-            room_id = _room_id(room[1]) if room else None
+            room_id = _opening_room(clause, match, fronted)
             if verb in {"keep", "preserve"} and room_id in locks:
                 continue
             requested = f"{verb} {words}{noun}".strip()
@@ -302,19 +336,30 @@ def opening_questions(message, locks):
                 f"{requested} for a specific door or window. Lock the room on a saved "
                 "revision to keep its openings, or revise the brief."
             )
+        # "In the bedroom, keep the window" names the room in its own clause.
+        qualifier = re.fullmatch(
+            r"\s*(?:in|for)\s+(?:the\s+)?" + ROOMS + r"\s*", clause
+        )
+        fronted = _room_id(qualifier[1]) if qualifier else None
     return questions
 
 
-def _statement(message, pattern):
+def _statement(message, pattern, accepts):
     """Return the user's sentence that states a requirement, if one does."""
     for sentence in re.split(r"(?<=[.!?;])\s+|\n+", message.strip()):
-        if sentence and re.search(pattern, sentence, re.IGNORECASE):
+        if (
+            sentence
+            and re.search(pattern, sentence, re.IGNORECASE)
+            and accepts(sentence)
+        ):
             return sentence.strip()
     return None
 
 
-def _source(requirement, message, pattern, field, controls, carried, inherited):
-    if pattern and (statement := _statement(message, pattern)):
+def _source(
+    requirement, message, pattern, field, controls, carried, inherited, accepts
+):
+    if pattern and (statement := _statement(message, pattern, accepts)):
         return dict(requirement=requirement, origin="brief", statement=statement)
     if field in controls:
         origin = "controls"
@@ -345,10 +390,20 @@ def review_summary(
     saved_rooms = {r["design"]["room"]["id"] for r in (previous or {}).get("rooms", ())}
     requirements, sources = [], []
 
-    def require(text, pattern, field, *, inherited=False, interpreted=False):
+    def require(
+        text,
+        pattern,
+        field,
+        *,
+        inherited=False,
+        interpreted=False,
+        accepts=lambda _: True,
+    ):
         requirements.append(text)
         sources.append(
-            _source(text, message, pattern, field, controls, interpreted, inherited)
+            _source(
+                text, message, pattern, field, controls, interpreted, inherited, accepts
+            )
         )
 
     require(
@@ -365,6 +420,9 @@ def review_summary(
         "|".join(WIDTH_PATTERNS),
         "passage_m",
         inherited=passage_inherited,
+        accepts=lambda sentence: (
+            brief.passage_m in _widths(". ".join(_affirmative_clauses(sentence)))
+        ),
     )
     if brief.formal_salon:
         require(
