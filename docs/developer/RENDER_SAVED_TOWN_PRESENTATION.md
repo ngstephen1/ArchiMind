@@ -36,7 +36,9 @@ Save the two scene proof folders, the edited revision's three 1080p eye views
 and the corresponding client book. Keep the visual inspection receipt with the
 book. Record each inspected page in order and include both manifest hashes,
 the edited proof receipt hash and the exact doorway, desk and salon image
-hashes. Review the rendered book at print scale before handing it off.
+hashes. The standard `scripts/print_revision_book.py --eye-views` receipt
+records those hashes when the edited render includes the salon view. Add the
+visual inspection rows after reviewing the rendered book at print scale.
 
 With Python dependencies installed and Poppler's `pdfinfo` on `PATH`, run from
 the checkout used to verify the release:
@@ -50,7 +52,8 @@ the checkout used to verify the release:
 
 The ZIP binds the two saved manifests to the book, photographs and editable
 Blender file. It also includes dimensioned bedroom drawings, a concept DXF in
-metres, the furniture schedule, source notices and file checksums. The output
+metres, the furniture schedule, source notices and file checksums. Compare the
+declared release commit to the accepted CI run before publishing. The output
 path must be fresh. Unpack the ZIP and run `shasum -a 256 -c SHA256SUMS.txt` in
 its root. For an existing home, confirm the actual site dimensions and
 supplier clearances before using the concept for procurement or construction.

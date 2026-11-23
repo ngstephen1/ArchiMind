@@ -114,3 +114,110 @@ def test_book_receipt_must_bind_the_project_photos_and_inspected_pages(
     qa_path.write_text(json.dumps(qa))
     with pytest.raises(ValueError, match="every PDF page"):
         api["check_book"](*arguments)
+
+
+def test_build_writes_verified_zip_and_refuses_to_replace_it(tmp_path, monkeypatch):
+    import zipfile
+
+    monkeypatch.syspath_prepend(str(SCRIPTS))
+    api = runpy.run_path(str(SCRIPTS / "package_town_release.py"))
+    source = SCRIPTS.parent / "docs/data/conference-live-final"
+    boards, proofs = [], []
+    native = b"synthetic Blender bytes"
+    for revision, name in enumerate(("before.json", "manifest.json"), start=1):
+        folder = tmp_path / f"r{revision}"
+        folder.mkdir()
+        data = (source / name).read_bytes()
+        board = json.loads(data)
+        (folder / "manifest.json").write_bytes(data)
+        (folder / "home.blend").write_bytes(native)
+        proof = {
+            "home_id": board["home_id"],
+            "revision": revision,
+            "manifest_sha256": digest(data),
+            "files": {"manifest.json": digest(data), "home.blend": digest(native)},
+        }
+        (folder / "receipt.json").write_text(json.dumps(proof))
+        boards.append(board)
+        proofs.append(proof)
+    photos = tmp_path / "photos"
+    photos.mkdir()
+    image = b"\x89PNG\r\n\x1a\n\x00\x00\x00\x0dIHDR" + struct.pack(">II", 1920, 1080)
+    shots = []
+    for name in api["VIEWS"]:
+        (photos / name).write_bytes(image)
+        shots.append({"file": name, "sha256": digest(image)})
+    notices = {}
+    for name in api["NOTICES"]:
+        (photos / name).write_text(name)
+        notices[name] = digest(name.encode())
+    (photos / "eye-view-receipt.json").write_text(
+        json.dumps(
+            {
+                "home_id": boards[1]["home_id"],
+                "revision": 2,
+                "manifest_sha256": proofs[1]["manifest_sha256"],
+                "camera_manifest_sha256": proofs[1]["manifest_sha256"],
+                "proof_blend_sha256": digest(native),
+                "resolution": [1920, 1080],
+                "shots": shots,
+                "source_notices": notices,
+            }
+        )
+    )
+    book = tmp_path / "Client-Book.pdf"
+    book.write_text("synthetic PDF bytes")
+    qa = tmp_path / "book.json"
+    qa.write_text(
+        json.dumps(
+            {
+                "project": boards[1]["project"],
+                "revision": 2,
+                "home_id": boards[1]["home_id"],
+                "revisions": proofs,
+                "source_receipt_sha256": digest(
+                    (tmp_path / "r2/receipt.json").read_bytes()
+                ),
+                "images": {
+                    name: {"fixed_camera": True, "sha256": ["before", digest(image)]}
+                    for name in ("desk", "doorway")
+                },
+                "hero_sha256": digest(image),
+                "book_sha256": digest(book.read_bytes()),
+                "inspection": [{"page": 1}],
+            }
+        )
+    )
+    monkeypatch.setattr("subprocess.check_output", lambda *args, **kwargs: "Pages: 1\n")
+
+    destination = tmp_path / "handoff.zip"
+    arguments = (
+        tmp_path / "r1",
+        tmp_path / "r2",
+        photos,
+        book,
+        qa,
+        destination,
+        "a" * 40,
+    )
+    api["build"](*arguments)
+    with zipfile.ZipFile(destination) as archive:
+        assert set(archive.namelist()) >= {
+            "START-HERE.md",
+            "revisions/r1-manifest.json",
+            "revisions/r2-manifest.json",
+            "presentation/Client-Book.pdf",
+            "presentation/salon-overview.png",
+            "drawings/bedroom-concept-shell.dxf",
+            "native/home.blend",
+            "SHA256SUMS.txt",
+        }
+        sums = archive.read("SHA256SUMS.txt").decode().splitlines()
+        assert len(sums) == len(archive.namelist()) - 1
+        for row in sums:
+            expected, name = row.split("  ", 1)
+            assert digest(archive.read(name)) == expected
+    before = digest(destination.read_bytes())
+    with pytest.raises(FileExistsError, match="fresh destination"):
+        api["build"](*arguments)
+    assert digest(destination.read_bytes()) == before

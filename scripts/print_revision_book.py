@@ -83,6 +83,9 @@ def print_book(before, after, eyes, destination, chrome):
                 "source_receipt_sha256": digest(after / "receipt.json"),
             }
         )
+        hero = stage / "presentation-salon-overview.png"
+        if hero.is_file():
+            evidence["hero_sha256"] = digest(hero)
         receipt = work / "book.json"
         receipt.write_text(json.dumps(evidence, indent=2) + "\n")
         final.replace(destination)

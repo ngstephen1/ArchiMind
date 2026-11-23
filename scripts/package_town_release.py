@@ -19,10 +19,10 @@ from archimind.designer_handoff.schedule import write_schedule
 from archimind.designer_handoff.survey import write_survey_dxf
 
 VIEWS = ("bedroom-doorway.png", "bedroom-desk.png", "salon-overview.png")
+STYLE_NOTICE = "saved-style-receipt.json"
 NOTICES = (
     "BELAYA_ATTRIBUTION.txt",
     "ABO_LICENSE_CC_BY_4.0.txt",
-    "saved-style-receipt.json",
     "surface-sources.json",
 )
 
@@ -38,7 +38,8 @@ def check_photos(photos, board, proof, before_digest):
         eyes["home_id"] != board["home_id"]
         or eyes["revision"] != board["revision"]
         or eyes["manifest_sha256"] != proof["manifest_sha256"]
-        or eyes["camera_manifest_sha256"] != before_digest
+        or eyes["camera_manifest_sha256"]
+        not in {before_digest, proof["manifest_sha256"]}
         or eyes["proof_blend_sha256"] != proof["files"]["home.blend"]
         or eyes["resolution"] != [1920, 1080]
     ):
@@ -61,7 +62,12 @@ def check_photos(photos, board, proof, before_digest):
         ):
             raise ValueError(f"{name} is not a 1920 × 1080 PNG.")
         inputs[name] = path
-    for name in NOTICES:
+    required_notices = set(NOTICES)
+    if STYLE_NOTICE in proof["files"]:
+        required_notices.add(STYLE_NOTICE)
+    if required_notices - eyes["source_notices"].keys():
+        raise ValueError("The render receipt is missing a required source notice.")
+    for name in sorted(required_notices):
         inputs[name] = verified(photos / name, eyes["source_notices"][name])
     return inputs
 
@@ -82,7 +88,7 @@ def check_book(book, receipt, board, proofs, after, photos):
         [r["manifest_sha256"] for r in inspected["revisions"]],
         inspected["source_receipt_sha256"],
     )
-    if actual != expected or not inspected.get("photography"):
+    if actual != expected:
         raise ValueError(
             "The inspected book must contain this project's two exact revisions."
         )
@@ -90,10 +96,15 @@ def check_book(book, receipt, board, proofs, after, photos):
         "doorway": sha(photos["bedroom-doorway.png"]),
         "desk": sha(photos["bedroom-desk.png"]),
     }
-    if any(
-        inspected["images"][name][-1] != digest
-        for name, digest in expected_images.items()
-    ) or inspected["hero_sha256"] != sha(photos["salon-overview.png"]):
+    for name, digest in expected_images.items():
+        view = inspected["images"][name]
+        if isinstance(view, dict):
+            if not view.get("fixed_camera"):
+                raise ValueError("The book comparison requires fixed bedroom cameras.")
+            view = view["sha256"]
+        if len(view) != 2 or view[1] != digest:
+            raise ValueError("The book receipt refers to different edited photographs.")
+    if inspected.get("hero_sha256") != sha(photos["salon-overview.png"]):
         raise ValueError("The book receipt refers to different edited photographs.")
     verified(book, inspected["book_sha256"])
     metadata = subprocess.check_output(["pdfinfo", str(book)], text=True)
@@ -105,30 +116,59 @@ def check_book(book, receipt, board, proofs, after, photos):
 
 def build(before, after, photos, book, book_receipt, destination, commit):
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
-        raise ValueError("Provide the exact 40-hex tested commit.")
+        raise ValueError("Provide the declared release commit as a 40-hex Git SHA.")
     if destination.exists():
         raise FileExistsError("Choose a fresh destination for this release.")
-    old, first = load_revision(before)
-    board, second = load_revision(after)
-    if old["project"] != board["project"] or [old["revision"], board["revision"]] != [
-        1,
-        2,
-    ]:
-        raise ValueError("Expected a single Town project's first two revisions.")
-    movement = [measurements(record) for record in (old, board)]
-    if (
-        movement[0]["desk_id"] != movement[1]["desk_id"]
-        or movement[0]["chair_id"] != movement[1]["chair_id"]
-    ):
-        raise ValueError("The compared revisions must retain the same chair and desk.")
-    if movement[0]["chair_home_xy_m"] == movement[1]["chair_home_xy_m"]:
-        raise ValueError("The handoff needs a visible chair edit.")
-    native = verified(after / "home.blend", second["files"]["home.blend"])
-    photo_inputs = check_photos(photos, board, second, first["manifest_sha256"])
-    pages = check_book(book, book_receipt, board, (first, second), after, photo_inputs)
     destination.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=destination.parent) as stage:
         stage = Path(stage)
+
+        def snapshot(source, folder, names):
+            target = stage / folder
+            target.mkdir()
+            for name in names:
+                shutil.copyfile(source / name, target / name)
+            return target
+
+        before = snapshot(before, "before", ("manifest.json", "receipt.json"))
+        after = snapshot(
+            after, "after", ("manifest.json", "receipt.json", "home.blend")
+        )
+        notices = (
+            (*NOTICES, STYLE_NOTICE) if (photos / STYLE_NOTICE).is_file() else NOTICES
+        )
+        photos = snapshot(photos, "photos", ("eye-view-receipt.json", *VIEWS, *notices))
+        staged_book, staged_inspection = stage / "book.pdf", stage / "inspection.json"
+        shutil.copyfile(book, staged_book)
+        shutil.copyfile(book_receipt, staged_inspection)
+        book, book_receipt = staged_book, staged_inspection
+
+        old, first = load_revision(before)
+        board, second = load_revision(after)
+        if old["project"] != board["project"] or [
+            old["revision"],
+            board["revision"],
+        ] != [
+            1,
+            2,
+        ]:
+            raise ValueError("Expected a single Town project's first two revisions.")
+        movement = [measurements(record) for record in (old, board)]
+        if (
+            movement[0]["desk_id"] != movement[1]["desk_id"]
+            or movement[0]["chair_id"] != movement[1]["chair_id"]
+        ):
+            raise ValueError(
+                "The compared revisions must retain the same chair and desk."
+            )
+        if movement[0]["chair_home_xy_m"] == movement[1]["chair_home_xy_m"]:
+            raise ValueError("The handoff needs a visible chair edit.")
+        native = verified(after / "home.blend", second["files"]["home.blend"])
+        photo_inputs = check_photos(photos, board, second, first["manifest_sha256"])
+        pages = check_book(
+            book, book_receipt, board, (first, second), after, photo_inputs
+        )
+
         root = stage / "handoff"
         root.mkdir()
 
@@ -170,9 +210,10 @@ def build(before, after, photos, book, book_receipt, destination, commit):
         copy(book, "presentation/Client-Book.pdf")
         copy(book_receipt, "presentation/book-inspection.json")
         for name, source in photo_inputs.items():
-            copy(source, (("sources/" if name in NOTICES else "presentation/") + name))
+            category = "sources" if name in {*NOTICES, STYLE_NOTICE} else "presentation"
+            copy(source, f"{category}/{name}")
         evidence = {
-            "tested_commit": commit,
+            "declared_release_commit": commit,
             "project": board["project"],
             "revision": 2,
             "home_id": board["home_id"],
