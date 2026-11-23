@@ -1,0 +1,44 @@
+{
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "measurements": {
+    "1": {
+      "chair_xy_m": [
+        0.56,
+        4.131126822710037
+      ],
+      "chair_home_xy_m": [
+        0.56,
+        14.618126822710037
+      ],
+      "chair_desk_gap_m": 0.06000000000000005,
+      "desk_center_to_window_midpoint_m": 2.4877055663632084,
+      "window_wall": "west",
+      "desk_id": "belaya",
+      "chair_id": "desk-chair",
+      "window_id": "bedroom-window"
+    },
+    "2": {
+      "chair_xy_m": [
+        0.56,
+        3.8311268227100372
+      ],
+      "chair_home_xy_m": [
+        0.56,
+        14.318126822710038
+      ],
+      "chair_desk_gap_m": 0.3599999999999999,
+      "desk_center_to_window_midpoint_m": 2.4877055663632084,
+      "window_wall": "west",
+      "desk_id": "belaya",
+      "chair_id": "desk-chair",
+      "window_id": "bedroom-window"
+    }
+  },
+  "chair_move_m": 0.2999999999999998,
+  "artifact_sha256": {
+    "snapshot-r1.json": "e88700a59400f1718cf94a304c11b4f7a6a11f58a813141bf94b967ee9953d87",
+    "manifest-r1.json": "81acf4e5cf41a289b1d37104bce62b3e3f2a6592a77aeeab5899669685f8a139",
+    "snapshot-r2.json": "e5fd4343a5e5de05954c5d340c197d3de6177a3e828dafe419dfe494e835eb00",
+    "manifest-r2.json": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d"
+  }
+}
