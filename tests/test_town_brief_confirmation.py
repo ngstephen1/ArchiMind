@@ -963,4 +963,109 @@ def test_kitchen_capacity_uses_final_program_when_formal_salon_is_inferred():
         Brief(compare_tradeoffs=True, split_dining=True), text, None
     )
     assert brief.formal_salon
-    assert not any("five-room" in item for item in questions)
+    assert not questions and brief.split_dining and brief.dining_seats == 6
+
+
+def test_route_length_between_rooms_does_not_block_a_valid_width():
+    text = (
+        "Prefer an 8 m route between the kitchen and salon. Use an 80 cm clear passage."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.8
+
+
+def test_offsite_seats_are_not_another_home_seating_total():
+    text = "We have dinner at a restaurant and need six seats there. Four dining places at home."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.dining_seats == 4
+
+
+def test_bare_decline_of_another_feature_does_not_cancel_the_salon():
+    text = (
+        "Include a formal salon. A kitchen island? Not needed. Four seats in the salon."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+def test_combined_seating_citation_omits_unrelated_study_preference():
+    text = "Four seats in the salon. Prefer daylight in the study. Two seats in the kitchen."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6
+    assert {
+        "requirement": "6 dining places across two tables",
+        "origin": "brief",
+        "statement": "Four seats in the salon.\nTwo seats in the kitchen.",
+    } in review_summary(brief, message=text)["sources"]
+
+
+def test_five_room_correction_overrides_a_model_salon_even_after_another_preference(
+    monkeypatch,
+):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(service.provider, "request", live_answer(formal_salon=True))
+    text = "Include a formal salon. Use oak floors. Actually, no, keep the five standard rooms."
+    request = review_request(text, live=True, width=15, depth=16)
+    assert not service.interpret(request, None).formal_salon
+    checked = review_request(text, live=True, width=15, depth=16, formal_salon=True)
+    with pytest.raises(service.BriefClarification, match="Confirm the five-room"):
+        service.interpret(checked, None)
+
+
+def test_width_cue_after_fixture_endpoints_needs_clarification():
+    text = "Keep a 90 cm route between the kitchen island and the counters, measured across the open gap."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("90 cm clearance between specific objects" in item for item in questions)
+
+
+def test_combined_seating_quote_preserves_a_semicolon_without_spaces():
+    text = "Four seats in the salon;Two seats in the kitchen."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 6
+    assert {
+        "requirement": "6 dining places across two tables",
+        "origin": "brief",
+        "statement": text,
+    } in review_summary(brief, message=text)["sources"]
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Include a formal salon because we host family but keep a 90 cm clear passage.",
+        "Keep a 90 cm clear passage because a 0.6 m clear passage won’t fit the wheelchair.",
+    ],
+)
+def test_reasons_cannot_erase_separate_width_requests(text):
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
+
+
+def test_opening_after_rationale_is_a_separate_request():
+    text = "Include a formal salon because we host family but move the study window."
+    assert opening_questions(text, [])
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "When we entertain, seat four people at a single table in the formal salon.",
+        "We need room for two hosts and two guests in the formal salon because we dine together.",
+    ],
+)
+def test_unconditional_salon_seating_with_explanatory_context(text):
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.formal_salon and brief.dining_seats == 4
+
+
+@pytest.mark.parametrize(
+    "reason", ["otherwise we’ll dine together", "because we can’t dine together"]
+)
+def test_nonaffirmative_dining_rationale_does_not_add_seats(reason):
+    text = f"We need room for two hosts and four guests to play cards, {reason} in the kitchen."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and not brief.dining_seats

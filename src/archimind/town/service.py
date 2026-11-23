@@ -23,6 +23,7 @@ from archimind.town.brief_review import (
     requests_single_table,
     requirement_controls,
     review_summary,
+    salon_choice,
 )
 from archimind.town.design import (
     Brief,
@@ -435,7 +436,11 @@ def _interpret(req, previous):
                 "priority": parsed.priority,
                 "style": parsed.style,
                 "room_goals": goals,
-                "formal_salon": parsed.formal_salon or brief.formal_salon,
+                "formal_salon": brief.formal_salon
+                or (
+                    parsed.formal_salon
+                    and (not review or salon_choice(req.message)[0] is not False)
+                ),
                 "locks": sorted(locks),
                 "shift_bedroom_chair": parsed.shift_bedroom_chair
                 or brief.shift_bedroom_chair,

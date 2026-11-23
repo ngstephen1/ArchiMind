@@ -41,14 +41,16 @@ WIDTH_PATTERNS = (
 )
 FIXED_PASSAGE = (
     r"(?:"
-    + MEASUREMENT
-    + r"\s+(?:(?:clear|wide)\s+){0,2}"
-    + PATH
+    + "|".join(WIDTH_PATTERNS[:2])
     + r"|"
     + PASSAGE
     + r"\s+(?:width\s+)?(?:of |at least |of at least )?"
     + MEASUREMENT
     + r")(?:\s+wide)?\s+between\b"
+    + r"|"
+    + MEASUREMENT
+    + r"\s+routes?\s+between\b[^.;!?\n]*"
+    + r"\b(?:measured\s+)?across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
 PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
@@ -71,9 +73,10 @@ OFFSITE_MEAL = (
 )
 SALON_ACTION = r"\b(?:include|add|use|with) (?:a |the )?formal salon\b"
 SALON_ONLY = r"(?:a\s+)?formal salon(?:,?\s+please)?[.!;]?"
+FIVE_STANDARD_ROOMS = r"\b(?:keep|use) (?:the )?five standard rooms\b"
 SALON_DECLINE = (
-    r"\s*(?:(?:actually|no),\s*)?"
-    r"(?:no|not (?:needed|required|wanted)|"
+    r"\s*(?:(?:actually|no),\s*){0,2}"
+    r"(?:no|not (?:needed|required|wanted)|" + FIVE_STANDARD_ROOMS + r"|"
     r"leave (?:it|(?:the )?(?:formal )?salon) out|"
     r"(?:omit|skip|exclude) (?:it|(?:the )?(?:formal )?salon)|"
     r"(?:no|without) (?:a |the )?(?:formal )?salon)"
@@ -128,15 +131,20 @@ def _affirmative_clauses(message, *, retain_dining_context=False):
         reason = match[0]
         if (
             retain_dining_context
+            and reason.startswith("because")
             and re.search(r"\b(?:dine|eat) together\b", reason)
             and not re.search(OFFSITE_MEAL, reason)
-            and not re.search(r"\b(?:not|never|don['’]t|won['’]t|cannot)\b", reason)
+            and not re.search(
+                r"\b(?:not|never|don['’]t|won['’]t|can['’]t|cannot)\b", reason
+            )
         ):
             return " dine together "
         return " "
 
     message = re.sub(
-        r"\b(?:because|otherwise)\b[^;.!?,\n]*", replace_rationale, message
+        r"\b(?:because|otherwise)\b(?:(?!\bbut\b|[;!?,\n]|\.(?!\d)).)*",
+        replace_rationale,
+        message,
     )
     clauses = re.split(
         r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:(?:and|so)\s+)?"
@@ -155,27 +163,39 @@ def _affirmative_clauses(message, *, retain_dining_context=False):
     ]
 
 
-def _salon_statement(message):
-    """Return the original affirmative clause that requires the optional room."""
+def salon_choice(message):
+    """Return the last explicit program decision and its source, when recognized."""
     sentences = re.split(SALON_SEGMENT_BREAK, message)
     following_sentences = sentences[1:] + [""]
     continuations = [*sentences, "", ""][2:]
+    decision = None
     statement = None
     conditional_correction = False
+    previous = ""
     for sentence, following, continuation in zip(
         sentences, following_sentences, continuations, strict=True
     ):
         wrapped_condition = not following.rstrip().endswith(
             (".", "?", "!", ";")
         ) and re.match(CONDITIONAL_CONTINUATION, continuation.lower())
-        if re.match(SALON_DECLINE, sentence.lower()) and not conditional_correction:
-            statement = None
+        if (
+            not conditional_correction
+            and re.match(SALON_DECLINE, sentence.lower())
+            and (
+                re.search(r"\bsalon\b|" + FIVE_STANDARD_ROOMS, sentence, re.IGNORECASE)
+                or (decision is True and previous == statement)
+            )
+        ):
+            decision = False
+            statement = sentence.strip()
         conditional_correction = bool(wrapped_condition)
         if re.fullmatch(SALON_ONLY, sentence.strip().lower()) or any(
             re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(sentence)
         ):
+            decision = True
             statement = sentence.strip()
-    return statement
+        previous = sentence.strip()
+    return decision, statement
 
 
 def _dining_clauses(clauses):
@@ -188,11 +208,19 @@ def _dining_clauses(clauses):
             if not home_request:
                 continue
             clause = clause[offsite.end() + home_request.end() :]
+            if not re.search(
+                r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|"
+                + ROOM_NAMES
+                + r"))\b",
+                clause,
+            ):
+                continue
         if re.search(DINING_CONTEXT, clause):
             yield clause
 
 
 def requests_single_table(message):
+    named_rooms = set()
     for clause in _affirmative_clauses(message):
         table = re.search(
             r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
@@ -207,8 +235,14 @@ def requests_single_table(message):
             r"|people|persons|guests|diners)\b",
             prefix,
         ):
-            return True
-    return False
+            room = re.match(
+                r"\s+in (?:the )?(?:formal )?(salon|kitchen(?:[- ]dining)?)\b",
+                clause[table.end() :],
+            )
+            if not room:
+                return True
+            named_rooms.add(_room_id(room[1]))
+    return len(named_rooms) == 1
 
 
 def _widths(text):
@@ -246,22 +280,30 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     dining = ". ".join(
         _dining_clauses(_affirmative_clauses(message, retain_dining_context=True))
     )
-    salon_seating = any(
-        not re.match(r"\s*(?:if|unless|when|provided)\b", sentence.lower())
+    program, _ = salon_choice(message)
+    salon_seating = program is not False and any(
+        not re.match(
+            r"\s*(?:if|unless|provided)\b|\s*when\b[^,.;!?]*\bsalon\b",
+            sentence.lower(),
+        )
         and re.search(r"\bformal salon\b", clause)
         for sentence in re.split(STATEMENT_BREAK, message)
-        for clause in _dining_clauses(_affirmative_clauses(sentence))
-    )
-    salon = (
-        brief.formal_salon
-        or any(
-            part["design"]["room"]["id"] == "salon"
-            for part in (previous or {}).get("rooms", ())
+        for clause in _dining_clauses(
+            _affirmative_clauses(sentence, retain_dining_context=True)
         )
-        or bool(_salon_statement(message))
     )
+    existing_salon = brief.formal_salon or any(
+        part["design"]["room"]["id"] == "salon"
+        for part in (previous or {}).get("rooms", ())
+    )
+    salon = existing_salon or program is True
     totals = set()
     questions = []
+    if brief.compare_tradeoffs and existing_salon and program is False:
+        questions.append(
+            "The controls or saved revision include a formal salon. Confirm the five-room "
+            "program in a new brief, or keep the formal salon."
+        )
     per_table = []
     count_at = COUNT + r"\s+(?:(?:people|diners|guests|seats|places)\s+)?(?:at|around) "
     split_counts = re.search(
@@ -299,6 +341,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
         dining,
     )
+    single_table = requests_single_table(text)
     counted = set()
     room_minima = {}
     dining_room = r"(formal salon|salon|kitchen(?:[- ]dining)?)"
@@ -330,7 +373,15 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 counted.add((start, stop))
         tail = dining[end:]
         shared_seats = re.match(shared, tail)
-        location = re.match(r"\s+(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b", tail)
+        table_location = (
+            r""
+            if single_table
+            else r"(?:(?:at|around) (?:one|a single|the same) (?:dining )?table\s+)?"
+        )
+        location = re.match(
+            r"\s*" + table_location + r"(?:in|at)\s+(?:the\s+)?" + dining_room + r"\b",
+            tail,
+        )
         if not location and value <= 4:
             location = re.match(
                 r"\s+(?:at|around) (?:one|a single|the same|a separate) (?:dining )?table"
@@ -383,7 +434,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         questions.append(
             "Confirm separate dining tables in the brief controls, or revise the seating arrangement."
         )
-    if requests_single_table(text):
+    if single_table:
         if split and "split_dining" in explicit:
             questions.append(
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
@@ -631,10 +682,23 @@ def _dining_quote(brief, message):
     )
     if single:
         return single
-    # Preserve the submitted line breaks and punctuation in multi-room evidence.
-    message = message.strip()
-    if _dining_statement_matches(brief, message):
-        return message
+    # Preserve separators between adjacent relevant excerpts and skip unrelated prose.
+    excerpts = []
+    end = cursor = 0
+    for sentence in re.split(STATEMENT_BREAK, message):
+        start = message.index(sentence, cursor)
+        cursor = start + len(sentence)
+        if any(
+            _dining_clauses(_affirmative_clauses(sentence, retain_dining_context=True))
+        ):
+            gap = message[end:start]
+            if excerpts:
+                excerpts.append(gap if not gap.strip() else "\n")
+            excerpts.append(sentence)
+            end = start + len(sentence)
+    combined = "".join(excerpts).strip()
+    if combined and _dining_statement_matches(brief, combined):
+        return combined
     return None
 
 
@@ -734,14 +798,14 @@ def review_summary(
         ),
     )
     if brief.formal_salon:
-        salon_statement = _salon_statement(message)
+        salon_requested, salon_statement = salon_choice(message)
         require(
             "Formal salon",
             None,
             "formal_salon",
             inherited="salon" in saved_rooms,
             interpreted=True,
-            quote=salon_statement,
+            quote=salon_statement if salon_requested else None,
         )
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
