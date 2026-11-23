@@ -1204,10 +1204,11 @@ def test_offsite_table_in_a_compound_sentence_does_not_restrict_home_split(text)
     assert not questions and brief.dining_seats == 6 and brief.split_dining
 
 
-def test_same_table_followup_inherits_home_seating_location():
+@pytest.mark.parametrize("lead", ["want", "we want", "we would want"])
+def test_same_table_followup_inherits_home_seating_location(lead):
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
-        "We have lunch at work and need six dining seats at home and want everyone at one table.",
+        f"We have lunch at work and need six dining seats at home and {lead} everyone at one table.",
         None,
     )
     assert brief.dining_seats == 6 and not brief.split_dining
@@ -1250,11 +1251,21 @@ def test_while_location_qualifier_stays_with_home_seating(text):
     [
         "For dinner at home, seat four guests at one table and seat two guests at the other table for lunch at work.",
         "For lunch at work, seat two guests at one table and seat four guests at the other table for dinner at home.",
+        "For lunch at work, seat two at one table and seat four at the other table for dinner at home.",
     ],
 )
 def test_allocations_with_different_meals_keep_the_home_count(text):
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True), text, None
+    )
+    assert not questions and brief.dining_seats == 4 and not brief.split_dining
+
+
+def test_later_home_activity_does_not_rescope_restaurant_seating():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "For dinner at a restaurant, seat four guests at one table and seat two guests at the other table before we meet back at home. We need four dining seats.",
+        None,
     )
     assert not questions and brief.dining_seats == 4 and not brief.split_dining
 

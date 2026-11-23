@@ -124,7 +124,9 @@ DINING_TRANSITION = re.compile(
     r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
     r"|\bwhile\s+(?!(?:at|in|near|around)\b)"
 )
+DINING_ACTIVITY_END = re.compile(r"\b(?:before|after)\s+(?=(?:we|i|they|you)\s+)")
 HOME_TABLE_FOLLOWUP = re.compile(
+    r"(?:(?:we|i)\s+)?(?:(?:will|would|must)\s+)?"
     r"(?:need|want|require)\s+(?:everyone|everybody|all (?:of us|guests|diners))"
     r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table\b"
 )
@@ -278,6 +280,13 @@ def salon_choice(message):
     return decision, statement
 
 
+def _dining_locations(activity):
+    dining = DINING_ACTIVITY_END.split(activity, maxsplit=1)[0]
+    return bool(HOME_DINING_LOCATION.search(dining)), bool(
+        re.search(OFFSITE_MEAL, dining)
+    )
+
+
 def _home_meal_clauses(clause):
     if not re.search(OFFSITE_MEAL, clause):
         yield clause
@@ -298,10 +307,9 @@ def _home_meal_clauses(clause):
                 transitions[i + 1].start() if i + 1 < len(transitions) else len(clause)
             )
             right = clause[match.end() : stop]
-            separate_meals = (
-                HOME_DINING_LOCATION.search(left) and re.search(OFFSITE_MEAL, right)
-            ) or (re.search(OFFSITE_MEAL, left) and HOME_DINING_LOCATION.search(right))
-            if not separate_meals:
+            left_home, left_offsite = _dining_locations(left)
+            right_home, right_offsite = _dining_locations(right)
+            if not (left_home and right_offsite or right_home and left_offsite):
                 continue
         boundaries.append(match)
     starts = [0, *(match.end() for match in boundaries)]
@@ -309,9 +317,10 @@ def _home_meal_clauses(clause):
     home = False
     for start, end in zip(starts, ends, strict=True):
         activity = clause[start:end]
-        if re.search(OFFSITE_MEAL, activity):
+        at_home, off_site = _dining_locations(activity)
+        if off_site:
             home = False
-        elif HOME_DINING_LOCATION.search(activity):
+        elif at_home:
             home = True
             yield activity
         elif home and HOME_TABLE_FOLLOWUP.fullmatch(activity.strip(" ,.!?")):
@@ -502,7 +511,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + PARTY
         + r"|\bseat\s+"
         + COUNT
-        + r")\s+(?=(?:at|around) (?:one|a single|the same) (?:dining )?table\b)",
+        + r")\s+(?=(?:at|around) (?:one|a single|the same|the other|the second) (?:dining )?table\b)",
         dining,
     ):
         index = next(i for i, group in enumerate(match.groups(), 1) if group)
