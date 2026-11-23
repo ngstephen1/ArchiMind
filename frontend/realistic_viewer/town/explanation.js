@@ -42,6 +42,42 @@ export function asksChairChange(question) {
   return /\b(revisions|previous revision|changed|moved|displacement)\b/.test(q);
 }
 
+export function asksZoningTradeoff(question) {
+  return /\b(zoning|gallery|service[- ]core|A\s*\/\s*B)\b/i.test(question) &&
+    /\b(compare|between|difference|trade[- ]?offs?)\b/i.test(question);
+}
+
+const zoningNames = {gallery: "Gallery", "service-core": "Grouped service core"};
+
+function zoningEvidence(home) {
+  const measure = home.evidence?.comparison;
+  if (!zoningNames[home.zoning] || !measure) return "";
+  const routes = measure.routes.map(row =>
+    `${row.room} to ${row.target} via hall ${row.distance_m.toFixed(2)} m`
+  );
+  const opening = measure.direct_service;
+  const connection = opening
+    ? `Direct kitchen-to-salon opening ${opening.door_id}, ${opening.crossing_m.toFixed(2)} m checked crossing segment.`
+    : "Kitchen and salon connect through the gallery hall.";
+  return [zoningNames[home.zoning] + ".", connection,
+    routes.length ? "Modeled entrance-to-entrance routes: " + routes.join(", ") + "." : ""]
+    .filter(Boolean).join(" ");
+}
+
+function zoningComparison(home, manifest, previous) {
+  const selected = zoningEvidence(home);
+  const peer = previous?.home;
+  const compatible = manifest?.home_id === home.id &&
+    Boolean(manifest?.project) && manifest.project === previous?.project &&
+    Number.isInteger(previous?.revision) && manifest.revision === previous.revision + 1 &&
+    peer && home.width === peer.width && home.depth === peer.depth &&
+    home.zoning !== peer.zoning;
+  const other = compatible ? zoningEvidence(peer) : "";
+  if (!selected || !other)
+    return [selected, "A side-by-side comparison needs consecutive saved gallery and service-core revisions of this project on the same shell."].filter(Boolean).join(" ");
+  return `Revision ${previous.revision}. ${other} Revision ${manifest.revision}. ${selected} The shared opening measurement covers the crossing only.`;
+}
+
 function chairChange(home, manifest, previous) {
   if (!manifest || manifest.home_id !== home.id || !previous ||
       manifest.project !== previous.project || manifest.revision !== previous.revision + 1)
@@ -69,6 +105,7 @@ export function explanation(home, question, manifest = null, previous = null) {
   const q = question.toLowerCase();
   const normalized = q.replaceAll("-", " ");
   if (asksChairChange(q)) return chairChange(home, manifest, previous);
+  if (asksZoningTradeoff(q)) return zoningComparison(home, manifest, previous);
   const comparison = home.evidence?.comparison;
   const mentionedRooms = q.match(/\b(bedroom|study|living|salon|kitchen|bathroom)\b/g) ?? [];
   const requestedRooms = mentionedRooms.length
@@ -116,7 +153,8 @@ export function explanation(home, question, manifest = null, previous = null) {
       !/\b(desk|window|rug|chair|lamp|oak|daylight|glare|bedside|nightstand)\b/.test(q)) {
     const routes = comparison.routes.map(r => `${r.room} to ${r.target} via hall ${r.distance_m.toFixed(2)} m`);
     const seats = diningEvidence(home.rooms);
-    return [routes.length ? "Measured routes between room entrances · " + routes.join(", ") + "." : "",
+    const zoning = zoningEvidence(home);
+    return [zoning || (routes.length ? "Measured routes between room entrances · " + routes.join(", ") + "." : ""),
       seats.length ? "Modeled dining · " + seats.join(", ") + "." : "",
       `The layout passed the ${comparison.passage_m.toFixed(2)} m modeled passage check. These measurements describe the plan. Acoustic privacy, glare and clear opening hardware need separate evidence.`].filter(Boolean).join(" ");
   }

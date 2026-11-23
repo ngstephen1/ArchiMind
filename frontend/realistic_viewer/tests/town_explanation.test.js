@@ -201,3 +201,27 @@ test("named dining groups and dedicated storage use their own saved evidence", (
   assert.match(explanation(home, "What storage is in the study?"), /study bookcase/);
   assert.match(explanation(home, "What study storage exists besides a closet?"), /study bookcase/);
 });
+
+
+test("zoning answers compare only the two consecutive schemes on the same saved shell", () => {
+  const {home, manifest} = selected();
+  Object.assign(home, {width: 15, depth: 16, zoning: "service-core"});
+  home.evidence = {comparison: {routes: [{room: "kitchen-dining", target: "salon", distance_m: 8.779}],
+    direct_service: {door_id: "service-core-passage", crossing_m: 1.3},
+    dining_places: {}, passage_m: .6}};
+  const previousHome = structuredClone(home);
+  previousHome.zoning = "gallery";
+  previousHome.evidence.comparison.routes[0].distance_m = 3.29;
+  delete previousHome.evidence.comparison.direct_service;
+  const previous = {project: manifest.project, revision: manifest.revision, home: previousHome};
+  manifest.revision++;
+  const ask = prior => explanation(home, "Compare the gallery and service-core zoning trade-offs", manifest, prior);
+  assert.match(ask(previous), /Gallery.*3.29 m.*Grouped service core.*service-core-passage.*1.30 m.*8.78 m/);
+  assert.match(explanation(home, "Explain the layout", manifest), /Grouped service core.*1.30 m checked crossing/);
+  for (const evidence of [{...previous, project: "another project"},
+                          {...previous, home: {...previousHome, depth: 14}},
+                          {...previous, revision: previous.revision - 1}]) {
+    assert.doesNotMatch(ask(evidence), /3.29 m/);
+    assert.match(ask(evidence), /consecutive saved gallery and service-core revisions/);
+  }
+});
