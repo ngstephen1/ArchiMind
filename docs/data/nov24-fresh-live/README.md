@@ -76,3 +76,37 @@ Open [revision 1](http://127.0.0.1:8852/?project=1a3f1aff-0c41-4900-902f-34dc540
 and [revision 2](http://127.0.0.1:8852/?project=1a3f1aff-0c41-4900-902f-34dc54050fda&revision=2).
 The fresh Blender proofs are tracked in [#69](https://github.com/ngstephen1/ArchiMind/issues/69).
 Independent owner review remains separate from the automated browser run.
+
+## Rehearse from the portable download
+
+The [portable replay ZIP](Town-Replay-Candidate.zip) contains the same synthetic
+project and both saved revisions. Its SHA-256 is
+`3d3af89e785593ac8772c07594d7eca5e3374780eb9aaedb4e603e9b8d4b03c0`.
+The ZIP includes a clean SQLite database, its source hashes and a start guide.
+The database contains zero provider jobs and zero job events.
+
+From the configured repository root, verify the outer digest and extract a
+writable copy. This is an alternative to the snapshot-builder command above.
+
+```bash
+replay_dir=$(mktemp -d) &&
+printf '%s  %s\n' \
+  3d3af89e785593ac8772c07594d7eca5e3374780eb9aaedb4e603e9b8d4b03c0 \
+  docs/data/nov24-fresh-live/Town-Replay-Candidate.zip | shasum -a 256 -c - &&
+unzip -q docs/data/nov24-fresh-live/Town-Replay-Candidate.zip -d "$replay_dir" &&
+(cd "$replay_dir" && shasum -a 256 -c SHA256SUMS.txt) &&
+ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
+  TOWN_PORT=8852 TOWN_EDITOR_PORT=8853 TOWN_DB="$replay_dir/Town-Replay.sqlite3" \
+  .venv/bin/python scripts/run_town.py
+```
+
+The ZIP records `98c80efa` as the reference checkout for replaying the
+archived snapshots. A later test on
+`7c900e1` opened a clean extraction of those same ZIP bytes. The database
+passed SQLite integrity checks, both local endpoints returned HTTP 200,
+and Chrome entered the bedroom and opened the design board for both
+revisions at 1440 × 1000 and 390 × 844. View the
+[inspected client book and designer archive](../nov24-fresh-book) separately.
+The release and independent operator checks are tracked in
+[#70](https://github.com/ngstephen1/ArchiMind/issues/70) and
+[#72](https://github.com/ngstephen1/ArchiMind/issues/72).
