@@ -1,0 +1,4 @@
+project,revision,home_id,room,surface,gross_face_area_m2,basis,specification,supplier,source,as_of,quantity,unit,unit_price,extended_price,currency,price_status
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,floor,31.388588,"Saved rectangular shell; wall openings included. Verify net area, waste, coats and pack size.",,,,,,,,,,quote_required
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,walls,63.3024,"Saved rectangular shell; wall openings included. Verify net area, waste, coats and pack size.",,,,,,,,,,quote_required
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,ceiling,31.388588,"Saved rectangular shell; wall openings included. Verify net area, waste, coats and pack size.",,,,,,,,,,quote_required

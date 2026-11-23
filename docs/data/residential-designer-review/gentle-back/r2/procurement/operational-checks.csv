@@ -1,0 +1,7 @@
+project,revision,home_id,room,check,item_ids,result,measurement,source,outstanding
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,planned footprint gap,desk-chair / belaya,measured,0.360 m,Saved plan reservations,Verify at site.
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,under-desk opening,desk-chair / belaya,field verification required,,,"Measure clear width, underside height, chair passage envelope and insertion depth."
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,door swing,bedroom-door,field verification required,,Saved opening,"Confirm hinge, leaf, swing direction and swept clearance on site."
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,operating envelope,belaya,field verification required,,,"Confirm moving parts, full extension and the adjacent walking route."
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,operating envelope,queen-bed,field verification required,,,"Confirm moving parts, full extension and the adjacent walking route."
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,2,a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6,bedroom,operating envelope,bedside-lamp,field verification required,,,"Confirm moving parts, full extension and the adjacent walking route."

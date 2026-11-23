@@ -1,0 +1,5 @@
+project,revision,home_id,room,furniture_id,reservation_name,category,selection,quantity,reserved_width_m,reserved_depth_m,reserved_height_m,manufacturer,model,supplier,source,as_of,finish,availability,product_width_m,product_depth_m,product_height_m,price_status,unit_price,currency
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,3,a04a783e6ca7706aa5f8806e60a1cd9c05b5cebfcd300c8bbf38daebb92c20a4,bedroom,belaya,Belaya writing desk,desk,unspecified,1,1.6,0.8018731772899628,0.7516312003135682,,,,,,,,,,,quote_required,,
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,3,a04a783e6ca7706aa5f8806e60a1cd9c05b5cebfcd300c8bbf38daebb92c20a4,bedroom,queen-bed,Queen Bed,bed,unspecified,1,1.6,2,0.6,,,,,,,,,,,quote_required,,
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,3,a04a783e6ca7706aa5f8806e60a1cd9c05b5cebfcd300c8bbf38daebb92c20a4,bedroom,desk-chair,Oak writing chair,chair,unspecified,1,0.48,0.52,0.83,,,,,,,,,,,quote_required,,
+cfe87682-1ed5-4ddf-9bec-5aa9e6795872,3,a04a783e6ca7706aa5f8806e60a1cd9c05b5cebfcd300c8bbf38daebb92c20a4,bedroom,bedside-lamp,Nightstand with reading lamp,table,unspecified,1,0.48,0.43,1.06,,,,,,,,,,,quote_required,,

@@ -1,0 +1,24 @@
+{
+  "revisions": {
+    "2": {
+      "revision": 2,
+      "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+      "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+      "source_glb_sha256": "609b06fda80ff254cf00d844ae451ed8c03b3229c3af41812689591c03e62258",
+      "chair_version": "1.1.0",
+      "measurement": "Outer backrest plan projection. Center rear edge less mean outer left and right rear edge.",
+      "model_bend_mm": 71.0,
+      "svg_sha256": "6f1a27075e37671e58d6e0e3fa269f9bb7b37f7370e2a1bf1b1ed96ed57edc37"
+    },
+    "3": {
+      "revision": 3,
+      "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+      "home_id": "a04a783e6ca7706aa5f8806e60a1cd9c05b5cebfcd300c8bbf38daebb92c20a4",
+      "source_glb_sha256": "54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81",
+      "chair_version": "1.0.0",
+      "measurement": "Outer backrest plan projection. Center rear edge less mean outer left and right rear edge.",
+      "model_bend_mm": 42.0,
+      "svg_sha256": "9973b3e5ffa3b170d1b92b544c450949f96b75b81166a815fa18c594e467bf00"
+    }
+  }
+}

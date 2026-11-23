@@ -1,0 +1,28 @@
+{
+  "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+  "revision": 2,
+  "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+  "room": "bedroom",
+  "currency": null,
+  "priced_furniture_subtotal": "0",
+  "allowances": [],
+  "allowance_subtotal": "0",
+  "priced_finish_subtotal": "0",
+  "unpriced_finish_surfaces": [
+    "floor",
+    "walls",
+    "ceiling"
+  ],
+  "known_amount_including_allowances": "0",
+  "unpriced_furniture_ids": [
+    "belaya",
+    "queen-bed",
+    "desk-chair",
+    "bedside-lamp"
+  ],
+  "exclusions": [
+    "Freight, installation, labor, tax, permits and contractor scope require separate quotes."
+  ],
+  "commercial_scope": "One item per saved reservation. Totals cover only documented furniture, finish orders and explicit allowances.",
+  "complete_furniture_subtotal": null
+}
