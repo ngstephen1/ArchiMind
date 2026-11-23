@@ -4,7 +4,7 @@ import copy
 
 import pytest
 
-from archimind.town.design import Brief, generate, validate_home
+from archimind.town.design import Brief, RoomGoal, generate, validate_home
 
 
 @pytest.fixture(scope="module")
@@ -25,6 +25,26 @@ def zoning_pair():
 
 def rooms(home):
     return {part["design"]["room"]["id"]: part for part in home["rooms"]}
+
+
+def test_zoning_comparison_selects_the_scheme_that_best_fits_the_preference():
+    homes = generate(
+        Brief(
+            width=15,
+            depth=16,
+            formal_salon=True,
+            compare_zoning=True,
+            service_layout=True,
+            room_goals=[
+                RoomGoal(room="kitchen-dining", relation="near", target="salon")
+            ],
+        )
+    )
+    assert [home["zoning"] for home in homes] == ["service-core", "gallery"]
+    assert (
+        homes[0]["evidence"]["room_preferences"][0]["center_distance_m"]
+        < homes[1]["evidence"]["room_preferences"][0]["center_distance_m"]
+    )
 
 
 def test_zoning_comparison_changes_room_connections_and_keeps_the_common_program(

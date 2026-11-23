@@ -748,6 +748,10 @@ def _requirement_boundaries(brief, previous):
     return pairs, salon
 
 
+class ZoningInfeasible(ValueError):
+    """The bounded comparison could not produce both requested schemes."""
+
+
 def generate(brief, previous=None, *, on_progress=None):
     pairs, salon = _requirement_boundaries(brief, previous)
     if brief.shift_bedroom_chair or brief.closer_study_desk:
@@ -1035,6 +1039,13 @@ def generate(brief, previous=None, *, on_progress=None):
             and len(candidates) == 2
         ):
             break
+    if brief.compare_zoning and {home["zoning"] for home in candidates} != {
+        "gallery",
+        "service-core",
+    }:
+        raise ZoningInfeasible(
+            "The shell did not yield both a validated gallery and service-core plan. Increase the shell or revise the program."
+        )
     if not candidates:
         if salon:
             raise ValueError(
@@ -1054,13 +1065,12 @@ def generate(brief, previous=None, *, on_progress=None):
         evaluated = len(candidates)
         candidates.sort(key=cost)
         if brief.compare_zoning:
-            grouped = [home for home in candidates if home["zoning"] == "service-core"]
-            gallery = [home for home in candidates if home["zoning"] == "gallery"]
-            if not grouped or not gallery:
-                raise ValueError(
-                    "The shell did not yield both a validated gallery and service-core plan. Increase the shell or revise the program."
-                )
-            candidates = [gallery[0], grouped[0]]
+            # Walk the ranked list so the first selection reflects the brief.
+            first = candidates[0]
+            peer = next(
+                home for home in candidates if home["zoning"] != first["zoning"]
+            )
+            candidates = [first, peer]
         elif brief.compare_tradeoffs:
             primary = candidates[0]
             alternate = choose_tradeoff(primary, candidates[1:])

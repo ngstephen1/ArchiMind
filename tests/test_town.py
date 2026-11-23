@@ -134,6 +134,41 @@ def test_legacy_job_retry_accepts_disabled_service_layout(local):
     assert local.post("/api/jobs", json=changed).status_code == 409
 
 
+def test_legacy_job_retry_accepts_disabled_zoning_comparison(local):
+    project = local.post("/api/projects").json()["project"]
+    req = job(project)
+    assert local.post("/api/jobs", json=req).json()["job"] == req["id"]
+    with service.transaction() as q:
+        (raw,) = q("SELECT request FROM jobs WHERE id=?", (req["id"],)).fetchone()
+    assert '"compare_zoning"' not in raw
+    same = {**req, "brief": {"compare_zoning": False}}
+    assert local.post("/api/jobs", json=same).json()["job"] == req["id"]
+    changed = {**req, "brief": {"compare_zoning": True}}
+    assert local.post("/api/jobs", json=changed).status_code == 409
+
+
+def test_infeasible_zoning_requests_clarification_without_saving(local):
+    project = local.post("/api/projects").json()["project"]
+    req = job(
+        project,
+        brief={"width": 9, "depth": 9, "formal_salon": True, "compare_zoning": True},
+    )
+    identifier = local.post("/api/jobs", json=req).json()["job"]
+    assert service.work_once()
+    feed = local.get(f"/api/jobs/{identifier}/events").json()
+    reviews = [
+        event["artifact"]
+        for event in feed["events"]
+        if event["task"] == "Reviewable brief"
+    ]
+    assert feed["status"] == "failed"
+    assert reviews[-1]["status"] == "needs confirmation"
+    assert (
+        "both a validated gallery and service-core plan" in reviews[-1]["questions"][0]
+    )
+    assert local.get(f"/api/projects/{project}").json()["revision"] == 0
+
+
 def test_owner_and_budget(local, monkeypatch):
     p = service.create("other")["project"]
     assert local.get("/api/projects/" + p).status_code == 404

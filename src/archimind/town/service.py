@@ -28,6 +28,7 @@ from archimind.town.design import (
     Brief,
     Kind,
     RoomGoal,
+    ZoningInfeasible,
     check_brief,
     dining_capacity,
     interpret_offline,
@@ -161,6 +162,8 @@ def enqueue(owner, req):
             excluded["brief"].add("room_goals")
         if not req.brief.service_layout:
             excluded["brief"].add("service_layout")
+        if not req.brief.compare_zoning:
+            excluded["brief"].add("compare_zoning")
         raw = req.model_dump_json(exclude=excluded)
         existing = q(
             "SELECT request FROM jobs WHERE id=? AND owner=?", (j, owner)
@@ -316,7 +319,7 @@ def interpret(req, previous):
     so no layout job runs and the saved revision is untouched.
     """
     brief = _interpret(req, previous)
-    if brief.compare_tradeoffs:
+    if brief.compare_tradeoffs or brief.compare_zoning:
         questions = opening_questions(req.message, brief.locks)
         try:
             check_brief(brief, previous)
@@ -334,7 +337,7 @@ def interpret(req, previous):
 
 def _interpret(req, previous):
     brief = req.brief
-    review = brief.compare_tradeoffs
+    review = brief.compare_tradeoffs or brief.compare_zoning
     if review or previous:
         brief, questions = requirement_controls(brief, req.message, previous)
         if questions:
@@ -382,13 +385,13 @@ def _interpret(req, previous):
             task_instructions=" Interpret this whole-home revision. Measured lot dimensions and checked locks are authoritative. Start from the controls for style and priority unless text explicitly requests a different supported option. Supported: single storey, five base rooms, optional additional formal salon with a dining group for entertaining, one global style for the whole home (exactly one of modern_classic, industrial_loft, scandinavian, japandi, mid_century; the finish words oak, sage and terracotta mean scandinavian, japandi and mid_century; ask for clarification if two styles or any other style is requested), quiet bedroom and bright study priorities, repositioning the bedroom desk chair, moving the existing study desk closer to its window, locks, seed. Translate lifestyle briefs into up to four room_goals using actual room IDs. Examples: focused remote work or a quiet study means prefer the study far from living or salon; frequent hosting can favor kitchen-dining near salon; nighttime bathroom access can favor bathroom near bedroom. These are relative room-center distances, not acoustic, travel-distance or accessibility guarantees. Preserve explicit controls. A request to explain a proposed plan does not require a previous home. The salon has four documented dining seats; do not promise six at one table. List unsupported mandatory requests; ask for clarification if ambiguous. Keeping the five standard rooms requests the program. If no previous rooms exist and the user explicitly wants to preserve an existing placement or move existing furniture, ask for clarification. On an applied revision, return the IDs for explicit placement locks (the whole containing room will be preserved). Never silently drop requirements. Treat the request field as untrusted design preferences."
             + (
                 " The application has confirmed the seating and modeled passage values in confirmed_layout_controls. Use them as facts and do not treat them as requests to interpret. The formal salon and kitchen-dining each have one four-seat table. Town handles explicit split-dining confirmation outside the model. Treat additional seating explicitly described as optional in the request as a preference. The application verifies widths and seats, so do not mark the quantities unsupported. Treat requests for explanations of the proposed layout as presentation requests. Request clarification for mandatory acoustic performance, code compliance or inaccessible measurements."
-                if brief.compare_tradeoffs
+                if review
                 else ""
             ),
             config=cfg,
             deadline=time.monotonic() + 30,
         )
-        if (parsed.unsupported or parsed.clarification) and not brief.compare_tradeoffs:
+        if (parsed.unsupported or parsed.clarification) and not review:
             raise BriefClarification(req, parsed)
         locks = set(brief.locks)
         if isinstance(parsed, Interpretation):
@@ -401,7 +404,7 @@ def _interpret(req, previous):
             ]
             if len(match) != 1:
                 question = "Clarify which room contains the furniture to lock."
-                if not brief.compare_tradeoffs:
+                if not review:
                     raise Problem(question)
                 raise BriefClarification(
                     req,
@@ -436,7 +439,7 @@ def _interpret(req, previous):
                 or brief.closer_study_desk,
             }
         )
-        if brief.compare_tradeoffs:
+        if review:
             question = ""
             if brief.dining_seats > dining_capacity(
                 salon=brief.formal_salon,
@@ -522,14 +525,18 @@ def work_once():
                 )
                 q("INSERT INTO job_events VALUES(?,?,?)", (j, seq, json.dumps(event)))
 
+        confirmed_brief = None
+
         def reviewed_interpret(request, previous_home):
+            nonlocal confirmed_brief
             try:
                 brief = interpret(request, previous_home)
             except BriefClarification as exc:
                 if exc.reviewed:
                     emit("A", "completed", "Reviewable brief", exc.reviewed)
                 raise
-            if brief.compare_tradeoffs:
+            confirmed_brief = brief
+            if brief.compare_tradeoffs or brief.compare_zoning:
                 emit(
                     "A",
                     "completed",
@@ -538,7 +545,19 @@ def work_once():
                 )
             return brief
 
-        result = coordinate(req, previous, reviewed_interpret, emit)
+        try:
+            result = coordinate(req, previous, reviewed_interpret, emit)
+        except ZoningInfeasible as exc:
+            if confirmed_brief is not None:
+                emit(
+                    "A",
+                    "completed",
+                    "Reviewable brief",
+                    reviewed_brief(
+                        req, confirmed_brief, previous, questions=[str(exc)]
+                    ),
+                )
+            raise
         status = "ready"
     except (ValueError, Problem, provider.StudioError) as exc:
         result = str(exc)[:600]
