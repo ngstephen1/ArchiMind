@@ -49,11 +49,10 @@ def print_book(before, after, eyes, destination, chrome):
             except OSError:
                 shutil.copyfile(after / name, stage / name)
         comparison = work / "comparison.html"
-        build((before, after), eyes, comparison)
-        if eyes[1]:
-            book(stage, eyes[1])
-        else:
-            book(stage)
+        build(
+            (before, after), eyes, comparison, preceding_pages=len(board["rooms"]) + 4
+        )
+        book(stage, eyes[1], comparison_pages=2)
         portfolio = work / "portfolio.pdf"
         study = work / "comparison.pdf"
         print_page(chrome, stage / "index.html", portfolio, work / "chrome")
@@ -72,6 +71,13 @@ def print_book(before, after, eyes, destination, chrome):
             )
         if any(board["home_id"][:12] not in p for p in pages):
             raise ValueError("Printed page lacks the expected home identity.")
+        if any(
+            not page.endswith(f" · {number} / {len(pages)}")
+            for number, page in enumerate(pages, start=1)
+        ):
+            raise ValueError(
+                "Printed book folios must run continuously through the comparison."
+            )
         evidence = json.loads(comparison.with_suffix(".json").read_bytes())
         evidence.update(
             {
@@ -81,6 +87,7 @@ def print_book(before, after, eyes, destination, chrome):
                 "revision": board["revision"],
                 "home_id": board["home_id"],
                 "source_receipt_sha256": digest(after / "receipt.json"),
+                "before_receipt_sha256": digest(before / "receipt.json"),
             }
         )
         hero = stage / f"presentation-{portfolio_cover(board)}.png"

@@ -12,6 +12,12 @@ on:
         description: Optional approved before photography run (supply both)
       after_eye_run:
         description: Optional approved after photography run (supply both)
+      reviewed_book_run:
+        description: Successful book run to package without reprinting
+      inspection_source:
+        description: Approved page inspection as exact commit and docs/data path (commit:path)
+      release_commit:
+        description: Full release SHA recorded in the designer handoff
 permissions:
   contents: read
   actions: read
@@ -50,6 +56,7 @@ jobs:
             fetch "$NEW_PHOTOS" studio-eye-views new-photos
           fi
       - name: Print the portfolio and revision comparison
+        if: ${{ !inputs.reviewed_book_run }}
         run: |
           set -euo pipefail
           options=()
@@ -59,9 +66,65 @@ jobs:
           command -v pdfunite || { sudo apt-get update -qq && sudo apt-get install -y poppler-utils; }
           python scripts/print_revision_book.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" \
             "$RUNNER_TEMP/output/Client-Book.pdf" "${options[@]}"
-          pdftoppm -scale-to 600 -jpeg "$RUNNER_TEMP/output/Client-Book.pdf" "$RUNNER_TEMP/output/sheet"
+          pdftoppm -r 150 -jpeg "$RUNNER_TEMP/output/Client-Book.pdf" "$RUNNER_TEMP/output/sheet"
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0
+        if: inputs.reviewed_book_run
+        with:
+          python-version: "3.11"
+      - name: Package the already reviewed book and the edited Blender scene
+        if: inputs.reviewed_book_run
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REVIEWED_BOOK: ${{ inputs.reviewed_book_run }}
+          INSPECTION: ${{ inputs.inspection_source }}
+          RELEASE_COMMIT: ${{ inputs.release_commit }}
+        run: |
+          set -euo pipefail
+          [[ "$REVIEWED_BOOK" =~ ^[0-9]+$ ]]
+          [[ "$RELEASE_COMMIT" =~ ^[0-9a-f]{40}$ ]]
+          test "$(gh api "repos/$GITHUB_REPOSITORY/commits/$RELEASE_COMMIT" --jq .sha)" = "$RELEASE_COMMIT"
+          [[ "$INSPECTION" =~ ^([0-9a-f]{40}):(docs/data/[a-z0-9/_-]+/book-inspection[.]json)$ ]]
+          inspection_commit="${BASH_REMATCH[1]}"
+          inspection_path="${BASH_REMATCH[2]}"
+          test -d "$RUNNER_TEMP/old-photos"
+          test -d "$RUNNER_TEMP/new-photos"
+          workflow=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/revision-client-book.yml" --jq '.id')
+          test "$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$REVIEWED_BOOK" --jq '[.workflow_id|tostring]+[.conclusion]|join(" ")')" = "$workflow success"
+          gh run download "$REVIEWED_BOOK" -n revision-client-book -D "$RUNNER_TEMP/reviewed"
+          gh api "repos/$GITHUB_REPOSITORY/contents/$inspection_path?ref=$inspection_commit" \
+            -H "Accept: application/vnd.github.raw+json" > "$RUNNER_TEMP/book-inspection.json"
+          command -v pdfinfo || { sudo apt-get update -qq && sudo apt-get install -y poppler-utils; }
+          python -m pip install -e .
+          PYTHONPATH=scripts python - "$RUNNER_TEMP" <<'PYTHON'
+          import json
+          import sys
+          from pathlib import Path
+          from publish_revision_study import load_revision, matched_frames
+
+          root = Path(sys.argv[1])
+          proofs = (root / "before", root / "after")
+          boards, receipts = zip(*(load_revision(path) for path in proofs), strict=True)
+          frames = matched_frames(
+              boards, receipts, proofs, (root / "old-photos", root / "new-photos")
+          )
+          original = json.loads((root / "reviewed/Client-Book.json").read_bytes())
+          for view, pair in frames.items():
+              expected = [frame[2] for frame in pair]
+              if original["images"][view]["sha256"] != expected:
+                  raise ValueError(f"The {view} images do not match the reviewed book.")
+          PYTHON
+          mkdir "$RUNNER_TEMP/output"
+          python scripts/package_town_release.py "$RUNNER_TEMP/before" "$RUNNER_TEMP/after" \
+            "$RUNNER_TEMP/new-photos" "$RUNNER_TEMP/reviewed/Client-Book.pdf" \
+            "$RUNNER_TEMP/book-inspection.json" "$RUNNER_TEMP/output/Designer-Handoff.zip" \
+            --commit "$RELEASE_COMMIT" \
+            --original-book-receipt "$RUNNER_TEMP/reviewed/Client-Book.json"
+          cp "$RUNNER_TEMP/reviewed/Client-Book.pdf" "$RUNNER_TEMP/output/Client-Book.pdf"
+          cp "$RUNNER_TEMP/book-inspection.json" "$RUNNER_TEMP/output/book-inspection.json"
+          cd "$RUNNER_TEMP/output"
+          sha256sum Client-Book.pdf Designer-Handoff.zip book-inspection.json > SHA256SUMS.txt
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: revision-client-book
+          name: ${{ inputs.reviewed_book_run && 'town-designer-release' || 'revision-client-book' }}
           path: ${{ runner.temp }}/output
           if-no-files-found: error

@@ -21,6 +21,7 @@ from archimind.designer_handoff.survey import write_survey_dxf
 
 BEDROOM_VIEWS = ("bedroom-doorway.png", "bedroom-desk.png")
 STYLE_NOTICE = "saved-style-receipt.json"
+FINISH_NOTICE = "layered-finish-receipt.json"
 NOTICES = (
     "BELAYA_ATTRIBUTION.txt",
     "ABO_LICENSE_CC_BY_4.0.txt",
@@ -123,12 +124,23 @@ def check_book(book, receipt, board, proofs, after, photos):
     return count
 
 
-def build(before, after, photos, book, book_receipt, destination, commit):
+def build(
+    before,
+    after,
+    photos,
+    book,
+    book_receipt,
+    destination,
+    commit,
+    *,
+    original_book_receipt=None,
+):
     if not re.fullmatch(r"[0-9a-f]{40}", commit):
         raise ValueError("Provide the declared release commit as a 40-hex Git SHA.")
     if destination.exists():
         raise FileExistsError("Choose a fresh destination for this release.")
     destination.parent.mkdir(parents=True, exist_ok=True)
+    proof_sources = (before, after)
     with tempfile.TemporaryDirectory(dir=destination.parent) as stage:
         stage = Path(stage)
 
@@ -155,6 +167,17 @@ def build(before, after, photos, book, book_receipt, destination, commit):
         shutil.copyfile(book, staged_book)
         shutil.copyfile(book_receipt, staged_inspection)
         book, book_receipt = staged_book, staged_inspection
+        inspected = read_json(book_receipt)
+        if before_digest := inspected.get("before_receipt_sha256"):
+            verified(before / "receipt.json", before_digest)
+        if original_book_receipt is not None:
+            original = stage / "Client-Book.json"
+            shutil.copyfile(original_book_receipt, original)
+            inspected.pop("inspection", None)
+            if read_json(original) != inspected:
+                raise ValueError(
+                    "Page inspection does not match the original print receipt."
+                )
 
         if old["project"] != board["project"] or [
             old["revision"],
@@ -220,9 +243,18 @@ def build(before, after, photos, book, book_receipt, destination, commit):
         copy(native, "native/home.blend")
         copy(book, "presentation/Client-Book.pdf")
         copy(book_receipt, "presentation/book-inspection.json")
+        if original_book_receipt is not None:
+            copy(original, "presentation/Client-Book.json")
         for name, source in photo_inputs.items():
             category = "sources" if name in {*NOTICES, STYLE_NOTICE} else "presentation"
             copy(source, f"{category}/{name}")
+        for revision, (source, proof) in enumerate(
+            zip(proof_sources, (first, second), strict=True), start=1
+        ):
+            if expected := proof["files"].get(FINISH_NOTICE):
+                member = f"sources/r{revision}-{FINISH_NOTICE}"
+                copy(source / FINISH_NOTICE, member)
+                verified(root / member, expected)
         evidence = {
             "declared_release_commit": commit,
             "project": board["project"],
@@ -273,5 +305,6 @@ if __name__ == "__main__":
     for field in ("before", "after", "photos", "book", "book_receipt", "destination"):
         parser.add_argument(field, type=Path)
     parser.add_argument("--commit", required=True)
+    parser.add_argument("--original-book-receipt", type=Path)
     options = parser.parse_args()
     build(**vars(options))

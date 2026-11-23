@@ -109,7 +109,7 @@ def portfolio_cover(board):
     return featured["room"]["id"] + "-" + featured["cameras"][0]["id"]
 
 
-def book(directory, eye_views=None):
+def book(directory, eye_views=None, *, comparison_pages=0):
     receipt = json.loads((directory / "receipt.json").read_bytes())
     for name, expected in receipt["files"].items():
         if (
@@ -217,7 +217,7 @@ def book(directory, eye_views=None):
     pages.append(
         "<h2>Plan &amp; finishes</h2><div class='grid'><div>"
         + drawing(board)
-        + "</div><div><p>North is up. Blue marks windows and ochre marks doors. Dimensions are in metres.</p>"
+        + "</div><div><p>North is up. Blue marks windows and ochre marks doors. Dimensions are in metres and come from the saved model.</p><p>Verify site dimensions, openings and supplier specifications before procurement or construction.</p>"
         + finish_rows
         + "</div></div>"
         + credits
@@ -299,7 +299,7 @@ def book(directory, eye_views=None):
             + p
             + "<footer>"
             + footer
-            + f" · {i + 1} / {len(pages)}</footer></section>"
+            + f" · {i + 1} / {len(pages) + comparison_pages}</footer></section>"
             for i, p in enumerate(pages)
         )
         + "</body></html>"
