@@ -1,0 +1,114 @@
+{
+  "project": "cfe87682-1ed5-4ddf-9bec-5aa9e6795872",
+  "scope": "matched Blender proof for the delegated independent Codex edit",
+  "common_bedroom_cameras": [
+    {
+      "eye": [
+        5.6579999999999995,
+        1.57,
+        -8.892
+      ],
+      "fov": 69,
+      "id": "doorway",
+      "label": "Doorway",
+      "reason": null,
+      "target": [
+        1.0399,
+        0.58,
+        -7.2343
+      ]
+    },
+    {
+      "eye": [
+        5.360000000000002,
+        1.57,
+        -8.689
+      ],
+      "fov": 58,
+      "id": "desk",
+      "label": "Desk and chair",
+      "reason": null,
+      "target": [
+        3.96,
+        0.5535709201097488,
+        -7.000404882967473
+      ]
+    },
+    {
+      "eye": [
+        2.83,
+        1.57,
+        -6.619000000000001
+      ],
+      "fov": 58,
+      "id": "bedside",
+      "label": "Bedside",
+      "reason": null,
+      "target": [
+        1.8800000000000001,
+        0.742,
+        -7.8740000000000006
+      ]
+    }
+  ],
+  "proofs": [
+    {
+      "revision": 2,
+      "run": 45247544259,
+      "artifact_id": 14856575001,
+      "home_id": "a592e2dd3793a64774d9c8ecc57ce4a4c5685cbb75aa8c6d1caed5a8a995c7c6",
+      "manifest_sha256": "51730091069609ac32035ef80b113974ae1d32f448f073479ccf1cdc92d313d2",
+      "files_verified": 39,
+      "blend_sha256": "ce4ab9f270e7b9a9471d7c3c7b466ac8cfd9981a7e44db925c0138af6ca67068",
+      "bedroom_representations": {
+        "bedside-lamp": "procedural Town template",
+        "belaya": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+        "desk-chair": "saved style pack",
+        "queen-bed": "saved style pack"
+      },
+      "images": {
+        "doorway": {
+          "sha256": "45af041948fa47377685cbfd96cf8e294424286abf0976bf2e4ddc901a052d7b",
+          "exposure_ev": 0.5870747566223145
+        },
+        "desk": {
+          "sha256": "143df50a5d8e28eafe9d79d788b62a3c96ea3aa8f0a8c1f29799e7997dc76c49",
+          "exposure_ev": 0.5870747566223145
+        },
+        "bedside": {
+          "sha256": "c07834b45f318142b9e12589159a8aa765f5860fbfcbb169b3028635c7a5c980",
+          "exposure_ev": 0.5870747566223145
+        }
+      }
+    },
+    {
+      "revision": 3,
+      "run": 45259567665,
+      "artifact_id": 14859944691,
+      "home_id": "a04a783e6ca7706aa5f8806e60a1cd9c05b5cebfcd300c8bbf38daebb92c20a4",
+      "manifest_sha256": "97eeb252440574f9f3ff8d459cba537eb95c222991ef7065b7fbfa713759020f",
+      "files_verified": 39,
+      "blend_sha256": "4504b81d972731104638b0b95d1f21464033f55a70bda459fac41ca8f5afc27c",
+      "bedroom_representations": {
+        "bedside-lamp": "procedural Town template",
+        "belaya": "2568fab387096a98eb58b12dc6906995a251c005a189b078808e074612b88a3e",
+        "desk-chair": "54e0786096a654b33368b39b0377822a05168fb19c4528efa2386081f6bebc81",
+        "queen-bed": "saved style pack"
+      },
+      "images": {
+        "doorway": {
+          "sha256": "a7e5c083c77f02349992b09436158f79fd1ec897e4e080c873fe67d64d58eeef",
+          "exposure_ev": 0.5870747566223145
+        },
+        "desk": {
+          "sha256": "1832655d5b385f0b440c211b2924624ba9d030de115fef9fe66c09ea8876b2a3",
+          "exposure_ev": 0.5870747566223145
+        },
+        "bedside": {
+          "sha256": "94cd9425d7bcfb508d0a980f563b3bf721ffcc5127d0fa6f48eab32034105980",
+          "exposure_ev": 0.5870747566223145
+        }
+      }
+    }
+  ]
+}
