@@ -1377,6 +1377,18 @@ def test_split_out_home_seating_after_a_fronted_offsite_heading(other):
     assert not questions and brief.dining_seats == 6
 
 
+@pytest.mark.parametrize("sequence", ["after", "before"])
+def test_keep_home_seats_with_offsite_timing_qualifier(sequence):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"We need six dining seats, and at home we have dinner together {sequence} we eat at work.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 6
+    with pytest.raises(ValueError, match="four places at one table"):
+        check_brief(brief)
+
+
 def test_optional_same_table_end_cannot_waive_required_one_table_arrangement():
     brief, questions = requirement_controls(
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
