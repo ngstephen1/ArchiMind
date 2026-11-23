@@ -72,6 +72,9 @@ SALON_DECLINE = (
     r"\s*[.!;]?\s*$"
 )
 STATEMENT_BREAK = r"(?<=[.!?])\s+|(?<=;)\s*|\n+"
+CONDITIONAL_CONTINUATION = (
+    r"\s*(?:but\s+)?(?:(?:only\s+)?(?:if|when)|unless|provided(?:\s+that)?)\b"
+)
 
 # A verb acting on a specific door or window, e.g. "keep the bedroom window" or
 # "add a second door". Spatial words end the object, so "keep the bedroom near
@@ -116,8 +119,15 @@ def _affirmative_clauses(message):
 def _salon_statement(message):
     """Return the original affirmative clause that requires the optional room."""
     sentences = re.split(STATEMENT_BREAK, message)
-    for sentence, following in zip(sentences, sentences[1:] + [""], strict=True):
-        if re.match(SALON_DECLINE, following.lower()):
+    following_sentences = sentences[1:] + [""]
+    continuations = sentences[2:] + [""] * min(2, len(sentences))
+    for sentence, following, continuation in zip(
+        sentences, following_sentences, continuations, strict=True
+    ):
+        wrapped_condition = not following.rstrip().endswith(
+            (".", "?", "!", ";")
+        ) and re.match(CONDITIONAL_CONTINUATION, continuation.lower())
+        if re.match(SALON_DECLINE, following.lower()) and not wrapped_condition:
             continue
         if re.fullmatch(SALON_ONLY, sentence.strip().lower()) or any(
             re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(sentence)
