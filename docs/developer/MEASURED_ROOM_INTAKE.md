@@ -34,6 +34,19 @@ Use `source_kind: measured` for sourced site measurements or `archival` for a do
 
 ## Export and review
 
+### Current bedroom field record
+
+Give the field record a date and the bedroom project ID. Add a source ID beside each value on the sketch or in the measurement log. Keep the original record with the survey edition. Leave unresolved measurements blank and list the missing observations in `field_checks`.
+
+| Record | What to capture |
+| --- | --- |
+| Perimeter and height | Each finished-face wall run and bay segment, at least one independent check dimension, and finished floor-to-ceiling height. |
+| Window and door | Window jamb positions, sill height, reveal depth and trim projection. Door jamb positions, hinge end, swing direction and clear opening. |
+| Fixed services and retained furniture | Outlet wall, offset and height. Locate fixed obstructions and record each retained item's footprint and height. |
+| Desk and chair | Desk clear width, height to the lowest underside obstruction and usable knee depth. Chair arm height, width and overall depth. Record where the chair stands tucked in, occupied and pulled back, and measure the narrowest remaining passage in each state. |
+
+Use the current field record for the bedroom project. Keep the whole-home demonstration under its own project ID. The Zane Street archive supplies an angled-bay observation and nominal room dimensions. Its current condition, exact perimeter and ceiling height still need field evidence.
+
 Save the JSON as `room-survey.json`. From the installed ArchiMind environment run:
 
 ```sh
