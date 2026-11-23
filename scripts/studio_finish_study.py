@@ -84,24 +84,30 @@ def rug_binding(obj, low, high):
 
 
 def cushion_welt(obj, source, low, high, color):
-    """Use an existing cushion edge band for a dark, woven welt."""
-    if obj.data.users > 1:
-        obj.data = obj.data.copy()
-    mesh = obj.data
-    height = high.z - low.z
-    seam = [
-        face
-        for face in mesh.polygons
-        if abs(face.normal.z) < 0.6
-        and 0.15 < ((obj.matrix_world @ face.center).z - low.z) / height < 0.30
-    ]
-    if not seam:
-        return 0
-    edge = finish(source, f"{source.name} | welt", tuple(v * 0.60 for v in color), 105)
-    mesh.materials.append(edge)
-    for face in seam:
-        face.material_index = len(mesh.materials) - 1
-    return len(seam)
+    """Shade a thin welt at a consistent height without changing the cushion mesh."""
+    material = source.copy()
+    material.name = f"{source.name} | welt · {obj.name}"
+    tree = material.node_tree
+    shader = next(node for node in tree.nodes if node.type == "BSDF_PRINCIPLED")
+    base = shader.inputs["Base Color"]
+    weave_color = base.links[0].from_socket
+    geometry = tree.nodes.new("ShaderNodeNewGeometry")
+    position = tree.nodes.new("ShaderNodeSeparateXYZ")
+    tree.links.new(geometry.outputs["Position"], position.inputs["Vector"])
+    compare = tree.nodes.new("ShaderNodeMath")
+    compare.operation = "COMPARE"
+    center = low.z + 0.24 * (high.z - low.z)
+    width = 0.05 * (high.z - low.z)
+    compare.inputs[1].default_value = center
+    compare.inputs[2].default_value = width / 2
+    tree.links.new(position.outputs["Z"], compare.inputs[0])
+    accent = tree.nodes.new("ShaderNodeMixRGB")
+    accent.inputs[2].default_value = (*(value * 0.60 for value in color), 1)
+    tree.links.new(compare.outputs["Value"], accent.inputs["Fac"])
+    tree.links.new(weave_color, accent.inputs[1])
+    tree.links.new(accent.outputs["Color"], base)
+    obj.material_slots[0].material = material
+    return {"center_z_m": center, "width_m": width}
 
 
 def drape(obj, low, high, role):
