@@ -41,9 +41,7 @@ WIDTH_PATTERNS = (
 )
 FIXED_PASSAGE = (
     r"(?:"
-    + MEASUREMENT
-    + r"\s+(?:(?:clear|wide)\s+){0,2}"
-    + PATH
+    + "|".join(WIDTH_PATTERNS[:2])
     + r"|"
     + PASSAGE
     + r"\s+(?:width\s+)?(?:of |at least |of at least )?"
@@ -137,19 +135,28 @@ def _salon_statement(message):
     continuations = [*sentences, "", ""][2:]
     statement = None
     conditional_correction = False
+    previous = ""
     for sentence, following, continuation in zip(
         sentences, following_sentences, continuations, strict=True
     ):
         wrapped_condition = not following.rstrip().endswith(
             (".", "?", "!", ";")
         ) and re.match(CONDITIONAL_CONTINUATION, continuation.lower())
-        if re.match(SALON_DECLINE, sentence.lower()) and not conditional_correction:
+        if (
+            not conditional_correction
+            and re.match(SALON_DECLINE, sentence.lower())
+            and (
+                re.search(r"\bsalon\b", sentence, re.IGNORECASE)
+                or previous == statement
+            )
+        ):
             statement = None
         conditional_correction = bool(wrapped_condition)
         if re.fullmatch(SALON_ONLY, sentence.strip().lower()) or any(
             re.search(SALON_ACTION, clause) for clause in _affirmative_clauses(sentence)
         ):
             statement = sentence.strip()
+        previous = sentence.strip()
     return statement
 
 
@@ -163,6 +170,13 @@ def _dining_clauses(clauses):
             if not home_request:
                 continue
             clause = clause[offsite.end() + home_request.end() :]
+            if not re.search(
+                r"\b(?:at home|(?:in|at) (?:the )?(?:formal salon|"
+                + ROOM_NAMES
+                + r"))\b",
+                clause,
+            ):
+                continue
         if re.search(DINING_CONTEXT, clause):
             yield clause
 
@@ -590,10 +604,21 @@ def _dining_quote(brief, message):
     )
     if single:
         return single
-    # Preserve the submitted line breaks and punctuation in multi-room evidence.
-    message = message.strip()
-    if _dining_statement_matches(brief, message):
-        return message
+    # Preserve separators between adjacent relevant excerpts and skip unrelated prose.
+    excerpts = []
+    end = cursor = 0
+    for sentence in re.split(STATEMENT_BREAK, message):
+        start = message.index(sentence, cursor)
+        cursor = start + len(sentence)
+        if any(_dining_clauses(_affirmative_clauses(sentence))):
+            gap = message[end:start]
+            if excerpts:
+                excerpts.append(gap if gap.isspace() else "\n")
+            excerpts.append(sentence)
+            end = start + len(sentence)
+    combined = "".join(excerpts).strip()
+    if combined and _dining_statement_matches(brief, combined):
+        return combined
     return None
 
 
