@@ -92,7 +92,7 @@ def matched_frames(boards, receipts, directories, eyes):
     ):
         (room,) = [r for r in board["rooms"] if r["room"]["id"] == "bedroom"]
         hd = json.loads((eye / "eye-view-receipt.json").read_bytes()) if eye else None
-        if hd and hd.get("resolution") != [1920, 1080]:
+        if eye and (not isinstance(hd, dict) or hd.get("resolution") != [1920, 1080]):
             raise ValueError("The matched HD study requires 1920 × 1080 receipts.")
         if hd and (
             hd["home_id"] != board["home_id"]

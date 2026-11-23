@@ -115,7 +115,7 @@ def living_room_views(views, replacements):
     seen = set()
     for view in views:
         camera = replacements.get(f"living-{view['id']}.png", view)
-        if camera.get("reason"):
+        if result and camera.get("reason"):
             continue
         pose = (tuple(camera["eye"]), tuple(camera["target"]), camera["fov"])
         if pose in seen:
