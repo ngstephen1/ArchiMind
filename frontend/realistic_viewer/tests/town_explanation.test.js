@@ -147,6 +147,7 @@ test("the Decisions shortcut only bypasses standalone saved questions", () => {
   assert.equal(isUnambiguousSavedDesignQuestion("Why is the desk 4.46 m from the window?"), true);
   assert.equal(isUnambiguousSavedDesignQuestion("Why is the chair there? I mean the one at Belaya."), true);
   assert.equal(isUnambiguousSavedDesignQuestion("Why is the chair there? I mean the one at Belaya, move it."), false);
+  assert.equal(isUnambiguousSavedDesignQuestion("Why is the chair there? I mean the one at Belaya, could you move it closer?"), false);
   assert.equal(isUnambiguousSavedDesignQuestion("Why is the chair there? Move it closer."), false);
   assert.equal(isUnambiguousSavedDesignQuestion("Why is it there and move the chair closer?"), false);
   assert.equal(isUnambiguousSavedDesignQuestion("Why is it there and can you create a new one?"), false);
