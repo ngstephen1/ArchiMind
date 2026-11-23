@@ -1,5 +1,6 @@
 """Surveyed finished-face room geometry and a metre-based, editable DXF plan."""
 
+from datetime import date
 from math import atan2, cos, degrees, dist, radians, sin
 from pathlib import Path
 from typing import Annotated, Literal, Self
@@ -85,6 +86,8 @@ class CheckMeasure(SurveyRecord):
 
 class Survey(SurveyRecord):
     source_kind: Literal["measured", "demonstration", "archival"]
+    project_id: Text | None = None
+    surveyed_on: date | None = None
     vertices_m: Annotated[list[Point], Field(min_length=3)]
     height_m: Length | None = None
     sources: Annotated[list[SurveySource], Field(min_length=1)]
@@ -311,6 +314,10 @@ def export_intake(source: Path, destination: Path) -> None:
         "field_verification_items": items,
         "review_status": "pending professional review",
     }
+    if survey.project_id is not None:
+        report["project_id"] = survey.project_id
+    if survey.surveyed_on is not None:
+        report["surveyed_on"] = survey.surveyed_on.isoformat()
     destination.parent.mkdir(exist_ok=True, parents=True)
     if destination.exists():
         raise FileExistsError(

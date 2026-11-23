@@ -403,6 +403,12 @@ def write_drawings(
             raise ValueError(
                 "A measured survey is required for survey-linked drawings."
             )
+        if survey.project_id is None or survey.surveyed_on is None:
+            raise ValueError(
+                "A dated survey with a project ID is required for linking."
+            )
+        if survey.project_id != board["project"]:
+            raise ValueError("The survey belongs to a different project.")
         _check_survey(design.room, survey)
     elif survey is not None:
         raise ValueError("Select survey-linked provenance when supplying a survey.")
@@ -419,6 +425,8 @@ def write_drawings(
                 "data-survey-sha256",
                 hashlib.sha256(survey.model_dump_json().encode()).hexdigest(),
             )
+            sheet.set("data-survey-project-id", survey.project_id)
+            sheet.set("data-survey-date", survey.surveyed_on.isoformat())
         ET.ElementTree(sheet).write(
             destination / name, encoding="utf-8", xml_declaration=True
         )
