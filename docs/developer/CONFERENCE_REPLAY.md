@@ -15,9 +15,13 @@ ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
 
 Open [the edited home](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=2). Click **Visit saved home**, then **Enter house**. Select **Bedroom** from **Visit a room**, then choose **Design presentation**. The visitor can see the plan, switch rooms, inspect the furniture schedule, open the client book or ask a question. Open [the earlier revision](http://127.0.0.1:8790/?project=cfe87682-1ed5-4ddf-9bec-5aa9e6795872&revision=1) in another tab. If using a different Town port, change the port in both links. The launch runs only after the export check succeeds.
 
-If ports 8790 or 8791 are occupied, start the replay on a different pair. Set
-both variables before running the launcher so the town and editor links share
-the same configuration.
+Run one Town launcher per checkout. Stop your earlier Town process before
+starting the replay in that checkout. Running both at once requires a
+separate checkout because each launcher writes the site's API and editor URLs
+to the same `dist/town/config.json`.
+
+If another process occupies ports 8790 or 8791, start the replay on a different
+pair. Set both variables so the town and editor share the same configuration.
 
 ```bash
 ARCHIMIND_ENABLE_OPENAI_STUDIO=0 ARCHIMIND_ENABLE_CODEX_ADVISOR=0 \
