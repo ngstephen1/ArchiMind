@@ -331,12 +331,13 @@ def test_supported_table_phrasing_keeps_existing_path(
     assert service.work_once()
     client, _, _ = town
     result = client.get(f"/api/jobs/{response.json()['job']}").json()
+    if not formal_salon:
+        assert result["status"] == "failed", result
+        assert "five-room program" in result["result"]
+        return
     assert result["status"] == "ready", result
     for candidate in result["result"]:
         plan = candidate["evidence"]["comparison"]
         assert plan["required_dining_seats"] == dining_seats
         assert plan["split_dining"] is split_dining
-        if formal_salon:
-            assert plan["dining_places"] == {"kitchen-dining": 4, "salon": 4}
-        else:
-            assert "salon" not in plan["dining_places"]
+        assert plan["dining_places"] == {"kitchen-dining": 4, "salon": 4}

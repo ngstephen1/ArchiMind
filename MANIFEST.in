@@ -75,3 +75,4 @@ recursive-include design/oak-bedside-lamp *.blend *.json
 recursive-include design/upholstered-linen-bed *.blend *.json
 
 include docs/data/town-decisions/public-cases.json
+include docs/data/nov24-baseline/briefs.json
