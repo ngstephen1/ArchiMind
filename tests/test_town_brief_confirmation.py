@@ -1047,6 +1047,7 @@ def test_combined_seating_quote_preserves_a_semicolon_without_spaces():
     [
         "Include a formal salon because we host family but keep a 90 cm clear passage.",
         "Include a formal salon because we host family but we need a 90 cm clear passage.",
+        "Add a study because I work from home but really keep a 90 cm clear passage.",
         "Keep a 90 cm clear passage because a 0.6 m clear passage won’t fit the wheelchair.",
     ],
 )
@@ -1171,3 +1172,27 @@ def test_current_home_width_in_a_reason_remains_background():
     )
     brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
     assert not questions and brief.passage_m == 0.9
+
+
+@pytest.mark.parametrize(
+    "seating",
+    [
+        "two at the other end of the room at a separate table",
+        "two at another table, both in the formal salon if possible, "
+        "or put one table in each dining room",
+    ],
+)
+def test_explicit_second_table_or_supported_fallback_keeps_split(seating):
+    text = f"Seat four people at one table and {seating}."
+    settings = Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True)
+    brief, questions = requirement_controls(settings, text, None)
+    assert not questions and brief.dining_seats == 6 and brief.split_dining
+
+
+def test_live_capacity_uses_the_same_one_table_end_interpretation(monkeypatch):
+    monkeypatch.setattr(service.provider, "configuration", lambda _: ("f", "f"))
+    monkeypatch.setattr(service.provider, "request", live_answer(formal_salon=True))
+    text = "Seat two people at one dining table and four at the other end of it."
+    request = review_request(text, live=True, width=15, depth=16)
+    with pytest.raises(service.BriefClarification, match="still required at one table"):
+        service.interpret(request, None)
