@@ -80,3 +80,18 @@ Score each criterion at 0 (missing or distracting), 1 (readable with a visible i
 | Visible circulation | 2 | 2 | 2 | The approach past the desk or between seating and dining is readable in the full frame and corresponds to the saved plan. |
 
 The next visual pass should reach 2 on the applicable bedding/material and window rows in the doorway and salon, with no regression in grounding or circulation. Revalidate any added floor-standing item against the furniture reservations. A catalog mesh, photographed surface, or model score supplies no measurement of the actual site.
+
+### Run the matched finish study
+
+Use the **Studio home proof** workflow with `finish_study=true` to render the
+three 1080p comparison views on the hosted CPU runner. The job verifies the
+archived Blender scene, manifest and baseline image hashes before rendering.
+It records the exact finished image hashes, exposures, camera poses, crop
+bounds and render times. All mesh geometry and transforms are preserved
+except the two fabric layers, which must remain inside their original world
+bounds. The new materials and the salon lamp treatment use procedural
+Blender data. Source assets and notices are retained from the approved proof.
+
+Download the `studio-finish-study` artifact and apply the crop bounds above.
+Score the three matched views at print scale before accepting the visual
+milestone.
