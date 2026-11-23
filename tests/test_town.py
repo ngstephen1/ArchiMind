@@ -184,8 +184,17 @@ def test_zoning_only_preserves_confirmed_program_and_room_scoped_dining():
     brief = Brief(formal_salon=True, compare_zoning=True)
     _, questions = requirement_controls(brief, "No formal salon.", None)
     assert any(
-        "clearing the formal salon control" in question for question in questions
+        "turn off the zoning comparison and clear the formal salon control" in question
+        for question in questions
     )
+    _, questions = requirement_controls(
+        Brief(compare_zoning=True), "No formal salon.", None
+    )
+    assert any("turn off the zoning comparison" in question for question in questions)
+    _, questions = requirement_controls(
+        brief, "No formal salon.", {"rooms": [{"design": {"room": {"id": "salon"}}}]}
+    )
+    assert any("start a new project without the formal salon" in q for q in questions)
     reviewed, questions = requirement_controls(
         brief, "Four seats in the kitchen-dining room.", None
     )

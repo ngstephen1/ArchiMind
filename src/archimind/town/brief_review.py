@@ -488,7 +488,18 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     totals = set()
     questions = []
     if reviewed_program and program is False:
-        if saved_salon:
+        if brief.compare_zoning:
+            removal = (
+                " and start a new project without the formal salon"
+                if saved_salon
+                else " and clear the formal salon control"
+            )
+            questions.append(
+                "Both zoning schemes require a formal salon. Keep the salon to "
+                "compare zoning, or turn off the zoning comparison"
+                f"{removal} for a five-room design."
+            )
+        elif saved_salon:
             questions.append(
                 "This saved project includes the formal salon. Start a new project by "
                 "opening Town without the project and revision query parameters, "
