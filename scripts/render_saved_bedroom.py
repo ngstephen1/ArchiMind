@@ -530,7 +530,7 @@ def render(
     registry_data = json.loads((ASSETS / "designer_registry.json").read_text())
     registry = {
         (a["concept_id"], a["version"], a["sha256"])
-        for key in ("chairs", "bedroom")
+        for key in ("pieces", "chairs", "bedroom")
         for a in registry_data.get(key, [])
     }
     used = {
