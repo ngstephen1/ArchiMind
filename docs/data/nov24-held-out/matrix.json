@@ -1,0 +1,158 @@
+{
+  "issue": 68,
+  "scoring_status": "Provisional agent scoring on 301762b. Hieu reviews and replaces every row before sign-off.",
+  "cases": {
+    "H01": {
+      "slot": "Hosting and home-office trade-offs on a fresh lot",
+      "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
+      "tracked_changes": false,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "packet_sha256": "966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6",
+      "base_revision": 0,
+      "status": "failed",
+      "elapsed_s": 5.19,
+      "provider_calls_started": 2,
+      "candidate_count": 0,
+      "candidate_sha256": [],
+      "prior_snapshot_unchanged": null,
+      "provider_phases": [
+        "OpenAI \u00b7 Generate styling direction",
+        "OpenAI \u00b7 Interpret brief"
+      ],
+      "scores": {
+        "outcome": "fail",
+        "hard_constraints": 1,
+        "source_accuracy": 1,
+        "candidate_difference": 0,
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "high",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
+    "H02": {
+      "slot": "Ambiguous or conflicting seating that needs a confirmation",
+      "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
+      "tracked_changes": false,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "packet_sha256": "966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6",
+      "base_revision": 0,
+      "status": "failed",
+      "elapsed_s": 4.05,
+      "provider_calls_started": 2,
+      "candidate_count": 0,
+      "candidate_sha256": [],
+      "prior_snapshot_unchanged": null,
+      "provider_phases": [
+        "OpenAI \u00b7 Generate styling direction",
+        "OpenAI \u00b7 Interpret brief"
+      ],
+      "scores": {
+        "outcome": "partial",
+        "hard_constraints": 1,
+        "source_accuracy": 1,
+        "candidate_difference": "N/A",
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "medium",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
+    "H03": {
+      "slot": "Width conversion and circulation on a compact lot",
+      "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
+      "tracked_changes": false,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "packet_sha256": "966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6",
+      "base_revision": 0,
+      "status": "ready",
+      "elapsed_s": 11.83,
+      "provider_calls_started": 3,
+      "candidate_count": 2,
+      "candidate_sha256": [
+        "4ad68aaf84d31a996125637534d5faeeaf67fc5e4b7d732b0afc1f5b60971cb4",
+        "67d6ab7b080680e0689a602b46c49ffe85ae5e77ff79d9f4b3e30d1eddf894a5"
+      ],
+      "prior_snapshot_unchanged": null,
+      "provider_phases": [
+        "OpenAI \u00b7 Generate styling direction",
+        "OpenAI \u00b7 Interpret brief",
+        "OpenAI \u00b7 Review plan images"
+      ],
+      "scores": {
+        "outcome": "pass",
+        "hard_constraints": 2,
+        "source_accuracy": 2,
+        "candidate_difference": 2,
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
+    "H04": {
+      "slot": "Room lock and targeted change to a saved revision",
+      "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
+      "tracked_changes": false,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "packet_sha256": "966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6",
+      "base_revision": 1,
+      "status": "failed",
+      "elapsed_s": 4.76,
+      "provider_calls_started": 2,
+      "candidate_count": 0,
+      "candidate_sha256": [],
+      "prior_snapshot_unchanged": true,
+      "provider_phases": [
+        "OpenAI \u00b7 Generate styling direction",
+        "OpenAI \u00b7 Interpret brief"
+      ],
+      "scores": {
+        "outcome": "fail",
+        "hard_constraints": 1,
+        "source_accuracy": 1,
+        "candidate_difference": "N/A",
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "high",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
+    "H05": {
+      "slot": "Two plausible object referents in a saved-design follow-up",
+      "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
+      "tracked_changes": false,
+      "provider_calls_started": 0,
+      "path": "Ask about the saved design (browser, deterministic)",
+      "viewport": "1536x748",
+      "scores": {
+        "outcome": "pass",
+        "hard_constraints": 2,
+        "source_accuracy": 2,
+        "candidate_difference": "N/A",
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
+    "H06": {
+      "slot": "Conclusion that needs site, supplier or acoustic evidence",
+      "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
+      "tracked_changes": false,
+      "provider_calls_started": 0,
+      "path": "Ask about the saved design (browser, deterministic)",
+      "viewport": "1536x748",
+      "scores": {
+        "outcome": "partial",
+        "hard_constraints": 2,
+        "source_accuracy": 1,
+        "candidate_difference": "N/A",
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "medium",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    }
+  }
+}
