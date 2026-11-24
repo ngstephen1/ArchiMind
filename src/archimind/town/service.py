@@ -310,38 +310,51 @@ def clarification_guidance(req, parsed):
 COMPARISON_REQUEST = re.compile(
     r"\b(?:compare|comparing|comparison|contrast|trade[- ]?offs?)\b", re.IGNORECASE
 )
-# Comparisons Town cannot evidence stay unsupported.
+# Town compares alternatives only on its room-priority and room-distance measures.
+SUPPORTED_COMPARISON = re.compile(
+    r"\b(?:priorit|goal|preference|distance|separation|route|closer|farther"
+    r"|nearer|near\b|far\b)",
+    re.IGNORECASE,
+)
+# Comparisons of anything Town does not model stay unsupported.
 UNMODELED = re.compile(
     r"\b(?:acoustic|sound|noise|hear|code|complian|accessib|cost|price|budget|glare"
-    r"|daylight|sunlight|energy|thermal|guarantee)",
+    r"|daylight|sunlight|energy|thermal|guarantee|storey|story|stories|floor|level"
+    r"|basement|attic|garage|pool|extension|stair)",
     re.IGNORECASE,
 )
 MOVED_ROOM = {"closer_study_desk": "study", "shift_bedroom_chair": "bedroom"}
 ROOM_WORDS = {
-    "bedroom": r"bedroom",
-    "study": r"study|office",
-    "living": r"living",
+    "bedroom": r"bed\s?rooms?|master suite",
+    "study": r"study|studies|office|workroom|work room",
+    "living": r"living|lounge|sitting room|family room|den",
     "kitchen-dining": r"kitchen|dining",
-    "bathroom": r"bath(?:room)?",
-    "salon": r"salon",
+    "bathroom": r"bath(?:room)?s?|washroom|toilet|wc|shower room",
+    "salon": r"salon|reception room|drawing room|parlou?r",
 }
+# A new action verb starts an independent request, e.g. "keep X and move Y".
+ACTION_BREAK = (
+    r"[.;!?]|\bbut\b|\b(?:and|then)\s+(?=(?:move|shift|slide|put|place|bring|push"
+    r"|pull|rotate|turn|add|swap|replace|change)\b)"
+)
 
 
 def _mentions(message, room):
-    return re.search(r"\b(?:" + ROOM_WORDS.get(room, room) + r")", message, re.I)
+    return re.search(r"\b(?:" + ROOM_WORDS.get(room, room) + r")\b", message, re.I)
+
+
+KEEP_VERB = re.compile(
+    r"\b(?:keep|leave|lock|preserve|retain|don'?t (?:touch|change|alter))\b", re.I
+)
 
 
 def _asks_to_keep(message, room):
-    """True when a clause asks to keep, leave or lock the named room."""
-    return any(
-        re.search(
-            r"\b(?:keep|leave|lock|preserve|retain|don'?t (?:touch|change|alter))\b"
-            r"(?:\s+(?:the|my|our))?\s+(?:" + ROOM_WORDS.get(room, room) + r")",
-            clause,
-            re.I,
-        )
-        for clause in re.split(r"[.;!?]|\band\b|\bbut\b", message)
-    )
+    """True when a keep, leave or lock request names the room, alone or in a list."""
+    for clause in re.split(ACTION_BREAK, message, flags=re.I):
+        verb = KEEP_VERB.search(clause)
+        if verb and _mentions(clause[verb.end() :], room):
+            return True
+    return False
 
 
 def screen_interpretation(parsed, brief, message, previous, *, review):
@@ -357,7 +370,11 @@ def screen_interpretation(parsed, brief, message, previous, *, review):
         kept = [
             item
             for item in parsed.unsupported
-            if not (COMPARISON_REQUEST.search(item) and not UNMODELED.search(item))
+            if not (
+                COMPARISON_REQUEST.search(item)
+                and SUPPORTED_COMPARISON.search(item)
+                and not UNMODELED.search(item)
+            )
         ]
         if kept != parsed.unsupported:
             updates["unsupported"] = kept
@@ -368,10 +385,13 @@ def screen_interpretation(parsed, brief, message, previous, *, review):
         if previous and (getattr(parsed, flag) or getattr(brief, flag))
     }
     if moved:
+        # Keep any goal that names another room in the request, so a real layout
+        # edit still reaches the "apply separately" check. The moved room itself
+        # is always named by the move, so it is not evidence of a layout goal.
         goals = [
             g
             for g in goals
-            if _mentions(message, g.room) and _mentions(message, g.target)
+            if any(_mentions(message, r) for r in {g.room, g.target} - moved)
         ]
         if isinstance(parsed, Interpretation):
             # A requested lock on the moved room stays, so the contradiction is reviewed.

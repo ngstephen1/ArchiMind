@@ -53,14 +53,14 @@ FIXED_PASSAGE = (
     + r"\b(?:measured|(?:the\s+)?(?:clear\s+)?width(?:\s+(?:is|taken|measured|specified)){0,3})"
     r"\s+across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
-# Nouns that name a group of people sharing a meal.
-PARTY_NOUN = (
-    r"(?:people|persons?|guests?|diners?|hosts?|residents?|relatives"
-    r"|family members|friends|adults)"
-)
+# Nouns that count diners wherever dining is discussed.
+DINER_NOUN = r"(?:people|persons?|guests?|diners?|hosts?|residents?)"
+# Household words such as "two adults and two friends" describe who lives or
+# visits. They count as diners only beside a seat, place or table.
+PARTY_NOUN = r"(?:" + DINER_NOUN[3:-1] + r"|relatives|family members|friends|adults)"
 PARTY = r"\s+" + PARTY_NOUN + r"\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
-GROUP = COUNT + r"\s+(?:dinner\s+)?" + PARTY_NOUN + r"\b"
+GROUP = COUNT + r"\s+(?:dinner\s+)?" + DINER_NOUN + r"\b"
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
 TABLE_ALLOCATION = (
     GROUPS + r"|" + COUNT + r"(?:\s+(?:" + PARTY_NOUN + r"|seats|places))?"
@@ -72,7 +72,7 @@ SEATED = (
     r"(?:(?:sit|eat|dine|be seated)(?:\s+down)?(?:\s+together)?\s+)?"
 )
 TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
-TABLE_POSITION = r"\s+(?:at|around)\s+"
+TABLE_POSITION = r"\s+" + SEATED + r"(?:at|around)\s+"
 FIRST_TABLE = (
     r"(?P<first>"
     + TABLE_ALLOCATION
@@ -145,8 +145,8 @@ DINING_CONTEXT = (
 )
 OFFSITE_LOCATION = r"(?:off[- ]site|away from home|at (?:a |the )?restaurant|at work)"
 OFFSITE_MEAL = (
-    r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine)(?:\s+together)?)"
-    rf"\s+{OFFSITE_LOCATION}\b"
+    r"\b(?:breakfast|lunch|dinner|meal|(?:eat|dine|sit)(?:\s+together)?)"
+    r"(?:\s+(?:at|around)\s+" + ONE_TABLE + r")?" + rf"\s+{OFFSITE_LOCATION}\b"
     rf"|^\s*{OFFSITE_LOCATION}\s*[,:]"
 )
 HOME_DINING_LOCATION = re.compile(
@@ -443,8 +443,8 @@ def requests_single_table(message):
             continue
         prefix = clause[: table.start()].strip()
         if re.search(
-            r"\b(?:all|everyone|party|seats?|places?|seating|dine|sit|seated|together"
-            r"|people|persons|guests|diners)\b",
+            r"\b(?:all|everyone|party|seats?|places?|seating|dine|eat|sit|seated"
+            r"|together|family|" + PARTY_NOUN + r")\b",
             prefix,
         ):
             return True
@@ -739,6 +739,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             )
         elif not totals and (not seats or seats < minimum):
             totals.add(minimum)
+    stated = next(iter(totals)) if len(totals) == 1 else None
     if len(totals) > 1 or (
         totals and "dining_seats" in explicit and seats not in totals
     ):
@@ -747,12 +748,17 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         )
     elif totals:
         seats = totals.pop()
-    if single_table_conflict is not None and seats > 4:
-        # Keep the party size and explain the modeled table limit in one question.
+    if single_table_conflict is not None and (stated or seats) > 4:
+        # Quote the brief's own party size, never a count taken from the controls.
+        asked = (
+            f"The brief asks for {stated} places at one dining table"
+            if stated
+            else "The brief asks for one dining table"
+        )
         questions[single_table_conflict] = (
-            f"The brief asks for {seats} places at one dining table, but the controls allow two. "
+            f"{asked}, but the controls allow two. "
             "The largest modeled table has four places. "
-            f"Keep all {seats} places at one table as an open requirement, or revise the brief or controls."
+            "Keep everyone at one table as an open requirement, or revise the brief or controls."
         )
 
     circulation = text if evaluate_passage else ""

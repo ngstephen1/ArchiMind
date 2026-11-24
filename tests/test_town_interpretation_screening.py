@@ -153,3 +153,103 @@ def test_single_table_conflict_keeps_seats_and_explains_the_table_limit():
     assert "four places" in question
     review = review_summary(brief, message=text, questions=questions)
     assert "7 dining places at one table" in review["requirements"]
+
+
+# Review findings on #111.
+
+
+def test_listed_room_lock_survives_a_move_in_that_room(provider, saved_home):
+    message = "Keep the bathroom and study unchanged. Move the study desk closer to its window."
+    provider(closer_study_desk=True, lock_rooms=["bathroom", "study"])
+    request = review_request(message, width=15, depth=16, formal_salon=True)
+    with pytest.raises(service.BriefClarification, match="unlock its study"):
+        service.interpret(request, saved_home)
+
+
+def test_keep_one_room_and_move_another_is_not_a_lock_on_the_moved_room():
+    message = "Keep the bathroom and move the study desk closer to its window."
+    assert service._asks_to_keep(message, "bathroom")
+    assert not service._asks_to_keep(message, "study")
+
+
+@pytest.mark.parametrize(
+    "objection",
+    [
+        "Comparison of one-storey and two-storey layouts",
+        "Compare a garage option",
+        "Compare the two plans",
+    ],
+)
+def test_comparisons_town_cannot_produce_stay_unsupported(provider, objection):
+    provider(unsupported=[objection])
+    with pytest.raises(service.BriefClarification, match="Unsupported"):
+        service.interpret(
+            review_request("Compare the plans.", width=15, depth=16), None
+        )
+
+
+def test_shared_table_without_a_verb_conflicts_with_split_control():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Six adults at one shared table.",
+        None,
+    )
+    assert (brief.dining_seats, brief.split_dining) == (6, False)
+    assert questions and "6 places at one dining table" in questions[0]
+
+
+def test_two_seated_groups_at_separate_tables_keep_both_counts():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "Four adults sit at one table and four adults sit at the other table.",
+        None,
+    )
+    assert brief.dining_seats == 8
+    assert any("separate dining tables" in q for q in questions)
+
+
+def test_room_synonym_keeps_a_requested_goal_during_a_move(provider, saved_home):
+    message = "Move the study desk closer to its window and keep the lounge far from the salon."
+    provider(
+        closer_study_desk=True,
+        room_goals=[dict(room="living", relation="far", target="salon")],
+    )
+    request = review_request(message, width=15, depth=16, formal_salon=True)
+    with pytest.raises(service.BriefClarification, match="separately"):
+        service.interpret(request, saved_home)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Two adults and two friends live here; put the kitchen-dining room by the garden.",
+        "Six friends will eat together at one shared table at a restaurant.",
+    ],
+)
+def test_household_and_offsite_wording_adds_no_home_seats(text):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True), text, None
+    )
+    assert (brief.dining_seats, questions) == (0, [])
+
+
+@pytest.mark.parametrize(
+    ("text", "quoted"),
+    [
+        (
+            "Seven of us eat together at one table.",
+            "The brief asks for one dining table",
+        ),
+        ("Seven relatives eat together at one table.", "The brief asks for 7 places"),
+    ],
+)
+def test_conflict_question_quotes_only_the_brief_count(text, quoted):
+    _, questions = requirement_controls(
+        Brief(
+            compare_tradeoffs=True, formal_salon=True, split_dining=True, dining_seats=8
+        ),
+        text,
+        None,
+    )
+    assert questions[0].startswith(quoted)
+    assert "8 places" not in questions[0]
