@@ -319,8 +319,15 @@ SUPPORTED_COMPARISON = re.compile(
 # Comparisons of anything Town does not model stay unsupported.
 UNMODELED = re.compile(
     r"\b(?:acoustic|sound|noise|hear|code|complian|accessib|cost|price|budget|glare"
-    r"|daylight|sunlight|energy|thermal|guarantee|storey|story|stories|floor|level"
-    r"|basement|attic|garage|pool|extension|stair)",
+    r"|daylight|sunlight|energy|thermal|guarantee|storeys?|story|stories|floors\b"
+    r"|(?:one|two|three|single|multi|second|upper|lower|ground|first|extra|another)"
+    r"[- ](?:floor|level)\b|basement|attic|garage|pool|extension|stair)",
+    re.IGNORECASE,
+)
+# "Leave the layout as it is": a request that rules out room-placement changes.
+LAYOUT_UNCHANGED = re.compile(
+    r"\b(?:keep|leave)\s+(?:the\s+)?(?:layout|plan|floor plan|room placement|rooms)"
+    r"\b[^.;!?]*\b(?:as it is|as is|unchanged|the same|alone|where (?:it|they) (?:is|are))",
     re.IGNORECASE,
 )
 MOVED_ROOM = {"closer_study_desk": "study", "shift_bedroom_chair": "bedroom"}
@@ -334,8 +341,10 @@ ROOM_WORDS = {
 }
 # A new action verb starts an independent request, e.g. "keep X and move Y".
 ACTION_BREAK = (
-    r"[.;!?]|\bbut\b|\b(?:and|then)\s+(?=(?:move|shift|slide|put|place|bring|push"
-    r"|pull|rotate|turn|add|swap|replace|change)\b)"
+    r"[.;!?]|\bbut\b|\b(?:and|then)\s+(?=(?:please\s+|also\s+|just\s+"
+    r"|(?:i|we)\s+(?:want|would like|need)\s+(?:you\s+)?to\s+)?"
+    r"(?:move|shift|slide|put|place|bring|push|pull|rotate|turn|add|swap|replace"
+    r"|change)\b)"
 )
 
 
@@ -385,13 +394,16 @@ def screen_interpretation(parsed, brief, message, previous, *, review):
         if previous and (getattr(parsed, flag) or getattr(brief, flag))
     }
     if moved:
-        # Keep any goal that names another room in the request, so a real layout
-        # edit still reaches the "apply separately" check. The moved room itself
-        # is always named by the move, so it is not evidence of a layout goal.
+        # Keep a goal only when the request names every room in it other than the
+        # moved one (that room is named by the move itself), so a real layout edit
+        # still reaches the "apply separately" check. A request to leave the layout
+        # unchanged rules out every inferred goal.
         goals = [
             g
             for g in goals
-            if any(_mentions(message, r) for r in {g.room, g.target} - moved)
+            if not LAYOUT_UNCHANGED.search(message)
+            and (others := {g.room, g.target} - moved)
+            and all(_mentions(message, r) for r in others)
         ]
         if isinstance(parsed, Interpretation):
             # A requested lock on the moved room stays, so the contradiction is reviewed.

@@ -62,8 +62,11 @@ PARTY = r"\s+" + PARTY_NOUN + r"\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
 GROUP = COUNT + r"\s+(?:dinner\s+)?" + DINER_NOUN + r"\b"
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
+# Household words join a group only when the group is tied to a table.
+MEAL_GROUP = COUNT + r"\s+(?:dinner\s+)?" + PARTY_NOUN + r"\b"
+MEAL_GROUPS = MEAL_GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + MEAL_GROUP + r")+"
 TABLE_ALLOCATION = (
-    GROUPS + r"|" + COUNT + r"(?:\s+(?:" + PARTY_NOUN + r"|seats|places))?"
+    MEAL_GROUPS + r"|" + COUNT + r"(?:\s+(?:" + PARTY_NOUN + r"|seats|places))?"
 )
 ONE_TABLE = r"(?:one|a single|the same)(?: shared)? (?:dining )?table"
 # An optional seating verb between a party and its table, e.g. "must eat together".
@@ -157,6 +160,7 @@ DINING_TRANSITION = re.compile(
     r"(?:(?:will|would|must)\s+)?"
     r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
     r"|\bwhile\s+(?!(?:at|in|near|around)\b)"
+    r"|\b(?:even though|although|though|whereas)\s+"
 )
 DINING_ACTIVITY_END = re.compile(r"\b(?:before|after)\s+(?=(?:we|i|they|you)\s+)")
 HOME_TABLE_FOLLOWUP = re.compile(
@@ -430,6 +434,16 @@ def _normalize_table_ends(text):
     return SAME_TABLE_ENDS.sub(combine, text)
 
 
+WORK_TABLE = (
+    r"\b(?:work(?:s|ing)?|study(?:ing)?|craft(?:s|ing)?|sew(?:s|ing)?|homework)\b"
+    r"|\bin (?:the |our |my )?(?:study|office|workroom|bedroom)\b"
+)
+MEAL_WORDS = (
+    r"\b(?:dine|dining|diners?|eat(?:s|ing)?|meals?|dinner|lunch|breakfast|seats?"
+    r"|places?|seating|guests?)\b"
+)
+
+
 def requests_single_table(message):
     for clause in _dining_clauses(_affirmative_clauses(message), for_arrangement=True):
         clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
@@ -442,6 +456,8 @@ def requests_single_table(message):
         ):
             continue
         prefix = clause[: table.start()].strip()
+        if re.search(WORK_TABLE, clause) and not re.search(MEAL_WORDS, clause):
+            continue  # A work or study table is not a dining arrangement.
         if re.search(
             r"\b(?:all|everyone|party|seats?|places?|seating|dine|eat|sit|seated"
             r"|together|family|" + PARTY_NOUN + r")\b",
@@ -569,6 +585,18 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         )
         for party in re.finditer(GROUPS, dining)
     ]
+    # Groups such as "two adults and two friends" count only when seated at a table.
+    for party in re.finditer(
+        MEAL_GROUPS + r"(?=\s+" + SEATED + r"(?:at|around)\s+" + ONE_TABLE + r"\b)",
+        dining,
+    ):
+        if not any(s <= party.start() < e for (s, e), _ in parties):
+            parties.append(
+                (
+                    party.span(),
+                    sum(_seat_count(g[1]) for g in re.finditer(MEAL_GROUP, party[0])),
+                )
+            )
     kitchen_table = re.search(
         COUNT
         + PARTY

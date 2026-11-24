@@ -253,3 +253,82 @@ def test_conflict_question_quotes_only_the_brief_count(text, quoted):
     )
     assert questions[0].startswith(quoted)
     assert "8 places" not in questions[0]
+
+
+# Second review pass on #111.
+
+
+@pytest.mark.parametrize(
+    ("objection", "cleared"),
+    [
+        ("Compare the floor plans by bedroom-to-bathroom distance", True),
+        ("Compare one-floor and two-floor distance", False),
+        ("Comparison of one-storey and two-storey layouts", False),
+    ],
+)
+def test_floor_plan_wording_is_not_a_storey_request(provider, objection, cleared):
+    provider(unsupported=[objection])
+    request = review_request("Compare the plans.", width=15, depth=16)
+    if cleared:
+        assert service.interpret(request, None).compare_tradeoffs
+    else:
+        with pytest.raises(service.BriefClarification, match="Unsupported"):
+            service.interpret(request, None)
+
+
+def test_household_groups_at_one_table_count_every_diner():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "Two adults and two friends eat together at one table.",
+        None,
+    )
+    assert (brief.dining_seats, questions) == (4, [])
+
+
+def test_contrasting_restaurant_clause_keeps_home_seating():
+    brief, _ = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        "At home we need four dining seats, even though we usually eat at one "
+        "shared table at a restaurant.",
+        None,
+    )
+    assert brief.dining_seats == 4
+
+
+def test_work_table_is_not_a_single_dining_table():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Three adults work at one table in the study.",
+        None,
+    )
+    assert (brief.dining_seats, brief.split_dining, questions) == (0, True, [])
+
+
+def test_polite_move_after_a_keep_request_is_its_own_clause():
+    message = "Keep the bathroom unchanged and please move the study desk."
+    assert service._asks_to_keep(message, "bathroom")
+    assert not service._asks_to_keep(message, "study")
+
+
+def test_unchanged_layout_drops_inferred_goals_during_a_move(provider, saved_home):
+    message = (
+        "Leave the layout as it is; we host in the kitchen and salon. "
+        "Just move the study desk closer to its window."
+    )
+    provider(
+        closer_study_desk=True,
+        room_goals=[dict(room="kitchen-dining", relation="near", target="salon")],
+    )
+    request = review_request(message, width=15, depth=16, formal_salon=True)
+    brief = service.interpret(request, saved_home)
+    assert brief.closer_study_desk and brief.room_goals == []
+
+
+def test_goal_naming_only_one_other_room_is_dropped_during_a_move(provider, saved_home):
+    message = "We often host in the kitchen. Move the study desk closer to its window."
+    provider(
+        closer_study_desk=True,
+        room_goals=[dict(room="kitchen-dining", relation="near", target="salon")],
+    )
+    request = review_request(message, width=15, depth=16, formal_salon=True)
+    assert service.interpret(request, saved_home).room_goals == []
