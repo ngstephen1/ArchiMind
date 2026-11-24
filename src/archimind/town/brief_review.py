@@ -53,17 +53,23 @@ FIXED_PASSAGE = (
     + r"\b(?:measured|(?:the\s+)?(?:clear\s+)?width(?:\s+(?:is|taken|measured|specified)){0,3})"
     r"\s+across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
-PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
-# Two or more groups that sit together, e.g. "two guests and two hosts".
-GROUP = (
-    COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
+# Nouns that name a group of people sharing a meal.
+PARTY_NOUN = (
+    r"(?:people|persons?|guests?|diners?|hosts?|residents?|relatives"
+    r"|family members|friends|adults)"
 )
+PARTY = r"\s+" + PARTY_NOUN + r"\b"
+# Two or more groups that sit together, e.g. "two guests and two hosts".
+GROUP = COUNT + r"\s+(?:dinner\s+)?" + PARTY_NOUN + r"\b"
 GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
 TABLE_ALLOCATION = (
-    GROUPS
-    + r"|"
-    + COUNT
-    + r"(?:\s+(?:people|persons?|diners?|guests?|hosts?|residents?|seats|places))?"
+    GROUPS + r"|" + COUNT + r"(?:\s+(?:" + PARTY_NOUN + r"|seats|places))?"
+)
+ONE_TABLE = r"(?:one|a single|the same)(?: shared)? (?:dining )?table"
+# An optional seating verb between a party and its table, e.g. "must eat together".
+SEATED = (
+    r"(?:(?:must|need to|needs to|want to|wants to|will|would|should|can)\s+)?"
+    r"(?:(?:sit|eat|dine|be seated)(?:\s+down)?(?:\s+together)?\s+)?"
 )
 TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
 TABLE_POSITION = r"\s+(?:at|around)\s+"
@@ -72,7 +78,7 @@ FIRST_TABLE = (
     + TABLE_ALLOCATION
     + r")"
     + TABLE_POSITION
-    + r"(?:one|a single|the same) (?:dining )?table"
+    + ONE_TABLE
     + r"(?:\s+in (?:the )?(?P<first_room>"
     + TABLE_ROOM
     + r")\b)?"
@@ -156,7 +162,7 @@ DINING_ACTIVITY_END = re.compile(r"\b(?:before|after)\s+(?=(?:we|i|they|you)\s+)
 HOME_TABLE_FOLLOWUP = re.compile(
     r"(?:(?:we|i)\s+)?(?:(?:will|would|must)\s+)?"
     r"(?:need|want|require)\s+(?:everyone|everybody|all (?:of us|guests|diners))"
-    r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table\b"
+    r"\s+(?:at|around) " + ONE_TABLE + r"\b"
 )
 SALON_ACTION = (
     r"\b(?:include|add|use|with) (?:a |the )?(?:(?:separate|dedicated|additional) )?"
@@ -427,9 +433,7 @@ def _normalize_table_ends(text):
 def requests_single_table(message):
     for clause in _dining_clauses(_affirmative_clauses(message), for_arrangement=True):
         clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
-        table = re.search(
-            r"\b(?:at|around) (?:one|a single|the same) (?:dining )?table\b", clause
-        )
+        table = re.search(r"\b(?:at|around) " + ONE_TABLE + r"\b", clause)
         if not table or re.search(
             r"\b(?:other|another|second|separate) (?:dining )?tables?\b"
             r"|\b(?:at|around) (?:the )?other\s*(?:[.,;]|$)"
@@ -568,7 +572,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     kitchen_table = re.search(
         COUNT
         + PARTY
-        + r"\s+(?:at|around) (?:one|a single|the same) (?:dining )?table"
+        + r"\s+(?:at|around) "
+        + ONE_TABLE
         + r"\s+in (?:the )?kitchen(?:[- ]dining)?\b",
         dining,
     )
@@ -614,7 +619,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         + PARTY
         + r"|\bseat\s+"
         + COUNT
-        + r")\s+(?=(?:at|around) (?:one|a single|the same|the other|the second) (?:dining )?table\b)",
+        + r")\s+(?="
+        + SEATED
+        + r"(?:at|around) (?:one|a single|the same|the other|the second)"
+        + r"(?: shared)? (?:dining )?table\b)",
         dining,
     ):
         index = next(i for i, group in enumerate(match.groups(), 1) if group)
@@ -672,8 +680,10 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         questions.append(
             "Confirm separate dining tables in the brief controls, or revise the seating arrangement."
         )
+    single_table_conflict = None
     if requests_single_table(text):
         if split and "split_dining" in explicit:
+            single_table_conflict = len(questions)
             questions.append(
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
             )
@@ -737,6 +747,13 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         )
     elif totals:
         seats = totals.pop()
+    if single_table_conflict is not None and seats > 4:
+        # Keep the party size and explain the modeled table limit in one question.
+        questions[single_table_conflict] = (
+            f"The brief asks for {seats} places at one dining table, but the controls allow two. "
+            "The largest modeled table has four places. "
+            f"Keep all {seats} places at one table as an open requirement, or revise the brief or controls."
+        )
 
     circulation = text if evaluate_passage else ""
     if fixed := re.search(FIXED_PASSAGE, circulation):
@@ -1089,7 +1106,7 @@ def review_summary(
         "presentation_requests": [
             match.group(0).strip()
             for match in re.finditer(
-                r"\b(?:why|explain)\b[^.!?]*", message, re.IGNORECASE
+                r"\b(?:why|explain|compare)\b[^.!?]*", message, re.IGNORECASE
             )
         ],
         "questions": questions,
