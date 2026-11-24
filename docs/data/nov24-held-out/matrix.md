@@ -1,4 +1,4 @@
-| Case | Slot | Commit | Outcome | Calls | Elapsed (s) | Hard constraints | Source accuracy | Candidate difference | Latency | Provider use | Severity | Reviewer |
+| Run | Slot | Town commit | Outcome | OpenAI phases | Elapsed (s) | Hard constraints | Source accuracy | Candidate difference | Latency | Provider use | Severity | Reviewer |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | H01 | Hosting and home-office trade-offs on a fresh lot | `301762b` | fail | 2 | 5.19 | 1 | 1 | 0 | 2 | 2 | high | Claude (provisional), Hieu to confirm |
 | H02 | Ambiguous or conflicting seating that needs a confirmation | `301762b` | partial | 2 | 4.05 | 1 | 1 | N/A | 2 | 2 | medium | Claude (provisional), Hieu to confirm |

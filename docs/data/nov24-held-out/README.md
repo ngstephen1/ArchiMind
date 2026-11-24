@@ -5,9 +5,9 @@ Held-out evaluation for [#68](https://github.com/ngstephen1/ArchiMind/issues/68)
 with `gpt-5.4-mini-2026-03-17`. The sealed packet (SHA-256
 `966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6`) was verified before
 opening. Its prompts, answer key, full receipts and saved-design answers stay with the
-evaluation owner until the candidate freeze. This folder publishes only case IDs, the
+evaluation owner until the candidate freeze. This folder publishes only run IDs, the
 public slot names from the [baseline package](../nov24-baseline/README.md#twelve-public-acceptance-briefs),
-outcomes, scores, calls, latency, hashes and the commit.
+outcomes, scores, OpenAI phases, latency, hashes and commits.
 
 **Scoring status: provisional.** The agent proposed the scores below. Hieu reviews each
 row against the sealed answer key and assigns the final severity and reviewer before sign-off.
@@ -18,12 +18,14 @@ row against the sealed answer key and assigns the final severity and reviewer be
 
 On this commit the run does **not** meet the sign-off bar of five expected outcomes out
 of six. Two cases pass, two are partial and two fail. No case invented a measurement or
-changed a saved snapshot. Each saved-revision case compared equal before and after.
+changed a saved snapshot. H04's revision 1 compared equal before and after its job. H05
+and H06 were asked in the browser. Their revision 1 was later read back through the API
+and still matched the recorded base, with no jobs on either project.
 
-| Case | Slot | Outcome | Calls | Elapsed |
+| Case | Slot | Outcome | OpenAI phases | Elapsed |
 | --- | --- | --- | --- | --- |
 | H01 | Hosting and home-office trade-offs | Fail | 2 | 5.19 s |
-| H02 | Conflicting seating needing confirmation | Partial | 2 | 4.05 s |
+| H02 | Conflicting seating needing confirmation | Partial | 2 (1 request) | 4.05 s |
 | H03 | Width conversion and circulation | Pass | 3 | 11.83 s |
 | H04 | Room lock and targeted saved-revision change | Fail | 2 | 4.76 s |
 | H05 | Two plausible referents in a follow-up | Pass | 0 | browser, immediate |
@@ -45,8 +47,10 @@ rows and keep these receipts.
 
 - Local Town on a dedicated SQLite evaluation database with providers enabled and the
   Codex advisor disabled. Each design job reserves three bounded OpenAI calls.
-- Calls are counted as one bounded call per recorded OpenAI phase in the worker.
-  Elapsed time runs from job submission to the terminal status and includes polling at 0.75 s.
+- The OpenAI phase count is an upper bound on provider requests. The worker logs a phase
+  before it runs, and Town's deterministic review can stop interpretation before the
+  request is sent. That happened in H02, which made one request (styling). Elapsed time
+  runs from job submission to the terminal status and includes polling at 0.75 s.
 - The harness submits each case's packet controls directly to the local API. The ordinary
   Town form instead derives the seed from the revision and always requests comparison.
 - H04–H06 start from a zero-call base: seed 178, 15 × 15 m lot, formal salon, candidate A,
@@ -54,8 +58,10 @@ rows and keep these receipts.
 - H05 and H06 were asked through **Ask about the saved design** in Chrome at a
   1536 × 748 CSS viewport. That path is computed in the browser and makes no provider calls.
 - Two unrelated jobs were submitted through the Town page on the same evaluation database
-  before H01. They used four calls and are excluded from the case totals. Thirteen calls
-  were used in all.
+  before H01. They started four OpenAI phases and are excluded from the case totals. All
+  jobs together started thirteen phases, at most twelve provider requests.
+- These runs predate the `serve` command. Their model was read from `.env`, which matches
+  the launcher's resolution because no shell override was set.
 
 ## Reproduce
 
@@ -64,12 +70,16 @@ Keep the packet outside Git, for example in the ignored `storage/` directory.
 ```sh
 python scripts/held_out_eval.py setup --packet storage/held-out-briefs.json \
   --sha256 966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6
-TOWN_DB=storage/eval-68/town-eval.sqlite3 TOWN_PORT=8890 TOWN_EDITOR_PORT=8891 \
-  ARCHIMIND_ENABLE_CODEX_ADVISOR=0 python scripts/run_town.py --extra-team-jobs-on YYYY-MM-DD
+# In a separate terminal. Records the checkout commit and the model the worker uses.
+python scripts/held_out_eval.py serve --extra-team-jobs-on YYYY-MM-DD
 python scripts/held_out_eval.py run H01 --packet storage/held-out-briefs.json --confirm-live
 python scripts/held_out_eval.py record H05 --answer-file answer.txt --viewport 1536x748
+# Score every run in storage/eval-68/scores.json, keyed by run ID (H01, H01-rerun-<time>).
 python scripts/held_out_eval.py matrix --output docs/data/nov24-held-out/matrix.md
 ```
 
-Local mode allows five team jobs per UTC day with the extra-jobs flag. A rerun keeps the
-original receipt and writes a separate timestamped file.
+`scores.json` maps each run ID to `outcome`, the five axis scores, `severity` and
+`reviewer`. A `_status` entry describes the scoring state. `run` and `record` refuse to
+start when Town was launched from a different commit than the checkout. Neither replaces
+an original receipt. `--rerun` writes a separate timestamped run with its own matrix row
+and score. Local mode allows five team jobs per UTC day with the extra-jobs flag.

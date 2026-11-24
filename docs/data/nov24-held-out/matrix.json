@@ -1,9 +1,11 @@
 {
   "issue": 68,
   "scoring_status": "Provisional agent scoring on 301762b. Hieu reviews and replaces every row before sign-off.",
-  "cases": {
+  "runs": {
     "H01": {
+      "case": "H01",
       "slot": "Hosting and home-office trade-offs on a fresh lot",
+      "rerun": false,
       "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
       "tracked_changes": false,
       "model": "gpt-5.4-mini-2026-03-17",
@@ -11,7 +13,7 @@
       "base_revision": 0,
       "status": "failed",
       "elapsed_s": 5.19,
-      "provider_calls_started": 2,
+      "provider_phases_started": 2,
       "candidate_count": 0,
       "candidate_sha256": [],
       "prior_snapshot_unchanged": null,
@@ -31,7 +33,9 @@
       }
     },
     "H02": {
+      "case": "H02",
       "slot": "Ambiguous or conflicting seating that needs a confirmation",
+      "rerun": false,
       "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
       "tracked_changes": false,
       "model": "gpt-5.4-mini-2026-03-17",
@@ -39,7 +43,7 @@
       "base_revision": 0,
       "status": "failed",
       "elapsed_s": 4.05,
-      "provider_calls_started": 2,
+      "provider_phases_started": 2,
       "candidate_count": 0,
       "candidate_sha256": [],
       "prior_snapshot_unchanged": null,
@@ -59,7 +63,9 @@
       }
     },
     "H03": {
+      "case": "H03",
       "slot": "Width conversion and circulation on a compact lot",
+      "rerun": false,
       "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
       "tracked_changes": false,
       "model": "gpt-5.4-mini-2026-03-17",
@@ -67,7 +73,7 @@
       "base_revision": 0,
       "status": "ready",
       "elapsed_s": 11.83,
-      "provider_calls_started": 3,
+      "provider_phases_started": 3,
       "candidate_count": 2,
       "candidate_sha256": [
         "4ad68aaf84d31a996125637534d5faeeaf67fc5e4b7d732b0afc1f5b60971cb4",
@@ -91,7 +97,9 @@
       }
     },
     "H04": {
+      "case": "H04",
       "slot": "Room lock and targeted change to a saved revision",
+      "rerun": false,
       "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
       "tracked_changes": false,
       "model": "gpt-5.4-mini-2026-03-17",
@@ -99,7 +107,7 @@
       "base_revision": 1,
       "status": "failed",
       "elapsed_s": 4.76,
-      "provider_calls_started": 2,
+      "provider_phases_started": 2,
       "candidate_count": 0,
       "candidate_sha256": [],
       "prior_snapshot_unchanged": true,
@@ -119,10 +127,12 @@
       }
     },
     "H05": {
+      "case": "H05",
       "slot": "Two plausible object referents in a saved-design follow-up",
+      "rerun": false,
       "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
       "tracked_changes": false,
-      "provider_calls_started": 0,
+      "provider_phases_started": 0,
       "path": "Ask about the saved design (browser, deterministic)",
       "viewport": "1536x748",
       "scores": {
@@ -137,10 +147,12 @@
       }
     },
     "H06": {
+      "case": "H06",
       "slot": "Conclusion that needs site, supplier or acoustic evidence",
+      "rerun": false,
       "commit": "301762b72aac1a537b06e38db1d69dbecdbff42e",
       "tracked_changes": false,
-      "provider_calls_started": 0,
+      "provider_phases_started": 0,
       "path": "Ask about the saved design (browser, deterministic)",
       "viewport": "1536x748",
       "scores": {

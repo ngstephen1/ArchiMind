@@ -2,12 +2,19 @@ import importlib.util
 import json
 from pathlib import Path
 
+import pytest
+
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "held_out_eval.py"
 spec = importlib.util.spec_from_file_location("held_out_eval", SCRIPT)
 held_out_eval = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(held_out_eval)
 
 SECRET = "Synthetic private prompt that must never be published"
+
+
+def write(path, data):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(data), encoding="utf-8")
 
 
 def test_request_uses_packet_controls_and_saved_lot():
@@ -35,40 +42,103 @@ def test_request_uses_packet_controls_and_saved_lot():
     )
 
 
-def test_public_outputs_exclude_prompts_results_and_answers(tmp_path):
-    receipts = tmp_path / "receipts"
-    receipts.mkdir()
-    (receipts / "H01.json").write_text(
-        json.dumps(
-            {
-                "commit": "abc",
-                "status": "failed",
-                "elapsed_s": 1.0,
-                "provider_calls_started": 2,
-                "provider_phases": {"OpenAI · Interpret brief": ["running", "failed"]},
-                "request": {"message": SECRET},
-                "result": SECRET,
-                "events": [{"task": SECRET}],
-            }
-        )
-    )
-    (receipts / "H05.json").write_text(
-        json.dumps({"commit": "abc", "answer": SECRET, "provider_calls_started": 0})
-    )
-    (tmp_path / "scores.json").write_text(
-        json.dumps({"H01": {"outcome": "fail", "notes": SECRET}})
-    )
-
+def matrix(tmp_path):
     class Args:
         out = str(tmp_path)
         output = str(tmp_path / "public" / "matrix.md")
 
-    (tmp_path / "public").mkdir()
+    (tmp_path / "public").mkdir(exist_ok=True)
     held_out_eval.matrix(Args)
-    published = (tmp_path / "public" / "matrix.md").read_text() + (
-        tmp_path / "public" / "matrix.json"
-    ).read_text()
+    md = (tmp_path / "public" / "matrix.md").read_text(encoding="utf-8")
+    js = (tmp_path / "public" / "matrix.json").read_text(encoding="utf-8")
+    return md, json.loads(js), md + js
+
+
+def test_public_outputs_exclude_prompts_results_and_answers(tmp_path):
+    write(
+        tmp_path / "receipts" / "H01.json",
+        {
+            "case": "H01",
+            "commit": "abc",
+            "status": "failed",
+            "elapsed_s": 1.0,
+            "provider_calls_started": 2,
+            "provider_phases": {"OpenAI · Interpret brief": ["running", "failed"]},
+            "request": {"message": SECRET},
+            "result": SECRET,
+            "events": [{"task": SECRET}],
+        },
+    )
+    write(
+        tmp_path / "receipts" / "H05.json",
+        {"case": "H05", "commit": "abc", "answer": SECRET},
+    )
+    write(tmp_path / "scores.json", {"H01": {"outcome": "fail", "notes": SECRET}})
+    _, receipt, published = matrix(tmp_path)
     assert SECRET not in published
-    receipt = json.loads((tmp_path / "public" / "matrix.json").read_text())
-    assert receipt["cases"]["H01"]["provider_phases"] == ["OpenAI · Interpret brief"]
-    assert receipt["cases"]["H01"]["scores"] == {"outcome": "fail"}
+    run = receipt["runs"]["H01"]
+    assert run["provider_phases"] == ["OpenAI · Interpret brief"]
+    assert run["provider_phases_started"] == 2
+    assert run["scores"] == {"outcome": "fail"}
+
+
+def test_rerun_is_a_separate_row_with_its_own_score_and_commit(tmp_path):
+    write(
+        tmp_path / "receipts" / "H01.json",
+        {"case": "H01", "commit": "aaaaaaa1", "candidate_count": 0},
+    )
+    write(
+        tmp_path / "receipts" / "H01-rerun-2.json",
+        {"case": "H01", "commit": "bbbbbbb2", "town_commit": "bbbbbbb2"},
+    )
+    write(
+        tmp_path / "scores.json",
+        {"H01": {"outcome": "fail"}, "H01-rerun-2": {"outcome": "pass"}},
+    )
+    md, receipt, _ = matrix(tmp_path)
+    assert receipt["runs"]["H01"]["scores"]["outcome"] == "fail"
+    assert receipt["runs"]["H01"]["candidate_count"] == 0
+    assert receipt["runs"]["H01-rerun-2"]["scores"]["outcome"] == "pass"
+    assert receipt["runs"]["H01-rerun-2"]["rerun"] is True
+    assert "| H01 | " in md and "`aaaaaaa` | fail" in md
+    assert "| H01 rerun | " in md and "`bbbbbbb` | pass" in md
+
+
+def test_receipt_from_another_case_is_rejected(tmp_path):
+    write(tmp_path / "receipts" / "H01-rerun-3.json", {"case": "H02"})
+    write(tmp_path / "scores.json", {})
+    with pytest.raises(SystemExit, match="records case H02"):
+        matrix(tmp_path)
+
+
+def test_original_receipts_are_never_replaced(tmp_path):
+    write(tmp_path / "receipts" / "H06.json", {"case": "H06"})
+    with pytest.raises(SystemExit, match="--rerun"):
+        held_out_eval.receipt_path(tmp_path, "H06", rerun=False)
+    path = held_out_eval.receipt_path(tmp_path, "H06", rerun=True)
+    assert path.name.startswith("H06-rerun-") and not path.exists()
+    assert held_out_eval.receipt_path(tmp_path, "H05", rerun=False).name == "H05.json"
+
+
+def test_a_stale_town_server_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setattr(
+        held_out_eval, "commit", lambda: {"commit": "new", "tracked_changes": False}
+    )
+    with pytest.raises(SystemExit, match="serve"):
+        held_out_eval.town_start(tmp_path)
+    write(
+        tmp_path / "town-start.json",
+        {"commit": "old", "tracked_changes": False, "model": "m"},
+    )
+    with pytest.raises(SystemExit, match="Restart"):
+        held_out_eval.town_start(tmp_path)
+    write(
+        tmp_path / "town-start.json",
+        {"commit": "new", "tracked_changes": False, "model": "m"},
+    )
+    assert held_out_eval.town_start(tmp_path) == {"town_commit": "new", "model": "m"}
+
+
+def test_effective_model_prefers_the_shell_like_the_launcher(monkeypatch):
+    monkeypatch.setenv("ARCHIMIND_OPENAI_MODEL", "shell-model")
+    assert held_out_eval.effective_model() == "shell-model"

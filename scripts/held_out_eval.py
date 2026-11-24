@@ -2,10 +2,11 @@
 
 The packet, prompts, answer key and full receipts stay in an ignored directory
 (default ``storage/eval-68``). Only ``matrix`` writes a public summary, and it
-contains case IDs, slot names, outcomes, scores, calls, latency and the commit.
+contains run IDs, slot names, outcomes, scores, phases, latency and commits.
 
     setup   verify the packet hash, initialise the evaluation database and apply
             the zero-call base homes for cases whose controls name a ``base``
+    serve   launch Town on the evaluation database and record its commit and model
     run     submit one live case through the local Town API and record a receipt
             (requires --confirm-live; makes the app's bounded OpenAI calls)
     record  record a saved-design answer observed in the ordinary browser
@@ -79,12 +80,74 @@ def save(path, data):
     tmp.replace(path)
 
 
-def model_name():
+def effective_model():
+    """Resolve the model the way the Town launcher does: shell, then .env, then default."""
+    if os.getenv("ARCHIMIND_OPENAI_MODEL"):
+        return os.environ["ARCHIMIND_OPENAI_MODEL"]
     env = ROOT / ".env"
     for line in env.read_text(encoding="utf-8").splitlines() if env.exists() else []:
         if line.startswith("ARCHIMIND_OPENAI_MODEL="):
-            return line.split("=", 1)[1].strip().strip("'\"")
-    return os.getenv("ARCHIMIND_OPENAI_MODEL", "")
+            value = line.split("=", 1)[1].strip().strip("'\"")
+            if value:
+                return value
+    sys.path.insert(0, str(ROOT / "src"))
+    from archimind.agents.requirements_agent import DEFAULT_MODEL
+
+    return DEFAULT_MODEL
+
+
+def town_start(out):
+    """The commit and model Town was launched with by ``serve``; refuse stale servers."""
+    path = Path(out) / "town-start.json"
+    if not path.exists():
+        raise SystemExit(
+            "Start Town with `serve` so its commit and model are recorded."
+        )
+    start = json.loads(path.read_text(encoding="utf-8"))
+    now = commit()
+    if start["commit"] != now["commit"] or start["tracked_changes"]:
+        raise SystemExit(
+            f"Town was started from {start['commit'][:7]} but the checkout is "
+            f"{now['commit'][:7]}. Restart it with `serve` before recording a run."
+        )
+    return {"town_commit": start["commit"], "model": start["model"]}
+
+
+def receipt_path(out, cid, rerun):
+    """Original receipts are immutable. Each rerun gets its own file."""
+    original = Path(out) / "receipts" / f"{cid}.json"
+    if not original.exists():
+        return original
+    if not rerun:
+        raise SystemExit(f"{original} exists. Pass --rerun to keep it and add a rerun.")
+    return original.with_name(f"{cid}-rerun-{int(time.time())}.json")
+
+
+def serve(args):
+    """Launch Town on the evaluation database, recording its commit and model."""
+    out = Path(args.out)
+    model = effective_model()
+    save(
+        out / "town-start.json",
+        {
+            **commit(),
+            "model": model,
+            "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        },
+    )
+    env = dict(
+        os.environ,
+        TOWN_DB=str(out / "town-eval.sqlite3"),
+        TOWN_PORT=str(args.port),
+        TOWN_EDITOR_PORT=str(args.editor_port),
+        ARCHIMIND_ENABLE_CODEX_ADVISOR="0",
+        ARCHIMIND_OPENAI_MODEL=model,
+        PYTHONPATH=str(ROOT / "src"),
+    )
+    command = [sys.executable, str(ROOT / "scripts" / "run_town.py")]
+    if args.extra_team_jobs_on:
+        command += ["--extra-team-jobs-on", args.extra_team_jobs_on]
+    raise SystemExit(subprocess.call(command, cwd=ROOT, env=env))
 
 
 def setup(args):
@@ -130,7 +193,7 @@ def setup(args):
             "packet_sha256": sha,
             "packet_baseline": packet.get("baseline"),
             **commit(),
-            "model": model_name(),
+            "model": effective_model(),
             "database": str(db_path),
             "bases": bases,
             "created": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
@@ -189,11 +252,8 @@ def run(args):
     plan = json.loads((out / "run-plan.json").read_text(encoding="utf-8"))
     if sha != plan["packet_sha256"]:
         raise SystemExit("Packet differs from the one used for setup.")
-    receipt_path = out / "receipts" / f"{args.case}.json"
-    if receipt_path.exists() and not args.rerun:
-        raise SystemExit(
-            f"{receipt_path} exists. Pass --rerun to keep it and add a rerun."
-        )
+    town = town_start(out)
+    path = receipt_path(out, args.case, args.rerun)
     c = case(packet, args.case)
     if args.case in plan["bases"]:
         project, base = (
@@ -231,7 +291,7 @@ def run(args):
     receipt = {
         "case": args.case,
         **commit(),
-        "model": model_name(),
+        **town,
         "packet_sha256": sha,
         "project": project,
         "base_revision": base,
@@ -242,8 +302,11 @@ def run(args):
         "elapsed_s": round(finished - started, 2),
         "first_event_s": round(events[0]["time"] - started, 2) if events else None,
         "provider_phases": phases,
-        "provider_calls_started": len(phases),
-        "provider_count_basis": "one bounded call per recorded OpenAI phase in the worker",
+        "provider_phases_started": len(phases),
+        "provider_count_basis": (
+            "Upper bound: OpenAI team phases started. Town can stop a phase at its "
+            "deterministic review before the request is sent."
+        ),
         "candidate_count": len(candidates),
         "candidate_sha256": [digest(h) for h in candidates],
         "prior_snapshot_unchanged": None
@@ -252,12 +315,10 @@ def run(args):
         "result": result,
         "events": events,
     }
-    if receipt_path.exists():
-        receipt_path = receipt_path.with_name(f"{args.case}-rerun-{int(started)}.json")
-    save(receipt_path, receipt)
+    save(path, receipt)
     print(
         f"{args.case}: {status} in {receipt['elapsed_s']} s, "
-        f"{len(candidates)} candidate(s), {len(phases)} OpenAI phase(s) -> {receipt_path}"
+        f"{len(candidates)} candidate(s), {len(phases)} OpenAI phase(s) -> {path}"
     )
 
 
@@ -265,75 +326,101 @@ def record(args):
     out = Path(args.out)
     plan = json.loads((out / "run-plan.json").read_text(encoding="utf-8"))
     base = plan["bases"][args.case]
+    town = town_start(out)
+    path = receipt_path(out, args.case, args.rerun)
+    project = call(args.api, f"/projects/{base['project']}?revision={args.revision}")
     save(
-        out / "receipts" / f"{args.case}.json",
+        path,
         {
             "case": args.case,
             **commit(),
+            **town,
             "project": base["project"],
             "revision": args.revision,
             "path": "Ask about the saved design (browser, deterministic)",
             "viewport": args.viewport,
             "answer": Path(args.answer_file).read_text(encoding="utf-8"),
-            "provider_calls_started": 0,
+            "provider_phases_started": 0,
+            # The browser path must leave the saved base revision untouched.
+            "prior_snapshot_unchanged": project["head"] == base["revision"]
+            and digest(project["home"]) == base["home_sha256"],
             "recorded_unix": time.time(),
         },
     )
-    print(f"Recorded {args.case}.")
+    print(f"Recorded {args.case} -> {path}")
 
 
 PUBLIC_FIELDS = [
     "commit",
+    "town_commit",
     "tracked_changes",
     "model",
     "packet_sha256",
     "base_revision",
     "status",
     "elapsed_s",
-    "provider_calls_started",
+    "provider_phases_started",
     "candidate_count",
     "candidate_sha256",
     "prior_snapshot_unchanged",
     "path",
     "viewport",
 ]
+SCORE_FIELDS = AXES + ["outcome", "severity", "reviewer"]
+
+
+def receipts(out):
+    """Every run, original first, as (run ID, receipt). The run ID is the file stem."""
+    runs = []
+    for cid in SLOTS:
+        files = sorted((Path(out) / "receipts").glob(f"{cid}*.json"))
+        for path in sorted(files, key=lambda p: (p.stem != cid, p.stem)):
+            r = json.loads(path.read_text(encoding="utf-8"))
+            if r.get("case") != cid:
+                raise SystemExit(f"{path.name} records case {r.get('case')}.")
+            # Receipts written before the rename counted the same phases.
+            r.setdefault("provider_phases_started", r.get("provider_calls_started"))
+            runs.append((path.stem, r))
+    return runs
 
 
 def public_receipt(out, scores):
-    """Allow-list fields so prompts, answer keys, results and answers stay private."""
-    cases = {}
-    for cid, slot in SLOTS.items():
-        path = out / "receipts" / f"{cid}.json"
-        r = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-        row = {"slot": slot, **{k: r[k] for k in PUBLIC_FIELDS if k in r}}
+    """Allow-list fields so prompts, answer keys, results and answers stay private.
+
+    Scores are keyed by run ID, so a rerun's score never joins the original's evidence.
+    """
+    runs = {}
+    for run_id, r in receipts(out):
+        cid = r["case"]
+        row = {"case": cid, "slot": SLOTS[cid], "rerun": run_id != cid}
+        row.update({k: r[k] for k in PUBLIC_FIELDS if k in r})
         if "provider_phases" in r:
             row["provider_phases"] = sorted(r["provider_phases"])
         row["scores"] = {
-            k: v
-            for k, v in scores.get(cid, {}).items()
-            if k in AXES + ["outcome", "severity", "reviewer"]
+            k: v for k, v in scores.get(run_id, {}).items() if k in SCORE_FIELDS
         }
-        cases[cid] = row
-    return {"issue": 68, "scoring_status": scores.get("_status", ""), "cases": cases}
+        runs[run_id] = row
+    return {"issue": 68, "scoring_status": scores.get("_status", ""), "runs": runs}
 
 
 def matrix(args):
     out = Path(args.out)
     scores = json.loads((out / "scores.json").read_text(encoding="utf-8"))
-    save(Path(args.output).with_suffix(".json"), public_receipt(out, scores))
+    published = public_receipt(out, scores)
+    save(Path(args.output).with_suffix(".json"), published)
     rows = [
-        "| Case | Slot | Commit | Outcome | Calls | Elapsed (s) | "
+        "| Run | Slot | Town commit | Outcome | OpenAI phases | Elapsed (s) | "
         + " | ".join(a.replace("_", " ").capitalize() for a in AXES)
         + " | Severity | Reviewer |",
         "|" + " --- |" * (8 + len(AXES)),
     ]
-    for cid, slot in SLOTS.items():
-        path = out / "receipts" / f"{cid}.json"
-        r = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
-        s = scores.get(cid, {})
+    for run_id, r in published["runs"].items():
+        s = r["scores"]
+        label = r["case"] + (" rerun" if r["rerun"] else "")
+        town = r.get("town_commit") or r.get("commit", "")
         rows.append(
-            f"| {cid} | {slot} | `{r.get('commit', '')[:7]}` | {s.get('outcome', 'not run')} | "
-            f"{r.get('provider_calls_started', '')} | {r.get('elapsed_s', '—')} | "
+            f"| {label} | {r['slot']} | `{town[:7]}` | {s.get('outcome', 'not scored')} | "
+            f"{r.get('provider_phases_started', '')} | {r.get('elapsed_s', '—')} | "
             + " | ".join(str(s.get(a, "")) for a in AXES)
             + f" | {s.get('severity', '')} | {s.get('reviewer', '')} |"
         )
@@ -355,6 +442,11 @@ def main():
     p.add_argument("--base-seed", type=int, default=178)
     p.add_argument("--base-lot", type=float, nargs=2, default=[15.0, 15.0])
     p.set_defaults(func=setup)
+    p = sub.add_parser("serve")
+    p.add_argument("--port", type=int, default=8890)
+    p.add_argument("--editor-port", type=int, default=8891)
+    p.add_argument("--extra-team-jobs-on", metavar="YYYY-MM-DD")
+    p.set_defaults(func=serve)
     p = sub.add_parser("run")
     p.add_argument("case")
     p.add_argument("--packet", required=True)
@@ -367,6 +459,8 @@ def main():
     p.add_argument("--revision", type=int, default=1)
     p.add_argument("--viewport", default="1440x1000")
     p.add_argument("--answer-file", required=True)
+    p.add_argument("--api", default="http://127.0.0.1:8890/api")
+    p.add_argument("--rerun", action="store_true")
     p.set_defaults(func=record)
     p = sub.add_parser("matrix")
     p.add_argument("--output", required=True)
