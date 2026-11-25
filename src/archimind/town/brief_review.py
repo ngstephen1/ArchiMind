@@ -438,6 +438,11 @@ WORK_TABLE = (
     r"\b(?:work(?:s|ing)?|study(?:ing)?|craft(?:s|ing)?|sew(?:s|ing)?|homework)\b"
     r"|\bin (?:the |our |my )?(?:study|office|workroom|bedroom)\b"
 )
+# "After work" says when the table is used, not that it is a work table.
+WORK_TIMING = (
+    r"\b(?:after|before|from|during|outside(?: of)?|back from|home from)\s+"
+    r"(?:work|school|study|studying)\b"
+)
 MEAL_WORDS = (
     r"\b(?:dine|dining|diners?|eat(?:s|ing)?|meals?|dinner|lunch|breakfast|seats?"
     r"|places?|seating|guests?)\b"
@@ -456,7 +461,8 @@ def requests_single_table(message):
         ):
             continue
         prefix = clause[: table.start()].strip()
-        if re.search(WORK_TABLE, clause) and not re.search(MEAL_WORDS, clause):
+        activity = re.sub(WORK_TIMING, " ", clause, flags=re.I)
+        if re.search(WORK_TABLE, activity) and not re.search(MEAL_WORDS, activity):
             continue  # A work or study table is not a dining arrangement.
         if re.search(
             r"\b(?:all|everyone|party|seats?|places?|seating|dine|eat|sit|seated"

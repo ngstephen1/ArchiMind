@@ -332,3 +332,62 @@ def test_goal_naming_only_one_other_room_is_dropped_during_a_move(provider, save
     )
     request = review_request(message, width=15, depth=16, formal_salon=True)
     assert service.interpret(request, saved_home).room_goals == []
+
+
+# Third review pass on #111.
+
+
+def test_after_work_timing_keeps_the_single_table_requirement():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Six dining seats. Our family should sit together at one table after work.",
+        None,
+    )
+    assert (brief.dining_seats, brief.split_dining) == (6, False)
+    assert questions and "6 places at one dining table" in questions[0]
+
+
+def test_same_size_layout_does_not_cancel_a_requested_room_move(provider, saved_home):
+    message = (
+        "Keep the layout the same size, but put the kitchen closer to the salon. "
+        "Move the study desk closer to its window."
+    )
+    provider(
+        closer_study_desk=True,
+        room_goals=[dict(room="kitchen-dining", relation="near", target="salon")],
+    )
+    request = review_request(message, width=15, depth=16, formal_salon=True)
+    with pytest.raises(service.BriefClarification, match="separately"):
+        service.interpret(request, saved_home)
+
+
+def test_room_alias_keeps_an_explicit_placement_goal_during_a_move(
+    provider, saved_home
+):
+    message = (
+        "Move the study desk closer to its window and bring the bathroom closer "
+        "to the primary suite."
+    )
+    provider(
+        closer_study_desk=True,
+        room_goals=[dict(room="bathroom", relation="near", target="bedroom")],
+    )
+    request = review_request(message, width=15, depth=16, formal_salon=True)
+    with pytest.raises(service.BriefClarification, match="separately"):
+        service.interpret(request, saved_home)
+
+
+@pytest.mark.parametrize(
+    "objection",
+    [
+        "Compare bedroom-to-bathroom distance when they are on different levels",
+        "Compare the distance from an upstairs bedroom to the bathroom",
+        "Compare a split-level route between the study and living room",
+    ],
+)
+def test_cross_level_comparisons_stay_unsupported(provider, objection):
+    provider(unsupported=[objection])
+    with pytest.raises(service.BriefClarification, match="Unsupported"):
+        service.interpret(
+            review_request("Compare the plans.", width=15, depth=16), None
+        )

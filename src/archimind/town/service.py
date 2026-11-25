@@ -320,19 +320,25 @@ SUPPORTED_COMPARISON = re.compile(
 UNMODELED = re.compile(
     r"\b(?:acoustic|sound|noise|hear|code|complian|accessib|cost|price|budget|glare"
     r"|daylight|sunlight|energy|thermal|guarantee|storeys?|story|stories|floors\b"
-    r"|(?:one|two|three|single|multi|second|upper|lower|ground|first|extra|another)"
-    r"[- ](?:floor|level)\b|basement|attic|garage|pool|extension|stair)",
+    r"|(?:one|two|three|single|multi|second|upper|lower|ground|first|extra|another"
+    r"|different|separate|multiple|other|both)[- ](?:floor|level)s?\b"
+    r"|split[- ]level|upstairs|downstairs|mezzanine"
+    r"|basement|attic|garage|pool|extension|stair)",
     re.IGNORECASE,
 )
 # "Leave the layout as it is": a request that rules out room-placement changes.
 LAYOUT_UNCHANGED = re.compile(
     r"\b(?:keep|leave)\s+(?:the\s+)?(?:layout|plan|floor plan|room placement|rooms)"
-    r"\b[^.;!?]*\b(?:as it is|as is|unchanged|the same|alone|where (?:it|they) (?:is|are))",
+    r"\b[^.;!?]*\b(?:as it is|as is|unchanged|alone|where (?:it|they) (?:is|are)"
+    # "The same size" or "the same style" constrains an attribute, not placement.
+    r"|the same\b(?!\s+(?:size|width|depth|area|footprint|dimensions?|shape|style"
+    r"|colou?rs?|finish(?:es)?|budget|height|number)\b))",
     re.IGNORECASE,
 )
 MOVED_ROOM = {"closer_study_desk": "study", "shift_bedroom_chair": "bedroom"}
 ROOM_WORDS = {
-    "bedroom": r"bed\s?rooms?|master suite",
+    "bedroom": r"bed\s?rooms?|(?:master|primary|main|owner'?s|guest) suite"
+    r"|guest room|nursery",
     "study": r"study|studies|office|workroom|work room",
     "living": r"living|lounge|sitting room|family room|den",
     "kitchen-dining": r"kitchen|dining",
@@ -350,6 +356,24 @@ ACTION_BREAK = (
 
 def _mentions(message, room):
     return re.search(r"\b(?:" + ROOM_WORDS.get(room, room) + r")\b", message, re.I)
+
+
+PLACEMENT_RELATION = re.compile(
+    r"\b(?:closer|nearer|farther|further|near|far from|next to|beside|adjacent"
+    r"|away from)\b",
+    re.I,
+)
+
+
+def _requests_placement(message, others):
+    """True when the request names every other room in the goal, or one clause
+    places one of those rooms relative to another room, which may be an alias."""
+    if all(_mentions(message, r) for r in others):
+        return True
+    return any(
+        PLACEMENT_RELATION.search(clause) and any(_mentions(clause, r) for r in others)
+        for clause in re.split(ACTION_BREAK, message, flags=re.I)
+    )
 
 
 KEEP_VERB = re.compile(
@@ -403,7 +427,7 @@ def screen_interpretation(parsed, brief, message, previous, *, review):
             for g in goals
             if not LAYOUT_UNCHANGED.search(message)
             and (others := {g.room, g.target} - moved)
-            and all(_mentions(message, r) for r in others)
+            and _requests_placement(message, others)
         ]
         if isinstance(parsed, Interpretation):
             # A requested lock on the moved room stays, so the contradiction is reviewed.
