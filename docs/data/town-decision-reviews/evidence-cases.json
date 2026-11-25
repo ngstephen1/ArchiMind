@@ -1,0 +1,218 @@
+[
+  {
+    "id": "claim-01",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The current chair-to-desk footprint gap is 0.36 m."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-02",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The previous gap between the chair and desk footprints was 0.06 m."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-03",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The Belaya desk center is 4.46 m from the bedroom window center."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-04",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The salon has four modeled dining places."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-05",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The bedroom-to-bathroom modeled route is about 3.72 m."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-06",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The saved layout passed a modeled passage check set at 0.6 m."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-07",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "Revision 2 left a larger chair-to-desk footprint gap than revision 1."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-08",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The modeled kitchen-dining area and salon each have four dining places."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-09",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The bedroom-to-bathroom route is shorter than the study-to-living route."
+    ],
+    "expected": "supported"
+  },
+  {
+    "id": "claim-10",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The desk chair will fit under the desktop."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-11",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The desk avoids glare on the screen in late afternoon."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-12",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The study is acoustically isolated from the living room."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-13",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The desk was placed to optimize daylight deliberately."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-14",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "A wheelchair user can pass the installed furniture comfortably."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-15",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The chair upholstery is fire-rated for hospitality use."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-16",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "A contractor can install the chair and desk without any site checks."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-17",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "A 0.36 m footprint gap proves both objects meet all knee clearance requirements."
+    ],
+    "expected": "missing_evidence"
+  },
+  {
+    "id": "claim-18",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The current chair-to-desk gap is 0.06 m."
+    ],
+    "expected": "contradicted"
+  },
+  {
+    "id": "claim-19",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The salon has six modeled dining places."
+    ],
+    "expected": "contradicted"
+  },
+  {
+    "id": "claim-20",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The modeled passage check recorded for this plan was set at 1.2 m."
+    ],
+    "expected": "contradicted"
+  },
+  {
+    "id": "claim-21",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The bedroom-to-bathroom route is longer than the study-to-living route."
+    ],
+    "expected": "contradicted"
+  },
+  {
+    "id": "claim-22",
+    "split": "development",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The chair footprint stayed in the same place between revisions 1 and 2."
+    ],
+    "expected": "contradicted"
+  },
+  {
+    "id": "claim-23",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The window center is less than 1 m from the desk center."
+    ],
+    "expected": "contradicted"
+  },
+  {
+    "id": "claim-24",
+    "split": "holdout",
+    "message": "Check this statement about the saved design.",
+    "claims": [
+      "The chair-to-desk gap shrank after the move."
+    ],
+    "expected": "contradicted"
+  }
+]

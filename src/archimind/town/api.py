@@ -16,7 +16,7 @@ from starlette.responses import FileResponse, JSONResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
-from . import designer_chair, render_queue
+from . import decision_review, designer_chair, render_queue
 from . import service as db
 from .service_drawings import service_study
 
@@ -56,6 +56,16 @@ def handle(request, data):
         return db.create(owner)
     if path == ["jobs"] and request.method == "POST":
         return db.enqueue(owner, db.Request.model_validate(data))
+    if len(path) == 3 and path[0] == "projects" and path[2] == "decision-review":
+        if request.method == "POST":
+            return decision_review.check(
+                owner, path[1], decision_review.ReviewRequest.model_validate(data)
+            )
+        with db.transaction() as q:
+            db.project(q, owner, path[1])
+        return {
+            kind: decision_review.settings(kind)[0] for kind in decision_review.RUBRICS
+        }
     if len(path) >= 3 and path[0] == "projects" and path[2] == "render":
         blender = render_queue.configuration()
         if blender is None:

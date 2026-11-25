@@ -1,0 +1,21 @@
+{
+  "mode": "recorded model responses",
+  "viewport": [
+    1440,
+    1000
+  ],
+  "decisions_fixture_calls": 3,
+  "external_model_calls": 0,
+  "page_errors": [],
+  "checks": [
+    "clarification",
+    "corrected A/B",
+    "timeout A/B with revision 1 preserved",
+    "switch to B and open the walkthrough with no extra Decisions call"
+  ],
+  "screenshots_sha256": {
+    "alternatives.png": "313542bc14003b4f3af7c5984a1c5cd277f43734e16d28e79b70528fdbe0ef6a",
+    "clarification.png": "d52548c98caa94b085d0a354c92dee4ec5971eac67b18a224951a01c02db972a",
+    "timeout.png": "d04b9d1db4ff2f19695b13c7de9933f0bfd2e4ca5be55b01287ec94e14dd43ac"
+  }
+}

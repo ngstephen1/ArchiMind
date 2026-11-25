@@ -1,0 +1,1032 @@
+{
+  "model": "gpt-6-luna",
+  "rubric": "town-brief-v1",
+  "requests": 36,
+  "responses_complete": true,
+  "input_tokens_reported": 34356,
+  "p95_ms": 655,
+  "scores": [
+    {
+      "threshold": 0.7,
+      "missed": [
+        [
+          "paired-05-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-06-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-07-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-dropped",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "false_flags": [
+        [
+          "width-conflict",
+          "clearance_requirement_missing"
+        ],
+        [
+          "local-clearance",
+          "clearance_requirement_missing"
+        ],
+        [
+          "ambiguous-desk",
+          "lock_or_opening_missing"
+        ],
+        [
+          "second-storey",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-02-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-02-dropped",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-04-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-05-preserved",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-08-preserved",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-preserved",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "passed": false
+    },
+    {
+      "threshold": 0.75,
+      "missed": [
+        [
+          "paired-05-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-06-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-07-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-dropped",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "false_flags": [
+        [
+          "width-conflict",
+          "clearance_requirement_missing"
+        ],
+        [
+          "local-clearance",
+          "clearance_requirement_missing"
+        ],
+        [
+          "ambiguous-desk",
+          "lock_or_opening_missing"
+        ],
+        [
+          "second-storey",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-02-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-02-dropped",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-04-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-05-preserved",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-08-preserved",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-preserved",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "passed": false
+    },
+    {
+      "threshold": 0.8,
+      "missed": [
+        [
+          "paired-05-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-06-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-07-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-dropped",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "false_flags": [
+        [
+          "width-conflict",
+          "clearance_requirement_missing"
+        ],
+        [
+          "local-clearance",
+          "clearance_requirement_missing"
+        ],
+        [
+          "ambiguous-desk",
+          "lock_or_opening_missing"
+        ],
+        [
+          "second-storey",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-02-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-02-dropped",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-04-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-05-preserved",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-08-preserved",
+          "lock_or_opening_missing"
+        ]
+      ],
+      "passed": false
+    },
+    {
+      "threshold": 0.85,
+      "missed": [
+        [
+          "paired-05-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-06-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-07-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-dropped",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "false_flags": [
+        [
+          "width-conflict",
+          "clearance_requirement_missing"
+        ],
+        [
+          "local-clearance",
+          "clearance_requirement_missing"
+        ],
+        [
+          "ambiguous-desk",
+          "lock_or_opening_missing"
+        ],
+        [
+          "second-storey",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-02-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-02-dropped",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-04-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-05-preserved",
+          "clearance_requirement_missing"
+        ]
+      ],
+      "passed": false
+    },
+    {
+      "threshold": 0.9,
+      "missed": [
+        [
+          "paired-05-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-06-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-07-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-dropped",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "false_flags": [
+        [
+          "width-conflict",
+          "clearance_requirement_missing"
+        ],
+        [
+          "local-clearance",
+          "clearance_requirement_missing"
+        ],
+        [
+          "ambiguous-desk",
+          "lock_or_opening_missing"
+        ],
+        [
+          "second-storey",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-02-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-05-preserved",
+          "clearance_requirement_missing"
+        ]
+      ],
+      "passed": false
+    },
+    {
+      "threshold": 0.95,
+      "missed": [
+        [
+          "paired-05-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-06-dropped",
+          "clearance_requirement_missing"
+        ],
+        [
+          "paired-07-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-10-dropped",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-11-dropped",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-12-dropped",
+          "unsupported_requirement_unaddressed"
+        ]
+      ],
+      "false_flags": [
+        [
+          "width-conflict",
+          "clearance_requirement_missing"
+        ],
+        [
+          "local-clearance",
+          "clearance_requirement_missing"
+        ],
+        [
+          "second-storey",
+          "unsupported_requirement_unaddressed"
+        ],
+        [
+          "paired-02-dropped",
+          "lock_or_opening_missing"
+        ],
+        [
+          "paired-05-preserved",
+          "clearance_requirement_missing"
+        ]
+      ],
+      "passed": false
+    }
+  ],
+  "selected_threshold": null,
+  "heldout_gate_passed": false,
+  "cases": [
+    {
+      "case": "compact",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.01,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 981,
+        "elapsed_ms": 647
+      }
+    },
+    {
+      "case": "hosting",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 993,
+        "elapsed_ms": 441
+      }
+    },
+    {
+      "case": "separation",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 984,
+        "elapsed_ms": 244
+      }
+    },
+    {
+      "case": "split-dining",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 1029,
+        "elapsed_ms": 301
+      }
+    },
+    {
+      "case": "single-table",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.43,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 1026,
+        "elapsed_ms": 214
+      }
+    },
+    {
+      "case": "passage-conversion",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.01,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 975,
+        "elapsed_ms": 207
+      }
+    },
+    {
+      "case": "width-conflict",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 1.0,
+          "lock_or_opening_missing": 0.03,
+          "unsupported_requirement_unaddressed": 0.06
+        },
+        "input_tokens": 998,
+        "elapsed_ms": 217
+      }
+    },
+    {
+      "case": "local-clearance",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.98,
+          "lock_or_opening_missing": 0.11,
+          "unsupported_requirement_unaddressed": 0.01
+        },
+        "input_tokens": 986,
+        "elapsed_ms": 655
+      }
+    },
+    {
+      "case": "locked-bedroom",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.01,
+          "lock_or_opening_missing": 0.07,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 988,
+        "elapsed_ms": 300
+      }
+    },
+    {
+      "case": "ambiguous-desk",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.91,
+          "unsupported_requirement_unaddressed": 0.01
+        },
+        "input_tokens": 958,
+        "elapsed_ms": 522
+      }
+    },
+    {
+      "case": "second-storey",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.01,
+          "unsupported_requirement_unaddressed": 0.99
+        },
+        "input_tokens": 976,
+        "elapsed_ms": 211
+      }
+    },
+    {
+      "case": "tight-lot-exhausted",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 989,
+        "elapsed_ms": 218
+      }
+    },
+    {
+      "case": "paired-01-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.54,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.11,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 951,
+        "elapsed_ms": 223
+      }
+    },
+    {
+      "case": "paired-01-dropped",
+      "expected_flags": [
+        "dining_requirement_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.97,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 931,
+        "elapsed_ms": 244
+      }
+    },
+    {
+      "case": "paired-02-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 939,
+        "elapsed_ms": 233
+      }
+    },
+    {
+      "case": "paired-02-dropped",
+      "expected_flags": [
+        "dining_requirement_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 1.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 1.0,
+          "unsupported_requirement_unaddressed": 0.88
+        },
+        "input_tokens": 939,
+        "elapsed_ms": 239
+      }
+    },
+    {
+      "case": "paired-03-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 932,
+        "elapsed_ms": 215
+      }
+    },
+    {
+      "case": "paired-03-dropped",
+      "expected_flags": [
+        "dining_requirement_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 1.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.15,
+          "unsupported_requirement_unaddressed": 0.04
+        },
+        "input_tokens": 932,
+        "elapsed_ms": 251
+      }
+    },
+    {
+      "case": "paired-04-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 935,
+        "elapsed_ms": 310
+      }
+    },
+    {
+      "case": "paired-04-dropped",
+      "expected_flags": [
+        "clearance_requirement_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 1.0,
+          "lock_or_opening_missing": 0.86,
+          "unsupported_requirement_unaddressed": 0.03
+        },
+        "input_tokens": 935,
+        "elapsed_ms": 200
+      }
+    },
+    {
+      "case": "paired-05-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.98,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 942,
+        "elapsed_ms": 296
+      }
+    },
+    {
+      "case": "paired-05-dropped",
+      "expected_flags": [
+        "clearance_requirement_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.01,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 936,
+        "elapsed_ms": 231
+      }
+    },
+    {
+      "case": "paired-06-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.02,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 948,
+        "elapsed_ms": 238
+      }
+    },
+    {
+      "case": "paired-06-dropped",
+      "expected_flags": [
+        "clearance_requirement_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.66,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.01
+        },
+        "input_tokens": 941,
+        "elapsed_ms": 186
+      }
+    },
+    {
+      "case": "paired-07-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.04,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 935,
+        "elapsed_ms": 189
+      }
+    },
+    {
+      "case": "paired-07-dropped",
+      "expected_flags": [
+        "lock_or_opening_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.4,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 937,
+        "elapsed_ms": 228
+      }
+    },
+    {
+      "case": "paired-08-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.8,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 936,
+        "elapsed_ms": 288
+      }
+    },
+    {
+      "case": "paired-08-dropped",
+      "expected_flags": [
+        "lock_or_opening_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 1.0,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 931,
+        "elapsed_ms": 186
+      }
+    },
+    {
+      "case": "paired-09-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.02,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 931,
+        "elapsed_ms": 226
+      }
+    },
+    {
+      "case": "paired-09-dropped",
+      "expected_flags": [
+        "lock_or_opening_missing"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.97,
+          "unsupported_requirement_unaddressed": 0.0
+        },
+        "input_tokens": 931,
+        "elapsed_ms": 291
+      }
+    },
+    {
+      "case": "paired-10-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.05,
+          "unsupported_requirement_unaddressed": 0.76
+        },
+        "input_tokens": 927,
+        "elapsed_ms": 201
+      }
+    },
+    {
+      "case": "paired-10-dropped",
+      "expected_flags": [
+        "unsupported_requirement_unaddressed"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.37
+        },
+        "input_tokens": 929,
+        "elapsed_ms": 191
+      }
+    },
+    {
+      "case": "paired-11-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.31
+        },
+        "input_tokens": 934,
+        "elapsed_ms": 221
+      }
+    },
+    {
+      "case": "paired-11-dropped",
+      "expected_flags": [
+        "unsupported_requirement_unaddressed"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.94
+        },
+        "input_tokens": 937,
+        "elapsed_ms": 903
+      }
+    },
+    {
+      "case": "paired-12-preserved",
+      "expected_flags": [],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.04
+        },
+        "input_tokens": 945,
+        "elapsed_ms": 202
+      }
+    },
+    {
+      "case": "paired-12-dropped",
+      "expected_flags": [
+        "unsupported_requirement_unaddressed"
+      ],
+      "review": {
+        "rubric": "town-brief-v1",
+        "model": "gpt-6-luna",
+        "status": "checked",
+        "reason": null,
+        "probabilities": {
+          "dining_requirement_missing": 0.0,
+          "clearance_requirement_missing": 0.0,
+          "lock_or_opening_missing": 0.0,
+          "unsupported_requirement_unaddressed": 0.9
+        },
+        "input_tokens": 939,
+        "elapsed_ms": 258
+      }
+    }
+  ],
+  "public_cases_sha256": "a24dedecb68cd04428d01970bb47509e0ed2942fcda860bb4eaec2c5a2caaf0c",
+  "heldout_status": "sealed_public_calibration_did_not_qualify"
+}

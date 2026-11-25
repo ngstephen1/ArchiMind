@@ -56,6 +56,12 @@ export function timeline(container, events, status) {
     for (const e of log) {
       const line = document.createElement("p");
       line.textContent = e.state + " · " + e.task;
+      if (e.task === "OpenAI · Brief consistency check") {
+        const { status, mode, flags } = e.artifact;
+        if (status === "unavailable") line.textContent += " · Unavailable. Existing checks continue.";
+        else if (flags?.length && mode === "shadow") line.textContent += " · Flag recorded for evaluation.";
+        else if (status === "partial") line.textContent += " · Some questions unavailable.";
+      }
       card.append(line);
       if (e.artifact.advice) {
         const advice = e.artifact.advice;
