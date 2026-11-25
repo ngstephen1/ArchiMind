@@ -74,7 +74,7 @@ python scripts/held_out_eval.py setup --packet storage/held-out-briefs.json \
 python scripts/held_out_eval.py serve --extra-team-jobs-on YYYY-MM-DD
 python scripts/held_out_eval.py run H01 --packet storage/held-out-briefs.json --confirm-live
 python scripts/held_out_eval.py record H05 --answer-file answer.txt --viewport 1536x748
-# Score every run in storage/eval-68/scores.json, keyed by run ID (H01, H01-rerun-<time>).
+# Score every run in storage/eval-68/scores.json, keyed by run ID (H01, H01-rerun-<UTC time>-<suffix>).
 python scripts/held_out_eval.py matrix --output docs/data/nov24-held-out/matrix.md
 ```
 

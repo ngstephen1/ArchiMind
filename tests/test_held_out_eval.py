@@ -101,7 +101,7 @@ def test_rerun_is_a_separate_row_with_its_own_score_and_commit(tmp_path):
     assert receipt["runs"]["H01-rerun-2"]["scores"]["outcome"] == "pass"
     assert receipt["runs"]["H01-rerun-2"]["rerun"] is True
     assert "| H01 | " in md and "`aaaaaaa` | fail" in md
-    assert "| H01 rerun | " in md and "`bbbbbbb` | pass" in md
+    assert "| H01-rerun-2 | " in md and "`bbbbbbb` | pass" in md
 
 
 def test_receipt_from_another_case_is_rejected(tmp_path):
@@ -142,3 +142,39 @@ def test_a_stale_town_server_is_refused(tmp_path, monkeypatch):
 def test_effective_model_prefers_the_shell_like_the_launcher(monkeypatch):
     monkeypatch.setenv("ARCHIMIND_OPENAI_MODEL", "shell-model")
     assert held_out_eval.effective_model() == "shell-model"
+
+
+def test_same_second_reruns_get_distinct_receipts(tmp_path, monkeypatch):
+    write(tmp_path / "receipts" / "H05.json", {"case": "H05"})
+    monkeypatch.setattr(held_out_eval.time, "time", lambda: 123.5)
+    first = held_out_eval.receipt_path(tmp_path, "H05", rerun=True)
+    write(first, {"case": "H05"})
+    second = held_out_eval.receipt_path(tmp_path, "H05", rerun=True)
+    assert first != second and not second.exists()
+    assert sorted([first.name, second.name])[0].startswith("H05-rerun-")
+
+
+def test_matrix_labels_each_rerun_with_its_run_id(tmp_path):
+    write(tmp_path / "receipts" / "H05.json", {"case": "H05"})
+    write(tmp_path / "receipts" / "H05-rerun-1-a.json", {"case": "H05"})
+    write(tmp_path / "receipts" / "H05-rerun-1-b.json", {"case": "H05"})
+    write(tmp_path / "scores.json", {})
+    md, _, _ = matrix(tmp_path)
+    assert "| H05-rerun-1-a | " in md and "| H05-rerun-1-b | " in md
+
+
+@pytest.mark.parametrize(
+    ("dotenv", "expected"),
+    [
+        ("ARCHIMIND_OPENAI_MODEL = spaced-model\n", "spaced-model"),
+        ("ARCHIMIND_OPENAI_MODEL=first\nARCHIMIND_OPENAI_MODEL=last\n", "last"),
+        ("ARCHIMIND_OPENAI_MODEL=kept\nARCHIMIND_OPENAI_MODEL=\n", "kept"),
+    ],
+)
+def test_effective_model_reads_dotenv_like_the_launcher(
+    tmp_path, monkeypatch, dotenv, expected
+):
+    monkeypatch.delenv("ARCHIMIND_OPENAI_MODEL", raising=False)
+    (tmp_path / ".env").write_text(dotenv, encoding="utf-8")
+    monkeypatch.setattr(held_out_eval, "ROOT", tmp_path)
+    assert held_out_eval.effective_model() == expected

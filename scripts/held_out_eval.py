@@ -81,15 +81,21 @@ def save(path, data):
 
 
 def effective_model():
-    """Resolve the model the way the Town launcher does: shell, then .env, then default."""
+    """Resolve the model the way the Town launcher does: shell, then .env, then default.
+
+    The .env file is read with the launcher's own parser, so spacing and repeated
+    assignments resolve to the same value Town would use.
+    """
     if os.getenv("ARCHIMIND_OPENAI_MODEL"):
         return os.environ["ARCHIMIND_OPENAI_MODEL"]
-    env = ROOT / ".env"
-    for line in env.read_text(encoding="utf-8").splitlines() if env.exists() else []:
-        if line.startswith("ARCHIMIND_OPENAI_MODEL="):
-            value = line.split("=", 1)[1].strip().strip("'\"")
-            if value:
-                return value
+    scripts = str(Path(__file__).resolve().parent)
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    from run_with_agent import settings_from_dotenv
+
+    value = settings_from_dotenv(ROOT / ".env").get("ARCHIMIND_OPENAI_MODEL")
+    if value:
+        return value
     sys.path.insert(0, str(ROOT / "src"))
     from archimind.agents.requirements_agent import DEFAULT_MODEL
 
@@ -120,7 +126,10 @@ def receipt_path(out, cid, rerun):
         return original
     if not rerun:
         raise SystemExit(f"{original} exists. Pass --rerun to keep it and add a rerun.")
-    return original.with_name(f"{cid}-rerun-{int(time.time())}.json")
+    # A sortable UTC timestamp plus a random suffix, so two reruns recorded in the
+    # same second never share a file.
+    stamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime(time.time()))
+    return original.with_name(f"{cid}-rerun-{stamp}-{uuid.uuid4().hex[:8]}.json")
 
 
 def serve(args):
@@ -416,7 +425,7 @@ def matrix(args):
     ]
     for run_id, r in published["runs"].items():
         s = r["scores"]
-        label = r["case"] + (" rerun" if r["rerun"] else "")
+        label = run_id  # Reruns keep their IDs, which name their receipts and scores.
         town = r.get("town_commit") or r.get("commit", "")
         rows.append(
             f"| {label} | {r['slot']} | `{town[:7]}` | {s.get('outcome', 'not scored')} | "
