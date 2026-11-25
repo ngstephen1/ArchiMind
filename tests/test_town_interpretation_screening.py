@@ -50,9 +50,16 @@ def test_comparing_supported_priorities_is_a_presentation_request(provider):
         "Keep the bathroom near the bedroom and the study far from the living room. "
         "Compare how each option handles those two goals."
     )
-    provider(unsupported=["Compare how each option handles those two goals"])
+    provider(
+        unsupported=["Compare how each option handles those two goals"],
+        room_goals=[
+            dict(room="bathroom", relation="near", target="bedroom"),
+            dict(room="study", relation="far", target="living"),
+        ],
+    )
     brief = service.interpret(review_request(message, width=15, depth=16), None)
     assert brief.compare_tradeoffs
+    assert len(brief.room_goals) == 2
     review = review_summary(brief, message=message)
     assert review["presentation_requests"] == [
         "Compare how each option handles those two goals"
@@ -538,3 +545,30 @@ def test_incidental_room_mentions_do_not_add_goals_to_desk_edit(
         formal_salon=True,
     )
     assert service.interpret(request, saved_home).room_goals == []
+
+
+def test_explicit_chair_lock_conflicts_with_chair_move(provider, saved_home):
+    message = (
+        "Keep the chair exactly where it is. Move the bedroom desk chair sideways."
+    )
+    provider(shift_bedroom_chair=True, lock_furniture=["desk-chair"])
+    request = review_request(message, width=15, depth=16, formal_salon=True)
+    with pytest.raises(service.BriefClarification, match="unlock"):
+        service.interpret(request, saved_home)
+
+
+def test_study_table_count_is_separate_from_dining_capacity():
+    message = "During study sessions, six adults sit together at one table. Use four dining seats."
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        message,
+        None,
+    )
+    assert (brief.dining_seats, brief.split_dining, questions) == (4, True, [])
+
+
+def test_object_clearance_is_not_a_room_distance_comparison(provider):
+    message = "Compare the clearance distance from the sofa to the wall in each option."
+    provider(unsupported=[message])
+    with pytest.raises(service.BriefClarification, match="clearance distance"):
+        service.interpret(review_request(message), None)
