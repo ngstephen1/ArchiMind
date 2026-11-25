@@ -463,6 +463,37 @@ def test_exploratory_seating_preserves_confirmed_split(text):
     assert (brief.dining_seats, brief.split_dining, questions) == (4, True, [])
 
 
+@pytest.mark.parametrize(
+    ("text", "split", "seats"),
+    [
+        (
+            "Seat four guests at one table in the salon and two residents at a separate table in the kitchen.",
+            True,
+            6,
+        ),
+        (
+            "We cannot seat six people at a single table. Use four dining places instead.",
+            False,
+            4,
+        ),
+    ],
+)
+def test_explicit_split_and_negated_counts_preserve_the_confirmed_total(
+    text, split, seats
+):
+    brief, questions = requirement_controls(
+        Brief(
+            formal_salon=True,
+            compare_tradeoffs=True,
+            split_dining=split,
+            dining_seats=seats,
+        ),
+        text,
+        None,
+    )
+    assert (brief.dining_seats, brief.split_dining, questions) == (seats, split, [])
+
+
 def test_comparison_of_both_floor_plans_is_supported(provider):
     provider(
         unsupported=["Compare study-to-living room distances in both floor plans."]
