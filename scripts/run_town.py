@@ -29,7 +29,9 @@ if __name__ == "__main__":
         metavar="YYYY-MM-DD",
         help="Allow up to two extra local team jobs (six call reservations) for this UTC date.",
     )
-    extra_date = parser.parse_args().extra_team_jobs_on
+    parser.add_argument("--evaluation-instance", help=argparse.SUPPRESS)
+    args = parser.parse_args()
+    extra_date = args.extra_team_jobs_on
     os.environ.pop("TOWN_EXTRA_TEAM_JOBS_DATE", None)
     if extra_date is not None:
         os.environ["TOWN_EXTRA_TEAM_JOBS_DATE"] = extra_date.isoformat()
@@ -86,7 +88,14 @@ if __name__ == "__main__":
         cwd=ROOT,
     )
     try:
-        uvicorn.run("archimind.town.api:app", host="127.0.0.1", port=town_port)
+        headers = (
+            [("X-Archimind-Evaluation-Instance", args.evaluation_instance)]
+            if args.evaluation_instance
+            else None
+        )
+        uvicorn.run(
+            "archimind.town.api:app", host="127.0.0.1", port=town_port, headers=headers
+        )
     finally:
         editor.terminate()
         worker.terminate()
