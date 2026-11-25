@@ -10,6 +10,8 @@ Agent A can use the OpenAI Decisions API after it has interpreted an explicit li
 
 Set `ARCHIMIND_TOWN_DECISIONS_MODE` on the API and worker. When a held-out run qualifies, point `ARCHIMIND_TOWN_DECISIONS_PROMOTION_RECEIPT` at the operator-controlled six-case receipt on both processes. The current public run produced no qualifying threshold. Use shadow for the pilot and keep the held-out cases sealed. Start locally with existing server credentials.
 
+Both calibration and holdout need at least one labeled omission. A six-case promotion receipt must report that coverage for the operator to enable clarification.
+
 ```sh
 TOWN_DAILY_MODEL_CALLS=12 TOWN_DAILY_MICROUSD=1200000 \
   ARCHIMIND_TOWN_DECISIONS_MODE=shadow .venv/bin/python scripts/run_town.py

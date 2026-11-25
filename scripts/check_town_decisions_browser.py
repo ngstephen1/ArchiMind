@@ -127,6 +127,7 @@ def check(output):
                     "public_calibration_sha256": "a" * 64,
                     "responses_complete": True,
                     "requests": 6,
+                    "omitted_cases": 2,
                     "p95_ms": 500,
                 }
             )

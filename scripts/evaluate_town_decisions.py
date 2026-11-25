@@ -18,8 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def score(rows, threshold):
     missed, false_flags = [], []
+    omitted_cases = 0
     for row in rows:
         expected = set(row["expected_flags"])
+        omitted_cases += bool(expected)
         flagged = set(decisions.flagged(row["review"], threshold))
         missed.extend([row["case"], flag] for flag in sorted(expected - flagged))
         false_flags.extend([row["case"], flag] for flag in sorted(flagged - expected))
@@ -27,7 +29,8 @@ def score(rows, threshold):
         "threshold": threshold,
         "missed": missed,
         "false_flags": false_flags,
-        "passed": not missed and len(false_flags) <= 1,
+        "omitted_cases": omitted_cases,
+        "passed": omitted_cases > 0 and not missed and len(false_flags) <= 1,
     }
 
 
@@ -181,6 +184,8 @@ def main():
         if (
             payload_profile != decisions.APP_PAYLOAD_PROFILE
             or len(public_cases) != 36
+            or not any(row["expected_flags"] for row in public_cases)
+            or not any(row["expected_flags"] for row in cases)
             or reviewed_payload_profile(public_cases) != payload_profile
             or public.get("payload_profile") != payload_profile
             or public.get("rubric") != decisions.RUBRIC
@@ -190,7 +195,10 @@ def main():
             or public.get("selected_threshold") != args.threshold
             or public.get("public_cases_sha256") != sha256(expected_corpus).hexdigest()
             or not any(
-                row.get("threshold") == args.threshold and row.get("passed") is True
+                row.get("threshold") == args.threshold
+                and row.get("passed") is True
+                and row.get("omitted_cases")
+                == sum(bool(case["expected_flags"]) for case in public_cases)
                 for row in public.get("scores", [])
             )
         ):
@@ -250,6 +258,7 @@ def main():
             "rubric": decisions.RUBRIC,
             "payload_profile": payload_profile,
             "requests": len(rows),
+            "omitted_cases": sum(bool(row["expected_flags"]) for row in rows),
             "public_cases_sha256": cases_hash if public_hash is None else None,
             "public_calibration_sha256": public_hash,
             "responses_complete": complete,

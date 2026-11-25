@@ -103,6 +103,7 @@ def town(tmp_path, monkeypatch):
                 "public_calibration_sha256": "a" * 64,
                 "responses_complete": True,
                 "requests": 6,
+                "omitted_cases": 2,
                 "p95_ms": 500,
             }
         )
@@ -525,5 +526,7 @@ def test_evaluator_exposes_receipt_only_after_a_complete_run(
         assert list(tmp_path.iterdir()) == [source]
     else:
         api["main"]()
-        assert json.loads(output.read_bytes())["requests"] == 1
+        receipt = json.loads(output.read_bytes())
+        assert receipt["requests"] == 1 and receipt["omitted_cases"] == 0
+        assert receipt["selected_threshold"] is None
         assert set(tmp_path.iterdir()) == {source, output}
