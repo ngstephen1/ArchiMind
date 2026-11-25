@@ -1,0 +1,583 @@
+{
+  "model": "gpt-6-luna",
+  "rubric": "town-request-route-v1",
+  "corpus_sha256": "0e7c612239a0170f1e06d2c20a8645f04e39fdac5a69537c78bbcb486b893a9c",
+  "evidence_sha256": null,
+  "threshold": 0.4,
+  "diagnostic_threshold": 0.3,
+  "heldout_passed": false,
+  "development_metrics": {
+    "0.3": {
+      "count": 32,
+      "correct": 28,
+      "accepted": 30,
+      "p95_ms": 386,
+      "complete": true,
+      "precision": 0.9333333333333333,
+      "coverage": 0.9375,
+      "saved_questions_routed_to_write": [],
+      "passed": false
+    },
+    "0.4": {
+      "count": 32,
+      "correct": 26,
+      "accepted": 27,
+      "p95_ms": 386,
+      "complete": true,
+      "precision": 0.9629629629629629,
+      "coverage": 0.84375,
+      "saved_questions_routed_to_write": [],
+      "passed": true
+    },
+    "0.5": {
+      "count": 32,
+      "correct": 22,
+      "accepted": 22,
+      "p95_ms": 386,
+      "complete": true,
+      "precision": 1.0,
+      "coverage": 0.6875,
+      "saved_questions_routed_to_write": [],
+      "passed": false
+    },
+    "0.6": {
+      "count": 32,
+      "correct": 21,
+      "accepted": 21,
+      "p95_ms": 386,
+      "complete": true,
+      "precision": 1.0,
+      "coverage": 0.65625,
+      "saved_questions_routed_to_write": [],
+      "passed": false
+    },
+    "0.7": {
+      "count": 32,
+      "correct": 14,
+      "accepted": 14,
+      "p95_ms": 386,
+      "complete": true,
+      "precision": 1.0,
+      "coverage": 0.4375,
+      "saved_questions_routed_to_write": [],
+      "passed": false
+    },
+    "0.8": {
+      "count": 32,
+      "correct": 8,
+      "accepted": 8,
+      "p95_ms": 386,
+      "complete": true,
+      "precision": 1.0,
+      "coverage": 0.25,
+      "saved_questions_routed_to_write": [],
+      "passed": false
+    },
+    "0.9": {
+      "count": 32,
+      "correct": 4,
+      "accepted": 4,
+      "p95_ms": 386,
+      "complete": true,
+      "precision": 1.0,
+      "coverage": 0.125,
+      "saved_questions_routed_to_write": [],
+      "passed": false
+    }
+  },
+  "holdout_metrics": {
+    "count": 16,
+    "correct": 10,
+    "accepted": 10,
+    "p95_ms": 295,
+    "complete": true,
+    "precision": 1.0,
+    "coverage": 0.625,
+    "saved_questions_routed_to_write": [],
+    "passed": false
+  },
+  "development": [
+    {
+      "case": "route-01",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.65,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 590,
+      "input_tokens": 215
+    },
+    {
+      "case": "route-02",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.47,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 161,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-03",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.76,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 182,
+      "input_tokens": 210
+    },
+    {
+      "case": "route-04",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.4,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 156,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-05",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.77,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 220,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-06",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.43,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 267,
+      "input_tokens": 211
+    },
+    {
+      "case": "route-07",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.74,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 224,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-08",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.47,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 165,
+      "input_tokens": 212
+    },
+    {
+      "case": "route-13",
+      "expected": "compare",
+      "label": "compare",
+      "confidence": 0.34,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 197,
+      "input_tokens": 212
+    },
+    {
+      "case": "route-14",
+      "expected": "compare",
+      "label": "compare",
+      "confidence": 0.69,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 252,
+      "input_tokens": 218
+    },
+    {
+      "case": "route-15",
+      "expected": "compare",
+      "label": "answer",
+      "confidence": 0.4,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 386,
+      "input_tokens": 212
+    },
+    {
+      "case": "route-16",
+      "expected": "compare",
+      "label": "answer",
+      "confidence": 0.37,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 347,
+      "input_tokens": 212
+    },
+    {
+      "case": "route-17",
+      "expected": "compare",
+      "label": "clarify",
+      "confidence": 0.27,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 346,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-18",
+      "expected": "compare",
+      "label": "compare",
+      "confidence": 0.64,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 327,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-19",
+      "expected": "compare",
+      "label": "compare",
+      "confidence": 0.33,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 311,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-23",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.84,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 206,
+      "input_tokens": 212
+    },
+    {
+      "case": "route-24",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.91,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 213,
+      "input_tokens": 212
+    },
+    {
+      "case": "route-25",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.76,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 171,
+      "input_tokens": 217
+    },
+    {
+      "case": "route-26",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.76,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 175,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-27",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.94,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 180,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-28",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.56,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 247,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-32",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.99,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 190,
+      "input_tokens": 211
+    },
+    {
+      "case": "route-33",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.89,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 188,
+      "input_tokens": 217
+    },
+    {
+      "case": "route-34",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.6,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 197,
+      "input_tokens": 217
+    },
+    {
+      "case": "route-35",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.62,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 228,
+      "input_tokens": 215
+    },
+    {
+      "case": "route-36",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.8,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 197,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-40",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.69,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 266,
+      "input_tokens": 206
+    },
+    {
+      "case": "route-41",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.96,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 226,
+      "input_tokens": 208
+    },
+    {
+      "case": "route-42",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.68,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 173,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-43",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.29,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 224,
+      "input_tokens": 208
+    },
+    {
+      "case": "route-44",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.85,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 237,
+      "input_tokens": 209
+    },
+    {
+      "case": "route-45",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.73,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 164,
+      "input_tokens": 212
+    }
+  ],
+  "holdout": [
+    {
+      "case": "route-09",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.77,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 295,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-10",
+      "expected": "answer",
+      "label": "clarify",
+      "confidence": 0.33,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 210,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-11",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.71,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 170,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-12",
+      "expected": "answer",
+      "label": "answer",
+      "confidence": 0.85,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 166,
+      "input_tokens": 215
+    },
+    {
+      "case": "route-20",
+      "expected": "compare",
+      "label": "answer",
+      "confidence": 0.24,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 167,
+      "input_tokens": 219
+    },
+    {
+      "case": "route-21",
+      "expected": "compare",
+      "label": "answer",
+      "confidence": 0.22,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 283,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-22",
+      "expected": "compare",
+      "label": "compare",
+      "confidence": 0.3,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 183,
+      "input_tokens": 215
+    },
+    {
+      "case": "route-29",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.76,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 215,
+      "input_tokens": 216
+    },
+    {
+      "case": "route-30",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.33,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 200,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-31",
+      "expected": "edit",
+      "label": "edit",
+      "confidence": 0.91,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 255,
+      "input_tokens": 216
+    },
+    {
+      "case": "route-37",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.66,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 216,
+      "input_tokens": 213
+    },
+    {
+      "case": "route-38",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.98,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 187,
+      "input_tokens": 220
+    },
+    {
+      "case": "route-39",
+      "expected": "new",
+      "label": "new",
+      "confidence": 0.39,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 180,
+      "input_tokens": 215
+    },
+    {
+      "case": "route-46",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.54,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 207,
+      "input_tokens": 214
+    },
+    {
+      "case": "route-47",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.95,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 184,
+      "input_tokens": 210
+    },
+    {
+      "case": "route-48",
+      "expected": "clarify",
+      "label": "clarify",
+      "confidence": 0.57,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 248,
+      "input_tokens": 213
+    }
+  ]
+}

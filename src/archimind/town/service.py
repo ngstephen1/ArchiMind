@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from archimind.studio import provider
 from archimind.style_packs import StyleId
+from archimind.town import decisions
 from archimind.town.agents import coordinate
 from archimind.town.brief_review import (
     REVIEW_FIELDS,
@@ -38,6 +39,8 @@ SCHEMA = [
     "CREATE TABLE IF NOT EXISTS job_events (job TEXT NOT NULL, seq INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(job,seq))",
     "CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, owner TEXT NOT NULL, revision INTEGER NOT NULL)",
     "CREATE TABLE IF NOT EXISTS revisions (project TEXT NOT NULL, revision INTEGER NOT NULL, home TEXT NOT NULL, PRIMARY KEY(project,revision))",
+    "CREATE TABLE IF NOT EXISTS town_decision_checks (owner TEXT NOT NULL, project TEXT NOT NULL, id TEXT NOT NULL, created BIGINT NOT NULL, signature TEXT NOT NULL, result TEXT, PRIMARY KEY(owner,project,id))",
+    "CREATE TABLE IF NOT EXISTS job_brief_decisions (job TEXT PRIMARY KEY, mode TEXT NOT NULL, threshold DOUBLE PRECISION)",
     "CREATE TABLE IF NOT EXISTS jobs (id TEXT PRIMARY KEY, owner TEXT NOT NULL, project TEXT NOT NULL, base INTEGER NOT NULL, created BIGINT NOT NULL, started BIGINT, status TEXT NOT NULL, request TEXT NOT NULL, result TEXT, UNIQUE(owner,id))",
 ]
 
@@ -88,7 +91,14 @@ def initialize():
         if os.getenv("DATABASE_URL"):
             # Only the server DB role accesses these tables. Public Supabase clients
             # have neither table grants nor row policies granting direct access.
-            for table in ["projects", "revisions", "jobs", "job_events"]:
+            for table in [
+                "projects",
+                "revisions",
+                "jobs",
+                "job_events",
+                "job_brief_decisions",
+                "town_decision_checks",
+            ]:
                 q(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
                 q(f"REVOKE ALL ON {table} FROM PUBLIC, anon, authenticated")
 
@@ -152,6 +162,20 @@ def local_extra_team_jobs(req, now):
     )
 
 
+def model_calls_used(q, day):
+    jobs = q(
+        "SELECT COALESCE(SUM((CASE WHEN request LIKE ? THEN 3 ELSE 1 END) "
+        "+ (CASE WHEN d.job IS NULL THEN 0 ELSE 1 END)),0) "
+        "FROM jobs LEFT JOIN job_brief_decisions d ON d.job=jobs.id "
+        "WHERE created>=? AND request LIKE ?",
+        ('%"agent_team":true%', day, '%"live":true%'),
+    ).fetchone()[0]
+    reviews = q(
+        "SELECT count(*) FROM town_decision_checks WHERE created>=?", (day,)
+    ).fetchone()[0]
+    return jobs + reviews
+
+
 def enqueue(owner, req):
     p, j = str(req.project), str(req.id)
     with transaction() as q:
@@ -201,20 +225,15 @@ def enqueue(owner, req):
             raise Problem("One design is already in progress.", 409)
         day = now - now % 86400
         extra = local_extra_team_jobs(req, now)
-        if (
-            q(
-                "SELECT count(*) FROM jobs WHERE owner=? AND created>=?", (owner, day)
-            ).fetchone()[0]
-            >= 3 + extra
-        ):
+        jobs_today = q(
+            "SELECT count(*) FROM jobs WHERE owner=? AND created>=?", (owner, day)
+        ).fetchone()[0]
+        if jobs_today >= 3 + extra:
             raise Problem("Daily design job limit reached.", 429)
         # Reserve three calls for team jobs and one for legacy interpretation.
+        decision_slot = None
         if req.live:
-            used = q(
-                "SELECT COALESCE(SUM(CASE WHEN request LIKE ? THEN 3 ELSE 1 END),0) "
-                "FROM jobs WHERE created>=? AND request LIKE ?",
-                ('%"agent_team":true%', day, '%"live":true%'),
-            ).fetchone()[0]
+            used = model_calls_used(q, day)
             cap = int(os.getenv("TOWN_DAILY_MODEL_CALLS", "0"))
             reserve = int(os.getenv("TOWN_CALL_RESERVE_MICROUSD", "0"))
             budget = int(os.getenv("TOWN_DAILY_MICROUSD", "0"))
@@ -224,10 +243,24 @@ def enqueue(owner, req):
             total = used + (3 if req.agent_team else 1)
             if total > cap or reserve <= 0 or total * reserve > budget:
                 raise Problem("The operator's daily AI allowance is exhausted.", 429)
+            mode, threshold = decisions.settings()
+            # Preserve enough budget for this owner's remaining ordinary team jobs.
+            with_optional = total + 1 + 3 * (2 + extra - jobs_today)
+            if (
+                mode != "off"
+                and req.agent_team
+                and req.brief.compare_tradeoffs
+                and req.message.strip()
+                and with_optional <= cap
+                and with_optional * reserve <= budget
+            ):
+                decision_slot = (j, mode, threshold)
         q(
             "INSERT INTO jobs(id,owner,project,base,created,status,request) VALUES(?,?,?,?,?,'queued',?)",
             (j, owner, p, req.base, now, raw),
         )
+        if decision_slot:
+            q("INSERT INTO job_brief_decisions VALUES(?,?,?)", decision_slot)
     return {"job": j}
 
 
@@ -641,6 +674,9 @@ def work_once():
             (int(time.time()), j),
         )
         previous = revision(q, p, base) if base else None
+        decision_slot = q(
+            "SELECT mode,threshold FROM job_brief_decisions WHERE job=?", (j,)
+        ).fetchone()
     try:
         req = Request.model_validate_json(raw)
         deadline = time.monotonic() + 180
@@ -681,12 +717,64 @@ def work_once():
                 raise
             confirmed_brief = brief
             if brief.compare_tradeoffs or brief.compare_zoning:
-                emit(
-                    "A",
-                    "completed",
-                    "Reviewable brief",
-                    reviewed_brief(request, brief, previous_home),
-                )
+                summary = reviewed_brief(request, brief, previous_home)
+                mode, threshold = decisions.settings()
+                if (
+                    mode != "off"
+                    and brief.compare_tradeoffs
+                    and request.live
+                    and request.agent_team
+                    and request.message.strip()
+                ):
+                    if decision_slot:
+                        clarify = mode == "clarify" and tuple(decision_slot) == (
+                            mode,
+                            threshold,
+                        )
+                        emit("A", "running", decisions.TASK, {})
+                        review = decisions.audit(
+                            {
+                                "original_brief": request.message,
+                                "confirmed_controls": request.brief.model_dump(
+                                    mode="json", exclude_unset=True
+                                ),
+                                "proposed_brief": summary,
+                            },
+                            deadline=deadline,
+                        )
+                        flags = decisions.flagged(
+                            review, threshold if clarify else 0.85
+                        )
+                        emit(
+                            "A",
+                            "completed",
+                            decisions.TASK,
+                            review
+                            | {
+                                "mode": "clarify" if clarify else "shadow",
+                                "flags": flags,
+                            },
+                        )
+                        if clarify and flags:
+                            question = decisions.CRITERIA[flags[0]][1]
+                            summary["questions"] = [question]
+                            summary["status"] = "needs confirmation"
+                            emit("A", "completed", "Reviewable brief", summary)
+                            raise BriefClarification(
+                                request, None, reviewed=summary, question=question
+                            )
+                    else:
+                        emit(
+                            "A",
+                            "skipped",
+                            decisions.TASK,
+                            {
+                                "rubric": decisions.RUBRIC,
+                                "status": "unavailable",
+                                "reason": "not_reserved",
+                            },
+                        )
+                emit("A", "completed", "Reviewable brief", summary)
             return brief
 
         try:

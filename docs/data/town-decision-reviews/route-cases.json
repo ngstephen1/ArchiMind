@@ -1,0 +1,290 @@
+[
+  {
+    "id": "route-01",
+    "split": "development",
+    "message": "How far is the Belaya desk from the bedroom window?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-02",
+    "split": "development",
+    "message": "Which room has the shorter modeled walk to the bathroom?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-03",
+    "split": "development",
+    "message": "Tell me the modeled passage width.",
+    "expected": "answer"
+  },
+  {
+    "id": "route-04",
+    "split": "development",
+    "message": "Could you check if the chair slides under the desk?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-05",
+    "split": "development",
+    "message": "How many dining places are in the formal salon?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-06",
+    "split": "development",
+    "message": "Why did you put the desk there?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-07",
+    "split": "development",
+    "message": "What finish evidence do we have for the bedroom furniture?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-08",
+    "split": "development",
+    "message": "Do we know if the study is quiet?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-09",
+    "split": "holdout",
+    "message": "Can two residents host four visitors in the saved plan?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-10",
+    "split": "holdout",
+    "message": "Show me the modeled route from the study to living.",
+    "expected": "answer"
+  },
+  {
+    "id": "route-11",
+    "split": "holdout",
+    "message": "Did you account for screen glare in this saved home?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-12",
+    "split": "holdout",
+    "message": "Is the current bedroom chair a native mesh or a placeholder?",
+    "expected": "answer"
+  },
+  {
+    "id": "route-13",
+    "split": "development",
+    "message": "What changed when we pulled the chair out?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-14",
+    "split": "development",
+    "message": "Compare the desk and chair gap in revision 1 and revision 2.",
+    "expected": "compare"
+  },
+  {
+    "id": "route-15",
+    "split": "development",
+    "message": "Did the window distance change after the move?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-16",
+    "split": "development",
+    "message": "How far did the chair move between saves?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-17",
+    "split": "development",
+    "message": "What are the main differences from the previous revision?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-18",
+    "split": "development",
+    "message": "Was the salon changed when we edited the bedroom?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-19",
+    "split": "development",
+    "message": "Which revision left more space between the chair and desk?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-20",
+    "split": "holdout",
+    "message": "Does the latest saved plan still have the same dining count as the old one?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-21",
+    "split": "holdout",
+    "message": "What did you move when you pulled the chair back?",
+    "expected": "compare"
+  },
+  {
+    "id": "route-22",
+    "split": "holdout",
+    "message": "Tell me whether the study moved between the two saved plans.",
+    "expected": "compare"
+  },
+  {
+    "id": "route-23",
+    "split": "development",
+    "message": "Pull the desk chair back 30 cm.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-24",
+    "split": "development",
+    "message": "Move the desk closer to the bedroom window.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-25",
+    "split": "development",
+    "message": "Change the bedroom palette to sage and keep the bed where it is.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-26",
+    "split": "development",
+    "message": "Replace the current desk chair with the deep-back chair.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-27",
+    "split": "development",
+    "message": "Revise this layout to increase the hall width.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-28",
+    "split": "development",
+    "message": "Keep this home and add a formal salon opening.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-29",
+    "split": "holdout",
+    "message": "In this same home, shift the chair away from the desk.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-30",
+    "split": "holdout",
+    "message": "Preserve the study and redesign the dining area.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-31",
+    "split": "holdout",
+    "message": "For the current layout, move the desk to the south wall.",
+    "expected": "edit"
+  },
+  {
+    "id": "route-32",
+    "split": "development",
+    "message": "Start a new home with three bedrooms.",
+    "expected": "new"
+  },
+  {
+    "id": "route-33",
+    "split": "development",
+    "message": "Create a fresh layout for a 12 by 15 meter lot.",
+    "expected": "new"
+  },
+  {
+    "id": "route-34",
+    "split": "development",
+    "message": "Ignore the old plans and design a new single-storey guest house.",
+    "expected": "new"
+  },
+  {
+    "id": "route-35",
+    "split": "development",
+    "message": "Use an empty design and make a house for two residents.",
+    "expected": "new"
+  },
+  {
+    "id": "route-36",
+    "split": "development",
+    "message": "Start a completely new design with a formal salon.",
+    "expected": "new"
+  },
+  {
+    "id": "route-37",
+    "split": "holdout",
+    "message": "Make a separate project for my parents' home.",
+    "expected": "new"
+  },
+  {
+    "id": "route-38",
+    "split": "holdout",
+    "message": "Begin with an empty lot and generate a new 10 by 10 meter plan.",
+    "expected": "new"
+  },
+  {
+    "id": "route-39",
+    "split": "holdout",
+    "message": "Set this home aside and start a fresh accessible-home concept.",
+    "expected": "new"
+  },
+  {
+    "id": "route-40",
+    "split": "development",
+    "message": "Fix that.",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-41",
+    "split": "development",
+    "message": "Move it over there.",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-42",
+    "split": "development",
+    "message": "Did the chair move, and if not move it.",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-43",
+    "split": "development",
+    "message": "This looks better now.",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-44",
+    "split": "development",
+    "message": "Could you handle the chair?",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-45",
+    "split": "development",
+    "message": "Explain the change and then redo the house.",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-46",
+    "split": "holdout",
+    "message": "Change this or make a new one, whatever works.",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-47",
+    "split": "holdout",
+    "message": "The other thing should go there.",
+    "expected": "clarify"
+  },
+  {
+    "id": "route-48",
+    "split": "holdout",
+    "message": "Compare the revisions and then apply the better chair.",
+    "expected": "clarify"
+  }
+]

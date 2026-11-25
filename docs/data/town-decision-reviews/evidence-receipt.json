@@ -1,0 +1,341 @@
+{
+  "model": "gpt-6-luna",
+  "rubric": "town-answer-evidence-v1",
+  "corpus_sha256": "97683fbae12ab7de919a99dd0730c7e13856c113c4061cc0fb10492481ebeee7",
+  "source_fixture_sha256": {
+    "revision-1.json": "ef52a8e31ecf09bab94bcd7b3bf65c96b04171a9b8a13f339b6e03e39e17b454",
+    "live-snapshot-r2.json": "40f00cfe91439d7cdbc54824a45b345bfb99fb937ee8a45784e310a86364195b"
+  },
+  "evidence_sha256": "ad59ef72a47ab21d8b75c8e7e10ae5e020818cd3d75622d8d3aa85df689f5f5c",
+  "threshold": 0.3,
+  "locked_threshold": 0.3,
+  "diagnostic_threshold": 0.8,
+  "heldout_passed": true,
+  "development_metrics": {
+    "0.3": {
+      "count": 16,
+      "correct": 15,
+      "accepted": 16,
+      "p95_ms": 569,
+      "complete": true,
+      "recognition": 0.9375,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.4": {
+      "count": 16,
+      "correct": 15,
+      "accepted": 16,
+      "p95_ms": 569,
+      "complete": true,
+      "recognition": 0.9375,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.5": {
+      "count": 16,
+      "correct": 15,
+      "accepted": 16,
+      "p95_ms": 569,
+      "complete": true,
+      "recognition": 0.9375,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.6": {
+      "count": 16,
+      "correct": 15,
+      "accepted": 16,
+      "p95_ms": 569,
+      "complete": true,
+      "recognition": 0.9375,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.7": {
+      "count": 16,
+      "correct": 15,
+      "accepted": 16,
+      "p95_ms": 569,
+      "complete": true,
+      "recognition": 0.9375,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.8": {
+      "count": 16,
+      "correct": 15,
+      "accepted": 15,
+      "p95_ms": 569,
+      "complete": true,
+      "recognition": 0.9375,
+      "false_supported": [],
+      "passed": true
+    },
+    "0.9": {
+      "count": 16,
+      "correct": 12,
+      "accepted": 12,
+      "p95_ms": 569,
+      "complete": true,
+      "recognition": 0.75,
+      "false_supported": [],
+      "passed": false
+    }
+  },
+  "holdout_metrics": {
+    "count": 8,
+    "correct": 8,
+    "accepted": 8,
+    "p95_ms": 258,
+    "complete": true,
+    "recognition": 1.0,
+    "false_supported": [],
+    "passed": true
+  },
+  "development": [
+    {
+      "case": "claim-01",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.89,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 569,
+      "input_tokens": 556
+    },
+    {
+      "case": "claim-02",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.96,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 191,
+      "input_tokens": 557
+    },
+    {
+      "case": "claim-03",
+      "expected": "supported",
+      "label": "missing_evidence",
+      "confidence": 0.76,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 294,
+      "input_tokens": 558
+    },
+    {
+      "case": "claim-04",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.91,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 218,
+      "input_tokens": 549
+    },
+    {
+      "case": "claim-05",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.97,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 188,
+      "input_tokens": 557
+    },
+    {
+      "case": "claim-06",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.86,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 210,
+      "input_tokens": 557
+    },
+    {
+      "case": "claim-10",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 175,
+      "input_tokens": 550
+    },
+    {
+      "case": "claim-11",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 176,
+      "input_tokens": 552
+    },
+    {
+      "case": "claim-12",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 196,
+      "input_tokens": 552
+    },
+    {
+      "case": "claim-13",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 286,
+      "input_tokens": 550
+    },
+    {
+      "case": "claim-14",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 177,
+      "input_tokens": 551
+    },
+    {
+      "case": "claim-18",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 184,
+      "input_tokens": 555
+    },
+    {
+      "case": "claim-19",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.83,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 158,
+      "input_tokens": 549
+    },
+    {
+      "case": "claim-20",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.93,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 169,
+      "input_tokens": 558
+    },
+    {
+      "case": "claim-21",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.93,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 265,
+      "input_tokens": 558
+    },
+    {
+      "case": "claim-22",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 182,
+      "input_tokens": 557
+    }
+  ],
+  "holdout": [
+    {
+      "case": "claim-07",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.93,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 191,
+      "input_tokens": 558
+    },
+    {
+      "case": "claim-08",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.96,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 178,
+      "input_tokens": 555
+    },
+    {
+      "case": "claim-09",
+      "expected": "supported",
+      "label": "supported",
+      "confidence": 0.66,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 219,
+      "input_tokens": 558
+    },
+    {
+      "case": "claim-15",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 220,
+      "input_tokens": 551
+    },
+    {
+      "case": "claim-16",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 258,
+      "input_tokens": 554
+    },
+    {
+      "case": "claim-17",
+      "expected": "missing_evidence",
+      "label": "missing_evidence",
+      "confidence": 1.0,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 215,
+      "input_tokens": 558
+    },
+    {
+      "case": "claim-23",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.97,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 212,
+      "input_tokens": 555
+    },
+    {
+      "case": "claim-24",
+      "expected": "contradicted",
+      "label": "contradicted",
+      "confidence": 0.63,
+      "status": "checked",
+      "reason": null,
+      "elapsed_ms": 199,
+      "input_tokens": 553
+    }
+  ],
+  "evidence_schema": "validated-passage-check-v1"
+}

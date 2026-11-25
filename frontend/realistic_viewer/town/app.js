@@ -6,7 +6,7 @@ import {roomElevation} from "./elevations.js";
 import { bedroomManifest, manifestText, manifestDigest, publicationFor } from "./bedroom_manifest.js";
 import { floorPlan } from "./floor_plan.js";
 import { timeline } from "./agents.js";
-import { asksChairChange, asksZoningTradeoff, explanation, isSavedDesignQuestion } from "./explanation.js";
+import { asksChairChange, asksZoningTradeoff, explanation, isSavedDesignQuestion, isUnambiguousSavedDesignQuestion } from "./explanation.js";
 import { createTown } from "./world.js";
 import { homeStyle, STYLE_NAMES } from "./style_names.js";
 import { planColors } from "./plan_colors.js";
@@ -103,6 +103,91 @@ function loadSavedHome() {
   world.load(applied);
   el("tour").textContent = revision ? "Visit saved home" : "Visit showcase";
 }
+const reviewContext = () => ({ project, revision, home_id: applied.id });
+function isCurrentReview(context) {
+  return context.project === project && context.revision === revision && context.home_id === applied.id;
+}
+let reviewModes = {}, routeSerial = 0;
+function clearRouteReview() {
+  routeSerial++;
+  el("requestReviewStatus").textContent = "";
+  el("openSavedAnswer").hidden = true;
+  el("checkRequest").disabled = false;
+}
+async function refreshDecisionReviews() {
+  const context = reviewContext();
+  reviewModes = {};
+  clearRouteReview();
+  clearEvidenceReview();
+  el("checkRequest").hidden = el("requestReview").hidden = true;
+  if (!context.project || !context.revision) return;
+  try {
+    const modes = await api("/projects/" + encodeURIComponent(context.project) + "/decision-review");
+    if (!isCurrentReview(context)) return;
+    reviewModes = modes;
+    el("checkRequest").hidden = el("requestReview").hidden = modes.route === "off";
+  } catch { /* The rest of Town works when optional checks are unavailable. */ }
+}
+function requestDecisionReview(kind, context, message, claims = []) {
+  return api("/projects/" + encodeURIComponent(context.project) + "/decision-review", {
+    id: crypto.randomUUID(), kind, revision: context.revision, home_id: context.home_id,
+    message, claims, allow_live: true,
+  });
+}
+function reviewStatus(result) {
+  if (result.status === "unavailable") {
+    if (result.reason === "budget") return "The optional review allowance is used. Your saved design and normal tools are still available.";
+    return "Review unavailable. Your saved design is unchanged.";
+  }
+  if (result.mode === "shadow") return "Calibration check recorded. Advice is unavailable in this mode.";
+  if (!Object.keys(result.suggestions || {}).length)
+    return "No suggestion met the evidence or confidence threshold. Your saved design is unchanged.";
+  return "";
+}
+el("message").addEventListener("input", clearRouteReview);
+el("panel").addEventListener("close", clearRouteReview);
+bind("checkRequest", async () => {
+  const context = reviewContext(), message = el("message").value.trim();
+  const status = el("requestReviewStatus"), serial = ++routeSerial;
+  el("openSavedAnswer").hidden = true;
+  if (!message) {
+    status.textContent = "Enter a request to check.";
+    return;
+  }
+  function offerSavedAnswer(compare = false) {
+    el("openSavedAnswer").hidden = false;
+    el("openSavedAnswer").onclick = async () => {
+      if (serial !== routeSerial || !isCurrentReview(context)) return;
+      el("panel").close();
+      await askSavedDesign(message, { compare });
+    };
+  }
+  if (isUnambiguousSavedDesignQuestion(message)) {
+    status.textContent = "This is a question about a saved design.";
+    offerSavedAnswer();
+    return;
+  }
+  const current = () => serial === routeSerial && isCurrentReview(context) && el("panel").open;
+  el("checkRequest").disabled = true;
+  status.textContent = "Checking the request…";
+  try {
+    const result = await requestDecisionReview("route", context, message);
+    if (!current()) return;
+    const label = result.suggestions?.intent;
+    status.textContent = reviewStatus(result) || ({
+      answer: "Suggested next step: open the saved-design explanation.",
+      compare: "Suggested next step: compare the saved revisions.",
+      edit: "Suggested next step: revise the existing design. Review the brief before choosing Generate layouts.",
+      new: "Suggested next step: start a new design.",
+      clarify: "Suggested next step: say whether you want an explanation, an edit, or a new design.",
+    })[label];
+    if (label === "answer" || label === "compare") offerSavedAnswer(label === "compare");
+  } catch {
+    if (current()) status.textContent = "Review unavailable. Your saved design is unchanged.";
+  } finally {
+    if (current()) el("checkRequest").disabled = false;
+  }
+});
 function sync(data) {
   resetChairPreview();
   releasedChairs = [];
@@ -151,6 +236,7 @@ function sync(data) {
   url.searchParams.set("revision", revision);
   history.replaceState(null, "", url);
   links();
+  void refreshDecisionReviews();
 }
 async function restore() {
   if (tourOnly) return;
@@ -593,10 +679,10 @@ bind("apply", async () => {
   el("panel").close();
   if (followup) await askSavedDesign(followup);
 });
-async function askSavedDesign(question) {
+async function askSavedDesign(question, options) {
   await el("present").onclick();
   el("whyQuery").value = question;
-  await el("askWhy").onclick();
+  await explainSavedQuestion(options);
 }
 bind("undo", async () => {
   sync(await api("/projects/" + project + "/undo", { base: revision }));
@@ -824,6 +910,7 @@ el("present").onclick = async () => {
   el("printBoard").disabled = true;
   boardHome = applied;
   evidenceManifest = null;
+  clearEvidenceReview();
   el("whyAnswer").textContent = "";
   el("boardExports").replaceChildren();
   if (revision) {
@@ -906,6 +993,8 @@ async function showRoom(h,id){
   el("elevations").replaceChildren(node("h3",part.design.room.name+" · schematic elevations"),roomElevation(part,"north"),roomElevation(part,"east"));
   el("printBoard").disabled=true;
   el("whyAnswer").textContent = "";
+  questionSerial++;
+  clearEvidenceReview();
   el("photos").textContent = "Rendering "+part.design.room.name+" views…";
   try {
     const { images, views, chair, desk, collection } = await world.bedroomViews(h,id);
@@ -931,10 +1020,57 @@ async function showRoom(h,id){
     if (generation === photoSerial) el("printBoard").disabled = false;
   }
 };
-let questionSerial = 0;
-el("askWhy").onclick = async () => {
+let questionSerial = 0, evidenceSerial = 0, renderedAnswer = null;
+function clearEvidenceReview() {
+  evidenceSerial++;
+  renderedAnswer = null;
+  el("evidenceReview").hidden = true;
+  el("checkEvidence").disabled = false;
+  el("evidenceReviewStatus").textContent = "";
+  el("evidenceReviewItems").replaceChildren();
+}
+el("board").addEventListener("close", clearEvidenceReview);
+el("whyQuery").addEventListener("input", () => {
+  questionSerial++;
+  clearEvidenceReview();
+});
+bind("checkEvidence", async () => {
+  const saved = renderedAnswer;
+  if (!saved) return;
+  const serial = ++evidenceSerial;
+  const current = () => serial === evidenceSerial && el("board").open && isCurrentReview(saved.context);
+  const items = el("evidenceReviewItems"), status = el("evidenceReviewStatus");
+  const labels = {
+    supported: "Supported by the supplied facts",
+    missing_evidence: "Evidence is missing",
+    contradicted: "Conflicts with a supplied fact",
+  };
+  const claims = saved.answer.split(/(?<=[.?!])\s+(?=[A-Z])/).filter(Boolean).slice(0, 6);
+  el("checkEvidence").disabled = true;
+  status.textContent = "Checking the answer against the saved revision…";
+  items.replaceChildren();
+  try {
+    const result = await requestDecisionReview("evidence", saved.context, saved.question, claims);
+    if (!current()) return;
+    status.textContent = reviewStatus(result) || "Advisory checks for the saved revision";
+    if (Object.keys(result.suggestions || {}).length)
+      items.replaceChildren(...claims.map((claim, index) =>
+        node("li", (labels[result.suggestions["claim_" + index]] || "No reliable finding") + " — " + claim)));
+  } catch {
+    if (current()) status.textContent = "Review unavailable. The displayed explanation is unchanged.";
+  } finally {
+    if (current()) el("checkEvidence").disabled = false;
+  }
+});
+async function explainSavedQuestion({ compare = false } = {}) {
   const serial = ++questionSerial, generation = boardGeneration;
-  const question = el("whyQuery").value, manifest = evidenceManifest;
+  clearEvidenceReview();
+  const question = el("whyQuery").value.trim(), manifest = evidenceManifest;
+  const context = reviewContext();
+  if (compare && !asksChairChange(question)) {
+    el("whyAnswer").textContent = "Revision comparisons currently cover the bedroom desk chair. Ask how its position or gap to the desk changed.";
+    return;
+  }
   let previous = null;
   if ((asksChairChange(question) || asksZoningTradeoff(question)) && manifest?.revision > 1) {
     el("whyAnswer").textContent = "Checking the previous saved revision…";
@@ -942,11 +1078,16 @@ el("askWhy").onclick = async () => {
       previous = await api("/projects/" + encodeURIComponent(manifest.project) + "?revision=" + (manifest.revision - 1));
     } catch { /* The explanation identifies the missing revision. */ }
   }
-  if (serial !== questionSerial || generation !== boardGeneration) return;
+  if (serial !== questionSerial || generation !== boardGeneration || !el("board").open || !isCurrentReview(context)) return;
   const answer = explanation(boardHome, question, manifest, previous);
   const source = evidenceManifest ? `Project ${evidenceManifest.project} · Revision ${evidenceManifest.revision}` : "Bedroom preview";
   el("whyAnswer").textContent = `${source} · ${answer}`;
-};
+  if (question && manifest && reviewModes.evidence && reviewModes.evidence !== "off") {
+    renderedAnswer = { answer, question, context };
+    el("evidenceReview").hidden = false;
+  }
+}
+el("askWhy").onclick = () => explainSavedQuestion();
 el("printBoard").onclick = () => window.print();
 
 // Chromium retains modal scroll position during printing. Print a normal-flow
