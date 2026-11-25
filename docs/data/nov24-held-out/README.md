@@ -31,6 +31,40 @@ and still matched the recorded base, with no jobs on either project.
 | H05 | Two plausible referents in a follow-up | Pass | 0 | browser, immediate |
 | H06 | Conclusion needing site, supplier or acoustic evidence | Partial | 0 | browser, immediate |
 
+## November 25 rerun of the affected rows
+
+H01, H02 and H04 were rerun live on November 25, 2026 UTC against
+[`45871da`](https://github.com/ngstephen1/ArchiMind/commit/45871daed9d71a57bc76c29768ef436562091fad).
+That commit is the `eval/nov25-held-out-rerun` integration branch: main plus
+[#91](https://github.com/ngstephen1/ArchiMind/pull/91),
+[#111](https://github.com/ngstephen1/ArchiMind/pull/111) and
+[#112](https://github.com/ngstephen1/ArchiMind/pull/112). The runs used the same packet,
+the same evaluation database, the same model and the same harness. The original receipts
+and rows are kept. H03, H05 and H06 were not rerun.
+
+| Run | Outcome | OpenAI phases | Elapsed | Independent check |
+| --- | --- | --- | --- | --- |
+| H01 rerun | Pass | 3 | 12.36 s | Both six-room candidates pass `validate_home`. Both requested room-center distances were recomputed from the room origins and matched the recorded evidence. One candidate is better on both measures. |
+| H02 rerun | Pass | 2 | 7.33 s | No candidates. The question keeps the stated party size at one table, states the four-place table limit and the conflict with the split-dining control, and does not accept a two-table total. |
+| H04 rerun | Pass | 3 | 7.66 s | The revised home passes `validate_home`. The bedroom room, openings, furniture and origin are identical to revision 1, and no other room changed besides the study. The desk-to-window center distance fell from 4.445 m to 0.875 m. Revision 1 compared equal before and after the job. |
+
+With the reruns in place of their originals, five of six rows pass and H06 remains partial.
+This mixes two commits: H03, H05 and H06 were observed on `301762b`. The scores are still
+provisional.
+
+Observations for review:
+
+- H02's clarification also says that the five-room program has no modeled table in the
+  formal salon. The case's controls do not enable the salon, so the statement is
+  accurate, but it repeats the four-place point as a second question.
+- H01's styling direction suggests "quieter and more absorptive" study materials. It is
+  a finish suggestion. It does not claim sound isolation or a measured acoustic result.
+- The run plan's `home_sha256` for the H04 base does not equal the digest of the stored
+  revision 1. The receipt's before-and-after comparison reads the same stored revision
+  through the API, and those two digests match.
+- The H06 source-accuracy defect (wrong room label, acoustic and supplier gaps) is not
+  addressed by these branches.
+
 ## Triage
 
 | Case | Observed behavior (general) | Component | Severity |

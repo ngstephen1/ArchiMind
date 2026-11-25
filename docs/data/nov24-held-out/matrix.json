@@ -1,6 +1,6 @@
 {
   "issue": 68,
-  "scoring_status": "Provisional agent scoring on 301762b. Hieu reviews and replaces every row before sign-off.",
+  "scoring_status": "Provisional agent scoring. Originals on 301762b; H01, H02 and H04 reruns on 45871da. Hieu reviews and replaces every row before sign-off.",
   "runs": {
     "H01": {
       "case": "H01",
@@ -32,6 +32,41 @@
         "reviewer": "Claude (provisional), Hieu to confirm"
       }
     },
+    "H01-rerun-20261125T044832Z-0b12ea28": {
+      "case": "H01",
+      "slot": "Hosting and home-office trade-offs on a fresh lot",
+      "rerun": true,
+      "commit": "45871daed9d71a57bc76c29768ef436562091fad",
+      "town_commit": "45871daed9d71a57bc76c29768ef436562091fad",
+      "tracked_changes": false,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "packet_sha256": "966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6",
+      "base_revision": 0,
+      "status": "ready",
+      "elapsed_s": 12.36,
+      "provider_phases_started": 3,
+      "candidate_count": 2,
+      "candidate_sha256": [
+        "fe7af2ec5541aa707c146632c757c1064b1bc4c9f65d7e19ec348b8ae5aaa5b5",
+        "e719d51ca04ff84b450dc715fea85585481ec2c62351156aa2998d53adc31ade"
+      ],
+      "prior_snapshot_unchanged": null,
+      "provider_phases": [
+        "OpenAI \u00b7 Generate styling direction",
+        "OpenAI \u00b7 Interpret brief",
+        "OpenAI \u00b7 Review plan images"
+      ],
+      "scores": {
+        "outcome": "pass",
+        "hard_constraints": 2,
+        "source_accuracy": 2,
+        "candidate_difference": 2,
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
     "H02": {
       "case": "H02",
       "slot": "Ambiguous or conflicting seating that needs a confirmation",
@@ -59,6 +94,37 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "medium",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
+    "H02-rerun-20261125T044759Z-5b702632": {
+      "case": "H02",
+      "slot": "Ambiguous or conflicting seating that needs a confirmation",
+      "rerun": true,
+      "commit": "45871daed9d71a57bc76c29768ef436562091fad",
+      "town_commit": "45871daed9d71a57bc76c29768ef436562091fad",
+      "tracked_changes": false,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "packet_sha256": "966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6",
+      "base_revision": 0,
+      "status": "failed",
+      "elapsed_s": 7.33,
+      "provider_phases_started": 2,
+      "candidate_count": 0,
+      "candidate_sha256": [],
+      "prior_snapshot_unchanged": null,
+      "provider_phases": [
+        "OpenAI \u00b7 Generate styling direction",
+        "OpenAI \u00b7 Interpret brief"
+      ],
+      "scores": {
+        "outcome": "pass",
+        "hard_constraints": 2,
+        "source_accuracy": 2,
+        "candidate_difference": "N/A",
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "",
         "reviewer": "Claude (provisional), Hieu to confirm"
       }
     },
@@ -123,6 +189,40 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "high",
+        "reviewer": "Claude (provisional), Hieu to confirm"
+      }
+    },
+    "H04-rerun-20261125T044845Z-3a010ecc": {
+      "case": "H04",
+      "slot": "Room lock and targeted change to a saved revision",
+      "rerun": true,
+      "commit": "45871daed9d71a57bc76c29768ef436562091fad",
+      "town_commit": "45871daed9d71a57bc76c29768ef436562091fad",
+      "tracked_changes": false,
+      "model": "gpt-5.4-mini-2026-03-17",
+      "packet_sha256": "966f99271ba19c1b2f99d6a9106f781bee919124c165df80169e4ad8dfe369a6",
+      "base_revision": 1,
+      "status": "ready",
+      "elapsed_s": 7.66,
+      "provider_phases_started": 3,
+      "candidate_count": 1,
+      "candidate_sha256": [
+        "0dec85ce94601119a5f0a539361a90eec83cc8da732f19128ace59b88edae797"
+      ],
+      "prior_snapshot_unchanged": true,
+      "provider_phases": [
+        "OpenAI \u00b7 Generate styling direction",
+        "OpenAI \u00b7 Interpret brief",
+        "OpenAI \u00b7 Review plan images"
+      ],
+      "scores": {
+        "outcome": "pass",
+        "hard_constraints": 2,
+        "source_accuracy": 2,
+        "candidate_difference": "N/A",
+        "latency": 2,
+        "provider_use": 2,
+        "severity": "",
         "reviewer": "Claude (provisional), Hieu to confirm"
       }
     },
