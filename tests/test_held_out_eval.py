@@ -1,6 +1,8 @@
 import importlib.util
 import json
+from contextlib import nullcontext
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -136,7 +138,48 @@ def test_a_stale_town_server_is_refused(tmp_path, monkeypatch):
         tmp_path / "town-start.json",
         {"commit": "new", "tracked_changes": False, "model": "m"},
     )
-    assert held_out_eval.town_start(tmp_path) == {"town_commit": "new", "model": "m"}
+    with pytest.raises(SystemExit, match="Restart"):
+        held_out_eval.town_start(tmp_path)
+
+
+def test_evaluation_binds_to_the_serving_instance(tmp_path, monkeypatch):
+    api = "http://127.0.0.1:8892/api"
+    header = "X-Archimind-Evaluation-Instance"
+    write(
+        tmp_path / "town-start.json",
+        {
+            "commit": "new",
+            "tracked_changes": False,
+            "model": "m",
+            "api": api,
+            "instance": "launch-id",
+        },
+    )
+    monkeypatch.setattr(
+        held_out_eval, "commit", lambda: {"commit": "new", "tracked_changes": False}
+    )
+
+    def wrong_instance(url, *, timeout):
+        assert url == "http://127.0.0.1:8892/health"
+        return nullcontext(SimpleNamespace(headers={header: "old-instance"}))
+
+    monkeypatch.setattr(held_out_eval.urllib.request, "urlopen", wrong_instance)
+    with pytest.raises(SystemExit, match="requested API differs"):
+        held_out_eval.town_start(tmp_path, "http://127.0.0.1:8890/api")
+    with pytest.raises(SystemExit, match="does not match"):
+        held_out_eval.town_start(tmp_path)
+
+    monkeypatch.setattr(
+        held_out_eval.urllib.request,
+        "urlopen",
+        lambda *args, **kwargs: nullcontext(
+            SimpleNamespace(headers={header: "launch-id"})
+        ),
+    )
+    assert held_out_eval.town_start(tmp_path) == (
+        {"town_commit": "new", "model": "m"},
+        api,
+    )
 
 
 def test_effective_model_prefers_the_shell_like_the_launcher(monkeypatch):

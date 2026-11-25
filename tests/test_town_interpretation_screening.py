@@ -391,3 +391,105 @@ def test_cross_level_comparisons_stay_unsupported(provider, objection):
         service.interpret(
             review_request("Compare the plans.", width=15, depth=16), None
         )
+
+
+@pytest.mark.parametrize(
+    ("text", "split", "seats", "question"),
+    [
+        (
+            "Two adults and two children live here and we host six dinner guests",
+            False,
+            6,
+            "",
+        ),
+        (
+            "Our study group of six adults must eat together at one table.",
+            True,
+            6,
+            "6 places at one dining table",
+        ),
+        ("During study sessions, the kids sit together at one table.", True, 0, ""),
+        ("Provide a dining table for five guests and two children.", False, 7, ""),
+        (
+            "Seating for 2 - 4 attendees at one table in the salon.",
+            False,
+            0,
+            "Choose one required",
+        ),
+        ("We need four seats. Compare seating for 2 - 4 visitors.", False, 4, ""),
+        ("Seating for 4—2 adults and 2 children.", False, 4, ""),
+        (
+            "Dining for five guests and two children split between the salon and kitchen.",
+            False,
+            7,
+            "Confirm separate dining tables",
+        ),
+    ],
+)
+def test_dining_evidence_preserves_confirmed_counts_and_arrangements(
+    text, split, seats, question
+):
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=split),
+        text,
+        None,
+    )
+    assert brief.dining_seats == seats
+    assert len(questions) == bool(question)
+    if question:
+        assert question in questions[0]
+    if "must eat" in text:
+        assert not brief.split_dining
+
+
+def test_turning_radius_comparison_remains_unsupported(provider):
+    question = "Compare the alternatives against a 1.5 m wheelchair turning-radius goal"
+    provider(unsupported=[question])
+    with pytest.raises(service.BriefClarification, match="turning-radius"):
+        service.interpret(review_request(question), None)
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "Could we check whether five attendees can sit at one table in the salon? Four dining seats are required.",
+        "Four dining seats are required. Compare seating for 2 - 4 attendees at one table in the salon.",
+    ],
+)
+def test_exploratory_seating_preserves_confirmed_split(text):
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True), text, None
+    )
+    assert (brief.dining_seats, brief.split_dining, questions) == (4, True, [])
+
+
+def test_comparison_of_both_floor_plans_is_supported(provider):
+    provider(
+        unsupported=["Compare study-to-living room distances in both floor plans."]
+    )
+    assert service.interpret(
+        review_request("Compare both floor plans."), None
+    ).compare_tradeoffs
+
+
+@pytest.mark.parametrize(
+    "prelude",
+    [
+        "We host friends near the kitchen island.",
+        "Keep the layout the same size and arrangement. We host in the kitchen and salon.",
+    ],
+)
+def test_incidental_room_mentions_do_not_add_goals_to_desk_edit(
+    provider, saved_home, prelude
+):
+    provider(
+        closer_study_desk=True,
+        room_goals=[dict(room="kitchen-dining", relation="near", target="salon")],
+    )
+    request = review_request(
+        prelude + " Move the study desk closer to its window.",
+        width=15,
+        depth=16,
+        formal_salon=True,
+    )
+    assert service.interpret(request, saved_home).room_goals == []

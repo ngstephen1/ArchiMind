@@ -113,6 +113,10 @@ python scripts/held_out_eval.py record H05 --answer-file answer.txt --viewport 1
 python scripts/held_out_eval.py matrix --output docs/data/nov24-held-out/matrix.md
 ```
 
+`run` and `record` use the loopback endpoint recorded by `serve`. They check
+the running instance before recording evidence. An explicit `--api` must
+match the recorded endpoint. Restart Town when switching checkouts or launchers.
+
 `scores.json` maps each run ID to `outcome`, the five axis scores, `severity` and
 `reviewer`. A `_status` entry describes the scoring state. `run` and `record` refuse to
 start when Town was launched from a different commit than the checkout. Neither replaces

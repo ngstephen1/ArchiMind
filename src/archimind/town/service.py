@@ -319,9 +319,11 @@ SUPPORTED_COMPARISON = re.compile(
 # Comparisons of anything Town does not model stay unsupported.
 UNMODELED = re.compile(
     r"\b(?:acoustic|sound|noise|hear|code|complian|accessib|cost|price|budget|glare"
-    r"|daylight|sunlight|energy|thermal|guarantee|storeys?|story|stories|floors\b"
+    r"|daylight|sunlight|energy|thermal|guarantee|wheelchair|turning[- ](?:radius|circle)"
+    r"|(?:door|fixture|appliance)[- ](?:swing|clearance)|storeys?|story|stories|floors\b"
     r"|(?:one|two|three|single|multi|second|upper|lower|ground|first|extra|another"
     r"|different|separate|multiple|other|both)[- ](?:floor|level)s?\b"
+    r"(?![- ]plans?\b)"
     r"|split[- ]level|upstairs|downstairs|mezzanine"
     r"|basement|attic|garage|pool|extension|stair)",
     re.IGNORECASE,
@@ -332,7 +334,8 @@ LAYOUT_UNCHANGED = re.compile(
     r"\b[^.;!?]*\b(?:as it is|as is|unchanged|alone|where (?:it|they) (?:is|are)"
     # "The same size" or "the same style" constrains an attribute, not placement.
     r"|the same\b(?!\s+(?:size|width|depth|area|footprint|dimensions?|shape|style"
-    r"|colou?rs?|finish(?:es)?|budget|height|number)\b))",
+    r"|colou?rs?|finish(?:es)?|budget|height|number)\b)"
+    r"|the same size and (?:arrangement|placement|positions?)\b)",
     re.IGNORECASE,
 )
 MOVED_ROOM = {"closer_study_desk": "study", "shift_bedroom_chair": "bedroom"}
@@ -358,22 +361,9 @@ def _mentions(message, room):
     return re.search(r"\b(?:" + ROOM_WORDS.get(room, room) + r")\b", message, re.I)
 
 
-PLACEMENT_RELATION = re.compile(
-    r"\b(?:closer|nearer|farther|further|near|far from|next to|beside|adjacent"
-    r"|away from)\b",
-    re.I,
-)
-
-
 def _requests_placement(message, others):
-    """True when the request names every other room in the goal, or one clause
-    places one of those rooms relative to another room, which may be an alias."""
-    if all(_mentions(message, r) for r in others):
-        return True
-    return any(
-        PLACEMENT_RELATION.search(clause) and any(_mentions(clause, r) for r in others)
-        for clause in re.split(ACTION_BREAK, message, flags=re.I)
-    )
+    """Require evidence for every room outside the explicitly edited room."""
+    return all(_mentions(message, room) for room in others)
 
 
 KEEP_VERB = re.compile(

@@ -102,7 +102,7 @@ def effective_model():
     return DEFAULT_MODEL
 
 
-def town_start(out):
+def town_start(out, requested_api=None):
     """The commit and model Town was launched with by ``serve``; refuse stale servers."""
     path = Path(out) / "town-start.json"
     if not path.exists():
@@ -116,7 +116,32 @@ def town_start(out):
             f"Town was started from {start['commit'][:7]} but the checkout is "
             f"{now['commit'][:7]}. Restart it with `serve` before recording a run."
         )
-    return {"town_commit": start["commit"], "model": start["model"]}
+    api = start.get("api", "")
+    instance = start.get("instance")
+    if (
+        not api.startswith("http://127.0.0.1:")
+        or not api.endswith("/api")
+        or not instance
+    ):
+        raise SystemExit("Restart Town with this version of the evaluation launcher.")
+    if requested_api and requested_api.rstrip("/") != api:
+        raise SystemExit(
+            "The requested API differs from the Town instance launched by serve."
+        )
+    try:
+        with urllib.request.urlopen(
+            api.removesuffix("/api") + "/health", timeout=5
+        ) as response:
+            observed = response.headers.get("X-Archimind-Evaluation-Instance")
+    except OSError:
+        raise SystemExit(
+            "The evaluation Town instance is unavailable. Restart it with serve."
+        ) from None
+    if observed != instance:
+        raise SystemExit(
+            "The responding Town instance does not match the evaluation launch."
+        )
+    return {"town_commit": start["commit"], "model": start["model"]}, api
 
 
 def receipt_path(out, cid, rerun):
@@ -136,11 +161,14 @@ def serve(args):
     """Launch Town on the evaluation database, recording its commit and model."""
     out = Path(args.out)
     model = effective_model()
+    instance = uuid.uuid4().hex
     save(
         out / "town-start.json",
         {
             **commit(),
             "model": model,
+            "api": f"http://127.0.0.1:{args.port}/api",
+            "instance": instance,
             "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         },
     )
@@ -153,7 +181,12 @@ def serve(args):
         ARCHIMIND_OPENAI_MODEL=model,
         PYTHONPATH=str(ROOT / "src"),
     )
-    command = [sys.executable, str(ROOT / "scripts" / "run_town.py")]
+    command = [
+        sys.executable,
+        str(ROOT / "scripts" / "run_town.py"),
+        "--evaluation-instance",
+        instance,
+    ]
     if args.extra_team_jobs_on:
         command += ["--extra-team-jobs-on", args.extra_team_jobs_on]
     raise SystemExit(subprocess.call(command, cwd=ROOT, env=env))
@@ -261,7 +294,7 @@ def run(args):
     plan = json.loads((out / "run-plan.json").read_text(encoding="utf-8"))
     if sha != plan["packet_sha256"]:
         raise SystemExit("Packet differs from the one used for setup.")
-    town = town_start(out)
+    town, api = town_start(out, args.api)
     path = receipt_path(out, args.case, args.rerun)
     c = case(packet, args.case)
     if args.case in plan["bases"]:
@@ -270,32 +303,28 @@ def run(args):
             plan["bases"][args.case]["revision"],
         )
     else:
-        project, base = call(args.api, "/projects", {})["project"], 0
-    before = (
-        call(args.api, f"/projects/{project}?revision={base}")["home"] if base else None
-    )
+        project, base = call(api, "/projects", {})["project"], 0
+    before = call(api, f"/projects/{project}?revision={base}")["home"] if base else None
     req = request_for(c, project, base, plan["bases"].get(args.case, {}).get("brief"))
     started = time.time()
-    job = call(args.api, "/jobs", req)["job"]
+    job = call(api, "/jobs", req)["job"]
     events, status = [], "queued"
     while status not in {"ready", "failed", "cancelled"}:
         if time.time() - started > 240:
             break
         time.sleep(0.75)
         feed = call(
-            args.api, f"/jobs/{job}/events?after={events[-1]['seq'] if events else 0}"
+            api, f"/jobs/{job}/events?after={events[-1]['seq'] if events else 0}"
         )
         events += feed["events"]
         status = feed["status"]
     finished = time.time()
-    result = call(args.api, f"/jobs/{job}")["result"]
+    result = call(api, f"/jobs/{job}")["result"]
     phases = {}
     for e in events:
         if e["task"].startswith("OpenAI"):
             phases.setdefault(e["task"], []).append(e["state"])
-    after = (
-        call(args.api, f"/projects/{project}?revision={base}")["home"] if base else None
-    )
+    after = call(api, f"/projects/{project}?revision={base}")["home"] if base else None
     candidates = result if status == "ready" and isinstance(result, list) else []
     receipt = {
         "case": args.case,
@@ -335,9 +364,9 @@ def record(args):
     out = Path(args.out)
     plan = json.loads((out / "run-plan.json").read_text(encoding="utf-8"))
     base = plan["bases"][args.case]
-    town = town_start(out)
+    town, api = town_start(out, args.api)
     path = receipt_path(out, args.case, args.rerun)
-    project = call(args.api, f"/projects/{base['project']}?revision={args.revision}")
+    project = call(api, f"/projects/{base['project']}?revision={args.revision}")
     save(
         path,
         {
@@ -459,7 +488,7 @@ def main():
     p = sub.add_parser("run")
     p.add_argument("case")
     p.add_argument("--packet", required=True)
-    p.add_argument("--api", default="http://127.0.0.1:8890/api")
+    p.add_argument("--api", help="Override only with the API recorded by serve")
     p.add_argument("--confirm-live", action="store_true")
     p.add_argument("--rerun", action="store_true")
     p.set_defaults(func=run)
@@ -468,7 +497,7 @@ def main():
     p.add_argument("--revision", type=int, default=1)
     p.add_argument("--viewport", default="1440x1000")
     p.add_argument("--answer-file", required=True)
-    p.add_argument("--api", default="http://127.0.0.1:8890/api")
+    p.add_argument("--api", help="Override only with the API recorded by serve")
     p.add_argument("--rerun", action="store_true")
     p.set_defaults(func=record)
     p = sub.add_parser("matrix")
