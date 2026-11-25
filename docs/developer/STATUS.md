@@ -2,8 +2,8 @@
 
 ## November 22–30 release sprint
 
-As of November 23, **11 of the original 19 issues are closed**. Milestone 2
-is complete (5/5), and milestone 3 has finished six of seven issues. The
+As of November 23, **13 of the original 19 issues are closed**. Milestone 2
+is complete (5/5), milestone 3 is at 6/7, and milestone 4 is at 2/4. The
 archived bedroom finish comparison met the material and window-detail
 criteria at 1080p. [Sprint tracker](https://github.com/ngstephen1/ArchiMind/issues/54) ·
 [Archived finish comparison](../data/nov24-baseline/layered-finish)
@@ -15,13 +15,16 @@ the bedroom chair by 0.300 m and increased its plan gap to the desk from
 replay. The live receipt identifies the exact code tested.
 [Fresh run, saved inputs and local replay commands](../data/nov24-fresh-live#reopen-both-revisions)
 
-The delegated revision review on `512ed26` verified both saved homes,
-the 300 mm chair move, the matched renders, and ten replayed chatbot answers
-at desktop and narrow widths. The rebuilt designer handoff passed all 32
-checksum-listed files. Hieu's independent revision review, the held-out live
-evaluation, both owners' rehearsal, freeze, and publication remain open.
-[Delegated review](https://github.com/ngstephen1/ArchiMind/issues/67#issuecomment-7106415558) ·
-[Verified rehearsal handoff and checksums](../data/nov24-fresh-book) ·
+A fresh delegated reviewer verified both revisions on `512ed26`, the chair
+move, the matched renders, and 16 replayed chatbot answers at desktop and
+narrow widths. The reviewer flagged errors in the archived advisory critique
+about room count and dining capacity. The 32-file handoff passed a clean
+download check. The first held-out cohort returned two passes and one severe
+clarification failure. The remaining cases, owner rehearsals, freeze, and
+publication are still open.
+[Independent technical review](https://github.com/ngstephen1/ArchiMind/issues/67#issuecomment-7107013436) ·
+[Verified rehearsal handoff](https://github.com/ngstephen1/ArchiMind/issues/69#issuecomment-7107028898) ·
+[Redacted held-out results](https://github.com/ngstephen1/ArchiMind/issues/68#issuecomment-7107160187) ·
 [Portable replay and launch commands](../data/nov24-fresh-live#rehearse-from-the-portable-download)
 
 The public Vercel walkthrough serves static content. Managed design-service

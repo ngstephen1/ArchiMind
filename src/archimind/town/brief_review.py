@@ -19,10 +19,32 @@ NUMBERS = {
             "eight",
             "nine",
             "ten",
+            "eleven",
+            "twelve",
+            "thirteen",
+            "fourteen",
+            "fifteen",
+            "sixteen",
+            "seventeen",
+            "eighteen",
+            "nineteen",
         )
     )
 }
-COUNT = r"\b(\d{1,3}|" + "|".join(NUMBERS) + r")\b"
+TENS = {
+    word: value * 10
+    for value, word in enumerate(
+        ("twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"),
+        start=2,
+    )
+}
+COUNT_SEPARATOR = r"[-‐‑–— ]"
+UNITS = "|".join(word for word, value in NUMBERS.items() if 1 <= value <= 9)
+COMPOUND_COUNT = rf"(?:{'|'.join(TENS)})(?:{COUNT_SEPARATOR}(?:{UNITS}))?"
+COUNT = (
+    rf"(?<![-+‐‑])(?<!\d[–—])\b(\d{{1,3}}|{COMPOUND_COUNT}|{'|'.join(NUMBERS)})\b"
+    r"(?![-‐‑]\w|[–—]\d)"
+)
 
 
 MEASUREMENT = r"(?<![\d.])(\d+(?:\.\d+)?|\.\d+)\s*(mm|cm|m)\b"
@@ -53,20 +75,38 @@ FIXED_PASSAGE = (
     + r"\b(?:measured|(?:the\s+)?(?:clear\s+)?width(?:\s+(?:is|taken|measured|specified)){0,3})"
     r"\s+across\s+(?:the\s+)?(?:open\s+)?gap\b"
 )
-PARTY = r"\s+(?:people|persons?|guests?|diners?|hosts?|residents?)\b"
+DINING_ROLES = r"people|persons?|guests?|diners?|hosts?|residents?"
+DINER_ROLES = (
+    DINING_ROLES + r"|adults?|children|child|attendees?|(?:household |family )?members?"
+)
+PARTY = rf"\s+(?:{DINER_ROLES})\b"
 # Two or more groups that sit together, e.g. "two guests and two hosts".
-GROUP = (
-    COUNT + r"\s+(?:dinner\s+)?(?:people|persons?|guests?|diners?|residents?|hosts?)\b"
-)
-GROUPS = GROUP + r"(?:(?:\s*,\s*(?:and\s+)?|\s+and\s+)" + GROUP + r")+"
-TABLE_ALLOCATION = (
-    GROUPS
-    + r"|"
-    + COUNT
-    + r"(?:\s+(?:people|persons?|diners?|guests?|hosts?|residents?|seats|places))?"
-)
+GROUP = COUNT + rf"\s+(?:dinner\s+)?(?:{DINER_ROLES})\b"
+GROUP_JOIN = r"(?:\s*,\s*(?:and\s+)?|\s+and\s+)"
+GROUPS = GROUP + rf"(?:{GROUP_JOIN}{GROUP})+"
+DINING_GROUP = COUNT + rf"\s+(?:dinner\s+)?(?:{DINING_ROLES})\b"
+DINING_GROUPS = re.compile(DINING_GROUP + rf"(?:{GROUP_JOIN}{DINING_GROUP})+")
+TABLE_ALLOCATION = GROUPS + r"|" + COUNT + rf"(?:\s+(?:{DINER_ROLES}|seats|places))?"
 TABLE_ROOM = r"formal salon|salon|kitchen(?:[- ]dining)?(?: room)?"
 TABLE_POSITION = r"\s+(?:at|around)\s+"
+SINGLE_TABLE = r"(?:one|a single|the same) (?:dining )?table\b"
+SUBJECT_TABLE_COUNT = re.compile(
+    rf"(?P<party>{GROUPS}|{GROUP})\s+"
+    r"(?:must|need to|have to|will|should)\s+"
+    r"(?:all\s+)?(?:sit|dine|eat|be seated)(?:\s+together)?"
+    rf"(?={TABLE_POSITION}{SINGLE_TABLE})"
+)
+EXPLORATORY_DINING = re.compile(
+    r"\b(?:whether|what if)\b|^\s*(?:if|could|would|can|should|do|does|must)\b"
+)
+EXPLORATORY_QUESTION = re.compile(
+    r"^\s*(?:could|would|can|should|do|does)\b[^.;!?]*\bwhether\b"
+)
+DINING_RANGE = re.compile(r"\b(?:dining|seating) for (\d{1,3}\s*[-‐‑–—]\s*\d{1,3})\b")
+NAMED_SINGLE_TABLE = re.compile(
+    rf"(?:\bseat\s+)?(?P<count>{TABLE_ALLOCATION}){TABLE_POSITION}{SINGLE_TABLE}"
+    rf"\s+in (?:the )?(?P<room>{TABLE_ROOM})\b"
+)
 FIRST_TABLE = (
     r"(?P<first>"
     + TABLE_ALLOCATION
@@ -398,6 +438,14 @@ def _dining_clauses(clauses, *, for_arrangement=False):
             if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
                 home.strip()
             ):
+                subject = SUBJECT_TABLE_COUNT.search(home)
+                if subject:
+                    prefix = home[: subject.start()]
+                    if EXPLORATORY_QUESTION.search(prefix) or EXPLORATORY_DINING.search(
+                        prefix.rsplit(",", 1)[-1]
+                    ):
+                        continue
+                home = SUBJECT_TABLE_COUNT.sub(r"\g<party>", home)
                 yield OPTIONAL_SECOND_TABLE.sub(
                     lambda match: (
                         match[0]
@@ -409,7 +457,12 @@ def _dining_clauses(clauses, *, for_arrangement=False):
 
 
 def _seat_count(value):
-    return int(value) if value.isdecimal() else NUMBERS[value]
+    if value.isdecimal():
+        return int(value)
+    tens, *ones = re.split(COUNT_SEPARATOR, value)
+    if tens in TENS:
+        return TENS[tens] + (NUMBERS[ones[0]] if ones else 0)
+    return NUMBERS[tens]
 
 
 def _allocation_count(text):
@@ -419,9 +472,19 @@ def _allocation_count(text):
 def _normalize_table_ends(text):
     def combine(match):
         total = _allocation_count(match["first"]) + _allocation_count(match["second"])
-        return f"{total} seats at a single table"
+        room = f" in the {match['first_room']}" if match["first_room"] else ""
+        return f"{total} seats at a single table{room}"
 
     return SAME_TABLE_ENDS.sub(combine, text)
+
+
+def _named_single_tables(clauses):
+    for clause in _dining_clauses(clauses):
+        dining = _normalize_table_ends(clause)
+        dining = SEPARATE_TABLE_COUNTS.sub(" ", dining)
+        for table in NAMED_SINGLE_TABLE.finditer(dining):
+            if requests_single_table(dining[table.start() :]):
+                yield _allocation_count(table["count"]), table["room"]
 
 
 def requests_single_table(message):
@@ -440,7 +503,7 @@ def requests_single_table(message):
         prefix = clause[: table.start()].strip()
         if re.search(
             r"\b(?:all|everyone|party|seats?|places?|seating|dine|sit|seated|together"
-            r"|people|persons|guests|diners)\b",
+            rf"|{DINER_ROLES})\b",
             prefix,
         ):
             return True
@@ -487,6 +550,11 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     services = brief.service_layout or bool((previous or {}).get("service_layout"))
     totals = set()
     questions = []
+    for span in dict.fromkeys(DINING_RANGE.findall(dining)):
+        questions.append(
+            f"The brief requests a seating range of {span}. "
+            "Choose one required seat count for the layout."
+        )
     if reviewed_program and program is False:
         if brief.compare_zoning:
             removal = (
@@ -672,7 +740,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         questions.append(
             "Confirm separate dining tables in the brief controls, or revise the seating arrangement."
         )
-    if requests_single_table(text):
+    single_table = requests_single_table(text)
+    if single_table:
         if split and "split_dining" in explicit:
             questions.append(
                 "The brief asks for one dining table, but the controls allow two. Confirm the arrangement."
@@ -680,6 +749,12 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         split = False
     for (start, end), total in parties:
         if (start, end) in counted:
+            continue
+        if not (
+            DINING_GROUPS.fullmatch(dining[start:end])
+            or re.match(TABLE_POSITION + SINGLE_TABLE, dining[end:])
+            or re.search(r"\b(?:dining for|seat(?:ing)?(?: for)?)\s+$", dining[:start])
+        ):
             continue
         location = re.match(r"\s+in (?:the )?" + dining_room + r"\b", dining[end:])
         if location and total > 4:
@@ -738,6 +813,20 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
     elif totals:
         seats = totals.pop()
 
+    if brief.compare_tradeoffs and single_table:
+        for amount, room in dict.fromkeys(_named_single_tables(clauses)):
+            if "kitchen" in room and kitchen_table:
+                continue
+            if not salon:
+                questions.append(
+                    f"The five-room program has no modeled table in the {room}. "
+                    f"Confirm how to accommodate the requested {amount} places there."
+                )
+            elif amount > 4:
+                questions.append(
+                    f"The {room} has four modeled places at one table. "
+                    f"Confirm how to accommodate the requested {amount} places there."
+                )
     circulation = text if evaluate_passage else ""
     if fixed := re.search(FIXED_PASSAGE, circulation):
         measurement = re.search(MEASUREMENT, fixed[0])
@@ -757,6 +846,17 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         )
     elif widths:
         passage = widths.pop()
+    if (
+        brief.compare_tradeoffs
+        and single_table
+        and seats > 4
+        and questions
+        and not any("four modeled places" in question for question in questions)
+    ):
+        questions.append(
+            "Town models up to four places at one table. Confirm a different "
+            "seating arrangement or revise the required count."
+        )
     if seats > 100:
         questions.append(
             "Choose a supported dining requirement of at most eight places."
@@ -1034,6 +1134,20 @@ def review_summary(
         require(
             "Compare gallery and grouped service-core zoning", None, "compare_zoning"
         )
+    pending_tables = {
+        (amount, room): _statement(
+            message,
+            DINING_CONTEXT,
+            lambda sentence: (
+                (amount, room) in _named_single_tables(_affirmative_clauses(sentence))
+            ),
+        )
+        for amount, room in (
+            dict.fromkeys(_named_single_tables(_affirmative_clauses(message)))
+            if questions
+            else ()
+        )
+    }
     if brief.dining_seats:
         arrangement = "across two tables" if brief.split_dining else "at one table"
         require(
@@ -1041,7 +1155,26 @@ def review_summary(
             None,
             "dining_seats",
             inherited=brief.dining_seats == comparison.get("required_dining_seats"),
-            quote=_dining_quote(brief, message),
+            quote=_dining_quote(brief, message)
+            or (
+                next(
+                    (
+                        statement
+                        for (amount, _), statement in pending_tables.items()
+                        if amount == brief.dining_seats and statement
+                    ),
+                    None,
+                )
+                if not brief.split_dining
+                else None
+            ),
+        )
+    for (amount, room), statement in pending_tables.items():
+        require(
+            f"Requested {amount} dining places at one table in the {room}",
+            None,
+            "dining_seats",
+            quote=statement,
         )
     for room_id in brief.locks:
         require(

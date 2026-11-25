@@ -64,6 +64,178 @@ def review_request(message="", live=False, **brief):
     )
 
 
+@pytest.mark.parametrize("split_dining", [True, False])
+@pytest.mark.parametrize(
+    "phrase",
+    [
+        "Five attendees must all sit together at one table in the formal salon.",
+        "Seat five diners around a single table in the formal salon.",
+        "Seat five at one table in the formal salon.",
+    ],
+)
+def test_single_table_clarification_preserves_count_location_and_capacity(
+    split_dining, phrase, monkeypatch
+):
+    monkeypatch.setattr(
+        service.provider, "configuration", lambda _: pytest.fail("called provider")
+    )
+    request = review_request(
+        phrase, live=True, formal_salon=True, split_dining=split_dining
+    )
+    brief, _ = requirement_controls(request.brief, phrase, None)
+    assert brief.dining_seats == 5
+    assert brief.split_dining is False
+    with pytest.raises(
+        service.BriefClarification, match="four modeled places"
+    ) as error:
+        service.interpret(request, None)
+    assert {
+        "requirement": "Requested 5 dining places at one table in the formal salon",
+        "origin": "brief",
+        "statement": phrase,
+    } in error.value.reviewed["sources"]
+    assert {
+        "requirement": "5 dining places at one table",
+        "origin": "brief",
+        "statement": phrase,
+    } in error.value.reviewed["sources"]
+
+
+@pytest.mark.parametrize("split_dining", [True, False])
+@pytest.mark.parametrize(
+    ("phrase", "count"),
+    [
+        ("Two children and four adults must sit at one table in the salon.", 6),
+        ("Four diners must sit at one table and two at the other end of it.", 6),
+        (
+            "Four diners must sit at one table and two at the other table if possible.",
+            4,
+        ),
+    ],
+)
+def test_modal_seating_includes_required_allocations_only(split_dining, phrase, count):
+    brief, _ = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=split_dining),
+        phrase,
+        None,
+    )
+    assert brief.dining_seats == count
+    assert brief.split_dining is (split_dining and count == 4)
+
+
+@pytest.mark.parametrize("modal", ["can", "must"])
+def test_modal_seating_does_not_extract_speculative_counts(modal):
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=False),
+        f"Could we check whether five attendees {modal} sit at one table in the salon? "
+        "Four dining seats are required.",
+        None,
+    )
+    assert brief.dining_seats == 4
+    assert not questions
+
+
+@pytest.mark.parametrize("aside", ["", ", for dinner,"])
+def test_exploratory_modal_seating_does_not_override_split_control(aside):
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=True),
+        f"Could we check whether{aside} five attendees must sit at one table in the salon? "
+        "Four dining seats are required.",
+        None,
+    )
+    assert (brief.dining_seats, brief.split_dining) == (4, True)
+    assert not questions
+
+
+@pytest.mark.parametrize(
+    ("phrase", "count"),
+    [
+        ("Five attendees will sit at one table in the salon.", 5),
+        (
+            "Whether dinner is formal or casual, five attendees must sit at one table in the salon.",
+            5,
+        ),
+        (
+            "Five attendees must sit at one table in the salon whether dinner is formal or casual.",
+            5,
+        ),
+        ("Thirty-one attendees and two adults must sit at one table in the salon.", 33),
+        ("Seat thirty-one attendees at one table in the salon.", 31),
+        ("Twenty‑one attendees must sit at one table in the salon.", 21),
+        ("Twenty one attendees must sit at one table in the salon.", 21),
+        ("Dining—6 seats at one table in the salon.", 6),
+        (
+            "Five attendees must sit at one table in the salon and two at the other end of it.",
+            7,
+        ),
+    ],
+)
+def test_single_table_counts_are_kept_whole(phrase, count):
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True, split_dining=False),
+        phrase,
+        None,
+    )
+    assert brief.dining_seats == count
+    assert any("four modeled places" in question for question in questions)
+
+
+def test_household_description_does_not_override_requested_dining_seats():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        "We are two adults and three children, and only need four dining seats.",
+        None,
+    )
+    assert brief.dining_seats == 4
+    assert not questions
+
+
+def test_explicit_mixed_dining_group_keeps_total_without_table():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        "We need dining for five guests and two children.",
+        None,
+    )
+    assert brief.dining_seats == 7
+    assert not questions
+    with pytest.raises(ValueError, match="up to four"):
+        check_brief(brief, None)
+
+
+def test_dining_range_requests_one_count_without_inventing_conflict():
+    brief, questions = requirement_controls(
+        Brief(formal_salon=True, compare_tradeoffs=True),
+        "Seating for 2–4 attendees at one table in the salon.",
+        None,
+    )
+    assert brief.dining_seats == 0
+    assert questions == [
+        "The brief requests a seating range of 2–4. Choose one required seat count for the layout."
+    ]
+
+
+def test_same_table_ends_preserve_named_room_source():
+    phrase = "Five attendees must sit at one table in the salon and two at the other end of it."
+    with pytest.raises(
+        service.BriefClarification, match="salon has four modeled"
+    ) as err:
+        service.interpret(review_request(phrase, formal_salon=True), None)
+    assert {
+        "requirement": "Requested 7 dining places at one table in the salon",
+        "origin": "brief",
+        "statement": phrase,
+    } in err.value.reviewed["sources"]
+
+
+def test_modal_guest_count_keeps_conflicting_total_visible():
+    request = review_request(
+        "Four guests must sit at one table in the salon with two hosts.",
+        formal_salon=True,
+    )
+    with pytest.raises(service.BriefClarification, match="Confirm one total"):
+        service.interpret(request, None)
+
+
 def test_locked_room_contradiction_is_reviewed_before_generation(
     saved_home, monkeypatch
 ):
