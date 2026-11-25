@@ -66,7 +66,7 @@ jobs:
               assert struct.unpack(">II",data[16:24])==(1920,1080)
           assert all(len(v)==64 for v in receipt["asset_sha256_or_fallback"].values())
           PY
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: saved-bedroom-cycles
           path: ${{ runner.temp }}/bedroom

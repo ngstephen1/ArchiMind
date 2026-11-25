@@ -141,7 +141,7 @@ jobs:
           python scripts/publish_studio_board.py "$RUNNER_TEMP/accepted" --eye-views "$RUNNER_TEMP/eye-views"
           google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf" "file://$RUNNER_TEMP/accepted/index.html"
           test -s "$RUNNER_TEMP/eye-views/Studio-House-Presentation.pdf"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: inputs.approved_proof_run
         with:
           name: ${{ inputs.lighting_proof && 'studio-lighting-proof' || 'studio-eye-views' }}
@@ -159,7 +159,7 @@ jobs:
           python scripts/publish_studio_board.py "$RUNNER_TEMP/proof"
           google-chrome --headless --disable-gpu --no-sandbox --no-pdf-header-footer --print-to-pdf="$RUNNER_TEMP/proof/Studio-House.pdf" "file://$RUNNER_TEMP/proof/index.html"
           test -s "$RUNNER_TEMP/proof/Studio-House.pdf"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: ${{ !inputs.approved_proof_run }}
         with:
           name: studio-home-proof
@@ -185,7 +185,7 @@ jobs:
           assert original["home_id"] != edited["home_id"]
           assert original["files"]["bedroom-desk.png"] != edited["files"]["bedroom-desk.png"]
           PYTHON
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         if: ${{ !inputs.fresh_home }}
         with:
           name: studio-home-edited-proof
@@ -223,7 +223,7 @@ jobs:
           "$RUNNER_TEMP/blender-5.1.2-linux-x64/blender" -b --factory-startup --disable-autoexec --python-exit-code 1 -P scripts/render_studio_finish_study.py -- \
             "$RUNNER_TEMP/finish-source" "$RUNNER_TEMP/finish-before" \
             docs/data/nov24-baseline/visual-baseline.json "$RUNNER_TEMP/finish-study" "${options[@]}"
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
         with:
           name: studio-finish-study
           path: ${{ runner.temp }}/finish-study
