@@ -326,11 +326,14 @@ def _affirmative_clauses(message):
         message,
     )
     clauses = re.split(
-        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:and\s+)?"
+        r"[;!?\n]|\.(?!\d)|\bbut\b|,(?=\s*(?:(?:and|so)\s+)?"
         r"(?:not|never|no|keep|add|use|place|put|include|maintain|reserve|leave|allow|ensure|provide|make|seating)\b)",
         message,
     )
-    negative = r"\b(?:not(?!\s+only\b)|never|don['’]t|cannot|can['’]t|no need|instead of)\b"
+    negative = (
+        r"\b(?:not(?!\s+only\b)|never|don['’]t|no need|instead of"
+        r"|(?:cannot|can['’]t)(?=\s+(?:seat|fit)\b))\b"
+    )
     return [
         re.split(negative + r"|\bno\s+(?=" + MEASUREMENT + r")", clause, maxsplit=1)[0]
         for clause in clauses

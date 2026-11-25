@@ -26,8 +26,9 @@ checksum-listed files. The revision review and designer handoff issues are close
 Hieu approved the held-out evaluation at five passes and one partial. The
 original cases ran at `301762b`, and three affected cases were rerun at
 `45871da`. H06 still has a medium-severity saved-explanation defect. The
-evaluation issue is closed. The combined implementation PR remains under
-review for dining requirements, unsupported clearances and receipt provenance.
+evaluation issue is closed. The combined implementation fixes dining
+requirements, preserves unsupported clearances for clarification, and verifies
+the serving Town instance in new evaluation runs.
 [Evaluation sign-off](https://github.com/ngstephen1/ArchiMind/issues/68#issuecomment-7153331714) ·
 [Combined Town PR](https://github.com/ngstephen1/ArchiMind/pull/114)
 

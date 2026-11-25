@@ -17,6 +17,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -111,18 +112,18 @@ def town_start(out, requested_api=None):
         )
     start = json.loads(path.read_text(encoding="utf-8"))
     now = commit()
-    if start["commit"] != now["commit"] or start["tracked_changes"]:
+    if (
+        start["commit"] != now["commit"]
+        or start["tracked_changes"]
+        or now["tracked_changes"]
+    ):
         raise SystemExit(
             f"Town was started from {start['commit'][:7]} but the checkout is "
             f"{now['commit'][:7]}. Restart it with `serve` before recording a run."
         )
     api = start.get("api", "")
     instance = start.get("instance")
-    if (
-        not api.startswith("http://127.0.0.1:")
-        or not api.endswith("/api")
-        or not instance
-    ):
+    if not re.fullmatch(r"http://127\.0\.0\.1:[0-9]{1,5}/api", api) or not instance:
         raise SystemExit("Restart Town with this version of the evaluation launcher.")
     if requested_api and requested_api.rstrip("/") != api:
         raise SystemExit(

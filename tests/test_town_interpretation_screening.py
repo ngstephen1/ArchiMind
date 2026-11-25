@@ -476,6 +476,11 @@ def test_exploratory_seating_preserves_confirmed_split(text):
             False,
             4,
         ),
+        (
+            "We can't fit six people at a single table, so use four dining places instead.",
+            False,
+            4,
+        ),
     ],
 )
 def test_explicit_split_and_negated_counts_preserve_the_confirmed_total(
@@ -492,6 +497,15 @@ def test_explicit_split_and_negated_counts_preserve_the_confirmed_total(
         None,
     )
     assert (brief.dining_seats, brief.split_dining, questions) == (seats, split, [])
+
+
+def test_negative_necessity_does_not_erase_a_passage_requirement():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "We can't do without a 90 cm clear passage.",
+        None,
+    )
+    assert (brief.passage_m, questions) == (0.9, [])
 
 
 def test_comparison_of_both_floor_plans_is_supported(provider):
