@@ -349,11 +349,14 @@ SUPPORTED_COMPARISON = re.compile(
     r"|nearer|near\b|far\b)",
     re.IGNORECASE,
 )
+RECORDED_GOALS = re.compile(
+    r"\b(?:these|those|the stated|the requested)\b.*\bgoals?\b", re.I
+)
 # Comparisons of anything Town does not model stay unsupported.
 UNMODELED = re.compile(
     r"\b(?:acoustic|sound|noise|hear|code|complian|accessib|cost|price|budget|glare"
     r"|daylight|sunlight|energy|thermal|guarantee|wheelchair|turning[- ](?:radius|circle)"
-    r"|(?:door|fixture|appliance)[- ](?:swing|clearance)|storeys?|story|stories|floors\b"
+    r"|clearance|(?:door|fixture|appliance)[- ]swing|storeys?|story|stories|floors\b"
     r"|(?:one|two|three|single|multi|second|upper|lower|ground|first|extra|another"
     r"|different|separate|multiple|other|both)[- ](?:floor|level)s?\b"
     r"(?![- ]plans?\b)"
@@ -391,7 +394,9 @@ ACTION_BREAK = (
 
 
 def _mentions(message, room):
-    return re.search(r"\b(?:" + ROOM_WORDS.get(room, room) + r")\b", message, re.I)
+    return re.search(
+        r"\b(?:" + ROOM_WORDS.get(room, re.escape(room)) + r")\b", message, re.I
+    )
 
 
 def _requests_placement(message, others):
@@ -404,11 +409,11 @@ KEEP_VERB = re.compile(
 )
 
 
-def _asks_to_keep(message, room):
-    """True when a keep, leave or lock request names the room, alone or in a list."""
+def _asks_to_keep(message, *names):
+    """Check which room or furniture names occur after a keep instruction."""
     for clause in re.split(ACTION_BREAK, message, flags=re.I):
         verb = KEEP_VERB.search(clause)
-        if verb and _mentions(clause[verb.end() :], room):
+        if verb and any(_mentions(clause[verb.end() :], name) for name in names):
             return True
     return False
 
@@ -430,6 +435,13 @@ def screen_interpretation(parsed, brief, message, previous, *, review):
                 COMPARISON_REQUEST.search(item)
                 and SUPPORTED_COMPARISON.search(item)
                 and not UNMODELED.search(item)
+                and (
+                    sum(bool(_mentions(item, room)) for room in ROOM_WORDS) >= 2
+                    or (
+                        (parsed.room_goals or brief.room_goals)
+                        and RECORDED_GOALS.search(item)
+                    )
+                )
             )
         ]
         if kept != parsed.unsupported:
@@ -453,7 +465,7 @@ def screen_interpretation(parsed, brief, message, previous, *, review):
             and _requests_placement(message, others)
         ]
         if isinstance(parsed, Interpretation):
-            # A requested lock on the moved room stays, so the contradiction is reviewed.
+            # Preserve explicit room and furniture locks for contradiction review.
             explicit = set(brief.locks) | {
                 room for room in moved if _asks_to_keep(message, room)
             }
@@ -465,7 +477,13 @@ def screen_interpretation(parsed, brief, message, previous, *, review):
                 for item in parsed.lock_furniture
                 if not any(
                     r["design"]["room"]["id"] in moved - explicit
-                    and any(f["id"] == item for f in r["design"]["furniture"])
+                    and any(
+                        f["id"] == item
+                        and not _asks_to_keep(
+                            message, item.replace("-", " "), f["name"], f["category"]
+                        )
+                        for f in r["design"]["furniture"]
+                    )
                     for r in previous["rooms"]
                 )
             ]

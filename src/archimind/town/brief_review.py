@@ -472,8 +472,10 @@ def _dining_clauses(clauses, *, for_arrangement=False):
             if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
                 home.strip()
             ):
-                if EXPLORATORY_QUESTION.search(home) or (
-                    for_arrangement and SEATING_COMPARISON.search(home)
+                if (
+                    _is_work_table(home)
+                    or EXPLORATORY_QUESTION.search(home)
+                    or (for_arrangement and SEATING_COMPARISON.search(home))
                 ):
                     continue
                 subject = SUBJECT_TABLE_COUNT.search(home)
@@ -539,6 +541,11 @@ MEAL_WORDS = (
 )
 
 
+def _is_work_table(clause):
+    activity = re.sub(WORK_TIMING, " ", clause, flags=re.I)
+    return bool(re.search(WORK_TABLE, activity) and not re.search(MEAL_WORDS, activity))
+
+
 def requests_single_table(message):
     for clause in _dining_clauses(_affirmative_clauses(message), for_arrangement=True):
         clause = _normalize_table_ends(SEPARATE_TABLE_COUNTS.sub(" ", clause))
@@ -551,9 +558,6 @@ def requests_single_table(message):
         ):
             continue
         prefix = clause[: table.start()].strip()
-        activity = re.sub(WORK_TIMING, " ", clause, flags=re.I)
-        if re.search(WORK_TABLE, activity) and not re.search(MEAL_WORDS, activity):
-            continue  # A work or study table is not a dining arrangement.
         if re.search(
             r"\b(?:all|everyone|party|seats?|places?|seating|dine|eat|sit|seated"
             r"|together|family|" + PARTY_NOUN + r")\b",
