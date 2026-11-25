@@ -2,8 +2,8 @@
 
 ## November 22–30 release sprint
 
-As of November 23, **13 of the original 19 issues are closed**. Milestone 2
-is complete (5/5), milestone 3 is at 6/7, and milestone 4 is at 2/4. The
+As of November 25, **14 of the original 19 issues are closed**. Milestones 2
+through 5 are at 5/5, 6/7, 3/4 and 0/3 respectively. The
 archived bedroom finish comparison met the material and window-detail
 criteria at 1080p. [Sprint tracker](https://github.com/ngstephen1/ArchiMind/issues/54) ·
 [Archived finish comparison](../data/nov24-baseline/layered-finish)
@@ -15,17 +15,32 @@ the bedroom chair by 0.300 m and increased its plan gap to the desk from
 replay. The live receipt identifies the exact code tested.
 [Fresh run, saved inputs and local replay commands](../data/nov24-fresh-live#reopen-both-revisions)
 
-A fresh delegated reviewer verified both revisions on `512ed26`, the chair
-move, the matched renders, and 16 replayed chatbot answers at desktop and
-narrow widths. The reviewer flagged errors in the archived advisory critique
-about room count and dining capacity. The 32-file handoff passed a clean
-download check. The first held-out cohort returned two passes and one severe
-clarification failure. The remaining cases, owner rehearsals, freeze, and
-publication are still open.
-[Independent technical review](https://github.com/ngstephen1/ArchiMind/issues/67#issuecomment-7107013436) ·
-[Verified rehearsal handoff](https://github.com/ngstephen1/ArchiMind/issues/69#issuecomment-7107028898) ·
-[Redacted held-out results](https://github.com/ngstephen1/ArchiMind/issues/68#issuecomment-7107160187) ·
+The delegated revision review on `512ed26` verified both saved homes,
+the 300 mm chair move, the matched renders, and ten replayed chatbot answers
+at desktop and narrow widths. The rebuilt designer handoff passed all 32
+checksum-listed files. The revision review and designer handoff issues are closed.
+[Delegated review](https://github.com/ngstephen1/ArchiMind/issues/67#issuecomment-7106415558) ·
+[Verified rehearsal handoff and checksums](../data/nov24-fresh-book) ·
 [Portable replay and launch commands](../data/nov24-fresh-live#rehearse-from-the-portable-download)
+
+Hieu approved the held-out evaluation at five passes and one partial. The
+original cases ran at `301762b`, and three affected cases were rerun at
+`45871da`. H06 still has a medium-severity saved-explanation defect. The
+evaluation issue is closed. The combined implementation PR remains under
+review for dining requirements, unsupported clearances and receipt provenance.
+[Evaluation sign-off](https://github.com/ngstephen1/ArchiMind/issues/68#issuecomment-7153331714) ·
+[Combined Town PR](https://github.com/ngstephen1/ArchiMind/pull/114)
+
+The artifact upload upgrade is merged. Both the Town browser and real Blender
+queue artifacts downloaded and unpacked under their existing names on PR CI.
+[Artifact upgrade](https://github.com/ngstephen1/ArchiMind/pull/113)
+
+Both owners' [rehearsal](https://github.com/ngstephen1/ArchiMind/issues/70),
+the [release freeze](https://github.com/ngstephen1/ArchiMind/issues/71) and
+[publication](https://github.com/ngstephen1/ArchiMind/issues/72) remain open.
+Residential design development is at four of six issues. The current survey
+and surveyed-bedroom visual checks still require field measurements.
+[Residential milestone](https://github.com/ngstephen1/ArchiMind/milestone/6)
 
 The public Vercel walkthrough serves static content. Managed design-service
 acceptance remains open. [Hosted scope and prior launch commands](CONFERENCE_REPLAY.md)
