@@ -1,6 +1,6 @@
 {
   "issue": 68,
-  "scoring_status": "Provisional agent scoring. Originals on 301762b; H01, H02 and H04 reruns on 45871da. Hieu reviews and replaces every row before sign-off.",
+  "scoring_status": "Approved by Hieu on 2026-11-25. Originals on 301762b; H01, H02 and H04 reruns on 45871da.",
   "runs": {
     "H01": {
       "case": "H01",
@@ -29,7 +29,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "high",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H01-rerun-20261125T044832Z-0b12ea28": {
@@ -64,7 +64,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H02": {
@@ -94,7 +94,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "medium",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H02-rerun-20261125T044759Z-5b702632": {
@@ -125,7 +125,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H03": {
@@ -159,7 +159,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H04": {
@@ -189,7 +189,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "high",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H04-rerun-20261125T044845Z-3a010ecc": {
@@ -223,7 +223,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H05": {
@@ -243,7 +243,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     },
     "H06": {
@@ -263,7 +263,7 @@
         "latency": 2,
         "provider_use": 2,
         "severity": "medium",
-        "reviewer": "Claude (provisional), Hieu to confirm"
+        "reviewer": "Hieu (approved 2026-11-25), proposed by Claude"
       }
     }
   }

@@ -9,8 +9,9 @@ evaluation owner until the candidate freeze. This folder publishes only run IDs,
 public slot names from the [baseline package](../nov24-baseline/README.md#twelve-public-acceptance-briefs),
 outcomes, scores, OpenAI phases, latency, hashes and commits.
 
-**Scoring status: provisional.** The agent proposed the scores below. Hieu reviews each
-row against the sealed answer key and assigns the final severity and reviewer before sign-off.
+**Scoring status: approved.** The agent proposed the scores below. Hieu approved every
+row on November 25, 2026, including the November 25 reruns and the observations listed
+with them.
 
 [Matrix](matrix.md) · [Machine-readable receipt](matrix.json)
 
@@ -49,8 +50,8 @@ and rows are kept. H03, H05 and H06 were not rerun.
 | H04 rerun | Pass | 3 | 7.66 s | The revised home passes `validate_home`. The bedroom room, openings, furniture and origin are identical to revision 1, and no other room changed besides the study. The desk-to-window center distance fell from 4.445 m to 0.875 m. Revision 1 compared equal before and after the job. |
 
 With the reruns in place of their originals, five of six rows pass and H06 remains partial.
-This mixes two commits: H03, H05 and H06 were observed on `301762b`. The scores are still
-provisional.
+This mixes two commits: H03, H05 and H06 were observed on `301762b`. Hieu approved the
+scores with this mix and with H06's medium-severity source-accuracy defect left open.
 
 Observations for review:
 
