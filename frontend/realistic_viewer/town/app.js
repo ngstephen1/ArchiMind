@@ -843,18 +843,19 @@ el("roomEditForm").onsubmit = async event => {
   finally { el("previewRoomEdit").disabled = false; }
 };
 el("roomEditDialog").addEventListener("cancel", event => {
-  if (el("roomEditForm").inert) event.preventDefault();
+  if (el("roomEditFields").disabled) event.preventDefault();
 });
 el("applyRoomEdit").onclick = async () => {
   if (!roomEditPreview) return;
-  el("roomEditForm").inert = true;
+  el("roomEditResult").textContent = "Saving the revised room…";
+  el("roomEditFields").disabled = true;
   try {
     sync(await api("/projects/" + project + "/room-edit/apply", roomEditPreview));
     clearRoomEdit();
     el("roomEditDialog").close();
     notify("Room edit saved in revision " + revision + ".");
   } catch(error) { el("roomEditResult").textContent = error.message; }
-  finally { el("roomEditForm").inert = false; }
+  finally { el("roomEditFields").disabled = false; }
 };
 
 function openChair() {

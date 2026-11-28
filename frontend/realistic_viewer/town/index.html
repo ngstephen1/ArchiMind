@@ -36,9 +36,9 @@
         <button id="compareHouse" hidden>Compare revisions</button>
         <a id="photoIntake" hidden>Room photos</a>
       </div>
-      <dialog id="roomEditDialog">
-        <form id="roomEditForm">
-          <div class="title"><h2>Edit a room</h2><button type="button" id="closeRoomEdit" aria-label="Close">×</button></div>
+      <dialog id="roomEditDialog" aria-labelledby="roomEditTitle">
+        <form id="roomEditForm"><fieldset id="roomEditFields" style="border:0;margin:0;padding:0">
+          <div class="title"><h2 id="roomEditTitle">Edit a room</h2><button type="button" id="closeRoomEdit" aria-label="Close">×</button></div>
           <label for="roomEditMessage">Requested change</label>
           <textarea id="roomEditMessage" rows="4" maxlength="300" required></textarea>
           <div class="grid">
@@ -49,6 +49,7 @@
           <p id="roomEditResult" role="status"></p>
           <button id="previewRoomEdit">Check edit</button>
           <button id="applyRoomEdit" type="button" class="dark" hidden>Save revision</button>
+          </fieldset>
         </form>
       </dialog>
       <form id="chairChat" hidden>

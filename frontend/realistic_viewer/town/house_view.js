@@ -48,6 +48,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
   }
   function load(h, roof, parts) {
     canvas.dispatchEvent(new CustomEvent("room-picked"));
+    const resetFraming = Boolean(focused && mode);
     home = h;
     focused = null;
     ceiling = roof;
@@ -103,6 +104,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
       highlight.box.copy(bounds);
     }
     selected = false;
+    if (resetFraming) set(mode);
   }
   function set(next) {
     canvas.dispatchEvent(new CustomEvent("room-picked"));
