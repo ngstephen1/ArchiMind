@@ -111,23 +111,30 @@ function chairChange(home, manifest, previous) {
 
 // A question about installation can include several independent evidence requests.
 // Bind furniture measurements to the clause that names the item and its room.
-const acousticEvidence = /\b(acoustics?|acoustically|noise|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))|decibels?)\b/i;
-const supplierEvidence = /\b(suppliers?|vendors?|in stock|stock availability|lead[- ]times?|delivery dates?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
+const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?|privacy|private|hear|overhear|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))|decibels?)\b/i;
+const supplierEvidence = /\b(suppliers?|vendors?|in stock|stock availability|retailers?|merchants?|backorders?|lead[- ]times?|in[- ]stock|ship(?:ping|ment)?|delivery(?: dates?)?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
 
 export function explanation(home, question, manifest = null, previous = null) {
   const acoustic = acousticEvidence.test(question);
   const supplier = supplierEvidence.test(question);
   if (!acoustic && !supplier) return explainPlan(home, question, manifest, previous);
 
-  const clauses = question.split(/[?!.;]|,\s*|\s+(?:and|also|plus)\s+(?=(?:can|could|is|are|will|would|does|do|how|what|whether|confirm|verify|check|which|acoustic|supplier|noise)\b)/i);
-  const plan = clauses.filter(clause =>
-    (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
-    /\b(fit|fits|slide|tuck|clearance|measure|distance|compare|moved)\b/i.test(clause)
+  // Keep room names attached to their own proposition. A pair of rooms in a
+  // privacy question does not establish which room contains a following chair.
+  const clauses = question.split(/[?!;]|\.(?!\d)|,\s*|\s+and\s+(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|verify|the (?:desk|chair)|(?:its|my|this|a) chair)\b)/i);
+  const hasFit = clause => /\b(fit|fits|slide|tuck|underneath|beneath|clearance)\b/i.test(clause) &&
+    /\b(chair|desk|table|worktable)\b/i.test(clause);
+  const fitClause = clauses.find(hasFit);
+  const plan = clauses.filter(clause => hasFit(clause) ||
+    (!acousticEvidence.test(clause) && !supplierEvidence.test(clause))
   ).map(clause => clause.trim()).filter(Boolean);
   const answers = [];
-  if (plan.length) answers.push(explainPlan(home, plan.join(" "), manifest, previous));
+  if (plan.length) {
+    const planQuestion = plan.join(" ");
+    answers.push(explainPlan(home, planQuestion, manifest, previous));
+  }
   if (acoustic) answers.push("Acoustic performance is unverified. The floor plan records room positions. To assess sound transfer, obtain wall and door assembly ratings or an on-site sound measurement.");
-  if (supplier) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
+  if (supplier || (fitClause && /\b(guarantee|guaranteed|certify|promise|certain|prove)\b/i.test(question))) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
   return answers.join(" ");
 }
 

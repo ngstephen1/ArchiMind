@@ -249,3 +249,12 @@ test("compound evidence questions keep the chair in its specified room", () => {
   assert.match(explanation(home, "Does the living room chair fit and is it in stock?"), /For the living.*Supplier availability is unknown/);
   assert.doesNotMatch(explanation(home, "Is the supplier able to deliver that chair?"), /footprint/);
 });
+
+test("rooms in a privacy question do not become the location of the furniture", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const answer = explanation(home, "Can the plan certify privacy between the salon and living room, and will the writing chair tuck beneath the worktable?");
+  assert.match(answer, /Source: bedroom desk-chair and belaya/);
+  assert.match(answer, /Acoustic performance is unverified/);
+  assert.match(answer, /Supplier availability is unknown/);
+  assert.doesNotMatch(answer, /Which room contains/);
+});
