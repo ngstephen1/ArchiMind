@@ -103,6 +103,29 @@ function buildPiece(part, f) {
     };
   });
 }
+// An untouched suite retains its historical single reservation. After a table
+// edit, drawings, schedules and the Blender export identify each saved table.
+function individualTables(part) {
+  if (!part.coffee_tables && !part.finish_overrides?.objects?.["salon-coffee-table"]) return null;
+  const suite = part.design.furniture.find(item => item.id === "salon-suite");
+  return coffeeTables(part, suite);
+}
+
+export function presentationFurniture(part) {
+  const tables = individualTables(part);
+  return tables ? [...part.design.furniture, ...tables] : part.design.furniture;
+}
+
+export function presentationFurnitureParts(part, item, studio) {
+  const tables = individualTables(part);
+  if (tables) {
+    if (item.id === "salon-suite")
+      return studioFurniture(item, part.suite_yaw_deg).filter(piece => !piece.coffeeComponent);
+    if (tables.some(table => table.id === item.id)) return buildPiece(part, item);
+  }
+  return savedFurnitureParts(part, item, studio);
+}
+
 export function savedFurnitureParts(part, f, studio) {
   if (f.id === "salon-suite" && !part.suite_yaw_deg && part.coffee_tables) {
     const original = studioFurniture(f).filter((p) => !p.coffeeComponent);

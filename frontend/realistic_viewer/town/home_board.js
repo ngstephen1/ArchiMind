@@ -1,6 +1,6 @@
 import { wallQuads } from "../src/room_geometry.js";
 import {finishColors} from "./finish_chat.js";
-import { savedFurnitureParts } from "./saved_pieces.js";
+import { presentationFurniture, presentationFurnitureParts } from "./saved_pieces.js";
 import { turnedCoverlet } from "./studio_textiles.js";
 import { bedroomManifest } from "./bedroom_manifest.js";
 import { bedroomCameras } from "./bedroom_cameras.js";
@@ -44,15 +44,16 @@ export function homeBoard(snapshot) {
           ? turnedCoverlet(furniture.find((f) => f.id === "queen-bed"))
           : null,
         details: salonDetails(part),
-        furniture: furniture.map((f) => ({
-          ...f,
-          parts:
-            savedFurnitureParts(part,f,room.id !== "bedroom" && (studio || (snapshot.home.service_layout && f.id === "breakfast-suite"))).map(p=>{
-              const id=p.selectedPiece?.id || (p.coffeeComponent?"salon-coffee-table":f.id);
-              const finish=part.finish_overrides?.objects?.[id];
-              return finish ? {...p,finish:"proposal-"+finish} : p;
-            }),
-        })),
+        furniture: presentationFurniture(part).map(item => {
+          const usesStudio = room.id !== "bedroom" &&
+            (studio || (snapshot.home.service_layout && item.id === "breakfast-suite"));
+          const parts = presentationFurnitureParts(part, item, usesStudio);
+          const finish = part.finish_overrides?.objects?.[item.id];
+          return {
+            ...item,
+            parts: finish ? parts.map(piece => ({...piece, finish: "proposal-" + finish})) : parts,
+          };
+        }),
         cameras: bedroomCameras(part),
       };
     }),

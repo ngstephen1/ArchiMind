@@ -1,6 +1,8 @@
+import { presentationFurniture } from "./saved_pieces.js";
+
 // Interior orthographic views. North looks along +Y, east along +X.
 export function roomElevation(part, wall) {
-  const { room, furniture } = part.design;
+  const { room } = part.design;
   const east = wall === "east",
     span = east ? room.depth_m : room.width_m,
     height = room.ceiling_height_m;
@@ -31,7 +33,7 @@ export function roomElevation(part, wall) {
       o.sill_height_m ? "#c6d9da" : "#fff",
     );
   const depth = (f) => (east ? f.x_m : f.y_m);
-  for (const f of [...furniture].sort((a, b) => depth(b) - depth(a)))
+  for (const f of [...presentationFurniture(part)].sort((a, b) => depth(b) - depth(a)))
     rect(
       east ? span - f.y_m - f.depth_m : f.x_m,
       0,

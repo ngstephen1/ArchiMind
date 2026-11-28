@@ -1,3 +1,4 @@
+import { presentationFurniture } from "./saved_pieces.js";
 import { bindFurnitureEditor } from "./furniture_editor.js";
 import { bindPhotoHome } from "./photo_home.js";
 import { bindRenovation } from "./renovate.js";
@@ -453,9 +454,9 @@ function showComparison() {
   const items = node("details", "");
   items.append(node("summary", "Selected furniture reservations"));
   const list = node("ul", "");
-  for (const { design } of alternatives[selected].rooms)
-    for (const f of design.furniture)
-      list.append(node("li", `${design.room.name} · ${f.name} · ${f.width_m.toFixed(2)} × ${f.depth_m.toFixed(2)} m`));
+  for (const part of alternatives[selected].rooms)
+    for (const f of presentationFurniture(part))
+      list.append(node("li", `${part.design.room.name} · ${f.name} · ${f.width_m.toFixed(2)} × ${f.depth_m.toFixed(2)} m`));
   items.append(list);
   area.append(items);
 }
@@ -1169,7 +1170,7 @@ el("present").onclick = async () => {
           " m",
       ),
     );
-    for (const f of p.design.furniture)
+    for (const f of presentationFurniture(p))
       el("schedule").append(
         node(
           "div",
