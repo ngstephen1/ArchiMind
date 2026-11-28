@@ -323,3 +323,25 @@ test("fit questions bind chair and desk rooms separately", () => {
   assert.doesNotMatch(followUp, /bedroom desk-chair and belaya/);
   assert.match(ask("Will the bedroom chair fit under the work table in the bedroom?"), /bedroom desk-chair and belaya/);
 });
+
+test("a local chair qualifier overrides the opening room in a compound question", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  for (const qualifier of ["that’s in", "which is in", "that is in"]) {
+    const answer = explanation(home, "In the study, how far is the desk from the window, and can the chair " + qualifier + " the bedroom fit under Belaya?");
+    assert.match(answer, /Source: study.*Source: bedroom desk-chair and belaya/);
+    assert.doesNotMatch(answer, /chair is in the study/);
+  }
+  const unclear = explanation(home, "In the study, how far is the desk from the window, and can the chair I keep by the bedroom doorway fit under Belaya?");
+  assert.match(unclear, /Which chair and desk should I check/);
+  assert.doesNotMatch(unclear, /chair is in the study|bedroom desk-chair and belaya/);
+});
+
+test("a question about fit across revisions retains the requested desk", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const question = "In the bedroom, how far is the desk from the window, and how does the chair fit under the study desk now compared to before?";
+  const previous = {project: "demo", revision: 1, home: structuredClone(home)};
+  assert.equal(asksChairChange(question), false);
+  const answer = explanation(home, question, {project: "demo", revision: 2, home_id: home.id}, previous);
+  assert.match(answer, /chair is in the bedroom.*desk is in the study/);
+  assert.doesNotMatch(answer, /Displacement|Closest footprint gap/);
+});

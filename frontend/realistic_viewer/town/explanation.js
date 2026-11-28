@@ -55,20 +55,29 @@ function words(value) {
 const roomScope = /^(?:in|inside|for) (?:the |my |our )?(bedroom|study|living room|salon|kitchen(?: dining)?|bathroom)\b/i;
 const roomMention = /\b(bedroom|study|living room|salon|kitchen|bathroom)\b/i;
 
-function furnitureRooms(question, kind, home) {
+function furnitureNoun(kind) {
+  const pattern = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:(?:writing[ -])?desks?(?![ -]chairs?\\b)|work[ -]?tables?|writing[ -]suites?)";
+  return new RegExp("\\b" + pattern + "\\b", "i");
+}
+
+function qualifiedFurniture(kind) {
   const room = "(bedroom|study|living(?: room)?|salon|bathroom|kitchen(?: dining)?)";
-  const noun = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:(?:writing[ -])?desks?(?![ -]chairs?\\b)|work[ -]?tables?|writing[ -]suites?)";
+  const noun = furnitureNoun(kind).source;
   const qualifier = "(?:the |our |my )?";
-  const pattern = new RegExp("\\b" + room + "(?:'s|’s)?[ -]+" + noun + "\\b|\\b" + noun + " (?:in|from|inside) " + qualifier + room + "\\b", "gi");
+  const relative = "(?:(?:that|which)(?:['’]s| is| are) )?";
+  return new RegExp("\\b" + room + "(?:'s|’s)?[ -]+" + noun + "\\b|\\b" + noun + " " + relative + "(?:in|from|inside) " + qualifier + room + "\\b", "gi");
+}
+
+function furnitureRooms(question, kind, home) {
   const rooms = [];
-  const unqualified = question.replace(pattern, (_, before, after) => {
+  const unqualified = question.replace(qualifiedFurniture(kind), (_, before, after) => {
     rooms.push((before || after).split(" ")[0].toLowerCase());
     return " ";
   });
   // Look up the remaining proper names in this revision. A room-qualified
   // noun has already been consumed and cannot also match an alias elsewhere.
   const prefix = roomScope.exec(question);
-  const scopedNoun = prefix && new RegExp("\\b" + noun + "\\b", "i").test(unqualified);
+  const scopedNoun = prefix && furnitureNoun(kind).test(unqualified);
   if (kind === "chair" && !rooms.length && scopedNoun)
     return [prefix[1].split(" ")[0].toLowerCase()];
   const rest = words(unqualified);
@@ -81,17 +90,25 @@ function furnitureRooms(question, kind, home) {
   return [...new Set(rooms)];
 }
 
+function unresolvedFurnitureRoom(clause) {
+  return roomMention.test(clause.replace(roomScope, "").replace(qualifiedFurniture("chair"), "").replace(qualifiedFurniture("desk"), ""));
+}
+
 function isBedroomChairComparison(question) {
   const q = question.toLowerCase();
   if (!/\bchair\b/.test(q)) return false;
-  const [room] = furnitureRooms(q, "chair");
+  const [room, secondChairRoom] = furnitureRooms(q, "chair");
+  if (secondChairRoom || furnitureRooms(q, "desk").some(id => id !== "bedroom")) return false;
   if (room ? room !== "bedroom" : /\b(study|living|salon|bathroom|kitchen)\b/.test(q)) return false;
+  // A fit question needs evidence for the specified desk. A historical position
+  // comparison below only knows the bedroom desk-chair and Belaya.
+  if (/\b(fits?|slides?|tucks?|clearances?)\b/.test(q)) return false;
   const comparative = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
   const timeline = /\b(revisions?|before|after|previously|now|earlier)\b/.test(q);
-  if (comparative && timeline) return true;
   if (/\bif\b/.test(q)) return false;
   if (/\bdid\b.*\b(move|shift|change)\b/.test(q)) return true;
-  if (/\b(fit|fits|slide|slides|tuck|tucks|under)\b/.test(q)) return false;
+  if (/\b(under|underneath|beneath)\b/.test(q)) return false;
+  if (comparative && timeline) return true;
   return /\b(revisions|previous revision|changed|moved|displacement)\b/.test(q);
 }
 
@@ -169,6 +186,9 @@ function planQuestions(question, home) {
       if (!prefix || !i || roomScope.test(piece)) return piece;
       const chairNeedsScope = /\bchairs?\b/i.test(piece) && asksFurnitureFit(piece)
         && !furnitureRooms(piece, "chair", home).length;
+      // Only inherit a room when every room named in the clause is already
+      // accounted for by an explicit chair or desk reference.
+      if (chairNeedsScope && unresolvedFurnitureRoom(piece)) return piece;
       const lacksSubjectRoom = !roomMention.test(piece) && !furnitureRooms(piece, "desk", home).length;
       return chairNeedsScope || lacksSubjectRoom ? prefix[0] + " " + piece : piece;
     });
@@ -311,6 +331,9 @@ function explainPlan(home, question, manifest, previous) {
   }
   const namedChairs = furnitureRooms(q, "chair", home);
   const fit = asksFurnitureFit(q);
+  if (fit && unresolvedFurnitureRoom(q) &&
+      !acousticEvidence.test(q))
+    return "Which chair and desk should I check? Please name the room for each piece.";
   if (fit && (namedChairs.length > 1 || namedDesks.length > 1))
     return "Which chair and desk pair should I compare first? Named rooms: " + [...new Set([...namedChairs, ...namedDesks])].join(", ") + ".";
   if (fit && namedChairs.length && namedDesks.length && namedChairs[0] !== namedDesks[0]) {
