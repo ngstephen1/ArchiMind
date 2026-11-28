@@ -279,3 +279,13 @@ test("room qualifiers and descriptive adjectives stay attached to the plan quest
   assert.equal(explanation(home, "What storage is in the quiet study?"), explanation(home, "What storage is in the study?"));
   assert.ok(asksChairChange("What changed when I moved the bedroom chair after adjusting the living room?"));
 });
+
+test("fit and movement stay with the named chair when another room supplies context", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  assert.match(explanation(home, "Will the bedroom chair fit, with enough privacy in the study?"), /bedroom desk-chair and belaya/);
+  assert.match(explanation(home, "Can I hear the TV from the study?"), /Acoustic performance is unverified/);
+  assert.match(explanation(home, "Is the quiet study suitable for calls?"), /Acoustic performance is unverified/);
+  const q = "Did the study chair move when we moved the bedroom chair?";
+  assert.equal(asksChairChange(q), false);
+  assert.match(explanation(home, q), /study chair move requires saved positions/);
+});
