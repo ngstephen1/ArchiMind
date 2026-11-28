@@ -21,6 +21,7 @@ await copyFile(
   new URL("materials/wood-floor.jpg", src),
   new URL("assets/wood-floor.jpg", out),
 );
+await copyFile(new URL("materials/meadow-4k.jpg", src), new URL("assets/meadow-4k.jpg", out));
 for (const image of ["studio-source.jpg", "studio-result.jpg"]) {
   await copyFile(new URL("photo-study/" + image, src), new URL("assets/" + image, out));
 }
