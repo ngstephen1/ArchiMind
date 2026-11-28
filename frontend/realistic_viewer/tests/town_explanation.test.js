@@ -362,7 +362,10 @@ test("an explicit before-and-after position request uses the two saved revisions
   for (const question of ["Compare the bedroom chair before and after to see if it moved.",
       "Compare the bedroom chair’s position before and after moving it under Belaya.",
       "What changed when I moved the bedroom chair after adjusting the study desk?",
-      "Compare the bedroom chair’s position after repositioning it."]) {
+      "Compare the bedroom chair’s position after repositioning it.",
+      "Can you tell me if the bedroom chair’s position changed between revisions?",
+      "Could you tell me how the chair’s position changed between revisions?",
+      "Did the bedroom chair move after repositioning the study desk for clearance?"]) {
     assert.equal(asksChairChange(question), true);
     assert.match(explanation(home, question, manifest, previous), /Displacement: 0.000 m/);
   }
@@ -376,4 +379,10 @@ test("acoustic context preserves furniture aliases and proposed edits cannot use
   assert.equal(asksChairChange(proposed), false);
   assert.match(explanation(home, proposed), /Which proposed chair position/);
   assert.doesNotMatch(explanation(home, "Will the bedroom chair fit under the desk now, before I order it?"), /Earlier-revision fit/);
+});
+
+test("a present-position fit question uses the displayed revision and identifies a requested historical limit", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  assert.match(explanation(home, "Will the bedroom chair fit under Belaya in its current position?"), /Source: bedroom desk-chair and belaya/);
+  assert.match(explanation(home, "How did the bedroom chair fit under Belaya before the move compared with now?"), /Earlier-revision fit was not evaluated/);
 });

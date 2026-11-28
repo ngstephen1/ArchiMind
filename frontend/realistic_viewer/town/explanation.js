@@ -95,16 +95,26 @@ function unresolvedFurnitureRoom(clause) {
 }
 
 function proposedPosition(q) {
-  const indicative = q.replace(/\b(?:to see|check|verify) if\b/gi, "");
-  return /\bif\b/i.test(indicative) || /\b(?:would|could|might|will) (?!you (?:compare|show|explain))[^?]*(?:position|mov(?:e|ing)|shift)/i.test(indicative);
+  // Resolve an explicit hypothetical move. A modal can also introduce a
+  // polite request or ask whether the present chair fits.
+  return /\bif\b[^?]*\b(?:were|would be|could be|were to be) (?:to be )?(?:moved|shifted|repositioned)\b/i.test(q) ||
+    /\bif (?:i|we|you) (?:move|moved|shift|shifted|reposition|repositioned)\b/i.test(q) ||
+    /\bhow (?:would|might|will)\b[^?]*\bposition (?:change|differ)\b/i.test(q);
+}
+
+function ambiguousConditional(q) {
+  // Only these explicit requests to inspect past state can use "if" in a
+  // saved-position comparison. Keep other conditionals out of the history path.
+  return /\bif\b/i.test(q.replace(/\b(?:to see|tell (?:me|us)|check) if\b/gi, ""));
 }
 
 function isBedroomChairComparison(question) {
   const q = question.toLowerCase();
-  if (!/\bchair\b/.test(q) || proposedPosition(q) || /\b(fits?|slides?|tucks?|clearances?)\b/.test(q)) return false;
+  if (!/\bchair\b/.test(q) || proposedPosition(q) || ambiguousConditional(q)) return false;
   // Room names after a separate completed edit describe context. Time markers
   // still come from the complete question.
   const subject = q.split(/\bafter (?:adjusting|editing|repositioning)\b/, 1)[0];
+  if (/\b(fits?|slides?|tucks?|clearances?)\b/.test(subject)) return false;
   const [room, secondChairRoom] = furnitureRooms(subject, "chair");
   if (secondChairRoom || furnitureRooms(subject, "desk").some(id => id !== "bedroom")) return false;
   if (room ? room !== "bedroom" : /\b(study|living|salon|bathroom|kitchen)\b/.test(subject)) return false;
@@ -235,7 +245,8 @@ export function explanation(home, question, manifest = null, previous = null) {
     return explainPlan(home, clause, manifest, previous);
   }))];
   if (plan.some(clause => asksFurnitureFit(clause) && !isBedroomChairComparison(clause) &&
-      /\brevisions\b|\b(?:compare|compared|comparison|changed)\b[^?]*\b(?:before|earlier|previous|after)\b|\bbefore and after\b/i.test(clause)))
+      (/\brevisions\b|\bbefore and after\b/i.test(clause) ||
+       (/\b(compare|compared|comparison|changed)\b/i.test(clause) && /\b(before|earlier|previous|after)\b/i.test(clause)))))
     answers.push("Earlier-revision fit was not evaluated. Comparing fit requires the named pair's operating measurements in both revisions.");
   if (acoustic) answers.push("Acoustic performance is unverified. The floor plan records room positions. To assess sound transfer, obtain wall and door assembly ratings or an on-site sound measurement.");
   if (supplier || (plan.some(asksFurnitureFit) && /\b(guarantee|guaranteed|certify|promise|certain|prove)\b/i.test(question))) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
@@ -251,6 +262,8 @@ function explainPlan(home, question, manifest, previous) {
   const normalized = words(q);
   if (/\bchair\b/.test(q) && proposedPosition(q) && /\b(position|displacement)\b/.test(q))
     return "Which proposed chair position should I check? Name its room, direction and distance, then preview the move. A position in a saved revision cannot establish the result of a proposed edit.";
+  if (/\bchair\b/.test(q) && /\b(position|displacement)\b/.test(q) && ambiguousConditional(q))
+    return "Do you mean the two saved chair positions, or a proposed move? To compare history, ask how the bedroom chair position changed between revisions.";
   if (isBedroomChairComparison(q)) return chairChange(home, manifest, previous);
   if (asksZoningTradeoff(q)) return zoningComparison(home, manifest, previous);
   const comparison = home.evidence?.comparison;
