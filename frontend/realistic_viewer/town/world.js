@@ -601,11 +601,17 @@ export function createTown(canvas, status, action) {
       : null;
     if (photoView.value === "landscape" && part?.design.room.windows.length) {
       const room = part.design.room, win = room.windows[0];
-      const west = win.wall === "west";
-      const x = part.origin[0] + (west ? 0 : room.width_m);
-      const z = -part.origin[1] - win.offset_m - win.width_m / 2;
+      const along = win.offset_m + win.width_m / 2;
       const y = win.sill_height_m + win.height_m / 2;
-      preset = {id: "landscape", eye: [x + (west ? 1.45 : -1.45), y, z + 0.24], target: [x, y, z], reason: "View through the saved bedroom window."};
+      const walls = {
+        west:  [0, along, 1, 0],
+        east:  [room.width_m, along, -1, 0],
+        north: [along, room.depth_m, 0, -1],
+        south: [along, 0, 0, 1],
+      };
+      const [localX, localY, inwardX, inwardY] = walls[win.wall];
+      const x = part.origin[0] + localX, z = -part.origin[1] - localY;
+      preset = {id: "landscape", eye: [x + inwardX * 1.45, y, z - inwardY * 1.45], target: [x, y, z], reason: "View through the saved bedroom window."};
     }
     photoReason.textContent = preset?.reason || "";
     canvas.dataset.camera = preset?.id || "walking";
