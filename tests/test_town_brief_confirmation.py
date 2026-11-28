@@ -2057,3 +2057,16 @@ def test_shared_conditional_does_not_establish_rejected_width(conditional):
     )
     _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
     assert not any("width you rejected" in q for q in questions)
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "I don't know if the corridor can widen",
+        "We are unsure whether the kitchen can move",
+    ],
+)
+def test_a_contrasting_objection_is_independent_of_an_embedded_question(prefix):
+    text = f"{prefix} but a 60 cm clear passage is too narrow for our wheelchair."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("width you rejected" in q for q in questions)

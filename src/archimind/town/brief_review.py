@@ -661,10 +661,15 @@ def _asserts_width_objection(prefix):
     # Conditional scope can govern both sides of "and". A negation of an
     # independent fact, e.g. "we don't need a salon, and ...", cannot.
     sentence = re.split(r"[;!?]|\.(?!\d)", prefix.lower())[-1]
+    # A fronted condition scopes everything up to its comma. An embedded
+    # question about a different design decision ends at an independent contrast.
+    if re.match(r"\s*(?:if|whether|unless)\b[^,]*$", sentence):
+        return False
+    sentence = re.split(r"\bbut\b", sentence)[-1]
     sentence = re.sub(r"\b(?:no doubt|without (?:a )?doubt)\b", "certain", sentence)
     if re.search(r"\b(?:if|whether|unless|doubt)\b[^,;.!?]*$", sentence):
         return False
-    governing = re.split(r"\bbut\b|,?\s+and\s+(?=(?:(?:the|an?)\s+)?$)", sentence)[-1]
+    governing = re.split(r",?\s+and\s+(?=(?:(?:the|an?)\s+)?$)", sentence)[-1]
     clauses = _affirmative_clauses(governing + " __objection__")
     return any(part.endswith("__objection__") for part in clauses)
 
@@ -1111,8 +1116,8 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         ):
             questions.append(
                 "Which measured passage width should the new layout reuse? "
-                "Under Seating and circulation requirements, enter the measurement "
-                "or select Use the displayed passage width."
+                "Enter the measurement in the brief. In Town, you can also select "
+                "Use the displayed passage width under Seating and circulation requirements."
             )
     if (
         brief.compare_tradeoffs
