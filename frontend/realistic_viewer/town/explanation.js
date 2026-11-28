@@ -46,17 +46,23 @@ export function asksChairChange(question) {
   return planQuestions(question).some(isBedroomChairComparison);
 }
 
-function namedChairRoom(question) {
-  const room = "(bedroom|study|living(?: room)?|salon|bathroom|kitchen)";
-  const match = new RegExp("\\b" + room + " (?:desk |writing )?chairs?\\b|\\bchairs? in (?:the |our |my )?" + room + "\\b|\\b(desk-chair)\\b", "i").exec(question);
-  if (!match) return null;
-  return (match[1] || match[2] || "bedroom").split(" ")[0].toLowerCase();
+// A room can be named before a furniture noun or as a qualifier after it.
+// Keep both identities when comparing alternatives instead of picking the first.
+function furnitureRooms(question, kind) {
+  const room = "(bedroom|study|living(?: room)?|salon|bathroom|kitchen(?: dining)?)";
+  const noun = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:desks?|worktables?)";
+  const qualifier = "(?:the |our |my )?";
+  const pattern = new RegExp("\\b" + room + "(?:'s|’s)?[ -]+" + noun + "\\b|\\b" + noun + " (?:in|from|inside) " + qualifier + room + "\\b", "gi");
+  const rooms = Array.from(question.matchAll(pattern), match =>
+    (match[1] || match[2]).split(" ")[0].toLowerCase());
+  if (kind === "desk" && /\bbelaya\b/i.test(question)) rooms.push("bedroom");
+  return [...new Set(rooms)];
 }
 
 function isBedroomChairComparison(question) {
   const q = question.toLowerCase();
   if (!/\bchair\b/.test(q)) return false;
-  const room = namedChairRoom(q);
+  const [room] = furnitureRooms(q, "chair");
   if (room ? room !== "bedroom" : /\b(study|living|salon|bathroom|kitchen)\b/.test(q)) return false;
   const comparative = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
   const timeline = /\b(revisions?|before|after|previously|now|earlier)\b/.test(q);
@@ -124,11 +130,11 @@ function chairChange(home, manifest, previous) {
 
 // A question about installation can include several independent evidence requests.
 // Bind furniture measurements to the clause that names the item and its room.
-const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?(?!\s+(?:study|bedroom|salon|living room)\b(?!\s+(?:for|during)\b))|privacy|private(?= enough| for (?:calls?|meetings?))|overhear|hear(?! (?:why|about|how)\b)|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))?|decibels?)\b/i;
+const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?(?!\s+(?:study|bedroom|salon|living room)\b(?!\s+(?:for|during)\b))|privacy|private(?= enough| for (?:calls?|meetings?))|overhear|hear(?! (?:more |something )?(?:why|about|how|from you)\b)|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))?|decibels?)\b/i;
 const supplierEvidence = /\b(suppliers?|vendors?|(?:can|could) (?:i|we) (?:order|buy|purchase)|stock availability|retailers?|merchants?|backorders?|lead[- ]times?|in[- ]stock|ship(?:ping|ment)?|delivery(?: dates?)?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
 
 function asksFurnitureFit(clause) {
-  return /\b(fits?|slides?|tucks?|underneath|beneath|clearances?)\b/i.test(clause) &&
+  return /\b(fits?|slides?|tucks?|under|underneath|beneath|clearances?)\b/i.test(clause) &&
     /\b(chairs?|desks?|tables?|worktables?)\b/i.test(clause);
 }
 
@@ -259,8 +265,20 @@ function explainPlan(home, question, manifest, previous) {
         workspaces.length ? `Saved ${workspaces[0]}. ` : "") +
       "To assess task lighting, provide the fixture or a work-surface light measurement. A daylight view alone cannot establish task illuminance or glare.";
   }
-  const chairRoom = namedChairRoom(q);
-  const chairRooms = chairRoom ? [chairRoom] : mentionedRooms;
+  const namedChairs = furnitureRooms(q, "chair");
+  const namedDesks = furnitureRooms(q, "desk");
+  const fit = asksFurnitureFit(q);
+  if (fit && (namedChairs.length > 1 || namedDesks.length > 1))
+    return "Which chair and desk pair should I compare first? Named rooms: " + [...new Set([...namedChairs, ...namedDesks])].join(", ") + ".";
+  if (fit && namedChairs.length && namedDesks.length && namedChairs[0] !== namedDesks[0]) {
+    const target = home.rooms.find(p => p.design.room.id.split("-")[0] === namedDesks[0]);
+    const desks = target?.design.furniture.filter(item => item.category === "desk").map(item => item.id) ?? [];
+    return "The chair is in the " + namedChairs[0] + " and the requested desk is in the " + namedDesks[0] +
+      (desks.length ? " (" + desks.join(", ") + ")" : "") +
+      ". To check fit at that desk, identify both items and measure the chair width and arm height, clear width between supports, and floor-to-underside height.";
+  }
+  const chairRoom = namedChairs[0];
+  const chairRooms = namedChairs.length ? namedChairs : mentionedRooms;
   if (/\bchairs?\b/.test(q) && chairRooms.some(id => id !== "study" && id !== "bedroom")) {
     const areas = [...new Set(chairRooms)];
     if (areas.length > 1) return "Which room contains the chair and desk you want to check? Named rooms: " + areas.join(", ") + ".";

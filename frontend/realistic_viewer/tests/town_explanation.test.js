@@ -290,3 +290,15 @@ test("fit and movement stay with the named chair when another room supplies cont
   assert.equal(asksChairChange(q), false);
   assert.match(explanation(home, q), /study chair move requires saved positions/);
 });
+
+test("fit questions bind chair and desk rooms separately", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const ask = text => explanation(home, text);
+  const mixed = ask("Will the bedroom chair fit under the desk in the study?");
+  assert.match(mixed, /chair is in the bedroom.*desk is in the study/);
+  assert.doesNotMatch(mixed, /closest edges|gap from that reservation/);
+  assert.match(ask("Which chair will fit under the desk, the bedroom chair or the living room chair?"), /Which chair and desk pair/);
+  assert.match(ask("Can the desk-chair in the study fit under its desk?"), /Study chair fit/);
+  assert.match(ask("Can the study chair be moved under the desk?"), /Study chair fit/);
+  assert.match(ask("Can I hear more about the study desk?"), /window center/);
+});
