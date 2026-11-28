@@ -75,6 +75,8 @@ Use **Design presentation** in the town footer for the applied revision, or for 
 
 The local explanation control supports questions about the writing station, rug and reading light. The explanations use authored rules and measurements calculated from the displayed revision. Regression tests vary furniture positions, dimensions and inventory to verify the answers. In particular the desk-to-window distance is measurable; glare depends on screen orientation, time and lighting. Bedroom Chat also shows reviewed uses, variant, material/style evidence where available, and the actual planning footprint for each search result.
 
+For saved furniture questions, name each piece and its room, such as “Will the bedroom chair fit under the study desk?” A room named at the start of a question can also apply to its follow-up clauses. If a room reference in a fit question cannot be matched to either piece, Town asks for both rooms. The before/after position comparison measures the saved bedroom desk-chair relative to Belaya. Fit at another desk requires its own underside and support measurements.
+
 The timber image is the 1k diffuse map from [Poly Haven Wood Floor](https://polyhaven.com/a/wood_floor), used under the [CC0 asset license](https://polyhaven.com/license). Its upstream MD5 is b7e927d2bf2f8f103820ff3890c8407c. Linen and plaster detail and the light at the modeled window are procedural.
 
 ## Preview a released designer chair

@@ -236,3 +236,153 @@ test("zoning answers compare only the two consecutive schemes on the same saved 
     assert.match(ask(evidence), /consecutive saved gallery and service-core revisions/);
   }
 });
+
+test("compound evidence questions keep the chair in its specified room", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const question = "Will the bedroom chair fit under the desk? Can the study stop sound transfer? Which supplier has it in stock?";
+  const answer = explanation(home, question);
+  assert.match(answer, /Source: bedroom desk-chair and belaya/);
+  assert.match(answer, /clear width between supports/);
+  assert.match(answer, /Acoustic performance is unverified/);
+  assert.match(answer, /Supplier availability is unknown/);
+  assert.doesNotMatch(answer, /Study chair fit/);
+  assert.match(explanation(home, "Does the living room chair fit and is it in stock?"), /For the living.*Supplier availability is unknown/);
+  assert.doesNotMatch(explanation(home, "Is the supplier able to deliver that chair?"), /footprint/);
+});
+
+test("rooms in a privacy question do not become the location of the furniture", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const answer = explanation(home, "Can the plan certify privacy between the salon and living room, and will the writing chair tuck beneath the worktable?");
+  assert.match(answer, /Source: bedroom desk-chair and belaya/);
+  assert.match(answer, /Acoustic performance is unverified/);
+  assert.match(answer, /Supplier availability is unknown/);
+  assert.doesNotMatch(answer, /Which room contains/);
+});
+
+test("composite evidence preserves distinct room questions and comparison history", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const answer = explanation(home, "Will the bedroom chair fit? Can the study chair fit? Is it in stock?");
+  assert.match(answer, /bedroom desk-chair and belaya/);
+  assert.match(answer, /Study chair fit/);
+  assert.doesNotMatch(explanation(home, "Will the living room chairs fit? Can I order them now?"), /bedroom desk-chair/);
+  assert.match(explanation(home, "How far is the study desk from the window to avoid noise?"), /window center/);
+  assert.match(explanation(home, "Can the study block sound?"), /Acoustic performance is unverified/);
+  assert.match(explanation(home, "Can I order the chair now?"), /Supplier availability is unknown/);
+  assert.ok(asksChairChange("What changed when I moved the bedroom chair? Can the study block sound?"));
+});
+
+test("room qualifiers and descriptive adjectives stay attached to the plan question", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  assert.match(explanation(home, "In the study, can the chair fit under the desk, and is it in stock?"), /Study chair fit/);
+  assert.match(explanation(home, "Can the bedroom chair from the supplier and the desk fit together?"), /clear width between supports/);
+  assert.match(explanation(home, "Measure the bedroom chair gap to the desk before contacting a supplier."), /bedroom desk-chair and belaya/);
+  assert.equal(explanation(home, "What storage is in the quiet study?"), explanation(home, "What storage is in the study?"));
+  assert.ok(asksChairChange("What changed when I moved the bedroom chair after adjusting the living room?"));
+});
+
+test("fit and movement stay with the named chair when another room supplies context", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  assert.match(explanation(home, "Will the bedroom chair fit, with enough privacy in the study?"), /bedroom desk-chair and belaya/);
+  assert.match(explanation(home, "Can I hear the TV from the study?"), /Acoustic performance is unverified/);
+  assert.match(explanation(home, "Is the quiet study suitable for calls?"), /Acoustic performance is unverified/);
+  assert.match(explanation(home, "Is the study private enough for calls?"), /Acoustic performance is unverified/);
+  const q = "Did the study chair move when we moved the bedroom chair?";
+  assert.equal(asksChairChange(q), false);
+  assert.match(explanation(home, q), /study chair move requires saved positions/);
+});
+
+test("fit questions bind chair and desk rooms separately", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const ask = text => explanation(home, text);
+  const mixed = ask("Will the bedroom chair fit under the desk in the study?");
+  assert.match(mixed, /chair is in the bedroom.*desk is in the study/);
+  assert.doesNotMatch(mixed, /closest edges|gap from that reservation/);
+  assert.match(ask("Will the bedroom desk-chair fit under the study desk?"), /chair is in the bedroom.*desk is in the study/);
+  assert.match(ask("Will the bedroom chair fit under the study work table?"), /chair is in the bedroom.*desk is in the study/);
+  assert.match(ask("Will the bedroom chair fit under its desk? Can I hear more about the study desk?"), /bedroom desk-chair and belaya.*window center/);
+  assert.match(ask("Which chair will fit under the desk, the bedroom chair or the living room chair?"), /Which chair and desk pair/);
+  assert.match(ask("Can the desk-chair in the study fit under its desk?"), /Study chair fit/);
+  assert.match(ask("Can the study chair be moved under the desk?"), /Study chair fit/);
+  assert.match(ask("Can I hear more about the study desk?"), /window center/);
+  assert.match(ask("Can the bedroom chair fit at the Work Table or the bedroom desk?"), /Which chair and desk pair/);
+  assert.match(ask("How far is the Work Table from the window, and can the chair fit under it?"), /window center.*Study chair fit/);
+  assert.equal(ask("How far is the Work   Table from the window, and can the chair fit under it?"), ask("How far is the Work Table from the window, and can the chair fit under it?"));
+  assert.equal(ask("Is the chair in  stock?"), ask("Is the chair in stock?"));
+  assert.match(ask("In the study, can the desk-chair fit under the desk?"), /Study chair fit/);
+  assert.match(ask("Explain task lighting and acoustic privacy in the study."), /study workspace.*Acoustic performance is unverified/);
+  const scoped = ask("In the study, how far is the desk from the window, and can the chair fit under the desk?");
+  assert.match(scoped, /window center.*Study chair fit/);
+  assert.doesNotMatch(scoped, /bedroom desk-chair and belaya/);
+  assert.match(ask("In the bedroom, can the chair fit under the Work Table?"), /chair is in the bedroom.*desk is in the study/);
+  assert.match(ask("In the study, how far is the desk from its window, and how far is Belaya from its window?"), /study.*Belaya.*bedroom/i);
+  assert.match(ask("Explain task lighting at the bedroom desk and acoustic privacy in the study."), /bedroom workspace: belaya.*Acoustic performance is unverified/);
+  assert.match(ask("In the study, how far is the desk from the window, and can the chair fit under Belaya?"), /chair is in the study.*desk is in the bedroom/);
+  assert.match(ask("In the study, how far is the desk from the window, and can the chair fit under the bedroom desk?"), /chair is in the study.*desk is in the bedroom/);
+  const followUp = ask("How far is the study desk from the window, and can the chair fit under it?");
+  assert.match(followUp, /window center.*Study chair fit/);
+  assert.doesNotMatch(followUp, /bedroom desk-chair and belaya/);
+  assert.match(ask("Will the bedroom chair fit under the work table in the bedroom?"), /bedroom desk-chair and belaya/);
+});
+
+test("a local chair qualifier overrides the opening room in a compound question", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  for (const qualifier of ["that’s in", "which is in", "that is in"]) {
+    const answer = explanation(home, "In the study, how far is the desk from the window, and can the chair " + qualifier + " the bedroom fit under Belaya?");
+    assert.match(answer, /Source: study.*Source: bedroom desk-chair and belaya/);
+    assert.doesNotMatch(answer, /chair is in the study/);
+  }
+  const unclear = explanation(home, "In the study, how far is the desk from the window, and can the chair I keep by the bedroom doorway fit under Belaya?");
+  assert.match(unclear, /Which chair and desk should I check/);
+  assert.doesNotMatch(unclear, /chair is in the study|bedroom desk-chair and belaya/);
+});
+
+test("a question about fit across revisions retains the requested desk", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const question = "In the bedroom, how far is the desk from the window, and how does the chair fit under the study desk now compared to before?";
+  const previous = {project: "demo", revision: 1, home: structuredClone(home)};
+  assert.equal(asksChairChange(question), false);
+  const answer = explanation(home, question, {project: "demo", revision: 2, home_id: home.id}, previous);
+  assert.match(answer, /chair is in the bedroom.*desk is in the study/);
+  assert.doesNotMatch(answer, /Displacement|Closest footprint gap/);
+  assert.match(answer, /Earlier-revision fit was not evaluated/);
+});
+
+
+test("a noise destination cannot supply the chair or desk for the fit measurement", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const answer = explanation(home, "In the bedroom, how far is the desk from the window, and can the chair fit under the desk without transferring noise to the study?");
+  assert.match(answer, /Source: bedroom desk-chair and belaya.*Acoustic performance is unverified/);
+  assert.doesNotMatch(answer, /Study chair fit/);
+});
+
+test("an explicit before-and-after position request uses the two saved revisions", () => {
+  const {home, manifest} = selected();
+  const previous = {project: manifest.project, revision: manifest.revision, home: structuredClone(home)};
+  manifest.revision++;
+  for (const question of ["Compare the bedroom chair before and after to see if it moved.",
+      "Compare the bedroom chair’s position before and after moving it under Belaya.",
+      "What changed when I moved the bedroom chair after adjusting the study desk?",
+      "Compare the bedroom chair’s position after repositioning it.",
+      "Can you tell me if the bedroom chair’s position changed between revisions?",
+      "Could you tell me how the chair’s position changed between revisions?",
+      "Did the bedroom chair move after repositioning the study desk for clearance?"]) {
+    assert.equal(asksChairChange(question), true);
+    assert.match(explanation(home, question, manifest, previous), /Displacement: 0.000 m/);
+  }
+});
+
+test("acoustic context preserves furniture aliases and proposed edits cannot use a past displacement", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const mixed = explanation(home, "In the study, will the chair fit with Belaya while keeping noise down?");
+  assert.match(mixed, /chair is in the study.*desk is in the bedroom.*Acoustic performance is unverified/);
+  const proposed = "How would the bedroom chair’s position change if it were moved under Belaya now?";
+  assert.equal(asksChairChange(proposed), false);
+  assert.match(explanation(home, proposed), /Which proposed chair position/);
+  assert.doesNotMatch(explanation(home, "Will the bedroom chair fit under the desk now, before I order it?"), /Earlier-revision fit/);
+});
+
+test("a present-position fit question uses the displayed revision and identifies a requested historical limit", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  assert.match(explanation(home, "Will the bedroom chair fit under Belaya in its current position?"), /Source: bedroom desk-chair and belaya/);
+  assert.match(explanation(home, "How did the bedroom chair fit under Belaya before the move compared with now?"), /Earlier-revision fit was not evaluated/);
+});
