@@ -1,0 +1,56 @@
+{
+  "project": "236b2648-3374-4eef-b03b-7f54b67d9f81",
+  "edits": [
+    {
+      "base": 1,
+      "object": "salon-coffee-table",
+      "mode": "plan",
+      "prompt": "Replace this with a round table and keep a 90 cm route from the door to the sofa.",
+      "result": "The model cannot verify a 90 cm door-to-sofa route for this arrangement.",
+      "saved": false
+    },
+    {
+      "base": 1,
+      "object": "salon-coffee-table",
+      "mode": "plan",
+      "prompt": "Move this to 2.2, 1.45",
+      "result": "Move \u00b7 Marble coffee table (salon-coffee-table)",
+      "saved": true
+    },
+    {
+      "base": 2,
+      "object": "salon-coffee-table",
+      "mode": "3d",
+      "prompt": "Replace this with a round table and keep a 90 cm route from the door to the sofa.",
+      "result": "Replace \u00b7 Round oak coffee table (salon-coffee-table) \u00b7 90 cm modeled door-to-sofa route verified",
+      "saved": true
+    },
+    {
+      "base": 3,
+      "object": "salon-coffee-table",
+      "mode": "plan",
+      "prompt": "Rotate this 90 degrees",
+      "result": "Rotate \u00b7 Round oak coffee table (salon-coffee-table)",
+      "saved": true
+    },
+    {
+      "base": 4,
+      "object": "salon-coffee-table",
+      "mode": "plan",
+      "prompt": "Duplicate this at 4, 0.5",
+      "result": "Duplicate \u00b7 Round oak coffee table (salon-coffee-table-copy-2)",
+      "saved": true
+    },
+    {
+      "base": 5,
+      "object": "salon-coffee-table-copy-2",
+      "mode": "plan",
+      "prompt": "Remove this",
+      "result": "Remove \u00b7 Round oak coffee table (salon-coffee-table-copy-2)",
+      "saved": true
+    }
+  ],
+  "final_revision": 6,
+  "home_id": "edf09b2a8e3e00de047a67359e1b388521df3ca418aa3b6f1e75f2b9d5959786",
+  "browser_errors": []
+}

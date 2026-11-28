@@ -186,6 +186,7 @@ export function studioFurniture(f, suiteYaw = 0, diningVariant = undefined) {
     seat(x, d - 0.4, 1.98, 0.8, 0.94, 1, "wool");
     seat(0.41, 0.34, 0.78, 0.68, 0.82, -1, "moss");
     seat(w - 0.41, 0.34, 0.78, 0.68, 0.82, -1, "moss");
+    const coffeeStart = parts.length;
     table(x, 1.07, 1.03, 0.48, 0.38, "marble");
     piece(
       "Earthenware vase",
@@ -241,6 +242,7 @@ export function studioFurniture(f, suiteYaw = 0, diningVariant = undefined) {
       );
     }
     piece("Art monograph", "clay", x - 0.21, 1.08, 0.399, 0.23, 0.18, 0.038);
+    for (const p of parts.slice(coffeeStart)) Object.defineProperty(p,"coffeeComponent",{value:true});
   } else if (f.id === "salon-dining") {
     const extended = diningVariant === "six-place";
     const places = extended ? [-0.66, 0, 0.66] : [-0.44, 0.44];
