@@ -1,5 +1,13 @@
 # Project status
 
+## November 28 demo and field work
+
+The [73-second captioned walkthrough](https://github.com/ngstephen1/ArchiMind/releases/tag/town-photo-studio-demo-2026-11-28) was captured from `35d5ecc`. The new local project saved a 300 mm chair movement between revisions 1 and 2. The recorded photographic redesign and the earlier agent run each have their own source. A clean download matched the published video checksum and decoded all 1,825 frames. [Goal and issue tracker](https://github.com/ngstephen1/ArchiMind/issues/119)
+
+The [current-bedroom field sheets](../handovers/current-bedroom/Bedroom-Field-Visit-Sheets.pdf) are ready for an observer to record the shell, openings, desk underside and chair clearances. The surveyed-room work still needs a dated visit. The public Town site currently serves a static tour. [Survey intake #92](https://github.com/ngstephen1/ArchiMind/issues/92) · [Hosted configuration check](https://github.com/ngstephen1/ArchiMind/issues/66#issuecomment-7235267388)
+
+The November 30 release remains pending. A clean download of the existing candidate verified all 32 handoff entries. The team can rehearse from that package while the two owners record their observations and release decisions. [Download verification](https://github.com/ngstephen1/ArchiMind/issues/72#issuecomment-7235302935)
+
 ## November 22–30 release sprint
 
 As of November 25, **14 of the original 19 issues are closed**. Milestones 2
