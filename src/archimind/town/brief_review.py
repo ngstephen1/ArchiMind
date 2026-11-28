@@ -72,7 +72,9 @@ CURRENT_WIDTH = re.compile(
 REUSE_WIDTH = (
     r"(?:(?:and|but|so)\s+)?(?:(?:we|i)\s+)?(?:please\s+)?"
     r"(?:want|need|use|keep|reuse|match|maintain|retain)\s+"
-    r"(?:(?:that|the) same|that) (?:clear )?(?:width|passage)\b"
+    r"(?:(?:that|the) same|that) (?:clear )?(?:width|passage(?: width)?)\b"
+    r"(?=\s*(?:$|[.;!?]|(?:in|for|throughout) (?:the |our |my |this )?"
+    r"(?:(?:new|proposed|renovated) )?(?:passage|walkway|home|house|room|layout|design|renovation)\b))"
 )
 FIXED_PASSAGE = (
     r"(?:"
@@ -1074,6 +1076,15 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         passage = next(iter(widths))
     if evaluate_passage:
         for match in REJECTED_WIDTH.finditer(message):
+            # Keep the negation inside "will not fit" intact, while checking
+            # whether the client actually asserts the objection.
+            context = _affirmative_clauses(message[: match.start()] + " __objection__")
+            if not any(
+                part.endswith("__objection__")
+                and not re.search(r"\b(?:if|whether|unless|doubt)\b[^,;.!?]*$", part)
+                for part in context
+            ):
+                continue
             rejected = _widths(match[0].lower())
             if rejected and (
                 passage in rejected
@@ -1087,6 +1098,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                 break
         if (
             not widths
+            and "passage_m" not in explicit
             and re.search(PATH, circulation)
             and re.search(REUSE_WIDTH, circulation)
         ):
@@ -1362,7 +1374,10 @@ def review_summary(
             message,
             WIDTH,
             lambda sentence: brief.passage_m in _widths(_circulation_text(sentence)),
-            separator=rf"(?:{STATEMENT_BREAK})(?!\s*(?:{WIDTH_OBJECTION}|{REUSE_WIDTH}))",
+            separator=(
+                rf"(?:{STATEMENT_BREAK})(?!\s*(?:{WIDTH_OBJECTION}|{REUSE_WIDTH}|"
+                r"in (?:our|the) (?:current|existing) (?:home|house)\b))"
+            ),
         ),
     )
     if brief.formal_salon:

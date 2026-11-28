@@ -1963,3 +1963,44 @@ def test_shared_location_fallback_allows_a_comma_before_its_preference(punctuati
         Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
     )
     assert not questions and brief.dining_seats == 5
+
+
+@pytest.mark.parametrize("negation", ["I don’t think", "We do not consider", "I doubt"])
+def test_negated_objection_accepts_the_affirmative_clearance(negation):
+    text = (
+        f"{negation} a 90 cm clear passage is too narrow. Keep a 90 cm clear passage."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
+
+
+def test_explicit_width_control_resolves_an_unmeasured_reuse_reference():
+    text = "Keep the same passage width in the renovation."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, passage_m=0.9), text, None
+    )
+    assert not questions and brief.passage_m == 0.9
+
+
+def test_width_request_for_chairs_does_not_reuse_current_passage():
+    text = "We have a 90 cm clear passage in our current home. Use the same width for both chairs."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.6
+    source = next(
+        s
+        for s in review_summary(brief, message=text)["sources"]
+        if "passage" in s["requirement"]
+    )
+    assert source["origin"] == "default"
+
+
+def test_current_home_citation_keeps_wrapped_location_and_reuse_instruction():
+    text = "We have a 90 cm clear passage\nin our current home. Use the same width in the new house."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
+    source = next(
+        s
+        for s in review_summary(brief, message=text)["sources"]
+        if "passage" in s["requirement"]
+    )
+    assert source["origin"] == "brief" and source["statement"] == text
