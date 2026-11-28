@@ -48,6 +48,10 @@ export function asksChairChange(question) {
 
 // A room can be named before a furniture noun or as a qualifier after it.
 // Keep both identities when comparing alternatives instead of picking the first.
+function words(value) {
+  return " " + value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim() + " ";
+}
+
 function furnitureRooms(question, kind, home) {
   const room = "(bedroom|study|living(?: room)?|salon|bathroom|kitchen(?: dining)?)";
   const noun = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:(?:writing[ -])?desks?(?![ -]chairs?\\b)|work[ -]?tables?|writing[ -]suites?)";
@@ -60,7 +64,6 @@ function furnitureRooms(question, kind, home) {
   });
   // Look up the remaining proper names in this revision. A room-qualified
   // noun has already been consumed and cannot also match an alias elsewhere.
-  const words = value => " " + value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim() + " ";
   const rest = words(unqualified);
   for (const {design} of home?.rooms ?? []) {
     const named = design.furniture.some(item => item.category === kind &&
@@ -150,7 +153,7 @@ function asksFurnitureFit(clause) {
 }
 
 function planQuestions(question) {
-  const scoped = question.replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
+  const scoped = question.trim().replace(/\s+/g, " ").replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
   const clauses = scoped.split(/[?!;]|\.(?!\d)|(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
   return clauses.map(clause => clause.trim()).filter(clause => clause && (
     (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
@@ -187,7 +190,7 @@ function explainPlan(home, question, manifest, previous) {
   const get = id => furniture.find(f => f.id === id);
   const desk = get("belaya"), bed = get("queen-bed");
   const q = question.toLowerCase();
-  const normalized = q.replaceAll("-", " ");
+  const normalized = words(q);
   if (isBedroomChairComparison(q)) return chairChange(home, manifest, previous);
   if (asksZoningTradeoff(q)) return zoningComparison(home, manifest, previous);
   const comparison = home.evidence?.comparison;
@@ -260,7 +263,7 @@ function explainPlan(home, question, manifest, previous) {
   const study = home.rooms.find(p => p.design.room.id === "study");
   const studyDesks = study?.design.furniture.filter(f => f.category === "desk") ?? [];
   const namedStudyDesk = studyDesks.find(f =>
-    [f.name, f.id].some(label => label && normalized.includes(label.toLowerCase().replaceAll("-", " ")))
+    [f.name, f.id].some(label => label && normalized.includes(words(label)))
   );
   if (taskLighting) {
     const surfaces = home.rooms.flatMap(({design}) => design.furniture
