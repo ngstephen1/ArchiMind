@@ -110,7 +110,7 @@ def chair_chat(q, owner, project, data, *, apply):
         r"(?:please )?(?:pull|move|slide) (?:the |this |my |selected )?"
         r"(?:desk chair|chair|it) (?:back )?"
         r"(?:30 (?:cm|centimet(?:er|re)s)|30cm|300 ?mm|0[.]3 ?m)"
-        r" (?:away from|back from|from) (?:the |my |its )?(?:belaya )?desk",
+        r" (?:away from|back from) (?:the |my |its )?(?:belaya )?desk",
         normalized,
     ):
         raise db.Problem(

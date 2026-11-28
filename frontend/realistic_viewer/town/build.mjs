@@ -21,6 +21,9 @@ await copyFile(
   new URL("materials/wood-floor.jpg", src),
   new URL("assets/wood-floor.jpg", out),
 );
+for (const image of ["studio-source.jpg", "studio-result.jpg"]) {
+  await copyFile(new URL("photo-study/" + image, src), new URL("assets/" + image, out));
+}
 for (const engine of ["openai", "python"]) {
   const source = new URL("../../../docs/assets/" + engine + ".svg", src);
   await copyFile(source, new URL("assets/" + engine + ".svg", out));

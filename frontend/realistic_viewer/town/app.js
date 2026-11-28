@@ -1,3 +1,4 @@
+import { bindPhotoStudio } from "./photo_studio.js";
 import { bindHouseComparison } from "./house_compare.js";
 import { competingGoals } from "./tradeoff.js";
 import studioShowcasePublications from "./studio_publications.json";
@@ -850,6 +851,29 @@ el("closeChairChat").onclick = el("cancelChat").onclick = () => {
 for (const button of document.querySelectorAll("[data-view]")) {
   button.onclick = () => button.dataset.view === "walk" ? world.walk() : world.overview.set(button.dataset.view);
 }
+const openPhotoStudio = bindPhotoStudio({el,world,api,local,context:()=>({project,revision,home:applied})});
+let pickedRoom;
+function clearRoom() {
+  pickedRoom = null;
+  el("roomInspector").hidden = true;
+}
+el("world").addEventListener("chair-picked",clearRoom);
+el("world").addEventListener("room-picked",event=>{
+  clearRoom();
+  if (el("chairChat").hidden === false || world.homeId !== applied.id) return;
+  const room=applied.rooms.find(part=>part.design.room.id===event.detail)?.design.room;
+  if(!room)return;
+  pickedRoom=room.id;
+  el("pickedRoom").textContent=room.name;
+  el("pickedDimensions").textContent=room.width_m.toFixed(2)+" × "+room.depth_m.toFixed(2)+" m";
+  el("restyleRoom").hidden=!local;
+  el("roomInspector").hidden=false;
+});
+el("selectChair").addEventListener("click",clearRoom);
+el("clearRoom").onclick=()=>{clearRoom();world.overview.set(world.overview.mode);};
+el("focusRoom").onclick=()=>world.overview.focusRoom(pickedRoom);
+el("restyleRoom").onclick=()=>openPhotoStudio(pickedRoom);
+if(!local)el("compareKind").querySelector('[value="blender"]').remove();
 bindHouseComparison({el,world,api,context:()=>({project, revision,home:applied}),asset:async path=>{
   const response=await fetch(cfg.api+path,{headers:token()?{Authorization:"Bearer "+token()}:{}});
   if(!response.ok) throw Error("No completed HD shot for this revision. Request an HD render in the client presentation.");
@@ -944,12 +968,15 @@ function watchRender() {
   const statusText = el("renderStatus");
   el("renderDownloads").replaceChildren();
   el("renderHD").hidden = true;
-  el("renderProof").disabled = false;
+  el("renderProof").disabled = true;
+  let pollId = 0;
   statusText.textContent = "Checking the local rendering service.";
   async function poll() {
+    const id=++pollId;
     try {
       const values = await api(endpoint + query);
       if (epoch !== renderWatch || !el("board").open) return;
+      if (id!==pollId) return;
       const { proof, hd } = values;
       el("renderProof").disabled = ["queued", "running", "ready"].includes(proof.state);
       el("renderHD").hidden = proof.state !== "ready";
@@ -966,7 +993,7 @@ function watchRender() {
       }
       if ([proof.state, hd.state].some(s => ["queued", "running"].includes(s))) setTimeout(poll, 1600);
     } catch (error) {
-      if (epoch !== renderWatch || !el("board").open) return;
+      if (id !== pollId || epoch !== renderWatch || !el("board").open) return;
       statusText.textContent = error.message;
       el("renderProof").disabled = true;
     }
@@ -974,6 +1001,7 @@ function watchRender() {
   for (const [id, stage] of [["renderProof", "proof"], ["renderHD", "hd"]]) {
     el(id).onclick = async () => {
       try {
+        pollId++;
         el(id).disabled = true;
         await api(endpoint + query, { stage });
         if (epoch === renderWatch) await poll();

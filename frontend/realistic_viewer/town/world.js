@@ -469,6 +469,7 @@ export function createTown(canvas, status, action) {
     for (const part of home.rooms) {
       if (!Array.isArray(part.style?.dressing)) continue;
       const holder = new T.Group();
+      holder.userData.roomId = part.design.room.id;
       holder.position.set(...dressingOrigin(part));
       interior.add(holder);
       const dressing = buildTownDressing(holder, part.style.dressing, pack, packTier);
@@ -880,6 +881,7 @@ export function createTown(canvas, status, action) {
       const [ox, oy] = part.origin,
         r = part.design.room,
         group = new T.Group();
+      group.userData.roomId = r.id;
       group.position.set(ox, 0, -oy);
       interior.add(group);
       let validBindings = true;
@@ -1327,20 +1329,24 @@ export function createTown(canvas, status, action) {
   };
   canvas.onpointerup = (e) => {
     look = false;
-    if (pressed?.id === e.pointerId && Math.hypot(e.clientX-pressed.x,e.clientY-pressed.y)<5 &&
-        (overview.mode || inside) && overview.pick(e,camera)) {
-      canvas.dispatchEvent(new CustomEvent("chair-picked",{detail:home.id}));
+    if (pressed?.id === e.pointerId && Math.hypot(e.clientX-pressed.x,e.clientY-pressed.y)<5) {
+      if ((overview.mode || inside) && overview.pick(e,camera)) {
+        canvas.dispatchEvent(new CustomEvent("chair-picked",{detail:home.id}));
+      } else if (overview.mode) {
+        canvas.dispatchEvent(new CustomEvent("room-picked",{detail:overview.roomAt(e)}));
+      }
     }
     pressed = null;
   };
-  canvas.ondblclick = event => {
-    const room = overview.roomAt(event);
+  function enterOverviewRoom(room) {
     if (!room) return;
     overview.set("");
     enter(true);
     roomJump.value = room;
     roomJump.onchange();
   };
+  canvas.ondblclick = event => enterOverviewRoom(overview.roomAt(event));
+  canvas.addEventListener("enter-room", event => enterOverviewRoom(event.detail));
   canvas.onpointercancel = () => {look = false; pressed = null;};
   for (const el of document.querySelectorAll("[data-key]")) {
     el.onpointerdown = (e) => {
@@ -1360,7 +1366,10 @@ export function createTown(canvas, status, action) {
   renderer.setAnimationLoop((now) => {
     const dt = Math.min(0.045, (now - before) / 1000);
     before = now;
-    if (overview.mode) { overview.render(); return; }
+    if (overview.mode) {
+      if (!document.querySelector("dialog[open]")) overview.render();
+      return;
+    }
     if (active()) {
       const forward =
         Number(keys.has("KeyW") || keys.has("ArrowUp")) -
@@ -1491,10 +1500,12 @@ export function createTown(canvas, status, action) {
         const visible = [hero, street, interior, avatar].map((o) => o.visible);
         const size = renderer.getSize(new T.Vector2());
         const ratio = renderer.getPixelRatio();
+        const previousSweep = Number(sweepInput?.value ?? 100)/100;
         const oldEnv = scene.environment;
         const oldIntensity = scene.environmentIntensity,
           oldExposure = renderer.toneMappingExposure;
         try {
+          sweep?.set(1);
           hero.visible = avatar.visible = false;
           street.visible = interior.visible = true;
           // A pack home is photographed with its own environment and exposure.
@@ -1516,6 +1527,7 @@ export function createTown(canvas, status, action) {
           });
           return { images, views, chair: renderedChair, desk: canvas.dataset.desk, collection: renderedCollection };
         } finally {
+          sweep?.set(previousSweep);
           renderer.setPixelRatio(ratio);
           renderer.setSize(size.x,size.y,false);
           [hero, street, interior, avatar].forEach((o,i) => {o.visible = visible[i];});

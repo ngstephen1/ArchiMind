@@ -54,6 +54,25 @@ def check_house_editor(page, url, output):
     ).get_attribute("src")
     page.screenshot(path=output / "house-editor-comparison.png")
     page.locator("#houseCompare button").click()
+    page.locator("#openPhotoStudio").click()
+    page.wait_for_function("document.querySelector('#conceptAfter').naturalWidth > 0")
+    page.locator("#conceptWipe").fill("35")
+    page.locator("#exampleLayout").click()
+    page.locator("#layoutStudio canvas").wait_for()
+    assert page.locator("#layoutPiece option").count() == 2
+    page.locator("#layoutX").fill("2.30")
+    page.locator("#layoutX").press("Tab")
+    with page.expect_download() as download:
+        page.locator("#saveStudy").click()
+    model = Path(download.value.path()).read_bytes()
+    assert model[:4] == b"glTF"
+    gltf = json.loads(model[20 : 20 + int.from_bytes(model[12:16], "little")])
+    chair_node = next(
+        node for node in gltf["nodes"] if node.get("extras", {}).get("kind") == "chair"
+    )
+    assert abs(chair_node["matrix"][12] - 2.30) < 0.001
+    page.locator("#layoutStudio button[aria-label]").click()
+    page.locator("#conceptStudio button[aria-label]").first.click()
     page.set_viewport_size({"width": 390, "height": 844})
     page.get_by_role("button", name="3D house", exact=True).click()
     page.get_by_role("button", name="Walk", exact=True).click()

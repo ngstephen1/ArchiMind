@@ -1,5 +1,6 @@
 """Room-photo intake for the private Town editor."""
 
+import hashlib
 import json
 
 import streamlit as st
@@ -74,9 +75,12 @@ def photo_form(project, revision, home, *, allow_analysis):
     with st.form(key + "-reviewed-intake"):
         notes = []
         for index, row in enumerate(st.session_state.get(key, [])):
+            observation_id = hashlib.sha256(
+                json.dumps(row, sort_keys=True).encode()
+            ).hexdigest()
             if st.checkbox(
                 f"Photo {row['photo']} · {row['observation']} — {row['field_question']}",
-                key=f"{key}-accept-{index}",
+                key=f"{key}-accept-{index}-{observation_id}",
             ):
                 notes.append(
                     dict(

@@ -46,6 +46,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
     });
   }
   function load(h, roof, parts) {
+    canvas.dispatchEvent(new CustomEvent("room-picked"));
     home = h;
     ceiling = roof;
     walls = parts;
@@ -69,7 +70,11 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
     tags.replaceChildren();
     labels = h.rooms.map(({ origin, design }) => {
       const { room } = design;
-      const tag = document.createElement("span");
+      const tag = document.createElement("button");
+      tag.type = "button";
+      tag.hidden = true;
+      tag.onclick = () => canvas.dispatchEvent(new CustomEvent("room-picked", {detail: room.id}));
+      tag.ondblclick = () => canvas.dispatchEvent(new CustomEvent("enter-room", {detail: room.id}));
       const area = document.createElement("small");
       area.textContent = (room.width_m * room.depth_m).toFixed(1) + " m²";
       tag.append(room.name, area);
@@ -98,6 +103,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
     selected = false;
   }
   function set(next) {
+    canvas.dispatchEvent(new CustomEvent("room-picked"));
     mode = next;
     for (const button of document.querySelectorAll("[data-view]")) {
       button.setAttribute(
@@ -121,6 +127,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
           : new T.Vector3(20, 32, 25),
       );
     controls.update();
+    render();
   }
   function cut(enable) {
     ceiling.visible = !enable;
@@ -170,6 +177,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
       cut(true);
       renderer.render(scene, camera);
       for (const { tag, center } of labels) {
+        tag.hidden = false;
         pos.copy(center).project(camera);
         tag.style.left = 50 + 50 * pos.x + "%";
         tag.style.top = 50 - 50 * pos.y + "%";
@@ -200,7 +208,30 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
   function roomAt(event) {
     if (!mode) return;
     pointRay(event, camera);
-    if (!ray.ray.intersectPlane(floor, pos)) return;
+    cut(true);
+    try {
+      interior.updateMatrixWorld(true);
+      const hit = ray.intersectObjects(interior.children, true).find((hit) => {
+        for (
+          let node = hit.object;
+          node && node !== interior;
+          node = node.parent
+        )
+          if (!node.visible) return false;
+        return true;
+      });
+      if (hit) {
+        for (
+          let node = hit.object;
+          node && node !== interior;
+          node = node.parent
+        )
+          if (node.userData.roomId) return node.userData.roomId;
+        pos.copy(hit.point);
+      } else if (!ray.ray.intersectPlane(floor, pos)) return;
+    } finally {
+      cut(false);
+    }
     return home.rooms.find(
       ({ origin, design }) =>
         pos.x >= origin[0] &&
@@ -235,6 +266,24 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
     render,
     pick,
     roomAt,
+    focusRoom(id) {
+      const part = home.rooms.find((part) => part.design.room.id === id);
+      if (!part || !mode) return;
+      const r = part.design.room;
+      const center = new T.Vector3(
+        part.origin[0] + r.width_m / 2,
+        0,
+        -part.origin[1] - r.depth_m / 2,
+      );
+      camera.position.add(center.clone().sub(controls.target));
+      controls.target.copy(center);
+      camera.zoom = Math.min(
+        controls.maxZoom,
+        0.88 * Math.min(home.width / r.width_m, home.depth / r.depth_m),
+      );
+      camera.updateProjectionMatrix();
+      controls.update();
+    },
     walkHighlight(inside) {
       highlight.visible = inside && selected && !!bounds;
     },
