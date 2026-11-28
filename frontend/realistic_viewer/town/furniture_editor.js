@@ -9,7 +9,7 @@ export function bindFurnitureEditor({ el, context, api, sync }) {
   <p data-piece></p><label>Describe the edit<input name="command" maxlength="200" placeholder="Replace this with a round table"></label><button type="button" data-use>Use request</button><label>Change<select name="action"><option value="move">Move</option><option value="rotate">Rotate 90°</option><option value="replace">Replace</option><option value="duplicate">Duplicate</option><option value="remove">Remove</option></select></label>
   <div data-placement><label>West edge from room west (m)<input type="number" step="any" min="0" name="x"></label><label>South edge from room south (m)<input type="number" step="any" min="0" name="y"></label></div>
   <label data-model>Table model<select name="model"><option value="round">Round oak coffee table</option><option value="rectangular">Rectangular oak coffee table</option></select></label>
-  <label data-route><input type="checkbox" name="route"> Require a 90 cm door-to-sofa route</label>
+  <label data-route><input type="checkbox" name="route"> <span data-route-label>Require a 90 cm door-to-sofa route</span></label>
   <p role="status"></p><button>Check edit</button> <button type="button" data-save hidden>Save revision</button></form>`;
   document.body.append(dialog);
   const find = (q) => dialog.querySelector(q),
@@ -54,7 +54,11 @@ export function bindFurnitureEditor({ el, context, api, sync }) {
     fields.action.value = "move";
     fields.x.value = f.x_m;
     fields.y.value = f.y_m;
-    fields.route.checked = false;
+    const part = context().applied.rooms.find(p => p.design.room.id === f.room);
+    fields.route.disabled = fields.route.checked = Boolean(part?.sofa_route);
+    find("[data-route-label]").textContent = fields.route.disabled
+      ? "Saved requirement · keep the 90 cm door-to-sofa route"
+      : "Require a 90 cm door-to-sofa route";
     refreshFields();
     dialog.showModal();
   };
@@ -77,7 +81,7 @@ export function bindFurnitureEditor({ el, context, api, sync }) {
           " with (?:a |an )?(round|rectangular)(?: oak)?(?: coffee)? table( and (?:keep|maintain) a 90 cm (?:route|passage) from the door to the sofa)?$",
       ),
     );
-    fields.route.checked = false;
+    fields.route.checked = fields.route.disabled;
     if (coords) {
       fields.action.value = coords[1];
       fields.x.value = coords[2];
@@ -85,7 +89,7 @@ export function bindFurnitureEditor({ el, context, api, sync }) {
     } else if (model) {
       fields.action.value = "replace";
       fields.model.value = model[1];
-      fields.route.checked = Boolean(model[2]);
+      fields.route.checked = fields.route.disabled || Boolean(model[2]);
     } else if (
       new RegExp("^rotate " + noun + "(?: (?:by )?90(?: degrees|°)?)?$").test(q)
     )
@@ -148,7 +152,7 @@ export function bindFurnitureEditor({ el, context, api, sync }) {
   save.onclick = async () => {
     if (!preview || busy) return;
     busy = true;
-    const p = preview;
+    const p = preview, routeLocked = fields.route.disabled;
     status.textContent = "Saving furniture edit…";
     for (const field of fields) field.disabled = true;
     try {
@@ -163,6 +167,7 @@ export function bindFurnitureEditor({ el, context, api, sync }) {
     } finally {
       busy = false;
       for (const field of fields) field.disabled = false;
+      fields.route.disabled = routeLocked;
     }
   };
 }
