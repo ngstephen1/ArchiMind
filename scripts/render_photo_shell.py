@@ -1,6 +1,7 @@
 """Build the confirmed photo-room shell for a bookmarked Cycles view."""
 
 import bpy
+from mathutils import Vector
 
 
 def build(board):
@@ -62,3 +63,43 @@ def build(board):
                     (abs(b[0] - a[0]) + 0.075, abs(b[1] - a[1]) + 0.075, 0.13),
                     "#eadfcb",
                 )
+        for win in room["windows"]:
+            side = win["wall"]
+            if side == "west" and win["id"].startswith("join-window-"):
+                continue
+            width = win["width_m"]
+            along = win["offset_m"] + width / 2
+            sill, height = win["sill_height_m"], win["height_m"]
+            horizontal = side in {"north", "south"}
+            x = ox + (along if horizontal else w if side == "east" else 0)
+            y = oy + (d if side == "north" else 0 if horizontal else along)
+            if not win["id"].startswith("join-window-"):
+                inward = {
+                    "north": (0, -1, 0),
+                    "south": (0, 1, 0),
+                    "east": (-1, 0, 0),
+                    "west": (1, 0, 0),
+                }[side]
+                light = bpy.data.lights.new("Window daylight", "AREA")
+                light.shape, light.size, light.size_y = "RECTANGLE", width, height
+                light.energy = 250 * width * height
+                emitter = bpy.data.objects.new("Window daylight", light)
+                scene.collection.objects.link(emitter)
+                emitter.location = (
+                    Vector((x, y, sill + height / 2)) - Vector(inward) * 0.12
+                )
+                emitter.rotation_euler = (
+                    Vector(inward).to_track_quat("-Z", "Y").to_euler()
+                )
+            box(
+                "Window sill",
+                (x, y, sill),
+                (width + 0.1, 0.19, 0.07) if horizontal else (0.19, width + 0.1, 0.07),
+                "#e8dec9",
+            )
+            box(
+                "Window mullion",
+                (x, y, sill + height / 2),
+                (0.045, 0.09, height) if horizontal else (0.09, 0.045, height),
+                "#efe9dc",
+            )

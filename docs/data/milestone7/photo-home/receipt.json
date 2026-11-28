@@ -1,11 +1,12 @@
 {
-  "url": "http://127.0.0.1:8972/?project=edb1775d-1c49-4be2-bd72-3f551b66d94b&revision=1",
+  "url": "http://127.0.0.1:8976/?project=1816d2ea-0572-495e-bf5d-5246a3419b4d&revision=1",
   "rooms": [
     "Studio",
     "Library"
   ],
   "revision": 1,
-  "window_count": 2,
+  "exterior_windows": 2,
+  "paired_interior_windows": 1,
   "rejected_mismatched_offset": true,
   "reopened_sources": 2,
   "walked": [

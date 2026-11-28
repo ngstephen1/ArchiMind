@@ -331,6 +331,19 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
     select(value) {
       selected = value;
     },
+    framing() {
+      return {mode, room: focused?.design.room.id, eye: camera.position.clone(), target: controls.target.clone(), zoom: camera.zoom};
+    },
+    restoreFraming(frame) {
+      if (!frame.mode) return;
+      set(frame.mode);
+      focused = home.rooms.find(p => p.design.room.id === frame.room);
+      camera.position.copy(frame.eye);
+      controls.target.copy(frame.target);
+      camera.zoom = frame.zoom;
+      camera.updateProjectionMatrix();
+      controls.update();
+    },
     get mode() {
       return mode;
     },

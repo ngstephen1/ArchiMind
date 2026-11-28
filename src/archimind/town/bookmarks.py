@@ -23,6 +23,24 @@ class Camera(BaseModel):
     aspect: float = Field(ge=0.15, le=8)
 
 
+def validate_room(home, pose):
+    part = next(
+        (p for p in home["rooms"] if p["design"]["room"]["id"] == pose.room), None
+    )
+    if part is None or math.dist(pose.eye, pose.target) < 0.01:
+        raise service.Problem("Select a room and a valid camera.")
+    x, y = part["origin"]
+    r = part["design"]["room"]
+    if not (
+        x <= pose.eye[0] <= x + r["width_m"]
+        and y <= -pose.eye[2] <= y + r["depth_m"]
+        and 0 < pose.eye[1] < r["ceiling_height_m"]
+    ):
+        raise service.Problem(
+            "The saved camera falls outside the room in this revision."
+        )
+
+
 def handle(q, owner, project, method, body):
     head = service.project(q, owner, project)
     if method == "GET":
@@ -39,19 +57,7 @@ def handle(q, owner, project, method, body):
         raise service.Problem("Open the latest revision to bookmark a view.", 409)
     pose = Camera.model_validate(body["pose"])
     home = service.revision(q, project, head)
-    part = next(
-        (p for p in home["rooms"] if p["design"]["room"]["id"] == pose.room), None
-    )
-    if part is None or math.dist(pose.eye, pose.target) < 0.01:
-        raise service.Problem("Select a room and a valid camera.")
-    x, y = part["origin"]
-    r = part["design"]["room"]
-    if not (
-        x <= pose.eye[0] <= x + r["width_m"]
-        and y <= -pose.eye[2] <= y + r["depth_m"]
-        and 0 < pose.eye[1] < r["ceiling_height_m"]
-    ):
-        raise service.Problem("Walk inside the room before bookmarking its view.")
+    validate_room(home, pose)
     value = pose.model_dump()
     q(
         "INSERT INTO town_bookmarks(project,room,pose) VALUES(?,?,?) ON CONFLICT(project,room) DO UPDATE SET pose=excluded.pose",
@@ -70,6 +76,7 @@ def photograph(snapshot, pose, blender):
     from . import render_queue
     from .design import digest
 
+    validate_room(snapshot["home"], Camera.model_validate(pose))
     proof = render_queue._paths(snapshot, blender) / "proof"
     key = digest([snapshot["home"]["id"], pose])
     output = proof.parent / ("camera-" + key + ".png")

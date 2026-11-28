@@ -5,6 +5,14 @@ import { manifestDigest } from "./bedroom_manifest.js";
 const bedroom = (home) =>
   home.rooms.find((part) => part.design.room.id === "bedroom");
 
+function containsCamera(home, pose) {
+  const part = home.rooms.find(p => p.design.room.id === pose.room);
+  if (!part) return false;
+  const [x, y] = part.origin, [px, height, z] = pose.eye, room = part.design.room;
+  return px >= x && px <= x + room.width_m && -z >= y && -z <= y + room.depth_m
+    && height > 0 && height < room.ceiling_height_m;
+}
+
 export function bindHouseComparison({ el, world, api, context, asset }) {
   const bookmarks = new Map();
   const dialog = el("houseCompare");
@@ -35,17 +43,15 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     let left, right, caption;
     const savedPose = bookmarks.get(view);
     if (savedPose) {
-      const hasRoom = (snapshot) =>
-        snapshot.rooms.some((p) => p.design.room.id === savedPose.room);
-      if (!hasRoom(home))
-        throw Error("The bookmarked room is absent in this revision.");
+      if (!containsCamera(home, savedPose))
+        throw Error("The camera is outside its room in this revision. Bookmark a new view.");
       if (kind === "revision") {
         if (revision < 2)
           throw Error("Save an edit before comparing two revisions.");
         const before = await api(path + "?revision=" + (revision - 1));
-        if (!hasRoom(before.home))
+        if (!containsCamera(before.home, savedPose))
           throw Error(
-            "The bookmarked room is absent in the previous revision.",
+            "The camera is outside its room in the previous revision.",
           );
         if (!current()) return;
         left = await capture(before.home, savedPose);
@@ -233,10 +239,11 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
   };
   el("restoreRoomView").onclick = async () => {
     const pose = bookmarks.get(el("compareCamera").value);
-    if (!pose) return;
+    if (!pose || !containsCamera(context().home,pose)) return;
+    const source = context().home;
     dialog.close();
     await running;
-    world.restoreWalkingView(pose);
+    if (source === context().home) world.restoreWalkingView(pose);
   };
   el("compareKind").onchange = el("compareCamera").onchange = refresh;
   el("compareWipe").oninput = (event) =>

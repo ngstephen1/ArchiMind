@@ -86,3 +86,22 @@ def test_insufficient_or_conflicting_room_intake(bad):
         d["rooms"][0]["windows"][0]["wall"] = "south"
     with pytest.raises(service.Problem):
         assemble(d)
+
+
+def test_shared_glazing_requires_both_observations_and_matches_by_location():
+    intake = payload()
+    east = dict(wall="east", offset=0.15, width=0.65, sill=0.85, height=1.1)
+    west = {**east, "wall": "west"}
+    intake["rooms"][0]["windows"].append(east)
+    intake["rooms"][1]["windows"].insert(0, west)
+    home, _ = assemble(intake)
+    shared = [
+        next(w for w in p["design"]["room"]["windows"] if w["wall"] == side)
+        for p, side in zip(home["rooms"], ["east", "west"])
+    ]
+    assert shared[0]["id"] == shared[1]["id"] == "join-window-1-1"
+    for field in ("offset", "width", "sill", "height"):
+        west[field] += 0.01
+        with pytest.raises(service.Problem, match="Reconcile shared windows"):
+            assemble(intake)
+        west[field] = east[field]

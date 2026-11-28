@@ -1545,7 +1545,7 @@ export function createTown(canvas, status, action) {
   // Photo Studio, the client board, and revision comparison borrow the same camera and scene.
   let captureQueue = Promise.resolve();
   async function captureBedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
-    const original = home, originalPreset = photoView.value;
+    const original = home, originalPreset = photoView.value, framing = overview.framing();
     const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
     if (home !== snapshot) load(snapshot);
     const epoch = generation;
@@ -1598,6 +1598,7 @@ export function createTown(canvas, status, action) {
         load(original); enter(wasInside);
         pos.copy(eye); yaw = heading; pitch = tilt;
         photoView.value = originalPreset; selectPhoto();
+        overview.restoreFraming(framing);
       }
     }
   }

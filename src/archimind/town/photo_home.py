@@ -109,12 +109,18 @@ def assemble(data):
             raise service.Problem(
                 f"Reconcile the width and south-end offset on both sides of the doorway to {row.name}."
             )
-        if any(
-            (w.wall == "west" and i) or (w.wall == "east" and i < len(intake.rooms) - 1)
-            for w in row.windows
-        ):
+
+        def glazing(room, wall):
+            return sorted(
+                (w.offset, w.width, w.sill, w.height)
+                for w in room.windows
+                if w.wall == wall
+            )
+
+        if i and glazing(row, "west") != glazing(intake.rooms[i - 1], "east"):
             raise service.Problem(
-                "A shared partition cannot be an exterior window wall."
+                f"Reconcile shared windows on both sides of the partition to {row.name}: "
+                "check the south-end offset, width, sill and height."
             )
         key, jpeg = prepare_photo(base64.b64decode(row.photo, validate=True))
         if key in images:
@@ -136,9 +142,20 @@ def assemble(data):
                         height_m=2.0,
                     )
                 )
+
+        def window_id(window, n):
+            if window.wall == "west" and i:
+                partition = i
+            elif window.wall == "east" and i < len(intake.rooms) - 1:
+                partition = i + 1
+            else:
+                return f"window-{i + 1}-{n + 1}"
+            order = sorted(w.offset for w in row.windows if w.wall == window.wall)
+            return f"join-window-{partition}-{1 + order.index(window.offset)}"
+
         windows = [
             Window(
-                id=f"window-{i + 1}-{n + 1}",
+                id=window_id(w, n),
                 wall=w.wall,
                 offset_m=w.offset,
                 width_m=w.width,
