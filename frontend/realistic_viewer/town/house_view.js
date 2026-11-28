@@ -28,7 +28,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
     walls = [],
     labels = [],
     bounds,
-    focused = false,
+    focused = null,
     selected = false,
     cutCaps;
   const pos = new T.Vector3(),
@@ -49,6 +49,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
   function load(h, roof, parts) {
     canvas.dispatchEvent(new CustomEvent("room-picked"));
     home = h;
+    focused = null;
     ceiling = roof;
     walls = parts;
     refreshDetails();
@@ -105,7 +106,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
   }
   function set(next) {
     canvas.dispatchEvent(new CustomEvent("room-picked"));
-    focused = false;
+    focused = null;
     mode = next;
     for (const button of document.querySelectorAll("[data-view]")) {
       button.setAttribute(
@@ -146,6 +147,25 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
       wall.position.y = bottom + h / 2;
     }
   }
+  function fitFocusedRoom() {
+    const r = focused.design.room;
+    const center = { x: focused.origin[0] + r.width_m / 2, z: -focused.origin[1] - r.depth_m / 2 };
+    camera.zoom = 1;
+    camera.updateProjectionMatrix();
+    controls.update();
+    camera.updateMatrixWorld();
+    // Fit the cut room in screen space at the current orbit and aspect ratio.
+    let extent = 0;
+    for (const dx of [-0.5, 0.5])
+      for (const dz of [-0.5, 0.5])
+        for (const height of [0, Math.min(2.1, r.ceiling_height_m)]) {
+          pos.set(center.x + dx * r.width_m, height, center.z + dz * r.depth_m).project(camera);
+          extent = Math.max(extent, Math.abs(pos.x), Math.abs(pos.y));
+        }
+    camera.zoom = Math.min(controls.maxZoom, 0.88 / extent);
+    camera.updateProjectionMatrix();
+    controls.update();
+  }
   function render() {
     const aspect = canvas.clientWidth / Math.max(1, canvas.clientHeight);
     const w = home.width,
@@ -155,6 +175,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
         ? Math.max(d / 2, w / (2 * aspect)) * 1.2
         : Math.max(Math.hypot(w, d) * 0.48, Math.hypot(w, d) / (2 * aspect)) *
           1.15;
+    const resized = camera.right !== half * aspect || camera.top !== half;
     Object.assign(camera, {
       left: -half * aspect,
       right: half * aspect,
@@ -163,6 +184,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
     });
     camera.updateProjectionMatrix();
     controls.update();
+    if (focused && resized) fitFocusedRoom();
     const old = [
       street.visible,
       avatar.visible,
@@ -180,7 +202,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
       lightInterior();
       renderer.render(scene, camera);
       for (const { tag, center } of labels) {
-        tag.hidden = focused;
+        tag.hidden = Boolean(focused);
         pos.copy(center).project(camera);
         tag.style.left = 50 + 50 * pos.x + "%";
         tag.style.top = 50 - 50 * pos.y + "%";
@@ -278,26 +300,12 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
         0,
         -part.origin[1] - r.depth_m / 2,
       );
-      focused = true;
+      focused = part;
       center.y = 0.6;
       if (mode === "3d") camera.position.copy(center).add(new T.Vector3(6, 11, 14));
       else camera.position.add(center.clone().sub(controls.target));
       controls.target.copy(center);
-      camera.zoom = 1;
-      camera.updateProjectionMatrix();
-      controls.update();
-      camera.updateMatrixWorld();
-      // Fit the cut room in screen space at the current orbit and aspect ratio.
-      let extent = 0;
-      for (const dx of [-0.5, 0.5])
-        for (const dz of [-0.5, 0.5])
-          for (const height of [0, Math.min(2.1, r.ceiling_height_m)]) {
-            pos.set(center.x + dx * r.width_m, height, center.z + dz * r.depth_m).project(camera);
-            extent = Math.max(extent, Math.abs(pos.x), Math.abs(pos.y));
-          }
-      camera.zoom = Math.min(controls.maxZoom, 0.88 / extent);
-      camera.updateProjectionMatrix();
-      controls.update();
+      fitFocusedRoom();
     },
     walkHighlight(inside) {
       highlight.visible = inside && selected && !!bounds;

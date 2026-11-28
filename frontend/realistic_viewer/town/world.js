@@ -382,9 +382,14 @@ export function createTown(canvas, status, action) {
   const siteSetting = document.getElementById("siteSetting");
   let meadowShell, meadowActive = false, meadowLoad;
   function displaySite() {
+    const wasMeadow = meadowActive;
     meadowActive = siteSetting.value === "meadow" && Boolean(meadowShell);
     for (const child of townScenery) child.visible = !meadowActive;
     obstacles.splice(0, obstacles.length, ...(meadowActive ? [] : streetObstacles));
+    if (wasMeadow && !meadowActive && !inside && obstacles.some(([l,t,r,b]) =>
+      pos.x >= l - 0.22 && pos.x <= r + 0.22 && pos.z >= t - 0.22 && pos.z <= b + 0.22)) {
+      pos.set(doorX, 0, 1.6);
+    }
     if (meadowShell) meadowShell.visible = meadowActive;
     canvas.dataset.landscape = meadowActive ? "meadow" : "town";
   }
