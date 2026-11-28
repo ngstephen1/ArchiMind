@@ -1,5 +1,11 @@
 # Project status
 
+## November 28 Town home editor
+
+A saved Town home now supports edits to loose furniture, shared gallery partitions and finishes. The client can reopen adjacent revisions at a bookmarked room camera, compare them with a wipe, and render that camera locally in Blender. The local photo importer connects two to four rectangular rooms with user-confirmed dimensions and matched thresholds. The intake rehearsal used synthetic source photos.
+
+The furniture walkthrough verified its modeled 90 cm route and reopened all five edited revisions in Walk. The salon comparison used the same 1176 × 720 camera in Town and Cycles. [Editor walkthrough and screenshots](../data/milestone7/README.md) · [Rendering receipt](../data/milestone7/cameras/salon-town-cycles.json) · [Photo-home rehearsal](../data/milestone7/photo-home/README.md)
+
 ## November 28 demo and field work
 
 The November 28 single-home rehearsal used a fresh six-room project. Town returned two validated designs in 16.5 seconds. In the selected Layout B, the modeled kitchen-to-salon route measured 7.99 m, down from 12.87 m in A. The bedroom-to-bathroom route increased from 3.72 m to 14.12 m. The saved chair edit moved its footprint 300 mm and increased the measured gap to the Belaya desk from 60 mm to 360 mm. [68-second film](https://github.com/ngstephen1/ArchiMind/releases/download/town-photo-studio-demo-2026-11-28/ArchiMind-One-Home-Live-Design.mp4) · [Live run and both snapshots](https://github.com/ngstephen1/ArchiMind/issues/70#issuecomment-7235520471)
