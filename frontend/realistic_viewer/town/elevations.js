@@ -22,7 +22,7 @@ export function roomElevation(part, wall) {
     c.strokeStyle = "#485650";
     c.strokeRect(left + s * x, base - s * (z + h), s * w, s * h);
   }
-  rect(0, 0, span, height, "#e9e2d4");
+  rect(0, 0, span, height, finishColors[part.finish_overrides?.wall] || "#e9e2d4");
   for (const o of [...room.doors, ...room.windows].filter(
     (o) => o.wall === wall,
   ))

@@ -1156,6 +1156,11 @@ el("present").onclick = async () => {
     const pack = PACK_MANIFESTS[h.style_pack?.id];
     for (const [role, locations] of Object.entries(baseFinishLocations(h))) {
       if (!locations.length) continue;
+      if (role === "hall_floor" || role === "hall_wall") {
+        swatches.push(role === "hall_floor" ? ["Base timber floor · Hall", "#b39b7a"]
+          : ["Base plaster · Hall ends", plaster]);
+        continue;
+      }
       const packed = pack?.version === h.style_pack?.version ? pack?.surfaces[role] : null;
       const name = packed?.asset_id?.split(":").pop().replaceAll("_", " ") ||
         {wall: "plaster", floor: "timber", tile: "bathroom tile"}[role];

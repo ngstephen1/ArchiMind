@@ -18,8 +18,11 @@ def drawing(home):
         f'<svg viewBox="-0.3 -0.3 {w + 0.6} {d + 0.6}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dimensioned home plan">'
     ]
 
-    def rect(x, y, w, h, color, stroke="#686558"):
-        shapes.append(
+    walls, openings, labels = [], [], []
+
+    def rect(x, y, w, h, color, stroke="#686558", layer=None):
+        target = shapes if layer is None else layer
+        target.append(
             f'<rect x="{x}" y="{d - y - h}" width="{w}" height="{h}" fill="{esc(color)}" stroke="{esc(stroke)}" stroke-width=".026"/>'
         )
 
@@ -32,7 +35,11 @@ def drawing(home):
         overrides = part.get("finish_overrides", {})
         paint = colors.get("proposal-" + overrides.get("wall", ""), "#686558")
         floor = colors.get("proposal-" + overrides.get("floor", ""), "#faf7ee")
-        rect(x, y, rw, rd, floor, paint)
+        rect(x, y, rw, rd, floor, "none")
+        # A 26 mm line represents the finish just inside each room. Neighboring
+        # rooms therefore retain independent faces regardless of drawing order.
+        inset = 0.013
+        rect(x + inset, y + inset, rw - 2 * inset, rd - 2 * inset, "none", paint, walls)
         for f in part["furniture"]:
             finish = overrides.get("objects", {}).get(f["id"], "")
             rect(
@@ -54,6 +61,7 @@ def drawing(home):
                     0.07,
                     length,
                     color,
+                    layer=openings,
                 )
             else:
                 rect(
@@ -62,11 +70,12 @@ def drawing(home):
                     length,
                     0.07,
                     color,
+                    layer=openings,
                 )
-        shapes.append(
+        labels.append(
             f'<text x="{x + 0.15}" y="{d - y - rd + 0.44}" font-size=".28">{esc(room["name"])} · {rw:.2f} × {rd:.2f} m</text>'
         )
-    return "".join(shapes) + "</svg>"
+    return "".join([*shapes, *walls, *openings, *labels]) + "</svg>"
 
 
 def elevation_furniture(part):
@@ -104,7 +113,8 @@ def elevations(part, finishes=None):
                 f'<rect x="{x}" y="{h - z - height}" width="{width}" height="{height}" fill="{color}" stroke="#53554d" stroke-width=".015"/>'
             )
 
-        rect(0, 0, w, h, "#e6dfd3")
+        wall_finish = part.get("finish_overrides", {}).get("wall", "")
+        rect(0, 0, w, h, (finishes or {}).get("proposal-" + wall_finish, "#e6dfd3"))
         for o in r["windows"] + r["doors"]:
             if o["wall"] == wall:
                 rect(
@@ -179,6 +189,11 @@ def finish_swatches(board, style, directory):
         )
         for role, row in style["surfaces"].items():
             locations = board.get("base_finish_locations", {}).get(role)
+            if role == "wall" and locations is not None:
+                # The styled Blender scene applies the wall pack to its hall end.
+                locations = locations + board["base_finish_locations"].get(
+                    "hall_wall", []
+                )
             if locations == []:
                 continue
             digest = row["files"]["diffuse"]
@@ -200,6 +215,11 @@ def finish_swatches(board, style, directory):
             scope = " · " + ", ".join(map(esc, locations)) if locations else ""
             finish_rows += f'<p><img class="swatch" src="{esc(filename)}" alt=""><b>{esc(role.title())}</b> · {esc(label)}{scope}</p>'
         finish_rows += "<p>Furniture and dressing follow the saved high-quality Town style. The furniture schedule gives reserved dimensions and floor positions.</p>"
+    bases = board.get("base_finish_locations", {})
+    if bases.get("hall_floor"):
+        finish_rows += "<p><b>Base timber floor</b> · Hall</p>"
+    if bases.get("hall_wall") and not style:
+        finish_rows += "<p><b>Base plaster</b> · Hall ends</p>"
     for row in board.get("finish_schedule", []):
         locations = ", ".join(
             esc(loc["label"])

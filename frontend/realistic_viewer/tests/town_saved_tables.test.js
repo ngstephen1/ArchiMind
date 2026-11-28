@@ -91,3 +91,15 @@ test("the original coffee table remains visible in both elevations after a finis
     assert.ok(visible > 5, "Part of the table face should be visible in this direction");
   }
 });
+
+test("a room-only paint change keeps the base hall independent of pack floors", () => {
+  const home = JSON.parse(readFileSync(fixture, "utf8"));
+  const room = home.rooms.find(p => p.design.room.id === "salon");
+  room.finish_overrides = {wall: "dark green"};
+  const board = homeBoard({project: "wall-only", home, revision: 2});
+  assert.deepEqual(board.base_finish_locations.hall_floor, ["Hall"]);
+  assert.deepEqual(board.base_finish_locations.hall_wall, ["Hall ends"]);
+  assert.ok(!board.base_finish_locations.floor.includes("Hall"));
+  assert.ok(!board.base_finish_locations.wall.includes("Hall ends"));
+  assert.deepEqual(board.finish_schedule.map(r => r.surface), ["wall"]);
+});

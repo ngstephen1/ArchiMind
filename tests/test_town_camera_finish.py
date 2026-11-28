@@ -138,3 +138,59 @@ def test_client_book_shows_selected_materials_on_their_saved_surfaces(tmp_path):
         assert "Walnut</b> · floor · Salon, Hall" in html
         assert "Sage</b> · object · Salon · Coffee table [salon-coffee-table]" in html
         assert "Proposal-" not in html
+
+
+def test_salon_plan_keeps_both_wall_faces_and_openings_above_them():
+    import runpy
+    import xml.etree.ElementTree as ET
+
+    drawing = runpy.run_path(
+        str(Path(__file__).resolve().parents[1] / "scripts/publish_studio_board.py")
+    )["drawing"]
+    opening = {"wall": "north", "offset_m": 1, "width_m": 0.9}
+    fixture = {
+        "width": 4,
+        "depth": 6,
+        "finishes": {"proposal-dark green": "#294735"},
+        "rooms": [
+            {
+                "origin": [0, y],
+                "room": {
+                    "name": name,
+                    "width_m": 4,
+                    "depth_m": 3,
+                    "doors": [opening | {"wall": wall}],
+                    "windows": [],
+                },
+                "finish_overrides": {"wall": "dark green"} if y == 0 else {},
+                "furniture": [],
+            }
+            for name, y, wall in (("Salon", 0, "north"), ("Living", 3, "south"))
+        ],
+    }
+    for rooms in (fixture["rooms"], list(reversed(fixture["rooms"]))):
+        root = ET.fromstring(drawing(fixture | {"rooms": rooms}))
+        rects = list(root.iter("{http://www.w3.org/2000/svg}rect"))
+        faces = [r for r in rects if r.get("fill") == "none"]
+        salon = next(r for r in faces if r.get("stroke") == "#294735")
+        living = next(r for r in faces if r.get("stroke") == "#686558")
+        assert float(salon.get("y")) > 3
+        assert float(living.get("y")) + float(living.get("height")) < 3
+        assert min(i for i, r in enumerate(rects) if r.get("fill") == "#cb8e3c") > max(
+            rects.index(f) for f in faces
+        )
+
+
+def test_unmodified_hall_floor_keeps_its_own_material_in_the_book(tmp_path):
+    import runpy
+
+    swatches = runpy.run_path(
+        str(Path(__file__).resolve().parents[1] / "scripts/publish_studio_board.py")
+    )["finish_swatches"]
+    board = {
+        "finishes": {},
+        "base_finish_locations": {"hall_floor": ["Hall"], "hall_wall": ["Hall ends"]},
+    }
+    actual = swatches(board, {"surfaces": {}}, tmp_path)
+    assert "<b>Base timber floor</b> · Hall" in actual
+    assert "Base plaster" in swatches(board, None, tmp_path)
