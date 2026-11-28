@@ -48,7 +48,9 @@ export function asksChairChange(question) {
 
 function isBedroomChairComparison(question) {
   const q = question.toLowerCase();
-  if (!/\bchair\b/.test(q) || /\b(study|living|salon|bathroom|kitchen)\b/.test(q)) return false;
+  if (!/\bchair\b/.test(q)) return false;
+  const namedBedroomChair = /\b(?:bedroom (?:desk )?chair|chair in (?:the )?bedroom|desk-chair)\b/.test(q);
+  if (!namedBedroomChair && /\b(study|living|salon|bathroom|kitchen)\b/.test(q)) return false;
   const comparative = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
   const timeline = /\b(revisions?|before|after|previously|now|earlier)\b/.test(q);
   if (comparative && timeline) return true;
@@ -115,7 +117,7 @@ function chairChange(home, manifest, previous) {
 
 // A question about installation can include several independent evidence requests.
 // Bind furniture measurements to the clause that names the item and its room.
-const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?|privacy|private|hear|overhear|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))?|decibels?)\b/i;
+const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?(?!\s+(?:study|bedroom|salon|living room))|privacy|overhear|hear (?:sound|noise|people|conversations?)|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))?|decibels?)\b/i;
 const supplierEvidence = /\b(suppliers?|vendors?|(?:can|could) (?:i|we) (?:order|buy|purchase)|stock availability|retailers?|merchants?|backorders?|lead[- ]times?|in[- ]stock|ship(?:ping|ment)?|delivery(?: dates?)?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
 
 function asksFurnitureFit(clause) {
@@ -125,11 +127,13 @@ function asksFurnitureFit(clause) {
 
 function planQuestions(question) {
   if (!acousticEvidence.test(question) && !supplierEvidence.test(question)) return [question];
-  const clauses = question.split(/[?!;]|\.(?!\d)|,\s*|\s+and\s+(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|verify|the (?:desk|chair)|(?:its|my|this|a) chair)\b)/i);
+  const scoped = question.replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
+  const clauses = scoped.split(/[?!;]|\.(?!\d)|(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
   return clauses.map(clause => clause.trim()).filter(clause => clause && (
     (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
     asksFurnitureFit(clause) || isBedroomChairComparison(clause) ||
-    (/\b(distance|how far|proximity)\b/i.test(clause) && /\b(desk|window)\b/i.test(clause)) ||
+    (/\b(distance|how far|proximity|gap|width|height|measure)\b/i.test(clause) && /\b(chairs?|desk|window)\b/i.test(clause)) ||
+    /\b(storage|wardrobe|seating capacity)\b/i.test(clause) ||
     asksZoningTradeoff(clause)
   ));
 }

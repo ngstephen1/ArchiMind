@@ -270,3 +270,12 @@ test("composite evidence preserves distinct room questions and comparison histor
   assert.match(explanation(home, "Can I order the chair now?"), /Supplier availability is unknown/);
   assert.ok(asksChairChange("What changed when I moved the bedroom chair? Can the study block sound?"));
 });
+
+test("room qualifiers and descriptive adjectives stay attached to the plan question", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  assert.match(explanation(home, "In the study, can the chair fit under the desk, and is it in stock?"), /Study chair fit/);
+  assert.match(explanation(home, "Can the bedroom chair from the supplier and the desk fit together?"), /clear width between supports/);
+  assert.match(explanation(home, "Measure the bedroom chair gap to the desk before contacting a supplier."), /bedroom desk-chair and belaya/);
+  assert.equal(explanation(home, "What storage is in the quiet study?"), explanation(home, "What storage is in the study?"));
+  assert.ok(asksChairChange("What changed when I moved the bedroom chair after adjusting the living room?"));
+});
