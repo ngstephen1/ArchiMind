@@ -152,20 +152,24 @@ FIRST_TABLE = (
     + r")"
 )
 TABLE_OPTION = r"(?:if|when)\s+(?:possible|practical|feasible|space permits)\b"
-TABLE_BOUNDARY = (
-    r"(?=\s*(?:$|[,.!?;]|in\b|for (?:breakfast|lunch|dinner)\b|" + TABLE_OPTION + r"))"
-)
+MEAL_QUALIFIER = r"for (?:family )?(?:breakfasts?|lunch(?:es)?|dinners?)\b"
+TABLE_BOUNDARY = rf"(?=\s*(?:$|[,.!?;]|in\b|{MEAL_QUALIFIER}|{TABLE_OPTION}))"
 OTHER_TABLE = (
     r"(?:(?:the )?(?:other|second)\b(?: (?:dining )?table\b|"
     + TABLE_BOUNDARY
-    + r")|(?:a |the )?separate (?:dining )?table\b)"
+    + r")|(?:the other (?:end|side) of (?:the )?room (?:at|around) )?"
+    + r"(?:another|a second|(?:a |the )?separate) (?:dining )?table\b)"
 )
 OTHER_END = (
     r"the other (?:end|side)\b(?: of (?:it|the table)\b|" + TABLE_BOUNDARY + r")"
 )
+# A single table specified in each named room is also a split arrangement.
+NAMED_ALTERNATIVE = (
+    rf"(?:one|a single) (?:dining )?table(?= in (?:the )?(?:{TABLE_ROOM})\b)"
+)
 SEPARATE_TABLE_COUNTS = re.compile(
     FIRST_TABLE
-    + OTHER_TABLE
+    + rf"(?:{OTHER_TABLE}|(?(first_room){NAMED_ALTERNATIVE}|(?!)))"
     + r"(?:\s+in (?:the )?(?P<second_room>"
     + TABLE_ROOM
     + r")\b)?"
@@ -181,7 +185,7 @@ OPTIONAL_SECOND_TABLE = re.compile(
     + r"(?:\s+in (?:the )?(?:"
     + TABLE_ROOM
     + r")\b)?"
-    + r"(?:\s+for (?:breakfast|lunch|dinner))?\s*,?\s+"
+    + rf"(?:\s+{MEAL_QUALIFIER})?\s*,?\s+"
     + TABLE_OPTION
 )
 SECOND_ALLOCATION_ONLY = (
@@ -410,6 +414,19 @@ def _dining_scope(activity, *, preceding_offsite=False):
 
 
 def _home_meal_clauses(clause):
+    # Keep the people involved in an unrelated activity separate from a
+    # hypothetical meal and from any later, independent dining requirement.
+    unavailable = re.search(
+        r"\b(?:otherwise (?:we|i)(?:['’]ll| will)|because (?:we|i) "
+        r"(?:can['’]t|cannot|can not|do not|don['’]t)) (?:eat|dine)\b",
+        clause,
+    )
+    if unavailable:
+        yield from _home_meal_clauses(clause[: unavailable.start()])
+        next_request = DINING_TRANSITION.search(clause, unavailable.end())
+        if next_request:
+            yield from _home_meal_clauses(clause[next_request.end() :])
+        return
     if not re.search(OFFSITE_MEAL, clause):
         yield clause
         return
@@ -466,8 +483,32 @@ def _home_meal_clauses(clause):
             home = False
 
 
+def _paired_room_allocations(clauses):
+    """Join two unconditional, counted table assignments in adjacent sentences."""
+    clauses = iter(clauses)
+    clause = next(clauses, None)
+    while clause is not None:
+        following = next(clauses, None)
+        if following:
+            first = NAMED_SINGLE_TABLE.fullmatch(_normalize_table_ends(clause).strip())
+            second = re.fullmatch(
+                rf"(?:seat )?(?P<count>{TABLE_ALLOCATION}){TABLE_POSITION}"
+                rf"(?:{OTHER_TABLE}|{NAMED_ALTERNATIVE}) in (?:the )?(?P<room>{TABLE_ROOM})",
+                following.strip(),
+            )
+            if first and second:
+                yield (
+                    f"seat {first['count']} at one table in the {first['room']} "
+                    f"and {second['count']} at a separate table in the {second['room']}"
+                )
+                clause = next(clauses, None)
+                continue
+        yield clause
+        clause = following
+
+
 def _dining_clauses(clauses, *, for_arrangement=False):
-    for clause in clauses:
+    for clause in _paired_room_allocations(clauses):
         for home in _home_meal_clauses(clause):
             if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
                 home.strip()
@@ -578,7 +619,16 @@ def _circulation_text(message):
         + width
         + r"\s+in (?:our|the) (?:current|existing) (?:home|house)\b"
     )
-    return ". ".join(_affirmative_clauses(re.sub(existing, " ", text)))
+    text = re.sub(existing, " ", text)
+    # A still-needed width inside a description of the present home belongs
+    # to that example. A new request after "but keep/provide" remains active.
+    text = re.sub(
+        r"\bbecause in (?:our|the) (?:current|existing) (?:home|house)\b"
+        r"[^.;!?\n]*?\bbut (?:we )?still need (?:an? )?" + width,
+        " ",
+        text,
+    )
+    return ". ".join(_affirmative_clauses(text))
 
 
 def _widths(text):
@@ -683,6 +733,33 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             split_counts["second_room"],
         )
         if (
+            reviewed_program
+            and not salon
+            and any(
+                room and ("salon" in room or not services)
+                for room in (first_room, second_room)
+            )
+        ):
+            questions.append(
+                "The five-room program cannot seat both named groups in the requested rooms. "
+                "Confirm the six-room program or revise the seating locations."
+            )
+        shared_room = re.match(
+            rf"\s*,?\s+(?:both|all) in (?:the )?(?P<room>{TABLE_ROOM})\b",
+            dining[split_counts.end() :],
+        )
+        if shared_room:
+            fallback = dining[split_counts.end() + shared_room.end() :]
+            if not re.match(
+                rf"\s+{TABLE_OPTION}\s*,?\s+(?:or|otherwise) "
+                r"(?:put|place|use) one table in each (?:dining )?room\s*(?=$|[.!?;])",
+                fallback,
+            ):
+                questions.append(
+                    f"The {shared_room['room']} has one modeled table. "
+                    "Confirm a different location for the second table."
+                )
+        elif (
             first_room
             and second_room
             and (("salon" in first_room) == ("salon" in second_room))
@@ -940,15 +1017,16 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         for amount, room in dict.fromkeys(_named_single_tables(clauses)):
             if "kitchen" in room and kitchen_table:
                 continue
+            room_label = "kitchen-dining" if "kitchen" in room else room
             # The service layout models a kitchen-dining table in the five-room program.
             if not (salon or ("kitchen" in room and services)):
                 questions.append(
-                    f"The five-room program has no modeled table in the {room}. "
+                    f"The five-room program has no modeled table in the {room_label}. "
                     f"Confirm how to accommodate the requested {amount} places there."
                 )
             elif amount > 4:
                 questions.append(
-                    f"The {room} has four modeled places at one table. "
+                    f"The {room_label} has four modeled places at one table. "
                     f"Confirm how to accommodate the requested {amount} places there."
                 )
     circulation = _circulation_text(message) if evaluate_passage else ""

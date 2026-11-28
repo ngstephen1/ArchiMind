@@ -1729,3 +1729,136 @@ def test_two_explicit_passage_widths_still_need_confirmation():
         None,
     )
     assert any("one modeled passage width" in q for q in questions)
+
+
+@pytest.mark.parametrize(
+    "activity",
+    [
+        "otherwise we'll dine together at one table",
+        "because we cannot eat together at one table",
+    ],
+)
+@pytest.mark.parametrize("join", [". Provide", ", so we need"])
+def test_other_activity_participants_do_not_set_dining_capacity(activity, join):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        f"We need room for three hosts and four guests to play cards, {activity}{join} three dining seats.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 3
+
+
+@pytest.mark.parametrize(
+    "allocation",
+    [
+        "two at another table",
+        "two at the other side of the room at a separate table",
+        "two at a second dining table",
+    ],
+)
+def test_alternative_table_names_preserve_the_second_group(allocation):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"Seat three at one table and {allocation}.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 5 and brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "fallback,needs_question",
+    [
+        ("", True),
+        (" if practical, otherwise put one table in each dining room", False),
+        (
+            " if practical, or put one table in each dining room only if directly connected",
+            True,
+        ),
+    ],
+)
+def test_shared_room_needs_a_supported_alternative(fallback, needs_question):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Seat three guests at one table and two at another table, both in the salon"
+        + fallback
+        + ".",
+        None,
+    )
+    assert brief.dining_seats == 5
+    assert any("salon has one modeled table" in q for q in questions) is needs_question
+
+
+def test_separate_room_assignments_preserve_count_and_original_citation():
+    text = (
+        "Seat two people at one table and one at the other end of it in the kitchen. "
+        "Seat two at another table in the formal salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 5 and brief.split_dining
+    assert any(
+        s["statement"] == text for s in review_summary(brief, message=text)["sources"]
+    )
+
+
+@pytest.mark.parametrize(
+    "qualifier,expected",
+    [("for family lunches", 5), ("for family lunches if possible", 3)],
+)
+def test_meal_qualifier_retains_the_scope_of_the_second_group(qualifier, expected):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"Seat three at one table and two at the other end {qualifier}.",
+        None,
+    )
+    assert not questions and brief.dining_seats == expected and not brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "purpose,expected_conflict",
+    [
+        (
+            "because in our current home we reach the kitchen but still need a 70 cm clear passage",
+            False,
+        ),
+        ("because we need storage but provide a 70 cm clear passage", True),
+    ],
+)
+def test_width_of_existing_home_versus_a_second_requested_width(
+    purpose, expected_conflict
+):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "Keep a 90 cm clear passage " + purpose + ".",
+        None,
+    )
+    assert bool(questions) is expected_conflict
+    if not questions:
+        assert brief.passage_m == 0.9
+
+
+@pytest.mark.parametrize("join", [". Two", " and two"])
+@pytest.mark.parametrize("salon", [False, True])
+def test_each_named_room_can_have_its_own_single_table_after_program_confirmation(
+    join, salon
+):
+    text = (
+        "Seat three guests at a single table in the formal salon"
+        + join
+        + " people at a single table in the kitchen."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=salon, split_dining=True),
+        text,
+        None,
+    )
+    assert (
+        brief.dining_seats == 5 and brief.split_dining and brief.formal_salon is salon
+    )
+    if salon:
+        assert not questions
+    else:
+        assert any("six-room program" in q for q in questions)
