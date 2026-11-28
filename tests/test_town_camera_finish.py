@@ -189,8 +189,30 @@ def test_unmodified_hall_floor_keeps_its_own_material_in_the_book(tmp_path):
     )["finish_swatches"]
     board = {
         "finishes": {},
-        "base_finish_locations": {"hall_floor": ["Hall"], "hall_wall": ["Hall ends"]},
+        "base_finish_locations": {
+            "floor": ["Study"],
+            "wall": ["Bedroom"],
+            "hall_floor": ["Hall"],
+            "hall_wall": ["Hall ends"],
+        },
     }
-    actual = swatches(board, {"surfaces": {}}, tmp_path)
+    packs = Path(__file__).resolve().parents[1] / "src/archimind/_viewer_assets/packs"
+    releases = {
+        row["asset_id"]: row
+        for row in json.loads((packs / "releases.json").read_text())
+    }
+    pack = json.loads((packs / "scandinavian.json").read_text())
+    surfaces = {}
+    for role in ("floor", "wall"):
+        asset = pack["surfaces"][role]["asset_id"]
+        texture = next(
+            f
+            for f in releases[asset]["files"]
+            if f["role"] == "diffuse" and f["tier"] == "high"
+        )
+        surfaces[role] = {"asset_id": asset, "files": {"diffuse": texture["sha256"]}}
+    actual = swatches(board, {"surfaces": surfaces}, tmp_path)
+    assert "<b>Floor</b> · Oak Wood Planks · Study</p>" in actual
+    assert "<b>Wall</b> · White Stucco · Bedroom, Hall ends</p>" in actual
     assert "<b>Base timber floor</b> · Hall" in actual
     assert "Base plaster" in swatches(board, None, tmp_path)
