@@ -600,8 +600,9 @@ export function createTown(canvas, status, action) {
   const photoControls = document.getElementById("photoControls");
   const photoView = document.getElementById("photoView");
   const photoReason = document.getElementById("photoReason");
-  let preset = null;
+  let preset = null, restoredLens = null;
   function selectPhoto() {
+    restoredLens = null;
     const part = home?.rooms.find((p) => p.design.room.id === "bedroom");
     preset = (photoView.value && part)
       ? bedroomCameras(part, camera.aspect).find((item) => item.id === photoView.value)
@@ -630,6 +631,7 @@ export function createTown(canvas, status, action) {
     if (!preset) canvas.focus();
   };
   function walkView() {
+    restoredLens = null;
     if (!preset) return;
     photoView.value = "";
     selectPhoto();
@@ -1358,8 +1360,10 @@ export function createTown(canvas, status, action) {
   function move(dx, dz) {
     const coll = inside ? indoor : [...obstacles, ...heroObstacles];
     const ok = (x,z) => canStand(x,z,inside,coll);
+    const x = pos.x, z = pos.z;
     if (ok(pos.x + dx, pos.z)) pos.x += dx;
     if (ok(pos.x, pos.z + dz)) pos.z += dz;
+    if (pos.x !== x || pos.z !== z) restoredLens = null;
   }
   const active = () =>
     !overview.mode && !preset && !document.querySelector("dialog[open]") &&
@@ -1397,6 +1401,7 @@ export function createTown(canvas, status, action) {
   };
   canvas.onpointermove = (e) => {
     if (look) {
+      if (e.clientX !== lastX || e.clientY !== lastY) restoredLens = null;
       yaw -= (e.clientX - lastX) * 0.005;
       pitch = T.MathUtils.clamp(
         pitch - (e.clientY - lastY) * 0.003,
@@ -1466,6 +1471,7 @@ export function createTown(canvas, status, action) {
         Number(keys.has("KeyW") || keys.has("ArrowUp")) -
         Number(keys.has("KeyS") || keys.has("ArrowDown"));
       const side = Number(keys.has("KeyD")) - Number(keys.has("KeyA"));
+      if (keys.has("ArrowLeft") !== keys.has("ArrowRight")) restoredLens = null;
       yaw +=
         dt *
         1.7 *
@@ -1490,7 +1496,7 @@ export function createTown(canvas, status, action) {
     avatar.position.copy(pos);
     avatar.rotation.y = yaw;
     camera.position.copy(pos);
-    camera.position.y = inside ? 1.57 : 2.9;
+    camera.position.y = inside ? (restoredLens?.height ?? 1.57) : 2.9;
     if (inside) {
       camera.rotation.order = "YXZ";
       camera.rotation.set(pitch, yaw, 0, "YXZ");
@@ -1531,7 +1537,7 @@ export function createTown(canvas, status, action) {
       camera.position.fromArray(preset.eye);
       camera.lookAt(...preset.target);
     }
-    const fov = preset?.fov || 61;
+    const fov = preset?.fov ?? restoredLens?.fov ?? 61;
     if (camera.fov !== fov) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
@@ -1547,7 +1553,7 @@ export function createTown(canvas, status, action) {
   let captureQueue = Promise.resolve();
   async function captureBedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
     const original = home, originalPreset = photoView.value, framing = overview.framing();
-    const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
+    const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside, lens = restoredLens;
     if (home !== snapshot) load(snapshot);
     const epoch = generation;
     try {
@@ -1598,7 +1604,7 @@ export function createTown(canvas, status, action) {
       if (epoch === generation && original !== snapshot) {
         load(original); enter(wasInside);
         pos.copy(eye); yaw = heading; pitch = tilt;
-        photoView.value = originalPreset; selectPhoto();
+        photoView.value = originalPreset; selectPhoto(); restoredLens = lens;
         overview.restoreFraming(framing);
       }
     }
@@ -1632,6 +1638,7 @@ export function createTown(canvas, status, action) {
       overview.set("");
       enter(true);
       pos.set(pose.eye[0], 0, pose.eye[2]);
+      restoredLens = {height: pose.eye[1], fov: pose.fov};
       const direction = new T.Vector3().fromArray(pose.target).sub(new T.Vector3().fromArray(pose.eye)).normalize();
       yaw = Math.atan2(-direction.x, -direction.z);
       pitch = Math.asin(T.MathUtils.clamp(direction.y, -1, 1));

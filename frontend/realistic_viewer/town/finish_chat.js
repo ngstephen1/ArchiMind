@@ -27,6 +27,7 @@ export function bindFinishChat({ el, api, sync, context }) {
     epoch++;
     pending = null;
     el("finishSave").hidden = true;
+    el("finishSave").disabled = false;
     el("finishStatus").textContent = "";
     el("finishStatus").style.removeProperty("--finish-color");
   }
@@ -75,7 +76,7 @@ export function bindFinishChat({ el, api, sync, context }) {
   };
   room.onchange = scope.onchange = refresh;
   object.onchange = message.oninput = invalidate;
-  dialog.addEventListener("close", invalidate);
+  dialog.addEventListener("close", () => { if (!dialog.open) invalidate(); });
   el("finishCheck").onclick = async () => {
     invalidate();
     const n = epoch,
@@ -92,27 +93,37 @@ export function bindFinishChat({ el, api, sync, context }) {
         "/projects/" + project + "/finish/preview",
         request,
       );
-      if (n !== epoch) return;
-      pending = { ...request, preview_id: result.home.id };
+      const current = context();
+      if (n !== epoch || current.project !== project || current.revision !== revision) return;
+      pending = { project, request: { ...request, preview_id: result.home.id } };
       el("finishStatus").textContent = result.summary;
       el("finishStatus").style.setProperty("--finish-color",finishColors[result.finish]);
       el("finishSave").hidden = false;
     } catch (e) {
-      if (n === epoch) el("finishStatus").textContent = e.message;
+      if (n === epoch && context().project === project) el("finishStatus").textContent = e.message;
     }
   };
   el("finishSave").onclick = async () => {
-    if (!pending) return;
+    if (!pending || el("finishSave").disabled) return;
+    const n = epoch;
+    const { project, request } = pending;
+    if (context().project !== project || context().revision !== request.base) {
+      invalidate();
+      el("finishStatus").textContent = "The design changed. Check this finish again.";
+      return;
+    }
     el("finishSave").disabled = true;
     try {
-      sync(
-        await api("/projects/" + context().project + "/finish/apply", pending),
-      );
-      dialog.close();
+      const saved = await api("/projects/" + project + "/finish/apply", request);
+      const current = context();
+      const sameDesign = current.project === project && current.revision === request.base;
+      if (sameDesign) sync(saved);
+      if (n === epoch && sameDesign) dialog.close();
     } catch (e) {
-      el("finishStatus").textContent = e.message;
+      if (n === epoch && context().project === project)
+        el("finishStatus").textContent = e.message;
     } finally {
-      el("finishSave").disabled = false;
+      if (n === epoch && context().project === project) el("finishSave").disabled = false;
     }
   };
 }
