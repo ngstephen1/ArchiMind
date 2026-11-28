@@ -134,7 +134,12 @@ def check(url, output):
         cache.touch(exist_ok=False)
         open_board(1)
         queue(1)
-        expect(page.locator("#renderStatus")).to_contain_text("Render failed")
+        # The proof worker and the browser progress poll complete independently.
+        # Board camera captures on software WebGL can delay the next browser poll.
+        wait_capture(1, "failed", timeout=30)
+        expect(page.locator("#renderStatus")).to_contain_text(
+            "Render failed", timeout=30_000
+        )
         expect(page.locator("#renderProof")).to_be_enabled()
         assert state(1)["proof"]["state"] == "failed"
         page.locator("#renderPanel").screenshot(path=output / "retry-visible.png")
