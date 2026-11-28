@@ -25,10 +25,9 @@ const PACK_MANIFESTS = Object.fromEntries(
 import showcase from "./showcase.json";
 const el = (id) => document.getElementById(id);
 const cfg = await fetch("./config.json").then((r) => r.json());
-const url = new URL(location.href),
-  local = cfg.mode === "local";
+const local = cfg.mode === "local";
 const tourOnly = !local && !(cfg.api && cfg.editor && cfg.supabase && cfg.anon);
-let project = url.searchParams.get("project"),
+let project = new URL(location.href).searchParams.get("project"),
   revision = 0,
   applied = showcase,
   job = null,
@@ -247,6 +246,7 @@ function sync(data) {
   el("confirmPassage").checked = false;
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
+  const url = new URL(location.href);
   url.searchParams.set("project", project);
   url.searchParams.set("revision", revision);
   history.replaceState(null, "", url);
@@ -254,6 +254,7 @@ function sync(data) {
   void refreshDecisionReviews();
 }
 async function restore() {
+  const url = new URL(location.href);
   if (tourOnly) return;
   if (project && (local || token()))
     sync(
@@ -335,6 +336,7 @@ bind("logout", async () => {
   const previous = token();
   sessionStorage.removeItem("town-session");
   job = null;
+  const url = new URL(location.href);
   url.searchParams.delete("project");
   url.searchParams.delete("revision");
   history.replaceState(null, "", url);
@@ -547,6 +549,7 @@ bind("generate", async () => {
   try {
     if (!project) {
       project = (await api("/projects", {})).project;
+      const url = new URL(location.href);
       url.searchParams.set("project", project);
       history.replaceState(null, "", url);
       links();
@@ -808,6 +811,11 @@ function clearRoomEdit() {
 }
 el("editSavedRoom").onclick = () => {
   clearRoomEdit();
+  const study = applied.rooms.find(part => part.design.room.id === "study");
+  const ids = new Set(study?.design.furniture.map(item => item.id));
+  const hasGroup = ["library-table", "library-chair", "side-table"].every(id => ids.has(id));
+  el("studyPassagePreset").disabled = !hasGroup;
+  el("studyPresetHint").hidden = hasGroup;
   el("roomEditMessage").value = "";
   el("roomEditDialog").showModal();
 };

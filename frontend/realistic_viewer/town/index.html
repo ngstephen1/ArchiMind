@@ -43,8 +43,9 @@
           <textarea id="roomEditMessage" rows="4" maxlength="300" required></textarea>
           <div class="grid">
             <button type="button" data-room-prompt="Seat six at one table in the salon and keep the lounge seating unchanged.">Six-seat salon</button>
-            <button type="button" data-room-prompt="Move the study table and chair together to clear a 90 cm passage from the door to the window-side table.">90 cm study passage</button>
+            <button type="button" id="studyPassagePreset" data-room-prompt="Move the study table and chair together to clear a 90 cm passage from the door to the window-side table.">90 cm study passage</button>
           </div>
+          <small id="studyPresetHint" hidden>The study passage edit needs the folio table, its chair and a window-side table.</small>
           <p id="roomEditResult" role="status"></p>
           <button id="previewRoomEdit">Check edit</button>
           <button id="applyRoomEdit" type="button" class="dark" hidden>Save revision</button>

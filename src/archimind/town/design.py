@@ -1009,8 +1009,11 @@ def generate(brief, previous=None, *, on_progress=None):
             measures["required_dining_seats"] = brief.dining_seats
             measures["split_dining"] = brief.split_dining
         if salon:
+            salon_part = next(p for p in rooms if p["design"]["room"]["id"] == "salon")
             home["evidence"]["salon"] = {
-                "dining_places": 4,
+                "dining_places": 6
+                if salon_part.get("dining_variant") == "six-place"
+                else 4,
                 "chair_pullout_m": 0.5,
                 "basis": "A reserved dining group includes a 0.50 m withdrawal strip behind each chair row.",
                 "seating": "A three-piece conversation group faces the central coffee table.",
