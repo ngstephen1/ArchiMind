@@ -31,10 +31,25 @@
       <small class="house-hint">Double-click a room to walk inside</small>
       <aside id="roomInspector" hidden><strong id="pickedRoom"></strong><small id="pickedDimensions"></small><button id="focusRoom">Focus room</button><button id="restyleRoom">Restyle room</button><button aria-label="Close room selection" id="clearRoom">×</button></aside>
       <div id="houseTools">
+        <button id="editSavedRoom" hidden>Edit a room</button>
         <button id="selectChair" hidden>Select desk chair</button>
         <button id="compareHouse" hidden>Compare revisions</button>
         <a id="photoIntake" hidden>Room photos</a>
       </div>
+      <dialog id="roomEditDialog">
+        <form id="roomEditForm">
+          <div class="title"><h2>Edit a room</h2><button type="button" id="closeRoomEdit" aria-label="Close">×</button></div>
+          <label for="roomEditMessage">Requested change</label>
+          <textarea id="roomEditMessage" rows="4" maxlength="300" required></textarea>
+          <div class="grid">
+            <button type="button" data-room-prompt="Seat six at one table in the salon and keep the lounge seating unchanged.">Six-seat salon</button>
+            <button type="button" data-room-prompt="Move the study table and chair together to clear a 90 cm passage from the door to the window-side table.">90 cm study passage</button>
+          </div>
+          <p id="roomEditResult" role="status"></p>
+          <button id="previewRoomEdit">Check edit</button>
+          <button id="applyRoomEdit" type="button" class="dark" hidden>Save revision</button>
+        </form>
+      </dialog>
       <form id="chairChat" hidden>
         <header><strong>Bedroom · Desk chair</strong><button type="button" id="closeChairChat" aria-label="Close chair chat">×</button></header>
         <label for="chairMessage">Move relative to the Belaya desk</label>

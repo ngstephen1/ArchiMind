@@ -12,7 +12,7 @@ export const studioFinishes = {
   glass: "#637873",
 };
 
-export function studioFurniture(f, suiteYaw = 0) {
+export function studioFurniture(f, suiteYaw = 0, diningVariant = undefined) {
   if (f.id === "salon-suite" && suiteYaw) {
     if (suiteYaw !== 90) throw Error("Unsupported salon grouping orientation.");
     const parts = studioFurniture({
@@ -242,11 +242,13 @@ export function studioFurniture(f, suiteYaw = 0) {
     }
     piece("Art monograph", "clay", x - 0.21, 1.08, 0.399, 0.23, 0.18, 0.038);
   } else if (f.id === "salon-dining") {
-    table(x, y, 1.58, 0.76, 0.75, "walnut");
-    for (const dx of [-0.44, 0.44])
+    const extended = diningVariant === "six-place";
+    const places = extended ? [-0.66, 0, 0.66] : [-0.44, 0.44];
+    table(x, y, extended ? 2.04 : 1.58, 0.76, 0.75, "walnut");
+    for (const dx of places)
       for (const sign of [-1, 1])
         seat(x + dx, y + sign * 0.72, 0.46, 0.46, 0.84, sign, "moss");
-    for (const dx of [-0.44, 0.44])
+    for (const dx of places)
       for (const sign of [-1, 1]) {
         const cy = y + sign * 0.22,
           cx = x + dx;

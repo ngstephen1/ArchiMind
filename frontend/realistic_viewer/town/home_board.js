@@ -42,7 +42,7 @@ export function homeBoard(snapshot) {
           ...f,
           parts:
             room.id !== "bedroom" && (studio || (snapshot.home.service_layout && f.id === "breakfast-suite"))
-              ? studioFurniture(f, part.suite_yaw_deg)
+              ? studioFurniture(f, part.suite_yaw_deg, part.dining_variant)
               : [],
         })),
         cameras: bedroomCameras(part),

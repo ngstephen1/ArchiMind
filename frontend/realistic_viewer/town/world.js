@@ -1047,7 +1047,7 @@ export function createTown(canvas, status, action) {
         indoor.push([ox + f.x_m, -oy - f.y_m - d, ox + f.x_m + w, -oy - f.y_m]);
         const usesStudioFurniture = h.rooms.some(p => p.design.room.id === "salon") ||
           (h.service_layout && f.id === "breakfast-suite");
-        const pieces = r.id !== "bedroom" && usesStudioFurniture ? studioFurniture(f,part.suite_yaw_deg) : [];
+        const pieces = r.id !== "bedroom" && usesStudioFurniture ? studioFurniture(f, part.suite_yaw_deg, part.dining_variant) : [];
         if (pieces.length) {
           pieces.forEach(studioPiece);
           continue;

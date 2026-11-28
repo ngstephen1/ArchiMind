@@ -451,7 +451,12 @@ def validate_home(home, *, passage_m=None, measure=False):
             if free.covers(route):
                 routes.append(dict(room=a, target=b, distance_m=round(route.length, 3)))
         seats = {
-            part["design"]["room"]["id"]: 4
+            part["design"]["room"]["id"]: (
+                6
+                if part["design"]["room"]["id"] == "salon"
+                and part.get("dining_variant") == "six-place"
+                else 4
+            )
             for part in home["rooms"]
             if any(
                 f["id"] in ("salon-dining", "breakfast-suite")

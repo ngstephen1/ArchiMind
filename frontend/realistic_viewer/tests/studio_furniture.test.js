@@ -53,3 +53,20 @@ test("a quarter turn swaps the design envelope and preserves every part", () => 
   }
   assert.throws(() => studioFurniture(f, 33));
 });
+
+test("extend the salon table to six distinct settings within its existing reservation", () => {
+  const group = { id: "salon-dining", x_m: 1.3, y_m: 2.7, width_m: 2.2, depth_m: 2.92, height_m: 1 };
+  for (const [variant, count, length] of [[undefined, 4, 1.58], ["six-place", 6, 2.04]]) {
+    const pieces = studioFurniture(group, 0, variant);
+    const seats = pieces.filter(piece => piece.name === "Boxed seat cushion");
+    assert.equal(new Set(seats.map(p => p.xyz.join(","))).size, count);
+    assert.equal(pieces.filter(p => p.name === "Thrown dinner plate").length, count);
+    assert.equal(pieces.find(p => p.name === "Tabletop").wdh[0], length);
+    for (const p of pieces) {
+      for (const [axis, origin, size] of [[0, group.x_m, group.width_m], [1, group.y_m, group.depth_m]]) {
+        assert.ok(p.xyz[axis] - p.wdh[axis] / 2 >= origin - 1e-7);
+        assert.ok(p.xyz[axis] + p.wdh[axis] / 2 <= origin + size + 1e-7);
+      }
+    }
+  }
+});
