@@ -68,7 +68,8 @@ function furnitureRooms(question, kind, home) {
   // Look up the remaining proper names in this revision. A room-qualified
   // noun has already been consumed and cannot also match an alias elsewhere.
   const prefix = roomScope.exec(question);
-  if (!rooms.length && prefix && new RegExp("\\b" + noun + "\\b", "i").test(unqualified))
+  const scopedNoun = prefix && new RegExp("\\b" + noun + "\\b", "i").test(unqualified);
+  if (kind === "chair" && !rooms.length && scopedNoun)
     return [prefix[1].split(" ")[0].toLowerCase()];
   const rest = words(unqualified);
   for (const {design} of home?.rooms ?? []) {
@@ -76,6 +77,7 @@ function furnitureRooms(question, kind, home) {
       [item.id, item.name].some(label => label && rest.includes(words(label))));
     if (named) rooms.push(design.room.id.split("-")[0]);
   }
+  if (!rooms.length && scopedNoun) rooms.push(prefix[1].split(" ")[0].toLowerCase());
   return [...new Set(rooms)];
 }
 
@@ -158,12 +160,12 @@ function asksFurnitureFit(clause) {
     /\b(chairs?|desks?|tables?|worktables?)\b/i.test(clause);
 }
 
-function planQuestions(question) {
+function planQuestions(question, home) {
   const scoped = question.replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
   const clauses = scoped.split(/[?!;]|\.(?!\d)/).flatMap(sentence => {
     const pieces = sentence.trim().split(/(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
     const prefix = roomScope.exec(sentence.trim());
-    return pieces.map((piece, i) => prefix && i > 0 && !roomMention.test(piece)
+    return pieces.map((piece, i) => prefix && i > 0 && !roomMention.test(piece) && !furnitureRooms(piece, "desk", home).length
       ? prefix[0] + " " + piece : piece);
   });
   return clauses.map(clause => clause.trim()).filter(clause => clause && (
@@ -180,7 +182,7 @@ export function explanation(home, question, manifest = null, previous = null) {
   const acoustic = acousticEvidence.test(question)
     || (/\bquiet\b/i.test(question) && /\b(?:calls?|meetings?)\b/i.test(question));
   const supplier = supplierEvidence.test(question);
-  const plan = planQuestions(question);
+  const plan = planQuestions(question, home);
   const answers = [...new Set(plan.map((clause, index) => {
     // An anaphoric fit question cannot establish that the default bedroom pair is intended.
     if (index > 0 && /\b(?:under|beneath|underneath|fit(?:s)? (?:at|with)) (?:it|that|this|them)\b/i.test(clause)
@@ -274,14 +276,17 @@ function explainPlan(home, question, manifest, previous) {
   }
   const study = home.rooms.find(p => p.design.room.id === "study");
   const studyDesks = study?.design.furniture.filter(f => f.category === "desk") ?? [];
-  const namedStudyDesk = studyDesks.find(f =>
+  const namedDesks = furnitureRooms(q, "desk", home);
+  const namedStudyDesk = (!namedDesks.length || namedDesks.includes("study")) && studyDesks.find(f =>
     [f.name, f.id].some(label => label && normalized.includes(words(label)))
   );
   if (taskLighting) {
     const surfaces = home.rooms.flatMap(({design}) => design.furniture
       .filter(item => namedTables.includes(item.id))
       .map(item => `${design.room.id} ${item.id}`));
-    const lightingRooms = namedStudyDesk
+    const lightingRooms = namedDesks.length
+      ? home.rooms.filter(part => namedDesks.includes(part.design.room.id.split("-")[0]))
+      : namedStudyDesk
       ? requestedRooms.filter(part => part === study)
       : /\bbelaya\b/.test(q)
         ? requestedRooms.filter(part => part === bedroom)
@@ -300,7 +305,6 @@ function explainPlan(home, question, manifest, previous) {
       "To assess task lighting, provide the fixture or a work-surface light measurement. A daylight view alone cannot establish task illuminance or glare.";
   }
   const namedChairs = furnitureRooms(q, "chair", home);
-  const namedDesks = furnitureRooms(q, "desk", home);
   const fit = asksFurnitureFit(q);
   if (fit && (namedChairs.length > 1 || namedDesks.length > 1))
     return "Which chair and desk pair should I compare first? Named rooms: " + [...new Set([...namedChairs, ...namedDesks])].join(", ") + ".";
