@@ -1,3 +1,4 @@
+import { houseView } from "./house_view.js";
 import { turnedCoverlet } from "./studio_textiles.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { studioFurniture, studioFinishes, salonDetails } from "./studio_furniture.js";
@@ -68,6 +69,7 @@ export function createTown(canvas, status, action) {
     avatar = new T.Group();
   scene.add(street, interior, avatar);
   interior.visible = false;
+  const overview = houseView(canvas, scene, interior, street, avatar, renderer);
   const mats = new Map(),
     unit = new T.BoxGeometry(),
     obstacles = [],
@@ -90,8 +92,9 @@ export function createTown(canvas, status, action) {
     return m;
   }
   function solid(g, x, y, z, w, h, d, c, colliders) {
-    block(g, x, y, z, w, h, d, c);
+    const object = block(g, x, y, z, w, h, d, c);
     colliders.push([x - w / 2, z - d / 2, x + w / 2, z + d / 2]);
+    return object;
   }
   function label(g, str, x, y, z, w, bg = "#294841") {
     const c = document.createElement("canvas");
@@ -350,7 +353,7 @@ export function createTown(canvas, status, action) {
   function batch(group) {
     const buckets = new Map();
     for (const m of group.children.slice()) {
-      if (!m.isMesh) continue;
+      if (!m.isMesh || m.userData.surface === "wall" || m.userData.aboveCut) continue;
       const key = m.geometry.uuid + m.material.uuid;
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key).push(m);
@@ -490,6 +493,7 @@ export function createTown(canvas, status, action) {
     // Name pack furniture that fell back to the procedural piece, while this look is live.
     const allReady = Promise.all(ready).then(() => {
       if (!live) return;
+      overview.refreshDetails();
       const text = furnitureFallbackText(
         furnitureFailed.map((f) => f.id),
         furnitureFailed,
@@ -740,8 +744,8 @@ export function createTown(canvas, status, action) {
     sweepInput = null;
   const roomFurniture = new Map();
   const surfaces = bedroomSurfaces(renderer, mats);
-  function load(h) {
-    walkView();
+  function load(h, keepPosition = false) {
+    if (!keepPosition) walkView();
     generation++;
     const epoch = generation;
     // Dispose the sweep first so the pack look is released from real materials.
@@ -844,7 +848,9 @@ export function createTown(canvas, status, action) {
         );
       }
     batch(hero);
-    block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf").userData.surface = "ceiling";
+    const roof = block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf");
+    roof.userData.surface = "ceiling";
+    const walls = [];
     delete canvas.dataset.desk;
     const bindings = h.rooms.flatMap((p) => p.asset_bindings || []);
     const admitted =
@@ -902,6 +908,7 @@ export function createTown(canvas, status, action) {
           wallColor,
         );
         wall.userData.surface = "wall";
+        walls.push({wall, ox, oy, bottom:q.bottom, height:q.top-q.bottom});
         if (q.bottom === 0) {
           block(
             group,
@@ -951,6 +958,7 @@ export function createTown(canvas, status, action) {
             block(group, x, 0.016, -z - 0.125, 0.006, 0.003, 0.25, "#a78c6f").userData.legacySeam = true;
         }
       }
+      const windowStart = group.children.length;
       for (const win of r.windows)
         furnishedWindow(group, r, win, surfaces, block);
       // Wall-mounted print, clear of the window and of the circulation door.
@@ -968,6 +976,7 @@ export function createTown(canvas, status, action) {
         0.012,
         "#ba7e5c",
       );
+      for (const detail of group.children.slice(windowStart)) detail.userData.aboveCut = true;
       function studioPiece(p) {
         const [w,d,h]=p.wdh,[x,y,z]=p.xyz;
         const rounded=p.shape==="sphere" || p.shape==="cylinder";
@@ -1230,22 +1239,15 @@ export function createTown(canvas, status, action) {
       plaque.position.set(wall + side * 0.065, 2.29, -y);
       plaque.rotation.y = (side * Math.PI) / 2;
       label(plaque, room.name.toUpperCase(), 0, 0, 0, 0.98);
+      plaque.userData.aboveCut = true;
       interior.add(plaque);
     }
-    solid(interior, doorX, 1.4, -D, 1.6, 2.8, 0.1, wallColor, indoor);
-    for (const side of [-1, 1])
-      solid(
-        interior,
-        doorX + side * 0.675,
-        1.4,
-        0,
-        0.25,
-        2.8,
-        0.1,
-        wallColor,
-        indoor,
-      );
-    if (inside) enter(true);
+    for (const [x,z,width] of [[doorX,-D,1.6],[doorX-.675,0,.25],[doorX+.675,0,.25]]) {
+      const wall = solid(interior,x,1.4,z,width,2.8,.1,wallColor,indoor);
+      walls.push({wall,ox:0,oy:0,bottom:0,height:2.8});
+    }
+    overview.load(h, roof, walls);
+    if (inside && !keepPosition) enter(true);
     refresh();
     updateQuality();
     requestPack(epoch);
@@ -1278,7 +1280,7 @@ export function createTown(canvas, status, action) {
     if (ok(pos.x, pos.z + dz)) pos.z += dz;
   }
   const active = () =>
-    !preset && !document.querySelector("dialog[open]") &&
+    !overview.mode && !preset && !document.querySelector("dialog[open]") &&
     !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
   window.addEventListener("keydown", (e) => {
     if (!active()) return;
@@ -1302,8 +1304,10 @@ export function createTown(canvas, status, action) {
   });
   window.addEventListener("keyup", (e) => keys.delete(e.code));
   window.addEventListener("blur", () => keys.clear());
+  let pressed;
   canvas.onpointerdown = (e) => {
-    if (preset) return;
+    pressed = {x:e.clientX,y:e.clientY,id:e.pointerId};
+    if (preset || overview.mode) return;
     look = true;
     canvas.setPointerCapture(e.pointerId);
     lastX = e.clientX;
@@ -1321,7 +1325,23 @@ export function createTown(canvas, status, action) {
       lastY = e.clientY;
     }
   };
-  canvas.onpointerup = canvas.onpointercancel = () => (look = false);
+  canvas.onpointerup = (e) => {
+    look = false;
+    if (pressed?.id === e.pointerId && Math.hypot(e.clientX-pressed.x,e.clientY-pressed.y)<5 &&
+        (overview.mode || inside) && overview.pick(e,camera)) {
+      canvas.dispatchEvent(new CustomEvent("chair-picked",{detail:home.id}));
+    }
+    pressed = null;
+  };
+  canvas.ondblclick = event => {
+    const room = overview.roomAt(event);
+    if (!room) return;
+    overview.set("");
+    enter(true);
+    roomJump.value = room;
+    roomJump.onchange();
+  };
+  canvas.onpointercancel = () => {look = false; pressed = null;};
   for (const el of document.querySelectorAll("[data-key]")) {
     el.onpointerdown = (e) => {
       el.setPointerCapture(e.pointerId);
@@ -1340,6 +1360,7 @@ export function createTown(canvas, status, action) {
   renderer.setAnimationLoop((now) => {
     const dt = Math.min(0.045, (now - before) / 1000);
     before = now;
+    if (overview.mode) { overview.render(); return; }
     if (active()) {
       const forward =
         Number(keys.has("KeyW") || keys.has("ArrowUp")) -
@@ -1424,11 +1445,16 @@ export function createTown(canvas, status, action) {
     scene.environment = lit.environment;
     scene.environmentIntensity = lit.intensity;
     renderer.toneMappingExposure = lit.exposure;
+    overview.walkHighlight(inside);
     if (look && composer) composer.render();
     else renderer.render(scene, camera);
+    overview.walkHighlight(false);
   });
   return {
     load,
+    overview,
+    get homeId() { return home?.id; },
+    walk() { overview.set(""); enter(true); },
     // Plan ↔ Room over the home's interior only; a pure view change.
     bindSweep(input) {
       sweepInput = input;
@@ -1447,7 +1473,7 @@ export function createTown(canvas, status, action) {
       };
       updateQuality();
     },
-    async bedroomViews(snapshot, roomId = "bedroom") {
+    async bedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
       const original = home, originalPreset = photoView.value;
       const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
       if (home !== snapshot) load(snapshot);
@@ -1461,7 +1487,7 @@ export function createTown(canvas, status, action) {
         await packLook?.ready;
         if (epoch !== generation) throw Error("Presentation source changed.");
         const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
-        const views = bedroomCameras(part);
+        const views = fixedViews ?? bedroomCameras(part);
         const visible = [hero, street, interior, avatar].map((o) => o.visible);
         const size = renderer.getSize(new T.Vector2());
         const ratio = renderer.getPixelRatio();
@@ -1506,6 +1532,7 @@ export function createTown(canvas, status, action) {
       }
     },
     visit: () => {
+      overview.set("");
       walkView();
       pos.set(doorX, 0, 1.6);
       yaw = 0;

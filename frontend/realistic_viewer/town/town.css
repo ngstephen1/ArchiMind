@@ -443,3 +443,38 @@ button[aria-pressed="true"] {
 
 #elevations img { width: 50%; height: auto; vertical-align: top }
 @media(max-width:600px){#elevations img{width:100%}}
+
+.house-modes,#houseTools,#chairChat {position:absolute; z-index:2;}
+.house-modes {top:12px;left:50%;transform:translateX(-50%);display:flex;padding:3px;border-radius:12px;background:#fffefa;box-shadow:0 2px 12px #273b3420}
+.house-modes button {border:0;background:transparent;padding:.45em .8em}
+.house-modes button[aria-pressed="true"] {background:#243b33;color:white}
+#houseTools {top:12px;right:12px;display:flex;gap:5px;align-items:center}
+#houseTools a {background:#fffdf6;padding:.55em .75em;border-radius:7px}
+#houseLabels {position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#houseLabels span {position:absolute;transform:translate(-50%,-50%);text-align:center;color:#27332e;background:#fffffff0;font-size:12px;font-weight:650;border-radius:4px;padding:2px 6px}
+#houseLabels small {display:block;font-weight:400}
+main:is([data-house-mode="plan"],[data-house-mode="3d"]) :is(.place,.walk,.pad,.photo-controls) {display:none}
+#chairChat {bottom:14px;left:50%;transform:translateX(-50%);width:min(510px,94%);padding:12px 16px;background:#fffefa;border:1px solid #c4cdc5;border-radius:12px;box-shadow:0 4px 24px #223a2924}
+#chairChat header {display:flex;align-items:center;justify-content:space-between}
+#chairChat input,#chairChat output {display:block;width:100%;margin:.4em 0}
+#chairChat label {font-size:.82em}
+#houseCompare {width:min(950px,96vw)}
+#compareFrames {position:relative;aspect-ratio:16/9;--wipe:50%}
+#compareFrames img {position:absolute;inset:0;width:100%;height:100%}
+#compareLeft {clip-path:inset(0 calc(100% - var(--wipe)) 0 0)}
+#compareFrames::after {content:"";position:absolute;left:var(--wipe);height:100%;border-left:2px solid white}
+#wipeControl input {width:100%}
+@media(max-width:850px){#houseTools {top:60px;right:6px;font-size:12px}.house-modes {z-index:3}#houseLabels span {font-size:10px} main:has(.house-modes) .place {top:106px}}
+
+.house-modes {width:max-content;white-space:nowrap}
+#compareFrames {touch-action:none;cursor:ew-resize}
+#compareFrames img {pointer-events:none}
+
+main[data-house-mode=""] .photo-controls {top:64px}
+@media(max-width:850px) {
+  main[data-house-mode=""] .photo-controls {top:106px}
+  #houseTools button {padding:.48em .65em}
+}
+
+.house-hint {position:absolute;bottom:14px;left:14px;background:#fffefa;padding:4px 9px;border-radius:6px;color:#41524b;pointer-events:none}
+main[data-house-mode=""] .house-hint, main:has(#chairChat:not([hidden])) .house-hint {display:none}

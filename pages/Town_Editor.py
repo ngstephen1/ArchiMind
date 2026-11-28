@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 import streamlit as st
 
 from archimind.town.agents import ROLES
+from archimind.town.photo_form import photo_form
 
 api = os.getenv("TOWN_API_URL", "http://127.0.0.1:8790/api").rstrip("/")
 town = os.getenv("TOWN_SITE_URL", "http://127.0.0.1:8790")
@@ -87,6 +88,10 @@ st.caption(f"Revision {rev} · Current head {snapshot['head']}")
 if rev != snapshot["head"] and st.button("Open latest"):
     st.query_params["revision"] = str(snapshot["head"])
     st.rerun()
+with st.expander(
+    "Room photos and field survey", expanded=st.query_params.get("mode") == "photos"
+):
+    photo_form(p, rev, home, allow_analysis=not hosted)
 if home:
     st.table(
         [

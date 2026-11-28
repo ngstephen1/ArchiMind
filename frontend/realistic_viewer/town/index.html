@@ -23,6 +23,26 @@
         aria-label="Walkable town and home interiors"
         tabindex="0"
       ></canvas>
+      <div id="houseLabels" hidden aria-hidden="true"></div>
+      <div class="house-modes" role="group" aria-label="House view">
+        <button data-view="plan">Plan</button><button data-view="3d">3D house</button><button data-view="walk">Walk</button>
+      </div>
+      <small class="house-hint">Double-click a room to walk inside</small>
+      <div id="houseTools">
+        <button id="selectChair" hidden>Select desk chair</button>
+        <button id="compareHouse" hidden>Compare revisions</button>
+        <a id="photoIntake" hidden>Room photos</a>
+      </div>
+      <form id="chairChat" hidden>
+        <header><strong>Bedroom · Desk chair</strong><button type="button" id="closeChairChat" aria-label="Close chair chat">×</button></header>
+        <label for="chairMessage">Move relative to the Belaya desk</label>
+        <input id="chairMessage" maxlength="240" value="Pull this chair 30 cm away from the desk." required>
+        <button id="copyHouse" type="button" hidden>Save an editable copy</button>
+        <button id="previewChat">Preview move</button>
+        <button type="button" id="applyChat" class="dark" hidden>Apply move</button>
+        <button type="button" id="cancelChat" hidden>Discard</button>
+        <output id="chatFeedback" aria-live="polite"></output>
+      </form>
       <div class="place">
         <span>ARCHIMIND / TOWN WALK</span>
         <h1 id="place">Market Square</h1>
@@ -65,6 +85,14 @@
       ><a href="./assets/BELAYA_ATTRIBUTION.txt">Belaya desk credits</a
       ><a href="./assets/bedroom-sources.json">Bedroom material credits</a><a id="editor">Streamlit editor ↗</a>
     </footer>
+    <dialog id="houseCompare">
+      <form method="dialog" class="title"><h2>Compare views</h2><button aria-label="Close comparison">×</button></form>
+      <label>Camera <select id="compareCamera"><option value="desk">Desk and chair</option><option value="doorway">Bedroom doorway</option></select></label>
+      <label>Compare <select id="compareKind"><option value="revision">Previous / current revision</option><option value="blender">3D / Blender HD</option></select></label>
+      <p id="compareStatus" role="status"></p>
+      <div id="compareFrames" hidden><img id="compareRight" alt="Current view"><img id="compareLeft" alt="Reference view"></div>
+      <label id="wipeControl" hidden>Comparison divider <input type="range" id="compareWipe" min="0" max="100" value="50"></label>
+    </dialog>
     <dialog id="panel">
       <form method="dialog" class="title">
         <h2>Home studio</h2>

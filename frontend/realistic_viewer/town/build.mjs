@@ -15,7 +15,7 @@ await build({
   target: "es2022",
   legalComments: "linked",
 });
-for (const f of ["index.html", "town.css"])
+for (const f of ["index.html", "town.css", "showcase.json"])
   await copyFile(new URL(f, src), new URL(f, out));
 await copyFile(
   new URL("materials/wood-floor.jpg", src),
