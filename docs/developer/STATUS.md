@@ -2,11 +2,15 @@
 
 ## November 28 demo and field work
 
+The November 28 single-home rehearsal used a fresh six-room project. Town returned two validated designs in 16.5 seconds. In the selected Layout B, the modeled kitchen-to-salon route measured 7.99 m, down from 12.87 m in A. The bedroom-to-bathroom route increased from 3.72 m to 14.12 m. The saved chair edit moved its footprint 300 mm and increased the measured gap to the Belaya desk from 60 mm to 360 mm. [68-second film](https://github.com/ngstephen1/ArchiMind/releases/download/town-photo-studio-demo-2026-11-28/ArchiMind-One-Home-Live-Design.mp4) · [Live run and both snapshots](https://github.com/ngstephen1/ArchiMind/issues/70#issuecomment-7235520471)
+
+The film replays all 35 recorded agent events. The edit was repeated on a copy and reproduced the full original revision 2. The new project reused the November 24 bedroom geometry. One live image edit of its desk camera took 24.1 seconds and proposed a rug, framed art and brass lamp. Use the saved model for clearances. On the local Apple M5 laptop, High and Low both measured 16.7 ms median frame time on the same 30-second route. [Recording receipt](https://github.com/ngstephen1/ArchiMind/issues/119#issuecomment-7235849191) · [Camera and finish study](https://github.com/ngstephen1/ArchiMind/releases/download/town-photo-studio-demo-2026-11-28/Town-Revision-2-Photographic-Study.zip) · [Laptop timing](https://github.com/ngstephen1/ArchiMind/issues/70#issuecomment-7235633196)
+
 The [73-second captioned walkthrough](https://github.com/ngstephen1/ArchiMind/releases/tag/town-photo-studio-demo-2026-11-28) was captured from `35d5ecc`. The new local project saved a 300 mm chair movement between revisions 1 and 2. The recorded photographic redesign and the earlier agent run each have their own source. A clean download matched the published video checksum and decoded all 1,825 frames. [Goal and issue tracker](https://github.com/ngstephen1/ArchiMind/issues/119)
 
 The [current-bedroom field sheets](../handovers/current-bedroom/Bedroom-Field-Visit-Sheets.pdf) are ready for an observer to record the shell, openings, desk underside and chair clearances. The surveyed-room work still needs a dated visit. The public Town site currently serves a static tour. [Survey intake #92](https://github.com/ngstephen1/ArchiMind/issues/92) · [Hosted configuration check](https://github.com/ngstephen1/ArchiMind/issues/66#issuecomment-7235267388)
 
-The November 30 release remains pending. A clean download of the existing candidate verified all 32 handoff entries. The team can rehearse from that package while the two owners record their observations and release decisions. [Download verification](https://github.com/ngstephen1/ArchiMind/issues/72#issuecomment-7235302935)
+The delegated decision approved the demo and held the November 30 designer release. A clean download verified all 32 entries in the separate November 24 home’s handoff. Its revision 2 presentation now opens the matching package after GitHub sign-in. The original two-owner rehearsal and release freeze remain tracked. [Release decision](https://github.com/ngstephen1/ArchiMind/issues/71#issuecomment-7235397238) · [Rehearsal and package access](https://github.com/ngstephen1/ArchiMind/issues/70#issuecomment-7235754337)
 
 ## November 22–30 release sprint
 
@@ -33,7 +37,7 @@ checksum-listed files. The revision review and designer handoff issues are close
 
 Hieu approved the held-out evaluation at five passes and one partial. The
 original cases ran at `301762b`, and three affected cases were rerun at
-`45871da`. H06 still has a medium-severity saved-explanation defect. The
+`45871da`. H06 had a medium-severity saved-explanation defect on that evaluation. A subsequent delegated browser check passed on the saved-answer branch while preserving the original scores. [Affected-case replay](https://github.com/ngstephen1/ArchiMind/issues/68#issuecomment-7235638192). The
 evaluation issue is closed. The combined implementation fixes dining
 requirements, preserves unsupported clearances for clarification, and verifies
 the serving Town instance in new evaluation runs.
