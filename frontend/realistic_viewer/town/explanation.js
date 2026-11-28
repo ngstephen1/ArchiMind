@@ -48,14 +48,25 @@ export function asksChairChange(question) {
 
 // A room can be named before a furniture noun or as a qualifier after it.
 // Keep both identities when comparing alternatives instead of picking the first.
-function furnitureRooms(question, kind) {
+function furnitureRooms(question, kind, home) {
   const room = "(bedroom|study|living(?: room)?|salon|bathroom|kitchen(?: dining)?)";
   const noun = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:(?:writing[ -])?desks?(?![ -]chairs?\\b)|work[ -]?tables?|writing[ -]suites?)";
   const qualifier = "(?:the |our |my )?";
   const pattern = new RegExp("\\b" + room + "(?:'s|’s)?[ -]+" + noun + "\\b|\\b" + noun + " (?:in|from|inside) " + qualifier + room + "\\b", "gi");
-  const rooms = Array.from(question.matchAll(pattern), match =>
-    (match[1] || match[2]).split(" ")[0].toLowerCase());
-  if (kind === "desk" && /\bbelaya\b/i.test(question)) rooms.push("bedroom");
+  const rooms = [];
+  const unqualified = question.replace(pattern, (_, before, after) => {
+    rooms.push((before || after).split(" ")[0].toLowerCase());
+    return " ";
+  });
+  // Look up the remaining proper names in this revision. A room-qualified
+  // noun has already been consumed and cannot also match an alias elsewhere.
+  const words = value => " " + value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim() + " ";
+  const rest = words(unqualified);
+  for (const {design} of home?.rooms ?? []) {
+    const named = design.furniture.some(item => item.category === kind &&
+      [item.id, item.name].some(label => label && rest.includes(words(label))));
+    if (named) rooms.push(design.room.id.split("-")[0]);
+  }
   return [...new Set(rooms)];
 }
 
@@ -158,8 +169,8 @@ export function explanation(home, question, manifest = null, previous = null) {
   const answers = [...new Set(plan.map((clause, index) => {
     // An anaphoric fit question cannot establish that the default bedroom pair is intended.
     if (index > 0 && /\b(?:under|beneath|underneath|fit(?:s)? (?:at|with)) (?:it|that|this|them)\b/i.test(clause)
-        && !furnitureRooms(clause, "desk").length) {
-      const desks = furnitureRooms(plan[index - 1], "desk");
+        && !furnitureRooms(clause, "desk", home).length) {
+      const desks = furnitureRooms(plan[index - 1], "desk", home);
       if (desks.length !== 1) return "Which desk and chair should I check? Please name their rooms.";
       return explainPlan(home, clause + " at the " + desks[0] + " desk", manifest, previous);
     }
@@ -273,9 +284,8 @@ function explainPlan(home, question, manifest, previous) {
         workspaces.length ? `Saved ${workspaces[0]}. ` : "") +
       "To assess task lighting, provide the fixture or a work-surface light measurement. A daylight view alone cannot establish task illuminance or glare.";
   }
-  const namedChairs = furnitureRooms(q, "chair");
-  const namedDesks = furnitureRooms(q, "desk");
-  if (namedStudyDesk && !namedDesks.length) namedDesks.push("study");
+  const namedChairs = furnitureRooms(q, "chair", home);
+  const namedDesks = furnitureRooms(q, "desk", home);
   const fit = asksFurnitureFit(q);
   if (fit && (namedChairs.length > 1 || namedDesks.length > 1))
     return "Which chair and desk pair should I compare first? Named rooms: " + [...new Set([...namedChairs, ...namedDesks])].join(", ") + ".";
