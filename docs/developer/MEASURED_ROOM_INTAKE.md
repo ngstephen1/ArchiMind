@@ -36,6 +36,8 @@ Use `source_kind: measured` for sourced site measurements or `archival` for a do
 
 ### Current bedroom field record
 
+Use the three-page [Bedroom field visit sheets](../handovers/current-bedroom/Bedroom-Field-Visit-Sheets.pdf) on site. Print the first sheet to sketch the perimeter, or attach a separate sketch with the same sheet ID. The PDF can also be filled digitally. Repeat sheets for additional walls, openings or retained furniture and keep original photos with the dated record.
+
 Set `surveyed_on` to the field visit date (ISO format) and `project_id` to the bedroom project ID. Both fields are required to link drawings to the survey. The selected project ID must match even when the room dimensions are identical. Add a source ID beside each value on the sketch or in the measurement log. Keep the original record with the survey edition. Leave unresolved measurements blank and list the missing observations in `field_checks`.
 
 | Record | What to capture |
