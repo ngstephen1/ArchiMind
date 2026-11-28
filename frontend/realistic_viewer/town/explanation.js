@@ -50,7 +50,7 @@ export function asksChairChange(question) {
 // Keep both identities when comparing alternatives instead of picking the first.
 function furnitureRooms(question, kind) {
   const room = "(bedroom|study|living(?: room)?|salon|bathroom|kitchen(?: dining)?)";
-  const noun = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:desks?|worktables?)";
+  const noun = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:(?:writing[ -])?desks?(?![ -]chairs?\\b)|work[ -]?tables?|writing[ -]suites?)";
   const qualifier = "(?:the |our |my )?";
   const pattern = new RegExp("\\b" + room + "(?:'s|’s)?[ -]+" + noun + "\\b|\\b" + noun + " (?:in|from|inside) " + qualifier + room + "\\b", "gi");
   const rooms = Array.from(question.matchAll(pattern), match =>
@@ -139,7 +139,6 @@ function asksFurnitureFit(clause) {
 }
 
 function planQuestions(question) {
-  if (!acousticEvidence.test(question) && !supplierEvidence.test(question)) return [question];
   const scoped = question.replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
   const clauses = scoped.split(/[?!;]|\.(?!\d)|(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
   return clauses.map(clause => clause.trim()).filter(clause => clause && (
@@ -267,6 +266,7 @@ function explainPlan(home, question, manifest, previous) {
   }
   const namedChairs = furnitureRooms(q, "chair");
   const namedDesks = furnitureRooms(q, "desk");
+  if (namedStudyDesk && !namedDesks.includes("study")) namedDesks.push("study");
   const fit = asksFurnitureFit(q);
   if (fit && (namedChairs.length > 1 || namedDesks.length > 1))
     return "Which chair and desk pair should I compare first? Named rooms: " + [...new Set([...namedChairs, ...namedDesks])].join(", ") + ".";
