@@ -520,3 +520,5 @@ main[data-house-mode=""] #roomInspector,main:has(#roomInspector:not([hidden])) .
 #houseTools {top:60px;max-width:calc(100% - 16px);overflow-x:auto;white-space:nowrap;}
 #houseTools > * {flex:none}
 #houseCompare #compareFrames {max-height:66vh;max-width:100%;margin-inline:auto}
+
+#finishStatus[style*="--finish-color"]::before {content:"";display:inline-block;width:1.25em;height:1.25em;vertical-align:middle;margin-right:.5rem;border:1px solid #999;border-radius:3px;background:var(--finish-color)}

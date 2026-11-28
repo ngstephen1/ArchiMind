@@ -93,7 +93,15 @@ def change(q, owner, project, data, applying):
         if data.get("preview_id") != home["id"]:
             raise service.Problem("Recheck this finish before saving.", 409)
         return service.apply(q, owner, project, base, home)
+    if scope == "object":
+        target = f"{data['object']} in {parts[0]['design']['room']['name']}"
+    else:
+        names = ", ".join(p["design"]["room"]["name"] for p in parts)
+        target = f"{surface}s in {names}"
+        if scope == "home" and surface == "floor" and not home.get("photo_home"):
+            target += " and the entrance hall"
     return {
         "home": home,
-        "summary": f"{finish.title()} · {scope} · {len(parts)} room(s).",
+        "finish": finish,
+        "summary": f"{finish.title()} · {target}",
     }

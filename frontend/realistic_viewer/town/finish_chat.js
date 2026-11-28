@@ -28,6 +28,7 @@ export function bindFinishChat({ el, api, sync, context }) {
     pending = null;
     el("finishSave").hidden = true;
     el("finishStatus").textContent = "";
+    el("finishStatus").style.removeProperty("--finish-color");
   }
   function refresh() {
     invalidate();
@@ -94,6 +95,7 @@ export function bindFinishChat({ el, api, sync, context }) {
       if (n !== epoch) return;
       pending = { ...request, preview_id: result.home.id };
       el("finishStatus").textContent = result.summary;
+      el("finishStatus").style.setProperty("--finish-color",finishColors[result.finish]);
       el("finishSave").hidden = false;
     } catch (e) {
       if (n === epoch) el("finishStatus").textContent = e.message;
