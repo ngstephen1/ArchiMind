@@ -826,7 +826,7 @@ function showExport(manifest, hash, studio, studioHash) {
     pack.target = "_blank";
     pack.rel = "noopener";
     el("boardExports").append(node("p", ""), pack, node("p",
-      "Open Client-Book.pdf inside the ZIP. The editable files are in Designer-Handoff.zip. GitHub sign-in may be required."
+      "Open Client-Book.pdf inside the ZIP. The editable files are in Designer-Handoff.zip. Sign in to GitHub before downloading. GitHub shows a 404 when signed out."
     ));
   } else if (studioRelease) {
     downloadLabel = "Jump to client book";

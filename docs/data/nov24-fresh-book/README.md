@@ -48,7 +48,7 @@ The rehearsal candidate at `512ed26` preserves the same inspected PDF and
 includes the original print receipt. Its clean-download check verified all 32
 checksum-listed files. The designer ZIP SHA-256 is
 `13e200835b80ae65c8fe9247623e1f76d6ec489aee2cf1ce8e72b8c20e63265a`.
-Open `Client-Book.pdf` inside the [revision 2 rehearsal package ZIP](https://github.com/ngstephen1/ArchiMind/actions/runs/45207279553/artifacts/14834053043). GitHub sign-in may be required.
+Open `Client-Book.pdf` inside the [revision 2 rehearsal package ZIP](https://github.com/ngstephen1/ArchiMind/actions/runs/45207279553/artifacts/14834053043). Sign in to GitHub before downloading. GitHub shows a 404 when signed out.
 
 [Rebuilt candidate verification](https://github.com/ngstephen1/ArchiMind/issues/69#issuecomment-7105933953)
 
