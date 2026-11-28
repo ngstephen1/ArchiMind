@@ -2004,3 +2004,43 @@ def test_current_home_citation_keeps_wrapped_location_and_reuse_instruction():
         if "passage" in s["requirement"]
     )
     assert source["origin"] == "brief" and source["statement"] == text
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "We don't need a formal salon, and a ",
+        "I have no doubt that a ",
+        "Without a doubt, a ",
+    ],
+)
+def test_separately_asserted_objection_is_preserved(prefix):
+    text = prefix + "60 cm clear passage is too narrow for our wheelchair."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("width you rejected" in question for question in questions)
+
+
+def test_reused_width_on_saved_home_requires_user_selection():
+    home = {"evidence": {"comparison": {"passage_m": 0.85}}}
+    text = "Keep the same passage width in the renovation."
+    omitted, questions = requirement_controls(Brief(compare_tradeoffs=True), text, home)
+    assert omitted.passage_m == 0.85 and any(
+        "reuse" in question for question in questions
+    )
+    confirmed, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, passage_m=0.85), text, home
+    )
+    assert confirmed.passage_m == 0.85 and not questions
+
+
+def test_open_count_clears_prior_requirement_and_accepts_an_explicit_new_count():
+    previous = {"evidence": {"comparison": {"required_dining_seats": 2}}}
+    open_count = Brief(compare_tradeoffs=True, formal_salon=True, dining_seats=0)
+    text = "Seat four people at a single table in the formal salon."
+    for message, expected in [("", 0), (text, 4)]:
+        brief, questions = requirement_controls(open_count, message, previous)
+        assert not questions and brief.dining_seats == expected
+    _, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, dining_seats=3), text, previous
+    )
+    assert any("one total number" in q for q in questions)

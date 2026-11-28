@@ -1019,7 +1019,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             totals.add(minimum)
     stated = next(iter(totals)) if len(totals) == 1 else None
     if len(totals) > 1 or (
-        totals and "dining_seats" in explicit and seats not in totals
+        totals and "dining_seats" in explicit and seats > 0 and seats not in totals
     ):
         questions.append(
             "Confirm one total number of dining places in both the brief and controls."
@@ -1078,7 +1078,12 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         for match in REJECTED_WIDTH.finditer(message):
             # Keep the negation inside "will not fit" intact, while checking
             # whether the client actually asserts the objection.
-            context = _affirmative_clauses(message[: match.start()] + " __objection__")
+            prefix = re.split(
+                r"[;!?]|\.(?!\d)|\bbut\b|,?\s+and\s+(?=(?:(?:the|an?)\s+)?$)",
+                message[: match.start()].lower(),
+            )[-1]
+            prefix = re.sub(r"\b(?:no doubt|without (?:a )?doubt)\b", "certain", prefix)
+            context = _affirmative_clauses(prefix + " __objection__")
             if not any(
                 part.endswith("__objection__")
                 and not re.search(r"\b(?:if|whether|unless|doubt)\b[^,;.!?]*$", part)
