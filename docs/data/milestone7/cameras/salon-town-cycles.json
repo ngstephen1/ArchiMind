@@ -1,0 +1,38 @@
+{
+  "project": "0bb3939b-7b10-475d-9ef6-4823d9f9204a",
+  "revision": 1,
+  "room": "salon",
+  "pose": {
+    "room": "salon",
+    "eye": [
+      5.80096,
+      1.57,
+      -0.59784
+    ],
+    "target": [
+      5.146399250485873,
+      1.3615401001539005,
+      -1.3245412421564027
+    ],
+    "fov": 61.0,
+    "aspect": 1.6326530612244898
+  },
+  "blender": "5.1.2 (ec6e62d40fa9)",
+  "stage": "CPU proof",
+  "proof_seconds": 780.0,
+  "manifest_sha256": "1d424a603c2f899abee675172a3957579d5206353805a036a87402dcd883c463",
+  "packed_blend_sha256": "6abc4dea3a04b01542b8893f7da2df6161834869a9a7ab5758b8f8977fe5a5f6",
+  "api_png_sha256": "6be3e28d9bdc376fe5c596b91696a173d948a0370dd5a8e1069dfc7d33a5e81c",
+  "town_view_size": [
+    1176,
+    720
+  ],
+  "cycles_view_size": [
+    1176,
+    720
+  ],
+  "repeated_post": "HTTP 200 image/png; identical bytes to cached output",
+  "browser_status": "salon · Town / Blender · Revision 1",
+  "browser_errors": [],
+  "visual_check": "Window mullions, ceiling pendants and dining group align. Exterior imagery, art and some materials differ across the two rendering engines."
+}

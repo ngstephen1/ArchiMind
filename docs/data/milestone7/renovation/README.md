@@ -13,6 +13,8 @@ Chrome at 1440 × 1000 used a local six-room fixture, project `aff79a22-91e3-414
 | 3 → 4 → 5 | Closed the opening, then undid the closure. The saved home in revision 5 matched revision 3. |
 | 5 | Previewed reversing the 0.03 m partition move. The salon changed from 33.04 to 32.84 m² and living from 36.09 to 36.29 m². [Live areas](renovation-live-areas.jpg) |
 
+A keyboard walkthrough started at the same saved kitchen camera facing the edited partition in revisions 4 and 5. Walking forward stopped inside Kitchen-Dining against the solid wall in revision 4. In revision 5 it passed into Study through the restored opening.
+
 Run `python -m pytest tests/test_town_renovation.py` from the repository root. Fixtures cover exterior wall stability, retained furniture and window locations, opening alignment, different portal heights and obstructed edits.
 
 The editor supports full-width north/south room pairs in Town's rectangular gallery layouts. The coordinated kitchen-to-salon passage in a service-core layout and exterior shell are protected. This is a conceptual floor plan. A project designer needs site and structural information to assess a built partition.
