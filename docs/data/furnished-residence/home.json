@@ -1,0 +1,1307 @@
+{
+  "version": 1,
+  "width": 15.0,
+  "depth": 16.0,
+  "hall": 6.592,
+  "rooms": [
+    {
+      "origin": [
+        0,
+        0
+      ],
+      "asset_bindings": [
+        {
+          "furniture_id": "salon-dining",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        },
+        {
+          "furniture_id": "salon-suite",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        }
+      ],
+      "design": {
+        "room": {
+          "id": "salon",
+          "name": "Salon",
+          "width_m": 6.592,
+          "depth_m": 4.982,
+          "ceiling_height_m": 2.8,
+          "doors": [
+            {
+              "id": "salon-door",
+              "wall": "east",
+              "offset_m": 1.941,
+              "width_m": 1.1,
+              "height_m": 2.15
+            }
+          ],
+          "windows": [
+            {
+              "id": "salon-window",
+              "wall": "west",
+              "offset_m": 1.066,
+              "width_m": 2.85,
+              "height_m": 1.75,
+              "sill_height_m": 0.55
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "salon-dining",
+            "name": "Salon Dining",
+            "category": "dining",
+            "x_m": 3.2,
+            "y_m": 2.062,
+            "width_m": 2.2,
+            "depth_m": 2.92,
+            "height_m": 1.0,
+            "rotation_deg": 0
+          },
+          {
+            "id": "salon-suite",
+            "name": "Salon Suite",
+            "category": "seating",
+            "x_m": 0.0,
+            "y_m": 2.632,
+            "width_m": 2.8,
+            "depth_m": 2.35,
+            "height_m": 0.94,
+            "rotation_deg": 0
+          },
+          {
+            "id": "media-console",
+            "name": "Media Console",
+            "category": "storage",
+            "x_m": 1.648,
+            "y_m": 0.08,
+            "width_m": 1.5,
+            "depth_m": 0.36,
+            "height_m": 0.7,
+            "rotation_deg": 0
+          },
+          {
+            "id": "side-table",
+            "name": "Side Table",
+            "category": "table",
+            "x_m": 5.992,
+            "y_m": 4.382,
+            "width_m": 0.52,
+            "depth_m": 0.5,
+            "height_m": 0.55,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "salon-dining",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "salon-suite",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [
+          {
+            "id": "art",
+            "kind": "art",
+            "asset_id": null,
+            "x_m": 2.696,
+            "y_m": 4.952,
+            "z_m": 1.05,
+            "width_m": 1.2,
+            "depth_m": 0.03,
+            "height_m": 0.9,
+            "wall": "north",
+            "rotation_deg": 180
+          },
+          {
+            "id": "curtain:salon-window",
+            "kind": "curtain",
+            "asset_id": null,
+            "x_m": 0.06,
+            "y_m": 0.916,
+            "z_m": 0.02,
+            "width_m": 0.08,
+            "depth_m": 3.15,
+            "height_m": 2.66,
+            "wall": "west",
+            "rotation_deg": 90,
+            "refined": true
+          },
+          {
+            "id": "pendant",
+            "kind": "pendant",
+            "asset_id": "designer:layered-pendant@1.0.0",
+            "x_m": 3.071,
+            "y_m": 2.266,
+            "z_m": 2.1,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 0.7,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "plant",
+            "kind": "plant",
+            "asset_id": null,
+            "x_m": 0.05,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 1.1,
+            "wall": null,
+            "rotation_deg": 0,
+            "refined": true
+          },
+          {
+            "id": "floor_lamp",
+            "kind": "floor_lamp",
+            "asset_id": null,
+            "x_m": 6.142,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.4,
+            "depth_m": 0.4,
+            "height_m": 1.6,
+            "wall": null,
+            "rotation_deg": 0
+          }
+        ],
+        "skipped": [
+          "rug:no_anchor"
+        ]
+      }
+    },
+    {
+      "origin": [
+        0,
+        4.982
+      ],
+      "asset_bindings": [
+        {
+          "furniture_id": "media-console",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        },
+        {
+          "furniture_id": "reading-suite",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        }
+      ],
+      "design": {
+        "room": {
+          "id": "living",
+          "name": "Living",
+          "width_m": 6.592,
+          "depth_m": 5.505,
+          "ceiling_height_m": 2.8,
+          "doors": [
+            {
+              "id": "living-door",
+              "wall": "east",
+              "offset_m": 2.2024999999999997,
+              "width_m": 1.1,
+              "height_m": 2.15
+            }
+          ],
+          "windows": [
+            {
+              "id": "living-window",
+              "wall": "west",
+              "offset_m": 2.0525,
+              "width_m": 1.4,
+              "height_m": 1.15,
+              "sill_height_m": 1.0
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "media-console",
+            "name": "Media Console",
+            "category": "storage",
+            "x_m": 2.47,
+            "y_m": 5.125,
+            "width_m": 1.6,
+            "depth_m": 0.38,
+            "height_m": 0.64,
+            "rotation_deg": 0
+          },
+          {
+            "id": "reading-suite",
+            "name": "Reading Suite",
+            "category": "seating",
+            "x_m": 1.33,
+            "y_m": 0.69,
+            "width_m": 2.85,
+            "depth_m": 2.35,
+            "height_m": 1.4,
+            "rotation_deg": 0
+          },
+          {
+            "id": "bookcase",
+            "name": "Bookcase",
+            "category": "storage",
+            "x_m": 5.262,
+            "y_m": 0.1,
+            "width_m": 1.25,
+            "depth_m": 0.36,
+            "height_m": 1.65,
+            "rotation_deg": 0
+          },
+          {
+            "id": "console-table",
+            "name": "Console Table",
+            "category": "table",
+            "x_m": 5.162,
+            "y_m": 4.985,
+            "width_m": 1.35,
+            "depth_m": 0.42,
+            "height_m": 0.78,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "media-console",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "reading-suite",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [
+          {
+            "id": "art",
+            "kind": "art",
+            "asset_id": null,
+            "x_m": 2.696,
+            "y_m": 5.475,
+            "z_m": 1.05,
+            "width_m": 1.2,
+            "depth_m": 0.03,
+            "height_m": 0.9,
+            "wall": "north",
+            "rotation_deg": 180
+          },
+          {
+            "id": "curtain:living-window",
+            "kind": "curtain",
+            "asset_id": null,
+            "x_m": 0.06,
+            "y_m": 1.9025,
+            "z_m": 0.02,
+            "width_m": 0.08,
+            "depth_m": 1.7,
+            "height_m": 2.66,
+            "wall": "west",
+            "rotation_deg": 90
+          },
+          {
+            "id": "pendant",
+            "kind": "pendant",
+            "asset_id": "designer:layered-pendant@1.0.0",
+            "x_m": 3.071,
+            "y_m": 2.5275,
+            "z_m": 2.1,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 0.7,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "plant",
+            "kind": "plant",
+            "asset_id": null,
+            "x_m": 0.05,
+            "y_m": 5.005,
+            "z_m": 0.0,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 1.1,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "floor_lamp",
+            "kind": "floor_lamp",
+            "asset_id": null,
+            "x_m": 0.05,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.4,
+            "depth_m": 0.4,
+            "height_m": 1.6,
+            "wall": null,
+            "rotation_deg": 0
+          }
+        ],
+        "skipped": [
+          "rug:no_anchor"
+        ]
+      }
+    },
+    {
+      "origin": [
+        0,
+        10.487
+      ],
+      "asset_bindings": [
+        {
+          "furniture_id": "bedside-lamp",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        },
+        {
+          "furniture_id": "belaya",
+          "asset_id": "abo-b074l4976t-amazon-co-uk",
+          "render_version": "1.0.0",
+          "envelope_sha256": "f2b706c8111e5f9321d3d90856d914a60ab63aebdb0cf30dd4b8847f493723a5"
+        },
+        {
+          "furniture_id": "desk-chair",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        },
+        {
+          "furniture_id": "queen-bed",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        }
+      ],
+      "design": {
+        "room": {
+          "id": "bedroom",
+          "name": "Bedroom",
+          "width_m": 6.592,
+          "depth_m": 5.513,
+          "ceiling_height_m": 2.8,
+          "doors": [
+            {
+              "id": "bedroom-door",
+              "wall": "east",
+              "offset_m": 2.2065,
+              "width_m": 1.1,
+              "height_m": 2.15
+            }
+          ],
+          "windows": [
+            {
+              "id": "bedroom-window",
+              "wall": "west",
+              "offset_m": 2.0564999999999998,
+              "width_m": 1.4,
+              "height_m": 1.15,
+              "sill_height_m": 1.0
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "belaya",
+            "name": "Belaya writing desk",
+            "category": "desk",
+            "x_m": 0.0,
+            "y_m": 4.711126822710037,
+            "width_m": 1.6,
+            "depth_m": 0.8018731772899628,
+            "height_m": 0.7516312003135682,
+            "rotation_deg": 0
+          },
+          {
+            "id": "queen-bed",
+            "name": "Queen Bed",
+            "category": "bed",
+            "x_m": 1.91,
+            "y_m": 0.26,
+            "width_m": 1.6,
+            "depth_m": 2.0,
+            "height_m": 0.6,
+            "rotation_deg": 0
+          },
+          {
+            "id": "desk-chair",
+            "name": "Oak writing chair",
+            "category": "chair",
+            "x_m": 0.56,
+            "y_m": 4.131126822710037,
+            "width_m": 0.48,
+            "depth_m": 0.52,
+            "height_m": 0.83,
+            "rotation_deg": 0
+          },
+          {
+            "id": "bedside-lamp",
+            "name": "Nightstand with reading lamp",
+            "category": "table",
+            "x_m": 1.39,
+            "y_m": 1.8299999999999998,
+            "width_m": 0.48,
+            "depth_m": 0.43,
+            "height_m": 1.06,
+            "rotation_deg": 0
+          },
+          {
+            "id": "wardrobe",
+            "name": "Wardrobe",
+            "category": "wardrobe",
+            "x_m": 4.612,
+            "y_m": 0.1,
+            "width_m": 1.9,
+            "depth_m": 0.61,
+            "height_m": 2.1,
+            "rotation_deg": 0
+          },
+          {
+            "id": "low-dresser",
+            "name": "Low Dresser",
+            "category": "storage",
+            "x_m": 2.621,
+            "y_m": 4.953,
+            "width_m": 1.35,
+            "depth_m": 0.48,
+            "height_m": 0.86,
+            "rotation_deg": 0
+          },
+          {
+            "id": "bench",
+            "name": "Bench",
+            "category": "table",
+            "x_m": 4.285,
+            "y_m": 5.013,
+            "width_m": 1.15,
+            "depth_m": 0.42,
+            "height_m": 0.44,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "bedside-lamp",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "belaya",
+            "asset_id": null,
+            "reason": "designer"
+          },
+          {
+            "furniture_id": "desk-chair",
+            "asset_id": "designer:oak-sage-writing-chair@1.1.0",
+            "reason": "designer"
+          },
+          {
+            "furniture_id": "queen-bed",
+            "asset_id": "designer:scandi-oak-bed@1.0.0",
+            "reason": "designer"
+          }
+        ],
+        "dressing": [
+          {
+            "id": "rug",
+            "kind": "rug",
+            "asset_id": null,
+            "x_m": 1.46,
+            "y_m": 0.15,
+            "z_m": 0.0,
+            "width_m": 2.5,
+            "depth_m": 2.56,
+            "height_m": 0.012,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "art",
+            "kind": "art",
+            "asset_id": null,
+            "x_m": 2.696,
+            "y_m": 5.483,
+            "z_m": 1.05,
+            "width_m": 1.2,
+            "depth_m": 0.03,
+            "height_m": 0.9,
+            "wall": "north",
+            "rotation_deg": 180
+          },
+          {
+            "id": "curtain:bedroom-window",
+            "kind": "curtain",
+            "asset_id": null,
+            "x_m": 0.06,
+            "y_m": 1.9065,
+            "z_m": 0.02,
+            "width_m": 0.08,
+            "depth_m": 1.7,
+            "height_m": 2.66,
+            "wall": "west",
+            "rotation_deg": 90,
+            "refined": true
+          },
+          {
+            "id": "pendant",
+            "kind": "pendant",
+            "asset_id": "designer:layered-pendant@1.0.0",
+            "x_m": 2.485,
+            "y_m": 1.035,
+            "z_m": 2.1,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 0.7,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "plant",
+            "kind": "plant",
+            "asset_id": null,
+            "x_m": 0.05,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 1.1,
+            "wall": null,
+            "rotation_deg": 0,
+            "refined": true
+          },
+          {
+            "id": "floor_lamp",
+            "kind": "floor_lamp",
+            "asset_id": null,
+            "x_m": 6.142,
+            "y_m": 5.063,
+            "z_m": 0.0,
+            "width_m": 0.4,
+            "depth_m": 0.4,
+            "height_m": 1.6,
+            "wall": null,
+            "rotation_deg": 0
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "origin": [
+        8.192,
+        0
+      ],
+      "asset_bindings": [
+        {
+          "furniture_id": "tub",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        },
+        {
+          "furniture_id": "vanity",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        }
+      ],
+      "design": {
+        "room": {
+          "id": "bathroom",
+          "name": "Bathroom",
+          "width_m": 6.808,
+          "depth_m": 4.252,
+          "ceiling_height_m": 2.8,
+          "doors": [
+            {
+              "id": "bathroom-door",
+              "wall": "west",
+              "offset_m": 1.5759999999999998,
+              "width_m": 1.1,
+              "height_m": 2.15
+            }
+          ],
+          "windows": [
+            {
+              "id": "bathroom-window",
+              "wall": "east",
+              "offset_m": 1.426,
+              "width_m": 1.4,
+              "height_m": 1.15,
+              "sill_height_m": 1.0
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "tub",
+            "name": "Tub",
+            "category": "bath",
+            "x_m": 5.308,
+            "y_m": 3.532,
+            "width_m": 1.5,
+            "depth_m": 0.72,
+            "height_m": 0.55,
+            "rotation_deg": 0
+          },
+          {
+            "id": "vanity",
+            "name": "Vanity",
+            "category": "vanity",
+            "x_m": 5.958,
+            "y_m": 0.0,
+            "width_m": 0.85,
+            "depth_m": 0.5,
+            "height_m": 0.85,
+            "rotation_deg": 0
+          },
+          {
+            "id": "linen-cabinet",
+            "name": "Linen Cabinet",
+            "category": "storage",
+            "x_m": 0.08,
+            "y_m": 3.732,
+            "width_m": 0.8,
+            "depth_m": 0.42,
+            "height_m": 1.5,
+            "rotation_deg": 0
+          },
+          {
+            "id": "walk-in-shower",
+            "name": "Walk In Shower",
+            "category": "shower",
+            "x_m": 1.2,
+            "y_m": 2.82,
+            "width_m": 1.35,
+            "depth_m": 1.35,
+            "height_m": 2.05,
+            "rotation_deg": 0
+          },
+          {
+            "id": "ceramic-wc",
+            "name": "Ceramic Wc",
+            "category": "toilet",
+            "x_m": 3.55,
+            "y_m": 3.36,
+            "width_m": 0.47,
+            "depth_m": 0.79,
+            "height_m": 0.79,
+            "rotation_deg": 0
+          },
+          {
+            "id": "towel-bench",
+            "name": "Towel Bench",
+            "category": "bench",
+            "x_m": 3.79,
+            "y_m": 1.85,
+            "width_m": 1.1,
+            "depth_m": 0.44,
+            "height_m": 0.57,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "tub",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "vanity",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [
+          {
+            "id": "art",
+            "kind": "art",
+            "asset_id": null,
+            "x_m": 2.804,
+            "y_m": 4.222,
+            "z_m": 1.05,
+            "width_m": 1.2,
+            "depth_m": 0.03,
+            "height_m": 0.9,
+            "wall": "north",
+            "rotation_deg": 180
+          },
+          {
+            "id": "curtain:bathroom-window",
+            "kind": "curtain",
+            "asset_id": null,
+            "x_m": 6.668,
+            "y_m": 1.276,
+            "z_m": 0.02,
+            "width_m": 0.08,
+            "depth_m": 1.7,
+            "height_m": 2.66,
+            "wall": "east",
+            "rotation_deg": 270
+          },
+          {
+            "id": "pendant",
+            "kind": "pendant",
+            "asset_id": "designer:layered-pendant@1.0.0",
+            "x_m": 3.179,
+            "y_m": 1.901,
+            "z_m": 2.1,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 0.7,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "plant",
+            "kind": "plant",
+            "asset_id": null,
+            "x_m": 0.05,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 1.1,
+            "wall": null,
+            "rotation_deg": 0
+          }
+        ],
+        "skipped": [
+          "rug:no_anchor",
+          "floor_lamp:wet_room"
+        ]
+      }
+    },
+    {
+      "origin": [
+        8.192,
+        4.252
+      ],
+      "asset_bindings": [
+        {
+          "furniture_id": "breakfast-suite",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        },
+        {
+          "furniture_id": "counter",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        }
+      ],
+      "design": {
+        "room": {
+          "id": "kitchen-dining",
+          "name": "Kitchen-Dining",
+          "width_m": 6.808,
+          "depth_m": 6.461,
+          "ceiling_height_m": 2.8,
+          "doors": [
+            {
+              "id": "kitchen-dining-door",
+              "wall": "west",
+              "offset_m": 2.6805000000000003,
+              "width_m": 1.1,
+              "height_m": 2.15
+            }
+          ],
+          "windows": [
+            {
+              "id": "kitchen-dining-window",
+              "wall": "east",
+              "offset_m": 2.5305,
+              "width_m": 1.4,
+              "height_m": 1.15,
+              "sill_height_m": 1.0
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "breakfast-suite",
+            "name": "Breakfast Suite",
+            "category": "table",
+            "x_m": 1.87,
+            "y_m": 0.0,
+            "width_m": 1.75,
+            "depth_m": 2.4,
+            "height_m": 0.87,
+            "rotation_deg": 0
+          },
+          {
+            "id": "counter",
+            "name": "Counter",
+            "category": "counter",
+            "x_m": 0.0,
+            "y_m": 5.821,
+            "width_m": 2.0,
+            "depth_m": 0.64,
+            "height_m": 0.92,
+            "rotation_deg": 0
+          },
+          {
+            "id": "refrigerator",
+            "name": "Refrigerator",
+            "category": "storage",
+            "x_m": 0.08,
+            "y_m": 0.1,
+            "width_m": 0.76,
+            "depth_m": 0.68,
+            "height_m": 1.8,
+            "rotation_deg": 0
+          },
+          {
+            "id": "pantry",
+            "name": "Pantry",
+            "category": "storage",
+            "x_m": 5.828,
+            "y_m": 2.931,
+            "width_m": 0.9,
+            "depth_m": 0.6,
+            "height_m": 2.1,
+            "rotation_deg": 0
+          },
+          {
+            "id": "prep-table",
+            "name": "Prep Table",
+            "category": "table",
+            "x_m": 4.425,
+            "y_m": 0.08,
+            "width_m": 1.32,
+            "depth_m": 0.65,
+            "height_m": 0.9,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "breakfast-suite",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "counter",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [
+          {
+            "id": "rug",
+            "kind": "rug",
+            "asset_id": null,
+            "x_m": 1.42,
+            "y_m": 0.15,
+            "z_m": 0.0,
+            "width_m": 2.65,
+            "depth_m": 2.7,
+            "height_m": 0.012,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "art",
+            "kind": "art",
+            "asset_id": null,
+            "x_m": 2.804,
+            "y_m": 6.431,
+            "z_m": 1.05,
+            "width_m": 1.2,
+            "depth_m": 0.03,
+            "height_m": 0.9,
+            "wall": "north",
+            "rotation_deg": 180
+          },
+          {
+            "id": "curtain:kitchen-dining-window",
+            "kind": "curtain",
+            "asset_id": null,
+            "x_m": 6.668,
+            "y_m": 2.3805,
+            "z_m": 0.02,
+            "width_m": 0.08,
+            "depth_m": 1.7,
+            "height_m": 2.66,
+            "wall": "east",
+            "rotation_deg": 270
+          },
+          {
+            "id": "pendant",
+            "kind": "pendant",
+            "asset_id": "designer:layered-pendant@1.0.0",
+            "x_m": 2.52,
+            "y_m": 0.975,
+            "z_m": 2.1,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 0.7,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "plant",
+            "kind": "plant",
+            "asset_id": null,
+            "x_m": 6.308,
+            "y_m": 5.961,
+            "z_m": 0.0,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 1.1,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "floor_lamp",
+            "kind": "floor_lamp",
+            "asset_id": null,
+            "x_m": 6.358,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.4,
+            "depth_m": 0.4,
+            "height_m": 1.6,
+            "wall": null,
+            "rotation_deg": 0
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "origin": [
+        8.192,
+        10.713000000000001
+      ],
+      "asset_bindings": [
+        {
+          "furniture_id": "bookcase",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        },
+        {
+          "furniture_id": "writing-suite",
+          "asset_id": null,
+          "render_version": null,
+          "envelope_sha256": null
+        }
+      ],
+      "design": {
+        "room": {
+          "id": "study",
+          "name": "Study",
+          "width_m": 6.808,
+          "depth_m": 5.286999999999999,
+          "ceiling_height_m": 2.8,
+          "doors": [
+            {
+              "id": "study-door",
+              "wall": "west",
+              "offset_m": 2.0934999999999997,
+              "width_m": 1.1,
+              "height_m": 2.15
+            }
+          ],
+          "windows": [
+            {
+              "id": "study-window",
+              "wall": "east",
+              "offset_m": 1.9434999999999996,
+              "width_m": 1.4,
+              "height_m": 1.15,
+              "sill_height_m": 1.0
+            }
+          ]
+        },
+        "furniture": [
+          {
+            "id": "bookcase",
+            "name": "Bookcase",
+            "category": "storage",
+            "x_m": 4.67,
+            "y_m": 0.0,
+            "width_m": 0.85,
+            "depth_m": 0.34,
+            "height_m": 1.75,
+            "rotation_deg": 0
+          },
+          {
+            "id": "writing-suite",
+            "name": "Writing Suite",
+            "category": "desk",
+            "x_m": 0.0,
+            "y_m": 3.436999999999999,
+            "width_m": 1.75,
+            "depth_m": 1.85,
+            "height_m": 1.13,
+            "rotation_deg": 0
+          },
+          {
+            "id": "sofa",
+            "name": "Sofa",
+            "category": "sofa",
+            "x_m": 5.228,
+            "y_m": 4.427,
+            "width_m": 1.5,
+            "depth_m": 0.76,
+            "height_m": 0.83,
+            "rotation_deg": 0
+          },
+          {
+            "id": "side-table",
+            "name": "Side Table",
+            "category": "table",
+            "x_m": 6.148,
+            "y_m": 2.413,
+            "width_m": 0.58,
+            "depth_m": 0.46,
+            "height_m": 0.56,
+            "rotation_deg": 0
+          },
+          {
+            "id": "library-table",
+            "name": "Library Table",
+            "category": "table",
+            "x_m": 2.55,
+            "y_m": 2.65,
+            "width_m": 1.75,
+            "depth_m": 0.84,
+            "height_m": 0.83,
+            "rotation_deg": 0
+          },
+          {
+            "id": "library-chair",
+            "name": "Library Chair",
+            "category": "chair",
+            "x_m": 3.06,
+            "y_m": 1.77,
+            "width_m": 0.71,
+            "depth_m": 0.68,
+            "height_m": 0.86,
+            "rotation_deg": 0
+          },
+          {
+            "id": "reading-light",
+            "name": "Reading Light",
+            "category": "lamp",
+            "x_m": 4.65,
+            "y_m": 4.52,
+            "width_m": 0.43,
+            "depth_m": 0.43,
+            "height_m": 1.48,
+            "rotation_deg": 0
+          }
+        ],
+        "name": "Generated layout"
+      },
+      "style": {
+        "style_pack": {
+          "id": "scandinavian",
+          "version": "1.0.0"
+        },
+        "bindings": [
+          {
+            "furniture_id": "bookcase",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          },
+          {
+            "furniture_id": "writing-suite",
+            "asset_id": null,
+            "reason": "procedural_fallback"
+          }
+        ],
+        "dressing": [
+          {
+            "id": "art",
+            "kind": "art",
+            "asset_id": null,
+            "x_m": 2.804,
+            "y_m": 5.257,
+            "z_m": 1.05,
+            "width_m": 1.2,
+            "depth_m": 0.03,
+            "height_m": 0.9,
+            "wall": "north",
+            "rotation_deg": 180
+          },
+          {
+            "id": "curtain:study-window",
+            "kind": "curtain",
+            "asset_id": null,
+            "x_m": 6.668,
+            "y_m": 1.7935,
+            "z_m": 0.02,
+            "width_m": 0.08,
+            "depth_m": 1.7,
+            "height_m": 2.66,
+            "wall": "east",
+            "rotation_deg": 270
+          },
+          {
+            "id": "pendant",
+            "kind": "pendant",
+            "asset_id": "designer:layered-pendant@1.0.0",
+            "x_m": 3.179,
+            "y_m": 2.4185,
+            "z_m": 2.1,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 0.7,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "plant",
+            "kind": "plant",
+            "asset_id": null,
+            "x_m": 0.05,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.45,
+            "depth_m": 0.45,
+            "height_m": 1.1,
+            "wall": null,
+            "rotation_deg": 0
+          },
+          {
+            "id": "floor_lamp",
+            "kind": "floor_lamp",
+            "asset_id": null,
+            "x_m": 6.358,
+            "y_m": 0.05,
+            "z_m": 0.0,
+            "width_m": 0.4,
+            "depth_m": 0.4,
+            "height_m": 1.6,
+            "wall": null,
+            "rotation_deg": 0
+          }
+        ],
+        "skipped": [
+          "rug:no_anchor"
+        ]
+      }
+    }
+  ],
+  "presentation_detail": "bedroom-salon-v1",
+  "style_pack": {
+    "id": "scandinavian",
+    "version": "1.0.0"
+  },
+  "palette": "oak",
+  "evidence": {
+    "reachable_rooms": 6,
+    "bedroom_center_from_front_m": 13.24,
+    "study_window_width_m": 1.4,
+    "comparison": {
+      "routes": [
+        {
+          "room": "study",
+          "target": "living",
+          "distance_m": 8.622
+        },
+        {
+          "room": "kitchen-dining",
+          "target": "salon",
+          "distance_m": 7.992
+        },
+        {
+          "room": "bedroom",
+          "target": "bathroom",
+          "distance_m": 14.118
+        }
+      ],
+      "modeled_openings_m": {
+        "salon": 1.1,
+        "living": 1.1,
+        "bedroom": 1.1,
+        "bathroom": 1.1,
+        "kitchen-dining": 1.1,
+        "study": 1.1
+      },
+      "dining_places": {
+        "salon": 4,
+        "kitchen-dining": 4
+      },
+      "passage_m": 0.6,
+      "required_dining_seats": 0,
+      "split_dining": false
+    },
+    "salon": {
+      "dining_places": 4,
+      "chair_pullout_m": 0.5,
+      "basis": "A reserved dining group includes a 0.50 m withdrawal strip behind each chair row.",
+      "seating": "A three-piece conversation group faces the central coffee table."
+    },
+    "room_preferences": [
+      {
+        "room": "kitchen-dining",
+        "target": "salon",
+        "relation": "near",
+        "center_distance_m": 9.685
+      },
+      {
+        "room": "living",
+        "target": "study",
+        "relation": "far",
+        "center_distance_m": 10.025
+      }
+    ]
+  },
+  "id": "56225c7adbba53b7bf05f7e04fd1df642f41337c757af5b3f65aef255fb0530a"
+}

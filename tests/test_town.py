@@ -982,3 +982,30 @@ def test_compound_conference_failure_offers_actionable_review(local, monkeypatch
     assert local.get("/api/projects/" + p).json()["revision"] == 0
     assert len(calls) == 2 and calls.count("initial style direction") == 1
     assert not service.work_once()
+
+
+def test_room_edit_presets_require_matching_preview_and_current_revision(local):
+    source = (
+        Path(__file__).resolve().parents[1] / "docs/data/furnished-residence/home.json"
+    )
+    home = json.loads(source.read_text())
+    saved = service.create("local-designer", home=home)
+    path = f"/api/projects/{saved['project']}"
+    for base, prompt in enumerate(
+        (
+            "Seat six at one table in the salon and keep the lounge seating unchanged.",
+            "Move the study table and chair together to clear a 90 cm passage from the door to the window-side table.",
+        ),
+        start=1,
+    ):
+        body = {"message": prompt, "base": base}
+        preview = local.post(path + "/room-edit/preview", json=body).json()["home"]
+        assert local.get(path).json()["revision"] == base
+        endpoint = path + "/room-edit/apply"
+        assert (
+            local.post(endpoint, json=body | {"preview_id": "wrong"}).status_code == 409
+        )
+        request = body | {"preview_id": preview["id"]}
+        assert local.post(endpoint, json=request).json()["home"] == preview
+        assert local.post(endpoint, json=request).status_code == 409
+    assert local.get(path + "?revision=1").json()["home"] == home

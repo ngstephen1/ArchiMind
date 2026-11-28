@@ -1,3 +1,4 @@
+import { GroundedSkybox } from "three/addons/objects/GroundedSkybox.js";
 import { houseView } from "./house_view.js";
 import { turnedCoverlet } from "./studio_textiles.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
@@ -376,6 +377,50 @@ export function createTown(canvas, status, action) {
     }
   }
   batch(street);
+  const townScenery = street.children.filter(child => child !== hero);
+  const streetObstacles = obstacles.slice();
+  const siteSetting = document.getElementById("siteSetting");
+  let meadowShell, meadowActive = false, meadowLoad;
+  function displaySite() {
+    const wasMeadow = meadowActive;
+    meadowActive = siteSetting.value === "meadow" && Boolean(meadowShell);
+    for (const child of townScenery) child.visible = !meadowActive;
+    obstacles.splice(0, obstacles.length, ...(meadowActive ? [] : streetObstacles));
+    if (wasMeadow && !meadowActive && !inside && obstacles.some(([l,t,r,b]) =>
+      pos.x >= l - 0.22 && pos.x <= r + 0.22 && pos.z >= t - 0.22 && pos.z <= b + 0.22)) {
+      pos.set(doorX, 0, 1.6);
+    }
+    if (meadowShell) meadowShell.visible = meadowActive;
+    canvas.dataset.landscape = meadowActive ? "meadow" : "town";
+  }
+  function chooseSite() {
+    if (siteSetting.value === "meadow" && !meadowLoad) {
+      meadowLoad = new T.TextureLoader().loadAsync("./assets/meadow-4k.jpg").then(texture => {
+        texture.colorSpace = T.SRGBColorSpace;
+        meadowShell = new GroundedSkybox(texture, 4, 90, 64);
+        meadowShell.material.fog = false;
+        meadowShell.material.toneMapped = false;
+        meadowShell.position.set(7, 3.99, -7);
+        meadowShell.renderOrder = -1;
+        street.add(meadowShell);
+        displaySite();
+      }).catch(() => {
+        meadowLoad = null;
+        siteSetting.value = "town";
+        displaySite();
+      });
+    }
+    displaySite();
+  }
+  siteSetting.value = new URL(location.href).searchParams.get("setting") === "meadow" ? "meadow" : "town";
+  siteSetting.onchange = () => {
+    const url = new URL(location.href);
+    if (siteSetting.value === "meadow") url.searchParams.set("setting", "meadow");
+    else url.searchParams.delete("setting");
+    history.replaceState(null, "", url);
+    chooseSite();
+  };
+  chooseSite();
   const head = new T.SphereGeometry(0.185, 16, 12),
     limb = new T.CapsuleGeometry(0.09, 0.42, 4, 8);
   mesh(avatar, head, "#b38467", 0, 1.57, 0);
@@ -559,6 +604,20 @@ export function createTown(canvas, status, action) {
     preset = (photoView.value && part)
       ? bedroomCameras(part, camera.aspect).find((item) => item.id === photoView.value)
       : null;
+    if (photoView.value === "landscape" && part?.design.room.windows.length) {
+      const room = part.design.room, win = room.windows[0];
+      const along = win.offset_m + win.width_m / 2;
+      const y = win.sill_height_m + win.height_m / 2;
+      const walls = {
+        west:  [0, along, 1, 0],
+        east:  [room.width_m, along, -1, 0],
+        north: [along, room.depth_m, 0, -1],
+        south: [along, 0, 0, 1],
+      };
+      const [localX, localY, inwardX, inwardY] = walls[win.wall];
+      const x = part.origin[0] + localX, z = -part.origin[1] - localY;
+      preset = {id: "landscape", eye: [x + inwardX * 1.45, y, z - inwardY * 1.45], target: [x, y, z], reason: "View through the saved bedroom window."};
+    }
     photoReason.textContent = preset?.reason || "";
     canvas.dataset.camera = preset?.id || "walking";
     look = false;
@@ -659,7 +718,7 @@ export function createTown(canvas, status, action) {
   }
   function refresh() {
     const text = inside ? "Exit house" : "Enter house",
-      place = preset ? "Bedroom" : inside ? roomName || "Entrance hall" : "Market Square";
+      place = preset ? "Bedroom" : inside ? roomName || "Entrance hall" : meadowActive ? "Woodland meadow" : "Market Square";
     photoControls.hidden = !inside;
     if (roomJump.hidden === inside) roomJump.hidden = !inside;
     if (action.textContent !== text) action.textContent = text;
@@ -999,7 +1058,7 @@ export function createTown(canvas, status, action) {
         indoor.push([ox + f.x_m, -oy - f.y_m - d, ox + f.x_m + w, -oy - f.y_m]);
         const usesStudioFurniture = h.rooms.some(p => p.design.room.id === "salon") ||
           (h.service_layout && f.id === "breakfast-suite");
-        const pieces = r.id !== "bedroom" && usesStudioFurniture ? studioFurniture(f,part.suite_yaw_deg) : [];
+        const pieces = r.id !== "bedroom" && usesStudioFurniture ? studioFurniture(f, part.suite_yaw_deg, part.dining_variant) : [];
         if (pieces.length) {
           pieces.forEach(studioPiece);
           continue;

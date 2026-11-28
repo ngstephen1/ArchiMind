@@ -25,10 +25,9 @@ const PACK_MANIFESTS = Object.fromEntries(
 import showcase from "./showcase.json";
 const el = (id) => document.getElementById(id);
 const cfg = await fetch("./config.json").then((r) => r.json());
-const url = new URL(location.href),
-  local = cfg.mode === "local";
+const local = cfg.mode === "local";
 const tourOnly = !local && !(cfg.api && cfg.editor && cfg.supabase && cfg.anon);
-let project = url.searchParams.get("project"),
+let project = new URL(location.href).searchParams.get("project"),
   revision = 0,
   applied = showcase,
   job = null,
@@ -230,6 +229,7 @@ function sync(data) {
   el("chairStudio").hidden = revision === 0 || (data.head !== undefined && data.head !== revision);
   el("chairStudio").open = false;
   el("selectChair").hidden = el("chairStudio").hidden || !applied.rooms.some(r => r.design.room.id === "bedroom" && r.design.furniture.some(f=>f.id==="desk-chair"));
+  el("editSavedRoom").hidden = el("chairStudio").hidden;
   el("compareHouse").hidden = !revision;
   loadSavedHome();
   el("width").value = applied.width;
@@ -246,6 +246,7 @@ function sync(data) {
   el("confirmPassage").checked = false;
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
+  const url = new URL(location.href);
   url.searchParams.set("project", project);
   url.searchParams.set("revision", revision);
   history.replaceState(null, "", url);
@@ -253,6 +254,7 @@ function sync(data) {
   void refreshDecisionReviews();
 }
 async function restore() {
+  const url = new URL(location.href);
   if (tourOnly) return;
   if (project && (local || token()))
     sync(
@@ -334,6 +336,7 @@ bind("logout", async () => {
   const previous = token();
   sessionStorage.removeItem("town-session");
   job = null;
+  const url = new URL(location.href);
   url.searchParams.delete("project");
   url.searchParams.delete("revision");
   history.replaceState(null, "", url);
@@ -546,6 +549,7 @@ bind("generate", async () => {
   try {
     if (!project) {
       project = (await api("/projects", {})).project;
+      const url = new URL(location.href);
       url.searchParams.set("project", project);
       history.replaceState(null, "", url);
       links();
@@ -798,6 +802,61 @@ async function applyChair() {
   notify((editingPosition ? "Chair position" : "Designer furniture") + " saved in revision " + revision + ".");
 }
 bind("chairApply", applyChair);
+
+let roomEditPreview;
+function clearRoomEdit() {
+  roomEditPreview = null;
+  el("applyRoomEdit").hidden = true;
+  el("roomEditResult").textContent = "";
+}
+el("editSavedRoom").onclick = () => {
+  clearRoomEdit();
+  const study = applied.rooms.find(part => part.design.room.id === "study");
+  const ids = new Set(study?.design.furniture.map(item => item.id));
+  const hasGroup = ["library-table", "library-chair", "side-table"].every(id => ids.has(id));
+  el("studyPassagePreset").disabled = !hasGroup;
+  el("studyPresetHint").hidden = hasGroup;
+  el("roomEditMessage").value = "";
+  el("roomEditDialog").showModal();
+};
+el("closeRoomEdit").onclick = () => el("roomEditDialog").close();
+el("roomEditMessage").oninput = clearRoomEdit;
+for (const choice of document.querySelectorAll("[data-room-prompt]")) {
+  choice.onclick = () => {
+    clearRoomEdit();
+    el("roomEditMessage").value = choice.dataset.roomPrompt;
+    el("roomEditMessage").focus();
+  };
+}
+el("roomEditForm").onsubmit = async event => {
+  event.preventDefault();
+  clearRoomEdit();
+  const request = {base: revision, message: el("roomEditMessage").value};
+  el("previewRoomEdit").disabled = true;
+  try {
+    const result = await api("/projects/" + project + "/room-edit/preview", request);
+    if (request.message !== el("roomEditMessage").value || revision !== request.base) return;
+    roomEditPreview = {...request, preview_id: result.home.id};
+    el("roomEditResult").textContent = result.summary;
+    el("applyRoomEdit").hidden = false;
+  } catch(error) { el("roomEditResult").textContent = error.message; }
+  finally { el("previewRoomEdit").disabled = false; }
+};
+el("roomEditDialog").addEventListener("cancel", event => {
+  if (el("roomEditFields").disabled) event.preventDefault();
+});
+el("applyRoomEdit").onclick = async () => {
+  if (!roomEditPreview) return;
+  el("roomEditResult").textContent = "Saving the revised room…";
+  el("roomEditFields").disabled = true;
+  try {
+    sync(await api("/projects/" + project + "/room-edit/apply", roomEditPreview));
+    clearRoomEdit();
+    el("roomEditDialog").close();
+    notify("Room edit saved in revision " + revision + ".");
+  } catch(error) { el("roomEditResult").textContent = error.message; }
+  finally { el("roomEditFields").disabled = false; }
+};
 
 function openChair() {
   if (el("selectChair").hidden || world.homeId !== applied.id || loadingChairScene) return;

@@ -31,10 +31,27 @@
       <small class="house-hint">Double-click a room to walk inside</small>
       <aside id="roomInspector" hidden><strong id="pickedRoom"></strong><small id="pickedDimensions"></small><button id="focusRoom">Focus room</button><button id="restyleRoom">Restyle room</button><button aria-label="Close room selection" id="clearRoom">×</button></aside>
       <div id="houseTools">
+        <button id="editSavedRoom" hidden>Edit a room</button>
         <button id="selectChair" hidden>Select desk chair</button>
         <button id="compareHouse" hidden>Compare revisions</button>
         <a id="photoIntake" hidden>Room photos</a>
       </div>
+      <dialog id="roomEditDialog" aria-labelledby="roomEditTitle">
+        <form id="roomEditForm"><fieldset id="roomEditFields" style="border:0;margin:0;padding:0">
+          <div class="title"><h2 id="roomEditTitle">Edit a room</h2><button type="button" id="closeRoomEdit" aria-label="Close">×</button></div>
+          <label for="roomEditMessage">Requested change</label>
+          <textarea id="roomEditMessage" rows="4" maxlength="300" required></textarea>
+          <div class="grid">
+            <button type="button" data-room-prompt="Seat six at one table in the salon and keep the lounge seating unchanged.">Six-seat salon</button>
+            <button type="button" id="studyPassagePreset" data-room-prompt="Move the study table and chair together to clear a 90 cm passage from the door to the window-side table.">90 cm study passage</button>
+          </div>
+          <small id="studyPresetHint" hidden>The study passage edit needs the folio table, its chair and a window-side table.</small>
+          <p id="roomEditResult" role="status"></p>
+          <button id="previewRoomEdit">Check edit</button>
+          <button id="applyRoomEdit" type="button" class="dark" hidden>Save revision</button>
+          </fieldset>
+        </form>
+      </dialog>
       <form id="chairChat" hidden>
         <header><strong>Bedroom · Desk chair</strong><button type="button" id="closeChairChat" aria-label="Close chair chat">×</button></header>
         <label for="chairMessage">Move relative to the Belaya desk</label>
@@ -56,6 +73,7 @@
           <option value="doorway">Doorway</option>
           <option value="desk">Desk and chair</option>
           <option value="bedside">Bedside</option>
+          <option value="landscape">Window outlook</option>
         </select>
         <small id="photoReason" role="status"></small>
       </div>
@@ -74,6 +92,7 @@
     </main>
     <footer>
       <button id="present">Design presentation</button>
+      <select id="siteSetting" aria-label="Site landscape"><option value="town">Town streets</option><option value="meadow">Woodland meadow</option></select>
       <button id="quality" hidden>Quality: High</button>
       <label id="sweepControl"
         >Plan <input id="sweep" type="range" min="0" max="100" value="100" aria-label="Plan to room view" /> Room</label

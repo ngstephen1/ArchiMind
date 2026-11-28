@@ -107,6 +107,36 @@ def handle(request, data):
         raise db.Problem("Render action unavailable.", 404)
     with db.transaction() as q:
         if (
+            len(path) == 4
+            and path[0] == "projects"
+            and path[2] == "room-edit"
+            and path[3] in {"preview", "apply"}
+            and request.method == "POST"
+        ):
+            from . import dining_edit, study_edit
+
+            base = db.project(q, owner, path[1])
+            if not base or data.get("base") != base:
+                raise db.Problem(
+                    "Reopen the latest saved revision before editing.", 409
+                )
+            message = data.get("message")
+            if not isinstance(message, str) or len(message) > 300:
+                raise db.Problem("Enter a room edit of up to 300 characters.")
+            applying = path[3] == "apply"
+            if applying and not isinstance(data.get("preview_id"), str):
+                raise db.Problem("Preview this edit first.", 409)
+            home = db.revision(q, path[1], base)
+            module = study_edit if "study" in message.lower() else dining_edit
+            try:
+                home, summary = module.edit(home, message)
+                result = designer_chair.finish_preview(
+                    q, owner, path[1], base, home, data, applying
+                )
+            except ValueError as exc:
+                raise db.Problem(str(exc)) from exc
+            return {**result, "summary": summary}
+        if (
             len(path) == 3
             and path[0] == "projects"
             and path[2] == "service-study"
