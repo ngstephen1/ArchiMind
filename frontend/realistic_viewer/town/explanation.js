@@ -155,7 +155,16 @@ export function explanation(home, question, manifest = null, previous = null) {
     || (/\bquiet\b/i.test(question) && /\b(?:calls?|meetings?)\b/i.test(question));
   const supplier = supplierEvidence.test(question);
   const plan = planQuestions(question);
-  const answers = [...new Set(plan.map(clause => explainPlan(home, clause, manifest, previous)))];
+  const answers = [...new Set(plan.map((clause, index) => {
+    // An anaphoric fit question cannot establish that the default bedroom pair is intended.
+    if (index > 0 && /\b(?:under|beneath|underneath|fit(?:s)? (?:at|with)) (?:it|that|this|them)\b/i.test(clause)
+        && !furnitureRooms(clause, "desk").length) {
+      const desks = furnitureRooms(plan[index - 1], "desk");
+      if (desks.length !== 1) return "Which desk and chair should I check? Please name their rooms.";
+      return explainPlan(home, clause + " at the " + desks[0] + " desk", manifest, previous);
+    }
+    return explainPlan(home, clause, manifest, previous);
+  }))];
   if (acoustic) answers.push("Acoustic performance is unverified. The floor plan records room positions. To assess sound transfer, obtain wall and door assembly ratings or an on-site sound measurement.");
   if (supplier || (plan.some(asksFurnitureFit) && /\b(guarantee|guaranteed|certify|promise|certain|prove)\b/i.test(question))) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
   return answers.join(" ");
@@ -266,7 +275,7 @@ function explainPlan(home, question, manifest, previous) {
   }
   const namedChairs = furnitureRooms(q, "chair");
   const namedDesks = furnitureRooms(q, "desk");
-  if (namedStudyDesk && !namedDesks.includes("study")) namedDesks.push("study");
+  if (namedStudyDesk && !namedDesks.length) namedDesks.push("study");
   const fit = asksFurnitureFit(q);
   if (fit && (namedChairs.length > 1 || namedDesks.length > 1))
     return "Which chair and desk pair should I compare first? Named rooms: " + [...new Set([...namedChairs, ...namedDesks])].join(", ") + ".";
