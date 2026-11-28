@@ -165,8 +165,13 @@ function planQuestions(question, home) {
   const clauses = scoped.split(/[?!;]|\.(?!\d)/).flatMap(sentence => {
     const pieces = sentence.trim().split(/(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
     const prefix = roomScope.exec(sentence.trim());
-    return pieces.map((piece, i) => prefix && i > 0 && !roomMention.test(piece) && !furnitureRooms(piece, "desk", home).length
-      ? prefix[0] + " " + piece : piece);
+    return pieces.map((piece, i) => {
+      if (!prefix || !i || roomScope.test(piece)) return piece;
+      const chairNeedsScope = /\bchairs?\b/i.test(piece) && asksFurnitureFit(piece)
+        && !furnitureRooms(piece, "chair", home).length;
+      const lacksSubjectRoom = !roomMention.test(piece) && !furnitureRooms(piece, "desk", home).length;
+      return chairNeedsScope || lacksSubjectRoom ? prefix[0] + " " + piece : piece;
+    });
   });
   return clauses.map(clause => clause.trim()).filter(clause => clause && (
     (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
