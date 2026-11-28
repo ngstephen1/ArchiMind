@@ -744,6 +744,41 @@ def test_pullout_is_a_validated_preview_of_the_saved_revision(local):
     )
 
 
+def test_showcase_chair_chat_scope_preview_and_replay(local, monkeypatch):
+    monkeypatch.setenv("TOWN_STATIC", str(SHOWCASE.parent))
+    home = json.loads(SHOWCASE.read_text())
+    saved = local.post("/api/showcase-project", json={"home_id": home["id"]}).json()
+    assert saved["home"] == home
+    path = f"/api/projects/{saved['project']}"
+    body = {
+        "base": 1,
+        "room": "bedroom",
+        "object": "desk-chair",
+        "message": "Pull this chair 30 cm away from the desk.",
+    }
+    for change in [
+        {"object": "belaya"},
+        {"room": "study"},
+        {"message": "Move it"},
+        {"message": "Move it 30 cm towards the desk"},
+    ]:
+        assert (
+            local.post(path + "/chair-chat/preview", json=body | change).status_code
+            == 400
+        )
+    preview = local.post(path + "/chair-chat/preview", json=body).json()["home"]
+    assert (
+        preview
+        == local.post(path + "/chair-pullout/preview", json={"base": 1}).json()["home"]
+    )
+    assert local.get(path).json()["revision"] == 1
+    request = body | {"preview_id": preview["id"]}
+    assert local.post(path + "/chair-chat/apply", json=request).json()["revision"] == 2
+    assert local.post(path + "/chair-chat/apply", json=request).status_code == 409
+    assert local.get(path + "?revision=1").json()["home"] == home
+    assert local.post(path + "/undo", json={"base": 2}).json()["home"] == home
+
+
 def test_stale_chair_preview_cannot_replace_another_saved_edit(local, record_property):
     project = service.create("local-designer")["project"]
     original = json.loads(SHOWCASE.read_text())

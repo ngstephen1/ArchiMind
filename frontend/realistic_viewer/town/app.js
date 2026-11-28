@@ -1,3 +1,5 @@
+import { bindPhotoStudio } from "./photo_studio.js";
+import { bindHouseComparison } from "./house_compare.js";
 import { competingGoals } from "./tradeoff.js";
 import studioShowcasePublications from "./studio_publications.json";
 import conferencePublications from "./conference_publications.json";
@@ -42,6 +44,8 @@ const world = createTown(el("world"), el("place"), el("door"));
 world.bindQuality(el("quality"));
 world.bindSweep(el("sweep"));
 world.load(showcase);
+world.overview.set("3d");
+el("selectChair").hidden = !(local && !project);
 new MutationObserver(() => {
   el("assetStatus").hidden = el("world").dataset.desk !== "placeholder";
   el("collectionStatus").hidden = el("world").dataset.collection !== "placeholder";
@@ -92,8 +96,14 @@ function links() {
     target.searchParams.set("revision", revision);
   }
   editor.href = target;
+  target.searchParams.set("mode","photos");
+  el("photoIntake").href = target;
+  el("photoIntake").hidden = tourOnly;
 }
 function resetChairPreview() {
+  el("chairChat").hidden = true;
+  el("applyChat").hidden = el("cancelChat").hidden = true;
+  world.overview.select(false);
   chairEpoch++;
   loadingChairScene = false;
   chairPreview = null;
@@ -218,6 +228,8 @@ function sync(data) {
   applied = data.home || showcase;
   el("chairStudio").hidden = revision === 0 || (data.head !== undefined && data.head !== revision);
   el("chairStudio").open = false;
+  el("selectChair").hidden = el("chairStudio").hidden || !applied.rooms.some(r => r.design.room.id === "bedroom" && r.design.furniture.some(f=>f.id==="desk-chair"));
+  el("compareHouse").hidden = !revision;
   loadSavedHome();
   el("width").value = applied.width;
   el("depth").value = applied.depth;
@@ -734,7 +746,7 @@ async function previewBedroomEdit(endpoint, request) {
     loadingChairScene = true;
     chairPreview = null;
     el("chairApply").hidden = el("chairDiscard").hidden = true;
-    status = await world.load(home);
+    status = await world.load(home, endpoint === "chair-chat");
   } catch (error) {
     if (epoch === chairEpoch) {
       // A refused request leaves the current room, camera and accepted preview intact.
@@ -743,10 +755,11 @@ async function previewBedroomEdit(endpoint, request) {
     }
     return;
   }
-  const proceduralMove = endpoint === "chair-pullout" && status === "procedural";
+  const proceduralMove = ["chair-pullout","chair-chat"].includes(endpoint) && status === "procedural";
   if (status !== "verified" && !proceduralMove) {
     if (epoch === chairEpoch) {
       discardChair();
+      if (endpoint === "chair-chat") throw Error("Chair mesh unavailable. Reopen the saved chair to try again.");
       el("chairNotice").textContent = "Furniture preview unavailable. Your saved bedroom is still displayed.";
     }
     return;
@@ -758,19 +771,117 @@ async function previewBedroomEdit(endpoint, request) {
   el("chairApply").hidden = el("chairDiscard").hidden = false;
   el("chairNotice").textContent = "Bedroom preview ready. Apply to save a new revision.";
   el("revision").textContent = "Bedroom furniture preview · Unsaved";
+  if (endpoint === "chair-chat") {
+    const gap = snapshot => {
+      const items = snapshot.rooms.find(r=>r.design.room.id==="bedroom").design.furniture;
+      const c = items.find(f=>f.id==="desk-chair"), d = items.find(f=>f.id==="belaya");
+      return Math.round(1000*Math.max(c.y_m-d.y_m-d.depth_m,d.y_m-c.y_m-c.depth_m,0));
+    };
+    world.overview.select(true);
+    el("applyChat").hidden = el("cancelChat").hidden = false;
+    el("chatFeedback").textContent = "Preview · Desk gap " + gap(applied) + " → " + gap(home) + " mm. Apply to save.";
+    return;
+  }
   world.visit();
   el("door").click();
   el("roomJump").value = "bedroom";
   el("roomJump").onchange();
   el("panel").close();
 }
-bind("chairApply", async () => {
+async function applyChair() {
   if (!chairPreview) return;
-  const editingPosition = chairPreview.endpoint === "chair-pullout";
+  const editingPosition = ["chair-pullout","chair-chat"].includes(chairPreview.endpoint);
   sync(await api("/projects/" + project + "/"+chairPreview.endpoint+"/apply", chairPreview.request));
   el("alternatives").hidden = true;
   notify((editingPosition ? "Chair position" : "Designer furniture") + " saved in revision " + revision + ".");
+}
+bind("chairApply", applyChair);
+
+function openChair() {
+  if (el("selectChair").hidden || world.homeId !== applied.id || loadingChairScene) return;
+  world.overview.select(true);
+  el("chairChat").hidden = false;
+  const sample = local && !project;
+  el("copyHouse").hidden = !sample;
+  el("previewChat").hidden = sample;
+  el("chatFeedback").textContent = sample ? "Save your own copy to edit this showcase." : "Selected in revision " + revision;
+  el("chairMessage").focus();
+}
+el("copyHouse").onclick = async () => {
+  if (project || !local) return;
+  el("copyHouse").disabled = true;
+  try {
+    const saved = await api("/showcase-project", {home_id:showcase.id});
+    project = saved.project;
+    sync(saved);
+    openChair();
+  } catch(error) { el("chatFeedback").textContent = error.message; }
+  finally { el("copyHouse").disabled = false; }
+};
+el("selectChair").onclick = openChair;
+el("world").addEventListener("chair-picked", openChair);
+el("chairChat").onsubmit = async event => {
+  event.preventDefault();
+  if (!project || !revision || (world.homeId !== applied.id && !chairPreview)) return;
+  el("previewChat").disabled = true;
+  el("chairMessage").readOnly = true;
+  el("chatFeedback").textContent = "Checking the move…";
+  try {
+    await previewBedroomEdit("chair-chat", {base:revision, room:"bedroom",object:"desk-chair",message:el("chairMessage").value});
+  } catch (error) {
+    if (el("chairChat").hidden) openChair();
+    el("chatFeedback").textContent = error.message;
+  }
+  finally { el("previewChat").disabled = false; el("chairMessage").readOnly = false; }
+};
+el("chairMessage").oninput = () => {
+  if (chairPreview?.endpoint === "chair-chat") { discardChair(); openChair(); }
+};
+el("applyChat").onclick = async () => {
+  if (chairPreview?.endpoint !== "chair-chat") return;
+  el("applyChat").disabled = true;
+  try {
+    await applyChair();
+    openChair();
+    el("chatFeedback").textContent = "Chair moved 30 cm · Saved revision " + revision + ".";
+  } catch(error) { el("chatFeedback").textContent = error.message; }
+  finally { el("applyChat").disabled = false; }
+};
+el("closeChairChat").onclick = el("cancelChat").onclick = () => {
+  if (chairPreview || loadingChairScene) discardChair();
+  else resetChairPreview();
+};
+for (const button of document.querySelectorAll("[data-view]")) {
+  button.onclick = () => button.dataset.view === "walk" ? world.walk() : world.overview.set(button.dataset.view);
+}
+const openPhotoStudio = bindPhotoStudio({el,world,api,local,context:()=>({project,revision,home:applied})});
+let pickedRoom;
+function clearRoom() {
+  pickedRoom = null;
+  el("roomInspector").hidden = true;
+}
+el("world").addEventListener("chair-picked",clearRoom);
+el("world").addEventListener("room-picked",event=>{
+  clearRoom();
+  if (el("chairChat").hidden === false || world.homeId !== applied.id) return;
+  const room=applied.rooms.find(part=>part.design.room.id===event.detail)?.design.room;
+  if(!room)return;
+  pickedRoom=room.id;
+  el("pickedRoom").textContent=room.name;
+  el("pickedDimensions").textContent=room.width_m.toFixed(2)+" × "+room.depth_m.toFixed(2)+" m";
+  el("restyleRoom").hidden=!local;
+  el("roomInspector").hidden=false;
 });
+el("selectChair").addEventListener("click",clearRoom);
+el("clearRoom").onclick=()=>{clearRoom();world.overview.set(world.overview.mode);};
+el("focusRoom").onclick=()=>world.overview.focusRoom(pickedRoom);
+el("restyleRoom").onclick=()=>openPhotoStudio(pickedRoom);
+if(!local)el("compareKind").querySelector('[value="blender"]').remove();
+bindHouseComparison({el,world,api,context:()=>({project, revision,home:applied}),asset:async path=>{
+  const response=await fetch(cfg.api+path,{headers:token()?{Authorization:"Bearer "+token()}:{}});
+  if(!response.ok) throw Error("No HD shot for this revision and renderer version. Generate a proof and HD render in the client presentation.");
+  return response;
+}});
 
 let boardHome;
 let evidenceManifest;
@@ -860,12 +971,15 @@ function watchRender() {
   const statusText = el("renderStatus");
   el("renderDownloads").replaceChildren();
   el("renderHD").hidden = true;
-  el("renderProof").disabled = false;
+  el("renderProof").disabled = true;
+  let pollId = 0;
   statusText.textContent = "Checking the local rendering service.";
   async function poll() {
+    const id=++pollId;
     try {
       const values = await api(endpoint + query);
       if (epoch !== renderWatch || !el("board").open) return;
+      if (id!==pollId) return;
       const { proof, hd } = values;
       el("renderProof").disabled = ["queued", "running", "ready"].includes(proof.state);
       el("renderHD").hidden = proof.state !== "ready";
@@ -882,7 +996,7 @@ function watchRender() {
       }
       if ([proof.state, hd.state].some(s => ["queued", "running"].includes(s))) setTimeout(poll, 1600);
     } catch (error) {
-      if (epoch !== renderWatch || !el("board").open) return;
+      if (id !== pollId || epoch !== renderWatch || !el("board").open) return;
       statusText.textContent = error.message;
       el("renderProof").disabled = true;
     }
@@ -890,6 +1004,7 @@ function watchRender() {
   for (const [id, stage] of [["renderProof", "proof"], ["renderHD", "hd"]]) {
     el(id).onclick = async () => {
       try {
+        pollId++;
         el(id).disabled = true;
         await api(endpoint + query, { stage });
         if (epoch === renderWatch) await poll();

@@ -1,3 +1,4 @@
+import { houseView } from "./house_view.js";
 import { turnedCoverlet } from "./studio_textiles.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { studioFurniture, studioFinishes, salonDetails } from "./studio_furniture.js";
@@ -68,6 +69,7 @@ export function createTown(canvas, status, action) {
     avatar = new T.Group();
   scene.add(street, interior, avatar);
   interior.visible = false;
+  const overview = houseView(canvas, scene, interior, street, avatar, renderer, () => lightScene(true));
   const mats = new Map(),
     unit = new T.BoxGeometry(),
     obstacles = [],
@@ -90,8 +92,9 @@ export function createTown(canvas, status, action) {
     return m;
   }
   function solid(g, x, y, z, w, h, d, c, colliders) {
-    block(g, x, y, z, w, h, d, c);
+    const object = block(g, x, y, z, w, h, d, c);
     colliders.push([x - w / 2, z - d / 2, x + w / 2, z + d / 2]);
+    return object;
   }
   function label(g, str, x, y, z, w, bg = "#294841") {
     const c = document.createElement("canvas");
@@ -350,7 +353,7 @@ export function createTown(canvas, status, action) {
   function batch(group) {
     const buckets = new Map();
     for (const m of group.children.slice()) {
-      if (!m.isMesh) continue;
+      if (!m.isMesh || m.userData.surface === "wall" || m.userData.aboveCut) continue;
       const key = m.geometry.uuid + m.material.uuid;
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key).push(m);
@@ -466,6 +469,7 @@ export function createTown(canvas, status, action) {
     for (const part of home.rooms) {
       if (!Array.isArray(part.style?.dressing)) continue;
       const holder = new T.Group();
+      holder.userData.roomId = part.design.room.id;
       holder.position.set(...dressingOrigin(part));
       interior.add(holder);
       const dressing = buildTownDressing(holder, part.style.dressing, pack, packTier);
@@ -490,6 +494,7 @@ export function createTown(canvas, status, action) {
     // Name pack furniture that fell back to the procedural piece, while this look is live.
     const allReady = Promise.all(ready).then(() => {
       if (!live) return;
+      overview.refreshDetails();
       const text = furnitureFallbackText(
         furnitureFailed.map((f) => f.id),
         furnitureFailed,
@@ -740,8 +745,8 @@ export function createTown(canvas, status, action) {
     sweepInput = null;
   const roomFurniture = new Map();
   const surfaces = bedroomSurfaces(renderer, mats);
-  function load(h) {
-    walkView();
+  function load(h, keepPosition = false) {
+    if (!keepPosition) walkView();
     generation++;
     const epoch = generation;
     // Dispose the sweep first so the pack look is released from real materials.
@@ -844,7 +849,9 @@ export function createTown(canvas, status, action) {
         );
       }
     batch(hero);
-    block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf").userData.surface = "ceiling";
+    const roof = block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf");
+    roof.userData.surface = "ceiling";
+    const walls = [];
     delete canvas.dataset.desk;
     const bindings = h.rooms.flatMap((p) => p.asset_bindings || []);
     const admitted =
@@ -874,6 +881,7 @@ export function createTown(canvas, status, action) {
       const [ox, oy] = part.origin,
         r = part.design.room,
         group = new T.Group();
+      group.userData.roomId = r.id;
       group.position.set(ox, 0, -oy);
       interior.add(group);
       let validBindings = true;
@@ -902,6 +910,7 @@ export function createTown(canvas, status, action) {
           wallColor,
         );
         wall.userData.surface = "wall";
+        walls.push({wall, ox, oy, bottom:q.bottom, height:q.top-q.bottom});
         if (q.bottom === 0) {
           block(
             group,
@@ -951,6 +960,7 @@ export function createTown(canvas, status, action) {
             block(group, x, 0.016, -z - 0.125, 0.006, 0.003, 0.25, "#a78c6f").userData.legacySeam = true;
         }
       }
+      const windowStart = group.children.length;
       for (const win of r.windows)
         furnishedWindow(group, r, win, surfaces, block);
       // Wall-mounted print, clear of the window and of the circulation door.
@@ -968,6 +978,7 @@ export function createTown(canvas, status, action) {
         0.012,
         "#ba7e5c",
       );
+      for (const detail of group.children.slice(windowStart)) detail.userData.aboveCut = true;
       function studioPiece(p) {
         const [w,d,h]=p.wdh,[x,y,z]=p.xyz;
         const rounded=p.shape==="sphere" || p.shape==="cylinder";
@@ -1230,22 +1241,15 @@ export function createTown(canvas, status, action) {
       plaque.position.set(wall + side * 0.065, 2.29, -y);
       plaque.rotation.y = (side * Math.PI) / 2;
       label(plaque, room.name.toUpperCase(), 0, 0, 0, 0.98);
+      plaque.userData.aboveCut = true;
       interior.add(plaque);
     }
-    solid(interior, doorX, 1.4, -D, 1.6, 2.8, 0.1, wallColor, indoor);
-    for (const side of [-1, 1])
-      solid(
-        interior,
-        doorX + side * 0.675,
-        1.4,
-        0,
-        0.25,
-        2.8,
-        0.1,
-        wallColor,
-        indoor,
-      );
-    if (inside) enter(true);
+    for (const [x,z,width] of [[doorX,-D,1.6],[doorX-.675,0,.25],[doorX+.675,0,.25]]) {
+      const wall = solid(interior,x,1.4,z,width,2.8,.1,wallColor,indoor);
+      walls.push({wall,ox:0,oy:0,bottom:0,height:2.8});
+    }
+    overview.load(h, roof, walls);
+    if (inside && !keepPosition) enter(true);
     refresh();
     updateQuality();
     requestPack(epoch);
@@ -1278,7 +1282,7 @@ export function createTown(canvas, status, action) {
     if (ok(pos.x, pos.z + dz)) pos.z += dz;
   }
   const active = () =>
-    !preset && !document.querySelector("dialog[open]") &&
+    !overview.mode && !preset && !document.querySelector("dialog[open]") &&
     !["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName);
   window.addEventListener("keydown", (e) => {
     if (!active()) return;
@@ -1302,8 +1306,10 @@ export function createTown(canvas, status, action) {
   });
   window.addEventListener("keyup", (e) => keys.delete(e.code));
   window.addEventListener("blur", () => keys.clear());
+  let pressed;
   canvas.onpointerdown = (e) => {
-    if (preset) return;
+    pressed = {x:e.clientX,y:e.clientY,id:e.pointerId};
+    if (preset || overview.mode) return;
     look = true;
     canvas.setPointerCapture(e.pointerId);
     lastX = e.clientX;
@@ -1321,7 +1327,27 @@ export function createTown(canvas, status, action) {
       lastY = e.clientY;
     }
   };
-  canvas.onpointerup = canvas.onpointercancel = () => (look = false);
+  canvas.onpointerup = (e) => {
+    look = false;
+    if (pressed?.id === e.pointerId && Math.hypot(e.clientX-pressed.x,e.clientY-pressed.y)<5) {
+      if ((overview.mode || inside) && overview.pick(e,camera)) {
+        canvas.dispatchEvent(new CustomEvent("chair-picked",{detail:home.id}));
+      } else if (overview.mode) {
+        canvas.dispatchEvent(new CustomEvent("room-picked",{detail:overview.roomAt(e)}));
+      }
+    }
+    pressed = null;
+  };
+  function enterOverviewRoom(room) {
+    if (!room) return;
+    overview.set("");
+    enter(true);
+    roomJump.value = room;
+    roomJump.onchange();
+  };
+  canvas.ondblclick = event => enterOverviewRoom(overview.roomAt(event));
+  canvas.addEventListener("enter-room", event => enterOverviewRoom(event.detail));
+  canvas.onpointercancel = () => {look = false; pressed = null;};
   for (const el of document.querySelectorAll("[data-key]")) {
     el.onpointerdown = (e) => {
       el.setPointerCapture(e.pointerId);
@@ -1336,10 +1362,23 @@ export function createTown(canvas, status, action) {
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
     composer?.setSize(canvas.clientWidth, canvas.clientHeight);
   }).observe(canvas);
+  function lightScene(indoors) {
+    const lit = interiorLook(indoors && packLook, {
+      ...townLook,
+      environment: (indoors && surfaces.environment) || map.texture,
+    });
+    scene.environment = lit.environment;
+    scene.environmentIntensity = lit.intensity;
+    renderer.toneMappingExposure = lit.exposure;
+  }
   let before = performance.now();
   renderer.setAnimationLoop((now) => {
     const dt = Math.min(0.045, (now - before) / 1000);
     before = now;
+    if (overview.mode) {
+      if (!document.querySelector("dialog[open]")) overview.render();
+      return;
+    }
     if (active()) {
       const forward =
         Number(keys.has("KeyW") || keys.has("ArrowUp")) -
@@ -1416,19 +1455,74 @@ export function createTown(canvas, status, action) {
       camera.updateProjectionMatrix();
     }
     // Inside a pack home, its environment, exposure and (high tier) AO apply.
-    const look = inside && packLook;
-    const lit = interiorLook(look, {
-      ...townLook,
-      environment: (inside && surfaces.environment) || map.texture,
-    });
-    scene.environment = lit.environment;
-    scene.environmentIntensity = lit.intensity;
-    renderer.toneMappingExposure = lit.exposure;
-    if (look && composer) composer.render();
+    lightScene(inside);
+    overview.walkHighlight(inside);
+    if (inside && packLook && composer) composer.render();
     else renderer.render(scene, camera);
+    overview.walkHighlight(false);
   });
+  // Photo Studio, the client board, and revision comparison borrow the same camera and scene.
+  let captureQueue = Promise.resolve();
+  async function captureBedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
+    const original = home, originalPreset = photoView.value;
+    const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
+    if (home !== snapshot) load(snapshot);
+    const epoch = generation;
+    try {
+      await deskReady;
+      const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
+      await surfaces.ready;
+      // A pack home is photographed dressed: wait for its pack, decor and furniture.
+      await stylePending;
+      await packLook?.ready;
+      if (epoch !== generation) throw Error("Presentation source changed.");
+      const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
+      const views = fixedViews ?? bedroomCameras(part);
+      const visible = [hero, street, interior, avatar].map((o) => o.visible);
+      const size = renderer.getSize(new T.Vector2());
+      const ratio = renderer.getPixelRatio();
+      const previousSweep = Number(sweepInput?.value ?? 100)/100;
+      const oldEnv = scene.environment;
+      const oldIntensity = scene.environmentIntensity,
+        oldExposure = renderer.toneMappingExposure;
+      try {
+        sweep?.set(1);
+        hero.visible = avatar.visible = false;
+        street.visible = interior.visible = true;
+        // A pack home is photographed with its own environment and exposure.
+        lightScene(true);
+        renderer.setPixelRatio(1);
+        renderer.setSize(1280, 720, false);
+        const images = views.map((view) => {
+          const cam = new T.PerspectiveCamera(view.fov, 16/9, 0.04, 130);
+          cam.position.fromArray(view.eye);
+          cam.lookAt(...view.target);
+          renderer.render(scene, cam);
+          return canvas.toDataURL("image/jpeg", 0.9);
+        });
+        return { images, views, chair: renderedChair, desk: canvas.dataset.desk, collection: renderedCollection };
+      } finally {
+        sweep?.set(previousSweep);
+        renderer.setPixelRatio(ratio);
+        renderer.setSize(size.x,size.y,false);
+        [hero, street, interior, avatar].forEach((o,i) => {o.visible = visible[i];});
+        scene.environment = oldEnv;
+        scene.environmentIntensity = oldIntensity;
+        renderer.toneMappingExposure = oldExposure;
+      }
+    } finally {
+      if (epoch === generation && original !== snapshot) {
+        load(original); enter(wasInside);
+        pos.copy(eye); yaw = heading; pitch = tilt;
+        photoView.value = originalPreset; selectPhoto();
+      }
+    }
+  }
   return {
     load,
+    overview,
+    get homeId() { return home?.id; },
+    walk() { overview.set(""); enter(true); },
     // Plan ↔ Room over the home's interior only; a pure view change.
     bindSweep(input) {
       sweepInput = input;
@@ -1447,65 +1541,13 @@ export function createTown(canvas, status, action) {
       };
       updateQuality();
     },
-    async bedroomViews(snapshot, roomId = "bedroom") {
-      const original = home, originalPreset = photoView.value;
-      const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
-      if (home !== snapshot) load(snapshot);
-      const epoch = generation;
-      try {
-        await deskReady;
-        const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
-        await surfaces.ready;
-        // A pack home is photographed dressed: wait for its pack, decor and furniture.
-        await stylePending;
-        await packLook?.ready;
-        if (epoch !== generation) throw Error("Presentation source changed.");
-        const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
-        const views = bedroomCameras(part);
-        const visible = [hero, street, interior, avatar].map((o) => o.visible);
-        const size = renderer.getSize(new T.Vector2());
-        const ratio = renderer.getPixelRatio();
-        const oldEnv = scene.environment;
-        const oldIntensity = scene.environmentIntensity,
-          oldExposure = renderer.toneMappingExposure;
-        try {
-          hero.visible = avatar.visible = false;
-          street.visible = interior.visible = true;
-          // A pack home is photographed with its own environment and exposure.
-          const lit = interiorLook(packLook, {
-            ...townLook,
-            environment: surfaces.environment || oldEnv,
-          });
-          scene.environment = lit.environment;
-          scene.environmentIntensity = lit.intensity;
-          renderer.toneMappingExposure = lit.exposure;
-          renderer.setPixelRatio(1);
-          renderer.setSize(1280, 720, false);
-          const images = views.map((view) => {
-            const cam = new T.PerspectiveCamera(view.fov, 16/9, 0.04, 130);
-            cam.position.fromArray(view.eye);
-            cam.lookAt(...view.target);
-            renderer.render(scene, cam);
-            return canvas.toDataURL("image/jpeg", 0.9);
-          });
-          return { images, views, chair: renderedChair, desk: canvas.dataset.desk, collection: renderedCollection };
-        } finally {
-          renderer.setPixelRatio(ratio);
-          renderer.setSize(size.x,size.y,false);
-          [hero, street, interior, avatar].forEach((o,i) => {o.visible = visible[i];});
-          scene.environment = oldEnv;
-          scene.environmentIntensity = oldIntensity;
-          renderer.toneMappingExposure = oldExposure;
-        }
-      } finally {
-        if (epoch === generation && original !== snapshot) {
-          load(original); enter(wasInside);
-          pos.copy(eye); yaw = heading; pitch = tilt;
-          photoView.value = originalPreset; selectPhoto();
-        }
-      }
+    bedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
+      const next = captureQueue.then(() => captureBedroomViews(snapshot, roomId, fixedViews));
+      captureQueue = next.catch(() => {});
+      return next;
     },
     visit: () => {
+      overview.set("");
       walkView();
       pos.set(doorX, 0, 1.6);
       yaw = 0;

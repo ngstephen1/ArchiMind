@@ -1,0 +1,29 @@
+{
+  "width": 6.592,
+  "depth": 5.513,
+  "photo_sha256": [
+    "1e524eaf03c0fea37ee9e910f2062ccf44940207a3980ef8a7dd4bbeb01046a6"
+  ],
+  "furniture": [
+    {
+      "kind": "chair",
+      "label": "single chair",
+      "photo": 1,
+      "center_x_fraction": 0.32,
+      "center_depth_fraction": 0.48,
+      "quarter_turns": 3
+    },
+    {
+      "kind": "desk",
+      "label": "rectangular desk",
+      "photo": 1,
+      "center_x_fraction": 0.63,
+      "center_depth_fraction": 0.34,
+      "quarter_turns": 1
+    }
+  ],
+  "uncertainty": "Only one photo is provided, so the layout is a rough visual estimate and the desk/chair orientation is somewhat uncertain.",
+  "source_file_sha256": [
+    "731a09ee43b9cac5c040425f21b544d9951e71bc49c77ee56df49766261a3295"
+  ]
+}

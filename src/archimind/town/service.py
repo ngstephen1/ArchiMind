@@ -121,10 +121,12 @@ def revision(q, p, n):
     return json.loads(row[0])
 
 
-def create(owner):
+def create(owner, *, home=None):
     p = str(uuid.uuid4())
     with transaction() as q:
         q("INSERT INTO projects VALUES(?,?,0)", (p, owner))
+        if home is not None:
+            return apply(q, owner, p, 0, home)
     return {"project": p, "revision": 0}
 
 

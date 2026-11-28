@@ -1,5 +1,7 @@
 """Attach a released chair to the existing validated bedroom reservation."""
 
+import re
+
 from archimind.assets.designer_concepts import (
     approved_chairs,
     approved_collection,
@@ -94,6 +96,28 @@ def chair_change(q, owner, project, data, *, apply, collection=False):
         # Re-dress so no pack model is bound to the chosen chair's reservation.
         apply_style(home, home["style_pack"]["id"])
     return finish_preview(q, owner, project, base, home, data, apply)
+
+
+def chair_chat(q, owner, project, data, *, apply):
+    keys = {"base", "room", "object", "message"} | ({"preview_id"} if apply else set())
+    if set(data) != keys or (data["room"], data["object"]) != ("bedroom", "desk-chair"):
+        raise db.Problem("Select the bedroom desk chair first.")
+    message = data["message"]
+    if not isinstance(message, str) or len(message) > 240:
+        raise db.Problem("Describe one chair move in 240 characters or fewer.")
+    normalized = " ".join(message.lower().strip(" .!").split())
+    if not re.fullmatch(
+        r"(?:please )?(?:pull|move|slide) (?:the |this |my |selected )?"
+        r"(?:desk chair|chair|it) (?:back )?"
+        r"(?:30 (?:cm|centimet(?:er|re)s)|30cm|300 ?mm|0[.]3 ?m)"
+        r" (?:away from|back from) (?:the |my |its )?(?:belaya )?desk",
+        normalized,
+    ):
+        raise db.Problem(
+            "Which direction and distance? Try: Move this chair 30 cm away from the desk."
+        )
+    request = {k: data[k] for k in ("base", "preview_id") if k in data}
+    return chair_pullout(q, owner, project, request, apply=apply)
 
 
 def chair_pullout(q, owner, project, data, *, apply):

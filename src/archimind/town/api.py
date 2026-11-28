@@ -16,8 +16,11 @@ from starlette.responses import FileResponse, JSONResponse, Response
 from starlette.routing import Mount, Route
 from starlette.staticfiles import StaticFiles
 
-from . import decision_review, designer_chair, render_queue
+from archimind.studio.contracts import StudioError
+
+from . import decision_review, designer_chair, photo_concept, photo_layout, render_queue
 from . import service as db
+from .design import digest, validate_home
 from .service_drawings import service_study
 
 
@@ -54,6 +57,22 @@ def handle(request, data):
         return {"concepts": designer_chair.chair_options(collection=True)}
     if path == ["projects"] and request.method == "POST":
         return db.create(owner)
+    if (
+        path == ["showcase-project"]
+        and request.method == "POST"
+        and os.getenv("TOWN_MODE") == "local"
+    ):
+        source = Path(os.getenv("TOWN_STATIC", "")) / "showcase.json"
+        if not source.is_file():
+            raise db.Problem("Rebuild the local Town to edit its showcase.", 503)
+        home = json.loads(source.read_text())
+        if (
+            data != {"home_id": home["id"]}
+            or digest({k: v for k, v in home.items() if k != "id"}) != home["id"]
+        ):
+            raise db.Problem("The showcase has changed. Reload the house.", 409)
+        validate_home(home)
+        return db.create(owner, home=home)
     if path == ["jobs"] and request.method == "POST":
         return db.enqueue(owner, db.Request.model_validate(data))
     if len(path) == 3 and path[0] == "projects" and path[2] == "decision-review":
@@ -107,10 +126,15 @@ def handle(request, data):
         if (
             len(path) == 4
             and path[0] == "projects"
-            and path[2] in {"designer-chair", "bedroom-collection", "chair-pullout"}
+            and path[2]
+            in {"designer-chair", "bedroom-collection", "chair-pullout", "chair-chat"}
             and path[3] in {"preview", "apply"}
             and request.method == "POST"
         ):
+            if path[2] == "chair-chat":
+                return designer_chair.chair_chat(
+                    q, owner, path[1], data, apply=path[3] == "apply"
+                )
             if path[2] == "chair-pullout":
                 return designer_chair.chair_pullout(
                     q, owner, path[1], data, apply=path[3] == "apply"
@@ -212,18 +236,42 @@ def handle(request, data):
 
 async def api(request: Request):
     try:
+        photo_action = request.path_params.get("path")
+        concept = photo_action in {"photo-concept", "photo-layout"}
+        if concept:
+            if os.getenv("TOWN_MODE") != "local" or request.method != "POST":
+                raise db.Problem("Photo concepts require the local Town studio.", 404)
+            identity(request)
+            if (
+                request.headers.get("content-type", "").split(";")[0]
+                != "application/json"
+            ):
+                raise db.Problem("Use the Town image form.", 415)
+        limit = 12000
+        if concept:
+            limit = (8 if photo_action == "photo-layout" else 4) * 1024 * 1024
         body = bytearray()
         async for chunk in request.stream():
             body.extend(chunk)
-            if len(body) > 12000:
+            if len(body) > limit:
                 raise db.Problem("Request too large.", 413)
         data = json.loads(body) if body else {}
         if not isinstance(data, dict):
             raise ValueError
+        if concept:
+            action = (
+                photo_layout.draft
+                if photo_action == "photo-layout"
+                else photo_concept.restyle
+            )
+            result = await asyncio.to_thread(action, data)
+            return JSONResponse(result, headers={"Cache-Control": "no-store"})
         result = await asyncio.to_thread(handle, request, data)
         return result if isinstance(result, Response) else JSONResponse(result)
     except db.Problem as exc:
         return JSONResponse({"error": str(exc)}, status_code=exc.status)
+    except StudioError as exc:
+        return JSONResponse({"error": str(exc)}, status_code=503)
     except (KeyError, ValueError, ValidationError, TypeError):
         return JSONResponse({"error": "Invalid design request."}, status_code=400)
 

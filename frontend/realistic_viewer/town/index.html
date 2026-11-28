@@ -13,6 +13,7 @@
         <span class="mark" aria-hidden="true">⌂</span> ArchiMind <i>Town</i>
       </div>
       <nav>
+        <button id="openPhotoStudio" hidden>Photo studio</button>
         <button id="tour">Visit showcase</button
         ><button id="design" class="dark">Design a home ↗</button>
       </nav>
@@ -23,6 +24,27 @@
         aria-label="Walkable town and home interiors"
         tabindex="0"
       ></canvas>
+      <div id="houseLabels" hidden></div>
+      <div class="house-modes" role="group" aria-label="House view">
+        <button data-view="plan">Plan</button><button data-view="3d">3D house</button><button data-view="walk">Walk</button>
+      </div>
+      <small class="house-hint">Double-click a room to walk inside</small>
+      <aside id="roomInspector" hidden><strong id="pickedRoom"></strong><small id="pickedDimensions"></small><button id="focusRoom">Focus room</button><button id="restyleRoom">Restyle room</button><button aria-label="Close room selection" id="clearRoom">×</button></aside>
+      <div id="houseTools">
+        <button id="selectChair" hidden>Select desk chair</button>
+        <button id="compareHouse" hidden>Compare revisions</button>
+        <a id="photoIntake" hidden>Room photos</a>
+      </div>
+      <form id="chairChat" hidden>
+        <header><strong>Bedroom · Desk chair</strong><button type="button" id="closeChairChat" aria-label="Close chair chat">×</button></header>
+        <label for="chairMessage">Move relative to the Belaya desk</label>
+        <input id="chairMessage" maxlength="240" value="Pull this chair 30 cm away from the desk." required>
+        <button id="copyHouse" type="button" hidden>Save an editable copy</button>
+        <button id="previewChat">Preview move</button>
+        <button type="button" id="applyChat" class="dark" hidden>Apply move</button>
+        <button type="button" id="cancelChat" hidden>Discard</button>
+        <output id="chatFeedback" aria-live="polite"></output>
+      </form>
       <div class="place">
         <span>ARCHIMIND / TOWN WALK</span>
         <h1 id="place">Market Square</h1>
@@ -65,6 +87,61 @@
       ><a href="./assets/BELAYA_ATTRIBUTION.txt">Belaya desk credits</a
       ><a href="./assets/bedroom-sources.json">Bedroom material credits</a><a id="editor">Streamlit editor ↗</a>
     </footer>
+    <dialog id="conceptStudio" aria-labelledby="conceptTitle">
+      <form method="dialog" class="title"><h2 id="conceptTitle">Room photo studio</h2><button aria-label="Close photo studio">×</button></form>
+      <div class="concept-workspace">
+        <div class="concept-image">
+          <div id="conceptFrame">
+            <p id="conceptEmpty">Choose a room photo or frame a view from Town.</p>
+            <img id="conceptOriginal" alt="Source room" hidden><img id="conceptAfter" alt="Generated design concept" hidden>
+            <div id="conceptSeam" hidden></div>
+          </div>
+          <div id="conceptCompare" hidden><span>Original</span><input id="conceptWipe" type="range" min="0" max="100" value="50" aria-label="Compare original and concept"><span>Concept</span></div>
+        </div>
+        <div class="concept-options">
+          <label>Starting image<select id="conceptSource"><option value="example">Studio House example</option><option value="town">Town camera</option><option value="upload">My room photo</option></select></label>
+          <div id="conceptCameraControls"><label>Room<select id="conceptRoom"></select></label><label>Camera<select id="conceptPose"></select></label></div>
+          <label id="conceptUploadControl" hidden>Photo · JPEG, PNG or WebP<input id="conceptUpload" type="file" accept="image/jpeg,image/png,image/webp"></label>
+          <p id="conceptSourceLabel"></p>
+          <label>Design direction<textarea id="conceptBrief" rows="3" maxlength="800" placeholder="Keep the desk. Try sage plaster, a woven wool rug and warm brass lighting."></textarea></label>
+          <div id="conceptIdeas" aria-label="Design ideas"><button type="button" data-look="Warm oak">Warm oak</button><button type="button" data-look="Soft Japandi">Soft Japandi</button><button type="button" data-look="Evening light">Evening light</button></div>
+          <button id="developConcept" class="dark" disabled>Generate concept</button>
+          <small>Generate sends the displayed image and brief to OpenAI for one image edit. Geometry in a concept is approximate.</small>
+          <p id="conceptStatus" role="status"></p>
+          <label id="conceptHistory" hidden>Design study<select id="conceptVariant"></select></label>
+          <button id="exampleLayout" hidden>Explore the example in 3D</button>
+          <details id="layoutSetup"><summary>Build a 3D layout study</summary>
+            <p>Enter the width across the first camera view and depth away from it. OpenAI identifies visible furniture in up to three photos. The study uses the rectangular floor size you enter.</p>
+            <div class="layout-size"><label>Width (m)<input id="layoutWidth" type="number" step=".01" min="1.5" max="15"></label><label>Depth (m)<input id="layoutDepth" type="number" step=".01" min="1.5" max="15"></label></div>
+            <label>Additional views of this room (optional)<input id="layoutExtra" type="file" accept="image/png,image/jpeg,image/webp" multiple></label>
+            <button id="buildLayout">Send photos &amp; build study</button>
+            <p id="layoutStatus" role="status"></p>
+          </details>
+          <a id="downloadConcept" hidden download="archimind-room-concept.jpg">Download concept</a>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="layoutStudio" aria-labelledby="layoutTitle">
+      <form method="dialog" class="title"><h2 id="layoutTitle">Furniture layout study</h2><button aria-label="Close layout study">×</button></form>
+      <div class="concept-workspace"><div id="layoutViewport" aria-label="Orbitable approximate room layout"></div>
+        <div class="concept-options">
+          <strong id="layoutDimensions"></strong><p id="layoutUncertainty"></p>
+          <label>Furniture<select id="layoutPiece"></select></label><small id="layoutEvidence"></small><img id="layoutSourcePhoto" hidden alt="">
+          <div class="layout-size"><label>From left (m)<input id="layoutX" type="number" step=".05"></label><label>From camera side (m)<input id="layoutDepthPos" type="number" step=".05"></label></div>
+          <button id="rotatePiece">Turn 90°</button><button id="saveStudy" class="dark">Download editable 3D model</button>
+          <small>Drag furniture to reposition it. Drag the floor to orbit. Object sizes and positions are approximate.</small>
+          <p id="layoutNotice" role="status"></p>
+        </div>
+      </div>
+    </dialog>
+    <dialog id="houseCompare" aria-labelledby="compareTitle">
+      <form method="dialog" class="title"><h2 id="compareTitle">Compare views</h2><button aria-label="Close comparison">×</button></form>
+      <label>Camera <select id="compareCamera"><option value="desk">Desk and chair</option><option value="doorway">Bedroom doorway</option></select></label>
+      <label>Compare <select id="compareKind"><option value="revision">Previous / current revision</option><option value="blender">3D / Blender HD</option></select></label>
+      <p id="compareStatus" role="status"></p>
+      <div id="compareFrames" hidden><img id="compareRight" alt="Current view"><img id="compareLeft" alt="Reference view"></div>
+      <label id="wipeControl" hidden>Comparison divider <input type="range" id="compareWipe" min="0" max="100" value="50"></label>
+    </dialog>
     <dialog id="panel">
       <form method="dialog" class="title">
         <h2>Home studio</h2>

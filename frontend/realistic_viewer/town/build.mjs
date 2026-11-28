@@ -15,12 +15,15 @@ await build({
   target: "es2022",
   legalComments: "linked",
 });
-for (const f of ["index.html", "town.css"])
+for (const f of ["index.html", "town.css", "showcase.json"])
   await copyFile(new URL(f, src), new URL(f, out));
 await copyFile(
   new URL("materials/wood-floor.jpg", src),
   new URL("assets/wood-floor.jpg", out),
 );
+for (const image of ["studio-source.jpg", "studio-result.jpg"]) {
+  await copyFile(new URL("photo-study/" + image, src), new URL("assets/" + image, out));
+}
 for (const engine of ["openai", "python"]) {
   const source = new URL("../../../docs/assets/" + engine + ".svg", src);
   await copyFile(source, new URL("assets/" + engine + ".svg", out));
