@@ -53,6 +53,8 @@
 
 ## Overview
 
+[Watch the 73-second Town walkthrough](https://github.com/ngstephen1/ArchiMind/releases/download/town-photo-studio-demo-2026-11-28/ArchiMind-Town-Photo-to-3D-Walkthrough.mp4). In a furnished six-room home, select the bedroom chair, move it 30 cm by chat, and compare the saved revisions from the desk camera. The final sequence shows a photographic redesign and an editable 3D furniture study. The film labels the earlier parallel-agent run and the recorded AI examples. [Captions, poster and recording details](https://github.com/ngstephen1/ArchiMind/releases/tag/town-photo-studio-demo-2026-11-28)
+
 **Task 09A — Chat bedroom: live conversation-to-layout acceptance passed.**
 Describe one measured rectangular bedroom, clarify missing measurements, explicitly
 select qualified catalog products or compatible procedural templates, then
