@@ -126,7 +126,40 @@ export function studioFurniture(f, suiteYaw = 0) {
     h = f.height_m,
     x = w / 2,
     y = d / 2;
-  if (f.id === "salon-suite") {
+  if (f.id === "library-table") {
+    table(x, y, w, d, h - 0.08, "oak");
+    for (let i = 0; i < 3; i++)
+      piece("Design folio", ["moss","paper","clay"][i], x - 0.32 + i * 0.045, y, h - 0.068 + i * 0.024, 0.39, 0.28, 0.023);
+    piece("Open sketchbook", "paper", x + 0.34, y, h - 0.07, 0.37, 0.25, 0.015);
+  } else if (f.id === "library-chair") {
+    seat(x, y, w, d, h, -1, "clay");
+  } else if (f.id === "reading-light") {
+    piece("Weighted foot", "ink", x,y,0.035,w,d,0.07,0,"cylinder");
+    piece("Brass stem", "brass", x,y,h/2,0.035,0.035,h-0.1,0,"cylinder");
+    piece("Linen shade", "paper", x,y,h-0.15,w,d,0.30,0,"cylinder");
+  } else if (f.id === "ceramic-wc") {
+    piece("Pedestal", "marble", x,y,0.19,w*0.59,d*0.65,0.38,0.09);
+    piece("Porcelain bowl", "paper", x,y-0.05,0.39,w,d*0.76,0.23,0,"sphere");
+    piece("Seat lid", "marble", x,y-0.05,0.50,w*0.93,d*0.7,0.055,0,"sphere");
+    piece("Cistern", "marble", x,d*0.85,h*0.57,w*0.9,d*0.28,h*0.86,0.05);
+    piece("Flush button", "brass", x,d*0.85,h+0.002,0.06,0.04,0.006);
+  } else if (f.id === "walk-in-shower") {
+    piece("Stone shower tray", "marble", x,y,0.042,w,d,0.084);
+    piece("Drain", "ink", x,y,0.087,0.13,0.13,0.008);
+    piece("Tiled wet wall", "moss", x,d-0.045,h/2,w,0.09,h);
+    for (let row = 1; row < 7; row++)
+      piece("Tile joint", "wool", x,d-0.091,h*row/7,w,0.003,0.009);
+    for (let col = 1; col < 5; col++)
+      piece("Tile joint", "wool", w*col/5,d-0.091,h/2,0.008,0.003,h);
+    piece("Shower riser", "brass", x,d-0.12,h*0.62,0.035,0.035,h*0.66);
+    piece("Spout arm", "brass", x,d-0.27,h*0.94,0.035,0.32,0.035);
+    piece("Rain head", "brass", x,d-0.42,h*0.92,0.27,0.27,0.045,0,"cylinder");
+    piece("Mixer", "ink", x,d-0.14,h*0.51,0.22,0.085,0.06);
+  } else if (f.id === "towel-bench") {
+    table(x,y,w,d,h-0.13,"oak");
+    for (let i=0;i<3;i++)
+      piece("Folded towel", i===1?"moss":"wool",x,y,h-0.107+i*0.044,w*0.52,d*0.84,0.043,0.018);
+  } else if (f.id === "salon-suite") {
     piece(
       "Bound wool rug",
       "paper",
