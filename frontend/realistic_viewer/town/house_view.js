@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 // The overview borrows Town's furnished scene. Its cut walls and highlight are
 // visible only during this pass so walking, exports and photographs stay intact.
-export function houseView(canvas, scene, interior, street, avatar, renderer) {
+export function houseView(canvas, scene, interior, street, avatar, renderer, lightInterior) {
   const camera = new T.OrthographicCamera(-1, 1, 1, -1, 0.01, 200);
   const controls = new OrbitControls(camera, canvas);
   controls.enabled = false;
@@ -175,6 +175,7 @@ export function houseView(canvas, scene, interior, street, avatar, renderer) {
     highlight.visible = selected && !!bounds;
     try {
       cut(true);
+      lightInterior();
       renderer.render(scene, camera);
       for (const { tag, center } of labels) {
         tag.hidden = false;

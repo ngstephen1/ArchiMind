@@ -22,6 +22,7 @@ def prepare_photo(data: bytes) -> tuple[str, bytes]:
             ):
                 raise ValueError("Choose one still image under 24 megapixels.")
             clean = ImageOps.exif_transpose(source).convert("RGB")
+            clean.info.clear()
             clean.thumbnail((1280, 1280))
             encoded = io.BytesIO()
             clean.save(encoded, format="JPEG", quality=85)

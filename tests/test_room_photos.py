@@ -11,12 +11,13 @@ def test_upload_resized_and_metadata_removed():
     meta = Image.Exif()
     meta[315] = "Private author"
     buffer = io.BytesIO()
-    photo.save(buffer, format="JPEG", exif=meta)
+    photo.save(buffer, format="JPEG", exif=meta, comment=b"private location")
     first = room_photos.prepare_photo(buffer.getvalue())
     assert first == room_photos.prepare_photo(buffer.getvalue())
     with Image.open(io.BytesIO(first[1])) as preview:
         assert preview.size == (1280, 640)
         assert not preview.getexif()
+        assert "comment" not in preview.info
     with pytest.raises(ValueError):
         room_photos.prepare_photo(b"invalid")
     with pytest.raises(ValueError):

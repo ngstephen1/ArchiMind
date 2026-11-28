@@ -31,6 +31,8 @@ export function openLayout(el, draft, photos) {
     room_width_m: width,
     room_depth_m: depth,
     photo_sha256: draft.photo_sha256,
+    photo_sha256_basis: "JPEG bytes normalized for the vision request",
+    ...(draft.source_file_sha256 && { source_file_sha256: draft.source_file_sha256 }),
     uncertainty: draft.uncertainty,
     geometry:
       "Rectangular study; proxy furniture envelopes and inferred positions.",
@@ -170,10 +172,16 @@ export function openLayout(el, draft, photos) {
     );
     return true;
   }
-  for (const item of draft.furniture) {
+  let autoTurned = 0;
+  for (const [index, item] of draft.furniture.entries()) {
     const piece = build(item);
-    if (!place(piece, piece.position.x, -piece.position.z)) continue;
-    piece.userData.source_index = draft.furniture.indexOf(item);
+    const x = piece.position.x, depthFromCamera = -piece.position.z;
+    if (!place(piece, x, depthFromCamera)) {
+      piece.rotation.y -= Math.PI / 2;
+      if (!place(piece, x, depthFromCamera)) continue;
+      autoTurned++;
+    }
+    piece.userData.source_index = index;
     pieces.push(piece);
     model.add(piece);
   }
@@ -256,10 +264,10 @@ export function openLayout(el, draft, photos) {
   el("layoutDimensions").textContent =
     width + " × " + depth + " m · " + pieces.length + " represented pieces";
   el("layoutUncertainty").textContent = draft.uncertainty;
-  notice.textContent =
-    pieces.length < draft.furniture.length
-      ? "Items larger than the supplied floor were omitted."
-      : "";
+  const changes = [];
+  if (autoTurned) changes.push("Turned " + autoTurned + " piece(s) 90° to fit the supplied room.");
+  if (pieces.length < draft.furniture.length) changes.push("Items larger than the supplied floor in both orientations were omitted.");
+  notice.textContent = changes.join(" ");
   choice.onchange = () => select(Number(choice.value));
   for (const id of ["layoutX", "layoutDepthPos"])
     el(id).onchange = () => {

@@ -24,7 +24,7 @@
         aria-label="Walkable town and home interiors"
         tabindex="0"
       ></canvas>
-      <div id="houseLabels" hidden aria-hidden="true"></div>
+      <div id="houseLabels" hidden></div>
       <div class="house-modes" role="group" aria-label="House view">
         <button data-view="plan">Plan</button><button data-view="3d">3D house</button><button data-view="walk">Walk</button>
       </div>
@@ -134,8 +134,8 @@
         </div>
       </div>
     </dialog>
-    <dialog id="houseCompare">
-      <form method="dialog" class="title"><h2>Compare views</h2><button aria-label="Close comparison">×</button></form>
+    <dialog id="houseCompare" aria-labelledby="compareTitle">
+      <form method="dialog" class="title"><h2 id="compareTitle">Compare views</h2><button aria-label="Close comparison">×</button></form>
       <label>Camera <select id="compareCamera"><option value="desk">Desk and chair</option><option value="doorway">Bedroom doorway</option></select></label>
       <label>Compare <select id="compareKind"><option value="revision">Previous / current revision</option><option value="blender">3D / Blender HD</option></select></label>
       <p id="compareStatus" role="status"></p>

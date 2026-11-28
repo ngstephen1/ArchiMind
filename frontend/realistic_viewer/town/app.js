@@ -828,7 +828,10 @@ el("chairChat").onsubmit = async event => {
   el("chatFeedback").textContent = "Checking the move…";
   try {
     await previewBedroomEdit("chair-chat", {base:revision, room:"bedroom",object:"desk-chair",message:el("chairMessage").value});
-  } catch (error) { el("chatFeedback").textContent = error.message; }
+  } catch (error) {
+    if (el("chairChat").hidden) openChair();
+    el("chatFeedback").textContent = error.message;
+  }
   finally { el("previewChat").disabled = false; el("chairMessage").readOnly = false; }
 };
 el("chairMessage").oninput = () => {
@@ -876,7 +879,7 @@ el("restyleRoom").onclick=()=>openPhotoStudio(pickedRoom);
 if(!local)el("compareKind").querySelector('[value="blender"]').remove();
 bindHouseComparison({el,world,api,context:()=>({project, revision,home:applied}),asset:async path=>{
   const response=await fetch(cfg.api+path,{headers:token()?{Authorization:"Bearer "+token()}:{}});
-  if(!response.ok) throw Error("No completed HD shot for this revision. Request an HD render in the client presentation.");
+  if(!response.ok) throw Error("No HD shot for this revision and renderer version. Generate a proof and HD render in the client presentation.");
   return response;
 }});
 

@@ -69,7 +69,7 @@ export function createTown(canvas, status, action) {
     avatar = new T.Group();
   scene.add(street, interior, avatar);
   interior.visible = false;
-  const overview = houseView(canvas, scene, interior, street, avatar, renderer);
+  const overview = houseView(canvas, scene, interior, street, avatar, renderer, () => lightScene(true));
   const mats = new Map(),
     unit = new T.BoxGeometry(),
     obstacles = [],
@@ -1362,6 +1362,15 @@ export function createTown(canvas, status, action) {
     renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
     composer?.setSize(canvas.clientWidth, canvas.clientHeight);
   }).observe(canvas);
+  function lightScene(indoors) {
+    const lit = interiorLook(indoors && packLook, {
+      ...townLook,
+      environment: (indoors && surfaces.environment) || map.texture,
+    });
+    scene.environment = lit.environment;
+    scene.environmentIntensity = lit.intensity;
+    renderer.toneMappingExposure = lit.exposure;
+  }
   let before = performance.now();
   renderer.setAnimationLoop((now) => {
     const dt = Math.min(0.045, (now - before) / 1000);
@@ -1446,19 +1455,69 @@ export function createTown(canvas, status, action) {
       camera.updateProjectionMatrix();
     }
     // Inside a pack home, its environment, exposure and (high tier) AO apply.
-    const look = inside && packLook;
-    const lit = interiorLook(look, {
-      ...townLook,
-      environment: (inside && surfaces.environment) || map.texture,
-    });
-    scene.environment = lit.environment;
-    scene.environmentIntensity = lit.intensity;
-    renderer.toneMappingExposure = lit.exposure;
+    lightScene(inside);
     overview.walkHighlight(inside);
-    if (look && composer) composer.render();
+    if (inside && packLook && composer) composer.render();
     else renderer.render(scene, camera);
     overview.walkHighlight(false);
   });
+  // Photo Studio, the client board, and revision comparison borrow the same camera and scene.
+  let captureQueue = Promise.resolve();
+  async function captureBedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
+    const original = home, originalPreset = photoView.value;
+    const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
+    if (home !== snapshot) load(snapshot);
+    const epoch = generation;
+    try {
+      await deskReady;
+      const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
+      await surfaces.ready;
+      // A pack home is photographed dressed: wait for its pack, decor and furniture.
+      await stylePending;
+      await packLook?.ready;
+      if (epoch !== generation) throw Error("Presentation source changed.");
+      const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
+      const views = fixedViews ?? bedroomCameras(part);
+      const visible = [hero, street, interior, avatar].map((o) => o.visible);
+      const size = renderer.getSize(new T.Vector2());
+      const ratio = renderer.getPixelRatio();
+      const previousSweep = Number(sweepInput?.value ?? 100)/100;
+      const oldEnv = scene.environment;
+      const oldIntensity = scene.environmentIntensity,
+        oldExposure = renderer.toneMappingExposure;
+      try {
+        sweep?.set(1);
+        hero.visible = avatar.visible = false;
+        street.visible = interior.visible = true;
+        // A pack home is photographed with its own environment and exposure.
+        lightScene(true);
+        renderer.setPixelRatio(1);
+        renderer.setSize(1280, 720, false);
+        const images = views.map((view) => {
+          const cam = new T.PerspectiveCamera(view.fov, 16/9, 0.04, 130);
+          cam.position.fromArray(view.eye);
+          cam.lookAt(...view.target);
+          renderer.render(scene, cam);
+          return canvas.toDataURL("image/jpeg", 0.9);
+        });
+        return { images, views, chair: renderedChair, desk: canvas.dataset.desk, collection: renderedCollection };
+      } finally {
+        sweep?.set(previousSweep);
+        renderer.setPixelRatio(ratio);
+        renderer.setSize(size.x,size.y,false);
+        [hero, street, interior, avatar].forEach((o,i) => {o.visible = visible[i];});
+        scene.environment = oldEnv;
+        scene.environmentIntensity = oldIntensity;
+        renderer.toneMappingExposure = oldExposure;
+      }
+    } finally {
+      if (epoch === generation && original !== snapshot) {
+        load(original); enter(wasInside);
+        pos.copy(eye); yaw = heading; pitch = tilt;
+        photoView.value = originalPreset; selectPhoto();
+      }
+    }
+  }
   return {
     load,
     overview,
@@ -1482,66 +1541,10 @@ export function createTown(canvas, status, action) {
       };
       updateQuality();
     },
-    async bedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
-      const original = home, originalPreset = photoView.value;
-      const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
-      if (home !== snapshot) load(snapshot);
-      const epoch = generation;
-      try {
-        await deskReady;
-        const [renderedChair, renderedCollection] = await Promise.all([chairReady, collectionReady]);
-        await surfaces.ready;
-        // A pack home is photographed dressed: wait for its pack, decor and furniture.
-        await stylePending;
-        await packLook?.ready;
-        if (epoch !== generation) throw Error("Presentation source changed.");
-        const part = snapshot.rooms.find((p) => p.design.room.id === roomId);
-        const views = fixedViews ?? bedroomCameras(part);
-        const visible = [hero, street, interior, avatar].map((o) => o.visible);
-        const size = renderer.getSize(new T.Vector2());
-        const ratio = renderer.getPixelRatio();
-        const previousSweep = Number(sweepInput?.value ?? 100)/100;
-        const oldEnv = scene.environment;
-        const oldIntensity = scene.environmentIntensity,
-          oldExposure = renderer.toneMappingExposure;
-        try {
-          sweep?.set(1);
-          hero.visible = avatar.visible = false;
-          street.visible = interior.visible = true;
-          // A pack home is photographed with its own environment and exposure.
-          const lit = interiorLook(packLook, {
-            ...townLook,
-            environment: surfaces.environment || oldEnv,
-          });
-          scene.environment = lit.environment;
-          scene.environmentIntensity = lit.intensity;
-          renderer.toneMappingExposure = lit.exposure;
-          renderer.setPixelRatio(1);
-          renderer.setSize(1280, 720, false);
-          const images = views.map((view) => {
-            const cam = new T.PerspectiveCamera(view.fov, 16/9, 0.04, 130);
-            cam.position.fromArray(view.eye);
-            cam.lookAt(...view.target);
-            renderer.render(scene, cam);
-            return canvas.toDataURL("image/jpeg", 0.9);
-          });
-          return { images, views, chair: renderedChair, desk: canvas.dataset.desk, collection: renderedCollection };
-        } finally {
-          sweep?.set(previousSweep);
-          renderer.setPixelRatio(ratio);
-          renderer.setSize(size.x,size.y,false);
-          [hero, street, interior, avatar].forEach((o,i) => {o.visible = visible[i];});
-          scene.environment = oldEnv;
-          scene.environmentIntensity = oldIntensity;
-          renderer.toneMappingExposure = oldExposure;
-        }
-      } finally {
-        if (epoch === generation && original !== snapshot) {
-          load(original); enter(wasInside);
-          pos.copy(eye); yaw = heading; pitch = tilt;
-          photoView.value = originalPreset; selectPhoto();
-        }
-      }
+    bedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
+      const next = captureQueue.then(() => captureBedroomViews(snapshot, roomId, fixedViews));
+      captureQueue = next.catch(() => {});
+      return next;
     },
     visit: () => {
       overview.set("");

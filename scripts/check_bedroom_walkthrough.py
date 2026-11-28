@@ -10,6 +10,46 @@ from urllib.parse import parse_qs, urlparse
 from playwright.sync_api import sync_playwright
 
 
+def check_room_study_reopen(page):
+    """A charged study and a furniture correction survive reopening the same room."""
+    page.locator("#houseLabels").get_by_role("button", name="Bedroom").click()
+    page.locator("#restyleRoom").click()
+    page.locator("#layoutSetup summary").click()
+    page.locator("#layoutWidth").fill("1.7")
+    page.locator("#layoutDepth").fill("2.1")
+    # The bed fits only after a quarter turn from the provider's estimated pose.
+    result = {
+        "width": 1.7,
+        "depth": 2.1,
+        "photo_sha256": ["a" * 64],
+        "uncertainty": "Recorded browser fixture.",
+        "furniture": [
+            {
+                "kind": "bed",
+                "label": "Bed",
+                "photo": 1,
+                "quarter_turns": 1,
+                "center_x_fraction": 0.5,
+                "center_depth_fraction": 0.5,
+            }
+        ],
+    }
+    route = "**/api/photo-layout"
+    page.route(route, lambda request: request.fulfill(json=result))
+    try:
+        page.locator("#buildLayout").click()
+        page.locator("#layoutStudio canvas").wait_for()
+        assert page.locator("#layoutPiece option").count() == 1
+        assert "Turned 1" in page.locator("#layoutNotice").inner_text()
+        page.locator("#layoutStudio button[aria-label]").click()
+        page.locator("#conceptStudio button[aria-label]").first.click()
+        page.locator("#restyleRoom").click()
+        assert page.locator("#buildLayout").inner_text() == "Reopen layout study"
+        page.locator("#conceptStudio button[aria-label]").first.click()
+    finally:
+        page.unroute(route)
+
+
 def check_house_editor(page, url, output):
     """Select the reservation on the actual plan canvas and save a scoped move."""
     page.goto(url)
@@ -75,6 +115,7 @@ def check_house_editor(page, url, output):
     page.locator("#conceptStudio button[aria-label]").first.click()
     page.set_viewport_size({"width": 390, "height": 844})
     page.get_by_role("button", name="3D house", exact=True).click()
+    check_room_study_reopen(page)
     page.get_by_role("button", name="Walk", exact=True).click()
     page.wait_for_function(
         "document.querySelector('#world').dataset.location === 'interior'"

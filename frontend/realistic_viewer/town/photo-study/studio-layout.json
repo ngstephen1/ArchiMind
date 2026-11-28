@@ -22,5 +22,8 @@
       "quarter_turns": 1
     }
   ],
-  "uncertainty": "Only one photo is provided, so the layout is a rough visual estimate and the desk/chair orientation is somewhat uncertain."
+  "uncertainty": "Only one photo is provided, so the layout is a rough visual estimate and the desk/chair orientation is somewhat uncertain.",
+  "source_file_sha256": [
+    "731a09ee43b9cac5c040425f21b544d9951e71bc49c77ee56df49766261a3295"
+  ]
 }

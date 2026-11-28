@@ -319,7 +319,7 @@ export function bindPhotoStudio({ el, world, api, context, local }) {
     dialog.showModal();
     const saved = context();
     if (
-      !preferredRoom &&
+      (!preferredRoom || (source.value === "town" && preferredRoom === room.value)) &&
       current?.home === saved.home &&
       saved.project === current.project &&
       saved.revision === current.revision
