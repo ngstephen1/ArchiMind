@@ -344,4 +344,25 @@ test("a question about fit across revisions retains the requested desk", () => {
   const answer = explanation(home, question, {project: "demo", revision: 2, home_id: home.id}, previous);
   assert.match(answer, /chair is in the bedroom.*desk is in the study/);
   assert.doesNotMatch(answer, /Displacement|Closest footprint gap/);
+  assert.match(answer, /Earlier-revision fit was not evaluated/);
+});
+
+
+test("a noise destination cannot supply the chair or desk for the fit measurement", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const answer = explanation(home, "In the bedroom, how far is the desk from the window, and can the chair fit under the desk without transferring noise to the study?");
+  assert.match(answer, /Source: bedroom desk-chair and belaya.*Acoustic performance is unverified/);
+  assert.doesNotMatch(answer, /Study chair fit/);
+});
+
+test("an explicit before-and-after position request uses the two saved revisions", () => {
+  const {home, manifest} = selected();
+  const previous = {project: manifest.project, revision: manifest.revision, home: structuredClone(home)};
+  manifest.revision++;
+  for (const question of ["Compare the bedroom chair before and after to see if it moved.",
+      "Compare the bedroom chair’s position before and after moving it under Belaya.",
+      "What changed when I moved the bedroom chair after adjusting the study desk?"]) {
+    assert.equal(asksChairChange(question), true);
+    assert.match(explanation(home, question, manifest, previous), /Displacement: 0.000 m/);
+  }
 });

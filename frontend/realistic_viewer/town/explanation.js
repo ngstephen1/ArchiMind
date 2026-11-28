@@ -95,7 +95,8 @@ function unresolvedFurnitureRoom(clause) {
 }
 
 function isBedroomChairComparison(question) {
-  const q = question.toLowerCase();
+  // A separate completed edit gives context, not a second comparison target.
+  const q = question.toLowerCase().split(/\bafter (?:adjusting|editing|repositioning)\b/, 1)[0];
   if (!/\bchair\b/.test(q)) return false;
   const [room, secondChairRoom] = furnitureRooms(q, "chair");
   if (secondChairRoom || furnitureRooms(q, "desk").some(id => id !== "bedroom")) return false;
@@ -105,10 +106,10 @@ function isBedroomChairComparison(question) {
   if (/\b(fits?|slides?|tucks?|clearances?)\b/.test(q)) return false;
   const comparative = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
   const timeline = /\b(revisions?|before|after|previously|now|earlier)\b/.test(q);
-  if (/\bif\b/.test(q)) return false;
+  if (/\bif (?:i|we|you)\b/.test(q)) return false;
+  if (comparative && timeline) return true;
   if (/\bdid\b.*\b(move|shift|change)\b/.test(q)) return true;
   if (/\b(under|underneath|beneath)\b/.test(q)) return false;
-  if (comparative && timeline) return true;
   return /\b(revisions|previous revision|changed|moved|displacement)\b/.test(q);
 }
 
@@ -177,12 +178,26 @@ function asksFurnitureFit(clause) {
     /\b(chairs?|desks?|tables?|worktables?)\b/i.test(clause);
 }
 
+// Separate a trailing acoustic condition only when it adds no furniture target.
+// Unbound rooms in other fit clauses reach the clarification path.
+function furnitureQuestion(piece) {
+  const condition = /\s+(?:with(?:out)?|while)\s+/ig;
+  for (const match of piece.matchAll(condition)) {
+    const question = piece.slice(0, match.index);
+    const context = piece.slice(match.index + match[0].length);
+    if (asksFurnitureFit(question) && acousticEvidence.test(context) &&
+        !furnitureNoun("chair").test(context) && !furnitureNoun("desk").test(context))
+      return question;
+  }
+  return piece;
+}
+
 function planQuestions(question, home) {
   const scoped = question.replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
   const clauses = scoped.split(/[?!;]|\.(?!\d)/).flatMap(sentence => {
     const pieces = sentence.trim().split(/(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
     const prefix = roomScope.exec(sentence.trim());
-    return pieces.map((piece, i) => {
+    return pieces.map(furnitureQuestion).map((piece, i) => {
       if (!prefix || !i || roomScope.test(piece)) return piece;
       const chairNeedsScope = /\bchairs?\b/i.test(piece) && asksFurnitureFit(piece)
         && !furnitureRooms(piece, "chair", home).length;
@@ -218,6 +233,9 @@ export function explanation(home, question, manifest = null, previous = null) {
     }
     return explainPlan(home, clause, manifest, previous);
   }))];
+  if (plan.some(clause => asksFurnitureFit(clause) && !isBedroomChairComparison(clause) &&
+      /\b(revisions|before|previous|earlier)\b/i.test(clause) && /\b(compare|compared|changes?|changed|after|now)\b/i.test(clause)))
+    answers.push("Earlier-revision fit was not evaluated. Comparing fit requires the named pair's operating measurements in both revisions.");
   if (acoustic) answers.push("Acoustic performance is unverified. The floor plan records room positions. To assess sound transfer, obtain wall and door assembly ratings or an on-site sound measurement.");
   if (supplier || (plan.some(asksFurnitureFit) && /\b(guarantee|guaranteed|certify|promise|certain|prove)\b/i.test(question))) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
   return answers.join(" ");
@@ -331,8 +349,7 @@ function explainPlan(home, question, manifest, previous) {
   }
   const namedChairs = furnitureRooms(q, "chair", home);
   const fit = asksFurnitureFit(q);
-  if (fit && unresolvedFurnitureRoom(q) &&
-      !acousticEvidence.test(q))
+  if (fit && unresolvedFurnitureRoom(q))
     return "Which chair and desk should I check? Please name the room for each piece.";
   if (fit && (namedChairs.length > 1 || namedDesks.length > 1))
     return "Which chair and desk pair should I compare first? Named rooms: " + [...new Set([...namedChairs, ...namedDesks])].join(", ") + ".";
