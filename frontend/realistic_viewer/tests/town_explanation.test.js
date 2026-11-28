@@ -361,8 +361,19 @@ test("an explicit before-and-after position request uses the two saved revisions
   manifest.revision++;
   for (const question of ["Compare the bedroom chair before and after to see if it moved.",
       "Compare the bedroom chair’s position before and after moving it under Belaya.",
-      "What changed when I moved the bedroom chair after adjusting the study desk?"]) {
+      "What changed when I moved the bedroom chair after adjusting the study desk?",
+      "Compare the bedroom chair’s position after repositioning it."]) {
     assert.equal(asksChairChange(question), true);
     assert.match(explanation(home, question, manifest, previous), /Displacement: 0.000 m/);
   }
+});
+
+test("acoustic context preserves furniture aliases and proposed edits cannot use a past displacement", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const mixed = explanation(home, "In the study, will the chair fit with Belaya while keeping noise down?");
+  assert.match(mixed, /chair is in the study.*desk is in the bedroom.*Acoustic performance is unverified/);
+  const proposed = "How would the bedroom chair’s position change if it were moved under Belaya now?";
+  assert.equal(asksChairChange(proposed), false);
+  assert.match(explanation(home, proposed), /Which proposed chair position/);
+  assert.doesNotMatch(explanation(home, "Will the bedroom chair fit under the desk now, before I order it?"), /Earlier-revision fit/);
 });

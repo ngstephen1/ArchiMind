@@ -94,23 +94,24 @@ function unresolvedFurnitureRoom(clause) {
   return roomMention.test(clause.replace(roomScope, "").replace(qualifiedFurniture("chair"), "").replace(qualifiedFurniture("desk"), ""));
 }
 
+function proposedPosition(q) {
+  const indicative = q.replace(/\b(?:to see|check|verify) if\b/gi, "");
+  return /\bif\b/i.test(indicative) || /\b(?:would|could|might|will) (?!you (?:compare|show|explain))[^?]*(?:position|mov(?:e|ing)|shift)/i.test(indicative);
+}
+
 function isBedroomChairComparison(question) {
-  // A separate completed edit gives context, not a second comparison target.
-  const q = question.toLowerCase().split(/\bafter (?:adjusting|editing|repositioning)\b/, 1)[0];
-  if (!/\bchair\b/.test(q)) return false;
-  const [room, secondChairRoom] = furnitureRooms(q, "chair");
-  if (secondChairRoom || furnitureRooms(q, "desk").some(id => id !== "bedroom")) return false;
-  if (room ? room !== "bedroom" : /\b(study|living|salon|bathroom|kitchen)\b/.test(q)) return false;
-  // A fit question needs evidence for the specified desk. A historical position
-  // comparison below only knows the bedroom desk-chair and Belaya.
-  if (/\b(fits?|slides?|tucks?|clearances?)\b/.test(q)) return false;
-  const comparative = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
-  const timeline = /\b(revisions?|before|after|previously|now|earlier)\b/.test(q);
-  if (/\bif (?:i|we|you)\b/.test(q)) return false;
-  if (comparative && timeline) return true;
-  if (/\bdid\b.*\b(move|shift|change)\b/.test(q)) return true;
-  if (/\b(under|underneath|beneath)\b/.test(q)) return false;
-  return /\b(revisions|previous revision|changed|moved|displacement)\b/.test(q);
+  const q = question.toLowerCase();
+  if (!/\bchair\b/.test(q) || proposedPosition(q) || /\b(fits?|slides?|tucks?|clearances?)\b/.test(q)) return false;
+  // Room names after a separate completed edit describe context. Time markers
+  // still come from the complete question.
+  const subject = q.split(/\bafter (?:adjusting|editing|repositioning)\b/, 1)[0];
+  const [room, secondChairRoom] = furnitureRooms(subject, "chair");
+  if (secondChairRoom || furnitureRooms(subject, "desk").some(id => id !== "bedroom")) return false;
+  if (room ? room !== "bedroom" : /\b(study|living|salon|bathroom|kitchen)\b/.test(subject)) return false;
+  const comparison = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
+  const history = /\b(revisions?|before|after|previously|earlier)\b/.test(q);
+  if (comparison && history) return true;
+  return /\bdid\b.*\b(move|shift|change)\b|\bchanged when\b|\bdisplacement\b|\bprevious revision\b/.test(q);
 }
 
 export function asksZoningTradeoff(question) {
@@ -180,13 +181,13 @@ function asksFurnitureFit(clause) {
 
 // Separate a trailing acoustic condition only when it adds no furniture target.
 // Unbound rooms in other fit clauses reach the clarification path.
-function furnitureQuestion(piece) {
-  const condition = /\s+(?:with(?:out)?|while)\s+/ig;
-  for (const match of piece.matchAll(condition)) {
+function furnitureQuestion(piece, home) {
+  const condition = /\s+(?:without|while|with(?= (?:enough |sufficient )?(?:privacy|noise|sound|acoustic)))\s+/ig;
+  for (const match of [...piece.matchAll(condition)].reverse()) {
     const question = piece.slice(0, match.index);
     const context = piece.slice(match.index + match[0].length);
     if (asksFurnitureFit(question) && acousticEvidence.test(context) &&
-        !furnitureNoun("chair").test(context) && !furnitureNoun("desk").test(context))
+        !["chair", "desk"].some(kind => furnitureNoun(kind).test(context) || furnitureRooms(context, kind, home).length))
       return question;
   }
   return piece;
@@ -197,7 +198,7 @@ function planQuestions(question, home) {
   const clauses = scoped.split(/[?!;]|\.(?!\d)/).flatMap(sentence => {
     const pieces = sentence.trim().split(/(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
     const prefix = roomScope.exec(sentence.trim());
-    return pieces.map(furnitureQuestion).map((piece, i) => {
+    return pieces.map(piece => furnitureQuestion(piece, home)).map((piece, i) => {
       if (!prefix || !i || roomScope.test(piece)) return piece;
       const chairNeedsScope = /\bchairs?\b/i.test(piece) && asksFurnitureFit(piece)
         && !furnitureRooms(piece, "chair", home).length;
@@ -234,7 +235,7 @@ export function explanation(home, question, manifest = null, previous = null) {
     return explainPlan(home, clause, manifest, previous);
   }))];
   if (plan.some(clause => asksFurnitureFit(clause) && !isBedroomChairComparison(clause) &&
-      /\b(revisions|before|previous|earlier)\b/i.test(clause) && /\b(compare|compared|changes?|changed|after|now)\b/i.test(clause)))
+      /\brevisions\b|\b(?:compare|compared|comparison|changed)\b[^?]*\b(?:before|earlier|previous|after)\b|\bbefore and after\b/i.test(clause)))
     answers.push("Earlier-revision fit was not evaluated. Comparing fit requires the named pair's operating measurements in both revisions.");
   if (acoustic) answers.push("Acoustic performance is unverified. The floor plan records room positions. To assess sound transfer, obtain wall and door assembly ratings or an on-site sound measurement.");
   if (supplier || (plan.some(asksFurnitureFit) && /\b(guarantee|guaranteed|certify|promise|certain|prove)\b/i.test(question))) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
@@ -248,6 +249,8 @@ function explainPlan(home, question, manifest, previous) {
   const desk = get("belaya"), bed = get("queen-bed");
   const q = question.toLowerCase();
   const normalized = words(q);
+  if (/\bchair\b/.test(q) && proposedPosition(q) && /\b(position|displacement)\b/.test(q))
+    return "Which proposed chair position should I check? Name its room, direction and distance, then preview the move. A position in a saved revision cannot establish the result of a proposed edit.";
   if (isBedroomChairComparison(q)) return chairChange(home, manifest, previous);
   if (asksZoningTradeoff(q)) return zoningComparison(home, manifest, previous);
   const comparison = home.evidence?.comparison;
