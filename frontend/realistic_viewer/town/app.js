@@ -154,6 +154,7 @@ function reviewStatus(result) {
     return "No suggestion met the evidence or confidence threshold. Your saved design is unchanged.";
   return "";
 }
+el("passage").addEventListener("input", () => { el("confirmPassage").checked = true; });
 el("message").addEventListener("input", clearRouteReview);
 el("panel").addEventListener("close", clearRouteReview);
 bind("checkRequest", async () => {
@@ -242,6 +243,7 @@ function sync(data) {
   el("serviceLayout").disabled = Boolean(applied.service_layout);
   el("compareZoning").checked = false;
   el("passage").value = requirements?.passage_m ?? 0.6;
+  el("confirmPassage").checked = false;
   el("undo").hidden = revision < 2;
   el("locks").disabled = revision === 0;
   url.searchParams.set("project", project);
@@ -567,7 +569,7 @@ bind("generate", async () => {
         split_dining: el("splitDining").checked,
         service_layout: el("serviceLayout").checked,
         compare_zoning: el("compareZoning").checked,
-        ...(revision || Number(el("passage").value) !== 0.6 ? { passage_m: Number(el("passage").value) } : {}),
+        ...(el("confirmPassage").checked ? { passage_m: Number(el("passage").value) } : {}),
         locks: [...el("locks").querySelectorAll(":checked")].map(
           (v) => v.value,
         ),

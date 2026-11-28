@@ -61,6 +61,21 @@ WIDTH_PATTERNS = (
     + MEASUREMENT
     + r"(?!\s+(?:long|in length|or shorter|(?:away\s+)?from|between|past)\b)",
 )
+WIDTH = "(?:" + "|".join(WIDTH_PATTERNS) + ")"
+WIDTH_OBJECTION = r"(?:is\s+too\s+(?:small|narrow)|(?:will\s+not|won['’]t)\s+fit)\b"
+REJECTED_WIDTH = re.compile(rf"{WIDTH}\s+(?P<reason>{WIDTH_OBJECTION})", re.I)
+CURRENT_WIDTH = re.compile(
+    rf"\b(?:we (?:have|use)|there is)\s+(?:an?\s+)?{WIDTH}"
+    r"\s+in (?:our|the) (?:current|existing) (?:home|house)\b",
+    re.I,
+)
+REUSE_WIDTH = (
+    r"(?:(?:and|but|so)\s+)?(?:(?:we|i)\s+)?(?:please\s+)?"
+    r"(?:want|need|use|keep|reuse|match|maintain|retain)\s+"
+    r"(?:(?:that|the) same|that) (?:clear )?(?:width|passage(?: width)?)\b"
+    r"(?=\s*(?:$|[.;!?]|(?:in|for|throughout) (?:the |our |my |this )?"
+    r"(?:(?:new|proposed|renovated) )?(?:passage|walkway|home|house|room|layout|design|renovation)\b))"
+)
 FIXED_PASSAGE = (
     r"(?:"
     + "|".join(WIDTH_PATTERNS[:2])
@@ -152,20 +167,25 @@ FIRST_TABLE = (
     + r")"
 )
 TABLE_OPTION = r"(?:if|when)\s+(?:possible|practical|feasible|space permits)\b"
-TABLE_BOUNDARY = (
-    r"(?=\s*(?:$|[,.!?;]|in\b|for (?:breakfast|lunch|dinner)\b|" + TABLE_OPTION + r"))"
-)
+MEAL_QUALIFIER = r"for (?:family )?(?:breakfasts?|lunch(?:es)?|dinners?)\b"
+TABLE_BOUNDARY = rf"(?=\s*(?:$|[,.!?;]|in\b|{MEAL_QUALIFIER}|{TABLE_OPTION}))"
 OTHER_TABLE = (
     r"(?:(?:the )?(?:other|second)\b(?: (?:dining )?table\b|"
     + TABLE_BOUNDARY
-    + r")|(?:a |the )?separate (?:dining )?table\b)"
+    + r")|(?:the other (?:end|side) of (?:the )?room (?:at|around) )?"
+    + r"(?:another|a second|(?:a |the )?separate) (?:dining )?table\b)"
 )
 OTHER_END = (
     r"the other (?:end|side)\b(?: of (?:it|the table)\b|" + TABLE_BOUNDARY + r")"
 )
+# A single table specified in each named room is also a split arrangement.
+NAMED_ALTERNATIVE = (
+    rf"(?:one|a single) (?:dining )?table(?= in (?:the )?(?:{TABLE_ROOM})\b)"
+)
+SECOND_TABLE = rf"(?:{OTHER_TABLE}|(?(first_room){NAMED_ALTERNATIVE}|(?!)))"
 SEPARATE_TABLE_COUNTS = re.compile(
     FIRST_TABLE
-    + OTHER_TABLE
+    + SECOND_TABLE
     + r"(?:\s+in (?:the )?(?P<second_room>"
     + TABLE_ROOM
     + r")\b)?"
@@ -174,14 +194,14 @@ SAME_TABLE_ENDS = re.compile(FIRST_TABLE + OTHER_END)
 OPTIONAL_SECOND_TABLE = re.compile(
     FIRST_TABLE
     + r"(?:(?P<separate_table>"
-    + OTHER_TABLE
+    + SECOND_TABLE
     + r")|"
     + OTHER_END
     + r")"
     + r"(?:\s+in (?:the )?(?:"
     + TABLE_ROOM
     + r")\b)?"
-    + r"(?:\s+for (?:breakfast|lunch|dinner))?\s*,?\s+"
+    + rf"(?:\s+{MEAL_QUALIFIER})?\s*,?\s+"
     + TABLE_OPTION
 )
 SECOND_ALLOCATION_ONLY = (
@@ -218,7 +238,7 @@ HOME_DINING_LOCATION = re.compile(
 )
 DINING_TRANSITION = re.compile(
     r"\b(?:so|and|then)\s+(?=(?:at home\s*,?\s+)?(?:(?:we|i)\s+)?"
-    r"(?:(?:will|would|must)\s+)?"
+    r"(?:(?:will|would|must)\s+)?(?:please\s+)?"
     r"(?:need|want|require|add|provide|seat|have|eat|dine|host|for)\b)"
     r"|\bwhile\s+(?!(?:at|in|near|around)\b)"
     r"|\b(?:even though|although|though|whereas)\s+"
@@ -318,6 +338,13 @@ def _affirmative_clauses(message):
         "",
         _join_wrapped_qualifiers(message).lower(),
     )
+    # A counted table suggestion phrased as a question is exploratory.
+    message = re.sub(
+        rf"(^|[.;!?\n])\s*(?:{TABLE_ALLOCATION}){TABLE_POSITION}"
+        rf"(?:{SINGLE_TABLE}|{OTHER_TABLE}) in (?:the )?(?:{TABLE_ROOM})\s*\?",
+        r"\1",
+        message,
+    )
     # Keep an explicit off-site heading attached to its activity when a comma
     # would otherwise split off the imperative that follows.
     message = re.sub(
@@ -410,6 +437,19 @@ def _dining_scope(activity, *, preceding_offsite=False):
 
 
 def _home_meal_clauses(clause):
+    # Keep the people involved in an unrelated activity separate from a
+    # hypothetical meal and from any later, independent dining requirement.
+    unavailable = re.search(
+        r"\b(?:otherwise (?:we|i)(?:['’]ll| will)|because (?:we|i) "
+        r"(?:can['’]t|cannot|can not|do not|don['’]t)) (?:eat|dine)\b",
+        clause,
+    )
+    if unavailable:
+        yield from _home_meal_clauses(clause[: unavailable.start()])
+        next_request = DINING_TRANSITION.search(clause, unavailable.end())
+        if next_request:
+            yield from _home_meal_clauses(clause[next_request.end() :])
+        return
     if not re.search(OFFSITE_MEAL, clause):
         yield clause
         return
@@ -466,8 +506,32 @@ def _home_meal_clauses(clause):
             home = False
 
 
+def _paired_room_allocations(clauses):
+    """Join two unconditional, counted table assignments in adjacent sentences."""
+    clauses = iter(clauses)
+    clause = next(clauses, None)
+    while clause is not None:
+        following = next(clauses, None)
+        if following:
+            first = NAMED_SINGLE_TABLE.fullmatch(_normalize_table_ends(clause).strip())
+            second = re.fullmatch(
+                rf"(?:seat )?(?P<count>{TABLE_ALLOCATION}){TABLE_POSITION}"
+                rf"(?:{OTHER_TABLE}|{NAMED_ALTERNATIVE}) in (?:the )?(?P<room>{TABLE_ROOM})",
+                following.strip(),
+            )
+            if first and second:
+                yield (
+                    f"seat {first['count']} at one table in the {first['room']} "
+                    f"and {second['count']} at a separate table in the {second['room']}"
+                )
+                clause = next(clauses, None)
+                continue
+        yield clause
+        clause = following
+
+
 def _dining_clauses(clauses, *, for_arrangement=False):
-    for clause in clauses:
+    for clause in _paired_room_allocations(clauses):
         for home in _home_meal_clauses(clause):
             if re.search(DINING_CONTEXT, home) and not OPTIONAL_STANDALONE.fullmatch(
                 home.strip()
@@ -565,6 +629,49 @@ def requests_single_table(message):
         ):
             return True
     return False
+
+
+def _circulation_text(message):
+    """Remove explicitly rejected widths and reports of existing conditions."""
+    text = _join_wrapped_qualifiers(message).lower()
+    text = REJECTED_WIDTH.sub(" ", text)
+    # Retain an existing dimension only when the next clause explicitly reuses it.
+    text = CURRENT_WIDTH.sub(
+        lambda match: (
+            match[0]
+            if re.match(rf"[\s,.;]*{REUSE_WIDTH}", text[match.end() :])
+            else " "
+        ),
+        text,
+    )
+    # A stated difficulty in the current house stays background unless the
+    # client explicitly applies that width to the proposed design.
+    text = re.sub(
+        r"\bbecause in (?:our|the) (?:current|existing) (?:home|house)\b"
+        rf"[^.;!?\n]*?\bbut (?:we )?still need (?:an? )?{WIDTH}"
+        r"(?!\s+(?:in|for) (?:the |our |my )?(?:new|proposed|renovated) "
+        r"(?:home|house|design|layout|room)\b)",
+        " ",
+        text,
+    )
+    return ". ".join(_affirmative_clauses(text))
+
+
+def _asserts_width_objection(prefix):
+    # Conditional scope can govern both sides of "and". A negation of an
+    # independent fact, e.g. "we don't need a salon, and ...", cannot.
+    sentence = re.split(r"[;!?]|\.(?!\d)", prefix.lower())[-1]
+    # A fronted condition scopes everything up to its comma. An embedded
+    # question about a different design decision ends at an independent contrast.
+    if re.match(r"\s*(?:if|whether|unless)\b[^,]*$", sentence):
+        return False
+    sentence = re.split(r"\bbut\b", sentence)[-1]
+    sentence = re.sub(r"\b(?:no doubt|without (?:a )?doubt)\b", "certain", sentence)
+    if re.search(r"\b(?:if|whether|unless|doubt)\b[^,;.!?]*$", sentence):
+        return False
+    governing = re.split(r",?\s+and\s+(?=(?:(?:the|an?)\s+)?$)", sentence)[-1]
+    clauses = _affirmative_clauses(governing + " __objection__")
+    return any(part.endswith("__objection__") for part in clauses)
 
 
 def _widths(text):
@@ -669,6 +776,33 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             split_counts["second_room"],
         )
         if (
+            reviewed_program
+            and not salon
+            and any(
+                room and ("salon" in room or not services)
+                for room in (first_room, second_room)
+            )
+        ):
+            questions.append(
+                "The five-room program cannot seat both named groups in the requested rooms. "
+                "Confirm the six-room program or revise the seating locations."
+            )
+        shared_room = re.match(
+            rf"\s*,?\s+(?:both|all) in (?:the )?(?P<room>{TABLE_ROOM})\b",
+            dining[split_counts.end() :],
+        )
+        if shared_room:
+            fallback = dining[split_counts.end() + shared_room.end() :]
+            if not re.match(
+                rf"\s*,?\s+{TABLE_OPTION}\s*,?\s+(?:or|otherwise) "
+                r"(?:put|place|use) one table in each (?:dining )?room\s*(?=$|[.!?;])",
+                fallback,
+            ):
+                questions.append(
+                    f"The {shared_room['room']} has one modeled table. "
+                    "Confirm a different location for the second table."
+                )
+        elif (
             first_room
             and second_room
             and (("salon" in first_room) == ("salon" in second_room))
@@ -902,7 +1036,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             totals.add(minimum)
     stated = next(iter(totals)) if len(totals) == 1 else None
     if len(totals) > 1 or (
-        totals and "dining_seats" in explicit and seats not in totals
+        totals and "dining_seats" in explicit and seats > 0 and seats not in totals
     ):
         questions.append(
             "Confirm one total number of dining places in both the brief and controls."
@@ -926,18 +1060,19 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         for amount, room in dict.fromkeys(_named_single_tables(clauses)):
             if "kitchen" in room and kitchen_table:
                 continue
+            room_label = "kitchen-dining" if "kitchen" in room else room
             # The service layout models a kitchen-dining table in the five-room program.
             if not (salon or ("kitchen" in room and services)):
                 questions.append(
-                    f"The five-room program has no modeled table in the {room}. "
+                    f"The five-room program has no modeled table in the {room_label}. "
                     f"Confirm how to accommodate the requested {amount} places there."
                 )
             elif amount > 4:
                 questions.append(
-                    f"The {room} has four modeled places at one table. "
+                    f"The {room_label} has four modeled places at one table. "
                     f"Confirm how to accommodate the requested {amount} places there."
                 )
-    circulation = text if evaluate_passage else ""
+    circulation = _circulation_text(message) if evaluate_passage else ""
     if fixed := re.search(FIXED_PASSAGE, circulation):
         measurement = re.search(MEASUREMENT, fixed[0])
         assert measurement is not None
@@ -955,7 +1090,35 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             "Confirm one modeled passage width in both the brief and controls."
         )
     elif widths:
-        passage = widths.pop()
+        passage = next(iter(widths))
+    if evaluate_passage:
+        for match in REJECTED_WIDTH.finditer(message):
+            # Keep the negation inside "will not fit" intact, while checking
+            # whether the client actually asserts the objection.
+            if not _asserts_width_objection(message[: match.start()]):
+                continue
+            rejected = _widths(match[0].lower())
+            if rejected and (
+                passage in rejected
+                or "too" in match["reason"].lower()
+                and passage < max(rejected)
+            ):
+                questions.append(
+                    "The selected passage width conflicts with a width you rejected. "
+                    "Confirm a suitable measured width for this layout."
+                )
+                break
+        if (
+            not widths
+            and "passage_m" not in explicit
+            and re.search(PATH, circulation)
+            and re.search(REUSE_WIDTH, circulation)
+        ):
+            questions.append(
+                "Which measured passage width should the new layout reuse? "
+                "Enter the measurement in the brief. In Town, you can also select "
+                "Use the displayed passage width under Seating and circulation requirements."
+            )
     if (
         brief.compare_tradeoffs
         and single_table
@@ -1057,9 +1220,9 @@ def opening_questions(message, locks):
     return questions
 
 
-def _statement(message, pattern, accepts):
+def _statement(message, pattern, accepts, *, separator=STATEMENT_BREAK):
     """Return the user's sentence that states a requirement, if one does."""
-    for sentence in re.split(STATEMENT_BREAK, message.strip()):
+    for sentence in re.split(separator, message.strip(), flags=re.I):
         if (
             sentence
             and re.search(pattern, sentence, re.IGNORECASE)
@@ -1218,11 +1381,17 @@ def review_summary(
     )
     require(
         f"{brief.passage_m:g} m modeled passage",
-        "|".join(WIDTH_PATTERNS),
+        None,
         "passage_m",
         inherited=passage_inherited,
-        accepts=lambda sentence: (
-            brief.passage_m in _widths(". ".join(_affirmative_clauses(sentence)))
+        quote=_statement(
+            message,
+            WIDTH,
+            lambda sentence: brief.passage_m in _widths(_circulation_text(sentence)),
+            separator=(
+                rf"(?:{STATEMENT_BREAK})(?!\s*(?:{WIDTH_OBJECTION}|{REUSE_WIDTH}|"
+                r"in (?:our|the) (?:current|existing) (?:home|house)\b))"
+            ),
         ),
     )
     if brief.formal_salon:

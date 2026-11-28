@@ -1704,3 +1704,369 @@ def test_live_payload_preserves_a_coordinated_opening_request(monkeypatch, saved
         live=True,
     )
     assert service.interpret(req, saved_home).passage_m == 0.65
+
+
+@pytest.mark.parametrize(
+    "background",
+    [
+        "because a 0.6 m clear passage won’t fit the wheelchair",
+        "but a 60 cm clear passage is too narrow",
+        "but we use a 60 cm clear passage in our current home",
+    ],
+)
+def test_requested_passage_width_is_preserved_alongside_background(background):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), f"Keep a 90 cm clear passage {background}.", None
+    )
+    assert not questions
+    assert brief.passage_m == 0.9
+
+
+def test_two_explicit_passage_widths_still_need_confirmation():
+    _, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "Keep a 90 cm clear passage but also keep a 70 cm clear passage.",
+        None,
+    )
+    assert any("one modeled passage width" in q for q in questions)
+
+
+@pytest.mark.parametrize(
+    "activity",
+    [
+        "otherwise we'll dine together at one table",
+        "because we cannot eat together at one table",
+    ],
+)
+@pytest.mark.parametrize("join", [". Provide", ", so we need"])
+def test_other_activity_participants_do_not_set_dining_capacity(activity, join):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        f"We need room for three hosts and four guests to play cards, {activity}{join} three dining seats.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 3
+
+
+@pytest.mark.parametrize(
+    "allocation",
+    [
+        "two at another table",
+        "two at the other side of the room at a separate table",
+        "two at a second dining table",
+    ],
+)
+def test_alternative_table_names_preserve_the_second_group(allocation):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        f"Seat three at one table and {allocation}.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 5 and brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "fallback,needs_question",
+    [
+        ("", True),
+        (" if practical, otherwise put one table in each dining room", False),
+        (
+            " if practical, or put one table in each dining room only if directly connected",
+            True,
+        ),
+    ],
+)
+def test_shared_room_needs_a_supported_alternative(fallback, needs_question):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        "Seat three guests at one table and two at another table, both in the salon"
+        + fallback
+        + ".",
+        None,
+    )
+    assert brief.dining_seats == 5
+    assert any("salon has one modeled table" in q for q in questions) is needs_question
+
+
+def test_separate_room_assignments_preserve_count_and_original_citation():
+    text = (
+        "Seat two people at one table and one at the other end of it in the kitchen. "
+        "Seat two at another table in the formal salon."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True),
+        text,
+        None,
+    )
+    assert not questions and brief.dining_seats == 5 and brief.split_dining
+    assert any(
+        s["statement"] == text for s in review_summary(brief, message=text)["sources"]
+    )
+
+
+@pytest.mark.parametrize(
+    "qualifier,expected",
+    [("for family lunches", 5), ("for family lunches if possible", 3)],
+)
+def test_meal_qualifier_retains_the_scope_of_the_second_group(qualifier, expected):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True),
+        f"Seat three at one table and two at the other end {qualifier}.",
+        None,
+    )
+    assert not questions and brief.dining_seats == expected and not brief.split_dining
+
+
+@pytest.mark.parametrize(
+    "purpose,expected_conflict",
+    [
+        (
+            "because in our current home we reach the kitchen but still need a 70 cm clear passage",
+            False,
+        ),
+        ("because we need storage but provide a 70 cm clear passage", True),
+    ],
+)
+def test_width_of_existing_home_versus_a_second_requested_width(
+    purpose, expected_conflict
+):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "Keep a 90 cm clear passage " + purpose + ".",
+        None,
+    )
+    assert bool(questions) is expected_conflict
+    if not questions:
+        assert brief.passage_m == 0.9
+
+
+@pytest.mark.parametrize("join", [". Two", " and two"])
+@pytest.mark.parametrize("salon", [False, True])
+def test_each_named_room_can_have_its_own_single_table_after_program_confirmation(
+    join, salon
+):
+    text = (
+        "Seat three guests at a single table in the formal salon"
+        + join
+        + " people at a single table in the kitchen."
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=salon, split_dining=True),
+        text,
+        None,
+    )
+    assert (
+        brief.dining_seats == 5 and brief.split_dining and brief.formal_salon is salon
+    )
+    if salon:
+        assert not questions
+    else:
+        assert any("six-room program" in q for q in questions)
+
+
+@pytest.mark.parametrize("join", [" and want", ". Use", ".\nReuse"])
+def test_current_measurement_becomes_an_explicit_new_requirement(join):
+    text = f"We have a 90 cm clear passage in our current home{join} the same width in the new house."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
+    passage = next(
+        s
+        for s in review_summary(brief, message=text)["sources"]
+        if "passage" in s["requirement"]
+    )
+    assert passage["origin"] == "brief" and passage["statement"] == text
+
+
+@pytest.mark.parametrize("control,clarify", [(0.6, True), (0.7, True), (0.8, False)])
+def test_rejected_clearance_is_a_lower_bound(control, clarify):
+    _, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, passage_m=control),
+        "A 70 cm clear passage is too narrow for us.",
+        None,
+    )
+    assert any("width you rejected" in q for q in questions) is clarify
+
+
+def test_wrapped_rejection_is_never_cited_as_the_accepted_measurement():
+    text = "A 70 cm clear passage\nis too narrow for us. Keep a 70 cm clear passage."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert questions
+    source = next(
+        s
+        for s in review_summary(brief, message=text)["sources"]
+        if "passage" in s["requirement"]
+    )
+    assert source["statement"] == "Keep a 70 cm clear passage."
+
+
+@pytest.mark.parametrize(
+    "prefix,clarify", [("", False), ("Keep a 65 cm clear passage. ", True)]
+)
+def test_new_room_width_after_a_description_of_the_current_home(prefix, clarify):
+    text = (
+        prefix
+        + "Rethink the kitchen because in our current home the kitchen is cramped, but we still need a 90 cm clear passage in the new layout."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert bool(questions) is clarify
+    if not clarify:
+        assert brief.passage_m == 0.9
+
+
+def test_unknown_reuse_and_unrelated_widths():
+    _, q = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "Keep the same passage width in the renovation.",
+        None,
+    )
+    assert any("reuse" in v for v in q)
+    _, q = requirement_controls(
+        Brief(compare_tradeoffs=True), "Use the same width for both chairs.", None
+    )
+    assert not q
+
+
+def test_unavailable_meal_retains_a_following_polite_imperative():
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "We need a bigger kitchen because we cannot dine together, so please provide three dining seats.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 3
+
+
+@pytest.mark.parametrize("split", [False, True])
+def test_optional_single_table_in_another_room_remains_optional(split):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=split),
+        "Seat three guests at a single table in the formal salon and two people at a single table in the kitchen if possible.",
+        None,
+    )
+    assert not questions and brief.dining_seats == 3 and brief.split_dining is split
+
+
+def test_a_question_fragment_does_not_confirm_the_second_table():
+    text = (
+        "Seat four at one table in the kitchen. Two people at one table in the salon?"
+    )
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert brief.dining_seats == 4 and not brief.split_dining
+    assert any("one dining table" in q for q in questions)
+
+
+@pytest.mark.parametrize("punctuation", [",", ""])
+def test_shared_location_fallback_allows_a_comma_before_its_preference(punctuation):
+    text = f"Seat three at one table and two at another table, both in the salon{punctuation} if practical, otherwise put one table in each dining room."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, split_dining=True), text, None
+    )
+    assert not questions and brief.dining_seats == 5
+
+
+@pytest.mark.parametrize("negation", ["I don’t think", "We do not consider", "I doubt"])
+def test_negated_objection_accepts_the_affirmative_clearance(negation):
+    text = (
+        f"{negation} a 90 cm clear passage is too narrow. Keep a 90 cm clear passage."
+    )
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
+
+
+def test_explicit_width_control_resolves_an_unmeasured_reuse_reference():
+    text = "Keep the same passage width in the renovation."
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, passage_m=0.9), text, None
+    )
+    assert not questions and brief.passage_m == 0.9
+
+
+def test_width_request_for_chairs_does_not_reuse_current_passage():
+    text = "We have a 90 cm clear passage in our current home. Use the same width for both chairs."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.6
+    source = next(
+        s
+        for s in review_summary(brief, message=text)["sources"]
+        if "passage" in s["requirement"]
+    )
+    assert source["origin"] == "default"
+
+
+def test_current_home_citation_keeps_wrapped_location_and_reuse_instruction():
+    text = "We have a 90 cm clear passage\nin our current home. Use the same width in the new house."
+    brief, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not questions and brief.passage_m == 0.9
+    source = next(
+        s
+        for s in review_summary(brief, message=text)["sources"]
+        if "passage" in s["requirement"]
+    )
+    assert source["origin"] == "brief" and source["statement"] == text
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "We don't need a formal salon, and a ",
+        "I have no doubt that a ",
+        "Without a doubt, a ",
+    ],
+)
+def test_separately_asserted_objection_is_preserved(prefix):
+    text = prefix + "60 cm clear passage is too narrow for our wheelchair."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("width you rejected" in question for question in questions)
+
+
+def test_reused_width_on_saved_home_requires_user_selection():
+    home = {"evidence": {"comparison": {"passage_m": 0.85}}}
+    text = "Keep the same passage width in the renovation."
+    omitted, questions = requirement_controls(Brief(compare_tradeoffs=True), text, home)
+    assert omitted.passage_m == 0.85 and any(
+        "reuse" in question for question in questions
+    )
+    confirmed, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, passage_m=0.85), text, home
+    )
+    assert confirmed.passage_m == 0.85 and not questions
+
+
+def test_open_count_clears_prior_requirement_and_accepts_an_explicit_new_count():
+    previous = {"evidence": {"comparison": {"required_dining_seats": 2}}}
+    open_count = Brief(compare_tradeoffs=True, formal_salon=True, dining_seats=0)
+    text = "Seat four people at a single table in the formal salon."
+    for message, expected in [("", 0), (text, 4)]:
+        brief, questions = requirement_controls(open_count, message, previous)
+        assert not questions and brief.dining_seats == expected
+    _, questions = requirement_controls(
+        Brief(compare_tradeoffs=True, formal_salon=True, dining_seats=3), text, previous
+    )
+    assert any("one total number" in q for q in questions)
+
+
+@pytest.mark.parametrize(
+    "conditional",
+    ["If the hallway turns sharply", "Check whether the hallway turns sharply"],
+)
+def test_shared_conditional_does_not_establish_rejected_width(conditional):
+    text = (
+        conditional
+        + " and a 60 cm clear passage is too narrow, use a different layout."
+    )
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not any("width you rejected" in q for q in questions)
+
+
+@pytest.mark.parametrize(
+    "prefix",
+    [
+        "I don't know if the corridor can widen",
+        "We are unsure whether the kitchen can move",
+    ],
+)
+def test_a_contrasting_objection_is_independent_of_an_embedded_question(prefix):
+    text = f"{prefix} but a 60 cm clear passage is too narrow for our wheelchair."
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert any("width you rejected" in q for q in questions)
