@@ -43,8 +43,12 @@ export function isUnambiguousSavedDesignQuestion(question) {
 }
 
 export function asksChairChange(question) {
+  return planQuestions(question).some(isBedroomChairComparison);
+}
+
+function isBedroomChairComparison(question) {
   const q = question.toLowerCase();
-  if (!/\bchair\b/.test(q) || /\bstudy\b/.test(q)) return false;
+  if (!/\bchair\b/.test(q) || /\b(study|living|salon|bathroom|kitchen)\b/.test(q)) return false;
   const comparative = /\b(compare|compared|comparison|difference|changes?|changed)\b/.test(q);
   const timeline = /\b(revisions?|before|after|previously|now|earlier)\b/.test(q);
   if (comparative && timeline) return true;
@@ -111,30 +115,32 @@ function chairChange(home, manifest, previous) {
 
 // A question about installation can include several independent evidence requests.
 // Bind furniture measurements to the clause that names the item and its room.
-const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?|privacy|private|hear|overhear|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))|decibels?)\b/i;
-const supplierEvidence = /\b(suppliers?|vendors?|in stock|stock availability|retailers?|merchants?|backorders?|lead[- ]times?|in[- ]stock|ship(?:ping|ment)?|delivery(?: dates?)?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
+const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?|privacy|private|hear|overhear|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))?|decibels?)\b/i;
+const supplierEvidence = /\b(suppliers?|vendors?|(?:can|could) (?:i|we) (?:order|buy|purchase)|stock availability|retailers?|merchants?|backorders?|lead[- ]times?|in[- ]stock|ship(?:ping|ment)?|delivery(?: dates?)?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
+
+function asksFurnitureFit(clause) {
+  return /\b(fits?|slides?|tucks?|underneath|beneath|clearances?)\b/i.test(clause) &&
+    /\b(chairs?|desks?|tables?|worktables?)\b/i.test(clause);
+}
+
+function planQuestions(question) {
+  if (!acousticEvidence.test(question) && !supplierEvidence.test(question)) return [question];
+  const clauses = question.split(/[?!;]|\.(?!\d)|,\s*|\s+and\s+(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|verify|the (?:desk|chair)|(?:its|my|this|a) chair)\b)/i);
+  return clauses.map(clause => clause.trim()).filter(clause => clause && (
+    (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
+    asksFurnitureFit(clause) || isBedroomChairComparison(clause) ||
+    (/\b(distance|how far|proximity)\b/i.test(clause) && /\b(desk|window)\b/i.test(clause)) ||
+    asksZoningTradeoff(clause)
+  ));
+}
 
 export function explanation(home, question, manifest = null, previous = null) {
   const acoustic = acousticEvidence.test(question);
   const supplier = supplierEvidence.test(question);
-  if (!acoustic && !supplier) return explainPlan(home, question, manifest, previous);
-
-  // Keep room names attached to their own proposition. A pair of rooms in a
-  // privacy question does not establish which room contains a following chair.
-  const clauses = question.split(/[?!;]|\.(?!\d)|,\s*|\s+and\s+(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|verify|the (?:desk|chair)|(?:its|my|this|a) chair)\b)/i);
-  const hasFit = clause => /\b(fit|fits|slide|tuck|underneath|beneath|clearance)\b/i.test(clause) &&
-    /\b(chair|desk|table|worktable)\b/i.test(clause);
-  const fitClause = clauses.find(hasFit);
-  const plan = clauses.filter(clause => hasFit(clause) ||
-    (!acousticEvidence.test(clause) && !supplierEvidence.test(clause))
-  ).map(clause => clause.trim()).filter(Boolean);
-  const answers = [];
-  if (plan.length) {
-    const planQuestion = plan.join(" ");
-    answers.push(explainPlan(home, planQuestion, manifest, previous));
-  }
+  const plan = planQuestions(question);
+  const answers = [...new Set(plan.map(clause => explainPlan(home, clause, manifest, previous)))];
   if (acoustic) answers.push("Acoustic performance is unverified. The floor plan records room positions. To assess sound transfer, obtain wall and door assembly ratings or an on-site sound measurement.");
-  if (supplier || (fitClause && /\b(guarantee|guaranteed|certify|promise|certain|prove)\b/i.test(question))) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
+  if (supplier || (plan.some(asksFurnitureFit) && /\b(guarantee|guaranteed|certify|promise|certain|prove)\b/i.test(question))) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
   return answers.join(" ");
 }
 
@@ -145,7 +151,7 @@ function explainPlan(home, question, manifest, previous) {
   const desk = get("belaya"), bed = get("queen-bed");
   const q = question.toLowerCase();
   const normalized = q.replaceAll("-", " ");
-  if (asksChairChange(q)) return chairChange(home, manifest, previous);
+  if (isBedroomChairComparison(q)) return chairChange(home, manifest, previous);
   if (asksZoningTradeoff(q)) return zoningComparison(home, manifest, previous);
   const comparison = home.evidence?.comparison;
   const mentionedRooms = q.match(/\b(bedroom|study|living|salon|kitchen|bathroom)\b/g) ?? [];
@@ -241,7 +247,7 @@ function explainPlan(home, question, manifest, previous) {
         workspaces.length ? `Saved ${workspaces[0]}. ` : "") +
       "To assess task lighting, provide the fixture or a work-surface light measurement. A daylight view alone cannot establish task illuminance or glare.";
   }
-  if (/\bchair\b/.test(q) && mentionedRooms.some(id => id !== "study" && id !== "bedroom")) {
+  if (/\bchairs?\b/.test(q) && mentionedRooms.some(id => id !== "study" && id !== "bedroom")) {
     const areas = [...new Set(mentionedRooms)];
     if (areas.length > 1) return "Which room contains the chair and desk you want to check? Named rooms: " + areas.join(", ") + ".";
     const part = requestedRooms[0];

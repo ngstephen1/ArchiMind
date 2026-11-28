@@ -258,3 +258,15 @@ test("rooms in a privacy question do not become the location of the furniture", 
   assert.match(answer, /Supplier availability is unknown/);
   assert.doesNotMatch(answer, /Which room contains/);
 });
+
+test("composite evidence preserves distinct room questions and comparison history", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const answer = explanation(home, "Will the bedroom chair fit? Can the study chair fit? Is it in stock?");
+  assert.match(answer, /bedroom desk-chair and belaya/);
+  assert.match(answer, /Study chair fit/);
+  assert.doesNotMatch(explanation(home, "Will the living room chairs fit? Can I order them now?"), /bedroom desk-chair/);
+  assert.match(explanation(home, "How far is the study desk from the window to avoid noise?"), /window center/);
+  assert.match(explanation(home, "Can the study block sound?"), /Acoustic performance is unverified/);
+  assert.match(explanation(home, "Can I order the chair now?"), /Supplier availability is unknown/);
+  assert.ok(asksChairChange("What changed when I moved the bedroom chair? Can the study block sound?"));
+});
