@@ -285,6 +285,7 @@ test("fit and movement stay with the named chair when another room supplies cont
   assert.match(explanation(home, "Will the bedroom chair fit, with enough privacy in the study?"), /bedroom desk-chair and belaya/);
   assert.match(explanation(home, "Can I hear the TV from the study?"), /Acoustic performance is unverified/);
   assert.match(explanation(home, "Is the quiet study suitable for calls?"), /Acoustic performance is unverified/);
+  assert.match(explanation(home, "Is the study private enough for calls?"), /Acoustic performance is unverified/);
   const q = "Did the study chair move when we moved the bedroom chair?";
   assert.equal(asksChairChange(q), false);
   assert.match(explanation(home, q), /study chair move requires saved positions/);

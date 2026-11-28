@@ -124,7 +124,7 @@ function chairChange(home, manifest, previous) {
 
 // A question about installation can include several independent evidence requests.
 // Bind furniture measurements to the clause that names the item and its room.
-const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?(?!\s+(?:study|bedroom|salon|living room)\b(?!\s+(?:for|during)\b))|privacy|overhear|hear(?! (?:why|about|how)\b)|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))?|decibels?)\b/i;
+const acousticEvidence = /\b(acoustics?|acoustically|nois(?:e|y)|quiet(?:ness|er)?(?!\s+(?:study|bedroom|salon|living room)\b(?!\s+(?:for|during)\b))|privacy|private(?= enough| for (?:calls?|meetings?))|overhear|hear(?! (?:why|about|how)\b)|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))?|decibels?)\b/i;
 const supplierEvidence = /\b(suppliers?|vendors?|(?:can|could) (?:i|we) (?:order|buy|purchase)|stock availability|retailers?|merchants?|backorders?|lead[- ]times?|in[- ]stock|ship(?:ping|ment)?|delivery(?: dates?)?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
 
 function asksFurnitureFit(clause) {
