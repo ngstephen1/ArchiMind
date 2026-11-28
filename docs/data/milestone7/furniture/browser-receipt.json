@@ -52,5 +52,104 @@
   ],
   "final_revision": 6,
   "home_id": "edf09b2a8e3e00de047a67359e1b388521df3ca418aa3b6f1e75f2b9d5959786",
-  "browser_errors": []
+  "browser_errors": [],
+  "walk_reload_geometry": [
+    {
+      "revision": 2,
+      "expected_saved_items": 1,
+      "rendered_tabletops": [
+        {
+          "id": "salon-coffee-table",
+          "x": 2.2,
+          "y": 1.45,
+          "w": 1.03,
+          "d": 0.48,
+          "top": 0.38,
+          "type": "RoundedBoxGeometry"
+        }
+      ],
+      "max_allowed_difference_m": 0.001
+    },
+    {
+      "revision": 3,
+      "expected_saved_items": 1,
+      "rendered_tabletops": [
+        {
+          "id": "salon-coffee-table",
+          "x": 2.385,
+          "y": 1.36,
+          "w": 0.66,
+          "d": 0.66,
+          "top": 0.4,
+          "type": "CylinderGeometry"
+        }
+      ],
+      "max_allowed_difference_m": 0.001
+    },
+    {
+      "revision": 4,
+      "expected_saved_items": 1,
+      "rendered_tabletops": [
+        {
+          "id": "salon-coffee-table",
+          "x": 2.385,
+          "y": 1.36,
+          "w": 0.66,
+          "d": 0.66,
+          "top": 0.4,
+          "type": "CylinderGeometry"
+        }
+      ],
+      "max_allowed_difference_m": 0.001
+    },
+    {
+      "revision": 5,
+      "expected_saved_items": 2,
+      "rendered_tabletops": [
+        {
+          "id": "salon-coffee-table",
+          "x": 2.385,
+          "y": 1.36,
+          "w": 0.66,
+          "d": 0.66,
+          "top": 0.4,
+          "type": "CylinderGeometry"
+        },
+        {
+          "id": "salon-coffee-table-copy-2",
+          "x": 4,
+          "y": 0.5,
+          "w": 0.66,
+          "d": 0.66,
+          "top": 0.4,
+          "type": "CylinderGeometry"
+        }
+      ],
+      "max_allowed_difference_m": 0.001
+    },
+    {
+      "revision": 6,
+      "expected_saved_items": 1,
+      "rendered_tabletops": [
+        {
+          "id": "salon-coffee-table",
+          "x": 2.385,
+          "y": 1.36,
+          "w": 0.66,
+          "d": 0.66,
+          "top": 0.4,
+          "type": "CylinderGeometry"
+        }
+      ],
+      "max_allowed_difference_m": 0.001
+    }
+  ],
+  "undo": {
+    "from_revision": 6,
+    "created_revision": 7,
+    "identical_to_revision": 5,
+    "restored_home_id": "d97037cde4b95e088df75ab6fdeb163af06b6e85b612c722891c0190925ca62c"
+  },
+  "stale_apply_http_status": 409,
+  "protected_chair_rotation_status": 400
 }

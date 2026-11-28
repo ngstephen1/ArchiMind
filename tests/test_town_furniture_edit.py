@@ -77,3 +77,29 @@ def test_standalone_furniture_edits_preserve_old_snapshot(object_id):
     new = next(p for p in updated["rooms"] if p["design"]["room"]["id"] == room)
     assert "piece_edits" not in original
     assert new["piece_edits"][object_id]["yaw"] == 90
+
+
+def test_copy_keeps_finish_and_delete_cleans_only_its_bindings():
+    from archimind.town.furniture_edit import Change, edit
+
+    home = json.loads(HOME.read_text())
+    salon = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "salon")
+    original = "salon-coffee-table"
+    copy = original + "-copy-2"
+    salon["finish_overrides"] = {"objects": {original: "sage"}}
+    spec = {"base": 1, "room": "salon", "object": original}
+    duplicated, _ = edit(home, Change(**spec, action="duplicate", x_m=4.0, y_m=0.5))
+    part = next(p for p in duplicated["rooms"] if p["design"]["room"]["id"] == "salon")
+    assert part["finish_overrides"]["objects"] == {original: "sage", copy: "sage"}
+    for bindings in (part["asset_bindings"], part["style"]["bindings"]):
+        bindings.append({"furniture_id": copy, "asset_id": None})
+    part["asset_bindings"][-1]["asset_id"] = "protected-model"
+    with pytest.raises(ValueError, match="protected asset binding"):
+        edit(duplicated, Change(**(spec | {"object": copy}), action="rotate"))
+    part["asset_bindings"][-1]["asset_id"] = None
+    removed, _ = edit(duplicated, Change(**(spec | {"object": copy}), action="remove"))
+    after = next(p for p in removed["rooms"] if p["design"]["room"]["id"] == "salon")
+    assert after["finish_overrides"]["objects"] == {original: "sage"}
+    assert copy not in after["piece_edits"]
+    for bindings in (after["asset_bindings"], after["style"]["bindings"]):
+        assert all(binding["furniture_id"] != copy for binding in bindings)
