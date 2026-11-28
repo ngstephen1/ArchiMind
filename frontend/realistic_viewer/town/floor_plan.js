@@ -1,3 +1,4 @@
+import {finishColors} from "./finish_chat.js";
 // Return endpoints in room-local metres, with north along positive Y.
 export function openingEndpoints(room, opening) {
   const start = opening.offset_m;
@@ -27,12 +28,12 @@ export function floorPlan(h, c, colors = LEGACY_PLAN_COLORS) {
       y = oy - s * p.origin[1],
       w = s * r.width_m,
       d = s * r.depth_m;
-    ctx.fillStyle = colors.room;
+    ctx.fillStyle = finishColors[p.finish_overrides?.floor] || colors.room;
     ctx.fillRect(x + 1, y - d + 1, w - 2, d - 2);
-    ctx.strokeStyle = colors.wall;
+    ctx.strokeStyle = finishColors[p.finish_overrides?.wall] || colors.wall;
     ctx.strokeRect(x, y - d, w, d);
     for (const f of p.design.furniture) {
-      ctx.fillStyle = colors.furniture;
+      ctx.fillStyle = finishColors[p.finish_overrides?.objects?.[f.id]] || colors.furniture;
       const rect = [x + s * f.x_m, y - s * (f.y_m + f.depth_m), s * f.width_m, s * f.depth_m];
       ctx.fillRect(...rect);
       if (colors.furnitureStroke) {

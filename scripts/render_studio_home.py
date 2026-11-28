@@ -321,6 +321,21 @@ def render(args):
         bump.inputs["Distance"].default_value = 0.0016
         tree.links.new(tex.outputs["Fac"], bump.inputs["Height"])
         tree.links.new(bump.outputs["Normal"], shader.inputs["Normal"])
+
+    def surface_finishes(objects, overrides):
+        for obj in objects:
+            role = (
+                "floor"
+                if obj.name.startswith("Oak floorboard")
+                else "wall"
+                if " plaster" in obj.name
+                else None
+            )
+            if role and role in overrides and obj.type == "MESH" and obj.data.materials:
+                obj.data.materials[0] = finishes["proposal-" + overrides[role]]
+
+    bedroom_part = next(p for p in board["rooms"] if p["room"]["id"] == "bedroom")
+    surface_finishes(bpy.data.objects, bedroom_part.get("finish_overrides", {}))
     coverlet = None
     views = []
     for part in board["rooms"]:
@@ -340,6 +355,9 @@ def render(args):
         if room["id"] != "bedroom":
             before = set(bpy.data.objects)
             bedroom.architecture(room, mats, pleated_curtains=style is None)
+            surface_finishes(
+                set(bpy.data.objects) - before, part.get("finish_overrides", {})
+            )
             for piece in part["details"]:
                 studio_piece(piece, finishes)
             for item in part["furniture"]:
@@ -379,7 +397,12 @@ def render(args):
     depth = board["depth"]
     for z, mat in ((-0.04, "oak"), (2.84, "ivory")):
         bedroom.box(
-            "Hall", (board["hall"] + 0.8, depth / 2, z), (1.6, depth, 0.08), mats[mat]
+            "Hall",
+            (board["hall"] + 0.8, depth / 2, z),
+            (1.6, depth, 0.08),
+            finishes[board["hall_finish"]]
+            if mat == "oak" and board.get("hall_finish")
+            else mats[mat],
         )
     bedroom.box(
         "Hall end", (board["hall"] + 0.8, depth, 1.4), (1.6, 0.1, 2.8), mats["plaster"]

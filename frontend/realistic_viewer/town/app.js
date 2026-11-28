@@ -1,3 +1,6 @@
+import { bindFurnitureEditor } from "./furniture_editor.js";
+import { bindPhotoHome } from "./photo_home.js";
+import { bindRenovation } from "./renovate.js";
 import { bindPhotoStudio } from "./photo_studio.js";
 import { bindHouseComparison } from "./house_compare.js";
 import { competingGoals } from "./tradeoff.js";
@@ -22,6 +25,7 @@ import midCentury from "../../../src/archimind/_viewer_assets/packs/mid_century.
 const PACK_MANIFESTS = Object.fromEntries(
   [modernClassic, industrialLoft, scandinavian, japandi, midCentury].map((m) => [m.id, m]),
 );
+import {bindFinishChat} from "./finish_chat.js";
 import showcase from "./showcase.json";
 const el = (id) => document.getElementById(id);
 const cfg = await fetch("./config.json").then((r) => r.json());
@@ -198,6 +202,7 @@ bind("checkRequest", async () => {
     if (current()) el("checkRequest").disabled = false;
   }
 });
+bindRenovation({el,api,context:()=>({project,revision,home:applied}),sync});
 function sync(data) {
   resetChairPreview();
   releasedChairs = [];
@@ -224,12 +229,17 @@ function sync(data) {
   }
   if (data.latest_job && data.head === data.revision && job !== data.latest_job)
     watch(data.latest_job).catch((e) => notify(e.message));
-  el("revision").textContent = "Studio House · Revision " + revision;
   applied = data.home || showcase;
+  const photographed = Boolean(applied.photo_home);
+  el("revision").textContent = (photographed ? "Photo home" : "Studio House") + " · Revision " + revision;
+  el("present").hidden = photographed;
+  el("design").hidden = photographed || tourOnly;
   el("chairStudio").hidden = revision === 0 || (data.head !== undefined && data.head !== revision);
   el("chairStudio").open = false;
   el("selectChair").hidden = el("chairStudio").hidden || !applied.rooms.some(r => r.design.room.id === "bedroom" && r.design.furniture.some(f=>f.id==="desk-chair"));
-  el("editSavedRoom").hidden = el("chairStudio").hidden;
+  el("renovate").hidden = photographed || el("chairStudio").hidden;
+  el("scopeFinish").hidden = el("chairStudio").hidden;
+  el("editSavedRoom").hidden = photographed || el("chairStudio").hidden;
   el("compareHouse").hidden = !revision;
   loadSavedHome();
   el("width").value = applied.width;
@@ -803,6 +813,7 @@ async function applyChair() {
 }
 bind("chairApply", applyChair);
 
+bindFurnitureEditor({el,api,sync,context:()=>({project,revision,applied,homeId:world.homeId})});
 let roomEditPreview;
 function clearRoomEdit() {
   roomEditPreview = null;
@@ -915,6 +926,9 @@ el("closeChairChat").onclick = el("cancelChat").onclick = () => {
 for (const button of document.querySelectorAll("[data-view]")) {
   button.onclick = () => button.dataset.view === "walk" ? world.walk() : world.overview.set(button.dataset.view);
 }
+bindPhotoHome({el,api,local,context:()=>({project,home:applied}),saved:data=>{
+  project=data.project;sync(data);world.overview.set("3d");
+}});
 const openPhotoStudio = bindPhotoStudio({el,world,api,local,context:()=>({project,revision,home:applied})});
 let pickedRoom;
 function clearRoom() {
@@ -938,12 +952,14 @@ el("clearRoom").onclick=()=>{clearRoom();world.overview.set(world.overview.mode)
 el("focusRoom").onclick=()=>world.overview.focusRoom(pickedRoom);
 el("restyleRoom").onclick=()=>openPhotoStudio(pickedRoom);
 if(!local)el("compareKind").querySelector('[value="blender"]').remove();
-bindHouseComparison({el,world,api,context:()=>({project, revision,home:applied}),asset:async path=>{
-  const response=await fetch(cfg.api+path,{headers:token()?{Authorization:"Bearer "+token()}:{}});
+bindHouseComparison({el,world,api,context:()=>({project, revision,home:applied}),asset:async (path,body)=>{
+  const response=await fetch(cfg.api+path,{method:body?"POST":"GET",body:body?JSON.stringify(body):undefined,headers:{"Content-Type":"application/json",...(token()?{Authorization:"Bearer "+token()}:{})}});
+  if(!response.ok && body) throw Error((await response.json()).error || "Render unavailable.");
   if(!response.ok) throw Error("No HD shot for this revision and renderer version. Generate a proof and HD render in the client presentation.");
   return response;
 }});
 
+bindFinishChat({el,api,sync,context:()=>({project,revision,home:applied})});
 let boardHome;
 let evidenceManifest;
 let exportUrl, homeUrl;

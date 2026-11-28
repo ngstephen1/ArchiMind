@@ -36,6 +36,7 @@ from archimind.town.design import (
 )
 
 SCHEMA = [
+    "CREATE TABLE IF NOT EXISTS town_bookmarks (project TEXT NOT NULL, room TEXT NOT NULL, pose TEXT NOT NULL, PRIMARY KEY(project,room))",
     "CREATE TABLE IF NOT EXISTS job_events (job TEXT NOT NULL, seq INTEGER NOT NULL, payload TEXT NOT NULL, PRIMARY KEY(job,seq))",
     "CREATE TABLE IF NOT EXISTS projects (id TEXT PRIMARY KEY, owner TEXT NOT NULL, revision INTEGER NOT NULL)",
     "CREATE TABLE IF NOT EXISTS revisions (project TEXT NOT NULL, revision INTEGER NOT NULL, home TEXT NOT NULL, PRIMARY KEY(project,revision))",
@@ -93,6 +94,7 @@ def initialize():
             # have neither table grants nor row policies granting direct access.
             for table in [
                 "projects",
+                "town_bookmarks",
                 "revisions",
                 "jobs",
                 "job_events",

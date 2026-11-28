@@ -13,6 +13,7 @@
         <span class="mark" aria-hidden="true">⌂</span> ArchiMind <i>Town</i>
       </div>
       <nav>
+        <button id="openPhotoHome" hidden>Photo home</button>
         <button id="openPhotoStudio" hidden>Photo studio</button>
         <button id="tour">Visit showcase</button
         ><button id="design" class="dark">Design a home ↗</button>
@@ -31,11 +32,45 @@
       <small class="house-hint">Double-click a room to walk inside</small>
       <aside id="roomInspector" hidden><strong id="pickedRoom"></strong><small id="pickedDimensions"></small><button id="focusRoom">Focus room</button><button id="restyleRoom">Restyle room</button><button aria-label="Close room selection" id="clearRoom">×</button></aside>
       <div id="houseTools">
+        <button id="renovate" hidden>Renovate</button>
+        <button id="scopeFinish" hidden>Finish chat</button>
         <button id="editSavedRoom" hidden>Edit a room</button>
         <button id="selectChair" hidden>Select desk chair</button>
         <button id="compareHouse" hidden>Compare revisions</button>
         <a id="photoIntake" hidden>Room photos</a>
       </div>
+      <dialog id="partitionDialog" aria-labelledby="renovationTitle">
+        <h2 id="renovationTitle">Renovate a partition</h2>
+        <fieldset id="partitionFields" style="border:0;padding:0;margin:0">
+          <label>Shared wall<select id="partitionPair"></select></label>
+          <svg id="partitionPlan" aria-label="Drag a shared wall north or south" style="width:100%;height:26vh;touch-action:none"></svg>
+          <label>Move north (+) or south (−), metres<input id="partitionMove" type="number" min="-5" max="5" step=".01" value="0"></label>
+          <label>Boundary segment<select id="partitionKind"><option value="wall">Wall</option><option value="door">Doorway</option><option value="opening">Open passage</option></select></label>
+          <div class="grid"><label>Offset from west (m)<input id="partitionOffset" type="number" min="0" step=".01"></label>
+          <label>Opening width (m)<input id="partitionWidth" type="number" min=".60" step=".01" value="1"></label></div>
+          <button id="checkPartition">Check renovation</button><button id="savePartition" class="dark" disabled>Save revision</button>
+          <button id="closePartition">Close</button>
+        </fieldset>
+        <p id="partitionStatus" role="status"></p>
+      </dialog>
+      <dialog id="photoHomeDialog" aria-labelledby="photoHomeTitle">
+<div class="title"><h2 id="photoHomeTitle">Build a home from room photos</h2><button id="closePhotoHome" aria-label="Close photo home">×</button></div>
+<div id="photoHomeSources"></div><form id="photoHomeForm"><p>Join two to four rectangular rooms from west to east. They must share a south baseline and depth. Enter field dimensions in metres. Match each connecting door from both sides. A photo alone cannot establish scale.</p>
+<div id="photoHomeRooms"></div>
+<button id="addPhotoRoom" type="button">Add room</button> <button id="removePhotoRoom" type="button">Remove last room</button>
+<fieldset><legend>South entry in room 1</legend><label>Offset from west (m)<input id="entryOffset" type="number" min="0" step=".01" required></label>
+<label>Clear width (m)<input id="entryWidth" type="number" min=".65" step=".01" required></label></fieldset>
+<label><input type="checkbox" id="photoHomeConfirmed" required> I checked the room scale, windows and both faces of every shared door.</label>
+<button class="dark" id="savePhotoHome">Save a new walkable home</button><p id="photoHomeStatus" role="status"></p></form></dialog>
+<template id="photoRoomTemplate"><fieldset><legend></legend><label>Room name<input class="name" type="text" required maxlength="60"></label><label>Source photo facing north<input class="file" type="file" accept="image/jpeg,image/png,image/webp" required></label><div class="grid"><label>Width E–W (m)<input class="width" type="number" step="0.01" min="0"></label><label>Depth S–N (m)<input class="depth" type="number" step="0.01" min="0"></label><label>Ceiling (m)<input class="height" type="number" step="0.01" min="0"></label></div><button class="suggest" type="button">Send this photo to OpenAI for a depth suggestion</button><label>Uncertainties / corrections<textarea class="uncertainty" maxlength="500"></textarea></label><div class="west"><strong>West shared door</strong><div class="grid"><label>Offset from south (m)<input class="offset" type="number" step="0.01" min="0"></label><label>Clear width (m)<input class="clear" type="number" step="0.01" min="0"></label></div></div><div class="east"><strong>East shared door</strong><div class="grid"><label>Offset from south (m)<input class="offset" type="number" step="0.01" min="0"></label><label>Clear width (m)<input class="clear" type="number" step="0.01" min="0"></label></div></div><div class="windows"></div><button class="windowAdd" type="button">Add exterior window</button></fieldset></template><template id="photoWindowTemplate"><fieldset><legend>Exterior window</legend><label>Wall<select><option>north</option><option>south</option><option>east</option><option>west</option></select></label><div class="grid"><label>Offset from west or south (m)<input class="offset" type="number" step="0.01" min="0"></label><label>Width (m)<input class="width" type="number" step="0.01" min="0"></label></div><div class="grid"><label>Sill (m)<input class="sill" type="number" step="0.01" min="0"></label><label>Height (m)<input class="height" type="number" step="0.01" min="0"></label></div><button type="button">Remove window</button></fieldset></template>
+      <dialog id="finishDialog" aria-labelledby="finishTitle">
+        <form method="dialog" class="title"><h2 id="finishTitle">Finish chat</h2><button aria-label="Close">×</button></form>
+        <label>Apply to<select id="finishScope"><option value="room">Room</option><option value="object">Object</option><option value="home">Whole home</option></select></label>
+        <label>Room<select id="finishRoom"></select></label>
+        <label hidden>Furniture<select id="finishObject"></select></label>
+        <label>Requested finish<input id="finishMessage" placeholder="Dark green walls" maxlength="180"></label>
+        <button id="finishCheck">Check finish</button><button hidden id="finishSave">Save revision</button><p role="status" id="finishStatus"></p>
+      </dialog>
       <dialog id="roomEditDialog" aria-labelledby="roomEditTitle">
         <form id="roomEditForm"><fieldset id="roomEditFields" style="border:0;margin:0;padding:0">
           <div class="title"><h2 id="roomEditTitle">Edit a room</h2><button type="button" id="closeRoomEdit" aria-label="Close">×</button></div>
@@ -155,6 +190,7 @@
     </dialog>
     <dialog id="houseCompare" aria-labelledby="compareTitle">
       <form method="dialog" class="title"><h2 id="compareTitle">Compare views</h2><button aria-label="Close comparison">×</button></form>
+      <button type="button" id="bookmarkView">Bookmark current walking view</button>
       <label>Camera <select id="compareCamera"><option value="desk">Desk and chair</option><option value="doorway">Bedroom doorway</option></select></label>
       <label>Compare <select id="compareKind"><option value="revision">Previous / current revision</option><option value="blender">3D / Blender HD</option></select></label>
       <p id="compareStatus" role="status"></p>

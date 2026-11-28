@@ -293,6 +293,22 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
     render,
     pick,
     roomAt,
+    pieceAt(event) {
+      if (!mode) return;
+      pointRay(event,camera);
+      cut(true);
+      try {
+        interior.updateMatrixWorld(true);
+        for(const hit of ray.intersectObjects(interior.children,true)) {
+          let item, visible=true;
+          for(let n=hit.object;n && n!==interior;n=n.parent) {
+            if(!n.visible) {visible=false;break;}
+            if(n.userData.furniturePick) item=n.userData.furniturePick;
+          }
+          if(visible) return item;
+        }
+      } finally {cut(false);}
+    },
     focusRoom(id) {
       const part = home.rooms.find((part) => part.design.room.id === id);
       if (!part || !mode) return;

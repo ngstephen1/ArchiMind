@@ -516,3 +516,7 @@ main[data-house-mode=""] #roomInspector,main:has(#roomInspector:not([hidden])) .
 @media(max-width:720px){#layoutStudio {box-sizing:border-box;padding:.8rem} #layoutViewport {height:38dvh}}
 
 #layoutSourcePhoto {width:100%;max-height:140px;object-fit:contain;object-position:left;border-radius:4px}
+/* Keep the house tools on their own row below the camera modes. */
+#houseTools {top:60px;max-width:calc(100% - 16px);overflow-x:auto;white-space:nowrap;}
+#houseTools > * {flex:none}
+#houseCompare #compareFrames {max-height:66vh;max-width:100%;margin-inline:auto}

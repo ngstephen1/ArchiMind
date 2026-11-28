@@ -6,10 +6,11 @@ const bedroom = (home) =>
   home.rooms.find((part) => part.design.room.id === "bedroom");
 
 export function bindHouseComparison({ el, world, api, context, asset }) {
+  const bookmarks = new Map();
   const dialog = el("houseCompare");
   let serial = 0,
     running = Promise.resolve(),
-    objectUrl;
+    objectUrl, openingPose, openingError;
   function clear() {
     if (objectUrl) URL.revokeObjectURL(objectUrl);
     objectUrl = null;
@@ -24,11 +25,36 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     if (!current()) return;
     const path = "/projects/" + encodeURIComponent(project);
     const capture = async (snapshot, pose) => {
-      const shot = await world.bedroomViews(snapshot, "bedroom", [pose]);
+      const shot = await world.bedroomViews(snapshot, pose.room || "bedroom", [pose]);
       return shot.images[0];
     };
     let left, right, caption;
-    if (kind === "revision") {
+    const savedPose = bookmarks.get(view);
+    if (savedPose) {
+      const hasRoom = snapshot => snapshot.rooms.some(p=>p.design.room.id===savedPose.room);
+      if (!hasRoom(home)) throw Error("The bookmarked room is absent in this revision.");
+      if (kind === "revision") {
+        if (revision < 2) throw Error("Save an edit before comparing two revisions.");
+        const before = await api(path + "?revision=" + (revision-1));
+        if (!hasRoom(before.home)) throw Error("The bookmarked room is absent in the previous revision.");
+        if (!current()) return;
+        left = await capture(before.home,savedPose);
+        if (!current()) return;
+        right = await capture(home,savedPose);
+        caption = savedPose.room + " · Revision " + before.revision + " / " + revision;
+      } else {
+        el("compareStatus").textContent = "Preparing the bookmarked Blender view…";
+        const response = await asset(path+"/bookmark-photo",{revision,pose:savedPose});
+        if (!current()) return;
+        left = await capture(home,savedPose);
+        if (!current()) return;
+        objectUrl = URL.createObjectURL(await response.blob());
+        right = objectUrl;
+        caption = savedPose.room+" · Town / Blender · Revision "+revision;
+      }
+    } else if (home.photo_home) {
+      throw Error("Enter a room in Walk and choose Bookmark this view to compare its saved camera.");
+    } else if (kind === "revision") {
       if (revision < 2)
         throw Error("Save a chair move first to compare two revisions.");
       const before = await api(path + "?revision=" + (revision - 1));
@@ -105,6 +131,9 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
         revision;
     }
     if (!current()) return;
+    const aspect = savedPose?.aspect || 16/9;
+    el("compareFrames").style.aspectRatio = String(aspect);
+    el("compareFrames").style.width = "min(100%, " + (66 * aspect) + "vh)";
     el("compareLeft").src = left;
     el("compareRight").src = right;
     el("compareFrames").hidden = el("wipeControl").hidden = false;
@@ -123,9 +152,40 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
         if (number === serial) el("compareStatus").textContent = error.message;
       });
   }
-  el("compareHouse").onclick = () => {
+  function install(views) {
+    const select = el("compareCamera"), previous = select.value;
+    const imported = Boolean(context().home.photo_home);
+    bookmarks.clear();
+    el("compareCamera").querySelectorAll("[data-bookmark]").forEach(o=>o.remove());
+    for (const option of select.options) option.disabled = option.hidden = imported;
+    for (const pose of views) {
+      const key="bookmark/"+pose.room, opt=new Option("Saved view · "+pose.room,key);
+      opt.dataset.bookmark="true";el("compareCamera").add(opt);bookmarks.set(key,pose);
+    }
+    if (bookmarks.has(previous)) select.value = previous;
+    else if (imported) select.value = bookmarks.keys().next().value ?? "";
+  }
+  el("compareHouse").onclick = async () => {
+    openingPose = null;
+    try { openingPose = world.bookmark(); } catch (error) { openingError = error; }
+    install([]);
     dialog.showModal();
-    refresh();
+    const project=context().project;
+    try {
+      const data=await api("/projects/"+project+"/bookmarks");
+      if (!dialog.open || context().project!==project) return;
+      install(data.views); refresh();
+    } catch(error) { el("compareStatus").textContent=error.message; }
+  };
+  el("bookmarkView").onclick = async () => {
+    try {
+      const {project,revision}=context(),pose=openingPose;
+      if (!pose) throw openingError;
+      await api("/projects/"+project+"/bookmarks",{pose,revision});
+      install([...bookmarks.values()].filter(v=>v.room!==pose.room).concat(pose));
+      el("compareCamera").value="bookmark/"+pose.room;
+      ++serial;clear();el("compareStatus").textContent="Saved this camera for "+pose.room+". Reopen Compare after saving an edit.";
+    } catch(error) {el("compareStatus").textContent=error.message;}
   };
   el("compareKind").onchange = el("compareCamera").onchange = refresh;
   el("compareWipe").oninput = (event) =>

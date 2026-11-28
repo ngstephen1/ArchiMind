@@ -292,9 +292,17 @@ def validate_home(home, *, passage_m=None, measure=False):
     zoning = home.get("zoning")
     if zoning not in (None, "gallery", "service-core"):
         raise ValueError("Unknown zoning scheme.")
+    from .renovation import PREFIX, paired_openings
+
+    partitions = paired_openings(home)
     grouped = zoning == "service-core"
     for part in home["rooms"]:
-        d = RoomDesign.model_validate(part["design"])
+        design = part["design"]
+        if part.get("coffee_tables"):
+            from .furniture_edit import checked_furniture
+
+            design = {**design, "furniture": checked_furniture(part)}
+        d = RoomDesign.model_validate(design)
         r = d.room
         if home.get("service_layout") and r.id in FIXTURES:
             service_rooms[r.id] = service_evidence(d, passage_m=passage_m)
@@ -332,7 +340,7 @@ def validate_home(home, *, passage_m=None, measure=False):
         x, y = part["origin"]
         areas.append(box(x, y, x + r.width_m, y + r.depth_m))
         linked = grouped and r.id in SERVICE_CORE_ROOMS
-        if len(r.doors) != (2 if linked else 1):
+        if sum(not d.id.startswith(PREFIX) for d in r.doors) != (2 if linked else 1):
             raise ValueError("Each room needs one entrance to the hall.")
         door = r.doors[0]
         west = door.wall == "west"
@@ -372,6 +380,14 @@ def validate_home(home, *, passage_m=None, measure=False):
                 stop = start + transfer.width_m
                 service_portals[r.id] = (start, stop, side, transfer.height_m)
                 spans = ((x, start), (stop, x + r.width_m))
+            elif cuts := [d for d in r.doors if d.id in partitions and d.wall == wall]:
+                if len(cuts) != 1:
+                    raise ValueError("A partition supports one edited opening.")
+                cut = cuts[0]
+                spans = (
+                    (x, x + cut.offset_m),
+                    (x + cut.offset_m + cut.width_m, x + r.width_m),
+                )
             else:
                 spans = ((x, x + r.width_m),)
             solids.extend(
@@ -412,6 +428,16 @@ def validate_home(home, *, passage_m=None, measure=False):
         raise ValueError(
             f"Entrance cannot reach every furnished room at {passage_m:g} m passage width."
         )
+    for sides in partitions.values():
+        part, door = min(sides, key=lambda side: side[0]["origin"][1])
+        x, y = part["origin"]
+        seam = y + part["design"]["room"]["depth_m"]
+        center = x + door["offset_m"] + door["width_m"] / 2
+        crossing = LineString(
+            ((center, seam - radius - 0.35), (center, seam + radius + 0.35))
+        )
+        if not connected.covers(crossing):
+            raise ValueError("The proposed partition crossing is obstructed.")
     direct_service = None
     if grouped:
         first, second = (service_portals.get(room) for room in SERVICE_CORE_ROOMS)
