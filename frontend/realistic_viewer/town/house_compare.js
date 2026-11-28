@@ -222,7 +222,9 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
       install(data.views);
       refresh();
     } catch (error) {
-      el("compareStatus").textContent = error.message;
+      if (!dialog.open || context().project !== project) return;
+      if (context().home.photo_home) el("compareStatus").textContent = error.message;
+      else refresh();
     }
   };
   el("bookmarkView").onclick = async () => {
@@ -251,9 +253,15 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     const pose = bookmarks.get(el("compareCamera").value);
     if (!pose || !containsCamera(context().home, pose)) return;
     const source = context().home;
-    dialog.close();
+    ++serial;
     await running;
-    if (source === context().home) world.restoreWalkingView(pose);
+    if (!dialog.open || source !== context().home) return;
+    try {
+      world.restoreWalkingView(pose);
+      dialog.close();
+    } catch (error) {
+      el("compareStatus").textContent = error.message;
+    }
   };
   el("compareKind").onchange = el("compareCamera").onchange = refresh;
   el("compareWipe").oninput = (event) =>
