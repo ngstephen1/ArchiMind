@@ -1,0 +1,74 @@
+{
+  "project": "529ab935-2d46-4089-90f7-8069141c27ba",
+  "edits": [
+    {
+      "scope": "room",
+      "command": "Dark green walls",
+      "summary": "Dark Green \u00b7 room \u00b7 1 room(s).",
+      "revision": 2
+    },
+    {
+      "scope": "home",
+      "command": "Walnut floors throughout",
+      "summary": "Walnut \u00b7 home \u00b7 6 room(s).",
+      "revision": 3
+    },
+    {
+      "scope": "object",
+      "command": "Apply sage",
+      "summary": "Sage \u00b7 object \u00b7 1 room(s).",
+      "revision": 4
+    }
+  ],
+  "home_id": "b7300f234ec28adacd820a0724a9cbf220923eb2548abe500ff4afed9e2aa621",
+  "revision": 4,
+  "material_colors_after_reopening_each_view": {
+    "plan": {
+      "salon_wall": "#294735",
+      "sage_table": "#9da98c",
+      "dark_green_room_ids": [
+        "salon"
+      ],
+      "walnut_room_ids": [
+        "bathroom",
+        "bedroom",
+        "kitchen-dining",
+        "living",
+        "salon",
+        "study"
+      ]
+    },
+    "3d": {
+      "salon_wall": "#294735",
+      "sage_table": "#9da98c",
+      "dark_green_room_ids": [
+        "salon"
+      ],
+      "walnut_room_ids": [
+        "bathroom",
+        "bedroom",
+        "kitchen-dining",
+        "living",
+        "salon",
+        "study"
+      ]
+    },
+    "walk": {
+      "salon_wall": "#294735",
+      "sage_table": "#9da98c",
+      "dark_green_room_ids": [
+        "salon"
+      ],
+      "walnut_room_ids": [
+        "bathroom",
+        "bedroom",
+        "kitchen-dining",
+        "living",
+        "salon",
+        "study"
+      ]
+    }
+  },
+  "hall_finish": "walnut",
+  "browser_errors": []
+}
