@@ -1,5 +1,5 @@
 {
-  "project": "edb1775d-1c49-4be2-bd72-3f551b66d94b",
+  "project": "1816d2ea-0572-495e-bf5d-5246a3419b4d",
   "room": "photo-room-1",
   "finish_edit": "Dark green walls",
   "before_revision": 1,
@@ -7,5 +7,25 @@
   "reopened": true,
   "pixel_changed": true,
   "bookmarked_blender_render": "photo-room-1 \u00b7 Town / Blender \u00b7 Revision 2",
-  "page_errors": []
+  "page_errors": [],
+  "model_render_sha256": "7f8d7692ffa68248c04561cabbcc7279204b4dfbfe7afbc8f0b5674c6ac60882",
+  "bookmarked_pose": {
+    "room": "photo-room-1",
+    "eye": [
+      1.7,
+      1.57,
+      -0.8
+    ],
+    "target": [
+      1.7,
+      1.57,
+      -1.8
+    ],
+    "fov": 61.0,
+    "aspect": 1.8414322250639386
+  },
+  "screenshots_sha256": {
+    "r1-r2.jpg": "f04121c987ab0338cc37e8a33c6e44d03d78aa9fe80e71c3e524bf53f0ca96ec",
+    "cycles.jpg": "0f9b1b74df269437c045fd7d98ba4289ef636e339490ef610250c13cf8667ce2"
+  }
 }

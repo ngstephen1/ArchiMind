@@ -105,3 +105,30 @@ def test_shared_glazing_requires_both_observations_and_matches_by_location():
         with pytest.raises(service.Problem, match="Reconcile shared windows"):
             assemble(intake)
         west[field] = east[field]
+
+
+def test_optional_suggestion_preserves_unknown_scale_and_requires_consent(monkeypatch):
+    from archimind.town import photo_home
+
+    calls = []
+    monkeypatch.setattr(
+        photo_home.provider, "configuration", lambda consent: ("test", "test")
+    )
+
+    def fake(schema, prompt, **kwargs):
+        calls.append(prompt)
+        return schema(
+            estimated_depth_to_width_ratio=200,
+            possible_window_wall=None,
+            observations_and_uncertainty="The far wall is obscured.",
+        )
+
+    monkeypatch.setattr(photo_home.provider, "request", fake)
+    data = {"photo": payload()["rooms"][0]["photo"], "consent": False}
+    with pytest.raises(service.Problem, match="Confirm sending"):
+        photo_home.suggest(data)
+    assert not calls
+    result = photo_home.suggest({**data, "consent": True})
+    assert result["estimated_depth_to_width_ratio"] is None
+    assert result["possible_window_wall"] is None
+    assert len(calls) == 1

@@ -84,3 +84,21 @@ def test_bookmark_is_project_owned_and_keeps_original_pose(saved):
     other = service.create("another-user", home=home)["project"]
     assert client.get("/api/projects/" + other + "/bookmarks").status_code in (403, 404)
     assert client.get(path + "/bookmarks").json()["views"] == [pose]
+
+
+def test_render_rejects_camera_outside_historical_room_before_loading_blender(
+    saved, tmp_path
+):
+    from archimind.town.bookmarks import photograph
+
+    _, _, home = saved
+    room = home["rooms"][0]
+    pose = {
+        "room": room["design"]["room"]["id"],
+        "eye": [300, 1.5, -300],
+        "target": [301, 1.5, -300],
+        "fov": 61,
+        "aspect": 1.5,
+    }
+    with pytest.raises(service.Problem, match="outside the room"):
+        photograph({"home": home}, pose, tmp_path / "unused-blender")

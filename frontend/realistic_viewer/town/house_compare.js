@@ -6,11 +6,19 @@ const bedroom = (home) =>
   home.rooms.find((part) => part.design.room.id === "bedroom");
 
 function containsCamera(home, pose) {
-  const part = home.rooms.find(p => p.design.room.id === pose.room);
+  const part = home.rooms.find((p) => p.design.room.id === pose.room);
   if (!part) return false;
-  const [x, y] = part.origin, [px, height, z] = pose.eye, room = part.design.room;
-  return px >= x && px <= x + room.width_m && -z >= y && -z <= y + room.depth_m
-    && height > 0 && height < room.ceiling_height_m;
+  const [x, y] = part.origin,
+    [px, height, z] = pose.eye,
+    room = part.design.room;
+  return (
+    px >= x &&
+    px <= x + room.width_m &&
+    -z >= y &&
+    -z <= y + room.depth_m &&
+    height > 0 &&
+    height < room.ceiling_height_m
+  );
 }
 
 export function bindHouseComparison({ el, world, api, context, asset }) {
@@ -44,7 +52,9 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     const savedPose = bookmarks.get(view);
     if (savedPose) {
       if (!containsCamera(home, savedPose))
-        throw Error("The camera is outside its room in this revision. Bookmark a new view.");
+        throw Error(
+          "The camera is outside its room in this revision. Bookmark a new view.",
+        );
       if (kind === "revision") {
         if (revision < 2)
           throw Error("Save an edit before comparing two revisions.");
@@ -239,7 +249,7 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
   };
   el("restoreRoomView").onclick = async () => {
     const pose = bookmarks.get(el("compareCamera").value);
-    if (!pose || !containsCamera(context().home,pose)) return;
+    if (!pose || !containsCamera(context().home, pose)) return;
     const source = context().home;
     dialog.close();
     await running;
