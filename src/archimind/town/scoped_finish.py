@@ -54,7 +54,7 @@ def change(q, owner, project, data, applying):
     ]
     if not parts:
         raise service.Problem("Select a room in this revision.")
-    if scope == "home" and surface == "floor":
+    if scope == "home" and surface == "floor" and not home.get("photo_home"):
         home["hall_finish"] = finish
     for p in parts:
         overrides = p.setdefault("finish_overrides", {})
