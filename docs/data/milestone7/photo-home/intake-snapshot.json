@@ -1,0 +1,22 @@
+{
+  "project": "2701120a-65fc-4eea-9f77-2c3cb95e05cc",
+  "revision": 1,
+  "deferred_photo_decodes": 2,
+  "during_encoding": {
+    "source": "replaced with second room photo",
+    "width_m": 5.5,
+    "entry_offset_m": 0.4,
+    "confirmation": false
+  },
+  "saved_at_submission": {
+    "width_m": 4,
+    "entry_offset_m": 1.2,
+    "entry_center_m": 1.7,
+    "source_digests": [
+      "5284c0bb3e7072993ca16faeeec74865a3f3582512f4dd084b03f90850ad125a",
+      "b928761b806be61a1dcd6d6c10e1ece99ecfcf8a6e70d1632e17f435a647a32f"
+    ],
+    "uncertainty": ""
+  },
+  "page_errors": []
+}

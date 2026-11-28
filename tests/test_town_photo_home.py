@@ -132,3 +132,44 @@ def test_optional_suggestion_preserves_unknown_scale_and_requires_consent(monkey
     assert result["estimated_depth_to_width_ratio"] is None
     assert result["possible_window_wall"] is None
     assert len(calls) == 1
+
+
+def test_photo_home_declines_gallery_work_before_reserving_a_job(tmp_path, monkeypatch):
+    import uuid
+
+    from archimind.town.design import refresh_geometry_evidence, validate_home
+
+    monkeypatch.setenv("TOWN_MODE", "local")
+    monkeypatch.setenv("TOWN_DB", str(tmp_path / "town.sqlite3"))
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    service.initialize()
+    client = TestClient(app, base_url="http://127.0.0.1")
+    data = client.post("/api/photo-home", json=payload()).json()
+    path = "/api/projects/" + data["project"]
+    for check in (validate_home, refresh_geometry_evidence):
+        with pytest.raises(ValueError, match="measured photo home"):
+            check(data["home"])
+    for action in ("preview", "apply"):
+        result = client.post(
+            path + "/furniture-edit/" + action,
+            json=dict(
+                base=1, room="photo-room-1", object="coffee-table", action="rotate"
+            ),
+        )
+        assert result.status_code == 400
+        assert "measured photo home" in result.json()["error"]
+    result = client.post(
+        "/api/jobs",
+        json=dict(
+            id=str(uuid.uuid4()),
+            project=data["project"],
+            base=1,
+            brief={},
+            live=True,
+            agent_team=True,
+        ),
+    )
+    assert result.status_code == 400 and "measured photo home" in result.json()["error"]
+    with service.transaction() as q:
+        assert q("SELECT COUNT(*) FROM jobs").fetchone()[0] == 0
+    assert client.get(path).json()["head"] == 1

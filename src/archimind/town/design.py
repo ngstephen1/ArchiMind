@@ -276,8 +276,13 @@ def opening(wall, offset, name):
     return Door(id=name, wall=wall, offset_m=offset, width_m=1.1, height_m=2.15)
 
 
+PHOTO_GEOMETRY_LIMIT = "This measured photo home supports room and whole-home finishes. Generating layouts and editing furnishings require a furnished Town design."
+
+
 def validate_home(home, *, passage_m=None, measure=False):
     """Verify coverage, portal pairing and connectivity in furnished free space."""
+    if home.get("photo_home"):
+        raise ValueError(PHOTO_GEOMETRY_LIMIT)
     recorded = home.get("evidence", {}).get("comparison", {}).get("passage_m", 0.6)
     passage_m = max(recorded, passage_m if passage_m is not None else 0.6)
     width, depth = home["width"], home["depth"]

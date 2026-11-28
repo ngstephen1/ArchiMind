@@ -26,6 +26,7 @@ from archimind.town.brief_review import (
     salon_choice,
 )
 from archimind.town.design import (
+    PHOTO_GEOMETRY_LIMIT,
     Brief,
     Kind,
     RoomGoal,
@@ -207,6 +208,8 @@ def enqueue(owner, req):
             return {"job": j}
         if head != req.base:
             raise Problem("Project changed. Reload this revision.", 409)
+        if head and revision(q, p, head).get("photo_home"):
+            raise Problem(PHOTO_GEOMETRY_LIMIT)
         now = int(time.time())
         expire_jobs(q, now)
         if req.agent_team and not req.live:

@@ -8,7 +8,7 @@ from shapely.geometry import Point, box
 from shapely.ops import unary_union
 
 from . import designer_chair, service
-from .design import refresh_geometry_evidence
+from .design import PHOTO_GEOMETRY_LIMIT, refresh_geometry_evidence
 
 LOOSE = {
     "coffee-table",
@@ -149,6 +149,8 @@ def checked_furniture(part):
 
 
 def edit(home, change):
+    if home.get("photo_home"):
+        raise ValueError(PHOTO_GEOMETRY_LIMIT)
     h = deepcopy(home)
     part = next(
         (p for p in h["rooms"] if p["design"]["room"]["id"] == change.room), None

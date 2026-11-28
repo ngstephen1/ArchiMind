@@ -136,33 +136,35 @@ export function bindPhotoHome({ el, api, local, saved, context }) {
     const button = el("savePhotoHome");
     button.disabled = true;
     try {
+      const snapshots = sections().map((s) => ({
+        name: s.querySelector(".name").value,
+        file: s.querySelector(".file").files[0],
+        width: val(s, ".width"),
+        depth: val(s, ".depth"),
+        ceiling_height: val(s, ".height"),
+        west: opening(s, ".west"),
+        east: opening(s, ".east"),
+        uncertainty: s.querySelector(".uncertainty").value,
+        windows: Array.from(s.querySelector(".windows").children, (r) => ({
+          wall: r.querySelector("select").value,
+          offset: val(r, ".offset"),
+          width: val(r, ".width"),
+          height: val(r, ".height"),
+          sill: val(r, ".sill"),
+        })),
+      }));
+      const entry = {
+        width: val(form, "#entryWidth"),
+        offset: val(form, "#entryOffset"),
+      };
+      const confirmed = el("photoHomeConfirmed").checked;
       const rooms = await Promise.all(
-        sections().map(async (s) => ({
-          name: s.querySelector(".name").value,
-          photo: await encodePhoto(s.querySelector(".file").files[0]),
-          width: val(s, ".width"),
-          depth: val(s, ".depth"),
-          ceiling_height: val(s, ".height"),
-          west: opening(s, ".west"),
-          east: opening(s, ".east"),
-          uncertainty: s.querySelector(".uncertainty").value,
-          windows: Array.from(s.querySelector(".windows").children, (r) => ({
-            wall: r.querySelector("select").value,
-            offset: val(r, ".offset"),
-            width: val(r, ".width"),
-            height: val(r, ".height"),
-            sill: val(r, ".sill"),
-          })),
+        snapshots.map(async ({ file, ...room }) => ({
+          ...room,
+          photo: await encodePhoto(file),
         })),
       );
-      const result = await api("/photo-home", {
-        rooms,
-        entry: {
-          width: val(form, "#entryWidth"),
-          offset: val(form, "#entryOffset"),
-        },
-        confirmed: el("photoHomeConfirmed").checked,
-      });
+      const result = await api("/photo-home", { rooms, entry, confirmed });
       saved(result);
       dialog.close();
       list.replaceChildren();
