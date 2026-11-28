@@ -24,7 +24,9 @@ function containsCamera(home, pose) {
 export function bindHouseComparison({ el, world, api, context, asset }) {
   const bookmarks = new Map();
   const dialog = el("houseCompare");
-  let serial = 0,
+  let session = 0,
+    bookmarkWrite = Promise.resolve(),
+    serial = 0,
     running = Promise.resolve(),
     objectUrl,
     openingPose,
@@ -207,6 +209,9 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     else if (imported) select.value = bookmarks.keys().next().value ?? "";
   }
   el("compareHouse").onclick = async () => {
+    const mine = ++session;
+    const button = el("bookmarkView");
+    button.disabled = true;
     openingPose = null;
     try {
       openingPose = world.bookmark();
@@ -216,23 +221,32 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     install([]);
     dialog.showModal();
     const project = context().project;
+    const active = () => dialog.open && mine === session && context().project === project;
     try {
+      await bookmarkWrite.catch(() => {});
       const data = await api("/projects/" + project + "/bookmarks");
-      if (!dialog.open || context().project !== project) return;
+      if (!active()) return;
       install(data.views);
       refresh();
     } catch (error) {
-      if (!dialog.open || context().project !== project) return;
+      if (!active()) return;
       if (context().home.photo_home) el("compareStatus").textContent = error.message;
       else refresh();
+    } finally {
+      if (active()) button.disabled = false;
     }
   };
   el("bookmarkView").onclick = async () => {
+    const button = el("bookmarkView");
+    if (button.disabled) return;
+    const mine = session, { project, revision } = context(), pose = openingPose;
+    const active = () => mine === session && dialog.open && context().project === project;
+    button.disabled = true;
     try {
-      const { project, revision } = context(),
-        pose = openingPose;
       if (!pose) throw openingError;
-      await api("/projects/" + project + "/bookmarks", { pose, revision });
+      bookmarkWrite = api("/projects/" + project + "/bookmarks", { pose, revision });
+      await bookmarkWrite;
+      if (!active()) return;
       install(
         [...bookmarks.values()]
           .filter((v) => v.room !== pose.room)
@@ -246,7 +260,9 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
         pose.room +
         ". Reopen Compare after saving an edit.";
     } catch (error) {
-      el("compareStatus").textContent = error.message;
+      if (active()) el("compareStatus").textContent = error.message;
+    } finally {
+      if (active()) button.disabled = false;
     }
   };
   el("restoreRoomView").onclick = async () => {
