@@ -48,6 +48,7 @@ export function dressTownSurfaces(group, pack) {
     const { x, y, z } = o.scale;
     const flat = role === "floor" || role === "ceiling";
     const material = flat ? tiledSurface(base, x, z) : tiledSurface(base, Math.max(x, z), y);
+    if (o.userData.finishColor) material.color.set(o.userData.finishColor);
     swaps.push([o, o.material, material]);
     o.material = material;
   });

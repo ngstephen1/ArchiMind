@@ -196,7 +196,7 @@ from studio_bedroom_dims import (  # noqa: E402
 )
 
 
-def architecture(room, materials, *, pleated_curtains=True):
+def architecture(room, materials, *, pleated_curtains=True, shared_walls=()):
     w, d, h = room["width_m"], room["depth_m"], room["ceiling_height_m"]
     box(
         "Ceiling", (w / 2, d / 2, h + 0.05), (w + 0.2, d + 0.2, 0.1), materials["ivory"]
@@ -224,7 +224,11 @@ def architecture(room, materials, *, pleated_curtains=True):
         east_west = wall in ("east", "west")
         length = d if east_west else w
         inward = -1 if wall in ("east", "north") else 1
+        finish_depth = WALL_DEPTH_M / 2 if wall in shared_walls else WALL_DEPTH_M
         wall_axis = {"west": 0, "east": w, "south": 0, "north": d}[wall]
+        if wall in shared_walls:
+            # Each room owns the inner half of the common partition, including its trim.
+            wall_axis += inward * finish_depth
 
         def point(t, z, inset=0, axis=wall_axis, sign=inward, ew=east_west):
             v = axis + sign * inset
@@ -270,8 +274,8 @@ def architecture(room, materials, *, pleated_curtains=True):
                     right,
                     z,
                     low,
-                    WALL_DEPTH_M,
-                    -WALL_DEPTH_M / 2,
+                    finish_depth,
+                    -finish_depth / 2,
                     materials["plaster"],
                 )
                 if z == 0 and low > 0.1:
@@ -456,6 +460,7 @@ def render(
     include_hall=True,
     style_slots=(),
     pleated_curtains=True,
+    shared_walls=(),
 ):
     manifest_bytes = manifest_path.read_bytes()
     manifest_sha256 = hashlib.sha256(manifest_bytes).hexdigest()
@@ -524,7 +529,7 @@ def render(
     scene.world.node_tree.links.new(env.outputs["Color"], bg.inputs["Color"])
     bg.inputs["Strength"].default_value = 0.8
     room = manifest["room"]
-    architecture(room, m, pleated_curtains=pleated_curtains)
+    architecture(room, m, pleated_curtains=pleated_curtains, shared_walls=shared_walls)
     if include_hall:
         hall_context(manifest["hall_context"], room, m)
     registry_data = json.loads((ASSETS / "designer_registry.json").read_text())

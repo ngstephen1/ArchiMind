@@ -36,7 +36,21 @@
         "living",
         "salon",
         "study"
-      ]
+      ],
+      "salon_living_partition": {
+        "salon": {
+          "center_m": 4.957,
+          "thickness_m": 0.05,
+          "material": "#294735",
+          "texture": true
+        },
+        "living": {
+          "center_m": 5.007000000000001,
+          "thickness_m": 0.05,
+          "material": "#ffffff",
+          "texture": true
+        }
+      }
     },
     "3d": {
       "salon_wall": "#294735",
@@ -51,7 +65,21 @@
         "living",
         "salon",
         "study"
-      ]
+      ],
+      "salon_living_partition": {
+        "salon": {
+          "center_m": 4.957,
+          "thickness_m": 0.05,
+          "material": "#294735",
+          "texture": true
+        },
+        "living": {
+          "center_m": 5.007000000000001,
+          "thickness_m": 0.05,
+          "material": "#ffffff",
+          "texture": true
+        }
+      }
     },
     "walk": {
       "salon_wall": "#294735",
@@ -66,7 +94,21 @@
         "living",
         "salon",
         "study"
-      ]
+      ],
+      "salon_living_partition": {
+        "salon": {
+          "center_m": 4.957,
+          "thickness_m": 0.05,
+          "material": "#294735",
+          "texture": true
+        },
+        "living": {
+          "center_m": 5.007000000000001,
+          "thickness_m": 0.05,
+          "material": "#ffffff",
+          "texture": true
+        }
+      }
     }
   },
   "hall_finish": "walnut",

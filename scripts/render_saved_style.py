@@ -271,7 +271,7 @@ def dress_scene(plan, board, base, out):
                 label
             )
         )
-        if role and obj.type == "MESH":
+        if role and obj.type == "MESH" and not obj.get("saved_surface_finish"):
             obj.data.materials[0] = materials[role]
     for room in board["rooms"]:
         r = room["room"]
@@ -281,7 +281,9 @@ def dress_scene(plan, board, base, out):
             "Town pack floor " + r["id"],
             (ox + w / 2, oy + d / 2, STYLED_FINISHED_FLOOR_M - 0.007),
             (w, d, 0.014),
-            materials["tile" if r["id"] == "bathroom" else "floor"],
+            bpy.data.materials["proposal-" + room["finish_overrides"]["floor"]]
+            if room.get("finish_overrides", {}).get("floor")
+            else materials["tile" if r["id"] == "bathroom" else "floor"],
         )
     env = releases[pack["lighting"]["environment_asset_id"]]
     env_file = tier_file(env, "hdr")

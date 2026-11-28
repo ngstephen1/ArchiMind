@@ -19,6 +19,34 @@ from render_saved_style import dress_scene  # noqa: E402
 from studio_photography import attach_textile_detail, daylight_exposure  # noqa: E402
 
 
+def touching_walls(rooms):
+    """Find opposing shell faces on coincident grid lines with a shared span."""
+    found = {p["room"]["id"]: set() for p in rooms}
+    if not any(p.get("finish_overrides", {}).get("wall") for p in rooms):
+        return found
+    edges = []
+    for p in rooms:
+        room = p["room"]
+        x, y = p["origin"]
+        right, top = x + room["width_m"], y + room["depth_m"]
+        for side, opposite, line, start, end in (
+            ("east", "west", right, y, top),
+            ("west", "east", x, y, top),
+            ("north", "south", top, x, right),
+            ("south", "north", y, x, right),
+        ):
+            for other, face, axis, lo, hi in edges:
+                if (
+                    face == opposite
+                    and abs(line - axis) < 1e-5
+                    and min(end, hi) - max(start, lo) > 1e-5
+                ):
+                    found[room["id"]].add(side)
+                    found[other].add(face)
+            edges.append((room["id"], side, line, start, end))
+    return found
+
+
 def translate_new(before, origin):
     for obj in set(bpy.data.objects) - before:
         if not obj.parent:
@@ -249,6 +277,7 @@ def render(args):
     (out / "surface-sources.json").write_bytes(
         (bedroom.SURFACES / "bedroom-sources.json").read_bytes()
     )
+    shared_walls = touching_walls(board["rooms"])
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         path = tmp / "manifest.json"
@@ -261,6 +290,7 @@ def render(args):
             include_hall=False,
             style_slots=slots.get("bedroom", set()),
             pleated_curtains=style is None,
+            shared_walls=shared_walls["bedroom"],
         )
     scene = bpy.context.scene
     for obj in list(bpy.data.objects):
@@ -333,6 +363,7 @@ def render(args):
             )
             if role and role in overrides and obj.type == "MESH" and obj.data.materials:
                 obj.data.materials[0] = finishes["proposal-" + overrides[role]]
+                obj["saved_surface_finish"] = overrides[role]
 
     bedroom_part = next(p for p in board["rooms"] if p["room"]["id"] == "bedroom")
     surface_finishes(bpy.data.objects, bedroom_part.get("finish_overrides", {}))
@@ -354,7 +385,12 @@ def render(args):
             seam.thickness = 0.003
         if room["id"] != "bedroom":
             before = set(bpy.data.objects)
-            bedroom.architecture(room, mats, pleated_curtains=style is None)
+            bedroom.architecture(
+                room,
+                mats,
+                pleated_curtains=style is None,
+                shared_walls=shared_walls[room["id"]],
+            )
             surface_finishes(
                 set(bpy.data.objects) - before, part.get("finish_overrides", {})
             )

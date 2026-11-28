@@ -485,14 +485,6 @@ export function createTown(canvas, status, action) {
   function dressInterior(pack, packTier) {
     const lighting = pack.manifest.lighting || {};
     const undoSurfaces = dressTownSurfaces(interior, pack);
-    for (const group of interior.children) {
-      const overrides = home.rooms.find(p=>p.design.room.id===group.userData.roomId)?.finish_overrides;
-      if (!overrides) continue;
-      for (const o of group.children) {
-        const role=o.userData.surface==="tile"?"floor":o.userData.surface;
-        if (["wall","floor"].includes(role) && overrides[role]) o.material=mat(finishColors[overrides[role]]);
-      }
-    }
     const seams = [];
     interior.traverse((o) => {
       if (o.userData.legacySeam && o.visible) {
@@ -925,6 +917,8 @@ export function createTown(canvas, status, action) {
 
     }
     const wallColor = LEGACY_WALL_COLORS[h.palette];
+    // Split both faces so an adjacent room cannot hide the selected wall paint.
+    const splitFaces = h.photo_home || h.rooms.some(p => p.finish_overrides?.wall);
     for (const part of h.rooms) {
       const [ox, oy] = part.origin,
         r = part.design.room,
@@ -945,20 +939,23 @@ export function createTown(canvas, status, action) {
       for (const q of wallQuads(r)) {
         const a = q.points[0],
           b = q.points[2],
-          x = (a[0] + b[0]) / 2 + (h.photo_home ? ({ west: 0.025, east: -0.025 }[q.wall] || 0) : 0),
-          z = -(a[1] + b[1]) / 2 - (h.photo_home ? ({ south: 0.025, north: -0.025 }[q.wall] || 0) : 0);
+          x = (a[0] + b[0]) / 2 + (splitFaces ? ({ west: 0.025, east: -0.025 }[q.wall] || 0) : 0),
+          z = -(a[1] + b[1]) / 2 - (splitFaces ? ({ south: 0.025, north: -0.025 }[q.wall] || 0) : 0);
         const wall = block(
           group,
           x,
           (q.bottom + q.top) / 2,
           z,
-          Math.abs(a[0] - b[0]) || (h.photo_home ? 0.05 : 0.1),
+          Math.abs(a[0] - b[0]) || (splitFaces ? 0.05 : 0.1),
           q.top - q.bottom,
-          Math.abs(a[1] - b[1]) || (h.photo_home ? 0.05 : 0.1),
+          Math.abs(a[1] - b[1]) || (splitFaces ? 0.05 : 0.1),
           wallColor,
         );
         wall.userData.surface = "wall";
-        if(part.finish_overrides?.wall) wall.material=mat(finishColors[part.finish_overrides.wall]);
+        if (part.finish_overrides?.wall) {
+          wall.userData.finishColor = finishColors[part.finish_overrides.wall];
+          wall.material = mat(wall.userData.finishColor);
+        }
         walls.push({wall, ox, oy, bottom:q.bottom, height:q.top-q.bottom});
         if (q.bottom === 0) {
           block(
@@ -991,7 +988,10 @@ export function createTown(canvas, status, action) {
         r.id === "bathroom" ? "#b4b8b1" : "#ba9a70",
       );
       if (r.id === "bedroom") flooring.material = oak;
-      if(part.finish_overrides?.floor) flooring.material=mat(finishColors[part.finish_overrides.floor]);
+      if (part.finish_overrides?.floor) {
+        flooring.userData.finishColor = finishColors[part.finish_overrides.floor];
+        flooring.material = mat(flooring.userData.finishColor);
+      }
       flooring.userData.surface = r.id === "bathroom" ? "tile" : "floor";
       for (let row = 0; r.id !== "bedroom" && row < r.depth_m / 0.25; row++) {
         const z = row * 0.25;
@@ -1348,22 +1348,16 @@ export function createTown(canvas, status, action) {
       states.includes("placeholder") ? "placeholder" : states.includes("verified") ? "verified" : "procedural"
     );
   }
+  function canStand(x, z, indoors, colliders) {
+    const inBounds = indoors
+      ? x > 0.23 && x < home.width - 0.23 && z < -0.18 && z > -home.depth + 0.23
+      : Math.abs(x) < 45 && Math.abs(z) < 30;
+    return inBounds && colliders.every(([l, t, r, b]) =>
+      x < l - 0.22 || x > r + 0.22 || z < t - 0.22 || z > b + 0.22);
+  }
   function move(dx, dz) {
     const coll = inside ? indoor : [...obstacles, ...heroObstacles];
-    function ok(x, z) {
-      return (
-        (inside
-          ? x > 0.23 &&
-            x < home.width - 0.23 &&
-            z < -0.18 &&
-            z > -home.depth + 0.23
-          : Math.abs(x) < 45 && Math.abs(z) < 30) &&
-        coll.every(
-          ([l, t, r, b]) =>
-            x < l - 0.22 || x > r + 0.22 || z < t - 0.22 || z > b + 0.22,
-        )
-      );
-    }
+    const ok = (x,z) => canStand(x,z,inside,coll);
     if (ok(pos.x + dx, pos.z)) pos.x += dx;
     if (ok(pos.x, pos.z + dz)) pos.z += dz;
   }
@@ -1633,6 +1627,8 @@ export function createTown(canvas, status, action) {
       updateQuality();
     },
     restoreWalkingView(pose) {
+      if (!canStand(pose.eye[0], pose.eye[2], true, indoor))
+        throw Error("This walking position is obstructed in this revision. Choose another view.");
       overview.set("");
       enter(true);
       pos.set(pose.eye[0], 0, pose.eye[2]);

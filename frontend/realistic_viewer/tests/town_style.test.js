@@ -46,6 +46,7 @@ test("tagged interior meshes take tiled pack surfaces and the undo restores shar
   const wall = new T.Mesh(new T.BoxGeometry(), shared);
   wall.scale.set(4, 2.8, 0.1);
   wall.userData.surface = "wall";
+  wall.userData.finishColor = "#294735";
   const floor = new T.Mesh(new T.BoxGeometry(), shared);
   floor.scale.set(3, 0.014, 5);
   floor.userData.surface = "floor";
@@ -61,6 +62,8 @@ test("tagged interior meshes take tiled pack surfaces and the undo restores shar
   const pack = { surface: (role) => surfaces[role] || null };
   const undo = dressTownSurfaces(group, pack);
   assert.deepEqual(wall.material.map.repeat.toArray(), [2, 1.4]);
+  assert.equal(wall.material.color.getHexString(), "294735");
+  assert.equal(surfaces.wall.color.getHexString(), "ffffff");
   assert.deepEqual(floor.material.map.repeat.toArray(), [2, 5 / 1.5]);
   assert.equal(plain.material, shared);
   undo();

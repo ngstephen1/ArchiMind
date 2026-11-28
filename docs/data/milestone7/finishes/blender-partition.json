@@ -1,0 +1,17 @@
+{
+  "renderer": "Blender 5.1.2",
+  "room_boundaries_from": "docs/data/furnished-residence/home.json",
+  "shared_gridline_y_m": 4.982,
+  "ray_hits_from_inside_both_rooms": {
+    "salon": {
+      "hit_object": "north plaster",
+      "render_material": "salon",
+      "face_y_m": 4.922
+    },
+    "living": {
+      "hit_object": "south plaster.001",
+      "render_material": "living",
+      "face_y_m": 5.042
+    }
+  }
+}
