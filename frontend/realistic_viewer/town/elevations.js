@@ -1,4 +1,5 @@
-import { presentationFurniture } from "./saved_pieces.js";
+import {finishColors} from "./finish_chat.js";
+import { schematicFurniture } from "./saved_pieces.js";
 
 // Interior orthographic views. North looks along +Y, east along +X.
 export function roomElevation(part, wall) {
@@ -33,13 +34,13 @@ export function roomElevation(part, wall) {
       o.sill_height_m ? "#c6d9da" : "#fff",
     );
   const depth = (f) => (east ? f.x_m : f.y_m);
-  for (const f of [...presentationFurniture(part)].sort((a, b) => depth(b) - depth(a)))
+  for (const f of schematicFurniture(part).sort((a, b) => depth(b) - depth(a)))
     rect(
       east ? span - f.y_m - f.depth_m : f.x_m,
-      0,
+      f.z_m ?? 0,
       east ? f.depth_m : f.width_m,
       f.height_m,
-      "#beb6a6",
+      finishColors[part.finish_overrides?.objects?.[f.id]] || "#beb6a6",
     );
   c.fillStyle = "#263b32";
   c.font = "18px sans-serif";

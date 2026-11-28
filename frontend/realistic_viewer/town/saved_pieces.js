@@ -113,7 +113,10 @@ function individualTables(part) {
 
 export function presentationFurniture(part) {
   const tables = individualTables(part);
-  return tables ? [...part.design.furniture, ...tables] : part.design.furniture;
+  if (!tables) return part.design.furniture;
+  const grouped = part.design.furniture.map(item => item.id === "salon-suite"
+    ? {...item, draw_parts: true} : item);
+  return [...grouped, ...tables];
 }
 
 export function presentationFurnitureParts(part, item, studio) {
@@ -124,6 +127,20 @@ export function presentationFurnitureParts(part, item, studio) {
     if (tables.some(table => table.id === item.id)) return buildPiece(part, item);
   }
   return savedFurnitureParts(part, item, studio);
+}
+
+export function schematicFurniture(part) {
+  return presentationFurniture(part).flatMap(item => {
+    if (!item.draw_parts) return [item];
+    // The suite reservation includes free space between its seating. Project
+    // the saved pieces so an independently edited table can be seen through it.
+    return presentationFurnitureParts(part, item, true).map(piece => {
+      const [x, y, z] = piece.xyz;
+      const [width_m, depth_m, height_m] = piece.wdh;
+      return {id: item.id, x_m: x - width_m / 2, y_m: y - depth_m / 2,
+        z_m: z - height_m / 2, width_m, depth_m, height_m};
+    });
+  });
 }
 
 export function savedFurnitureParts(part, f, studio) {

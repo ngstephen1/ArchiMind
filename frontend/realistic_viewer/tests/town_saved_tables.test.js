@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import test from "node:test";
 import { homeBoard } from "../town/home_board.js";
 import { floorPlan } from "../town/floor_plan.js";
-import { coffeeTables, presentationFurniture } from "../town/saved_pieces.js";
+import { coffeeTables, presentationFurniture, schematicFurniture } from "../town/saved_pieces.js";
 
 const fixture = new URL("../../../docs/data/furnished-residence/home.json", import.meta.url);
 
@@ -69,4 +69,25 @@ test("finish rows identify the saved surfaces and objects while preserving base 
   assert.deepEqual(board.base_finish_locations.tile, []);
   assert.ok(!board.base_finish_locations.wall.includes(bedroom.design.room.name));
   assert.ok(board.base_finish_locations.wall.includes(salon.design.room.name));
+});
+
+test("the original coffee table remains visible in both elevations after a finish-only edit", () => {
+  const home = JSON.parse(readFileSync(fixture, "utf8"));
+  const salon = home.rooms.find(part => part.design.room.id === "salon");
+  const id = "salon-coffee-table";
+  salon.finish_overrides = {objects: {[id]: "sage"}};
+  const shapes = schematicFurniture(salon);
+  const table = shapes.find(piece => piece.id === id);
+  for (const east of [true, false]) {
+    const h = east ? "y_m" : "x_m", width = east ? "depth_m" : "width_m";
+    const depth = east ? "x_m" : "y_m";
+    const order = shapes.toSorted((a, b) => b[depth] - a[depth]);
+    let visible = 0;
+    for (let x = table[h] + 0.005; x < table[h] + table[width]; x += 0.01) {
+      const front = order.findLast(piece => piece[h] <= x && x <= piece[h] + piece[width] &&
+        (piece.z_m ?? 0) <= 0.2 && 0.2 <= (piece.z_m ?? 0) + piece.height_m);
+      if (front?.id === id) visible++;
+    }
+    assert.ok(visible > 5, "Part of the table face should be visible in this direction");
+  }
 });

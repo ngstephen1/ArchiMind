@@ -69,7 +69,26 @@ def drawing(home):
     return "".join(shapes) + "</svg>"
 
 
-def elevations(part):
+def elevation_furniture(part):
+    for item in part["furniture"]:
+        if not item.get("draw_parts"):
+            yield item
+            continue
+        for piece in item["parts"]:
+            x, y, z = piece["xyz"]
+            width, depth, height = piece["wdh"]
+            yield {
+                "id": item["id"],
+                "x_m": x - width / 2,
+                "y_m": y - depth / 2,
+                "z_m": z - height / 2,
+                "width_m": width,
+                "depth_m": depth,
+                "height_m": height,
+            }
+
+
+def elevations(part, finishes=None):
     r = part["room"]
     result = []
     for wall in ("north", "east"):
@@ -96,14 +115,22 @@ def elevations(part):
                     "#c3d7d3",
                 )
         for f in sorted(
-            part["furniture"], key=lambda f: f["x_m" if east else "y_m"], reverse=True
+            elevation_furniture(part),
+            key=lambda f: f["x_m" if east else "y_m"],
+            reverse=True,
         ):
             rect(
                 w - f["y_m"] - f["depth_m"] if east else f["x_m"],
-                0,
+                f.get("z_m", 0),
                 f["depth_m"] if east else f["width_m"],
                 f["height_m"],
-                "#b8aa94",
+                (finishes or {}).get(
+                    "proposal-"
+                    + part.get("finish_overrides", {})
+                    .get("objects", {})
+                    .get(f["id"], ""),
+                    "#b8aa94",
+                ),
             )
         svg.append(
             f'<text x="0" y="{h + 0.32}" font-size=".20">{wall.title()} · {w:.2f} m × {h:.2f} m</text></svg>'
@@ -299,7 +326,7 @@ def book(directory, eye_views=None, *, comparison_pages=0):
                 for v in views
             )
             + '</div><div class="grid">'
-            + elevations(part)
+            + elevations(part, board["finishes"])
             + "</div><table><tr><th>Furniture</th><th>Reserved W × D × H (m)</th><th>Room X, Y (m)</th></tr>"
             + rows
             + "</table>"
