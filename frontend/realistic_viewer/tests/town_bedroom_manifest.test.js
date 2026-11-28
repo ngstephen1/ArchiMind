@@ -91,3 +91,23 @@ test("chair version, unavailable desk evidence and unsupported orientation", () 
   part.design.furniture[0].rotation_deg = 90;
   assert.throws(() => bedroomManifest(d));
 });
+
+test("the handoff ZIP matches only the archived revision 2 whole-home export", async () => {
+  const { homeBoard } = await import("../town/home_board.js");
+  const read = async (file) => JSON.parse(await readFile(new URL(file, import.meta.url), "utf8"));
+  const entries = await read("../town/conference_publications.json");
+  const snapshot = await read("../../../docs/data/nov24-fresh-live/snapshot-r2.json");
+  const manifest = homeBoard(snapshot);
+  const digest = await manifestDigest(manifest);
+  const candidate = publicationFor(manifest, digest, entries);
+  assert.equal(candidate?.kind, "rehearsal-package");
+  assert.equal(candidate.url, "https://github.com/ngstephen1/ArchiMind/actions/runs/45207279553/artifacts/14834053043");
+  assert.equal(candidate.pdf, undefined);
+  const before = homeBoard(await read("../../../docs/data/nov24-fresh-live/snapshot-r1.json"));
+  assert.equal(publicationFor(before, await manifestDigest(before), entries), undefined);
+  for (const change of [{ project: "other" }, { revision: 1 }, { home_id: "other" }]) {
+    assert.equal(publicationFor({ ...manifest, ...change }, digest, entries), undefined);
+  }
+  const revised = { ...manifest, palette: "new finish" };
+  assert.equal(publicationFor(revised, await manifestDigest(revised), entries), undefined);
+});

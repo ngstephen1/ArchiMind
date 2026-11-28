@@ -817,7 +817,19 @@ function showExport(manifest, hash, studio, studioHash) {
     el("boardExports").append(section);
   }
   const studioRelease = publicationFor(studio, studioHash, [...studioShowcasePublications, ...conferencePublications]);
-  if (studioRelease) {
+  let downloadLabel = "Jump to downloads";
+  if (studioRelease?.kind === "rehearsal-package") {
+    downloadLabel = "Jump to rehearsal package";
+    const pack = node("a", "Download the revision " + studio.revision + " rehearsal package (ZIP)");
+    pack.id = "studioBookLink";
+    pack.href = studioRelease.url;
+    pack.target = "_blank";
+    pack.rel = "noopener";
+    el("boardExports").append(node("p", ""), pack, node("p",
+      "Open Client-Book.pdf inside the ZIP. The editable files are in Designer-Handoff.zip. GitHub sign-in may be required."
+    ));
+  } else if (studioRelease) {
+    downloadLabel = "Jump to client book";
     const pdf = node("a", "Open the whole-home client book (PDF)");
     pdf.id = "studioBookLink";
     pdf.href = studioRelease.pdf;
@@ -827,7 +839,7 @@ function showExport(manifest, hash, studio, studioHash) {
     pack.href = studioRelease.url;
     el("boardExports").append(node("p",""), pdf, node("p",""), pack);
   }
-  el("jumpDownloads").textContent = studioRelease ? "Jump to client book" : "Jump to downloads";
+  el("jumpDownloads").textContent = downloadLabel;
   el("jumpDownloads").hidden = false;
   const publication = publicationFor(manifest,hash);
   if (publication) {
