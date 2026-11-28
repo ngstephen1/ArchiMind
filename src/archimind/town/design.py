@@ -298,7 +298,7 @@ def validate_home(home, *, passage_m=None, measure=False):
     grouped = zoning == "service-core"
     for part in home["rooms"]:
         design = part["design"]
-        if part.get("coffee_tables"):
+        if part.get("coffee_tables") or part.get("sofa_route"):
             from .furniture_edit import checked_furniture
 
             design = {**design, "furniture": checked_furniture(part)}

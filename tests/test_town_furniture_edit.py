@@ -103,3 +103,43 @@ def test_copy_keeps_finish_and_delete_cleans_only_its_bindings():
     assert copy not in after["piece_edits"]
     for bindings in (after["asset_bindings"], after["style"]["bindings"]):
         assert all(binding["furniture_id"] != copy for binding in bindings)
+
+
+def test_requested_sofa_clearance_survives_other_edits():
+    from archimind.town.furniture_edit import Change, edit
+
+    h = json.loads(HOME.read_text())
+    spec = {"base": 1, "room": "salon", "object": "salon-coffee-table"}
+    moved, _ = edit(h, Change(**spec, action="move", x_m=2.2, y_m=1.45))
+    round_table, _ = edit(
+        moved, Change(**spec, action="replace", replacement="round", sofa_route=True)
+    )
+    part = next(p for p in round_table["rooms"] if p["design"]["room"]["id"] == "salon")
+    assert part["sofa_route"]["width_m"] == 0.9
+    suite = next(f for f in part["design"]["furniture"] if f["id"] == "salon-suite")
+    with pytest.raises(ValueError, match="90 cm"):
+        edit(
+            round_table,
+            Change(
+                **spec,
+                action="move",
+                x_m=suite["x_m"] + suite["width_m"] / 2 - 0.33,
+                y_m=suite["y_m"] + 1.07 - 0.33,
+            ),
+        )
+
+
+def test_removing_study_passage_destination_releases_old_corridor():
+    from archimind.town.furniture_edit import Change, edit
+    from archimind.town.study_edit import edit as open_passage
+
+    h, _ = open_passage(
+        json.loads(HOME.read_text()),
+        "Move the study table and chair together to clear a 90 cm passage from the door to the window-side table.",
+    )
+    assert h["evidence"]["study_passage"]["to"] == "side-table"
+    updated, _ = edit(
+        h, Change(base=1, room="study", object="side-table", action="remove")
+    )
+    assert "study_passage" not in updated["evidence"]
+    assert "study_passage" in h["evidence"]

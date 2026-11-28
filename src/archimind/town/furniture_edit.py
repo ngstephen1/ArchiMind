@@ -66,9 +66,58 @@ def default_table(s):
     )
 
 
+def check_saved_sofa_route(part):
+    route = part.get("sofa_route")
+    if not route:
+        return
+    room = part["design"]["room"]
+    items = part["design"]["furniture"]
+    suite = next((f for f in items if f["id"] == route["to"]), None)
+    door = next((d for d in room["doors"] if d["id"] == route["from"]), None)
+    if (
+        not suite
+        or part.get("suite_yaw_deg")
+        or not door
+        or door["wall"] not in {"east", "west"}
+    ):
+        raise ValueError("Cannot verify the saved 90 cm door-to-sofa route.")
+    shell = box(0, 0, room["width_m"], room["depth_m"])
+    sofa, chairs = suite_geometry(suite)
+    obstacles = [sofa, *chairs]
+    obstacles.extend(rect(f) for f in items if f is not suite)
+    obstacles.extend(rect(f) for f in part.get("coffee_tables", [default_table(suite)]))
+    obstacles.extend(
+        rect(f)
+        for f in part.get("style", {}).get("dressing", [])
+        if f["kind"] in {"plant", "accent", "floor_lamp"}
+    )
+    radius = 0.45
+    start = Point(
+        radius if door["wall"] == "west" else room["width_m"] - radius,
+        door["offset_m"] + door["width_m"] / 2,
+    )
+    free = shell.buffer(-radius).difference(
+        unary_union(obstacles).buffer(radius, quad_segs=12)
+    )
+    region = next(
+        (g for g in getattr(free, "geoms", [free]) if g.buffer(1e-7).covers(start)),
+        None,
+    )
+    # A visitor can approach within one body radius of the sofa footprint.
+    if (
+        door["width_m"] < 0.9
+        or region is None
+        or region.distance(sofa) > radius + 0.002
+    ):
+        raise ValueError(
+            "The model cannot verify a 90 cm door-to-sofa route for this arrangement."
+        )
+
+
 def checked_furniture(part):
     """Include edited freestanding coffee tables in ordinary geometry validation."""
     items = part["design"]["furniture"]
+    check_saved_sofa_route(part)
     if not part.get("coffee_tables"):
         return items
     suite = next((f for f in items if f["id"] == "salon-suite"), None)
@@ -136,10 +185,6 @@ def edit(home, change):
     ) or ((change.x_m is None) != (change.y_m is None)):
         raise ValueError(
             "Specify the southwest x and y coordinates only for moves and duplicates."
-        )
-    if change.sofa_route and (not suite or part.get("suite_yaw_deg")):
-        raise ValueError(
-            "The 90 cm check needs the supported salon sofa and its entrance."
         )
     group = coffee if nested else items
     if nested:
@@ -214,34 +259,30 @@ def edit(home, change):
     if (
         passage
         and change.room == "study"
+        and ident == passage.get("to")
+        and change.action != "duplicate"
+    ):
+        # Moving or removing the measured destination invalidates the old corridor.
+        h["evidence"].pop("study_passage")
+        passage = None
+    if (
+        passage
+        and change.room == "study"
         and change.action != "remove"
         and rect(target).intersection(box(*passage["room_local_bounds_m"])).area > 1e-8
     ):
         raise ValueError("This edit obstructs the saved study passage.")
     summary = f"{change.action.capitalize()} · {target['name']} ({target['id']})"
     if change.sofa_route:
-        door = room["doors"][0]
-        radius = 0.45
-        start = Point(
-            radius if door["wall"] == "west" else room["width_m"] - radius,
-            door["offset_m"] + door["width_m"] / 2,
-        )
-        free = shell.buffer(-radius).difference(
-            unary_union(obstacles).buffer(radius, quad_segs=12)
-        )
-        region = next(
-            (g for g in getattr(free, "geoms", [free]) if g.buffer(1e-7).covers(start)),
-            None,
-        )
-        # A visitor can approach within one body radius of the sofa footprint.
-        if (
-            door["width_m"] < 0.9
-            or region is None
-            or region.distance(sofa) > radius + 0.002
-        ):
+        if not suite or part.get("suite_yaw_deg") or not room["doors"]:
             raise ValueError(
-                "The model cannot verify a 90 cm door-to-sofa route for this arrangement."
+                "The 90 cm check needs the supported salon sofa and its entrance."
             )
+        part["sofa_route"] = {
+            "from": room["doors"][0]["id"],
+            "to": suite["id"],
+            "width_m": 0.90,
+        }
         summary += " · 90 cm modeled door-to-sofa route verified"
     refresh_geometry_evidence(h)
     return h, summary
