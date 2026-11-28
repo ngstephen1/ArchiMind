@@ -1,0 +1,199 @@
+{
+  "reviewer": "Codex / delegated independent technical operator",
+  "runtime": "512ed265fe759e135e8290079440da82df9f55c5",
+  "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+  "saved_revisions": {
+    "1": {
+      "home_id": "d49a87b77fe4f85e9012ef7d391262189aefca508b805b2ecd702d666b79c67a",
+      "snapshot_sha256": "e88700a59400f1718cf94a304c11b4f7a6a11f58a813141bf94b967ee9953d87",
+      "manifest_sha256": "81acf4e5cf41a289b1d37104bce62b3e3f2a6592a77aeeab5899669685f8a139"
+    },
+    "2": {
+      "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+      "snapshot_sha256": "e5fd4343a5e5de05954c5d340c197d3de6177a3e828dafe419dfe494e835eb00",
+      "manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d"
+    }
+  },
+  "portable_zip_sha256": "3d3af89e785593ac8772c07594d7eca5e3374780eb9aaedb4e603e9b8d4b03c0",
+  "artifact_id": 14834053043,
+  "artifact_download_sha256": "2797b94bb23f2f04d6d4a743c30740677ba6296db6d881239b82d4ae52226063",
+  "archive_files_checked": 32,
+  "artifact_checksums": {
+    "Client-Book.pdf": "1205af8dd7f3b9b1541776c829eb8cd7f637a34f7c962b3a62efec50bfda8b63",
+    "Designer-Handoff.zip": "13e200835b80ae65c8fe9247623e1f76d6ec489aee2cf1ce8e72b8c20e63265a"
+  },
+  "browser": "158.0.8127.38",
+  "hardware": {
+    "model": "Mac17,3",
+    "cpu": "Apple M5",
+    "power": "Now drawing from 'Battery Power'",
+    "renderer": "ANGLE (Apple, ANGLE Metal Renderer: Apple M5, Unspecified Version)"
+  },
+  "viewports": [
+    {
+      "width": 1440,
+      "height": 1000,
+      "revision": 1,
+      "board": "Saved revision 1 \u00b7 15 \u00d7 16 m \u00b7 d49a87b77fe4",
+      "photos": 3,
+      "room": "Bedroom",
+      "desk": "verified",
+      "viewport_css": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "width": 1440,
+      "height": 1000,
+      "revision": 2,
+      "board": "Saved revision 2 \u00b7 15 \u00d7 16 m \u00b7 8675fef1b5dc",
+      "photos": 3,
+      "room": "Bedroom",
+      "desk": "verified",
+      "viewport_css": [
+        1440,
+        1000
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "revision": 1,
+      "board": "Saved revision 1 \u00b7 15 \u00d7 16 m \u00b7 d49a87b77fe4",
+      "photos": 3,
+      "room": "Bedroom",
+      "desk": "verified",
+      "viewport_css": [
+        390,
+        844
+      ]
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "revision": 2,
+      "board": "Saved revision 2 \u00b7 15 \u00d7 16 m \u00b7 8675fef1b5dc",
+      "photos": 3,
+      "room": "Bedroom",
+      "desk": "verified",
+      "viewport_css": [
+        390,
+        844
+      ]
+    }
+  ],
+  "failures": {
+    "missing_asset": "Desk shown as a placeholder",
+    "after_restore": "verified",
+    "live_disabled": {
+      "status": 400,
+      "response": {
+        "error": "Configure the server OPENAI_API_KEY to generate a home."
+      }
+    }
+  },
+  "performance": [
+    {
+      "quality": "High",
+      "seconds": 30.0,
+      "frames": 1800,
+      "median_frame_ms": 16.7,
+      "p95_frame_ms": 16.7,
+      "viewport": [
+        1440,
+        1000
+      ],
+      "method": "Browser requestAnimationFrame intervals over a 30 s scripted walkthrough; WASD translation and turns; headless Chrome, power and WebGL renderer listed in hardware."
+    },
+    {
+      "quality": "Low",
+      "seconds": 30.0,
+      "frames": 1800,
+      "median_frame_ms": 16.7,
+      "p95_frame_ms": 16.7,
+      "viewport": [
+        1440,
+        1000
+      ],
+      "method": "Browser requestAnimationFrame intervals over a 30 s scripted walkthrough; WASD translation and turns; headless Chrome, power and WebGL renderer listed in hardware."
+    }
+  ],
+  "provider_http_requests_seen": [],
+  "page_errors": [],
+  "before": {
+    "snapshots": [
+      [
+        1,
+        "85400f7760c0710ec5628b80a6b1a38d342b5ebcc4ed2529ef536c8765a9dd1a"
+      ],
+      [
+        2,
+        "5def299cddbc23cb6c5005fcebf0d13f826f854c14751f421f24f4a39945aeed"
+      ]
+    ],
+    "jobs": 0,
+    "events": 0
+  },
+  "after": {
+    "snapshots": [
+      [
+        1,
+        "85400f7760c0710ec5628b80a6b1a38d342b5ebcc4ed2529ef536c8765a9dd1a"
+      ],
+      [
+        2,
+        "5def299cddbc23cb6c5005fcebf0d13f826f854c14751f421f24f4a39945aeed"
+      ]
+    ],
+    "jobs": 0,
+    "events": 0
+  },
+  "date": "2026-11-28",
+  "operator_scope": "Automated local replay on the listed Mac. Owner observations and venue rehearsal remain separate.",
+  "grounded_answers": [
+    {
+      "viewport": 1440,
+      "revision": 1,
+      "kind": "chair fit",
+      "answer": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda \u00b7 Revision 1 \u00b7 The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.06 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints.",
+      "match": true
+    },
+    {
+      "viewport": 1440,
+      "revision": 2,
+      "kind": "chair fit",
+      "answer": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda \u00b7 Revision 2 \u00b7 The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.36 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints.",
+      "match": true
+    },
+    {
+      "viewport": 1440,
+      "revision": 2,
+      "kind": "saved edit",
+      "answer": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda \u00b7 Revision 2 \u00b7 Bedroom desk-chair footprint origin, revision 1: (0.560, 4.131) m; revision 2: (0.560, 3.831) m. Displacement: 0.300 m. Closest footprint gap to belaya: 0.060 m before and 0.360 m after. Source: saved bedroom furniture coordinates."
+    },
+    {
+      "viewport": 390,
+      "revision": 1,
+      "kind": "chair fit",
+      "answer": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda \u00b7 Revision 1 \u00b7 The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.06 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints.",
+      "match": true
+    },
+    {
+      "viewport": 390,
+      "revision": 2,
+      "kind": "chair fit",
+      "answer": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda \u00b7 Revision 2 \u00b7 The writing chair is 0.48 m wide. The closest edges of its footprint and the desk are 0.36 m apart. Under-desk knee clearance has not been measured. Can you provide the clear width between supports and the floor-to-underside height? Source: bedroom desk-chair and belaya footprints.",
+      "match": true
+    },
+    {
+      "viewport": 390,
+      "revision": 2,
+      "kind": "saved edit",
+      "answer": "Project 1a3f1aff-0c41-4900-902f-34dc54050fda \u00b7 Revision 2 \u00b7 Bedroom desk-chair footprint origin, revision 1: (0.560, 4.131) m; revision 2: (0.560, 3.831) m. Displacement: 0.300 m. Closest footprint gap to belaya: 0.060 m before and 0.360 m after. Source: saved bedroom furniture coordinates."
+    }
+  ],
+  "package_access": "Downloaded artifact 14834053043 directly. The 512ed26 Town board offered only manifest links in both revisions.",
+  "drawing_opened": "drawings/r2/bedroom-plan.svg",
+  "book_check": "Poppler opened the 12-page A3 PDF and rendered the cover. Its footer matches revision 2 and home 8675fef1b5dc. Headless Chrome did not report a PDF embed for the local file."
+}

@@ -105,8 +105,12 @@ archived snapshots. A later test on
 `7c900e1` opened a clean extraction of those same ZIP bytes. The database
 passed SQLite integrity checks, both local endpoints returned HTTP 200,
 and Chrome entered the bedroom and opened the design board for both
-revisions at 1440 × 1000 and 390 × 844. View the
-[inspected client book and designer archive](../nov24-fresh-book) separately.
+revisions at 1440 × 1000 and 390 × 844. For revision 2, download the
+[32-file rehearsal handoff](https://github.com/ngstephen1/ArchiMind/actions/runs/45207279553/artifacts/14834053043).
+Open `Client-Book.pdf` in the downloaded ZIP. The editable files and their checksums are
+inside `Designer-Handoff.zip`. Sign in to GitHub before downloading. GitHub shows a 404 when signed out. The complete download's
+SHA-256 is `2797b94bb23f2f04d6d4a743c30740677ba6296db6d881239b82d4ae52226063`.
+See the [book inspection and handoff verification](../nov24-fresh-book).
 The release and independent operator checks are tracked in
 [#70](https://github.com/ngstephen1/ArchiMind/issues/70) and
 [#72](https://github.com/ngstephen1/ArchiMind/issues/72).

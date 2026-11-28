@@ -14,5 +14,13 @@
     "manifest_sha256": "f02b4ea3bf609253ae0b320a6a4059286f3a69bef58816476570f7038fd36118",
     "pdf": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Fresh-Home-Client-Book.pdf",
     "url": "https://github.com/ngstephen1/ArchiMind/releases/download/conference-home-r2/Fresh-Home-R2-Scene.zip"
+  },
+  {
+    "project": "1a3f1aff-0c41-4900-902f-34dc54050fda",
+    "revision": 2,
+    "home_id": "8675fef1b5dc2d9006d4847b585825273a48655e1d2c7a464888ec79892bcd61",
+    "manifest_sha256": "26d5d744f3faf0adb9d3686a530d4d5290041d40db66e0c3cab5877238bdf11d",
+    "kind": "rehearsal-package",
+    "url": "https://github.com/ngstephen1/ArchiMind/actions/runs/45207279553/artifacts/14834053043"
   }
 ]
