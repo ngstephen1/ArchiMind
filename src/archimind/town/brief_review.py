@@ -657,6 +657,18 @@ def _circulation_text(message):
     return ". ".join(_affirmative_clauses(text))
 
 
+def _asserts_width_objection(prefix):
+    # Conditional scope can govern both sides of "and". A negation of an
+    # independent fact, e.g. "we don't need a salon, and ...", cannot.
+    sentence = re.split(r"[;!?]|\.(?!\d)", prefix.lower())[-1]
+    sentence = re.sub(r"\b(?:no doubt|without (?:a )?doubt)\b", "certain", sentence)
+    if re.search(r"\b(?:if|whether|unless|doubt)\b[^,;.!?]*$", sentence):
+        return False
+    governing = re.split(r"\bbut\b|,?\s+and\s+(?=(?:(?:the|an?)\s+)?$)", sentence)[-1]
+    clauses = _affirmative_clauses(governing + " __objection__")
+    return any(part.endswith("__objection__") for part in clauses)
+
+
 def _widths(text):
     text = re.sub(FIXED_PASSAGE, "", text)
     return {
@@ -1078,17 +1090,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
         for match in REJECTED_WIDTH.finditer(message):
             # Keep the negation inside "will not fit" intact, while checking
             # whether the client actually asserts the objection.
-            prefix = re.split(
-                r"[;!?]|\.(?!\d)|\bbut\b|,?\s+and\s+(?=(?:(?:the|an?)\s+)?$)",
-                message[: match.start()].lower(),
-            )[-1]
-            prefix = re.sub(r"\b(?:no doubt|without (?:a )?doubt)\b", "certain", prefix)
-            context = _affirmative_clauses(prefix + " __objection__")
-            if not any(
-                part.endswith("__objection__")
-                and not re.search(r"\b(?:if|whether|unless|doubt)\b[^,;.!?]*$", part)
-                for part in context
-            ):
+            if not _asserts_width_objection(message[: match.start()]):
                 continue
             rejected = _widths(match[0].lower())
             if rejected and (
@@ -1108,7 +1110,9 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
             and re.search(REUSE_WIDTH, circulation)
         ):
             questions.append(
-                "Which measured passage width should the new layout reuse?"
+                "Which measured passage width should the new layout reuse? "
+                "Under Seating and circulation requirements, enter the measurement "
+                "or select Use the displayed passage width."
             )
     if (
         brief.compare_tradeoffs

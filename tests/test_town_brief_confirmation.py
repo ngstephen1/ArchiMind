@@ -2044,3 +2044,16 @@ def test_open_count_clears_prior_requirement_and_accepts_an_explicit_new_count()
         Brief(compare_tradeoffs=True, formal_salon=True, dining_seats=3), text, previous
     )
     assert any("one total number" in q for q in questions)
+
+
+@pytest.mark.parametrize(
+    "conditional",
+    ["If the hallway turns sharply", "Check whether the hallway turns sharply"],
+)
+def test_shared_conditional_does_not_establish_rejected_width(conditional):
+    text = (
+        conditional
+        + " and a 60 cm clear passage is too narrow, use a different layout."
+    )
+    _, questions = requirement_controls(Brief(compare_tradeoffs=True), text, None)
+    assert not any("width you rejected" in q for q in questions)
