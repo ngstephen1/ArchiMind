@@ -1013,6 +1013,13 @@ export function createTown(canvas, status, action) {
       const windowStart = group.children.length;
       for (const win of r.windows) {
         if (h.photo_home && win.wall === "west" && win.id.startsWith("join-window-")) continue;
+        if (h.photo_home) {
+          const { x, y } = openingFrame(r, win);
+          const eastWest = win.wall === "east" || win.wall === "west";
+          const halfX = eastWest ? 0.05 : win.width_m / 2;
+          const halfZ = eastWest ? win.width_m / 2 : 0.05;
+          indoor.push([ox + x - halfX, -oy - y - halfZ, ox + x + halfX, -oy - y + halfZ]);
+        }
         furnishedWindow(group, r, win, surfaces, block);
       }
       // Wall-mounted print, clear of the window and of the circulation door.

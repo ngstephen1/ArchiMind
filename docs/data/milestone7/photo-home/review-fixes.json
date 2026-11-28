@@ -1,0 +1,30 @@
+{
+  "project": "9eefc952-6e4e-48ae-b645-b2af469be8eb",
+  "window": {
+    "wall": "partition between Studio and Library",
+    "sill_m": 0.1,
+    "clear_width_m": 1.5,
+    "height_m": 1.95,
+    "east_boundary_x_m": 4,
+    "walk_stopped_at": [
+      3.6999999999999993,
+      1.57,
+      -0.8
+    ]
+  },
+  "door": {
+    "south_offset_m": 1.7,
+    "clear_width_m": 1.0,
+    "approach": [
+      3.6999999999999993,
+      1.57,
+      -2.0497500000000013
+    ],
+    "entered": "Library"
+  },
+  "revision_2_finish": "Library dark green walls",
+  "restored_revision": 3,
+  "reopened_revision_3_equals_revision_1": true,
+  "historical_restore_hidden": true,
+  "page_errors": []
+}

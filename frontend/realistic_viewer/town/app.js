@@ -255,7 +255,9 @@ function sync(data) {
   el("compareZoning").checked = false;
   el("passage").value = requirements?.passage_m ?? 0.6;
   el("confirmPassage").checked = false;
-  el("undo").hidden = revision < 2;
+  const canRestore = revision >= 2 && (data.head === undefined || revision === data.head);
+  el("undo").hidden = !canRestore || photographed;
+  el("photoUndo").hidden = !canRestore || !photographed;
   el("locks").disabled = revision === 0;
   const url = new URL(location.href);
   url.searchParams.set("project", project);
@@ -713,11 +715,13 @@ async function askSavedDesign(question, options) {
   el("whyQuery").value = question;
   await explainSavedQuestion(options);
 }
-bind("undo", async () => {
+async function restorePreviousRevision() {
   sync(await api("/projects/" + project + "/undo", { base: revision }));
   el("alternatives").hidden = true;
   notify("Previous home restored as revision " + revision + ".");
-});
+}
+bind("undo", restorePreviousRevision);
+bind("photoUndo", restorePreviousRevision);
 
 el("chairStudio").ontoggle = async () => {
   if (!el("chairStudio").open || chairPreview || releasedChairs.length) return;
