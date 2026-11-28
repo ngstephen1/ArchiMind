@@ -52,6 +52,9 @@ function words(value) {
   return " " + value.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim() + " ";
 }
 
+const roomScope = /^(?:in|inside|for) (?:the |my |our )?(bedroom|study|living room|salon|kitchen(?: dining)?|bathroom)\b/i;
+const roomMention = /\b(bedroom|study|living room|salon|kitchen|bathroom)\b/i;
+
 function furnitureRooms(question, kind, home) {
   const room = "(bedroom|study|living(?: room)?|salon|bathroom|kitchen(?: dining)?)";
   const noun = kind === "chair" ? "(?:(?:desk|writing)[ -])?chairs?" : "(?:(?:writing[ -])?desks?(?![ -]chairs?\\b)|work[ -]?tables?|writing[ -]suites?)";
@@ -64,6 +67,9 @@ function furnitureRooms(question, kind, home) {
   });
   // Look up the remaining proper names in this revision. A room-qualified
   // noun has already been consumed and cannot also match an alias elsewhere.
+  const prefix = roomScope.exec(question);
+  if (!rooms.length && prefix && new RegExp("\\b" + noun + "\\b", "i").test(unqualified))
+    return [prefix[1].split(" ")[0].toLowerCase()];
   const rest = words(unqualified);
   for (const {design} of home?.rooms ?? []) {
     const named = design.furniture.some(item => item.category === kind &&
@@ -154,12 +160,17 @@ function asksFurnitureFit(clause) {
 
 function planQuestions(question) {
   const scoped = question.replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
-  const clauses = scoped.split(/[?!;]|\.(?!\d)|(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
+  const clauses = scoped.split(/[?!;]|\.(?!\d)/).flatMap(sentence => {
+    const pieces = sentence.trim().split(/(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
+    const prefix = roomScope.exec(sentence.trim());
+    return pieces.map((piece, i) => prefix && i > 0 && !roomMention.test(piece)
+      ? prefix[0] + " " + piece : piece);
+  });
   return clauses.map(clause => clause.trim()).filter(clause => clause && (
     (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
     asksFurnitureFit(clause) || isBedroomChairComparison(clause) ||
     (/\b(distance|how far|proximity|gap|width|height|measure)\b/i.test(clause) && /\b(chairs?|desk|window)\b/i.test(clause)) ||
-    /\b(storage|wardrobe|seating capacity)\b/i.test(clause) ||
+    /\b(storage|wardrobe|seating capacity|task[- ]light(?:ing)?|reading light|desk lamp|bedside lamp)\b/i.test(clause) ||
     asksZoningTradeoff(clause)
   ));
 }
