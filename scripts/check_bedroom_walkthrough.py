@@ -41,10 +41,30 @@ def check_room_study_reopen(page):
         page.locator("#layoutStudio canvas").wait_for()
         assert page.locator("#layoutPiece option").count() == 1
         assert "Turned 1" in page.locator("#layoutNotice").inner_text()
+        assert page.locator("#rotatePiece").inner_text() == "Turn 180°"
+        page.locator("#rotatePiece").click()
+        page.locator("#layoutX").fill("0.80")
+        page.locator("#layoutX").press("Tab")
         page.locator("#layoutStudio button[aria-label]").click()
         page.locator("#conceptStudio button[aria-label]").first.click()
         page.locator("#restyleRoom").click()
         assert page.locator("#buildLayout").inner_text() == "Reopen layout study"
+        page.locator("#buildLayout").click()
+        page.locator("#layoutStudio canvas").wait_for()
+        assert page.locator("#layoutX").input_value() == "0.80"
+        with page.expect_download() as download:
+            page.locator("#saveStudy").click()
+        glb = Path(download.value.path()).read_bytes()
+        scene = json.loads(glb[20 : 20 + int.from_bytes(glb[12:16], "little")])
+        bed = next(
+            node
+            for node in scene["nodes"]
+            if node.get("extras", {}).get("kind") == "bed"
+        )
+        # The input orientation was 90°. Auto-fitting and flipping yield 360°.
+        assert abs(bed["matrix"][0] - 1) < 1e-6
+        assert abs(bed["matrix"][12] - 0.80) < 1e-6
+        page.locator("#layoutStudio button[aria-label]").click()
         page.locator("#conceptStudio button[aria-label]").first.click()
     finally:
         page.unroute(route)

@@ -162,6 +162,10 @@ export function openLayout(el, draft, photos) {
     const turned = Math.abs(Math.sin(piece.rotation.y)) > 0.5;
     return { x: (turned ? d : w) / 2, z: (turned ? w : d) / 2 };
   }
+  function nextTurn(piece) {
+    const half = limits(piece);
+    return half.z * 2 <= width && half.x * 2 <= depth ? 90 : 180;
+  }
   function place(piece, x, z) {
     const half = limits(piece);
     if (half.x * 2 > width || half.z * 2 > depth) return false;
@@ -231,6 +235,7 @@ export function openLayout(el, draft, photos) {
     item.center_depth_fraction = -selected.position.z / depth;
     item.quarter_turns =
       ((Math.round(-selected.rotation.y / (Math.PI / 2)) % 4) + 4) % 4;
+    el("rotatePiece").textContent = "Turn " + nextTurn(selected) + "°";
     el("layoutX").value = selected.position.x.toFixed(2);
     el("layoutDepthPos").value = (-selected.position.z).toFixed(2);
     outline.setFromObject(selected);
@@ -277,11 +282,8 @@ export function openLayout(el, draft, photos) {
       sync();
     };
   el("rotatePiece").onclick = () => {
-    selected.rotation.y -= Math.PI / 2;
-    if (!place(selected, selected.position.x, -selected.position.z)) {
-      selected.rotation.y += Math.PI / 2;
-      notice.textContent = "This orientation exceeds the floor size.";
-    }
+    selected.rotation.y -= nextTurn(selected) * Math.PI / 180;
+    place(selected, selected.position.x, -selected.position.z);
     sync();
   };
   const ray = new T.Raycaster(),
