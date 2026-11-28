@@ -48,3 +48,25 @@ test("saved salon tables reach the furniture schedule, drawing and Blender expor
   assert.ok(!exported().some(item => [copy.id, original.id].includes(item.id)));
   assert.equal(exported().find(item => item.id === suite.id).parts.length, suiteParts.length);
 });
+
+test("finish rows identify the saved surfaces and objects while preserving base materials elsewhere", () => {
+  const home = JSON.parse(readFileSync(fixture, "utf8"));
+  for (const part of home.rooms) part.finish_overrides = {floor: "walnut"};
+  home.hall_finish = "walnut";
+  const bedroom = home.rooms.find(p => p.design.room.id === "bedroom");
+  bedroom.finish_overrides.wall = "dark green";
+  const salon = home.rooms.find(p => p.design.room.id === "salon");
+  salon.finish_overrides.objects = {"salon-coffee-table": "sage"};
+  const board = homeBoard({home, project: "finish-review", revision: 4});
+  assert.deepEqual(Object.keys(board.finishes).filter(k => k.startsWith("proposal-")).sort(),
+    ["proposal-dark green", "proposal-sage", "proposal-walnut"]);
+  const rows = board.finish_schedule;
+  assert.deepEqual(rows.find(row => row.finish === "dark green").locations,
+    [{room: "bedroom", label: bedroom.design.room.name}]);
+  assert.equal(rows.find(row => row.finish === "walnut").locations.length, home.rooms.length + 1);
+  assert.deepEqual(rows.find(row => row.finish === "sage").locations.map(loc => loc.object), ["salon-coffee-table"]);
+  assert.deepEqual(board.base_finish_locations.floor, []);
+  assert.deepEqual(board.base_finish_locations.tile, []);
+  assert.ok(!board.base_finish_locations.wall.includes(bedroom.design.room.name));
+  assert.ok(board.base_finish_locations.wall.includes(salon.design.room.name));
+});

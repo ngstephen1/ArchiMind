@@ -18,19 +18,30 @@ def drawing(home):
         f'<svg viewBox="-0.3 -0.3 {w + 0.6} {d + 0.6}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Dimensioned home plan">'
     ]
 
-    def rect(x, y, w, h, color):
+    def rect(x, y, w, h, color, stroke="#686558"):
         shapes.append(
-            f'<rect x="{x}" y="{d - y - h}" width="{w}" height="{h}" fill="{color}" stroke="#686558" stroke-width=".026"/>'
+            f'<rect x="{x}" y="{d - y - h}" width="{w}" height="{h}" fill="{esc(color)}" stroke="{esc(stroke)}" stroke-width=".026"/>'
         )
 
-    rect(0, 0, w, d, "#d7c09e")
+    colors = home.get("finishes", {})
+    rect(0, 0, w, d, colors.get(home.get("hall_finish"), "#d7c09e"))
     for part in home["rooms"]:
         x, y = part["origin"]
         room = part["room"]
         rw, rd = room["width_m"], room["depth_m"]
-        rect(x, y, rw, rd, "#faf7ee")
+        overrides = part.get("finish_overrides", {})
+        paint = colors.get("proposal-" + overrides.get("wall", ""), "#686558")
+        floor = colors.get("proposal-" + overrides.get("floor", ""), "#faf7ee")
+        rect(x, y, rw, rd, floor, paint)
         for f in part["furniture"]:
-            rect(x + f["x_m"], y + f["y_m"], f["width_m"], f["depth_m"], "#c0c4ae")
+            finish = overrides.get("objects", {}).get(f["id"], "")
+            rect(
+                x + f["x_m"],
+                y + f["y_m"],
+                f["width_m"],
+                f["depth_m"],
+                colors.get("proposal-" + finish, "#c0c4ae"),
+            )
         for o in room["doors"] + room["windows"]:
             off = o["offset_m"]
             length = o["width_m"]
@@ -127,6 +138,54 @@ def living_room_views(views, replacements):
     return result or views[:1]
 
 
+def finish_swatches(board, style, directory):
+    finish_rows = "".join(
+        f'<p><i style="background:{esc(col)}"></i>{esc(label.title())}</p>'
+        for label, col in board["finishes"].items()
+        if not label.startswith("proposal-")
+    )
+    if style:
+        finish_rows = ""
+        surfaces = (
+            Path(__file__).resolve().parents[1]
+            / "src/archimind/_viewer_assets/packs/assets"
+        )
+        for role, row in style["surfaces"].items():
+            locations = board.get("base_finish_locations", {}).get(role)
+            if locations == []:
+                continue
+            digest = row["files"]["diffuse"]
+            if not re.fullmatch(r"[0-9a-f]{64}", digest):
+                raise ValueError("Invalid surface swatch digest")
+            asset = next(
+                (
+                    f
+                    for f in surfaces.glob(digest + ".*")
+                    if f.suffix in {".webp", ".jpg", ".png"}
+                ),
+                None,
+            )
+            if not asset or hashlib.sha256(asset.read_bytes()).hexdigest() != digest:
+                raise ValueError("Released surface swatch unavailable")
+            filename = "swatch-" + asset.name
+            (directory / filename).write_bytes(asset.read_bytes())
+            label = row["asset_id"].split(":")[-1].replace("_", " ").title()
+            scope = " · " + ", ".join(map(esc, locations)) if locations else ""
+            finish_rows += f'<p><img class="swatch" src="{esc(filename)}" alt=""><b>{esc(role.title())}</b> · {esc(label)}{scope}</p>'
+        finish_rows += "<p>Furniture and dressing follow the saved high-quality Town style. The furniture schedule gives reserved dimensions and floor positions.</p>"
+    for row in board.get("finish_schedule", []):
+        locations = ", ".join(
+            esc(loc["label"])
+            + (" [" + esc(loc["object"]) + "]" if "object" in loc else "")
+            for loc in row["locations"]
+        )
+        finish_rows += (
+            f'<p><i style="background:{esc(row["color"])}"></i><b>{esc(row["finish"].title())}</b>'
+            f" · {esc(row['surface'])} · {locations}</p>"
+        )
+    return finish_rows
+
+
 def book(directory, eye_views=None, *, comparison_pages=0):
     receipt = json.loads((directory / "receipt.json").read_bytes())
     for name, expected in receipt["files"].items():
@@ -202,35 +261,7 @@ def book(directory, eye_views=None, *, comparison_pages=0):
         + img(hero)
         + f"<p>Whole-home interior study · {board['width']} × {board['depth']} m · {esc(palette.title())}</p>"
     )
-    finish_rows = "".join(
-        f'<p><i style="background:{esc(col)}"></i>{esc(label.title())}</p>'
-        for label, col in board["finishes"].items()
-    )
-    if style:
-        finish_rows = ""
-        surfaces = (
-            Path(__file__).resolve().parents[1]
-            / "src/archimind/_viewer_assets/packs/assets"
-        )
-        for role, row in style["surfaces"].items():
-            digest = row["files"]["diffuse"]
-            if not re.fullmatch(r"[0-9a-f]{64}", digest):
-                raise ValueError("Invalid surface swatch digest")
-            asset = next(
-                (
-                    f
-                    for f in surfaces.glob(digest + ".*")
-                    if f.suffix in {".webp", ".jpg", ".png"}
-                ),
-                None,
-            )
-            if not asset or hashlib.sha256(asset.read_bytes()).hexdigest() != digest:
-                raise ValueError("Released surface swatch unavailable")
-            filename = "swatch-" + asset.name
-            (directory / filename).write_bytes(asset.read_bytes())
-            label = row["asset_id"].split(":")[-1].replace("_", " ").title()
-            finish_rows += f'<p><img class="swatch" src="{esc(filename)}" alt=""><b>{esc(role.title())}</b> · {esc(label)}</p>'
-        finish_rows += "<p>Furniture and dressing follow the saved high-quality Town style. The furniture schedule gives reserved dimensions and floor positions.</p>"
+    finish_rows = finish_swatches(board, style, directory)
     credits = '<p><small>Belaya model © Amazon.com. <a href="https://amazon-berkeley-objects.s3.amazonaws.com/index.html">Amazon Berkeley Objects</a> · <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>. Scene assembly and rendering by ArchiMind. <a href="https://polyhaven.com/license">Poly Haven</a> surfaces and lighting · CC0. Full notices accompany the source book.</small></p>'
     pages.append(
         "<h2>Plan &amp; finishes</h2><div class='grid'><div>"

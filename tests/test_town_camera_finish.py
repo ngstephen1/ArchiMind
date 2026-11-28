@@ -102,3 +102,39 @@ def test_render_rejects_camera_outside_historical_room_before_loading_blender(
     }
     with pytest.raises(service.Problem, match="outside the room"):
         photograph({"home": home}, pose, tmp_path / "unused-blender")
+
+
+def test_client_book_shows_selected_materials_on_their_saved_surfaces(tmp_path):
+    import runpy
+
+    swatches = runpy.run_path(
+        str(Path(__file__).resolve().parents[1] / "scripts/publish_studio_board.py")
+    )["finish_swatches"]
+    board = {
+        "finishes": {"proposal-walnut": "#795337"},
+        "base_finish_locations": {"floor": [], "tile": []},
+        "finish_schedule": [
+            {
+                "surface": "floor",
+                "finish": "walnut",
+                "color": "#795337",
+                "locations": [
+                    {"room": "salon", "label": "Salon"},
+                    {"room": "hall", "label": "Hall"},
+                ],
+            },
+            {
+                "surface": "object",
+                "finish": "sage",
+                "color": "#9da98c",
+                "locations": [
+                    {"label": "Salon · Coffee table", "object": "salon-coffee-table"}
+                ],
+            },
+        ],
+    }
+    for style in (None, {"surfaces": {"floor": {}, "tile": {}}}):
+        html = swatches(board, style, tmp_path)
+        assert "Walnut</b> · floor · Salon, Hall" in html
+        assert "Sage</b> · object · Salon · Coffee table [salon-coffee-table]" in html
+        assert "Proposal-" not in html

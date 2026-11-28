@@ -1,5 +1,5 @@
 import { wallQuads } from "../src/room_geometry.js";
-import {finishColors} from "./finish_chat.js";
+import { baseFinishLocations, finishSchedule } from "./finish_schedule.js";
 import { presentationFurniture, presentationFurnitureParts } from "./saved_pieces.js";
 import { turnedCoverlet } from "./studio_textiles.js";
 import { bedroomManifest } from "./bedroom_manifest.js";
@@ -12,6 +12,7 @@ import {
 export function homeBoard(snapshot) {
   const imported = Boolean(snapshot.home.photo_home);
   const bedroom = imported ? null : bedroomManifest(snapshot);
+  const schedule = finishSchedule(snapshot.home);
   const studio = snapshot.home.rooms.some((p) => p.design.room.id === "salon");
   return {
     schema_version: 1,
@@ -23,8 +24,10 @@ export function homeBoard(snapshot) {
     width: snapshot.home.width,
     depth: snapshot.home.depth,
     hall: snapshot.home.hall,
-    finishes: snapshot.home.rooms.some(p=>p.finish_overrides) ? {...studioFinishes,...Object.fromEntries(Object.entries(finishColors).map(([k,v])=>["proposal-"+k,v]))} : studioFinishes,
-    ...(snapshot.home.hall_finish?{hall_finish:"proposal-"+snapshot.home.hall_finish}:{}),
+    finishes: schedule.length ? {...studioFinishes, ...Object.fromEntries(
+      schedule.map(row => ["proposal-" + row.finish, row.color]))} : studioFinishes,
+    ...(schedule.length ? {finish_schedule: schedule, base_finish_locations: baseFinishLocations(snapshot.home)} : {}),
+    ...(Number.isFinite(snapshot.home.hall) && snapshot.home.hall_finish?{hall_finish:"proposal-"+snapshot.home.hall_finish}:{}),
     ...(snapshot.home.presentation_detail ? { presentation_detail: snapshot.home.presentation_detail } : {}),
     ...(imported ? { shell_source: "user-confirmed photo room dimensions" } : { bedroom }),
     rooms: snapshot.home.rooms.map((part) => {

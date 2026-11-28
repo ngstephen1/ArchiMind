@@ -1,3 +1,4 @@
+import { baseFinishLocations, finishSchedule } from "./finish_schedule.js";
 import { presentationFurniture } from "./saved_pieces.js";
 import { bindFurnitureEditor } from "./furniture_editor.js";
 import { bindPhotoHome } from "./photo_home.js";
@@ -1146,15 +1147,28 @@ el("present").onclick = async () => {
   planOf(h, el("boardPlan"));
   el("schedule").replaceChildren();
   el("swatches").replaceChildren();
-  for (const [name, color] of [
-    [
-      "Bedroom plaster",
-      { oak: "#e5d6bc", sage: "#bac6ad", terracotta: "#d8ab91" }[h.palette],
-    ],
-    ["Timber floor", null],
-    ["Curtain linen", "#e9e1cd"],
-    ["Brushed brass", "#9a7546"],
-  ]) {
+  const chosen = finishSchedule(h);
+  const swatches = [];
+  const plaster = { oak: "#e5d6bc", sage: "#bac6ad", terracotta: "#d8ab91" }[h.palette];
+  if (!chosen.length) {
+    swatches.push(["Bedroom plaster", plaster], ["Timber floor", null]);
+  } else {
+    const pack = PACK_MANIFESTS[h.style_pack?.id];
+    for (const [role, locations] of Object.entries(baseFinishLocations(h))) {
+      if (!locations.length) continue;
+      const packed = pack?.version === h.style_pack?.version ? pack?.surfaces[role] : null;
+      const name = packed?.asset_id?.split(":").pop().replaceAll("_", " ") ||
+        {wall: "plaster", floor: "timber", tile: "bathroom tile"}[role];
+      swatches.push([name.charAt(0).toUpperCase() + name.slice(1) + " · " + role + " · " + locations.join(", "),
+        packed?.fallback_color || {wall: plaster, floor: "#ba9a70", tile: "#b4b8b1"}[role]]);
+    }
+    for (const row of chosen) {
+      const labels = row.locations.map(loc => loc.label + (loc.object ? " [" + loc.object + "]" : ""));
+      swatches.push([row.finish.charAt(0).toUpperCase() + row.finish.slice(1) + " · " + row.surface + " · " + labels.join(", "), row.color]);
+    }
+  }
+  swatches.push(["Curtain linen", "#e9e1cd"], ["Brushed brass", "#9a7546"]);
+  for (const [name, color] of swatches) {
     const tile = node("div", name);
     tile.style.borderTop = "20px solid " + (color || "#ad8562");
     if (!color)
