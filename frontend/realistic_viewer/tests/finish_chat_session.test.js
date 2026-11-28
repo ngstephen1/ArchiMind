@@ -12,7 +12,7 @@ for (const outcome of ["success", "failure", "project changed", "newer revision"
           style: { removeProperty() {}, setProperty() {} },
           replaceChildren(...options) { this.options = options; },
           showModal() { this.open = true; },
-          close() { this.open = false; this.dispatchEvent(new Event("close")); },
+          close() { this.open = false; queueMicrotask(() => this.dispatchEvent(new Event("close"))); },
         });
         elements.set(id, item);
       }
@@ -32,6 +32,10 @@ for (const outcome of ["success", "failure", "project changed", "newer revision"
     if (outcome === "newer revision") state.revision = 4;
     await el("finishCheck").onclick();
     const laterStatus = el("finishStatus").textContent;
+    // Browsers may deliver the previous close event after a second preview is ready.
+    el("finishDialog").dispatchEvent(new Event("close"));
+    assert.equal(el("finishStatus").textContent, laterStatus);
+    assert.equal(el("finishSave").hidden, false);
     if(outcome === "failure") fail(new Error("old failure")); else complete({revision:2});
     await save;
     assert.equal(el("finishDialog").open, true);

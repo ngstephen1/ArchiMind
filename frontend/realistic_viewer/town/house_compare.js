@@ -24,8 +24,8 @@ function containsCamera(home, pose) {
 export function bindHouseComparison({ el, world, api, context, asset }) {
   const bookmarks = new Map();
   const dialog = el("houseCompare");
+  const bookmarkWrites = new Map();
   let session = 0,
-    bookmarkWrite = Promise.resolve(),
     serial = 0,
     running = Promise.resolve(),
     objectUrl,
@@ -223,7 +223,7 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     const project = context().project;
     const active = () => dialog.open && mine === session && context().project === project;
     try {
-      await bookmarkWrite.catch(() => {});
+      await bookmarkWrites.get(project)?.catch(() => {});
       const data = await api("/projects/" + project + "/bookmarks");
       if (!active()) return;
       install(data.views);
@@ -244,8 +244,13 @@ export function bindHouseComparison({ el, world, api, context, asset }) {
     button.disabled = true;
     try {
       if (!pose) throw openingError;
-      bookmarkWrite = api("/projects/" + project + "/bookmarks", { pose, revision });
-      await bookmarkWrite;
+      const write = api("/projects/" + project + "/bookmarks", { pose, revision });
+      bookmarkWrites.set(project, write);
+      try {
+        await write;
+      } finally {
+        if (bookmarkWrites.get(project) === write) bookmarkWrites.delete(project);
+      }
       if (!active()) return;
       install(
         [...bookmarks.values()]
