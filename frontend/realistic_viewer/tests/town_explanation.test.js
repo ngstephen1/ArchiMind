@@ -236,3 +236,16 @@ test("zoning answers compare only the two consecutive schemes on the same saved 
     assert.match(ask(evidence), /consecutive saved gallery and service-core revisions/);
   }
 });
+
+test("compound evidence questions keep the chair in its specified room", () => {
+  const home = JSON.parse(readFileSync(new URL("../town/showcase.json", import.meta.url)));
+  const question = "Will the bedroom chair fit under the desk? Can the study stop sound transfer? Which supplier has it in stock?";
+  const answer = explanation(home, question);
+  assert.match(answer, /Source: bedroom desk-chair and belaya/);
+  assert.match(answer, /clear width between supports/);
+  assert.match(answer, /Acoustic performance is unverified/);
+  assert.match(answer, /Supplier availability is unknown/);
+  assert.doesNotMatch(answer, /Study chair fit/);
+  assert.match(explanation(home, "Does the living room chair fit and is it in stock?"), /For the living.*Supplier availability is unknown/);
+  assert.doesNotMatch(explanation(home, "Is the supplier able to deliver that chair?"), /footprint/);
+});

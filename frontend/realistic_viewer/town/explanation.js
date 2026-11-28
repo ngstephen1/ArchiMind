@@ -109,7 +109,29 @@ function chairChange(home, manifest, previous) {
     " m before and " + gap(chair,desk).toFixed(3) + " m after. Source: saved bedroom furniture coordinates.";
 }
 
+// A question about installation can include several independent evidence requests.
+// Bind furniture measurements to the clause that names the item and its room.
+const acousticEvidence = /\b(acoustics?|acoustically|noise|sound(?:proof(?:ing)?|proofed|[- ](?:isolation|transfer|transmission|insulation|proof))|decibels?)\b/i;
+const supplierEvidence = /\b(suppliers?|vendors?|in stock|stock availability|lead[- ]times?|delivery dates?|availability to purchase|available (?:to (?:order|buy|purchase)|for (?:purchase|delivery))|purchase availability)\b/i;
+
 export function explanation(home, question, manifest = null, previous = null) {
+  const acoustic = acousticEvidence.test(question);
+  const supplier = supplierEvidence.test(question);
+  if (!acoustic && !supplier) return explainPlan(home, question, manifest, previous);
+
+  const clauses = question.split(/[?!.;]|,\s*|\s+(?:and|also|plus)\s+(?=(?:can|could|is|are|will|would|does|do|how|what|whether|confirm|verify|check|which|acoustic|supplier|noise)\b)/i);
+  const plan = clauses.filter(clause =>
+    (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
+    /\b(fit|fits|slide|tuck|clearance|measure|distance|compare|moved)\b/i.test(clause)
+  ).map(clause => clause.trim()).filter(Boolean);
+  const answers = [];
+  if (plan.length) answers.push(explainPlan(home, plan.join(" "), manifest, previous));
+  if (acoustic) answers.push("Acoustic performance is unverified. The floor plan records room positions. To assess sound transfer, obtain wall and door assembly ratings or an on-site sound measurement.");
+  if (supplier) answers.push("Supplier availability is unknown for this revision. Confirm the item, finish, stock and delivery date with the supplier.");
+  return answers.join(" ");
+}
+
+function explainPlan(home, question, manifest, previous) {
   const bedroom = home.rooms.find(p => p.design.room.id === "bedroom");
   const {room, furniture} = bedroom.design;
   const get = id => furniture.find(f => f.id === id);
@@ -211,6 +233,14 @@ export function explanation(home, question, manifest = null, previous = null) {
       (namedTables.length ? (surfaces.length ? `Saved dining surface: ${surfaces.join(", ")}. ` : "") :
         workspaces.length ? `Saved ${workspaces[0]}. ` : "") +
       "To assess task lighting, provide the fixture or a work-surface light measurement. A daylight view alone cannot establish task illuminance or glare.";
+  }
+  if (/\bchair\b/.test(q) && mentionedRooms.some(id => id !== "study" && id !== "bedroom")) {
+    const areas = [...new Set(mentionedRooms)];
+    if (areas.length > 1) return "Which room contains the chair and desk you want to check? Named rooms: " + areas.join(", ") + ".";
+    const part = requestedRooms[0];
+    const items = part?.design.furniture.filter(f => ["chair", "desk"].includes(f.category)) ?? [];
+    return "For the " + areas[0] + ", the saved design " + (items.length ? "lists " + items.map(f => f.id).join(", ") : "has no individually identified chair or desk") +
+      ". To verify fit, identify both pieces and measure the chair, clear width between supports and floor-to-underside height.";
   }
   if (/\bstudy\b/.test(q) || namedStudyDesk) {
     if (!study) return "This revision has no recorded study.";
