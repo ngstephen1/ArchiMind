@@ -307,6 +307,7 @@ test("fit questions bind chair and desk rooms separately", () => {
   assert.match(ask("Can the bedroom chair fit at the Work Table or the bedroom desk?"), /Which chair and desk pair/);
   assert.match(ask("How far is the Work Table from the window, and can the chair fit under it?"), /window center.*Study chair fit/);
   assert.equal(ask("How far is the Work   Table from the window, and can the chair fit under it?"), ask("How far is the Work Table from the window, and can the chair fit under it?"));
+  assert.equal(ask("Is the chair in  stock?"), ask("Is the chair in stock?"));
   const followUp = ask("How far is the study desk from the window, and can the chair fit under it?");
   assert.match(followUp, /window center.*Study chair fit/);
   assert.doesNotMatch(followUp, /bedroom desk-chair and belaya/);

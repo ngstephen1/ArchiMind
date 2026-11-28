@@ -43,7 +43,7 @@ export function isUnambiguousSavedDesignQuestion(question) {
 }
 
 export function asksChairChange(question) {
-  return planQuestions(question).some(isBedroomChairComparison);
+  return planQuestions(question.trim().replace(/\s+/g, " ")).some(isBedroomChairComparison);
 }
 
 // A room can be named before a furniture noun or as a qualifier after it.
@@ -153,7 +153,7 @@ function asksFurnitureFit(clause) {
 }
 
 function planQuestions(question) {
-  const scoped = question.trim().replace(/\s+/g, " ").replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
+  const scoped = question.replace(/\b((?:in|for|inside) (?:the |my |our )?(?:study|bedroom|salon|living room|bathroom|kitchen)),/gi, "$1");
   const clauses = scoped.split(/[?!;]|\.(?!\d)|(?:,\s*(?:and\s+)?|\s+and\s+)(?=(?:that|whether|can|could|is|are|will|would|does|do|how|what|which|verify)\b)/i);
   return clauses.map(clause => clause.trim()).filter(clause => clause && (
     (!acousticEvidence.test(clause) && !supplierEvidence.test(clause)) ||
@@ -165,6 +165,7 @@ function planQuestions(question) {
 }
 
 export function explanation(home, question, manifest = null, previous = null) {
+  question = question.trim().replace(/\s+/g, " ");
   const acoustic = acousticEvidence.test(question)
     || (/\bquiet\b/i.test(question) && /\b(?:calls?|meetings?)\b/i.test(question));
   const supplier = supplierEvidence.test(question);
@@ -215,7 +216,7 @@ function explainPlan(home, question, manifest, previous) {
       ? "Saved storage reservations: " + storage.join("; ") + ". Interior capacity and door operation need separate measurements."
       : `The requested area has no recorded ${excludesDedicated ? "other storage reservation" : dedicated ? "wardrobe or closet" : "storage reservation"} in this design.`;
   }
-  const namedTables = (normalized.match(/\b(breakfast suite|salon dining)\b/g) ?? [])
+  const namedTables = (q.replaceAll("-", " ").match(/\b(breakfast suite|salon dining)\b/g) ?? [])
     .map(name => name.replaceAll(" ", "-"));
   const taskLighting = /\b(task[- ]light(?:ing)?|reading light|desk lamp)\b/.test(q) &&
     !/\b(bedside|nightstand)\b/.test(q);
