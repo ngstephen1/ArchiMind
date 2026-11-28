@@ -945,16 +945,16 @@ export function createTown(canvas, status, action) {
       for (const q of wallQuads(r)) {
         const a = q.points[0],
           b = q.points[2],
-          x = (a[0] + b[0]) / 2,
-          z = -(a[1] + b[1]) / 2;
+          x = (a[0] + b[0]) / 2 + (h.photo_home ? ({ west: 0.025, east: -0.025 }[q.wall] || 0) : 0),
+          z = -(a[1] + b[1]) / 2 - (h.photo_home ? ({ south: 0.025, north: -0.025 }[q.wall] || 0) : 0);
         const wall = block(
           group,
           x,
           (q.bottom + q.top) / 2,
           z,
-          Math.abs(a[0] - b[0]) || 0.1,
+          Math.abs(a[0] - b[0]) || (h.photo_home ? 0.05 : 0.1),
           q.top - q.bottom,
-          Math.abs(a[1] - b[1]) || 0.1,
+          Math.abs(a[1] - b[1]) || (h.photo_home ? 0.05 : 0.1),
           wallColor,
         );
         wall.userData.surface = "wall";
@@ -1011,8 +1011,10 @@ export function createTown(canvas, status, action) {
         }
       }
       const windowStart = group.children.length;
-      for (const win of r.windows)
+      for (const win of r.windows) {
+        if (h.photo_home && win.wall === "west" && win.id.startsWith("join-window-")) continue;
         furnishedWindow(group, r, win, surfaces, block);
+      }
       // Wall-mounted print, clear of the window and of the circulation door.
       if (!h.photo_home) {
       const artX = r.width_m * 0.51;
@@ -1621,6 +1623,15 @@ export function createTown(canvas, status, action) {
         requestPack(generation);
       };
       updateQuality();
+    },
+    restoreWalkingView(pose) {
+      overview.set("");
+      enter(true);
+      pos.set(pose.eye[0], 0, pose.eye[2]);
+      const direction = new T.Vector3().fromArray(pose.target).sub(new T.Vector3().fromArray(pose.eye)).normalize();
+      yaw = Math.atan2(-direction.x, -direction.z);
+      pitch = Math.asin(T.MathUtils.clamp(direction.y, -1, 1));
+      canvas.focus();
     },
     bookmark() {
       if (!inside || overview.mode) throw Error("Walk inside a room to bookmark its camera.");

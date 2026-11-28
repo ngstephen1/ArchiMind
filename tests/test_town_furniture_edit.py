@@ -64,7 +64,7 @@ def test_editable_coffee_table_lifecycle(monkeypatch, tmp_path):
 
 @pytest.mark.parametrize("object_id", ["side-table", "console-table"])
 def test_standalone_furniture_edits_preserve_old_snapshot(object_id):
-    from archimind.town.furniture_edit import edit, Change
+    from archimind.town.furniture_edit import Change, edit
 
     h = json.loads(HOME.read_text())
     room = "salon" if object_id == "side-table" else "living"

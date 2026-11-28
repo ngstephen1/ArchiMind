@@ -147,7 +147,10 @@ def handle(request, data):
             db.project(q, owner, p)
             home = db.revision(q, p, n)
         if home.get("photo_home"):
-            raise db.Problem("For a photo home, enter a room, bookmark its view, and choose Town / Blender in Compare.", 409)
+            raise db.Problem(
+                "For a photo home, enter a room, bookmark its view, and choose Town / Blender in Compare.",
+                409,
+            )
         snapshot = {"project": p, "revision": n, "home": home}
         if len(path) == 3 and request.method == "GET":
             return render_queue.describe(snapshot, blender)
