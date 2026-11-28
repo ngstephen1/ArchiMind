@@ -32,20 +32,18 @@ def edit(home: dict, message: str):
     room = study["design"]["room"]
     items = {i["id"]: i for i in study["design"]["furniture"]}
     moving = ("library-table", "library-chair")
-    if (
-        not all(key in items for key in (*moving, "side-table"))
-        or len(room["doors"]) != 1
-    ):
+    # Gallery homes enter the study from the hall on an east or west wall.
+    hall_doors = [d for d in room["doors"] if d["wall"] in {"east", "west"}]
+    if not all(key in items for key in (*moving, "side-table")) or len(hall_doors) != 1:
         raise ValueError(
             "A unique study entrance, folio table, chair and side table are required."
         )
-    door = room["doors"][0]
+    door = hall_doors[0]
     west = door["wall"] == "west"
     side = footprint(items["side-table"])
     mid = door["offset_m"] + door["width_m"] / 2
     if (
-        door["wall"] not in {"east", "west"}
-        or door["width_m"] < 0.90
+        door["width_m"] < 0.90
         or not side.bounds[1] <= mid <= side.bounds[3]
         or not any(
             w["wall"] == ("east" if west else "west")

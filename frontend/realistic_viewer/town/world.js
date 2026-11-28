@@ -1,11 +1,13 @@
+import {finishColors} from "./finish_chat.js";
+import { editable, savedFurnitureParts, coffeeTables } from "./saved_pieces.js";
 import { GroundedSkybox } from "three/addons/objects/GroundedSkybox.js";
 import { houseView } from "./house_view.js";
 import { turnedCoverlet } from "./studio_textiles.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
-import { studioFurniture, studioFinishes, salonDetails } from "./studio_furniture.js";
+import { studioFinishes, salonDetails } from "./studio_furniture.js";
 import * as T from "three";
 import { bedroomSurfaces, finishBedroomConcept, furnishedWindow, scaledUV } from "./bedroom_surfaces.js";
-import { bedroomCameras } from "./bedroom_cameras.js";
+import { bedroomCameras, openingFrame } from "./bedroom_cameras.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 import {
@@ -354,7 +356,7 @@ export function createTown(canvas, status, action) {
   function batch(group) {
     const buckets = new Map();
     for (const m of group.children.slice()) {
-      if (!m.isMesh || m.userData.surface === "wall" || m.userData.aboveCut) continue;
+      if (!m.isMesh || m.userData.furniturePick || m.userData.surface === "wall" || m.userData.aboveCut) continue;
       const key = m.geometry.uuid + m.material.uuid;
       if (!buckets.has(key)) buckets.set(key, []);
       buckets.get(key).push(m);
@@ -598,8 +600,9 @@ export function createTown(canvas, status, action) {
   const photoControls = document.getElementById("photoControls");
   const photoView = document.getElementById("photoView");
   const photoReason = document.getElementById("photoReason");
-  let preset = null;
+  let preset = null, restoredLens = null;
   function selectPhoto() {
+    restoredLens = null;
     const part = home?.rooms.find((p) => p.design.room.id === "bedroom");
     preset = (photoView.value && part)
       ? bedroomCameras(part, camera.aspect).find((item) => item.id === photoView.value)
@@ -628,6 +631,7 @@ export function createTown(canvas, status, action) {
     if (!preset) canvas.focus();
   };
   function walkView() {
+    restoredLens = null;
     if (!preset) return;
     photoView.value = "";
     selectPhoto();
@@ -636,14 +640,11 @@ export function createTown(canvas, status, action) {
     const part = home.rooms.find((r) => r.design.room.id === roomJump.value);
     if (!inside || !part) return;
     walkView();
-    const r = part.design.room,
-      door = r.doors[0],
-      fromWest = door.wall === "west";
-    pos.set(
-      part.origin[0] + (fromWest ? 0.7 : r.width_m - 0.7),
-      0,
-      -part.origin[1] - door.offset_m - door.width_m / 2,
-    );
+    const r = part.design.room, frame=openingFrame(r,r.doors[0]);
+    pos.set(part.origin[0]+frame.x+.7*frame.nx,0,-part.origin[1]-frame.y-.7*frame.ny);
+    if (!part.design.furniture.length) {
+      yaw=Math.atan2(-frame.nx,frame.ny);pitch=0;roomJump.value="";canvas.focus();return;
+    }
     // Choose an eye point with a clear walk from the door and the widest view of the furniture.
     const doorX = pos.x,
       doorZ = pos.z;
@@ -842,7 +843,7 @@ export function createTown(canvas, status, action) {
     roomJump.length = 1;
     for (const part of h.rooms)
       roomJump.add(new Option(part.design.room.name, part.design.room.id));
-    doorX = home.hall + 0.8;
+    doorX = home.photo_home?.entry_x ?? home.hall + 0.8;
     const W = h.width,
       D = h.depth;
     solid(hero, W / 2, 1.4, -D / 2, W, 2.8, D, "#cdbba0", heroObstacles);
@@ -869,46 +870,26 @@ export function createTown(canvas, status, action) {
     block(hero, doorX, 0.065, 0.94, 4, 0.13, 2.07, "#ae9c85");
     block(hero, W / 2, 2.88, -D / 2, W + 0.4, 0.24, D + 0.45, "#53675c");
     block(hero, doorX, 1.08, 0.07, 1.12, 2.16, 0.14, "#45645e");
-    label(hero, "01  ·  STUDIO HOUSE", doorX, 2.48, 0.12, 3.2);
+    label(hero, h.photo_home ? "PHOTO HOME" : "01  ·  STUDIO HOUSE", doorX, 2.48, 0.12, 3.2);
     // Exterior glazing uses the same offset, wall, sill and width as each room.
     for (const part of h.rooms)
       for (const win of part.design.room.windows) {
-        const side = win.wall === "east" ? 1 : -1,
-          x = side === 1 ? W : 0,
-          z = -part.origin[1] - win.offset_m - win.width_m / 2;
-        block(
-          hero,
-          x + side * 0.025,
-          win.sill_height_m + win.height_m / 2,
-          z,
-          0.1,
-          win.height_m + 0.12,
-          win.width_m + 0.12,
-          "#f4e8cf",
-        );
-        block(
-          hero,
-          x + side * 0.09,
-          win.sill_height_m + win.height_m / 2,
-          z,
-          0.04,
-          win.height_m,
-          win.width_m,
-          "#66858a",
-        );
-        block(
-          hero,
-          x + side * 0.12,
-          win.sill_height_m + win.height_m / 2,
-          z,
-          0.05,
-          win.height_m,
-          0.06,
-          "#e8dec9",
-        );
+        const f=openingFrame(part.design.room,win), frame=new T.Group();
+        frame.position.set(part.origin[0]+f.x,0,-part.origin[1]-f.y);
+        frame.rotation.y=Math.atan2(-f.nx,f.ny);hero.add(frame);
+        const mid=win.sill_height_m+win.height_m/2;
+        block(frame,0,mid,.025,win.width_m+.12,win.height_m+.12,.10,"#f4e8cf");
+        block(frame,0,mid,.09,win.width_m,win.height_m,.04,"#66858a");
+        block(frame,0,mid,.12,.06,win.height_m,.05,"#e8dec9");
       }
     batch(hero);
-    const roof = block(interior, W / 2, 2.88, -D / 2, W, 0.16, D, "#eee4cf");
+    const roof = new T.Group();
+    interior.add(roof);
+    if (h.photo_home) {
+      for (const {origin,design:{room:r}} of h.rooms) {
+        block(roof,origin[0]+r.width_m/2,r.ceiling_height_m+.08,-origin[1]-r.depth_m/2,r.width_m,.16,r.depth_m,"#eee4cf").userData.surface="ceiling";
+      }
+    } else block(roof,W/2,2.88,-D/2,W,.16,D,"#eee4cf").userData.surface="ceiling";
     roof.userData.surface = "ceiling";
     const walls = [];
     delete canvas.dataset.desk;
@@ -916,8 +897,9 @@ export function createTown(canvas, status, action) {
     const admitted =
       productSceneAdmission(bindings).admitted &&
       productSceneBudget(bindings).passed;
-    block(interior, W / 2, -0.09, -D / 2, W, 0.18, D, "#b39b7a");
+    block(interior, W / 2, -0.09, -D / 2, W, 0.18, D, finishColors[h.hall_finish] || "#b39b7a");
     // Woven runner and flush ceiling pendants keep the circulation route clear.
+    if (!h.photo_home) {
     block(interior, doorX, 0.014, -D / 2, 0.9, 0.018, D - 0.8, "#995b44");
     for (const v of [-0.38, 0.38])
       block(
@@ -935,7 +917,10 @@ export function createTown(canvas, status, action) {
       block(interior, doorX, 2.61, -z, 0.34, 0.17, 0.34, "#e1cc98");
     }
 
+    }
     const wallColor = LEGACY_WALL_COLORS[h.palette];
+    // Split both faces so an adjacent room cannot hide the selected wall paint.
+    const splitFaces = h.photo_home || h.rooms.some(p => p.finish_overrides?.wall);
     for (const part of h.rooms) {
       const [ox, oy] = part.origin,
         r = part.design.room,
@@ -956,19 +941,23 @@ export function createTown(canvas, status, action) {
       for (const q of wallQuads(r)) {
         const a = q.points[0],
           b = q.points[2],
-          x = (a[0] + b[0]) / 2,
-          z = -(a[1] + b[1]) / 2;
+          x = (a[0] + b[0]) / 2 + (splitFaces ? ({ west: 0.025, east: -0.025 }[q.wall] || 0) : 0),
+          z = -(a[1] + b[1]) / 2 - (splitFaces ? ({ south: 0.025, north: -0.025 }[q.wall] || 0) : 0);
         const wall = block(
           group,
           x,
           (q.bottom + q.top) / 2,
           z,
-          Math.abs(a[0] - b[0]) || 0.1,
+          Math.abs(a[0] - b[0]) || (splitFaces ? 0.05 : 0.1),
           q.top - q.bottom,
-          Math.abs(a[1] - b[1]) || 0.1,
+          Math.abs(a[1] - b[1]) || (splitFaces ? 0.05 : 0.1),
           wallColor,
         );
         wall.userData.surface = "wall";
+        if (part.finish_overrides?.wall) {
+          wall.userData.finishColor = finishColors[part.finish_overrides.wall];
+          wall.material = mat(wall.userData.finishColor);
+        }
         walls.push({wall, ox, oy, bottom:q.bottom, height:q.top-q.bottom});
         if (q.bottom === 0) {
           block(
@@ -1001,6 +990,10 @@ export function createTown(canvas, status, action) {
         r.id === "bathroom" ? "#b4b8b1" : "#ba9a70",
       );
       if (r.id === "bedroom") flooring.material = oak;
+      if (part.finish_overrides?.floor) {
+        flooring.userData.finishColor = finishColors[part.finish_overrides.floor];
+        flooring.material = mat(flooring.userData.finishColor);
+      }
       flooring.userData.surface = r.id === "bathroom" ? "tile" : "floor";
       for (let row = 0; r.id !== "bedroom" && row < r.depth_m / 0.25; row++) {
         const z = row * 0.25;
@@ -1020,9 +1013,19 @@ export function createTown(canvas, status, action) {
         }
       }
       const windowStart = group.children.length;
-      for (const win of r.windows)
+      for (const win of r.windows) {
+        if (h.photo_home && win.wall === "west" && win.id.startsWith("join-window-")) continue;
+        if (h.photo_home) {
+          const { x, y } = openingFrame(r, win);
+          const eastWest = win.wall === "east" || win.wall === "west";
+          const halfX = eastWest ? 0.05 : win.width_m / 2;
+          const halfZ = eastWest ? win.width_m / 2 : 0.05;
+          indoor.push([ox + x - halfX, -oy - y - halfZ, ox + x + halfX, -oy - y + halfZ]);
+        }
         furnishedWindow(group, r, win, surfaces, block);
+      }
       // Wall-mounted print, clear of the window and of the circulation door.
+      if (!h.photo_home) {
       const artX = r.width_m * 0.51;
       block(group, artX, 1.55, -r.depth_m + 0.055, 1.05, 0.73, 0.06, "#6e5541");
       block(group, artX, 1.55, -r.depth_m + 0.095, 0.96, 0.64, 0.02, "#e7d4ae");
@@ -1037,6 +1040,7 @@ export function createTown(canvas, status, action) {
         0.012,
         "#ba7e5c",
       );
+      }
       for (const detail of group.children.slice(windowStart)) detail.userData.aboveCut = true;
       function studioPiece(p) {
         const [w,d,h]=p.wdh,[x,y,z]=p.xyz;
@@ -1044,6 +1048,7 @@ export function createTown(canvas, status, action) {
         const geom=p.shape==="sphere"?new T.SphereGeometry(.5,20,12):p.shape==="cylinder"?new T.CylinderGeometry(.5,.5,1,24):new RoundedBoxGeometry(w,h,d,2,p.radius);
         const obj=mesh(group,geom,studioFinishes[p.finish],x,z,-y);
         if(rounded)obj.scale.set(w,h,d);
+        return obj;
       }
       salonDetails(part).forEach(studioPiece);
       const tagged = new Map();
@@ -1058,9 +1063,26 @@ export function createTown(canvas, status, action) {
         indoor.push([ox + f.x_m, -oy - f.y_m - d, ox + f.x_m + w, -oy - f.y_m]);
         const usesStudioFurniture = h.rooms.some(p => p.design.room.id === "salon") ||
           (h.service_layout && f.id === "breakfast-suite");
-        const pieces = r.id !== "bedroom" && usesStudioFurniture ? studioFurniture(f, part.suite_yaw_deg, part.dining_variant) : [];
+        const pieces = savedFurnitureParts(part,f,r.id !== "bedroom" && usesStudioFurniture);
+        const pick = item => ({...item,room:r.id});
+        const allowed = editable(part,f);
+        const coffee = f.id === "salon-suite" ? coffeeTables(part,f) : [];
+        const finishes=part.finish_overrides?.objects || {};
         if (pieces.length) {
-          pieces.forEach(studioPiece);
+          if(f.id==="salon-suite" && part.coffee_tables && !part.suite_yaw_deg) {
+            indoor.pop();
+            const fx=ox+f.x_m, fy=oy+f.y_m;
+            for(const [a,b,c,d] of [[w/2-.99,f.depth_m-.8,w/2+.99,f.depth_m],[.02,0,.8,.68],[w-.8,0,w-.02,.68]])
+              indoor.push([fx+a,-fy-d,fx+c,-fy-b]);
+          }
+          for(const p of pieces) {
+            const obj=studioPiece(p);
+            const item=p.selectedPiece || (p.coffeeComponent ? coffee[0] : (allowed ? f : null));
+            if(item) obj.userData.furniturePick=pick(item);
+            const color=finishColors[finishes[item?.id] || finishes[f.id]];
+            if(color) obj.material=mat(color);
+          }
+          for(const table of coffee) indoor.push([ox+table.x_m,-oy-table.y_m-table.depth_m,ox+table.x_m+table.width_m,-oy-table.y_m]);
           continue;
         }
         if (f.id === "queen-bed") {
@@ -1278,11 +1300,18 @@ export function createTown(canvas, status, action) {
           block(group, x, t * 0.47, z, w, t * 0.94, d, "#a48c73");
           block(group, x, t * 0.97, z, w, t * 0.06, d, "#e1dbcc");
         }
-        tagged.set(f.id, group.children.slice(before));
+        const members=group.children.slice(before);
+        for(const obj of members){
+          if(allowed) obj.userData.furniturePick=pick(f);
+          const color=finishColors[finishes[f.id]];
+          if(color) obj.traverse(child=>{if(child.isMesh)child.material=mat(color);});
+        }
+        tagged.set(f.id,members);
       }
       // Batch only stable meshes; native desk loading may replace its stand-in later.
       // Pack homes stay unbatched so pack models can replace individual pieces.
       if (
+        !part.finish_overrides &&
         !part.designer_collection &&
         !part.designer_chair &&
         !part.design.furniture.some((f) => f.id === "belaya") &&
@@ -1290,7 +1319,7 @@ export function createTown(canvas, status, action) {
       )
         batch(group);
     }
-    for (const part of h.rooms) {
+    for (const part of h.photo_home ? [] : h.rooms) {
       const room = part.design.room,
         door = room.doors[0];
       const side = door.wall === "east" ? 1 : -1,
@@ -1303,7 +1332,7 @@ export function createTown(canvas, status, action) {
       plaque.userData.aboveCut = true;
       interior.add(plaque);
     }
-    for (const [x,z,width] of [[doorX,-D,1.6],[doorX-.675,0,.25],[doorX+.675,0,.25]]) {
+    for (const [x,z,width] of h.photo_home ? [] : [[doorX,-D,1.6],[doorX-.675,0,.25],[doorX+.675,0,.25]]) {
       const wall = solid(interior,x,1.4,z,width,2.8,.1,wallColor,indoor);
       walls.push({wall,ox:0,oy:0,bottom:0,height:2.8});
     }
@@ -1321,24 +1350,20 @@ export function createTown(canvas, status, action) {
       states.includes("placeholder") ? "placeholder" : states.includes("verified") ? "verified" : "procedural"
     );
   }
+  function canStand(x, z, indoors, colliders) {
+    const inBounds = indoors
+      ? x > 0.23 && x < home.width - 0.23 && z < -0.18 && z > -home.depth + 0.23
+      : Math.abs(x) < 45 && Math.abs(z) < 30;
+    return inBounds && colliders.every(([l, t, r, b]) =>
+      x < l - 0.22 || x > r + 0.22 || z < t - 0.22 || z > b + 0.22);
+  }
   function move(dx, dz) {
     const coll = inside ? indoor : [...obstacles, ...heroObstacles];
-    function ok(x, z) {
-      return (
-        (inside
-          ? x > 0.23 &&
-            x < home.width - 0.23 &&
-            z < -0.18 &&
-            z > -home.depth + 0.23
-          : Math.abs(x) < 45 && Math.abs(z) < 30) &&
-        coll.every(
-          ([l, t, r, b]) =>
-            x < l - 0.22 || x > r + 0.22 || z < t - 0.22 || z > b + 0.22,
-        )
-      );
-    }
+    const ok = (x,z) => canStand(x,z,inside,coll);
+    const x = pos.x, z = pos.z;
     if (ok(pos.x + dx, pos.z)) pos.x += dx;
     if (ok(pos.x, pos.z + dz)) pos.z += dz;
+    if (pos.x !== x || pos.z !== z) restoredLens = null;
   }
   const active = () =>
     !overview.mode && !preset && !document.querySelector("dialog[open]") &&
@@ -1376,6 +1401,7 @@ export function createTown(canvas, status, action) {
   };
   canvas.onpointermove = (e) => {
     if (look) {
+      if (e.clientX !== lastX || e.clientY !== lastY) restoredLens = null;
       yaw -= (e.clientX - lastX) * 0.005;
       pitch = T.MathUtils.clamp(
         pitch - (e.clientY - lastY) * 0.003,
@@ -1392,7 +1418,9 @@ export function createTown(canvas, status, action) {
       if ((overview.mode || inside) && overview.pick(e,camera)) {
         canvas.dispatchEvent(new CustomEvent("chair-picked",{detail:home.id}));
       } else if (overview.mode) {
+        const item=overview.pieceAt(e);
         canvas.dispatchEvent(new CustomEvent("room-picked",{detail:overview.roomAt(e)}));
+        if(item) canvas.dispatchEvent(new CustomEvent("furniture-picked",{detail:item}));
       }
     }
     pressed = null;
@@ -1443,6 +1471,7 @@ export function createTown(canvas, status, action) {
         Number(keys.has("KeyW") || keys.has("ArrowUp")) -
         Number(keys.has("KeyS") || keys.has("ArrowDown"));
       const side = Number(keys.has("KeyD")) - Number(keys.has("KeyA"));
+      if (keys.has("ArrowLeft") !== keys.has("ArrowRight")) restoredLens = null;
       yaw +=
         dt *
         1.7 *
@@ -1467,7 +1496,7 @@ export function createTown(canvas, status, action) {
     avatar.position.copy(pos);
     avatar.rotation.y = yaw;
     camera.position.copy(pos);
-    camera.position.y = inside ? 1.57 : 2.9;
+    camera.position.y = inside ? (restoredLens?.height ?? 1.57) : 2.9;
     if (inside) {
       camera.rotation.order = "YXZ";
       camera.rotation.set(pitch, yaw, 0, "YXZ");
@@ -1508,7 +1537,7 @@ export function createTown(canvas, status, action) {
       camera.position.fromArray(preset.eye);
       camera.lookAt(...preset.target);
     }
-    const fov = preset?.fov || 61;
+    const fov = preset?.fov ?? restoredLens?.fov ?? 61;
     if (camera.fov !== fov) {
       camera.fov = fov;
       camera.updateProjectionMatrix();
@@ -1523,8 +1552,8 @@ export function createTown(canvas, status, action) {
   // Photo Studio, the client board, and revision comparison borrow the same camera and scene.
   let captureQueue = Promise.resolve();
   async function captureBedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
-    const original = home, originalPreset = photoView.value;
-    const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside;
+    const original = home, originalPreset = photoView.value, framing = overview.framing();
+    const eye = pos.clone(), heading = yaw, tilt = pitch, wasInside = inside, lens = restoredLens;
     if (home !== snapshot) load(snapshot);
     const epoch = generation;
     try {
@@ -1551,9 +1580,11 @@ export function createTown(canvas, status, action) {
         // A pack home is photographed with its own environment and exposure.
         lightScene(true);
         renderer.setPixelRatio(1);
-        renderer.setSize(1280, 720, false);
+        const aspect = views[0]?.aspect || 16/9;
+        const width = Math.round(Math.min(1280,720*aspect));
+        renderer.setSize(width, Math.round(width/aspect), false);
         const images = views.map((view) => {
-          const cam = new T.PerspectiveCamera(view.fov, 16/9, 0.04, 130);
+          const cam = new T.PerspectiveCamera(view.fov, aspect, 0.04, 130);
           cam.position.fromArray(view.eye);
           cam.lookAt(...view.target);
           renderer.render(scene, cam);
@@ -1573,7 +1604,8 @@ export function createTown(canvas, status, action) {
       if (epoch === generation && original !== snapshot) {
         load(original); enter(wasInside);
         pos.copy(eye); yaw = heading; pitch = tilt;
-        photoView.value = originalPreset; selectPhoto();
+        photoView.value = originalPreset; selectPhoto(); restoredLens = lens;
+        overview.restoreFraming(framing);
       }
     }
   }
@@ -1599,6 +1631,25 @@ export function createTown(canvas, status, action) {
         requestPack(generation);
       };
       updateQuality();
+    },
+    restoreWalkingView(pose) {
+      if (!canStand(pose.eye[0], pose.eye[2], true, indoor))
+        throw Error("This walking position is obstructed in this revision. Choose another view.");
+      overview.set("");
+      enter(true);
+      pos.set(pose.eye[0], 0, pose.eye[2]);
+      restoredLens = {height: pose.eye[1], fov: pose.fov};
+      const direction = new T.Vector3().fromArray(pose.target).sub(new T.Vector3().fromArray(pose.eye)).normalize();
+      yaw = Math.atan2(-direction.x, -direction.z);
+      pitch = Math.asin(T.MathUtils.clamp(direction.y, -1, 1));
+      canvas.focus();
+    },
+    bookmark() {
+      if (!inside || overview.mode) throw Error("Walk inside a room to bookmark its camera.");
+      const eye = camera.position.clone();
+      const room = home.rooms.find(p => eye.x >= p.origin[0] && eye.x <= p.origin[0]+p.design.room.width_m && -eye.z >= p.origin[1] && -eye.z <= p.origin[1]+p.design.room.depth_m);
+      if (!room) throw Error("Enter a furnished room first.");
+      return {room:room.design.room.id, eye:eye.toArray(), target:camera.getWorldDirection(new T.Vector3()).add(eye).toArray(), fov:camera.fov, aspect:camera.aspect};
     },
     bedroomViews(snapshot, roomId = "bedroom", fixedViews = null) {
       const next = captureQueue.then(() => captureBedroomViews(snapshot, roomId, fixedViews));

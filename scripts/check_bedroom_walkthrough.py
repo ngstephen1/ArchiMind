@@ -113,7 +113,7 @@ def check_house_editor(page, url, output):
         "#compareRight"
     ).get_attribute("src")
     page.screenshot(path=output / "house-editor-comparison.png")
-    page.locator("#houseCompare button").click()
+    page.get_by_role("button", name="Close comparison", exact=True).click()
     page.locator("#openPhotoStudio").click()
     page.wait_for_function("document.querySelector('#conceptAfter').naturalWidth > 0")
     page.locator("#conceptWipe").fill("35")

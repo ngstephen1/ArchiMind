@@ -1,0 +1,19 @@
+{
+  "url": "http://127.0.0.1:8976/?project=1816d2ea-0572-495e-bf5d-5246a3419b4d&revision=1",
+  "rooms": [
+    "Studio",
+    "Library"
+  ],
+  "revision": 1,
+  "exterior_windows": 2,
+  "paired_interior_windows": 1,
+  "rejected_mismatched_offset": true,
+  "reopened_sources": 2,
+  "walked": [
+    "Studio",
+    "Library",
+    "Studio"
+  ],
+  "page_errors": [],
+  "photos": "synthetic"
+}

@@ -293,6 +293,22 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
     render,
     pick,
     roomAt,
+    pieceAt(event) {
+      if (!mode) return;
+      pointRay(event,camera);
+      cut(true);
+      try {
+        interior.updateMatrixWorld(true);
+        for(const hit of ray.intersectObjects(interior.children,true)) {
+          let item, visible=true;
+          for(let n=hit.object;n && n!==interior;n=n.parent) {
+            if(!n.visible) {visible=false;break;}
+            if(n.userData.furniturePick) item=n.userData.furniturePick;
+          }
+          if(visible) return item;
+        }
+      } finally {cut(false);}
+    },
     focusRoom(id) {
       const part = home.rooms.find((part) => part.design.room.id === id);
       if (!part || !mode) return;
@@ -314,6 +330,19 @@ export function houseView(canvas, scene, interior, street, avatar, renderer, lig
     },
     select(value) {
       selected = value;
+    },
+    framing() {
+      return {mode, room: focused?.design.room.id, eye: camera.position.clone(), target: controls.target.clone(), zoom: camera.zoom};
+    },
+    restoreFraming(frame) {
+      if (!frame.mode) return;
+      set(frame.mode);
+      focused = home.rooms.find(p => p.design.room.id === frame.room);
+      camera.position.copy(frame.eye);
+      controls.target.copy(frame.target);
+      camera.zoom = frame.zoom;
+      camera.updateProjectionMatrix();
+      controls.update();
     },
     get mode() {
       return mode;

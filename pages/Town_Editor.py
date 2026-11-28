@@ -104,6 +104,12 @@ if home:
             for r in home["rooms"]
         ]
     )
+if home and home.get("photo_home"):
+    st.info(
+        "This home uses confirmed room measurements. Open this revision in Town "
+        "to change finishes, restore a revision or compare saved views."
+    )
+    st.stop()
 if snapshot.get("history"):
     with st.expander("Recent design briefs"):
         for past in snapshot["history"]:

@@ -5,6 +5,7 @@ import pytest
 from shapely.geometry import box
 
 from archimind.town.design import digest
+from archimind.town.renovation import edit as edit_partition
 from archimind.town.study_edit import edit
 
 PROMPT = (
@@ -60,3 +61,28 @@ def test_preserves_unsupported_requirements():
     study["design"]["room"]["doors"][0]["width_m"] = 0.85
     with pytest.raises(ValueError, match="align"):
         edit(original, PROMPT)
+
+
+def test_study_passage_remains_available_after_adding_a_shared_door():
+    home, _ = edit_partition(
+        json.loads(FIXTURE.read_text()),
+        {
+            "north": "study",
+            "south": "kitchen-dining",
+            "kind": "door",
+            "delta_m": 0,
+            "width_m": 1,
+            "offset_m": 2,
+        },
+    )
+    study = next(p for p in home["rooms"] if p["design"]["room"]["id"] == "study")
+    doors = study["design"]["room"]["doors"]
+    assert len(doors) == 2
+    revised, _ = edit(home, PROMPT)
+    passage = revised["evidence"]["study_passage"]
+    assert passage["from"] == next(
+        d["id"] for d in doors if d["wall"] in {"east", "west"}
+    )
+    assert passage["width_m"] == 0.90
+    result = next(p for p in revised["rooms"] if p["design"]["room"]["id"] == "study")
+    assert result["design"]["room"]["doors"] == doors

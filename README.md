@@ -51,6 +51,8 @@
 
 ---
 
+[Try the saved Town home editor](docs/data/milestone7/README.md) to edit furniture, renovate a partition, change finishes, compare saved cameras, or join photographed rooms.
+
 ## Overview
 
 **Conference demo.** Follow one home from a client brief through five agents, two floor plans and a saved furniture edit. The 68-second film shows why Layout B shortens the kitchen-to-salon route, then compares a 30 cm chair move from the same camera. The finish study shows what the desk corner could look like with oak, linen and brass. [Download the single-home film (MP4)](https://github.com/ngstephen1/ArchiMind/releases/download/town-photo-studio-demo-2026-11-28/ArchiMind-One-Home-Live-Design.mp4) · [Earlier 73-second photo and editable 3D furniture walkthrough](https://github.com/ngstephen1/ArchiMind/releases/download/town-photo-studio-demo-2026-11-28/ArchiMind-Town-Photo-to-3D-Walkthrough.mp4) · [Posters, captions within each MP4, and recording details](https://github.com/ngstephen1/ArchiMind/releases/tag/town-photo-studio-demo-2026-11-28)

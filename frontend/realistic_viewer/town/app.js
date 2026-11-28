@@ -1,3 +1,8 @@
+import { baseFinishLocations, finishSchedule } from "./finish_schedule.js";
+import { presentationFurniture } from "./saved_pieces.js";
+import { bindFurnitureEditor } from "./furniture_editor.js";
+import { bindPhotoHome } from "./photo_home.js";
+import { bindRenovation } from "./renovate.js";
 import { bindPhotoStudio } from "./photo_studio.js";
 import { bindHouseComparison } from "./house_compare.js";
 import { competingGoals } from "./tradeoff.js";
@@ -22,6 +27,7 @@ import midCentury from "../../../src/archimind/_viewer_assets/packs/mid_century.
 const PACK_MANIFESTS = Object.fromEntries(
   [modernClassic, industrialLoft, scandinavian, japandi, midCentury].map((m) => [m.id, m]),
 );
+import {bindFinishChat} from "./finish_chat.js";
 import showcase from "./showcase.json";
 const el = (id) => document.getElementById(id);
 const cfg = await fetch("./config.json").then((r) => r.json());
@@ -198,6 +204,7 @@ bind("checkRequest", async () => {
     if (current()) el("checkRequest").disabled = false;
   }
 });
+bindRenovation({el,api,context:()=>({project,revision,home:applied}),sync});
 function sync(data) {
   resetChairPreview();
   releasedChairs = [];
@@ -224,12 +231,17 @@ function sync(data) {
   }
   if (data.latest_job && data.head === data.revision && job !== data.latest_job)
     watch(data.latest_job).catch((e) => notify(e.message));
-  el("revision").textContent = "Studio House · Revision " + revision;
   applied = data.home || showcase;
+  const photographed = Boolean(applied.photo_home);
+  el("revision").textContent = (photographed ? "Photo home" : "Studio House") + " · Revision " + revision;
+  el("present").hidden = photographed;
+  el("design").hidden = photographed || tourOnly;
   el("chairStudio").hidden = revision === 0 || (data.head !== undefined && data.head !== revision);
   el("chairStudio").open = false;
   el("selectChair").hidden = el("chairStudio").hidden || !applied.rooms.some(r => r.design.room.id === "bedroom" && r.design.furniture.some(f=>f.id==="desk-chair"));
-  el("editSavedRoom").hidden = el("chairStudio").hidden;
+  el("renovate").hidden = photographed || el("chairStudio").hidden;
+  el("scopeFinish").hidden = el("chairStudio").hidden;
+  el("editSavedRoom").hidden = photographed || el("chairStudio").hidden;
   el("compareHouse").hidden = !revision;
   loadSavedHome();
   el("width").value = applied.width;
@@ -244,7 +256,9 @@ function sync(data) {
   el("compareZoning").checked = false;
   el("passage").value = requirements?.passage_m ?? 0.6;
   el("confirmPassage").checked = false;
-  el("undo").hidden = revision < 2;
+  const canRestore = revision >= 2 && (data.head === undefined || revision === data.head);
+  el("undo").hidden = !canRestore || photographed;
+  el("photoUndo").hidden = !canRestore || !photographed;
   el("locks").disabled = revision === 0;
   const url = new URL(location.href);
   url.searchParams.set("project", project);
@@ -443,9 +457,9 @@ function showComparison() {
   const items = node("details", "");
   items.append(node("summary", "Selected furniture reservations"));
   const list = node("ul", "");
-  for (const { design } of alternatives[selected].rooms)
-    for (const f of design.furniture)
-      list.append(node("li", `${design.room.name} · ${f.name} · ${f.width_m.toFixed(2)} × ${f.depth_m.toFixed(2)} m`));
+  for (const part of alternatives[selected].rooms)
+    for (const f of presentationFurniture(part))
+      list.append(node("li", `${part.design.room.name} · ${f.name} · ${f.width_m.toFixed(2)} × ${f.depth_m.toFixed(2)} m`));
   items.append(list);
   area.append(items);
 }
@@ -702,11 +716,13 @@ async function askSavedDesign(question, options) {
   el("whyQuery").value = question;
   await explainSavedQuestion(options);
 }
-bind("undo", async () => {
+async function restorePreviousRevision() {
   sync(await api("/projects/" + project + "/undo", { base: revision }));
   el("alternatives").hidden = true;
   notify("Previous home restored as revision " + revision + ".");
-});
+}
+bind("undo", restorePreviousRevision);
+bind("photoUndo", restorePreviousRevision);
 
 el("chairStudio").ontoggle = async () => {
   if (!el("chairStudio").open || chairPreview || releasedChairs.length) return;
@@ -803,6 +819,7 @@ async function applyChair() {
 }
 bind("chairApply", applyChair);
 
+bindFurnitureEditor({el,api,sync,context:()=>({project,revision,applied,homeId:world.homeId})});
 let roomEditPreview;
 function clearRoomEdit() {
   roomEditPreview = null;
@@ -915,6 +932,9 @@ el("closeChairChat").onclick = el("cancelChat").onclick = () => {
 for (const button of document.querySelectorAll("[data-view]")) {
   button.onclick = () => button.dataset.view === "walk" ? world.walk() : world.overview.set(button.dataset.view);
 }
+bindPhotoHome({el,api,local,context:()=>({project,home:applied}),saved:data=>{
+  project=data.project;sync(data);world.overview.set("3d");
+}});
 const openPhotoStudio = bindPhotoStudio({el,world,api,local,context:()=>({project,revision,home:applied})});
 let pickedRoom;
 function clearRoom() {
@@ -938,12 +958,14 @@ el("clearRoom").onclick=()=>{clearRoom();world.overview.set(world.overview.mode)
 el("focusRoom").onclick=()=>world.overview.focusRoom(pickedRoom);
 el("restyleRoom").onclick=()=>openPhotoStudio(pickedRoom);
 if(!local)el("compareKind").querySelector('[value="blender"]').remove();
-bindHouseComparison({el,world,api,context:()=>({project, revision,home:applied}),asset:async path=>{
-  const response=await fetch(cfg.api+path,{headers:token()?{Authorization:"Bearer "+token()}:{}});
+bindHouseComparison({el,world,api,context:()=>({project, revision,home:applied}),asset:async (path,body)=>{
+  const response=await fetch(cfg.api+path,{method:body?"POST":"GET",body:body?JSON.stringify(body):undefined,headers:{"Content-Type":"application/json",...(token()?{Authorization:"Bearer "+token()}:{})}});
+  if(!response.ok && body) throw Error((await response.json()).error || "Render unavailable.");
   if(!response.ok) throw Error("No HD shot for this revision and renderer version. Generate a proof and HD render in the client presentation.");
   return response;
 }});
 
+bindFinishChat({el,api,sync,context:()=>({project,revision,home:applied})});
 let boardHome;
 let evidenceManifest;
 let exportUrl, homeUrl;
@@ -1125,15 +1147,33 @@ el("present").onclick = async () => {
   planOf(h, el("boardPlan"));
   el("schedule").replaceChildren();
   el("swatches").replaceChildren();
-  for (const [name, color] of [
-    [
-      "Bedroom plaster",
-      { oak: "#e5d6bc", sage: "#bac6ad", terracotta: "#d8ab91" }[h.palette],
-    ],
-    ["Timber floor", null],
-    ["Curtain linen", "#e9e1cd"],
-    ["Brushed brass", "#9a7546"],
-  ]) {
+  const chosen = finishSchedule(h);
+  const swatches = [];
+  const plaster = { oak: "#e5d6bc", sage: "#bac6ad", terracotta: "#d8ab91" }[h.palette];
+  if (!chosen.length) {
+    swatches.push(["Bedroom plaster", plaster], ["Timber floor", null]);
+  } else {
+    const pack = PACK_MANIFESTS[h.style_pack?.id];
+    for (const [role, locations] of Object.entries(baseFinishLocations(h))) {
+      if (!locations.length) continue;
+      if (role === "hall_floor" || role === "hall_wall") {
+        swatches.push(role === "hall_floor" ? ["Base timber floor · Hall", "#b39b7a"]
+          : ["Base plaster · Hall ends", plaster]);
+        continue;
+      }
+      const packed = pack?.version === h.style_pack?.version ? pack?.surfaces[role] : null;
+      const name = packed?.asset_id?.split(":").pop().replaceAll("_", " ") ||
+        {wall: "plaster", floor: "timber", tile: "bathroom tile"}[role];
+      swatches.push([name.charAt(0).toUpperCase() + name.slice(1) + " · " + role + " · " + locations.join(", "),
+        packed?.fallback_color || {wall: plaster, floor: "#ba9a70", tile: "#b4b8b1"}[role]]);
+    }
+    for (const row of chosen) {
+      const labels = row.locations.map(loc => loc.label + (loc.object ? " [" + loc.object + "]" : ""));
+      swatches.push([row.finish.charAt(0).toUpperCase() + row.finish.slice(1) + " · " + row.surface + " · " + labels.join(", "), row.color]);
+    }
+  }
+  swatches.push(["Curtain linen", "#e9e1cd"], ["Brushed brass", "#9a7546"]);
+  for (const [name, color] of swatches) {
     const tile = node("div", name);
     tile.style.borderTop = "20px solid " + (color || "#ad8562");
     if (!color)
@@ -1153,7 +1193,7 @@ el("present").onclick = async () => {
           " m",
       ),
     );
-    for (const f of p.design.furniture)
+    for (const f of presentationFurniture(p))
       el("schedule").append(
         node(
           "div",

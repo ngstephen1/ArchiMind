@@ -53,7 +53,7 @@ def configuration():
 def _paths(snapshot, blender):
     output = Path(os.environ["TOWN_DB"]).resolve().parent / "town-renders"
     sources = [
-        Path(__file__),
+        Path(__file__).resolve(),
         *SCRIPTS.glob("render_*.py"),
         SCRIPTS / "studio_photography.py",
         SCRIPTS / "publish_studio_board.py",

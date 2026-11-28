@@ -51,6 +51,32 @@ def identity(request):
 def handle(request, data):
     owner = identity(request)
     path = request.path_params.get("path", "").split("/")
+    if (
+        len(path) == 4
+        and path[0] == "projects"
+        and path[2] == "room-photo"
+        and request.method == "GET"
+        and os.getenv("TOWN_MODE") == "local"
+    ):
+        with db.transaction() as q:
+            head = db.project(q, owner, path[1])
+            home = db.revision(q, path[1], head) if head else {}
+            if not any(
+                x["photo_sha256"] == path[3]
+                for x in home.get("photo_home", {}).get("sources", [])
+            ):
+                raise db.Problem("Room source unavailable.", 404)
+            row = q(
+                "SELECT jpeg FROM town_private_room_images WHERE project=? AND hash=?",
+                (path[1], path[3]),
+            ).fetchone()
+            if row:
+                return Response(
+                    content=bytes(row[0]),
+                    media_type="image/jpeg",
+                    headers={"Cache-Control": "private, no-store"},
+                )
+            raise db.Problem("Room source unavailable.", 404)
     if path == ["designer-chairs"] and request.method == "GET":
         return {"chairs": designer_chair.chair_options()}
     if path == ["bedroom-collection"] and request.method == "GET":
@@ -85,6 +111,30 @@ def handle(request, data):
         return {
             kind: decision_review.settings(kind)[0] for kind in decision_review.RUBRICS
         }
+    if (
+        len(path) == 3
+        and path[0] == "projects"
+        and path[2] == "bookmark-photo"
+        and request.method == "POST"
+    ):
+        from . import bookmarks
+
+        blender = render_queue.configuration()
+        if not blender:
+            raise db.Problem(
+                "A local Blender renderer is required for a photographic view.", 503
+            )
+        n = data["revision"]
+        with db.transaction() as q:
+            views = bookmarks.handle(q, owner, path[1], "GET", {})["views"]
+            pose = next((v for v in views if v == data.get("pose")), None)
+            if pose is None:
+                raise db.Problem("Reopen the saved bookmark before rendering.", 409)
+            home = db.revision(q, path[1], n)
+        image = bookmarks.photograph(
+            {"project": path[1], "revision": n, "home": home}, pose, blender
+        )
+        return FileResponse(image, media_type="image/png")
     if len(path) >= 3 and path[0] == "projects" and path[2] == "render":
         blender = render_queue.configuration()
         if blender is None:
@@ -96,6 +146,11 @@ def handle(request, data):
         with db.transaction() as q:
             db.project(q, owner, p)
             home = db.revision(q, p, n)
+        if home.get("photo_home"):
+            raise db.Problem(
+                "For a photo home, enter a room, bookmark its view, and choose Town / Blender in Compare.",
+                409,
+            )
         snapshot = {"project": p, "revision": n, "home": home}
         if len(path) == 3 and request.method == "GET":
             return render_queue.describe(snapshot, blender)
@@ -106,6 +161,36 @@ def handle(request, data):
             return FileResponse(asset, filename=asset.name)
         raise db.Problem("Render action unavailable.", 404)
     with db.transaction() as q:
+        if (
+            len(path) == 4
+            and path[0] == "projects"
+            and path[2] == "furniture-edit"
+            and path[3] in {"preview", "apply"}
+            and request.method == "POST"
+        ):
+            from . import furniture_edit
+
+            return furniture_edit.request(q, owner, path[1], data, path[3] == "apply")
+        if (
+            len(path) == 4
+            and path[0] == "projects"
+            and path[2] == "partition"
+            and path[3] in {"preview", "apply"}
+            and request.method == "POST"
+        ):
+            from . import renovation
+
+            base = db.project(q, owner, path[1])
+            if not base or base != data.get("base"):
+                raise db.Problem("Reopen the latest saved revision.", 409)
+            try:
+                home, summary = renovation.edit(db.revision(q, path[1], base), data)
+                result = designer_chair.finish_preview(
+                    q, owner, path[1], base, home, data, path[3] == "apply"
+                )
+                return {**result, "summary": summary}
+            except ValueError as exc:
+                raise db.Problem(str(exc)) from exc
         if (
             len(path) == 4
             and path[0] == "projects"
@@ -136,6 +221,20 @@ def handle(request, data):
             except ValueError as exc:
                 raise db.Problem(str(exc)) from exc
             return {**result, "summary": summary}
+        if (
+            len(path) == 4
+            and path[0] == "projects"
+            and path[2] == "finish"
+            and path[3] in {"preview", "apply"}
+            and request.method == "POST"
+        ):
+            from . import scoped_finish
+
+            return scoped_finish.change(q, owner, path[1], data, path[3] == "apply")
+        if len(path) == 3 and path[0] == "projects" and path[2] == "bookmarks":
+            from . import bookmarks
+
+            return bookmarks.handle(q, owner, path[1], request.method, data)
         if (
             len(path) == 3
             and path[0] == "projects"
@@ -267,8 +366,9 @@ def handle(request, data):
 async def api(request: Request):
     try:
         photo_action = request.path_params.get("path")
+        multi_photo = photo_action in {"photo-home", "photo-home-suggest"}
         concept = photo_action in {"photo-concept", "photo-layout"}
-        if concept:
+        if concept or multi_photo:
             if os.getenv("TOWN_MODE") != "local" or request.method != "POST":
                 raise db.Problem("Photo concepts require the local Town studio.", 404)
             identity(request)
@@ -280,6 +380,8 @@ async def api(request: Request):
         limit = 12000
         if concept:
             limit = (8 if photo_action == "photo-layout" else 4) * 1024 * 1024
+        if multi_photo:
+            limit = 12 * 1024 * 1024
         body = bytearray()
         async for chunk in request.stream():
             body.extend(chunk)
@@ -288,6 +390,16 @@ async def api(request: Request):
         data = json.loads(body) if body else {}
         if not isinstance(data, dict):
             raise ValueError
+        if multi_photo:
+            from . import photo_home
+
+            if photo_action == "photo-home":
+                result = await asyncio.to_thread(
+                    photo_home.save, identity(request), data
+                )
+            else:
+                result = await asyncio.to_thread(photo_home.suggest, data)
+            return JSONResponse(result, headers={"Cache-Control": "no-store"})
         if concept:
             action = (
                 photo_layout.draft
