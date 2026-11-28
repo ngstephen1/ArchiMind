@@ -1704,3 +1704,28 @@ def test_live_payload_preserves_a_coordinated_opening_request(monkeypatch, saved
         live=True,
     )
     assert service.interpret(req, saved_home).passage_m == 0.65
+
+
+@pytest.mark.parametrize(
+    "background",
+    [
+        "because a 0.6 m clear passage won’t fit the wheelchair",
+        "but a 60 cm clear passage is too narrow",
+        "but we use a 60 cm clear passage in our current home",
+    ],
+)
+def test_requested_passage_width_is_preserved_alongside_background(background):
+    brief, questions = requirement_controls(
+        Brief(compare_tradeoffs=True), f"Keep a 90 cm clear passage {background}.", None
+    )
+    assert not questions
+    assert brief.passage_m == 0.9
+
+
+def test_two_explicit_passage_widths_still_need_confirmation():
+    _, questions = requirement_controls(
+        Brief(compare_tradeoffs=True),
+        "Keep a 90 cm clear passage but also keep a 70 cm clear passage.",
+        None,
+    )
+    assert any("one modeled passage width" in q for q in questions)

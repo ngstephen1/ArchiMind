@@ -567,6 +567,20 @@ def requests_single_table(message):
     return False
 
 
+def _circulation_text(message):
+    """Remove explicitly rejected widths and reports of existing conditions."""
+    text = _join_wrapped_qualifiers(message).lower()
+    width = "(?:" + "|".join(WIDTH_PATTERNS) + ")"
+    rejected = r"\s+(?:is\s+too\s+(?:small|narrow)|(?:will\s+not|won['’]t)\s+fit)\b"
+    text = re.sub(width + rejected, " ", text)
+    existing = (
+        r"\b(?:we (?:have|use)|there is)\s+(?:an?\s+)?"
+        + width
+        + r"\s+in (?:our|the) (?:current|existing) (?:home|house)\b"
+    )
+    return ". ".join(_affirmative_clauses(re.sub(existing, " ", text)))
+
+
 def _widths(text):
     text = re.sub(FIXED_PASSAGE, "", text)
     return {
@@ -937,7 +951,7 @@ def requirement_controls(brief, message, previous, *, evaluate_passage=True):
                     f"The {room} has four modeled places at one table. "
                     f"Confirm how to accommodate the requested {amount} places there."
                 )
-    circulation = text if evaluate_passage else ""
+    circulation = _circulation_text(message) if evaluate_passage else ""
     if fixed := re.search(FIXED_PASSAGE, circulation):
         measurement = re.search(MEASUREMENT, fixed[0])
         assert measurement is not None
@@ -1222,7 +1236,7 @@ def review_summary(
         "passage_m",
         inherited=passage_inherited,
         accepts=lambda sentence: (
-            brief.passage_m in _widths(". ".join(_affirmative_clauses(sentence)))
+            brief.passage_m in _widths(_circulation_text(sentence))
         ),
     )
     if brief.formal_salon:
